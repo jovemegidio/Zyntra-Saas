@@ -7,17 +7,6 @@
 const fs   = require('fs');
 const path = require('path');
 
-// AUDIT-FIX R2: Função de escape HTML para prevenir XSS no DANFE
-function escapeHtml(str) {
-    if (str == null) return '';
-    return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-}
-
 // ─── Template HTML ────────────────────────────────────────────────────────────
 // Loaded from the canonical design file; any edit to danfe.html takes effect
 // after server restart without changing this file.
@@ -751,14 +740,14 @@ function renderDanfe(ctx) {
         if (Array.isArray(arr) && arr.length > 0) return '';
         return inner.replace(/\{\{([\w.]+)\}\}/g, (__, p) => {
             const v = getDeep(ctx, p);
-            return v != null ? escapeHtml(String(v)) : '';
+            return v != null ? String(v) : '';
         });
     });
 
     // 3. Simple value substitution
     html = html.replace(/\{\{([\w.]+)\}\}/g, (_, path) => {
         const v = getDeep(ctx, path);
-        return v != null ? escapeHtml(String(v)) : '';
+        return v != null ? String(v) : '';
     });
 
     return html;
@@ -902,15 +891,18 @@ function buildDanfeCtx(pedido, itens, opts = {}) {
     const transportadoraCnpj = transportadoraDigits.length > 11 ? transportadoraDoc : '';
     const transportadoraCpf = transportadoraDigits.length > 0 && transportadoraDigits.length <= 11 ? transportadoraDoc : '';
 
+    // Priorizar logo embutido (data:URI) para funcionar em blob URLs
+    const resolvedLogo = opts.logoDataUri || pedido.emitenteLogoUrl || '';
+
     return {
         marcaAguaClasse: opts.preview ? 'watermark-logo' : '',
-        marcaAguaTexto: opts.preview ? '<img src="' + (pedido.emitenteLogoUrl || '/api/empresa/' + (pedido.empresa_id || 1) + '/logo') + '" alt="ALUFORCE">' : '',
+        marcaAguaTexto: opts.preview && resolvedLogo ? '<img src="' + resolvedLogo + '" alt="ALUFORCE">' : '',
         avisoTopo: opts.preview ? 'DOCUMENTO DE PRÉVIA — NÃO POSSUI VALOR FISCAL' : '',
         _isPreview: opts.preview || false,
         paginaAtual: '1',
         paginaTotal: '1',
         codigoBarrasUrl: chave ? `https://barcodeapi.org/api/128/${chave}` : '',
-        emitenteLogoUrl: `/api/empresa/${pedido.empresa_id || 1}/logo`,
+        emitenteLogoUrl: resolvedLogo,
         portalConsultaUrl: 'www.nfe.fazenda.gov.br/portal',
 
         NFe: {
@@ -997,20 +989,39 @@ function buildDanfeCtx(pedido, itens, opts = {}) {
                     _danfePIpi: fmtMoney(aliqIpi)
                   };
                 }),
-                total: {
+                total: (() => {
+                    // Calcular totais de impostos a partir dos itens quando os campos do pedido estiverem zerados
+                    const calcBcIcms = itens.reduce((s, item) => {
+                      const aliqIcms = parseFloat(firstFilled(item.aliquota_icms, item.icms_percent, item.produto_aliquota_icms, aliquotaIcmsPadrao)) || 0;
+                      const sub = parseFloat(item.subtotal) || 0;
+                      const vIcmsItem = parseFloat(firstFilled(item.icms_value, item.v_icms)) || 0;
+                      const bc = aliqIcms > 0 ? (vIcmsItem > 0 ? (vIcmsItem / (aliqIcms / 100)) : sub) : 0;
+                      return s + bc;
+                    }, 0);
+                    const calcVIcms = itens.reduce((s, item) => {
+                      const sub = parseFloat(item.subtotal) || 0;
+                      const aliqIcms = parseFloat(firstFilled(item.aliquota_icms, item.icms_percent, item.produto_aliquota_icms, aliquotaIcmsPadrao)) || 0;
+                      return s + (parseFloat(firstFilled(item.icms_value, item.v_icms, sub * aliqIcms / 100)) || 0);
+                    }, 0);
+                    const calcVIpi = itens.reduce((s, item) => {
+                      const sub = parseFloat(item.subtotal) || 0;
+                      const aliqIpi = parseFloat(firstFilled(item.aliquota_ipi, item.produto_aliquota_ipi, aliquotaIpiPadrao)) || 0;
+                      return s + (parseFloat(firstFilled(item.valor_ipi, item.v_ipi, sub * aliqIpi / 100)) || 0);
+                    }, 0);
+                    return {
                     ICMSTot: {
-                        vBC: fmtMoney(pedido.base_calculo_icms || 0),
-                        vICMS: fmtMoney(pedido.total_icms || 0),
+                        vBC: fmtMoney(pedido.base_calculo_icms || calcBcIcms),
+                        vICMS: fmtMoney(pedido.total_icms || calcVIcms),
                         vBCST: fmtMoney(pedido.base_calculo_icms_st || 0),
                         vST: fmtMoney(pedido.total_icms_st || 0),
-                        vTotTrib: fmtMoney(pedido.total_impostos || 0),
+                        vTotTrib: fmtMoney(pedido.total_impostos || (calcVIcms + calcVIpi)),
                         vProd: fmtMoney(valorTotal),
                         vFCPSTRet: fmtMoney(pedido.total_fcp || 0),
                         vFrete: fmtMoney(frete),
                         vSeg: fmtMoney(seguro),
                         vDesc: fmtMoney(desconto),
                         vOutro: fmtMoney(outras),
-                        vIPI: fmtMoney(pedido.total_ipi || 0),
+                        vIPI: fmtMoney(pedido.total_ipi || calcVIpi),
                         vPIS: fmtMoney(pedido.total_pis || 0),
                         vCOFINS: fmtMoney(pedido.total_cofins || 0),
                         vNF: fmtMoney(valorNF),
@@ -1022,9 +1033,17 @@ function buildDanfeCtx(pedido, itens, opts = {}) {
                         vISS: '',
                         cMunFG: ''
                     }
-                },
+                    };
+                })(),
                 transp: {
-                    modFrete: (pedido.tipo_frete || '').toUpperCase() === 'CIF' ? '0 - Emitente' : '1 - Destinat\u00e1rio',
+                    modFrete: (() => {
+                      const tf = String(pedido.tipo_frete || '').trim();
+                      if (tf === '0' || tf.toUpperCase() === 'CIF') return '0 - Emitente';
+                      if (tf === '1' || tf.toUpperCase() === 'FOB') return '1 - Destinat\u00e1rio';
+                      if (tf === '2') return '2 - Terceiros';
+                      if (tf === '9') return '9 - Sem Frete';
+                      return tf ? tf : '1 - Destinat\u00e1rio';
+                    })(),
                     transporta: {
                     xNome: transportadoraNome,
                     CNPJ: transportadoraCnpj,

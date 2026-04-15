@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ï»¿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -29,7 +29,7 @@
             --text-secondary: #64748b;
             --bg-gray: #f8fafc;
             --border-color: #e2e8f0;
-            --primary-dark: #1a1a2e;
+            --primary-dark: #ffffff;
             --sidebar-width: 48px;
             --header-height: 42px;
         }
@@ -149,9 +149,9 @@
                 <a href="bancos.html" class="sidebar-btn" title="Bancos"><i class="fas fa-university"></i></a>
                 <a href="boletos.html" class="sidebar-btn active" title="Boletos"><i class="fas fa-barcode"></i></a>
                 <a href="nfse.html" class="sidebar-btn" title="NFS-e"><i class="fas fa-file-invoice"></i></a>
-                <a href="recorrencias.html" class="sidebar-btn" title="Recorrências"><i class="fas fa-redo"></i></a>
-                <a href="conciliacao.html" class="sidebar-btn" title="Conciliação"><i class="fas fa-balance-scale"></i></a>
-                <a href="relatorios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
+                <a href="recorrencias.html" class="sidebar-btn" title="RecorrÃªncias"><i class="fas fa-redo"></i></a>
+                <a href="conciliacao.html" class="sidebar-btn" title="ConciliaÃ§Ã£o"><i class="fas fa-balance-scale"></i></a>
+                <a href="relatorios.html" class="sidebar-btn" title="RelatÃ³rios"><i class="fas fa-chart-bar"></i></a>
             </nav>
             <div class="sidebar-bottom">
                 <!-- [DEV SPEC 2.1] Centro de Custos oculto -->
@@ -173,7 +173,7 @@
                 <div class="header-right">
                     <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">UsuÃ¡rio</strong></span>
                     </div>
                 </div>
             </header>
@@ -216,7 +216,7 @@
                         </select>
                         <label>De</label>
                         <input type="date" id="filtro-inicio" onchange="carregarBoletos()">
-                        <label>Até</label>
+                        <label>AtÃ©</label>
                         <input type="date" id="filtro-fim" onchange="carregarBoletos()">
                         <button class="btn btn-secondary" onclick="carregarBoletos()" style="margin-left:auto"><i class="fas fa-filter"></i> Filtrar</button>
                     </div>
@@ -238,17 +238,17 @@
                             <table class="data-table">
                                 <thead>
                                     <tr>
-                                        <th>Nº Doc</th>
+                                        <th>NÂº Doc</th>
                                         <th>Sacado</th>
-                                        <th>Emissão</th>
+                                        <th>EmissÃ£o</th>
                                         <th>Vencimento</th>
                                         <th>Valor</th>
                                         <th>Status</th>
-                                        <th style="width:100px">Ações</th>
+                                        <th style="width:100px">AÃ§Ãµes</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tbody-boletos">
-                                    <tr><td colspan="7"><div class="empty-state"><i class="fas fa-barcode"></i><h4>Nenhum boleto encontrado</h4><p>Emita seu primeiro boleto clicando no botão acima</p></div></td></tr>
+                                    <tr><td colspan="7"><div class="empty-state"><i class="fas fa-barcode"></i><h4>Nenhum boleto encontrado</h4><p>Emita seu primeiro boleto clicando no botÃ£o acima</p></div></td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -270,9 +270,9 @@
                 <div class="form-section">
                     <h4><i class="fas fa-user"></i> Dados do Sacado (Pagador)</h4>
                     <div class="form-grid">
-                        <div class="form-group"><label><i class="fas fa-user"></i> Nome <span class="req">*</span></label><input type="text" id="bol-sacado-nome" placeholder="Nome completo ou Razão Social"></div>
+                        <div class="form-group"><label><i class="fas fa-user"></i> Nome <span class="req">*</span></label><input type="text" id="bol-sacado-nome" placeholder="Nome completo ou RazÃ£o Social"></div>
                         <div class="form-group"><label><i class="fas fa-id-card"></i> CPF/CNPJ</label><input type="text" id="bol-sacado-cpf" placeholder="000.000.000-00"></div>
-                        <div class="form-group full"><label><i class="fas fa-map-marker-alt"></i> Endereço</label><input type="text" id="bol-sacado-endereco" placeholder="Rua, número, bairro"></div>
+                        <div class="form-group full"><label><i class="fas fa-map-marker-alt"></i> EndereÃ§o</label><input type="text" id="bol-sacado-endereco" placeholder="Rua, nÃºmero, bairro"></div>
                         <div class="form-group"><label><i class="fas fa-city"></i> Cidade</label><input type="text" id="bol-sacado-cidade"></div>
                         <div class="form-group"><label><i class="fas fa-map"></i> UF</label><select id="bol-sacado-uf"><option value="">--</option><option>AC</option><option>AL</option><option>AM</option><option>AP</option><option>BA</option><option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option><option>MG</option><option>MS</option><option>MT</option><option>PA</option><option>PB</option><option>PE</option><option>PI</option><option>PR</option><option>RJ</option><option>RN</option><option>RO</option><option>RR</option><option>RS</option><option>SC</option><option>SE</option><option>SP</option><option>TO</option></select></div>
                     </div>
@@ -282,9 +282,9 @@
                     <div class="form-grid">
                         <div class="form-group"><label><i class="fas fa-dollar-sign"></i> Valor <span class="req">*</span></label><input type="number" id="bol-valor" step="0.01" min="0.01" placeholder="0,00"></div>
                         <div class="form-group"><label><i class="fas fa-calendar"></i> Vencimento <span class="req">*</span></label><input type="date" id="bol-vencimento"></div>
-                        <div class="form-group"><label><i class="fas fa-university"></i> Conta Bancária</label><select id="bol-conta"><option value="">Selecione...</option></select></div>
+                        <div class="form-group"><label><i class="fas fa-university"></i> Conta BancÃ¡ria</label><select id="bol-conta"><option value="">Selecione...</option></select></div>
                         <div class="form-group"><label><i class="fas fa-link"></i> Conta a Receber</label><select id="bol-conta-receber"><option value="">Nenhuma</option></select></div>
-                        <div class="form-group full"><label><i class="fas fa-sticky-note"></i> Observações</label><textarea id="bol-obs" rows="2" placeholder="Observações adicionais..."></textarea></div>
+                        <div class="form-group full"><label><i class="fas fa-sticky-note"></i> ObservaÃ§Ãµes</label><textarea id="bol-obs" rows="2" placeholder="ObservaÃ§Ãµes adicionais..."></textarea></div>
                     </div>
                 </div>
             </div>
@@ -316,7 +316,7 @@
 
         let boletos = [];
 
-        // Paginação
+        // PaginaÃ§Ã£o
         const pgBoletos = new FinPagination({
             containerId: 'fp-pg-boletos',
             searchId: 'fp-search-boletos',
@@ -324,7 +324,7 @@
             perPage: 30,
             getData: () => boletos,
             searchFields: [
-                b => b.número_documento,
+                b => b.nÃºmero_documento,
                 b => b.sacado_nome,
                 b => b.status,
                 b => b.data_vencimento
@@ -332,12 +332,12 @@
             renderRows: (pageData, allFiltered) => {
                 const tbody = document.getElementById('tbody-boletos');
                 if (allFiltered.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><i class="fas fa-barcode"></i><h4>Nenhum boleto encontrado</h4><p>Emita seu primeiro boleto clicando no botão acima</p></div></td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><i class="fas fa-barcode"></i><h4>Nenhum boleto encontrado</h4><p>Emita seu primeiro boleto clicando no botÃ£o acima</p></div></td></tr>';
                     return;
                 }
                 tbody.innerHTML = pageData.map(b => `
                     <tr>
-                        <td><strong>${esc(b.número_documento || '-')}</strong></td>
+                        <td><strong>${esc(b.nÃºmero_documento || '-')}</strong></td>
                         <td>${esc(b.sacado_nome)}</td>
                         <td>${formatarData(b.data_emissao)}</td>
                         <td>${formatarData(b.data_vencimento)}</td>
@@ -410,14 +410,14 @@
             document.getElementById('detalhe-body').innerHTML = `
                 <div class="boleto-detail">
                     <div class="linha-digitavel">${esc(b.linha_digitavel || 'N/A')}</div>
-                    <div class="info-row"><span class="label">Nº Documento</span><span class="value">${esc(b.número_documento)}</span></div>
-                    <div class="info-row"><span class="label">Nosso Número</span><span class="value">${esc(b.nosso_número)}</span></div>
+                    <div class="info-row"><span class="label">NÂº Documento</span><span class="value">${esc(b.nÃºmero_documento)}</span></div>
+                    <div class="info-row"><span class="label">Nosso NÃºmero</span><span class="value">${esc(b.nosso_nÃºmero)}</span></div>
                     <div class="info-row"><span class="label">Sacado</span><span class="value">${esc(b.sacado_nome)}</span></div>
                     <div class="info-row"><span class="label">CPF/CNPJ</span><span class="value">${esc(b.sacado_cpf_cnpj || '-')}</span></div>
                     <div class="info-row"><span class="label">Valor</span><span class="value" style="color:var(--success)">${formatarMoeda(b.valor)}</span></div>
                     <div class="info-row"><span class="label">Multa</span><span class="value">${formatarMoeda(b.valor_multa)}</span></div>
                     <div class="info-row"><span class="label">Juros/dia</span><span class="value">${formatarMoeda(b.valor_juros_dia)}</span></div>
-                    <div class="info-row"><span class="label">Emissão</span><span class="value">${formatarData(b.data_emissao)}</span></div>
+                    <div class="info-row"><span class="label">EmissÃ£o</span><span class="value">${formatarData(b.data_emissao)}</span></div>
                     <div class="info-row"><span class="label">Vencimento</span><span class="value">${formatarData(b.data_vencimento)}</span></div>
                     <div class="info-row"><span class="label">Status</span><span class="value"><span class="badge badge-${b.status}">${b.status}</span></span></div>
                     ${b.data_pagamento ? `<div class="info-row"><span class="label">Data Pagamento</span><span class="value">${formatarData(b.data_pagamento)}</span></div>` : ''}
@@ -461,7 +461,7 @@
                     mostrarToast(data.message || 'Erro ao emitir boleto', 'error');
                 }
             } catch (e) {
-                mostrarToast('Erro de conexão', 'error');
+                mostrarToast('Erro de conexÃ£o', 'error');
             } finally { window._guardEmitirBoleto = false; }
         }
 
@@ -492,9 +492,9 @@
 
         function exportarBoletos() {
             if (boletos.length === 0) { mostrarToast('Nenhum boleto para exportar', 'warning'); return; }
-            let csv = 'Nº Documento,Sacado,CPF/CNPJ,Valor,Emissão,Vencimento,Status\n';
+            let csv = 'NÂº Documento,Sacado,CPF/CNPJ,Valor,EmissÃ£o,Vencimento,Status\n';
             boletos.forEach(b => {
-                csv += `"${b.número_documento}","${b.sacado_nome}","${b.sacado_cpf_cnpj || ''}","${b.valor}","${formatarData(b.data_emissao)}","${formatarData(b.data_vencimento)}","${b.status}"\n`;
+                csv += `"${b.nÃºmero_documento}","${b.sacado_nome}","${b.sacado_cpf_cnpj || ''}","${b.valor}","${formatarData(b.data_emissao)}","${formatarData(b.data_vencimento)}","${b.status}"\n`;
             });
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
@@ -527,7 +527,7 @@
                 contas.forEach(c => {
                     const opt = document.createElement('option');
                     opt.value = c.id;
-                    opt.textContent = `#${c.id} - ${c.cliente_nome || c.descrição} - ${formatarMoeda(c.valor)}`;
+                    opt.textContent = `#${c.id} - ${c.cliente_nome || c.descriÃ§Ã£o} - ${formatarMoeda(c.valor)}`;
                     sel.appendChild(opt);
                 });
             } catch (e) { console.error('Erro contas receber:', e); }
@@ -541,7 +541,7 @@
                 const r = await fetch('/api/me', { credentials: 'include' });
                 if (r.ok) {
                     const u = await r.json();
-                    const nome = u.apelido || (u.nome ? u.nome.split(' ')[0] : 'Usuário');
+                    const nome = u.apelido || (u.nome ? u.nome.split(' ')[0] : 'UsuÃ¡rio');
                     const h = new Date().getHours();
                     document.getElementById('greeting-text').textContent = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
                     document.getElementById('user-name').textContent = (nome || '').split(' ')[0];

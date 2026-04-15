@@ -11,21 +11,6 @@
 let configModalsLoaded = false;
 
 // =========================
-// REATIVIDADE: Notificação de alteração de configuração
-// Dispara CustomEvent 'zyntra:configUpdated' para que outros módulos
-// (Vendas, Financeiro, etc.) recarreguem dados em tempo real sem F5.
-// =========================
-function notifyConfigChange(tipo, dados) {
-    try {
-        window.dispatchEvent(new CustomEvent('zyntra:configUpdated', {
-            detail: { tipo: tipo, dados: dados || null, timestamp: Date.now() }
-        }));
-    } catch (e) {
-        console.warn('[config-modals] Erro ao emitir evento de atualização:', e);
-    }
-}
-
-// =========================
 // FUNÇÕES PRINCIPAIS
 // =========================
 
@@ -126,17 +111,7 @@ async function abrirConfiguracao(tipo) {
     modal.style.setProperty('visibility', 'visible', 'important');
     modal.style.setProperty('opacity', '1', 'important');
     modal.style.setProperty('pointer-events', 'auto', 'important');
-
-    // FIX #8: z-index dinâmico — sub-modais abrem acima do modal pai
-    const activeModals = document.querySelectorAll('.config-detail-modal.active');
-    const maxZ = Array.from(activeModals).reduce((max, m) => {
-        const z = parseInt(m.style.zIndex || m.style.getPropertyValue('z-index')) || 200000;
-        return Math.max(max, z);
-    }, 200000);
-    modal.style.setProperty('z-index', String(maxZ + 10), 'important');
-
-    // FIX #9: Usar removeAttribute('inert') em vez de aria-hidden para WAI-ARIA compliance
-    modal.removeAttribute('inert');
+    modal.style.setProperty('z-index', '200000', 'important');
     modal.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
     
@@ -306,22 +281,15 @@ async function abrirConfiguracao(tipo) {
 function closeConfigModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
-        // FIX #9: Mover foco para fora do modal antes de fechar (WAI-ARIA compliance)
-        const mainModal = document.getElementById('modal-configuracoes');
-        if (mainModal && mainModal.classList.contains('active')) {
-            const focusTarget = mainModal.querySelector('button, [tabindex], input, select');
-            if (focusTarget) focusTarget.focus();
-        }
         modal.classList.remove('active');
         modal.style.setProperty('display', 'none', 'important');
         modal.style.setProperty('visibility', 'hidden', 'important');
         modal.style.setProperty('opacity', '0', 'important');
         modal.style.setProperty('pointer-events', 'none', 'important');
-        // FIX #9: Usar inert em vez de aria-hidden para evitar bloqueio de foco
-        modal.setAttribute('inert', '');
         modal.setAttribute('aria-hidden', 'true');
         document.body.style.overflow = 'auto';
         // Restaurar título para Configurações do Sistema ao fechar sub-modal
+        const mainModal = document.getElementById('modal-configuracoes');
         if (mainModal && mainModal.classList.contains('active')) {
             document.title = 'Zyntra: Configurações do Sistema';
         } else if (window._originalPageTitle) {
@@ -336,16 +304,11 @@ function closeConfigModal(modalId) {
 function closeAllConfigModals() {
     const modals = document.querySelectorAll('.config-detail-modal');
     modals.forEach(modal => {
-        // FIX: Blur focused element before hiding to prevent aria-hidden focus warning
-        if (modal.contains(document.activeElement)) {
-            document.activeElement.blur();
-        }
         modal.classList.remove('active');
         modal.style.setProperty('display', 'none', 'important');
         modal.style.setProperty('visibility', 'hidden', 'important');
         modal.style.setProperty('opacity', '0', 'important');
         modal.style.setProperty('pointer-events', 'none', 'important');
-        modal.setAttribute('inert', '');
         modal.setAttribute('aria-hidden', 'true');
     });
     document.body.style.overflow = 'auto';
@@ -387,7 +350,7 @@ function populateEmpresaForm(data) {
     // Preenche os campos do formulário
     const fields = ['razao_social', 'nome_fantasia', 'cnpj', 'inscricao_estadual', 
                    'inscricao_municipal', 'telefone', 'email', 'site', 'cep', 
-                   'estado', 'cidade', 'bairro', 'endereco', 'número', 'complemento'];
+                   'estado', 'cidade', 'bairro', 'endereco', 'numero', 'complemento'];
     
     fields.forEach(field => {
         const input = form.querySelector(`[name="${field}"]`);
@@ -395,6 +358,30 @@ function populateEmpresaForm(data) {
             input.value = data[field];
         }
     });
+
+    // Exibir preview do logo atual
+    if (data.logo_url) {
+        const logoPreview = document.getElementById('logo-preview');
+        if (logoPreview) {
+            const img = logoPreview.querySelector('img');
+            if (img) img.src = data.logo_url + '?v=' + Date.now();
+            logoPreview.style.display = 'block';
+        }
+        const logoName = form.querySelector('#input-logo')?.parentElement?.querySelector('.config-file-upload-name');
+        if (logoName) logoName.textContent = 'Logo atual carregado';
+    }
+
+    // Exibir preview do favicon atual
+    if (data.favicon_url) {
+        const faviconPreview = document.getElementById('favicon-preview');
+        if (faviconPreview) {
+            const img = faviconPreview.querySelector('img');
+            if (img) img.src = data.favicon_url + '?v=' + Date.now();
+            faviconPreview.style.display = 'block';
+        }
+        const faviconName = form.querySelector('#input-favicon')?.parentElement?.querySelector('.config-file-upload-name');
+        if (faviconName) faviconName.textContent = 'Favicon atual carregado';
+    }
 }
 
 /**
@@ -466,7 +453,6 @@ async function saveEmpresaConfig() {
         }
 
         showNotification('Dados da empresa salvos com sucesso!', 'success');
-        notifyConfigChange('empresa');
         
         // Registrar na central de notificações
         if (window.registrarAcao) {
@@ -574,7 +560,6 @@ async function saveVendaProdutosConfig() {
 
         if (response.ok) {
             showNotification('Configurações de venda de produtos salvas!', 'success');
-            notifyConfigChange('venda-produtos');
             fecharModal('modal-venda-produtos');
         } else {
             showNotification('Configurações salvas localmente!', 'success');
@@ -730,8 +715,8 @@ function abrirFormTipoEntrega(id = null) {
     const form = document.getElementById('form-tipo-entrega');
     const titulo = document.getElementById('form-tipo-entrega-titulo');
     
-    const elFormConfig = document.getElementById('form-tipo-entrega-config'); if (elFormConfig) elFormConfig.reset();
-    const elTipoId = document.getElementById('tipo-entrega-id'); if (elTipoId) elTipoId.value = '';
+    document.getElementById('form-tipo-entrega-config').reset();
+    document.getElementById('tipo-entrega-id').value = '';
     tipoEntregaEditandoId = null;
     
     if (id) {
@@ -739,11 +724,11 @@ function abrirFormTipoEntrega(id = null) {
         const tipo = (Array.isArray(tiposEntregaCache) ? tiposEntregaCache : []).find(t => t.id === id);
         if (tipo) {
             tipoEntregaEditandoId = id;
-            const elId2 = document.getElementById('tipo-entrega-id'); if (elId2) elId2.value = tipo.id;
-            const elNome = document.getElementById('tipo-entrega-nome'); if (elNome) elNome.value = tipo.nome || '';
-            const elPrazo = document.getElementById('tipo-entrega-prazo'); if (elPrazo) elPrazo.value = tipo.prazo || '';
-            const elTransp = document.getElementById('tipo-entrega-transportadora'); if (elTransp) elTransp.value = tipo.transportadora_id || '';
-            const elSit = document.getElementById('tipo-entrega-situacao'); if (elSit) elSit.value = tipo.situacao || 'ativo';
+            document.getElementById('tipo-entrega-id').value = tipo.id;
+            document.getElementById('tipo-entrega-nome').value = tipo.nome || '';
+            document.getElementById('tipo-entrega-prazo').value = tipo.prazo || '';
+            document.getElementById('tipo-entrega-transportadora').value = tipo.transportadora_id || '';
+            document.getElementById('tipo-entrega-situacao').value = tipo.situacao || 'ativo';
         }
     } else {
         titulo.textContent = 'Novo Tipo de Entrega';
@@ -757,8 +742,8 @@ function abrirFormTipoEntrega(id = null) {
  * Fecha formulário de tipo de entrega
  */
 function fecharFormTipoEntrega() {
-    const elFormTE = document.getElementById('form-tipo-entrega'); if (elFormTE) elFormTE.style.display = 'none';
-    const elFormTEC = document.getElementById('form-tipo-entrega-config'); if (elFormTEC) elFormTEC.reset();
+    document.getElementById('form-tipo-entrega').style.display = 'none';
+    document.getElementById('form-tipo-entrega-config').reset();
     tipoEntregaEditandoId = null;
 }
 
@@ -766,12 +751,12 @@ function fecharFormTipoEntrega() {
  * Salva tipo de entrega
  */
 async function salvarTipoEntrega() {
-    const id = (document.getElementById('tipo-entrega-id') || {}).value || '';
+    const id = document.getElementById('tipo-entrega-id').value;
     const dados = {
-        nome: (document.getElementById('tipo-entrega-nome') || {}).value?.trim() || '',
-        prazo: parseInt((document.getElementById('tipo-entrega-prazo') || {}).value) || 0,
-        transportadora_id: (document.getElementById('tipo-entrega-transportadora') || {}).value || null,
-        situacao: (document.getElementById('tipo-entrega-situacao') || {}).value || 'ativo'
+        nome: document.getElementById('tipo-entrega-nome').value.trim(),
+        prazo: parseInt(document.getElementById('tipo-entrega-prazo').value) || 0,
+        transportadora_id: document.getElementById('tipo-entrega-transportadora').value || null,
+        situacao: document.getElementById('tipo-entrega-situacao').value
     };
     
     if (!dados.nome) {
@@ -792,7 +777,6 @@ async function salvarTipoEntrega() {
         
         if (response.ok) {
             showNotification(id ? 'Tipo de entrega atualizado!' : 'Tipo de entrega criado!', 'success');
-            notifyConfigChange('tipos-entrega');
             fecharFormTipoEntrega();
             loadTiposEntregaData();
         } else {
@@ -856,13 +840,13 @@ async function loadInfoFreteData() {
         if (response.ok) {
             const config = await response.json();
             
-            if (config.modalidade) { const el = document.getElementById('frete-modalidade'); if (el) el.value = config.modalidade; }
-            if (config.frete_minimo) { const el = document.getElementById('frete-minimo'); if (el) el.value = formatMoney(config.frete_minimo); }
-            if (config.url_rastreio) { const el = document.getElementById('frete-url-rastreio'); if (el) el.value = config.url_rastreio; }
+            if (config.modalidade) document.getElementById('frete-modalidade').value = config.modalidade;
+            if (config.frete_minimo) document.getElementById('frete-minimo').value = formatMoney(config.frete_minimo);
+            if (config.url_rastreio) document.getElementById('frete-url-rastreio').value = config.url_rastreio;
             
-            const elRast = document.getElementById('habilitar-rastreamento'); if (elRast) elRast.checked = config.habilitar_rastreamento || false;
-            const elDesp = document.getElementById('notificar-despacho'); if (elDesp) elDesp.checked = config.notificar_despacho || false;
-            const elEntrega = document.getElementById('notificar-entrega'); if (elEntrega) elEntrega.checked = config.notificar_entrega || false;
+            document.getElementById('habilitar-rastreamento').checked = config.habilitar_rastreamento || false;
+            document.getElementById('notificar-despacho').checked = config.notificar_despacho || false;
+            document.getElementById('notificar-entrega').checked = config.notificar_entrega || false;
         }
     } catch (error) {
         console.error('Erro ao carregar info frete:', error);
@@ -874,12 +858,12 @@ async function loadInfoFreteData() {
  */
 async function salvarInfoFrete() {
     const config = {
-        modalidade: (document.getElementById('frete-modalidade') || {}).value || '',
-        frete_minimo: parseFloat(((document.getElementById('frete-minimo') || {}).value || '0').replace(/\./g, '').replace(',', '.')) || 0,
-        url_rastreio: ((document.getElementById('frete-url-rastreio') || {}).value || '').trim(),
-        habilitar_rastreamento: (document.getElementById('habilitar-rastreamento') || {}).checked || false,
-        notificar_despacho: (document.getElementById('notificar-despacho') || {}).checked || false,
-        notificar_entrega: (document.getElementById('notificar-entrega') || {}).checked || false
+        modalidade: document.getElementById('frete-modalidade').value,
+        frete_minimo: parseFloat(document.getElementById('frete-minimo').value.replace(/\./g, '').replace(',', '.')) || 0,
+        url_rastreio: document.getElementById('frete-url-rastreio').value.trim(),
+        habilitar_rastreamento: document.getElementById('habilitar-rastreamento').checked,
+        notificar_despacho: document.getElementById('notificar-despacho').checked,
+        notificar_entrega: document.getElementById('notificar-entrega').checked
     };
     
     try {
@@ -892,7 +876,6 @@ async function salvarInfoFrete() {
         
         if (response.ok) {
             showNotification('Configurações de frete salvas!', 'success');
-            notifyConfigChange('info-frete');
             fecharModal('modal-info-frete');
         } else {
             showNotification('Configurações salvas localmente!', 'success');
@@ -1356,7 +1339,6 @@ async function salvarCategoria() {
         
         if (response.ok) {
             showNotification(id ? 'Categoria atualizada com sucesso!' : 'Categoria criada com sucesso!', 'success');
-            notifyConfigChange('categorias');
             closeConfigModal('modal-categoria-form');
             loadCategoriasData(); // Recarregar lista
         } else {
@@ -1792,14 +1774,51 @@ async function loadCertificadoData() {
  * Exibe informações do certificado
  */
 function displayCertificadoInfo(data) {
-    if (!data || !data.validade) return;
-
     const info = document.getElementById('certificado-info');
+    if (!info) return;
+
+    if (!data || !data.configurado) {
+        info.style.display = 'none';
+        return;
+    }
+
+    const validade = data.validade ? new Date(data.validade).toLocaleDateString('pt-BR') : '--';
+    const diasRestantes = data.diasRestantes || 0;
+    const nome = data.nome || 'Certificado Digital';
+    const cnpj = data.cnpj || '';
+    const statusCor = data.status === 'valido' ? '#22c55e' : data.status === 'expirando' ? '#f59e0b' : '#ef4444';
+    const statusTexto = data.status === 'valido' ? 'Válido' : data.status === 'expirando' ? 'Expirando' : 'Expirado';
+    const statusIcon = data.status === 'valido' ? 'check-circle' : data.status === 'expirando' ? 'exclamation-triangle' : 'times-circle';
+
+    info.style.display = 'block';
+    info.innerHTML = `
+        <div style="background: linear-gradient(135deg, #f0fdf4, #ecfdf5); border: 1px solid ${statusCor}40; border-radius: 12px; padding: 20px; margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                <div style="width: 42px; height: 42px; background: ${statusCor}20; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-${statusIcon}" style="font-size: 20px; color: ${statusCor};"></i>
+                </div>
+                <div style="flex: 1;">
+                    <strong style="display: block; font-size: 15px; color: #1f2937;">${nome}</strong>
+                    ${cnpj ? `<small style="color: #6b7280;">CNPJ: ${cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5')}</small>` : ''}
+                </div>
+                <span style="padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; background: ${statusCor}15; color: ${statusCor};">${statusTexto}</span>
+            </div>
+            <div style="display: flex; gap: 20px; font-size: 13px; color: #4b5563;">
+                <span><i class="fas fa-calendar-alt" style="margin-right: 4px;"></i> Validade: ${validade}</span>
+                <span><i class="fas fa-hourglass-half" style="margin-right: 4px;"></i> ${diasRestantes > 0 ? diasRestantes + ' dias restantes' : 'Expirado'}</span>
+            </div>
+            <div style="margin-top: 14px; display: flex; gap: 8px;">
+                <button onclick="excluirCertificado()" class="config-btn config-btn-danger" style="font-size: 13px; padding: 8px 16px; background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; border-radius: 8px; cursor: pointer;">
+                    <i class="fas fa-trash-alt"></i> Remover Certificado
+                </button>
+            </div>
+        </div>
+    `;
+
+    // Also update expiracao if it exists (legacy)
     const expiracao = document.getElementById('certificado-expiracao');
-    
-    if (info && expiracao) {
-        info.style.display = 'flex';
-        expiracao.textContent = new Date(data.validade).toLocaleDateString('pt-BR');
+    if (expiracao) {
+        expiracao.textContent = validade;
     }
 }
 
@@ -1843,6 +1862,29 @@ async function saveCertificadoConfig() {
     } catch (error) {
         console.error('Erro ao salvar certificado:', error);
         showNotification('Erro ao salvar certificado', 'error');
+    }
+}
+
+/**
+ * Exclui o certificado digital
+ */
+async function excluirCertificado() {
+    if (!confirm('Deseja realmente remover o certificado digital? Esta ação não pode ser desfeita.')) return;
+
+    try {
+        const response = await fetch('/api/configuracoes/certificado', {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            showNotification('Certificado removido com sucesso!', 'success');
+            loadCertificadoData();
+        } else {
+            throw new Error('Erro ao remover certificado');
+        }
+    } catch (error) {
+        console.error('Erro ao remover certificado:', error);
+        showNotification('Erro ao remover certificado', 'error');
     }
 }
 
@@ -2128,6 +2170,7 @@ window.showNovoProjetoForm = showNovoProjetoForm;
 window.editarProjeto = editarProjeto;
 window.excluirProjeto = excluirProjeto;
 window.saveCertificadoConfig = saveCertificadoConfig;
+window.excluirCertificado = excluirCertificado;
 window.saveNfeConfig = saveNfeConfig;
 window.saveVendaProdutosConfig = saveVendaProdutosConfig;
 window.loadVendaProdutosConfig = loadVendaProdutosConfig;
@@ -2690,7 +2733,6 @@ async function salvarVendedorConfig() {
         
         if (response.ok) {
             showNotification(id ? 'Vendedor atualizado com sucesso!' : 'Vendedor cadastrado com sucesso!', 'success');
-            notifyConfigChange('vendedores');
             fecharFormVendedor();
             loadVendedoresData();
         } else {
@@ -3286,7 +3328,6 @@ function abrirModal(modalId) {
         modal.style.setProperty('opacity', '1', 'important');
         modal.style.setProperty('pointer-events', 'auto', 'important');
         modal.style.setProperty('z-index', '200000', 'important');
-        modal.removeAttribute('inert');
         modal.setAttribute('aria-hidden', 'false');
         document.body.style.overflow = 'hidden';
     }
@@ -4042,7 +4083,6 @@ async function salvarContaConfig() {
         
         if (response.ok) {
             showNotification(contaConfigEditandoId ? 'Conta atualizada!' : 'Conta criada!', 'success');
-            notifyConfigChange('plano-contas');
             fecharFormNovaConta();
             loadPlanoContasData();
         } else {
@@ -4778,7 +4818,6 @@ async function salvarFormaPagamentoConfig() {
         
         if (response.ok) {
             showNotification(id ? 'Forma de pagamento atualizada!' : 'Forma de pagamento criada!', 'success');
-            notifyConfigChange('formas-pagamento');
             fecharFormFormaPagamento();
             loadFormasPagamentoData();
         } else {
@@ -4899,7 +4938,6 @@ async function saveImpostosConfig() {
             const result = await response.json();
             if (result.success) {
                 showToast('Configurações de impostos salvas com sucesso!', 'success');
-                notifyConfigChange('impostos');
                 fecharModal('modal-impostos');
             } else {
                 showToast('Erro ao salvar configurações de impostos', 'error');
@@ -5176,7 +5214,6 @@ async function salvarTabelaPrecoInline() {
         
         if (response.ok) {
             showNotification(id ? 'Tabela atualizada com sucesso!' : 'Tabela criada com sucesso!', 'success');
-            notifyConfigChange('tabelas-preco');
             fecharFormTabelaPreco();
             loadTabelasPrecoData();
         } else {
@@ -7735,10 +7772,6 @@ function fecharModalConfig(modalId) {
     const modal = document.getElementById('modal-configuracoes');
     if (modal) {
         console.log('✓ Fechando modal de configurações...');
-        // FIX: Blur focused element before hiding to prevent aria-hidden focus warning
-        if (modal.contains(document.activeElement)) {
-            document.activeElement.blur();
-        }
         const content = modal.querySelector('.modal-config-content');
         if (content) {
             content.style.animation = 'slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
@@ -7751,7 +7784,6 @@ function fecharModalConfig(modalId) {
             modal.style.setProperty('opacity', '0', 'important');
             modal.style.setProperty('pointer-events', 'none', 'important');
             modal.style.setProperty('z-index', '-1', 'important');
-            modal.setAttribute('inert', '');
             modal.setAttribute('aria-hidden', 'true');
             document.body.style.overflow = '';
             if (content) {
@@ -7849,7 +7881,6 @@ async function salvarCondicaoConfig() {
         
         if (response.ok) {
             showNotification('Condição de pagamento criada com sucesso!', 'success');
-            notifyConfigChange('condicoes-pagamento');
             fecharModalConfig('modal-nova-condicao-config');
             loadCondicoesPagamentoData();
         } else {
@@ -8148,7 +8179,6 @@ function abrirSobreLancamentos(event) {
         modal.style.setProperty('opacity', '1', 'important');
         modal.style.setProperty('pointer-events', 'auto', 'important');
         modal.style.setProperty('z-index', '200000', 'important');
-        modal.removeAttribute('inert');
         modal.setAttribute('aria-hidden', 'false');
         document.body.style.overflow = 'hidden';
         document.title = 'Zyntra: Sobre os Lançamentos';
@@ -8175,7 +8205,6 @@ function abrirHistoricoAlteracoes(event) {
         modal.style.setProperty('opacity', '1', 'important');
         modal.style.setProperty('pointer-events', 'auto', 'important');
         modal.style.setProperty('z-index', '200000', 'important');
-        modal.removeAttribute('inert');
         modal.setAttribute('aria-hidden', 'false');
         document.body.style.overflow = 'hidden';
         document.title = 'Zyntra: Histórico de Alterações';
@@ -8376,7 +8405,6 @@ async function salvarEdicaoCondicao() {
         });
         if (response.ok) {
             showNotification('Condição atualizada com sucesso!', 'success');
-            notifyConfigChange('condicoes-pagamento');
             fecharModalConfig('modal-editar-condicao-config');
             loadCondicoesPagamentoData();
         } else {

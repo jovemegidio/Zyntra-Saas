@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -7,7 +7,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Zyntra: Conciliação Bancária</title>
+    <title>Zyntra: ConciliaÃ§Ã£o BancÃ¡ria</title>
     <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
     
     <script src="/js/auth-unified.js?v=20260326" defer></script>
@@ -28,7 +28,7 @@
             --text-secondary: #64748b;
             --bg-gray: #f8fafc;
             --border-color: #e2e8f0;
-            --primary-dark: #1a1a2e;
+            --primary-dark: #ffffff;
             --sidebar-width: 48px;
             --header-height: 42px;
         }
@@ -65,7 +65,7 @@
 
 
 
-        /* ======================================== SISTEMA DE NOTIFICAÇÕES ======================================== */
+        /* ======================================== SISTEMA DE NOTIFICAÃ‡Ã•ES ======================================== */
 
 
 
@@ -196,8 +196,8 @@
         .filters-bar .btn:hover { filter: brightness(1.1); }
 
         /* CONCILIAO GRID */
-        .conciliação-grid { display: grid; grid-template-columns: 1fr 80px 1fr; gap: 24px; margin-bottom: 24px; }
-        .conciliação-panel { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .conciliaÃ§Ã£o-grid { display: grid; grid-template-columns: 1fr 80px 1fr; gap: 24px; margin-bottom: 24px; }
+        .conciliaÃ§Ã£o-panel { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         .panel-header { padding: 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
         .panel-header h3 { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
         .panel-header h3 i { color: var(--primary-orange); }
@@ -226,7 +226,7 @@
         .item-check.checked { background: var(--primary-orange); border-color: var(--primary-orange); color: white; }
         .item-info { flex: 1; }
         .item-info .data { font-size: 11px; color: var(--text-secondary); margin-bottom: 4px; }
-        .item-info .descrição { font-size: 13px; font-weight: 500; }
+        .item-info .descriÃ§Ã£o { font-size: 13px; font-weight: 500; }
         .item-valor { font-size: 14px; font-weight: 600; text-align: right; }
         .item-valor.entrada { color: var(--success); }
         .item-valor.saida { color: var(--danger); }
@@ -260,7 +260,7 @@
         .modal-
         .modal-footer { padding: 20px 24px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 12px; }
 
-        /* MODAL - Classes padrão (Padrão SaaS Empresarial) */
+        /* MODAL - Classes padrÃ£o (PadrÃ£o SaaS Empresarial) */
         .modal-overlay-padrao { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15,23,42,0.7); display: none; align-items: center; justify-content: center; z-index: 99999; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
         .modal-overlay-padrao.active { display: flex !important; }
         .modal-padrao { display: flex !important; flex-direction: column !important; background: white !important; border-radius: 20px !important; width: 100% !important; max-width: 600px !important; max-height: 90vh !important; overflow: hidden !important; box-shadow: 0 25px 80px rgba(0,0,0,0.25), 0 10px 30px rgba(0,0,0,0.15) !important; animation: modalFadeIn 0.25s ease-out !important; position: relative !important; margin: 16px !important; }
@@ -303,7 +303,7 @@
         .upload-area.drag-over { border-color: #225cfa; background: rgba(34,92,250,0.05); }
 
         /* RESPONSIVE */
-        @media (max-width: 1400px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } .conciliação-grid { grid-template-columns: 1fr; } .match-column { flex-direction: row; padding: 20px; } }
+        @media (max-width: 1400px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } .conciliaÃ§Ã£o-grid { grid-template-columns: 1fr; } .match-column { flex-direction: row; padding: 20px; } }
         @media (max-width: 1100px) { .filters-bar { flex-wrap: wrap; } .filter-group { flex: 1; min-width: 250px; } .filters-bar .btn { width: 100%; justify-content: center; border-radius: 0 0 14px 14px; } }
         @media (max-width: 768px) { .kpi-grid { grid-template-columns: 1fr; } .filter-group { flex-direction: column; align-items: flex-start; min-width: 100%; } }
 
@@ -394,7 +394,7 @@
         <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
 
 
-        <!-- SIDEBAR - PADRÃO PCP (HTML estático, RBAC via JS) -->
+        <!-- SIDEBAR - PADRÃƒO PCP (HTML estÃ¡tico, RBAC via JS) -->
         <aside class="sidebar" id="mobile-sidebar">
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel">
                 <i class="fas fa-home"></i>
@@ -419,13 +419,13 @@
                 <a href="plano-contas.html" class="sidebar-btn" title="Plano de Contas">
                     <i class="fas fa-list-alt"></i>
                 </a>
-                <a href="orcamentos.html" class="sidebar-btn" title="Orçamentos">
+                <a href="orcamentos.html" class="sidebar-btn" title="OrÃ§amentos">
                     <i class="fas fa-calculator"></i>
                 </a>
-                <a href="conciliacao.html" class="sidebar-btn active" title="Conciliação">
+                <a href="conciliacao.html" class="sidebar-btn active" title="ConciliaÃ§Ã£o">
                     <i class="fas fa-balance-scale"></i>
                 </a>
-                <a href="relatorios.html" class="sidebar-btn" title="Relatórios">
+                <a href="relatorios.html" class="sidebar-btn" title="RelatÃ³rios">
                     <i class="fas fa-chart-bar"></i>
                 </a>
             </nav>
@@ -438,7 +438,7 @@
                 <a href="impostos.html" class="sidebar-btn" title="Impostos">
                     <i class="fas fa-percent"></i>
                 </a>
-                <button class="sidebar-btn" title="Configurações" id="btn-config" onclick="toggleConfiguracoes()">
+                <button class="sidebar-btn" title="ConfiguraÃ§Ãµes" id="btn-config" onclick="toggleConfiguracoes()">
                     <i class="fas fa-cog"></i>
                 </button>
             </div>
@@ -446,7 +446,7 @@
 
         <!-- Main Area -->
         <main class="main-area">
-            <!-- HEADER - PADRÃO PCP (HTML estático) -->
+            <!-- HEADER - PADRÃƒO PCP (HTML estÃ¡tico) -->
             <header class="header">
                 <div class="header-left">
                     <!-- Botao Menu Mobile -->
@@ -458,7 +458,7 @@
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;"></span>
-                        <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Conciliação</span>
+                        <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">ConciliaÃ§Ã£o</span>
                     </div>
                 </div>
                 <div class="header-right">
@@ -467,19 +467,19 @@
                     </button>
                     
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">UsuÃ¡rio</strong></span>
                     </div>
                 </div>
             </header>
 
-            <!-- Main Content - Padrão PCP -->
+            <!-- Main Content - PadrÃ£o PCP -->
             <div class="main-content">
 
             <div class="page-content">
                 <!-- Action Buttons -->
                 <div style="display:flex; justify-content:flex-end; gap:10px; margin-bottom:16px;">
                     <button class="btn btn-secondary" onclick="abrirModalImportar()"><i class="fas fa-file-import"></i> Importar OFX</button>
-                    <button class="btn btn-primary" onclick="conciliarAutomatico()"><i class="fas fa-magic"></i> Conciliar Automático</button>
+                    <button class="btn btn-primary" onclick="conciliarAutomatico()"><i class="fas fa-magic"></i> Conciliar AutomÃ¡tico</button>
                 </div>
 
                 <!-- KPIs -->
@@ -489,7 +489,7 @@
                             <div class="kpi-icon"><i class="fas fa-check-double"></i></div>
                         </div>
                         <div class="kpi-content">
-                            <h3>Lançamentos Conciliados</h3>
+                            <h3>LanÃ§amentos Conciliados</h3>
                             <div class="kpi-value" id="totalConciliados">0</div>
                         </div>
                     </div>
@@ -529,7 +529,7 @@
                         <select id="filtroBanco" name="filtroBanco" onchange="aplicarFiltros()">
                             <option value="">Todos os bancos</option>
                             <option value="1" selected>Banco do Brasil - Principal</option>
-                            <option value="2">Itaú - Fornecedores</option>
+                            <option value="2">ItaÃº - Fornecedores</option>
                             <option value="3">Bradesco - Recebimentos</option>
                         </select>
                     </div>
@@ -543,21 +543,21 @@
                     </div>
                     <div class="filter-group">
                         <label><i class="fas fa-calendar-alt"></i> De</label>
-                        <input type="date" id="dataInicio" title="Data início">
+                        <input type="date" id="dataInicio" title="Data inÃ­cio">
                     </div>
                     <div class="filter-group">
-                        <label><i class="fas fa-calendar-day"></i> Até</label>
+                        <label><i class="fas fa-calendar-day"></i> AtÃ©</label>
                         <input type="date" id="dataFim" title="Data fim">
                     </div>
                     <button class="btn btn-primary" onclick="aplicarFiltros()"><i class="fas fa-filter"></i> Filtrar</button>
                 </div>
 
-                <!-- Conciliação Grid -->
-                <div class="conciliação-grid">
+                <!-- ConciliaÃ§Ã£o Grid -->
+                <div class="conciliaÃ§Ã£o-grid">
                     <!-- Sistema -->
-                    <div class="conciliação-panel">
+                    <div class="conciliaÃ§Ã£o-panel">
                         <div class="panel-header">
-                            <h3><i class="fas fa-desktop"></i> Lançamentos do Sistema</h3>
+                            <h3><i class="fas fa-desktop"></i> LanÃ§amentos do Sistema</h3>
                             <div class="saldo positivo" id="saldoSistema">R$ 0,00</div>
                         </div>
                         <div class="panel-body">
@@ -571,10 +571,10 @@
                         <button class="match-btn link" onclick="conciliarSelecionados()" title="Conciliar Selecionados">
                             <i class="fas fa-link"></i>
                         </button>
-                        <button class="match-btn unlink" onclick="desconciliarSelecionados()" title="Desfazer Conciliação">
+                        <button class="match-btn unlink" onclick="desconciliarSelecionados()" title="Desfazer ConciliaÃ§Ã£o">
                             <i class="fas fa-unlink"></i>
                         </button>
-                        <button class="match-btn auto" onclick="conciliarAutomatico()" title="Conciliar Automático">
+                        <button class="match-btn auto" onclick="conciliarAutomatico()" title="Conciliar AutomÃ¡tico">
                             <i class="fas fa-magic"></i>
                         </button>
                         <div class="match-info">
@@ -583,9 +583,9 @@
                     </div>
 
                     <!-- Extrato -->
-                    <div class="conciliação-panel">
+                    <div class="conciliaÃ§Ã£o-panel">
                         <div class="panel-header">
-                            <h3><i class="fas fa-file-invoice"></i> Extrato Bancário</h3>
+                            <h3><i class="fas fa-file-invoice"></i> Extrato BancÃ¡rio</h3>
                             <div class="saldo positivo" id="saldoExtrato">R$ 0,00</div>
                         </div>
                         <div class="panel-body">
@@ -595,23 +595,23 @@
                     </div>
                 </div>
 
-                <!-- Histórico de Conciliações -->
+                <!-- HistÃ³rico de ConciliaÃ§Ãµes -->
                 <div class="card">
                     <div class="card-header">
-                        <h3><i class="fas fa-history"></i> Histórico de Conciliações</h3>
+                        <h3><i class="fas fa-history"></i> HistÃ³rico de ConciliaÃ§Ãµes</h3>
                     </div>
                     <table class="data-table">
                         <thead>
                             <tr>
-                                <th>Data Conciliação</th>
-                                <th>Lançamento Sistema</th>
-                                <th>Lançamento Extrato</th>
+                                <th>Data ConciliaÃ§Ã£o</th>
+                                <th>LanÃ§amento Sistema</th>
+                                <th>LanÃ§amento Extrato</th>
                                 <th>Valor</th>
                                 <th>Status</th>
-                                <th>Ações</th>
+                                <th>AÃ§Ãµes</th>
                             </tr>
                         </thead>
-                        <tbody id="históricoConciliacoes"></tbody>
+                        <tbody id="histÃ³ricoConciliacoes"></tbody>
                     </table>
                 </div>
             </div>
@@ -630,7 +630,7 @@
                     </div>
                     <div class="modal-header-text-padrao">
                         <h2>Importar Extrato</h2>
-                        <p>Importe seu extrato bancário</p>
+                        <p>Importe seu extrato bancÃ¡rio</p>
                     </div>
                 </div>
                 <button class="modal-close-padrao" onclick="fecharModal('modalImportar')"><i class="fas fa-times"></i></button>
@@ -693,7 +693,7 @@
         // === State ===
         let lancamentosSistema = []; // contas_pagar + contas_receber pendentes
         let lancamentosExtrato = []; // extratos_importados
-        let histórico = []; // conciliacoes_bancarias
+        let histÃ³rico = []; // conciliacoes_bancarias
         let sistemasSelecionados = [];
         let extratosSelecionados = [];
         let contaBancariaAtual = '';
@@ -720,7 +720,7 @@
                 const r = await fetch('/api/me', { credentials: 'include' });
                 if (r.ok) {
                     const u = await r.json();
-                    const nome = u.apelido || (u.nome ? u.nome.split(' ')[0] : 'Usuário');
+                    const nome = u.apelido || (u.nome ? u.nome.split(' ')[0] : 'UsuÃ¡rio');
                     const h = new Date().getHours();
                     const el = document.getElementById('greeting-text');
                     if (el) el.textContent = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
@@ -761,7 +761,7 @@
         }
 
         async function carregarSistema() {
-            // Carrega contas a pagar e receber recentes (representam lançamentos do sistema)
+            // Carrega contas a pagar e receber recentes (representam lanÃ§amentos do sistema)
             try {
                 const ini = document.getElementById('dataInicio').value;
                 const fim = document.getElementById('dataFim').value;
@@ -773,12 +773,12 @@
                 const receber = await rReceber.json();
                 const itensPagar = (pagar.data || []).map(c => ({
                     id: 'p_' + c.id, dbId: c.id, tabela: 'contas_pagar',
-                    data: c.data_vencimento || c.data_emissao, descrição: c.descricao || c.descrição || c.fornecedor_nome || c.fornecedor || ('Conta #' + c.id),
+                    data: c.data_vencimento || c.data_emissao, descriÃ§Ã£o: c.descricao || c.descriÃ§Ã£o || c.fornecedor_nome || c.fornecedor || ('Conta #' + c.id),
                     tipo: 'saida', valor: Number(c.valor), conciliado: false
                 }));
                 const itensReceber = (receber.data || []).map(c => ({
                     id: 'r_' + c.id, dbId: c.id, tabela: 'contas_receber',
-                    data: c.data_vencimento || c.data_emissao, descrição: c.descricao || c.descrição || c.cliente_nome || c.cliente || ('Conta #' + c.id),
+                    data: c.data_vencimento || c.data_emissao, descriÃ§Ã£o: c.descricao || c.descriÃ§Ã£o || c.cliente_nome || c.cliente || ('Conta #' + c.id),
                     tipo: 'entrada', valor: Number(c.valor), conciliado: false
                 }));
                 lancamentosSistema = [...itensPagar, ...itensReceber].sort((a, b) => new Date(String(b.data).slice(0,10) + 'T00:00:00') - new Date(String(a.data).slice(0,10) + 'T00:00:00'));
@@ -795,7 +795,7 @@
                 const data = await r.json();
                 lancamentosExtrato = (data.data || []).map(e => ({
                     id: 'e_' + e.id, dbId: e.id,
-                    data: e.data, descrição: e.descrição,
+                    data: e.data, descriÃ§Ã£o: e.descriÃ§Ã£o,
                     tipo: Number(e.valor) >= 0 ? 'entrada' : 'saida',
                     valor: Math.abs(Number(e.valor)),
                     conciliado: e.conciliado == 1
@@ -810,17 +810,17 @@
                 if (contaId) url += `&conta_id=${contaId}`;
                 const r = await fetch(url, { credentials: 'include', headers: hdrs() });
                 const data = await r.json();
-                histórico = (data.data || []).map(c => ({
+                histÃ³rico = (data.data || []).map(c => ({
                     id: c.id, data: c.created_at || c.data,
                     sistemaDesc: c.movimentacao_sistema_id ? `Mov #${c.movimentacao_sistema_id}` : '-',
                     extratoDesc: c.extrato_id ? `Extrato #${c.extrato_id}` : '-',
                     valor: Number(c.valor), status: 'conciliado'
                 }));
-            } catch (e) { console.error('Erro histórico:', e); histórico = []; }
+            } catch (e) { console.error('Erro histÃ³rico:', e); histÃ³rico = []; }
         }
 
         function atualizarKPIs() {
-            const conciliados = histórico.length;
+            const conciliados = histÃ³rico.length;
             const pendentesSis = lancamentosSistema.filter(l => !l.conciliado).length;
             const pendentesExt = lancamentosExtrato.filter(l => !l.conciliado).length;
             const divergencias = lancamentosExtrato.filter(e => !e.conciliado && !lancamentosSistema.some(s => Math.abs(s.valor - e.valor) < 0.01 && !s.conciliado)).length;
@@ -847,7 +847,7 @@
         function renderizarPainelSistema() {
             const listaSistema = document.getElementById('listaSistema');
             if (lancamentosSistema.length === 0) {
-                listaSistema.innerHTML = '<li style="padding:40px;text-align:center;color:var(--text-secondary)"><i class="fas fa-inbox" style="font-size:32px;margin-bottom:12px;display:block;color:#cbd5e1"></i>Nenhum lançamento no período</li>';
+                listaSistema.innerHTML = '<li style="padding:40px;text-align:center;color:var(--text-secondary)"><i class="fas fa-inbox" style="font-size:32px;margin-bottom:12px;display:block;color:#cbd5e1"></i>Nenhum lanÃ§amento no perÃ­odo</li>';
                 document.getElementById('paginacaoSistema').innerHTML = '';
                 return;
             }
@@ -864,7 +864,7 @@
                     <div class="item-check ${sistemasSelecionados.includes(item.id) ? 'checked' : ''}">
                         ${sistemasSelecionados.includes(item.id) ? '<i class="fas fa-check" style="font-size:12px;"></i>' : ''}
                     </div>
-                    <div class="item-info"><div class="data">${formatarData(item.data)}</div><div class="descrição">${item.descrição}</div></div>
+                    <div class="item-info"><div class="data">${formatarData(item.data)}</div><div class="descriÃ§Ã£o">${item.descriÃ§Ã£o}</div></div>
                     <div class="item-valor ${item.tipo}">${item.tipo === 'entrada' ? '+' : '-'}${formatarMoeda(item.valor)}</div>
                 </li>
             `).join('');
@@ -875,7 +875,7 @@
         function renderizarPainelExtrato() {
             const listaExtrato = document.getElementById('listaExtrato');
             if (lancamentosExtrato.length === 0) {
-                listaExtrato.innerHTML = '<li style="padding:40px;text-align:center;color:var(--text-secondary)"><i class="fas fa-file-import" style="font-size:32px;margin-bottom:12px;display:block;color:#cbd5e1"></i>Importe um extrato OFX para começar</li>';
+                listaExtrato.innerHTML = '<li style="padding:40px;text-align:center;color:var(--text-secondary)"><i class="fas fa-file-import" style="font-size:32px;margin-bottom:12px;display:block;color:#cbd5e1"></i>Importe um extrato OFX para comeÃ§ar</li>';
                 document.getElementById('paginacaoExtrato').innerHTML = '';
                 return;
             }
@@ -892,7 +892,7 @@
                     <div class="item-check ${extratosSelecionados.includes(item.id) ? 'checked' : ''}">
                         ${extratosSelecionados.includes(item.id) ? '<i class="fas fa-check" style="font-size:12px;"></i>' : ''}
                     </div>
-                    <div class="item-info"><div class="data">${formatarData(item.data)}</div><div class="descrição">${item.descrição}</div></div>
+                    <div class="item-info"><div class="data">${formatarData(item.data)}</div><div class="descriÃ§Ã£o">${item.descriÃ§Ã£o}</div></div>
                     <div class="item-valor ${item.tipo}">${item.tipo === 'entrada' ? '+' : '-'}${formatarMoeda(item.valor)}</div>
                 </li>
             `).join('');
@@ -903,8 +903,8 @@
         function renderizarPaginacao(containerId, paginaAtual, totalPags, total, inicio, fim, tipo) {
             const container = document.getElementById(containerId);
             if (totalPags <= 1) {
-                container.innerHTML = `<div class="pagination-info">${total} lançamento${total !== 1 ? 's' : ''}</div>
-                    <div class="pagination-per-page"><span>Por página:</span>
+                container.innerHTML = `<div class="pagination-info">${total} lanÃ§amento${total !== 1 ? 's' : ''}</div>
+                    <div class="pagination-per-page"><span>Por pÃ¡gina:</span>
                     <select onchange="alterarItensPorPagina(this.value)">
                         <option value="20" ${itensPorPagina===20?'selected':''}>20</option>
                         <option value="30" ${itensPorPagina===30?'selected':''}>30</option>
@@ -931,7 +931,7 @@
                     <button class="pagination-btn" onclick="irParaPagina('${tipo}',${paginaAtual+1})" ${paginaAtual===totalPags?'disabled':''}><i class="fas fa-angle-right"></i></button>
                     <button class="pagination-btn" onclick="irParaPagina('${tipo}',${totalPags})" ${paginaAtual===totalPags?'disabled':''}><i class="fas fa-angle-double-right"></i></button>
                 </div>
-                <div class="pagination-per-page"><span>Por página:</span>
+                <div class="pagination-per-page"><span>Por pÃ¡gina:</span>
                 <select onchange="alterarItensPorPagina(this.value)">
                     <option value="20" ${itensPorPagina===20?'selected':''}>20</option>
                     <option value="30" ${itensPorPagina===30?'selected':''}>30</option>
@@ -960,12 +960,12 @@
         }
 
         function renderizarHistorico() {
-            const tbody = document.getElementById('históricoConciliacoes');
-            if (histórico.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-secondary)">Nenhuma conciliação realizada</td></tr>';
+            const tbody = document.getElementById('histÃ³ricoConciliacoes');
+            if (histÃ³rico.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-secondary)">Nenhuma conciliaÃ§Ã£o realizada</td></tr>';
                 return;
             }
-            tbody.innerHTML = histórico.map(item => `
+            tbody.innerHTML = histÃ³rico.map(item => `
                 <tr>
                     <td>${formatarData(item.data)}</td>
                     <td>${item.sistemaDesc}</td>
@@ -1011,16 +1011,16 @@
                 const r = await fetch(`${API}/conciliacao`, { credentials: 'include', method: 'POST', headers: hdrs(), body: JSON.stringify(payload) });
                 const data = await r.json();
                 if (data.success) {
-                    mostrarToastFinanceiro('Conciliação manual realizada!', 'success');
+                    mostrarToastFinanceiro('ConciliaÃ§Ã£o manual realizada!', 'success');
                     sistemasSelecionados = [];
                     extratosSelecionados = [];
                     await carregarTudo();
                 } else { mostrarToastFinanceiro(data.message || 'Erro', 'error'); }
-            } catch (e) { mostrarToastFinanceiro('Erro de conexão', 'error'); }
+            } catch (e) { mostrarToastFinanceiro('Erro de conexÃ£o', 'error'); }
         }
 
         function desconciliarSelecionados() {
-            mostrarToastFinanceiro('Clique no Ícone de desfazer no histórico abaixo', 'info');
+            mostrarToastFinanceiro('Clique no Ãcone de desfazer no histÃ³rico abaixo', 'info');
         }
 
         async function conciliarAutomatico() {
@@ -1032,7 +1032,7 @@
                 const data = await r.json();
                 if (data.success) {
                     const total = data.conciliados || 0;
-                    mostrarToastFinanceiro(`Conciliação automática: ${total} item(ns) conciliado(s)!`, total > 0 ? 'success' : 'info');
+                    mostrarToastFinanceiro(`ConciliaÃ§Ã£o automÃ¡tica: ${total} item(ns) conciliado(s)!`, total > 0 ? 'success' : 'info');
                     await carregarTudo();
                 } else { mostrarToastFinanceiro(data.message || 'Erro', 'error'); }
             } catch (e) { mostrarToastFinanceiro('Erro ao conciliar', 'error'); }
@@ -1040,13 +1040,13 @@
 
         async function desconciliar(id) {
             const confirmado = typeof showConfirmModal === 'function'
-                ? await showConfirmModal({ type:'warning', title:'Desfazer Conciliação', message:'Deseja realmente desfazer esta conciliação?', confirmText:'Desfazer', cancelText:'Cancelar' })
-                : confirm('Deseja desfazer esta conciliação?');
+                ? await showConfirmModal({ type:'warning', title:'Desfazer ConciliaÃ§Ã£o', message:'Deseja realmente desfazer esta conciliaÃ§Ã£o?', confirmText:'Desfazer', cancelText:'Cancelar' })
+                : confirm('Deseja desfazer esta conciliaÃ§Ã£o?');
             if (!confirmado) return;
             try {
                 const r = await fetch(`${API}/conciliacao/${id}`, { credentials: 'include', method: 'DELETE', headers: hdrs() });
                 const data = await r.json();
-                if (data.success) { mostrarToastFinanceiro('Conciliação desfeita', 'success'); await carregarTudo(); }
+                if (data.success) { mostrarToastFinanceiro('ConciliaÃ§Ã£o desfeita', 'success'); await carregarTudo(); }
                 else { mostrarToastFinanceiro(data.message || 'Erro', 'error'); }
             } catch (e) { mostrarToastFinanceiro('Erro', 'error'); }
         }
@@ -1077,10 +1077,10 @@
                 });
                 const data = await r.json();
                 if (data.success) {
-                    mostrarToastFinanceiro(`Extrato importado! ${data.importados || 0} lançamento(s) novos, ${data.duplicados || 0} duplicado(s)`, 'success');
+                    mostrarToastFinanceiro(`Extrato importado! ${data.importados || 0} lanÃ§amento(s) novos, ${data.duplicados || 0} duplicado(s)`, 'success');
                     fecharModal('modalImportar');
                     await carregarTudo();
-                } else { mostrarToastFinanceiro(data.message || 'Erro na importação', 'error'); }
+                } else { mostrarToastFinanceiro(data.message || 'Erro na importaÃ§Ã£o', 'error'); }
             } catch (e) { mostrarToastFinanceiro('Erro ao importar extrato', 'error'); }
         }
     </script>
@@ -1088,14 +1088,14 @@
     <script src="financeiro.js"></script>
     <script src="public/js/financeiro-user-loader.js?v=20251227"></script>
 
-    <!-- Sistema de Notificações Global -->
+    <!-- Sistema de NotificaÃ§Ãµes Global -->
     <script src="/js/notifications-manager.js?v=20251227"></script>
     <script src="/js/notification-button.js?v=20251227"></script>
 
     <!-- Sistema de Chat e Suporte -->
     <script src="/js/chat-suporte-widgets.js?v=20260103"></script>
 
-    <!-- Sistema de Monitoramento de Conexão -->
+    <!-- Sistema de Monitoramento de ConexÃ£o -->
     <script src="../_shared/connection-monitor.js?v=20251227"></script>
     <script src="/js/popup-confirmacao.js"></script>
     <script src="/js/confirm-modal.js?v=20260110"></script>

@@ -70,6 +70,44 @@ module.exports = function createVendasRoutes(deps) {
         )
     `).catch(e => console.error('Erro ao criar tabela notificacoes:', e.message));
 
+    // Correção pontual dos pedidos afetados pela falha de persistência de condição de pagamento
+    const sincronizarCondicoesPedidosAfetados = async () => {
+        try {
+            const pedidosAfetados = [
+                { numero: 4, condicao: '28 / 35 / 42 dias' },
+                { numero: 5, condicao: '28 / 35 / 42 / 49 dias' }
+            ];
+
+            for (const pedido of pedidosAfetados) {
+                await pool.query(`
+                    UPDATE pedidos
+                    SET condicao_pagamento = ?,
+                        condicoes_pagamento = ?,
+                        parcelas = ?,
+                        updated_at = NOW()
+                    WHERE (id = ? OR numero_pedido = ?)
+                      AND (
+                          COALESCE(condicao_pagamento, '') <> ? OR
+                          COALESCE(condicoes_pagamento, '') <> ? OR
+                          COALESCE(parcelas, '') <> ?
+                      )
+                `, [
+                    pedido.condicao,
+                    pedido.condicao,
+                    pedido.condicao,
+                    pedido.numero,
+                    pedido.numero,
+                    pedido.condicao,
+                    pedido.condicao,
+                    pedido.condicao
+                ]);
+            }
+        } catch (e) {
+            console.warn('[VENDAS] Falha ao sincronizar condições dos pedidos afetados:', e.message);
+        }
+    };
+    sincronizarCondicoesPedidosAfetados();
+
     // Precificação: retorna fatores de preço por tipo de venda e UF
     router.get('/precificacao', async (req, res) => {
         try {
@@ -291,9 +329,14 @@ module.exports = function createVendasRoutes(deps) {
                 SELECT p.*, p.valor as valor_total, p.created_at as data_pedido,
                        p.transportadora_id, p.transportadora_nome,
                        COALESCE(c.nome_fantasia, c.razao_social, c.nome, p.cliente_nome, p.cliente, 'Cliente não informado') AS cliente_nome,
+                       c.cnpj_cpf AS cliente_cnpj, c.inscricao_estadual AS cliente_ie,
+                       c.endereco AS cliente_endereco, c.numero AS cliente_numero,
+                       c.bairro AS cliente_bairro, c.cidade AS cliente_cidade,
+                       c.estado AS cliente_uf, c.cep AS cliente_cep,
+                       c.contato AS cliente_contato, c.complemento AS cliente_complemento,
                        c.email AS cliente_email, c.telefone AS cliente_telefone,
                        e.nome_fantasia AS empresa_nome, e.razao_social AS empresa_razao_social,
-                       u.nome AS vendedor_nome,
+                       COALESCE(u.nome, p.vendedor_nome) AS vendedor_nome,
                        t.razao_social AS transp_razao_social,
                        t.cnpj_cpf AS transp_cnpj,
                        t.telefone AS transp_telefone,
@@ -354,24 +397,39 @@ module.exports = function createVendasRoutes(deps) {
                 }
             }
 
-            // Auto-repair: fill NULL codigo/descricao from produto_id lookup
+            // Auto-repair: fill NULL/VLOOKUP codigo/descricao from produto_id or codigo lookup
             let repaired = false;
             for (const item of itensDB) {
-                if ((!item.codigo || !item.descricao) && item.produto_id) {
+                const descInvalid = !item.descricao || item.descricao.includes('VLOOKUP') || item.descricao.includes('vlookup');
+                if (descInvalid || !item.codigo) {
                     try {
-                        const [prods] = await pool.query('SELECT codigo, COALESCE(NULLIF(TRIM(descricao),\'\'), nome, codigo) as descricao FROM produtos WHERE id = ?', [item.produto_id]);
-                        if (prods.length > 0) {
+                        let prods = [];
+                        if (item.produto_id) {
+                            const [rows] = await pool.query('SELECT codigo, COALESCE(NULLIF(TRIM(descricao),\'\'), nome, codigo) as descricao FROM produtos WHERE id = ?', [item.produto_id]);
+                            prods = rows;
+                        }
+                        if (prods.length === 0 && item.codigo) {
+                            const [rows] = await pool.query('SELECT codigo, COALESCE(NULLIF(TRIM(descricao),\'\'), nome, codigo) as descricao FROM produtos WHERE codigo = ? LIMIT 1', [item.codigo]);
+                            prods = rows;
+                        }
+                        if (prods.length > 0 && prods[0].descricao && !prods[0].descricao.includes('VLOOKUP')) {
                             const pCodigo = prods[0].codigo || '';
                             const pDescricao = prods[0].descricao || '';
                             if (!item.codigo && pCodigo) { item.codigo = pCodigo; }
-                            if (!item.descricao && pDescricao) { item.descricao = pDescricao; }
-                            await pool.query('UPDATE pedido_itens SET codigo = COALESCE(NULLIF(codigo,\'\'), ?), descricao = COALESCE(NULLIF(descricao,\'\'), ?) WHERE id = ?', [pCodigo, pDescricao, item.id]);
-                            repaired = true;
+                            if (descInvalid && pDescricao) {
+                                item.descricao = pDescricao;
+                                await pool.query('UPDATE pedido_itens SET descricao = ? WHERE id = ?', [pDescricao, item.id]);
+                                repaired = true;
+                            }
+                            if (!item.codigo) {
+                                await pool.query('UPDATE pedido_itens SET codigo = COALESCE(NULLIF(codigo,\'\'), ?) WHERE id = ?', [pCodigo, item.id]);
+                                repaired = true;
+                            }
                         }
                     } catch (repairErr) { console.warn('[VENDAS] Auto-repair codigo/descricao erro:', repairErr.message); }
                 }
             }
-            if (repaired) console.log(`[VENDAS] Auto-repair: preencheu codigo/descricao via produto_id para pedido #${id}`);
+            if (repaired) console.log(`[VENDAS] Auto-repair: preencheu codigo/descricao via produto_id/codigo para pedido #${id}`);
 
             pedido.itens = itensDB;
             res.json(pedido);
@@ -391,7 +449,7 @@ module.exports = function createVendasRoutes(deps) {
                 empresa_id, cliente_id, cliente_nome, cliente,
                 valor, descricao, observacao, observacoes,
                 status = 'orcamento',
-                condicao_pagamento, cenario_fiscal,
+                condicao_pagamento, condicoes_pagamento, cenario_fiscal,
                 transportadora, transportadora_nome,
                 tipo_frete, frete = 0,
                 placa_veiculo, veiculo_uf, rntrc,
@@ -491,7 +549,7 @@ module.exports = function createVendasRoutes(deps) {
                 obs,
                 'orcamento',
                 numeroPedido,
-                sanitize(condicao_pagamento),
+                sanitize(condicao_pagamento) || sanitize(condicoes_pagamento),
                 sanitize(cenario_fiscal),
                 sanitize(transportadora_nome) || sanitize(transportadora),
                 sanitize(tipo_frete),
@@ -577,9 +635,23 @@ module.exports = function createVendasRoutes(deps) {
             connection.release();
         }
     });
+    // Statuses bloqueados para edição — somente ti@aluforce.ind.br pode editar
+    const STATUS_BLOQUEADO_EDICAO = ['faturado', 'faturar', 'aprovado', 'pedido-aprovado', 'orcamento', 'orçamento', 'analise', 'analise-credito', 'recibo', 'entregue'];
+    const EMAIL_EDICAO_LIBERADO = 'ti@aluforce.ind.br';
+
     router.put('/pedidos/:id', pedidoOwnership, async (req, res, next) => {
         try {
             const { id } = req.params;
+
+            // Lock: verificar status do pedido antes de permitir edição
+            const [[pedidoLock]] = await pool.query('SELECT status FROM pedidos WHERE id = ?', [parseInt(id)]);
+            if (pedidoLock && STATUS_BLOQUEADO_EDICAO.includes((pedidoLock.status || '').toLowerCase())) {
+                const userEmail = (req.user && req.user.email || '').toLowerCase();
+                if (userEmail !== EMAIL_EDICAO_LIBERADO) {
+                    return res.status(403).json({ message: `Pedido com status "${pedidoLock.status}" não pode ser editado. Somente TI pode editar pedidos neste status.`, code: 'EDIT_LOCKED_BY_STATUS' });
+                }
+            }
+
             const sanitize = (v) => (v === 'null' || v === 'undefined' || v === '' || v === undefined ? null : v);
             const sanitizeNum = (v) => { const n = parseFloat(v); return isNaN(n) ? null : n; };
 
@@ -587,7 +659,7 @@ module.exports = function createVendasRoutes(deps) {
                 empresa_id, cliente_id, cliente_nome, cliente,
                 valor, descricao, observacao, observacoes,
                 status,
-                condicao_pagamento, cenario_fiscal,
+                condicao_pagamento, condicoes_pagamento, cenario_fiscal,
                 transportadora, transportadora_nome,
                 tipo_frete, frete,
                 placa_veiculo, veiculo_uf, rntrc,
@@ -614,7 +686,8 @@ module.exports = function createVendasRoutes(deps) {
             if (status !== undefined && sanitize(status)) {
                 return res.status(400).json({ message: 'Alteração de status não permitida via PUT. Use PUT /pedidos/:id/status para garantir validação de transição.' });
             }
-            if (condicao_pagamento !== undefined) { sets.push('condicao_pagamento = ?'); params.push(sanitize(condicao_pagamento)); }
+            const condicaoPagamentoFinal = condicao_pagamento !== undefined ? condicao_pagamento : condicoes_pagamento;
+            if (condicaoPagamentoFinal !== undefined) { sets.push('condicao_pagamento = ?'); params.push(sanitize(condicaoPagamentoFinal)); }
             if (cenario_fiscal !== undefined) { sets.push('cenario_fiscal = ?'); params.push(sanitize(cenario_fiscal)); }
             if (transportadora_nome !== undefined || transportadora !== undefined) {
                 sets.push('transportadora_nome = ?'); params.push(sanitize(transportadora_nome) || sanitize(transportadora));
@@ -866,6 +939,16 @@ module.exports = function createVendasRoutes(deps) {
             const user = req.user || {};
             const isAdmin = user.is_admin === true || user.is_admin === 1 || (user.role && user.role.toString().toLowerCase() === 'admin');
 
+            // Lock: pedidos em status bloqueado só podem ser editados por ti@aluforce.ind.br
+            const statusAtualPatch = (existing.status || '').toLowerCase().trim();
+            if (STATUS_BLOQUEADO_EDICAO.includes(statusAtualPatch)) {
+                const userEmail = (user.email || '').toLowerCase();
+                if (userEmail !== EMAIL_EDICAO_LIBERADO) {
+                    await patchConn.rollback();
+                    return res.status(403).json({ message: `Pedido com status "${existing.status}" não pode ser editado. Somente TI pode editar pedidos neste status.`, code: 'EDIT_LOCKED_BY_STATUS' });
+                }
+            }
+
             // Verificar permissão
             if (!isAdmin && existing.vendedor_id && Number(existing.vendedor_id) !== Number(user.id)) {
                 return res.status(403).json({ message: 'Acesso negado: somente o vendedor responsável ou admin podem editar este pedido.' });
@@ -905,11 +988,11 @@ module.exports = function createVendasRoutes(deps) {
                 let opAtiva = [];
                 try {
                     [opAtiva] = await patchConn.query(
-                        'SELECT id, codigo FROM ordens_producao WHERE pedido_id = ? AND status NOT IN ("concluida", "cancelada") LIMIT 1',
+                        'SELECT id, codigo FROM ordens_producao WHERE pedido_vinculado_id = ? AND status NOT IN ("concluida", "cancelada") LIMIT 1',
                         [id]
                     );
                 } catch (_opErr) {
-                    // pedido_id column may not exist in this deployment — skip OP check
+                    // pedido_vinculado_id column may not exist in this deployment — skip OP check
                     opAtiva = [];
                 }
                 if (opAtiva.length > 0 && !isAdmin) {
@@ -1013,8 +1096,8 @@ module.exports = function createVendasRoutes(deps) {
             }
 
             // Parcelas/Condição de Pagamento - salvar em múltiplos campos
-            if (updates.parcelas !== undefined || updates.condicao_pagamento !== undefined) {
-                const condicaoValor = updates.condicao_pagamento || updates.parcelas;
+            if (updates.parcelas !== undefined || updates.condicao_pagamento !== undefined || updates.condicoes_pagamento !== undefined) {
+                const condicaoValor = updates.condicao_pagamento || updates.condicoes_pagamento || updates.parcelas;
                 fieldsToUpdate.push('condicao_pagamento = ?');
                 values.push(condicaoValor);
                 fieldsToUpdate.push('condicoes_pagamento = ?');
@@ -1434,7 +1517,7 @@ module.exports = function createVendasRoutes(deps) {
 
             // Sprint 1 (K-03/RC-01 fix): SELECT ... FOR UPDATE para atomicidade
             await connection.beginTransaction();
-            const [pedidoAtual] = await connection.query('SELECT id, status, vendedor_id, cliente_id, cliente_nome, valor, condicao_pagamento FROM pedidos WHERE id = ? FOR UPDATE', [id]);
+            const [pedidoAtual] = await connection.query('SELECT id, status, vendedor_id, cliente_id, cliente_nome, valor, condicao_pagamento, parcelas FROM pedidos WHERE id = ? FOR UPDATE', [id]);
             if (pedidoAtual.length === 0) {
                 await connection.rollback();
                 return res.status(404).json({ message: 'Pedido não encontrado.' });
@@ -1577,7 +1660,7 @@ module.exports = function createVendasRoutes(deps) {
                 try {
                     // Verificar se já existe OP para este pedido
                     const [opExistente] = await connection.query(
-                        'SELECT id, codigo FROM ordens_producao WHERE pedido_id = ? AND status NOT IN ("cancelada") LIMIT 1', [id]
+                        'SELECT id, codigo FROM ordens_producao WHERE pedido_vinculado_id = ? AND status NOT IN ("cancelada") LIMIT 1', [id]
                     );
                     if (opExistente.length === 0) {
                         // BUG-10 FIX: Buscar TODOS os itens do pedido (não só o primeiro)
@@ -1600,6 +1683,46 @@ module.exports = function createVendasRoutes(deps) {
                         const codigoOP = `OP N° ${ano}/${String(proximoNumero).padStart(5, '0')}`;
 
                         const pedidoData = pedidoAtual[0];
+
+                        // Buscar dados completos do cliente para a OP
+                        let clienteNomeOP = pedidoData.cliente_nome || '';
+                        let clienteCnpjOP = '';
+                        let clienteContatoOP = '';
+                        let clienteTelefoneOP = '';
+                        let clienteEmailOP = '';
+                        let clienteEnderecoOP = '';
+                        let clienteCepOP = '';
+                        let vendedorOP = '';
+                        let condicaoPagamentoOP = pedidoData.condicao_pagamento || '';
+                        let valorTotalOP = parseFloat(pedidoData.valor) || 0;
+
+                        if (pedidoData.cliente_id) {
+                            try {
+                                const [clienteRows] = await connection.query(
+                                    'SELECT nome, razao_social, nome_fantasia, cnpj_cpf, contato, telefone, email, endereco, numero, bairro, cidade, estado, cep FROM clientes WHERE id = ?',
+                                    [pedidoData.cliente_id]
+                                );
+                                if (clienteRows.length > 0) {
+                                    const cl = clienteRows[0];
+                                    clienteNomeOP = cl.razao_social || cl.nome_fantasia || cl.nome || clienteNomeOP;
+                                    clienteCnpjOP = cl.cnpj_cpf || '';
+                                    clienteContatoOP = cl.contato || '';
+                                    clienteTelefoneOP = cl.telefone || '';
+                                    clienteEmailOP = cl.email || '';
+                                    clienteEnderecoOP = [cl.endereco, cl.numero, cl.bairro, cl.cidade ? cl.cidade + '/' + (cl.estado || '') : ''].filter(Boolean).join(', ');
+                                    clienteCepOP = cl.cep || '';
+                                }
+                            } catch (clErr) { console.warn('[PIPELINE_AUTO] Erro ao buscar cliente:', clErr.message); }
+                        }
+
+                        // Buscar nome do vendedor
+                        if (pedidoData.vendedor_id) {
+                            try {
+                                const [vendRows] = await connection.query('SELECT nome FROM usuarios WHERE id = ?', [pedidoData.vendedor_id]);
+                                if (vendRows.length > 0) vendedorOP = vendRows[0].nome;
+                            } catch (_) {}
+                        }
+
                         let descProduto, qtdOP, undOP, obsItens;
                         if (itensOP.length > 1) {
                             // Múltiplos itens: listar todos na descrição e observações
@@ -1625,12 +1748,17 @@ module.exports = function createVendasRoutes(deps) {
                             INSERT INTO ordens_producao (
                                 codigo, produto_nome, quantidade, unidade,
                                 status, prioridade, data_prevista, responsavel, observacoes,
-                                progresso, quantidade_produzida, pedido_id, created_at, updated_at
-                            ) VALUES (?, ?, ?, ?, 'ativa', 'media', NULL, NULL, ?, 0, 0, ?, NOW(), NOW())
-                        `, [codigoOP, descProduto, qtdOP, undOP, obsItens, id]);
-
-                        // Marcar pedido com produção iniciada
-                        await connection.query('UPDATE pedidos SET producao_iniciada = 1 WHERE id = ?', [id]);
+                                progresso, quantidade_produzida, pedido_vinculado_id,
+                                cliente_nome, cliente_cnpj, cliente_contato, cliente_telefone,
+                                cliente_email, cliente_endereco, cliente_cep,
+                                vendedor, condicoes_pagamento, valor_total, numero_pedido,
+                                created_at, updated_at
+                            ) VALUES (?, ?, ?, ?, 'ativa', 'media', NULL, NULL, ?, 0, 0, ?,
+                                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+                        `, [codigoOP, descProduto, qtdOP, undOP, obsItens, id,
+                            clienteNomeOP, clienteCnpjOP, clienteContatoOP, clienteTelefoneOP,
+                            clienteEmailOP, clienteEnderecoOP, clienteCepOP,
+                            vendedorOP, condicaoPagamentoOP, valorTotalOP, String(id)]);
 
                         opAutoCriada = { id: opResult.insertId, codigo: codigoOP };
                         console.log(`[PIPELINE_AUTO] OP ${codigoOP} criada automaticamente para Pedido #${id}`);
@@ -2132,11 +2260,12 @@ module.exports = function createVendasRoutes(deps) {
             res.json(rows);
         } catch (error) { next(error); }
     });
-    router.get('/clientes', cacheMiddleware('vendas_clientes', 120000), async (req, res, next) => {
+    router.get('/clientes', cacheMiddleware('vendas_clientes', 120000, true), async (req, res, next) => {
         try {
             const { page = 1, limit = 2000 } = req.query;
             const isAdmin = req.user && (req.user.is_admin || req.user.role === 'admin' || req.user.role === 'administrador');
-            const rows = await repos.cliente.list({ page, limit, isAdmin, vendedorId: req.user?.id });
+            const isComercial = req.user?.role === 'comercial';
+            const rows = await repos.cliente.list({ page, limit, isAdmin, isComercial, vendedorId: req.user?.id, vendedorNome: req.user?.nome });
             res.json(rows);
         } catch (error) { next(error); }
     });
@@ -2223,6 +2352,108 @@ module.exports = function createVendasRoutes(deps) {
             });
         } catch (error) { next(error); }
     });
+
+    // ═══════════════════════════════════════════════════════
+    // CREDIT ANALYSIS ROUTES
+    // ═══════════════════════════════════════════════════════
+
+    // GET /clientes/:id/credito — Credit limit and available credit
+    router.get('/clientes/:id/credito', authenticateToken, async (req, res, next) => {
+        try {
+            const clienteId = parseInt(req.params.id);
+            if (isNaN(clienteId)) return res.status(400).json({ message: 'ID inválido.' });
+
+            const [clienteRows] = await pool.query(
+                'SELECT id, nome, razao_social, limite_credito, empresa_id FROM clientes WHERE id = ? LIMIT 1',
+                [clienteId]
+            );
+            if (clienteRows.length === 0) return res.status(404).json({ message: 'Cliente não encontrado.' });
+
+            const cliente = clienteRows[0];
+            const limiteCredito = parseFloat(cliente.limite_credito || 0);
+
+            const [creditUsed] = await pool.query(
+                `SELECT COALESCE(SUM(valor), 0) as total_pendente
+                 FROM pedidos
+                 WHERE cliente_id = ?
+                   AND status IN ('aprovado', 'pedido-aprovado', 'faturar', 'faturado', 'parcial')`,
+                [clienteId]
+            );
+            const totalPendente = parseFloat(creditUsed[0].total_pendente || 0);
+            const creditoDisponivel = Math.max(0, limiteCredito - totalPendente);
+
+            res.json({
+                cliente_id: clienteId,
+                nome: cliente.razao_social || cliente.nome,
+                limite_credito: limiteCredito,
+                total_pendente: totalPendente,
+                credito_disponivel: creditoDisponivel
+            });
+        } catch (error) { next(error); }
+    });
+
+    // POST /pedidos/:id/aprovacao-credito — Register credit analysis decision
+    router.post('/pedidos/:id/aprovacao-credito', authenticateToken, async (req, res, next) => {
+        try {
+            const pedidoId = parseInt(req.params.id);
+            if (isNaN(pedidoId)) return res.status(400).json({ success: false, message: 'ID inválido.' });
+
+            const { parecer, condicao_pagamento, observacoes } = req.body;
+            if (!parecer || !['aprovado', 'aprovado_avista', 'reprovado'].includes(parecer)) {
+                return res.status(400).json({ success: false, message: 'Parecer inválido.' });
+            }
+
+            const [pedidoRows] = await pool.query('SELECT id, status, cliente_id, valor FROM pedidos WHERE id = ? LIMIT 1', [pedidoId]);
+            if (pedidoRows.length === 0) return res.status(404).json({ success: false, message: 'Pedido não encontrado.' });
+
+            const connection = await pool.getConnection();
+            try {
+                await connection.beginTransaction();
+
+                if (condicao_pagamento) {
+                    await connection.query('UPDATE pedidos SET condicao_pagamento = ? WHERE id = ?', [condicao_pagamento, pedidoId]);
+                }
+
+                let novoStatus;
+                let descricao = '';
+                if (parecer === 'aprovado') {
+                    novoStatus = 'pedido-aprovado';
+                    descricao = 'Crédito aprovado';
+                } else if (parecer === 'aprovado_avista') {
+                    novoStatus = 'pedido-aprovado';
+                    descricao = 'Crédito aprovado (à vista)';
+                    await connection.query('UPDATE pedidos SET condicao_pagamento = ? WHERE id = ?', ['a_vista', pedidoId]);
+                } else {
+                    novoStatus = 'credito-reprovado';
+                    descricao = 'Crédito reprovado';
+                }
+                if (observacoes) descricao += ' — ' + observacoes;
+
+                await connection.query('UPDATE pedidos SET status = ? WHERE id = ?', [novoStatus, pedidoId]);
+
+                // Log to history
+                try {
+                    const [tables] = await connection.query("SHOW TABLES LIKE 'pedido_historico'");
+                    if (tables.length > 0) {
+                        await connection.query(
+                            `INSERT INTO pedido_historico (pedido_id, usuario_id, usuario_nome, acao, descricao, created_at)
+                             VALUES (?, ?, ?, ?, ?, NOW())`,
+                            [pedidoId, req.user.id, req.user.nome || req.user.email, 'aprovacao-credito', descricao]
+                        );
+                    }
+                } catch (_) { /* table may not exist */ }
+
+                await connection.commit();
+                res.json({ success: true, message: descricao, novo_status: novoStatus });
+            } catch (err) {
+                await connection.rollback();
+                throw err;
+            } finally {
+                connection.release();
+            }
+        } catch (error) { next(error); }
+    });
+
     router.post('/clientes', authenticateToken, async (req, res, next) => {
         try {
             // Field aliasing — frontend may send razao_social/cnpj_cpf/ie/logradouro/número
@@ -2724,20 +2955,38 @@ module.exports = function createVendasRoutes(deps) {
 
     router.get('/comissoes', authorizeAdminOrComercial, async (req, res, next) => {
         try {
-            const { periodo } = req.query; // Ex: '2025-08'
-            let where = 'p.status IN ("faturado", "recibo")';
-            let params = [];
-            if (periodo) {
-                where += ' AND DATE_FORMAT(p.created_at, "%Y-%m") = ?';
-                params.push(periodo);
+            const { periodo, vendedor_id } = req.query;
+            const periodoAtual = periodo || new Date().toISOString().substring(0, 7);
+
+            // Verificar se usuário é admin de comissões
+            const ADMINS_COMISSAO_DET = ['ti', 'douglas', 'andreia', 'fernando', 'consultoria', 'admin', 'antonio', 'tialuforce'];
+            const currentUser = req.user;
+            const usernameDet = (currentUser.email || '').split('@')[0].toLowerCase();
+            const isAdminDet = currentUser.is_admin === 1 || currentUser.role === 'admin' || ADMINS_COMISSAO_DET.includes(usernameDet);
+
+            let whereExtra = '';
+            let params = [periodoAtual];
+
+            if (!isAdminDet) {
+                whereExtra = ' AND p.vendedor_id = ?';
+                params.push(currentUser.id);
+            } else if (vendedor_id) {
+                whereExtra = ' AND p.vendedor_id = ?';
+                params.push(vendedor_id);
             }
+
             const [rows] = await pool.query(`
-                SELECT p.id AS pedido_id, p.valor, p.created_at, u.id AS vendedor_id, u.nome AS vendedor_nome, u.comissao_percentual,
-                (p.valor * u.comissao_percentual / 100) AS valor_comissao
+                SELECT p.id AS pedido_id, p.numero_pedido, p.valor, p.status, p.created_at,
+                       u.id AS vendedor_id, u.nome AS vendedor_nome, u.email AS vendedor_email,
+                       COALESCE(u.comissao_percentual, 1.0) AS comissao_percentual,
+                       (p.valor * COALESCE(u.comissao_percentual, 1.0) / 100) AS valor_comissao,
+                       c.razao_social AS cliente_nome
                 FROM pedidos p
                 LEFT JOIN usuarios u ON p.vendedor_id = u.id
-                WHERE ${where}
-                ORDER BY u.nome, p.created_at DESC
+                LEFT JOIN clientes c ON p.cliente_id = c.id
+                WHERE p.status NOT IN ('cancelado')
+                  AND DATE_FORMAT(p.created_at, '%Y-%m') = ?${whereExtra}
+                ORDER BY p.created_at DESC
             `, params);
             res.json(rows);
         } catch (error) { next(error); }
@@ -2840,6 +3089,38 @@ module.exports = function createVendasRoutes(deps) {
             const [rows] = await pool.query(query, params);
 
             res.json(rows);
+        } catch (error) { next(error); }
+    });
+
+    // Exportar comissões em CSV
+    router.get('/comissoes/exportar', authorizeAdminOrComercial, async (req, res, next) => {
+        try {
+            const { periodo } = req.query;
+            const periodoAtual = periodo || new Date().toISOString().substring(0, 7);
+
+            const [rows] = await pool.query(`
+                SELECT
+                    u.nome as vendedor,
+                    u.email,
+                    COALESCE(u.comissao_percentual, 1.0) as percentual,
+                    COUNT(CASE WHEN p.status IN ('faturado', 'recibo') THEN 1 END) as vendas_faturadas,
+                    COALESCE(SUM(CASE WHEN p.status IN ('faturado', 'recibo') THEN p.valor ELSE 0 END), 0) as valor_faturado,
+                    COALESCE(SUM(CASE WHEN p.status IN ('faturado', 'recibo') THEN (p.valor * COALESCE(u.comissao_percentual, 1.0) / 100) ELSE 0 END), 0) as comissao
+                FROM usuarios u
+                LEFT JOIN pedidos p ON u.id = p.vendedor_id AND DATE_FORMAT(p.created_at, '%Y-%m') = ?
+                WHERE (u.role IN ('comercial', 'vendedor') OR u.departamento IN ('Comercial', 'Vendas')) AND u.status = 'ativo'
+                GROUP BY u.id, u.nome, u.email, u.comissao_percentual
+                ORDER BY u.nome
+            `, [periodoAtual]);
+
+            const header = 'Vendedor;Email;Percentual;Vendas Faturadas;Valor Faturado;Comissao\n';
+            const csvRows = rows.map(r =>
+                `${r.vendedor};${r.email};${r.percentual}%;${r.vendas_faturadas};${parseFloat(r.valor_faturado).toFixed(2)};${parseFloat(r.comissao).toFixed(2)}`
+            ).join('\n');
+
+            res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+            res.setHeader('Content-Disposition', `attachment; filename="comissoes-${periodoAtual}.csv"`);
+            res.send('\uFEFF' + header + csvRows);
         } catch (error) { next(error); }
     });
 
@@ -3028,15 +3309,31 @@ module.exports = function createVendasRoutes(deps) {
                 [id]
             );
 
-            // Auto-repair: fill NULL codigo/descricao from produto_id
+            // Auto-repair: fill NULL/VLOOKUP codigo/descricao from produto_id or codigo lookup
             for (const item of itens) {
-                if ((!item.codigo || !item.descricao) && item.produto_id) {
+                const descInvalid = !item.descricao || item.descricao.includes('VLOOKUP') || item.descricao.includes('vlookup');
+                if (descInvalid || !item.codigo) {
                     try {
-                        const [prods] = await pool.query("SELECT codigo, COALESCE(NULLIF(TRIM(descricao),''), nome, codigo) as descricao FROM produtos WHERE id = ?", [item.produto_id]);
-                        if (prods.length > 0) {
+                        let prods = [];
+                        // Tentar por produto_id primeiro
+                        if (item.produto_id) {
+                            const [rows] = await pool.query("SELECT codigo, COALESCE(NULLIF(TRIM(descricao),''), nome, codigo) as descricao FROM produtos WHERE id = ?", [item.produto_id]);
+                            prods = rows;
+                        }
+                        // Se não achou por produto_id, tentar pelo código
+                        if (prods.length === 0 && item.codigo) {
+                            const [rows] = await pool.query("SELECT codigo, COALESCE(NULLIF(TRIM(descricao),''), nome, codigo) as descricao FROM produtos WHERE codigo = ? LIMIT 1", [item.codigo]);
+                            prods = rows;
+                        }
+                        if (prods.length > 0 && prods[0].descricao && !prods[0].descricao.includes('VLOOKUP')) {
                             if (!item.codigo && prods[0].codigo) item.codigo = prods[0].codigo;
-                            if (!item.descricao && prods[0].descricao) item.descricao = prods[0].descricao;
-                            await pool.query("UPDATE pedido_itens SET codigo = COALESCE(NULLIF(codigo,''), ?), descricao = COALESCE(NULLIF(descricao,''), ?) WHERE id = ?", [prods[0].codigo || '', prods[0].descricao || '', item.id]);
+                            if (descInvalid && prods[0].descricao) {
+                                item.descricao = prods[0].descricao;
+                                await pool.query("UPDATE pedido_itens SET descricao = ? WHERE id = ?", [prods[0].descricao, item.id]);
+                            }
+                            if (!item.codigo) {
+                                await pool.query("UPDATE pedido_itens SET codigo = COALESCE(NULLIF(codigo,''), ?) WHERE id = ?", [prods[0].codigo || '', item.id]);
+                            }
                         }
                     } catch (e) { /* non-blocking */ }
                 }
@@ -3054,6 +3351,16 @@ module.exports = function createVendasRoutes(deps) {
         try {
             await ensurePedidoItensTable();
             const { id } = req.params;
+
+            // Lock: verificar status do pedido antes de permitir adicionar item
+            const [[pedidoStatusCheck]] = await pool.query('SELECT status FROM pedidos WHERE id = ?', [parseInt(id)]);
+            if (pedidoStatusCheck && STATUS_BLOQUEADO_EDICAO.includes((pedidoStatusCheck.status || '').toLowerCase())) {
+                const userEmail = (req.user && req.user.email || '').toLowerCase();
+                if (userEmail !== EMAIL_EDICAO_LIBERADO) {
+                    return res.status(403).json({ message: `Pedido com status "${pedidoStatusCheck.status}" não pode ser editado. Somente TI pode adicionar itens neste status.`, code: 'EDIT_LOCKED_BY_STATUS' });
+                }
+            }
+
             const b = req.body;
             // Accept both accented and unaccented keys from frontend
             const codigo = b.codigo || b['código'] || '';
@@ -3146,6 +3453,15 @@ module.exports = function createVendasRoutes(deps) {
             await ensurePedidoItensTable();
             const { pedidoId, itemId } = req.params;
 
+            // Lock: verificar status do pedido antes de permitir edição de item
+            const [[pedidoStatusCheck]] = await pool.query('SELECT status FROM pedidos WHERE id = ?', [parseInt(pedidoId)]);
+            if (pedidoStatusCheck && STATUS_BLOQUEADO_EDICAO.includes((pedidoStatusCheck.status || '').toLowerCase())) {
+                const userEmail = (req.user && req.user.email || '').toLowerCase();
+                if (userEmail !== EMAIL_EDICAO_LIBERADO) {
+                    return res.status(403).json({ message: `Pedido com status "${pedidoStatusCheck.status}" não pode ser editado. Somente TI pode editar itens neste status.`, code: 'EDIT_LOCKED_BY_STATUS' });
+                }
+            }
+
             // AUDIT-FIX R3: Ownership check — vendedor só edita itens de seus próprios pedidos
             const user = req.user || {};
             const isAdmin = user.is_admin === true || user.is_admin === 1 || (user.role && user.role.toString().toLowerCase() === 'admin');
@@ -3228,6 +3544,17 @@ module.exports = function createVendasRoutes(deps) {
             // AUDIT-FIX R3: Ownership check — vendedor só exclui itens de seus próprios pedidos
             const user = req.user || {};
             const isAdmin = user.is_admin === true || user.is_admin === 1 || (user.role && user.role.toString().toLowerCase() === 'admin');
+
+            // Lock: verificar status do pedido antes de permitir exclusão de item
+            const [[pedidoStatusDel]] = await pool.query('SELECT status FROM pedidos WHERE id = ?', [parseInt(pedidoId)]);
+            if (pedidoStatusDel && STATUS_BLOQUEADO_EDICAO.includes((pedidoStatusDel.status || '').toLowerCase())) {
+                const userEmail = (user.email || '').toLowerCase();
+                if (userEmail !== EMAIL_EDICAO_LIBERADO) {
+                    connection.release();
+                    return res.status(403).json({ message: `Pedido com status "${pedidoStatusDel.status}" não pode ser editado. Somente TI pode excluir itens neste status.`, code: 'EDIT_LOCKED_BY_STATUS' });
+                }
+            }
+
             if (!isAdmin) {
                 const [ownerCheck] = await pool.query('SELECT vendedor_id FROM pedidos WHERE id = ?', [pedidoId]);
                 if (!ownerCheck.length) { connection.release(); return res.status(404).json({ error: 'Pedido não encontrado' }); }
@@ -3506,6 +3833,38 @@ module.exports = function createVendasRoutes(deps) {
                 return res.json([]);
             }
             console.error('❌ Erro ao buscar transportadoras:', error);
+            next(error);
+        }
+    });
+
+    // POST /transportadoras - Criar nova transportadora
+    router.post('/transportadoras', async (req, res, next) => {
+        try {
+            const { razao_social, nome_fantasia, cnpj_cpf, inscricao_estadual, telefone, email, cidade, estado, cep } = req.body;
+            if (!razao_social || !razao_social.trim()) {
+                return res.status(400).json({ error: 'Razão Social é obrigatória' });
+            }
+            const _enc = lgpdCrypto ? lgpdCrypto.encryptPII : (v => v);
+            const [result] = await pool.query(`
+                INSERT INTO transportadoras (razao_social, nome_fantasia, cnpj_cpf, inscricao_estadual, telefone, email, cidade, estado, cep)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `, [
+                razao_social.trim(),
+                (nome_fantasia || '').trim(),
+                _enc((cnpj_cpf || '').replace(/\D/g, '')),
+                _enc((inscricao_estadual || '').trim()),
+                (telefone || '').trim(),
+                (email || '').trim(),
+                (cidade || '').trim(),
+                (estado || '').trim(),
+                (cep || '').trim()
+            ]);
+            res.json({ success: true, id: result.insertId, message: 'Transportadora cadastrada com sucesso' });
+        } catch (error) {
+            if (error.code === 'ER_DUP_ENTRY') {
+                return res.status(409).json({ error: 'Transportadora já cadastrada com este CNPJ' });
+            }
+            console.error('❌ Erro ao criar transportadora:', error);
             next(error);
         }
     });
@@ -4767,11 +5126,13 @@ module.exports = function createVendasRoutes(deps) {
             // Buscar pedido completo com cliente e empresa
             const [[pedido]] = await pool.query(`
                 SELECT p.*, p.valor as valor_total,
-                       COALESCE(c.nome_fantasia, c.razao_social, c.nome) AS cliente_nome,
-                       c.razao_social AS cliente_razao_social,
-                       c.cnpj AS cliente_cnpj, c.cpf AS cliente_cpf,
+                       COALESCE(c.nome_fantasia, c.razao_social, c.nome, p.cliente_nome, p.cliente) AS cliente_nome,
+                       COALESCE(c.razao_social, c.nome, p.cliente_nome, p.cliente) AS cliente_razao_social,
+                       COALESCE(c.cnpj, c.cnpj_cpf) AS cliente_cnpj,
+                       COALESCE(c.cpf) AS cliente_cpf,
                        c.inscricao_estadual AS cliente_ie,
-                       c.email AS cliente_email, c.telefone AS cliente_telefone,
+                       COALESCE(c.email, p.email_cliente) AS cliente_email,
+                       c.telefone AS cliente_telefone,
                        c.endereco AS cliente_endereco, c.bairro AS cliente_bairro,
                        c.cidade AS cliente_cidade, c.estado AS cliente_estado,
                        c.cep AS cliente_cep,
@@ -4796,6 +5157,33 @@ module.exports = function createVendasRoutes(deps) {
 
             if (!pedido) {
                 return res.status(404).json({ message: 'Pedido não encontrado' });
+            }
+
+            // Se cliente_id NULL mas temos cliente_nome, tentar resolver pelo nome
+            if (!pedido.cliente_cnpj && (pedido.cliente_nome || pedido.cliente)) {
+                try {
+                    const nomeBusca = pedido.cliente_nome || pedido.cliente;
+                    const [[clienteMatch]] = await pool.query(
+                        `SELECT COALESCE(cnpj, cnpj_cpf) AS cnpj, cpf, inscricao_estadual,
+                                endereco, bairro, cidade, estado, cep, telefone, email,
+                                razao_social, nome_fantasia
+                         FROM clientes WHERE razao_social = ? OR nome = ? OR nome_fantasia = ? LIMIT 1`,
+                        [nomeBusca, nomeBusca, nomeBusca]
+                    );
+                    if (clienteMatch) {
+                        pedido.cliente_razao_social = clienteMatch.razao_social || pedido.cliente_razao_social;
+                        pedido.cliente_cnpj = clienteMatch.cnpj || '';
+                        pedido.cliente_cpf = clienteMatch.cpf || '';
+                        pedido.cliente_ie = clienteMatch.inscricao_estadual || '';
+                        pedido.cliente_endereco = clienteMatch.endereco || '';
+                        pedido.cliente_bairro = clienteMatch.bairro || '';
+                        pedido.cliente_cidade = clienteMatch.cidade || '';
+                        pedido.cliente_estado = clienteMatch.estado || '';
+                        pedido.cliente_cep = clienteMatch.cep || '';
+                        pedido.cliente_telefone = clienteMatch.telefone || '';
+                        pedido.cliente_email = clienteMatch.email || '';
+                    }
+                } catch (e) { /* best-effort */ }
             }
 
             // Sempre usar dados da empresa configurada (ALUFORCE) como emitente
@@ -4828,7 +5216,7 @@ module.exports = function createVendasRoutes(deps) {
             let itens = [];
             try {
                 const [rows] = await pool.query(`
-                    SELECT pi.codigo, pi.descricao, pi.quantidade, pi.unidade, pi.preco_unitario, 
+                    SELECT pi.codigo, pi.descricao, pi.quantidade, pi.unidade, pi.preco_unitario,
                            pi.desconto, pi.subtotal, pi.produto_id,
                            pi.icms_percent, pi.icms_value, pi.aliquota_icms, pi.aliquota_ipi,
                            pi.valor_ipi, pi.valor_icms_st, pi.cfop,
@@ -4861,9 +5249,24 @@ module.exports = function createVendasRoutes(deps) {
                 } catch (e) { itens = []; }
             }
 
+            // Resolver logo da empresa como data-URI para embutir no HTML
+            const { resolverCaminhoLogo } = require('../modules/_shared/services/empresa-config.service');
+            let logoDataUri = '';
+            try {
+                const logoAbsPath = resolverCaminhoLogo(cfgEmpresa || {});
+                if (logoAbsPath && fs.existsSync(logoAbsPath)) {
+                    const logoBuffer = fs.readFileSync(logoAbsPath);
+                    const ext = path.extname(logoAbsPath).toLowerCase().replace('.', '');
+                    const mime = ext === 'png' ? 'image/png' : (ext === 'jpg' || ext === 'jpeg') ? 'image/jpeg' : ext === 'svg' ? 'image/svg+xml' : 'image/png';
+                    logoDataUri = `data:${mime};base64,${logoBuffer.toString('base64')}`;
+                }
+            } catch (logoErr) {
+                console.warn('[DANFE] Falha ao resolver logo:', logoErr.message);
+            }
+
             // Gerar HTML da DANFE usando template oficial (routes/danfe-renderer.js)
             const { renderDanfe, buildDanfeCtx } = require('./danfe-renderer');
-            const danfeHTML = renderDanfe(buildDanfeCtx(pedido, itens, { preview: isPreview, cfgFiscal }));
+            const danfeHTML = renderDanfe(buildDanfeCtx(pedido, itens, { preview: isPreview, cfgFiscal, logoDataUri }));
 
             res.setHeader('Content-Type', 'text/html; charset=utf-8');
             res.setHeader('Content-Disposition', `inline; filename="danfe-pedido-${id}.html"`);

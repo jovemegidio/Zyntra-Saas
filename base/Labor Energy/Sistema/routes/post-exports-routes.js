@@ -386,8 +386,15 @@ module.exports = function createPostExportsRoutes(deps) {
     router.get('/financeiro/formas-pagamento', authenticateToken, async (req, res) => {
         try {
             const { ativo } = req.query;
+
+            // Garantir que as colunas prazo, taxa existam
+            try {
+                await pool.query(`ALTER TABLE formas_pagamento ADD COLUMN IF NOT EXISTS prazo INT DEFAULT 0`);
+                await pool.query(`ALTER TABLE formas_pagamento ADD COLUMN IF NOT EXISTS taxa DECIMAL(5,2) DEFAULT 0`);
+                await pool.query(`ALTER TABLE formas_pagamento ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'ativo'`);
+            } catch (e) { /* colunas já existem */ }
     
-let query = 'SELECT id, nome, tipo, icone, ativo FROM formas_pagamento WHERE 1=1';
+let query = 'SELECT id, nome, tipo, icone, ativo, COALESCE(prazo, 0) as prazo, COALESCE(taxa, 0) as taxa, CASE WHEN ativo = 1 THEN \'ativo\' ELSE \'inativo\' END as status FROM formas_pagamento WHERE 1=1';
             const params = [];
 
             if (ativo !== undefined) {
@@ -409,15 +416,22 @@ let query = 'SELECT id, nome, tipo, icone, ativo FROM formas_pagamento WHERE 1=1
     // Criar forma de pagamento
     router.post('/financeiro/formas-pagamento', authenticateToken, async (req, res) => {
         try {
-            const { nome, tipo, icone } = req.body;
+            const { nome, tipo, icone, prazo, taxa, status } = req.body;
     
             if (!nome) {
                 return res.status(400).json({ message: 'Nome é obrigatório' });
             }
+
+            // Garantir que as colunas prazo, taxa e status existam
+            try {
+                await pool.query(`ALTER TABLE formas_pagamento ADD COLUMN IF NOT EXISTS prazo INT DEFAULT 0`);
+                await pool.query(`ALTER TABLE formas_pagamento ADD COLUMN IF NOT EXISTS taxa DECIMAL(5,2) DEFAULT 0`);
+                await pool.query(`ALTER TABLE formas_pagamento ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'ativo'`);
+            } catch (e) { /* colunas já existem */ }
     
             const [result] = await pool.query(
-                'INSERT INTO formas_pagamento (nome, tipo, icone) VALUES (?, ?, ?)',
-                [nome, tipo || 'outros', icone || 'fa-money-bill']
+                'INSERT INTO formas_pagamento (nome, tipo, icone, prazo, taxa, ativo) VALUES (?, ?, ?, ?, ?, ?)',
+                [nome, tipo || 'outros', icone || 'fa-money-bill', prazo || 0, taxa || 0, status !== 'inativo' ? 1 : 0]
             );
     
             res.status(201).json({
@@ -429,6 +443,40 @@ let query = 'SELECT id, nome, tipo, icone, ativo FROM formas_pagamento WHERE 1=1
         } catch (err) {
             console.error('[FINANCEIRO] Erro ao criar forma de pagamento:', err);
             res.status(500).json({ message: 'Erro ao criar forma de pagamento' });
+        }
+    });
+
+    // Atualizar forma de pagamento
+    router.put('/financeiro/formas-pagamento/:id', authenticateToken, async (req, res) => {
+        try {
+            const { id } = req.params;
+            const { nome, tipo, icone, prazo, taxa, status } = req.body;
+
+            if (!nome) {
+                return res.status(400).json({ message: 'Nome é obrigatório' });
+            }
+
+            await pool.query(
+                'UPDATE formas_pagamento SET nome = ?, tipo = ?, icone = ?, prazo = ?, taxa = ?, ativo = ? WHERE id = ?',
+                [nome, tipo || 'outros', icone || 'fa-money-bill', prazo || 0, taxa || 0, status !== 'inativo' ? 1 : 0, id]
+            );
+
+            res.json({ success: true, message: 'Forma de pagamento atualizada' });
+        } catch (err) {
+            console.error('[FINANCEIRO] Erro ao atualizar forma de pagamento:', err);
+            res.status(500).json({ message: 'Erro ao atualizar forma de pagamento' });
+        }
+    });
+
+    // Excluir forma de pagamento (soft delete)
+    router.delete('/financeiro/formas-pagamento/:id', authenticateToken, async (req, res) => {
+        try {
+            const { id } = req.params;
+            await pool.query('UPDATE formas_pagamento SET ativo = 0 WHERE id = ?', [id]);
+            res.json({ success: true, message: 'Forma de pagamento excluída' });
+        } catch (err) {
+            console.error('[FINANCEIRO] Erro ao excluir forma de pagamento:', err);
+            res.status(500).json({ message: 'Erro ao excluir forma de pagamento' });
         }
     });
     

@@ -51,7 +51,7 @@
             --header-height: 42px;
             --tab-height: 0px;
             --primary-orange: #225cfa;
-            --primary-dark: #1a1a2e;
+            --primary-dark: #ffffff;
             --bg-gray: #f5f5f5;
             --border-color: #e5e5e5;
             --text-primary: #1a1a1a;
@@ -59,6 +59,10 @@
             --success-green: #22c55e;
             --warning-yellow: #eab308;
             --danger-red: #ef4444;
+            --sidebar-bg: #ffffff;
+            --sidebar-icon-color: #64748b;
+            --header-bg: #ffffff;
+            --header-border: #e2e8f0;
         }
 
         * {
@@ -87,12 +91,13 @@
            ======================================== */
         .sidebar {
             width: var(--sidebar-width);
-            background: var(--primary-dark);
+            background: var(--sidebar-bg, #ffffff);
             display: flex;
             flex-direction: column;
             align-items: center;
             padding: 12px 0;
             z-index: 100;
+            border-right: 1px solid var(--header-border, #e2e8f0);
         }
 
         .sidebar-logo {
@@ -125,7 +130,7 @@
             min-height: 34px;
             border: none;
             background: transparent;
-            color: #8b8b9a;
+            color: var(--sidebar-icon-color, #64748b);
             border-radius: 8px;
             cursor: pointer;
             display: flex;
@@ -189,11 +194,12 @@
            ======================================== */
         .header {
             height: var(--header-height);
-            background: var(--primary-dark);
+            background: var(--header-bg, #ffffff);
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 0 16px;
+            border-bottom: 1px solid var(--header-border, #e2e8f0);
         }
 
         .header-left {
@@ -15814,17 +15820,97 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
         }
 
         let _condicaoPersonalizadaContext = 'edit';
+        let _condicaoPersonalizadaAutorizada = false;
 
         function abrirModalCondicaoPersonalizada(context) {
             _condicaoPersonalizadaContext = context;
-            document.getElementById('custom-cond-nome').value = '';
-            document.getElementById('custom-cond-dias').value = '';
-            document.getElementById('custom-cond-desc').value = '';
-            document.getElementById('modal-condicao-personalizada').style.display = 'flex';
+            _condicaoPersonalizadaAutorizada = false;
+
+            // Exigir senha de supervisor antes de abrir o modal de criação
+            let modal = document.getElementById('modal-senha-condicao-custom');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'modal-senha-condicao-custom';
+                modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:99999;';
+                modal.innerHTML = `
+                    <div style="background:white;border-radius:16px;padding:30px;max-width:400px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+                        <div style="text-align:center;margin-bottom:20px;">
+                            <div style="width:60px;height:60px;background:#fef3c7;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+                                <i class="fas fa-key" style="font-size:24px;color:#d97706;"></i>
+                            </div>
+                            <h3 style="color:#1e293b;margin:0 0 6px;">Autorização Necessária</h3>
+                            <p style="color:#64748b;font-size:13px;margin:0;">Condição personalizada requer aprovação de supervisor/gerente</p>
+                        </div>
+                        <div style="margin-bottom:16px;">
+                            <input type="password" id="input-senha-condicao-custom" placeholder="Senha do supervisor"
+                                style="width:100%;padding:12px 16px;border:2px solid #e2e8f0;border-radius:10px;font-size:14px;box-sizing:border-box;"
+                                onkeydown="if(event.key==='Enter') confirmarSenhaCondicaoCustom()">
+                            <p id="erro-senha-condicao-custom" style="color:#dc2626;font-size:12px;margin:6px 0 0;display:none;">Senha incorreta</p>
+                        </div>
+                        <div style="display:flex;gap:10px;">
+                            <button onclick="cancelarCondicaoCustom()" style="flex:1;padding:10px;border:1px solid #e2e8f0;border-radius:8px;background:white;color:#64748b;font-weight:600;cursor:pointer;">Cancelar</button>
+                            <button onclick="confirmarSenhaCondicaoCustom()" style="flex:1;padding:10px;border:none;border-radius:8px;background:#d97706;color:white;font-weight:600;cursor:pointer;">Confirmar</button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            } else {
+                modal.style.display = 'flex';
+                document.getElementById('input-senha-condicao-custom').value = '';
+                document.getElementById('erro-senha-condicao-custom').style.display = 'none';
+            }
+            setTimeout(() => document.getElementById('input-senha-condicao-custom')?.focus(), 100);
+        }
+
+        function confirmarSenhaCondicaoCustom() {
+            const senha = document.getElementById('input-senha-condicao-custom')?.value || '';
+            const erroMsg = document.getElementById('erro-senha-condicao-custom');
+            let autorizado = false;
+            let nomeAutorizador = '';
+
+            for (const [nome, senhaCorreta] of Object.entries(_SENHAS_SUPERVISORES)) {
+                if (senha === senhaCorreta) {
+                    autorizado = true;
+                    nomeAutorizador = nome.charAt(0).toUpperCase() + nome.slice(1);
+                    break;
+                }
+            }
+
+            if (autorizado) {
+                _condicaoPersonalizadaAutorizada = true;
+                const modal = document.getElementById('modal-senha-condicao-custom');
+                if (modal) modal.style.display = 'none';
+                showNotification(`Condição personalizada autorizada por ${nomeAutorizador}`, 'success');
+
+                // Agora sim abrir o modal de criação
+                document.getElementById('custom-cond-nome').value = '';
+                document.getElementById('custom-cond-dias').value = '';
+                document.getElementById('custom-cond-desc').value = '';
+                document.getElementById('modal-condicao-personalizada').style.display = 'flex';
+            } else {
+                if (erroMsg) erroMsg.style.display = 'block';
+                const input = document.getElementById('input-senha-condicao-custom');
+                if (input) { input.value = ''; input.focus(); }
+            }
+        }
+
+        function cancelarCondicaoCustom() {
+            const modal = document.getElementById('modal-senha-condicao-custom');
+            if (modal) modal.style.display = 'none';
+            _condicaoPersonalizadaAutorizada = false;
+            // Reverter select
+            if (_condicaoPersonalizadaContext === 'edit') {
+                const sel = document.getElementById('edit-condicao-pagamento-header');
+                if (sel && sel.value === 'personalizado') sel.value = '';
+            } else {
+                const sel = document.getElementById('novo-condicao-pagamento');
+                if (sel && sel.value === 'personalizado') sel.value = '';
+            }
         }
 
         function fecharModalCondicaoPersonalizada() {
             document.getElementById('modal-condicao-personalizada').style.display = 'none';
+            _condicaoPersonalizadaAutorizada = false;
             // Reverter select para vazio se nada foi salvo
             if (_condicaoPersonalizadaContext === 'edit') {
                 const sel = document.getElementById('edit-condicao-pagamento-header');
@@ -15836,9 +15922,18 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
         }
 
         async function salvarCondicaoPersonalizada() {
+            if (!_condicaoPersonalizadaAutorizada) {
+                showNotification('Autorização de supervisor necessária', 'error');
+                return;
+            }
+
             const nome = document.getElementById('custom-cond-nome').value.trim();
             const dias = document.getElementById('custom-cond-dias').value.trim();
             const descricao = document.getElementById('custom-cond-desc').value.trim();
+
+            // Identificar o pedido atual para vincular a condição
+            const pedidoRef = pedidoAtual ? `Pedido #${pedidoAtual.numero || pedidoAtual.id || ''}` : '';
+            const descFinal = descricao ? `${descricao} (${pedidoRef})`.trim() : `Condição personalizada - ${pedidoRef}`.trim();
 
             if (!dias) {
                 showNotification('Informe os dias da condição', 'error');
@@ -15857,7 +15952,7 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
-                    body: JSON.stringify({ nome: nome || dias.replace(/\//g, '/') + ' dias', dias: dias.replace(/\//g, ','), descricao })
+                    body: JSON.stringify({ nome: nome || dias.replace(/\//g, '/') + ' dias', dias: dias.replace(/\//g, ','), descricao: descFinal })
                 });
                 if (!resp.ok) throw new Error('Erro ao salvar');
 
@@ -20274,7 +20369,7 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
         function pedidoBloqueadoParaEdicao(pedido) {
             if (!pedido) return false;
             const status = (pedido.status || '').toLowerCase();
-            const statusBloqueados = ['faturado', 'recibo'];
+            const statusBloqueados = ['faturado', 'faturar', 'aprovado', 'pedido-aprovado', 'orcamento', 'orçamento', 'analise', 'analise-credito', 'recibo', 'entregue'];
             return statusBloqueados.includes(status);
         }
 

@@ -193,15 +193,24 @@ module.exports = function registerAllRoutes(app, deps) {
         });
         app.get('/api/configuracoes/impostos', authenticateToken, async (req, res) => {
             try {
+                // Garantir que as colunas extras existam
+                try {
+                    await pool.query(`ALTER TABLE configuracoes_impostos ADD COLUMN IF NOT EXISTS regime_tributario VARCHAR(50) DEFAULT 'simples'`);
+                    await pool.query(`ALTER TABLE configuracoes_impostos ADD COLUMN IF NOT EXISTS cfop_venda_interna VARCHAR(10) DEFAULT '5102'`);
+                    await pool.query(`ALTER TABLE configuracoes_impostos ADD COLUMN IF NOT EXISTS cfop_venda_externa VARCHAR(10) DEFAULT '6102'`);
+                    await pool.query(`ALTER TABLE configuracoes_impostos ADD COLUMN IF NOT EXISTS cfop_devolucao_interna VARCHAR(10) DEFAULT '5202'`);
+                    await pool.query(`ALTER TABLE configuracoes_impostos ADD COLUMN IF NOT EXISTS cfop_devolucao_externa VARCHAR(10) DEFAULT '6202'`);
+                } catch (e) { /* colunas já existem */ }
+
                 const [rows] = await pool.query('SELECT * FROM configuracoes_impostos LIMIT 1');
                 if (rows && rows.length > 0) {
                     res.json(rows[0]);
                 } else {
                     await pool.query(`
-                        INSERT INTO configuracoes_impostos (icms, ipi, pis, cofins, iss)
-                        VALUES (18.00, 5.00, 1.65, 7.60, 5.00)
+                        INSERT INTO configuracoes_impostos (icms, ipi, pis, cofins, iss, regime_tributario, cfop_venda_interna, cfop_venda_externa, cfop_devolucao_interna, cfop_devolucao_externa)
+                        VALUES (18.00, 5.00, 1.65, 7.60, 5.00, 'simples', '5102', '6102', '5202', '6202')
                     `);
-                    res.json({ icms: 18.00, ipi: 5.00, pis: 1.65, cofins: 7.60, iss: 5.00, csll: 9.00, irpj: 15.00 });
+                    res.json({ icms: 18.00, ipi: 5.00, pis: 1.65, cofins: 7.60, iss: 5.00, csll: 9.00, irpj: 15.00, regime_tributario: 'simples', cfop_venda_interna: '5102', cfop_venda_externa: '6102', cfop_devolucao_interna: '5202', cfop_devolucao_externa: '6202' });
                 }
             } catch (error) {
                 console.error('❌ Erro ao buscar configurações impostos:', error);

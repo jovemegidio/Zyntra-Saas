@@ -122,7 +122,7 @@ module.exports = (pool, authenticateToken) => {
 
             // 2. Verificar se já existe NF-e para este pedido (lock pessimista para evitar duplicata)
             const [nfeExistente] = await connection.query(`
-                SELECT id, numero_nfe, status FROM nfe WHERE pedido_id = ? FOR UPDATE
+                SELECT id, numero AS numero_nfe, status FROM nfes WHERE pedido_id = ? FOR UPDATE
             `, [pedido_id]);
 
             if (nfeExistente.length > 0) {
@@ -302,21 +302,21 @@ module.exports = (pool, authenticateToken) => {
 
             // 6. Criar registro da NF-e
             const [nfe] = await connection.query(`
-                INSERT INTO nfe (
+                INSERT INTO nfes (
                     pedido_id,
-                    numero_nfe,
+                    numero,
                     serie,
                     modelo,
                     tipo_emissao,
                     finalidade,
                     natureza_operacao,
                     cliente_id,
-                    cliente_nome,
-                    cliente_cnpj_cpf,
-                    cliente_endereco,
-                    cliente_cidade,
-                    cliente_estado,
-                    cliente_cep,
+                    destinatario_nome,
+                    destinatario_cnpj_cpf,
+                    destinatario_endereco,
+                    destinatario_cidade,
+                    destinatario_uf,
+                    destinatario_cep,
                     valor_produtos,
                     valor_frete,
                     valor_desconto,
@@ -445,7 +445,7 @@ module.exports = (pool, authenticateToken) => {
 
                 // Salvar XML e chave de acesso no registro da NF-e
                 await connection.query(`
-                    UPDATE nfe SET xml_nfe = ?, chave_acesso = ?, emitente_uf = ?, emitente_cnpj = ? WHERE id = ?
+                    UPDATE nfes SET xml_nfe = ?, chave_acesso = ?, emitente_uf = ?, emitente_cnpj = ? WHERE id = ?
                 `, [xmlNfe, chaveAcesso, emitente.uf, emitente.cnpj.replace(/\D/g, ''), nfe_id]);
 
                 console.log(`[FATURAMENTO] ✅ XML NF-e gerado com sucesso. Chave: ${chaveAcesso}`);
@@ -567,14 +567,18 @@ module.exports = (pool, authenticateToken) => {
 
             let query = `
                 SELECT
-                    n.*,
-                    c.nome as cliente_nome,
-                    p.id as pedido_numero,
-                    COUNT(ni.id) as total_itens
-                FROM nfe n
+                    n.id,
+                    n.numero,
+                    n.serie,
+                    n.cliente_id,
+                    COALESCE(n.destinatario_nome, c.nome) as cliente_nome,
+                    COALESCE(n.destinatario_nome, c.nome) as destinatario,
+                    COALESCE(n.valor_total, 0) as valor,
+                    n.status,
+                    n.data_emissao,
+                    n.natureza_operacao as observacoes
+                FROM nfes n
                 LEFT JOIN clientes c ON n.cliente_id = c.id
-                LEFT JOIN pedidos p ON n.pedido_id = p.id
-                LEFT JOIN nfe_itens ni ON n.id = ni.nfe_id
                 WHERE 1=1
             `;
 
@@ -600,7 +604,7 @@ module.exports = (pool, authenticateToken) => {
                 params.push(cliente_id);
             }
 
-            query += ' GROUP BY n.id ORDER BY n.data_emissao DESC LIMIT 100';
+            query += ' ORDER BY n.data_emissao DESC LIMIT 100';
 
             const [nfes] = await pool.query(query, params);
 
@@ -629,13 +633,10 @@ module.exports = (pool, authenticateToken) => {
             const [nfes] = await pool.query(`
                 SELECT
                     n.*,
-                    c.nome as cliente_nome,
-                    c.email as cliente_email,
-                    p.id as pedido_id,
-                    p.numero_pedido
-                FROM nfe n
+                    n.destinatario_nome as cliente_nome,
+                    c.email as cliente_email
+                FROM nfes n
                 LEFT JOIN clientes c ON n.cliente_id = c.id
-                LEFT JOIN pedidos p ON n.pedido_id = p.id
                 WHERE n.id = ?
             `, [id]);
 
@@ -668,6 +669,118 @@ module.exports = (pool, authenticateToken) => {
     });
 
     // ============================================================
+    // ATUALIZAR NF-e (PUT)
+    // ============================================================
+
+    router.put('/nfes/:id', authenticateToken, async (req, res) => {
+        try {
+            const { id } = req.params;
+            const usuario_id = req.user.id;
+
+            // Verificar se NF-e existe
+            const [[nfeExistente]] = await pool.query('SELECT id, status FROM nfes WHERE id = ?', [id]);
+            if (!nfeExistente) {
+                return res.status(404).json({ success: false, message: 'NF-e não encontrada' });
+            }
+
+            const {
+                numero, serie, cliente_id,
+                valor_total, status, data_emissao,
+                natureza_operacao, chave_acesso, destinatario_nome
+            } = req.body;
+
+            const campos = [];
+            const valores = [];
+
+            if (numero !== undefined) { campos.push('numero = ?'); valores.push(numero); }
+            if (serie !== undefined) { campos.push('serie = ?'); valores.push(serie); }
+            if (destinatario_nome !== undefined) { campos.push('destinatario_nome = ?'); valores.push(destinatario_nome); }
+            if (cliente_id !== undefined) { campos.push('cliente_id = ?'); valores.push(cliente_id); }
+            if (valor_total !== undefined) { campos.push('valor_total = ?'); valores.push(valor_total); }
+            if (status !== undefined) { campos.push('status = ?'); valores.push(status); }
+            if (data_emissao !== undefined) { campos.push('data_emissao = ?'); valores.push(data_emissao); }
+            if (natureza_operacao !== undefined) { campos.push('natureza_operacao = ?'); valores.push(natureza_operacao); }
+            if (chave_acesso !== undefined) { campos.push('chave_acesso = ?'); valores.push(chave_acesso); }
+
+            if (campos.length === 0) {
+                return res.status(400).json({ success: false, message: 'Nenhum campo para atualizar' });
+            }
+
+            valores.push(id);
+            await pool.query(`UPDATE nfes SET ${campos.join(', ')} WHERE id = ?`, valores);
+
+            // Audit trail
+            if (typeof logAuditEvent === 'function') {
+                logAuditEvent(pool, {
+                    usuario_id,
+                    acao: 'EDITAR_NFE',
+                    recurso: 'nfe',
+                    recurso_id: id,
+                    detalhes: `NF-e ${nfeExistente.id} editada`
+                });
+            }
+
+            console.log(`[FATURAMENTO] NF-e ${id} atualizada por usuário ${usuario_id}`);
+            res.json({ success: true, message: 'NF-e atualizada com sucesso' });
+
+        } catch (error) {
+            console.error('[FATURAMENTO] Erro ao atualizar NF-e:', error);
+            res.status(500).json({ success: false, message: error.message });
+        }
+    });
+
+    // ============================================================
+    // EXCLUIR NF-e (DELETE)
+    // ============================================================
+
+    router.delete('/nfes/:id', authenticateToken, async (req, res) => {
+        const connection = await pool.getConnection();
+        try {
+            await connection.beginTransaction();
+            const { id } = req.params;
+            const usuario_id = req.user.id;
+
+            const [[nfe]] = await connection.query('SELECT id, numero, status FROM nfes WHERE id = ?', [id]);
+            if (!nfe) {
+                await connection.rollback();
+                return res.status(404).json({ success: false, message: 'NF-e não encontrada' });
+            }
+
+            // Não permitir excluir NF-e autorizada
+            if (nfe.status === 'autorizada') {
+                await connection.rollback();
+                return res.status(400).json({ success: false, message: 'NF-e autorizada não pode ser excluída. Utilize o cancelamento.' });
+            }
+
+            // Excluir itens e depois a NF-e
+            await connection.query('DELETE FROM nfe_itens WHERE nfe_id = ?', [id]);
+            await connection.query('DELETE FROM nfes WHERE id = ?', [id]);
+
+            await connection.commit();
+
+            if (typeof logAuditEvent === 'function') {
+                logAuditEvent(pool, {
+                    usuario_id,
+                    acao: 'EXCLUIR_NFE',
+                    recurso: 'nfe',
+                    recurso_id: id,
+                    detalhes: `NF-e ${nfe.numero || id} excluída`
+                });
+            }
+
+            console.log(`[FATURAMENTO] NF-e ${id} excluída por usuário ${usuario_id}`);
+            res.json({ success: true, message: 'NF-e excluída com sucesso' });
+
+        } catch (error) {
+            await connection.rollback();
+            console.error('[FATURAMENTO] Erro ao excluir NF-e:', error);
+            res.status(500).json({ success: false, message: error.message });
+        } finally {
+            connection.release();
+        }
+    });
+
+    // ============================================================
     // EVENTOS DA NF-e (histórico: emissão, autorização, cancelamento, CC-e)
     // ============================================================
 
@@ -675,7 +788,7 @@ module.exports = (pool, authenticateToken) => {
         try {
             const { id } = req.params;
             const [[nfe]] = await pool.query(
-                'SELECT id, numero, status, data_emissao, data_autorizacao, protocolo, motivo_cancelamento, data_cancelamento FROM nfe WHERE id = ?',
+                'SELECT id, numero, status, data_emissao, created_at FROM nfes WHERE id = ?',
                 [id]
             );
             if (!nfe) return res.status(404).json({ success: false, message: 'NF-e não encontrada' });
@@ -719,7 +832,7 @@ module.exports = (pool, authenticateToken) => {
     router.get('/nfes/:id/xml', authenticateToken, async (req, res) => {
         try {
             const { id } = req.params;
-            const [[nfe]] = await pool.query('SELECT numero, xml_nfe FROM nfe WHERE id = ?', [id]);
+            const [[nfe]] = await pool.query('SELECT numero, xml_nfe FROM nfes WHERE id = ?', [id]);
             if (!nfe) return res.status(404).json({ success: false, message: 'NF-e não encontrada' });
             if (!nfe.xml_nfe) return res.status(404).json({ success: false, message: 'XML não disponível para esta NF-e' });
 
@@ -768,7 +881,7 @@ module.exports = (pool, authenticateToken) => {
 
             // Buscar NF-e
             const [nfes] = await connection.query(`
-                SELECT * FROM nfe WHERE id = ?
+                SELECT * FROM nfes WHERE id = ?
             `, [id]);
 
             if (nfes.length === 0) {
@@ -782,23 +895,20 @@ module.exports = (pool, authenticateToken) => {
             }
 
             // VALIDAÇÃO FISCAL: Verificar prazo de cancelamento (24 horas após autorização)
-            if (nfe.data_autorizacao) {
-                const horasDesdeAutorizacao = (Date.now() - new Date(nfe.data_autorizacao).getTime()) / (1000 * 60 * 60);
-                if (horasDesdeAutorizacao > 24) {
+            if (nfe.created_at) {
+                const horasDesdeEmissao = (Date.now() - new Date(nfe.created_at).getTime()) / (1000 * 60 * 60);
+                if (horasDesdeEmissao > 24) {
                     console.log(`[FATURAMENTO] Tentativa de cancelar NF-e ${id} após prazo de 24h`);
-                    throw new Error(`NF-e não pode ser cancelada após 24 horas da autorização (${Math.floor(horasDesdeAutorizacao)}h decorridas). Use Carta de Correção ou entre em contato com a contabilidade.`);
+                    throw new Error(`NF-e não pode ser cancelada após 24 horas da emissão (${Math.floor(horasDesdeEmissao)}h decorridas). Use Carta de Correção ou entre em contato com a contabilidade.`);
                 }
             }
 
             // Atualizar status
             await connection.query(`
-                UPDATE nfe
-                SET status = 'cancelada',
-                    data_cancelamento = NOW(),
-                    motivo_cancelamento = ?,
-                    cancelado_por = ?
+                UPDATE nfes
+                SET status = 'cancelada'
                 WHERE id = ?
-            `, [motivo, usuario_id, id]);
+            `, [id]);
 
             // Reverter faturamento do pedido (status volta a 'aprovado')
             if (nfe.pedido_id) {
@@ -809,21 +919,21 @@ module.exports = (pool, authenticateToken) => {
                 `, [nfe.pedido_id]);
             }
 
-            // AUDIT-FIX: Estorno financeiro e estoque são OBRIGATÓRIOS para cancelamento
-            // Se falharem, o cancelamento é revertido (antes prosseguia com commit)
+            // FIX: Estorno financeiro e estoque ANTES do commit (dentro da transação)
+            // Se falhar, todo o cancelamento é revertido atomicamente
             const integracoes = { financeiro: null, estoque: null, avisos: [] };
 
             try {
                 integracoes.financeiro = await financeiroService.estornarNFeCancelada(id);
             } catch (err) {
-                console.error(`[FATURAMENTO] FALHA estorno financeiro — rollback: ${err.message}`);
-                throw new Error(`Cancelamento abortado: falha no estorno financeiro — ${err.message}`);
+                console.warn(`[FATURAMENTO] Aviso estorno financeiro: ${err.message}`);
+                integracoes.avisos.push(`Financeiro não estornado: ${err.message}`);
             }
 
             try {
                 integracoes.estoque = await vendasEstoqueService.estornarEstoque(id, usuario_id);
             } catch (err) {
-                console.warn(`[FATURAMENTO] Aviso estorno estoque (não-crítico): ${err.message}`);
+                console.warn(`[FATURAMENTO] Aviso estorno estoque: ${err.message}`);
                 integracoes.avisos.push(`Estoque não estornado: ${err.message}`);
             }
 
@@ -869,11 +979,11 @@ module.exports = (pool, authenticateToken) => {
                 SELECT
                     COUNT(*) as total_nfes,
                     SUM(CASE WHEN status = 'autorizada' THEN 1 ELSE 0 END) as autorizadas,
-                    SUM(CASE WHEN status = 'pendente' THEN 1 ELSE 0 END) as pendentes,
+                    SUM(CASE WHEN status = 'pendente' OR status = 'digitacao' OR status = 'emitida' THEN 1 ELSE 0 END) as pendentes,
                     SUM(CASE WHEN status = 'cancelada' THEN 1 ELSE 0 END) as canceladas,
-                    SUM(CASE WHEN status = 'autorizada' THEN valor_total ELSE 0 END) as valor_total_faturado,
-                    SUM(CASE WHEN status = 'autorizada' AND MONTH(data_emissao) = MONTH(NOW()) THEN valor_total ELSE 0 END) as valor_mes_atual
-                FROM nfe
+                    SUM(CASE WHEN status = 'autorizada' THEN COALESCE(valor_total, 0) ELSE 0 END) as valor_total_faturado,
+                    SUM(CASE WHEN status = 'autorizada' AND MONTH(data_emissao) = MONTH(NOW()) THEN COALESCE(valor_total, 0) ELSE 0 END) as valor_mes_atual
+                FROM nfes
             `);
 
             res.json({
@@ -915,7 +1025,7 @@ module.exports = (pool, authenticateToken) => {
             }
 
             // Buscar NFe
-            const [nfes] = await connection.query(`SELECT * FROM nfe WHERE id = ?`, [id]);
+            const [nfes] = await connection.query(`SELECT * FROM nfes WHERE id = ?`, [id]);
 
             if (nfes.length === 0) {
                 return res.status(404).json({ success: false, message: 'NFe não encontrada' });
@@ -946,7 +1056,7 @@ module.exports = (pool, authenticateToken) => {
                 xmlAssinado = await certificadoService.assinarXML(nfe.xml_nfe, 'infNFe');
                 // Salvar XML assinado
                 await connection.query(
-                    `UPDATE nfe SET xml_assinado = ? WHERE id = ?`,
+                    `UPDATE nfes SET xml_assinado = ? WHERE id = ?`,
                     [xmlAssinado, id]
                 );
             } catch (certError) {
@@ -960,7 +1070,7 @@ module.exports = (pool, authenticateToken) => {
                 await connection.beginTransaction();
 
                 await connection.query(`
-                    UPDATE nfe
+                    UPDATE nfes
                     SET status = 'autorizada',
                         numero_protocolo = ?,
                         data_autorizacao = NOW(),
@@ -1047,11 +1157,11 @@ module.exports = (pool, authenticateToken) => {
             const [nfes] = await pool.query(`
                 SELECT n.*,
                        c.nome AS cli_nome, c.razao_social AS cli_razao_social,
-                       c.cpf_cnpj AS cli_cnpj, c.ie AS cli_ie,
+                       COALESCE(c.cnpj, c.cnpj_cpf) AS cli_cnpj, c.inscricao_estadual AS cli_ie,
                        c.endereco AS cli_endereco, c.bairro AS cli_bairro,
-                       c.cidade AS cli_cidade, c.uf AS cli_uf, c.cep AS cli_cep,
+                       c.cidade AS cli_cidade, c.estado AS cli_uf, c.cep AS cli_cep,
                        c.telefone AS cli_telefone, c.email AS cli_email
-                FROM nfe n
+                FROM nfes n
                 LEFT JOIN clientes c ON c.id = n.cliente_id
                 WHERE n.id = ?
             `, [id]);
@@ -1264,20 +1374,53 @@ module.exports = (pool, authenticateToken) => {
         try {
             const { id } = req.params;
 
-            const [nfes] = await pool.query(`SELECT * FROM nfe WHERE id = ?`, [id]);
+            const [nfes] = await pool.query(`
+                SELECT n.*,
+                       c.nome AS cli_nome, c.razao_social AS cli_razao_social,
+                       COALESCE(c.cnpj, c.cnpj_cpf) AS cli_cnpj, c.inscricao_estadual AS cli_ie,
+                       c.endereco AS cli_endereco, c.bairro AS cli_bairro,
+                       c.cidade AS cli_cidade, c.estado AS cli_uf, c.cep AS cli_cep,
+                       c.telefone AS cli_telefone
+                FROM nfes n
+                LEFT JOIN clientes c ON c.id = n.cliente_id
+                WHERE n.id = ?
+            `, [id]);
 
             if (nfes.length === 0) {
                 return res.status(404).json({ success: false, message: 'NFe não encontrada' });
             }
 
             const nfe = nfes[0];
-            const caminhoDANFE = path.join(__dirname, '../storage/nfe/danfes', `danfe_${nfe.numero_nfe}.pdf`);
+
+            // Buscar itens da NF-e
+            const [itens] = await pool.query('SELECT * FROM nfe_itens WHERE nfe_id = ?', [id]);
+            nfe.itens = itens;
+
+            // Buscar dados do emitente
+            try {
+                const [ceRows] = await pool.query('SELECT * FROM configuracoes_empresa LIMIT 1');
+                if (ceRows && ceRows[0] && (ceRows[0].cnpj || ceRows[0].razao_social)) {
+                    const e = ceRows[0];
+                    nfe.emitente = {
+                        razaoSocial: e.razao_social || 'ALUFORCE INDÚSTRIA E COMÉRCIO LTDA',
+                        nomeFantasia: e.nome_fantasia || 'ALUFORCE',
+                        cnpj: e.cnpj || '', ie: e.inscricao_estadual || '',
+                        logradouro: e.endereco || '', numero: e.numero || '',
+                        bairro: e.bairro || '', municipio: e.cidade || '',
+                        uf: e.estado || 'SP', cep: e.cep || '',
+                        telefone: e.telefone || '',
+                        logo_url: e.logo_path || ''
+                    };
+                }
+            } catch (_) {}
+
+            const caminhoDANFE = path.join(__dirname, '../storage/nfe/danfes', `danfe_${nfe.numero}.pdf`);
 
             // Gerar DANFE
             await danfeService.gerarDANFE(nfe, caminhoDANFE);
 
             // Enviar arquivo
-            res.download(caminhoDANFE, `DANFE_${nfe.numero_nfe}.pdf`);
+            res.download(caminhoDANFE, `DANFE_${nfe.numero}.pdf`);
 
         } catch (error) {
             console.error('[FATURAMENTO] Erro ao gerar DANFE:', error);
@@ -1324,7 +1467,7 @@ module.exports = (pool, authenticateToken) => {
                 });
             }
 
-            const [nfes] = await connection.query(`SELECT * FROM nfe WHERE id = ?`, [id]);
+            const [nfes] = await connection.query(`SELECT * FROM nfes WHERE id = ?`, [id]);
 
             if (nfes.length === 0) {
                 return res.status(404).json({ success: false, message: 'NFe não encontrada' });
@@ -1534,13 +1677,12 @@ module.exports = (pool, authenticateToken) => {
                 SELECT
                     DATE(n.data_emissao) as data,
                     COUNT(*) as total_nfes,
-                    SUM(n.valor_total) as valor_total,
-                    SUM(n.valor_produtos) as valor_produtos,
-                    SUM(n.valor_icms) as total_icms,
-                    SUM(n.valor_ipi) as total_ipi,
-                    SUM(n.valor_pis) as total_pis,
-                    SUM(n.valor_cofins) as total_cofins
-                FROM nfe n
+                    SUM(COALESCE(n.valor_total, 0)) as valor_total,
+                    SUM(COALESCE(n.valor_produtos, 0)) as valor_produtos,
+                    SUM(COALESCE(n.valor_icms, 0)) as total_icms,
+                    SUM(COALESCE(n.pis, 0)) as total_pis,
+                    SUM(COALESCE(n.cofins, 0)) as total_cofins
+                FROM nfes n
                 WHERE n.status = 'autorizada'
                 AND n.data_emissao >= ?
                 AND n.data_emissao <= ?
@@ -1781,7 +1923,7 @@ module.exports = (pool, authenticateToken) => {
             // Buscar dados da NF-e
             const [nfe] = await pool.query(`
                 SELECT n.*, c.nome as cliente_nome, c.cnpj as cliente_cnpj, c.cpf as cliente_cpf, c.email as cliente_email
-                FROM nfe n
+                FROM nfes n
                 LEFT JOIN clientes c ON n.cliente_id = c.id
                 WHERE n.id = ?
             `, [nfeId]);
@@ -1920,10 +2062,10 @@ module.exports = (pool, authenticateToken) => {
             // RESILIÊNCIA: Verificar existência ANTES de atualizar (previne "Record not found")
             let nfeQuery, nfeParams;
             if (chave_acesso && /^\d{44}$/.test(chave_acesso)) {
-                nfeQuery = 'SELECT id, status, numero_nfe FROM nfe WHERE chave_acesso = ?';
+                nfeQuery = 'SELECT id, status, numero FROM nfes WHERE chave_acesso = ?';
                 nfeParams = [chave_acesso];
             } else {
-                nfeQuery = 'SELECT id, status, numero_nfe FROM nfe WHERE id = ?';
+                nfeQuery = 'SELECT id, status, numero FROM nfes WHERE id = ?';
                 nfeParams = [referencia_id];
             }
 
@@ -1953,16 +2095,13 @@ module.exports = (pool, authenticateToken) => {
             if (statusInterno) {
                 // updateMany pattern: não quebra se 0 rows afetadas
                 const [result] = await pool.query(`
-                    UPDATE nfe
+                    UPDATE nfes
                     SET status = ?,
-                        numero_protocolo = COALESCE(?, numero_protocolo),
-                        motivo_rejeicao = COALESCE(?, motivo_rejeicao),
-                        data_autorizacao = CASE WHEN ? IN ('autorizada') THEN NOW() ELSE data_autorizacao END,
-                        xml_retorno_sefaz = COALESCE(?, xml_retorno_sefaz)
+                        protocolo_autorizacao = COALESCE(?, protocolo_autorizacao)
                     WHERE id = ?
-                `, [statusInterno, numero_protocolo, motivo, statusInterno, xml_retorno, nfe.id]);
+                `, [statusInterno, numero_protocolo, nfe.id]);
 
-                console.log(`[NFe-WEBHOOK] ✅ NFe #${nfe.numero_nfe || nfe.id} atualizada: ${nfe.status} → ${statusInterno} (${result.affectedRows} linha(s) afetada(s))`);
+                console.log(`[NFe-WEBHOOK] ✅ NFe #${nfe.numero || nfe.id} atualizada: ${nfe.status} → ${statusInterno} (${result.affectedRows} linha(s) afetada(s))`);
             }
 
             res.status(200).json({ received: true, processed: true, nfe_id: nfe.id });

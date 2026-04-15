@@ -689,6 +689,67 @@
         }
     };
 
+    // === BRANDING: Aplicar logo e favicon da empresa em todas as páginas ===
+    function aplicarBrandingEmpresa() {
+        try {
+            // Aplicar favicon do localStorage
+            const faviconUrl = localStorage.getItem('empresa_favicon_url');
+            if (faviconUrl) {
+                const ts = localStorage.getItem('empresa_favicon_timestamp') || '';
+                const url = faviconUrl + '?v=' + ts;
+                document.querySelectorAll('link[rel*="icon"]').forEach(l => l.href = url);
+                // Se não existe, criar
+                if (!document.querySelector('link[rel="icon"]')) {
+                    const link = document.createElement('link');
+                    link.rel = 'icon';
+                    link.href = url;
+                    document.head.appendChild(link);
+                }
+            }
+
+            // Aplicar logo do localStorage
+            const logoUrl = localStorage.getItem('empresa_logo_url');
+            if (logoUrl) {
+                const ts = localStorage.getItem('empresa_logo_timestamp') || '';
+                const url = logoUrl + '?v=' + ts;
+                document.querySelectorAll('.logo-empresa, .company-logo, #logo-sidebar, #logo-header, img[src*="logo"]').forEach(img => {
+                    if (img.tagName === 'IMG') img.src = url;
+                });
+            }
+
+            // Buscar do servidor caso não tenha no localStorage (primeira visita)
+            if (!faviconUrl && !logoUrl) {
+                fetch('/api/configuracoes/empresa', { credentials: 'include' })
+                    .then(r => r.ok ? r.json() : null)
+                    .then(data => {
+                        if (!data) return;
+                        if (data.logo_url) {
+                            localStorage.setItem('empresa_logo_url', data.logo_url);
+                            localStorage.setItem('empresa_logo_timestamp', Date.now().toString());
+                            document.querySelectorAll('.logo-empresa, .company-logo, #logo-sidebar, #logo-header, img[src*="logo"]').forEach(img => {
+                                if (img.tagName === 'IMG') img.src = data.logo_url + '?v=' + Date.now();
+                            });
+                        }
+                        if (data.favicon_url) {
+                            localStorage.setItem('empresa_favicon_url', data.favicon_url);
+                            localStorage.setItem('empresa_favicon_timestamp', Date.now().toString());
+                            document.querySelectorAll('link[rel*="icon"]').forEach(l => l.href = data.favicon_url + '?v=' + Date.now());
+                        }
+                    })
+                    .catch(() => {});
+            }
+        } catch (e) {
+            // Branding is non-critical, don't block auth flow
+        }
+    }
+
+    // Aplicar branding quando DOM estiver pronto
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', aplicarBrandingEmpresa);
+    } else {
+        aplicarBrandingEmpresa();
+    }
+
     // Inicializar
     initAuth();
 

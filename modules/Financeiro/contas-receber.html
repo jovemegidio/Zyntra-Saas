@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
@@ -25,7 +25,7 @@
         :root {
             --primary-blue: #3b82f6;
             --primary-orange: #3b82f6;
-            --primary-dark: #1a1a2e;
+            --primary-dark: #ffffff;
             --bg-gray: #f8fafc;
             --border-color: #e2e8f0;
             --text-primary: #1e293b;
@@ -40,7 +40,7 @@
         .btn-primary { background: linear-gradient(135deg, var(--danger), #dc2626); color: white; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.25); }
         .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4); }
 
-        /* ===== CONTAS A RECEBER é ESTILOS ESPECÍFICOS ===== */
+        /* ===== CONTAS A RECEBER Ã© ESTILOS ESPECÃFICOS ===== */
         .content-area { padding: 0; display: flex; flex-direction: column; }
 
         /* ===============================================
@@ -87,7 +87,7 @@
         .tab-placeholder { display: flex; align-items: center; justify-content: center; flex: 1; color: #94a3b8; font-size: 14px; }
         .tab-placeholder i { font-size: 48px; margin-bottom: 16px; display: block; }
 
-        /* === Stat Cards é Padrão Compras === */
+        /* === Stat Cards Ã© PadrÃ£o Compras === */
 
 
         .search-bar-global { margin-bottom: 16px; }
@@ -289,7 +289,7 @@
         .modal-header-conta { display:flex; justify-content:space-between; align-items:center; padding:18px 24px; background:#fff; border-bottom:1px solid #e5e7eb; position:absolute; top:0; left:0; right:100px; z-index:10; border-radius:16px 0 0 0; }
         .modal-header-left-conta { display:flex; align-items:center; gap:14px; }
         .modal-avatar-conta { width:46px; height:46px; background:linear-gradient(135deg,#f0fdf4 0%,#dcfce7 100%); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#84cc16; font-size:20px; border:2px solid #bbf7d0; }
-        .modal-título-conta h2 { font-size:18px; font-weight:700; color:#84cc16; margin:0; letter-spacing:-0.3px; }
+        .modal-tÃ­tulo-conta h2 { font-size:18px; font-weight:700; color:#84cc16; margin:0; letter-spacing:-0.3px; }
         .btn-fechar-omie { background:#f9fafb; border:1px solid #e5e7eb; color:#6b7280; font-size:13px; cursor:pointer; display:flex; align-items:center; gap:8px; padding:8px 14px; border-radius:8px; transition:all 0.2s; font-weight:500; }
         .btn-fechar-omie:hover { background:#f3f4f6; border-color:#d1d5db; color:#111827; }
 
@@ -324,8 +324,8 @@
         .empty-state-conta { text-align:center; padding:48px 24px; color:#6b7280; background:#fafafa; border-radius:8px; border:1px dashed #e5e7eb; }
         .empty-state-conta span { font-size:32px; display:block; margin-bottom:12px; }
         .empty-state-conta p { font-size:14px; margin-bottom:8px; color:#6b7280; }
-        .link-ação { color:#84cc16; text-decoration:none; font-size:14px; font-weight:500; }
-        .link-ação:hover { text-decoration:underline; }
+        .link-aÃ§Ã£o { color:#84cc16; text-decoration:none; font-size:14px; font-weight:500; }
+        .link-aÃ§Ã£o:hover { text-decoration:underline; }
 
         .checkbox-conta { justify-content:flex-end; padding-bottom:10px; }
         .checkbox-label-cr { display:flex; align-items:center; gap:8px; font-size:13px; color:#4b5563; cursor:pointer; }
@@ -400,13 +400,13 @@
                 <a href="plano-contas.html" class="sidebar-btn" title="Plano de Contas">
                     <i class="fas fa-list-alt"></i>
                 </a>
-                <a href="orcamentos.html" class="sidebar-btn" title="Orçamentos">
+                <a href="orcamentos.html" class="sidebar-btn" title="OrÃ§amentos">
                     <i class="fas fa-calculator"></i>
                 </a>
-                <a href="conciliacao.html" class="sidebar-btn" title="Conciliação">
+                <a href="conciliacao.html" class="sidebar-btn" title="ConciliaÃ§Ã£o">
                     <i class="fas fa-balance-scale"></i>
                 </a>
-                <a href="relatorios.html" class="sidebar-btn" title="Relatórios">
+                <a href="relatorios.html" class="sidebar-btn" title="RelatÃ³rios">
                     <i class="fas fa-chart-bar"></i>
                 </a>
             </nav>
@@ -418,7 +418,7 @@
                 <a href="impostos.html" class="sidebar-btn" title="Impostos">
                     <i class="fas fa-percent"></i>
                 </a>
-                <button class="sidebar-btn" title="Configurações" id="btn-config" onclick="toggleConfiguracoes()">
+                <button class="sidebar-btn" title="ConfiguraÃ§Ãµes" id="btn-config" onclick="toggleConfiguracoes()">
                     <i class="fas fa-cog"></i>
                 </button>
             </div>
@@ -440,7 +440,7 @@
                     <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
                     
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">UsuÃ¡rio</strong></span>
                     </div>
                 </div>
             </header>
@@ -458,7 +458,7 @@
                     </div>
                 </div>
 
-                <!-- TAB PANE: BASE (dados de referência) -->
+                <!-- TAB PANE: BASE (dados de referÃªncia) -->
                 <div class="tab-pane-view" id="pane-base">
                     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding:8px 0;">
                         <div class="table-container">
@@ -467,13 +467,13 @@
                             <tbody id="base-portador-body"></tbody></table>
                         </div>
                         <div class="table-container">
-                            <div class="table-header"><h3 class="table-title"><i class="fas fa-tags" style="color:#3b82f6;margin-right:6px;"></i> Status / Situação / Posição</h3></div>
-                            <table><thead><tr><th>Status</th><th>Situação</th><th>Posição</th></tr></thead>
+                            <div class="table-header"><h3 class="table-title"><i class="fas fa-tags" style="color:#3b82f6;margin-right:6px;"></i> Status / SituaÃ§Ã£o / PosiÃ§Ã£o</h3></div>
+                            <table><thead><tr><th>Status</th><th>SituaÃ§Ã£o</th><th>PosiÃ§Ã£o</th></tr></thead>
                             <tbody id="base-status-body"></tbody></table>
                         </div>
                         <div class="table-container">
-                            <div class="table-header"><h3 class="table-title"><i class="fas fa-undo" style="color:#f59e0b;margin-right:6px;"></i> Recomprado / Cartório</h3></div>
-                            <table><thead><tr><th>Recomprado</th><th>Cartório</th></tr></thead>
+                            <div class="table-header"><h3 class="table-title"><i class="fas fa-undo" style="color:#f59e0b;margin-right:6px;"></i> Recomprado / CartÃ³rio</h3></div>
+                            <table><thead><tr><th>Recomprado</th><th>CartÃ³rio</th></tr></thead>
                             <tbody id="base-recomprado-body"></tbody></table>
                         </div>
                     </div>
@@ -487,7 +487,7 @@
                     <div class="metric-card red">
                         <div class="metric-header">
                             <div class="metric-icon red"><i class="fas fa-file-invoice-dollar"></i></div>
-                            <span class="metric-trend" id="stat-total-meta">0 títulos em aberto</span>
+                            <span class="metric-trend" id="stat-total-meta">0 tÃ­tulos em aberto</span>
                         </div>
                         <div class="metric-value" id="stat-total">R$ 0,00</div>
                         <div class="metric-label">Total a Receber</div>
@@ -495,7 +495,7 @@
                     <div class="metric-card orange">
                         <div class="metric-header">
                             <div class="metric-icon orange"><i class="fas fa-clock"></i></div>
-                            <span class="metric-trend" id="stat-vencendo-meta">0 títulos</span>
+                            <span class="metric-trend" id="stat-vencendo-meta">0 tÃ­tulos</span>
                         </div>
                         <div class="metric-value" id="stat-vencendo">R$ 0,00</div>
                         <div class="metric-label">A Vencer</div>
@@ -503,7 +503,7 @@
                     <div class="metric-card red">
                         <div class="metric-header">
                             <div class="metric-icon red"><i class="fas fa-triangle-exclamation"></i></div>
-                            <span class="metric-trend" id="stat-vencidas-meta">0 títulos</span>
+                            <span class="metric-trend" id="stat-vencidas-meta">0 tÃ­tulos</span>
                         </div>
                         <div class="metric-value" id="stat-vencidas">R$ 0,00</div>
                         <div class="metric-label">Vencido</div>
@@ -511,7 +511,7 @@
                     <div class="metric-card green">
                         <div class="metric-header">
                             <div class="metric-icon green"><i class="fas fa-circle-check"></i></div>
-                            <span class="metric-trend" id="stat-recebidas-meta">0 títulos</span>
+                            <span class="metric-trend" id="stat-recebidas-meta">0 tÃ­tulos</span>
                         </div>
                         <div class="metric-value" id="stat-recebidas">R$ 0,00</div>
                         <div class="metric-label">Liquidado</div>
@@ -522,7 +522,7 @@
                 <div class="search-bar-global">
                     <div class="search-input-wrapper">
                         <i class="fas fa-search"></i>
-                        <input type="text" id="pesquisa-global" class="search-input-global" placeholder="Pesquisar por descrição, cliente, valor, documento..." oninput="pesquisarGlobal()">
+                        <input type="text" id="pesquisa-global" class="search-input-global" placeholder="Pesquisar por descriÃ§Ã£o, cliente, valor, documento..." oninput="pesquisarGlobal()">
                         <button class="btn-clear-search" onclick="limparPesquisa()" title="Limpar"><i class="fas fa-times"></i></button>
                     </div>
                 </div>
@@ -530,18 +530,18 @@
                 <!-- Filtros -->
                 <div class="filters-bar">
                     <div class="filter-group">
-                        <label><i class="fas fa-calendar"></i> Período</label>
-                        <select class="filter-input" id="filtro-período" onchange="filtrarContas()">
+                        <label><i class="fas fa-calendar"></i> PerÃ­odo</label>
+                        <select class="filter-input" id="filtro-perÃ­odo" onchange="filtrarContas()">
                             <option value="todas" selected>Todas</option>
-                            <option value="mes">Este Mês</option>
-                            <option value="mes-anterior">Mês Anterior</option>
-                            <option value="proximos7">Próximos 7 dias</option>
-                            <option value="proximos30">Próximos 30 dias</option>
-                            <option value="proximos60">Próximos 60 dias</option>
-                            <option value="proximos90">Próximos 90 dias</option>
-                            <option value="ultimos30">Últimos 30 dias</option>
-                            <option value="ultimos60">Últimos 60 dias</option>
-                            <option value="ultimos90">Últimos 90 dias</option>
+                            <option value="mes">Este MÃªs</option>
+                            <option value="mes-anterior">MÃªs Anterior</option>
+                            <option value="proximos7">PrÃ³ximos 7 dias</option>
+                            <option value="proximos30">PrÃ³ximos 30 dias</option>
+                            <option value="proximos60">PrÃ³ximos 60 dias</option>
+                            <option value="proximos90">PrÃ³ximos 90 dias</option>
+                            <option value="ultimos30">Ãšltimos 30 dias</option>
+                            <option value="ultimos60">Ãšltimos 60 dias</option>
+                            <option value="ultimos90">Ãšltimos 90 dias</option>
                             <option value="vencidas">Vencidas</option>
                             <option value="hoje">Hoje</option>
                             <option value="semana">Esta Semana</option>
@@ -567,8 +567,8 @@
                         </select>
                     </div>
                     <div class="filter-group">
-                        <label><i class="fas fa-map-marker-alt"></i> Situação</label>
-                        <select class="filter-input" id="filtro-situação" onchange="filtrarContas()">
+                        <label><i class="fas fa-map-marker-alt"></i> SituaÃ§Ã£o</label>
+                        <select class="filter-input" id="filtro-situaÃ§Ã£o" onchange="filtrarContas()">
                             <option value="">Todas</option>
                             <option value="OPERADO">Operado</option>
                             <option value="CARTEIRA">Carteira</option>
@@ -608,8 +608,8 @@
                         <thead id="tabela-header">
                             <tr>
                                 <th>Empresa</th><th>NFe</th><th>Parcela</th><th>Cliente</th><th>CNPJ</th>
-                                <th>Valor</th><th>Vencimento</th><th>Situação</th><th>Portador</th>
-                                <th>Status</th><th>Dias</th><th>Ações</th>
+                                <th>Valor</th><th>Vencimento</th><th>SituaÃ§Ã£o</th><th>Portador</th>
+                                <th>Status</th><th>Dias</th><th>AÃ§Ãµes</th>
                             </tr>
                         </thead>
                         <tbody id="tabela-contas">
@@ -626,7 +626,7 @@
                 <div class="tab-pane-view" id="pane-fundos">
                     <div class="table-container" style="flex:1;">
                         <div class="table-header">
-                            <h3 class="table-title"><i class="fas fa-chart-pie" style="color:#8b5cf6;margin-right:6px;"></i> Posição dos Fundos / Portadores</h3>
+                            <h3 class="table-title"><i class="fas fa-chart-pie" style="color:#8b5cf6;margin-right:6px;"></i> PosiÃ§Ã£o dos Fundos / Portadores</h3>
                         </div>
                         <div style="overflow-x:auto;flex:1;min-height:0;">
                         <table>
@@ -676,7 +676,7 @@
                 <div class="tab-pane-view" id="pane-faturamento">
                     <div class="table-container" style="flex:1;">
                         <div class="table-header" style="display:flex;align-items:center;justify-content:space-between;">
-                            <h3 class="table-title"><i class="fas fa-file-invoice-dollar" style="color:#f59e0b;margin-right:6px;"></i> Faturamento / Operações</h3>
+                            <h3 class="table-title"><i class="fas fa-file-invoice-dollar" style="color:#f59e0b;margin-right:6px;"></i> Faturamento / OperaÃ§Ãµes</h3>
                             <div style="font-size:11px;color:#6b7280;" id="fat-totais"></div>
                         </div>
                         <div style="overflow-x:auto;flex:1;min-height:0;">
@@ -684,9 +684,9 @@
                             <thead><tr>
                                 <th>Empresa</th><th>Tipo</th><th>NFe</th><th>Parcela</th>
                                 <th>Cliente</th><th style="text-align:right">Valor</th>
-                                <th>Emissão</th><th>Vcto</th><th>Situação</th>
+                                <th>EmissÃ£o</th><th>Vcto</th><th>SituaÃ§Ã£o</th>
                                 <th>Portador</th><th>Status</th>
-                                <th style="text-align:right">Dias</th><th>Posição</th>
+                                <th style="text-align:right">Dias</th><th>PosiÃ§Ã£o</th>
                             </tr></thead>
                             <tbody id="tabela-faturamento-body">
                                 <tr><td colspan="13" style="text-align:center;padding:36px;color:var(--gray-400);">Aguardando dados...</td></tr>
@@ -700,7 +700,7 @@
                 <div class="tab-pane-view" id="pane-disponivel">
                     <div class="table-container" style="flex:1;">
                         <div class="table-header">
-                            <h3 class="table-title"><i class="fas fa-wallet" style="color:#14b8a6;margin-right:6px;"></i> Disponível por Empresa</h3>
+                            <h3 class="table-title"><i class="fas fa-wallet" style="color:#14b8a6;margin-right:6px;"></i> DisponÃ­vel por Empresa</h3>
                         </div>
                         <div style="overflow-x:auto;flex:1;min-height:0;">
                         <table>
@@ -708,7 +708,7 @@
                                 <th>Empresa</th>
                                 <th style="text-align:right">NF (A Vencer)</th>
                                 <th style="text-align:right">F9 (A Vencer)</th>
-                                <th style="text-align:right">Total Disponível</th>
+                                <th style="text-align:right">Total DisponÃ­vel</th>
                                 <th style="text-align:right">Vencido</th>
                                 <th style="text-align:right">Liquidado</th>
                             </tr></thead>
@@ -724,7 +724,7 @@
                 <div class="tab-pane-view" id="pane-diario">
                     <div class="table-container" style="flex:1;">
                         <div class="table-header" style="display:flex;align-items:center;justify-content:space-between;">
-                            <h3 class="table-title"><i class="fas fa-calendar-day" style="color:#ef4444;margin-right:6px;"></i> Contas a Receber é Diário</h3>
+                            <h3 class="table-title"><i class="fas fa-calendar-day" style="color:#ef4444;margin-right:6px;"></i> Contas a Receber Ã© DiÃ¡rio</h3>
                             <div style="font-size:11px;color:#6b7280;" id="diario-totais"></div>
                         </div>
                         <div style="overflow-x:auto;flex:1;min-height:0;">
@@ -749,10 +749,10 @@
                     <div style="display:flex;flex-direction:column;gap:8px;flex:1;min-height:0;overflow-y:auto;padding:4px 0;">
                         <!-- PM Inputs Row -->
                         <div style="display:flex;align-items:center;gap:16px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:10px 16px;flex-shrink:0;flex-wrap:wrap;">
-                            <span style="font-size:12px;font-weight:700;color:#374151;white-space:nowrap;"><i class="fas fa-stopwatch" style="color:#ec4899;margin-right:5px;"></i>Simulação PM</span>
+                            <span style="font-size:12px;font-weight:700;color:#374151;white-space:nowrap;"><i class="fas fa-stopwatch" style="color:#ec4899;margin-right:5px;"></i>SimulaÃ§Ã£o PM</span>
                             <div style="display:flex;align-items:center;gap:6px;">
-                                <label style="font-size:11px;font-weight:600;color:#6b7280;white-space:nowrap;">DT Operação:</label>
-                                <input type="date" id="pm-dt-operação" value="2026-03-20"
+                                <label style="font-size:11px;font-weight:600;color:#6b7280;white-space:nowrap;">DT OperaÃ§Ã£o:</label>
+                                <input type="date" id="pm-dt-operaÃ§Ã£o" value="2026-03-20"
                                     style="padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;font-weight:600;color:#111827;outline:none;"
                                     oninput="atualizarPM()">
                             </div>
@@ -769,7 +769,7 @@
                                     oninput="atualizarPM()">
                             </div>
                             <div style="display:flex;align-items:center;gap:6px;">
-                                <label style="font-size:11px;font-weight:600;color:#6b7280;white-space:nowrap;">Antecipação (%):</label>
+                                <label style="font-size:11px;font-weight:600;color:#6b7280;white-space:nowrap;">AntecipaÃ§Ã£o (%):</label>
                                 <input type="number" id="pm-taxa-antecipacao" value="0" min="0" max="100" step="0.01"
                                     style="width:72px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;font-weight:600;color:#111827;outline:none;text-align:center;"
                                     oninput="atualizarPM()">
@@ -781,7 +781,7 @@
                                     oninput="atualizarPM()">
                             </div>
                             <div style="font-size:10px;color:#9ca3af;margin-left:auto;">
-                                Prazo Nominal = Vcto - DT Operação &nbsp;|&nbsp; Prazo D+X = Nominal + D+
+                                Prazo Nominal = Vcto - DT OperaÃ§Ã£o &nbsp;|&nbsp; Prazo D+X = Nominal + D+
                             </div>
                         </div>
                         <!-- KPI Cards -->
@@ -789,7 +789,7 @@
                         <!-- Table -->
                         <div class="table-container" style="flex:1;">
                             <div class="table-header" style="display:flex;align-items:center;justify-content:space-between;">
-                                <h3 class="table-title"><i class="fas fa-table" style="color:#ec4899;margin-right:6px;"></i> Títulos em Aberto</h3>
+                                <h3 class="table-title"><i class="fas fa-table" style="color:#ec4899;margin-right:6px;"></i> TÃ­tulos em Aberto</h3>
                                 <span style="font-size:10px;color:#6b7280;" id="pm-col-dplus-label">Prazo D+3</span>
                             </div>
                             <div style="overflow-x:auto;flex:1;min-height:0;">
@@ -799,9 +799,9 @@
                                     <th style="text-align:right">Valor</th>
                                     <th style="text-align:right">Prazo Nominal</th>
                                     <th style="text-align:right" id="pm-th-dplus">Prazo D+3</th>
-                                    <th style="text-align:right">Pr × Valor</th>
+                                    <th style="text-align:right">Pr Ã— Valor</th>
                                     <th style="text-align:right">Custo Fin.</th>
-                                    <th style="text-align:right">Valor Líquido</th>
+                                    <th style="text-align:right">Valor LÃ­quido</th>
                                     <th>Portador</th><th>Empresa</th>
                                 </tr></thead>
                                 <tbody id="tabela-pm-body">
@@ -813,16 +813,16 @@
                     </div>
                 </div>
 
-                <!-- TAB PANE: TD (Tabela Dinâmica) -->
+                <!-- TAB PANE: TD (Tabela DinÃ¢mica) -->
                 <div class="tab-pane-view" id="pane-td">
                     <div class="table-container" style="flex:1;">
                         <div class="table-header">
-                            <h3 class="table-title"><i class="fas fa-table" style="color:#6366f1;margin-right:6px;"></i> Tabela Dinâmica é Por Vencimento</h3>
+                            <h3 class="table-title"><i class="fas fa-table" style="color:#6366f1;margin-right:6px;"></i> Tabela DinÃ¢mica Ã© Por Vencimento</h3>
                         </div>
                         <div style="overflow-x:auto;flex:1;min-height:0;">
                         <table>
                             <thead><tr>
-                                <th>Mês/Período</th>
+                                <th>MÃªs/PerÃ­odo</th>
                                 <th style="text-align:right">A Vencer</th>
                                 <th style="text-align:right">Vencido</th>
                                 <th style="text-align:right">Liquidado</th>
@@ -836,7 +836,7 @@
                     </div>
                 </div>
 
-                <!-- TAB PANE: OPERAÇÕES -->
+                <!-- TAB PANE: OPERAÃ‡Ã•ES -->
                 <div class="tab-pane-view" id="pane-operacoes">
                     <div style="display:flex;flex-direction:column;gap:8px;flex:1;min-height:0;">
                         <!-- KPI Cards -->
@@ -848,7 +848,7 @@
                                 <option value="">Todas Empresas</option>
                             </select>
                             <select id="op-filtro-instituicao" onchange="filtrarOperacoes()" style="padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;">
-                                <option value="">Todas Instituições</option>
+                                <option value="">Todas InstituiÃ§Ãµes</option>
                             </select>
                             <select id="op-filtro-tipo" onchange="filtrarOperacoes()" style="padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;">
                                 <option value="">Todos Tipos</option>
@@ -858,7 +858,7 @@
                         <!-- Table -->
                         <div class="table-container" style="flex:1;">
                             <div class="table-header" style="display:flex;align-items:center;justify-content:space-between;">
-                                <h3 class="table-title"><i class="fas fa-exchange-alt" style="color:#8b5cf6;margin-right:6px;"></i> Operações de Crédito</h3>
+                                <h3 class="table-title"><i class="fas fa-exchange-alt" style="color:#8b5cf6;margin-right:6px;"></i> OperaÃ§Ãµes de CrÃ©dito</h3>
                                 <div style="display:flex;gap:8px;align-items:center;">
                                     <button class="btn btn-success" onclick="abrirModalImportarOp()" style="padding:4px 12px;font-size:11px;border-radius:6px;"><i class="fas fa-file-excel"></i> Importar</button>
                                     <span style="font-size:11px;color:#6b7280;" id="op-totais"></span>
@@ -867,18 +867,18 @@
                             <div style="overflow-x:auto;flex:1;min-height:0;">
                             <table>
                                 <thead><tr>
-                                    <th>Borderô</th><th>Empresa</th><th>Tipo</th><th>Instituição</th>
+                                    <th>BorderÃ´</th><th>Empresa</th><th>Tipo</th><th>InstituiÃ§Ã£o</th>
                                     <th>Prorrog.</th><th style="text-align:right">PM</th>
                                     <th>Data OP</th><th style="text-align:right">Taxa Per.</th>
                                     <th style="text-align:right">TMP</th>
-                                    <th style="text-align:right">Vlr Bruto</th><th style="text-align:right">Títulos</th>
+                                    <th style="text-align:right">Vlr Bruto</th><th style="text-align:right">TÃ­tulos</th>
                                     <th style="text-align:right">Dif Monet</th><th style="text-align:right">Tarifas</th>
                                     <th style="text-align:right">ISS %</th><th style="text-align:right">ISS R$</th>
                                     <th style="text-align:right">IOF</th><th style="text-align:right">CPMF</th>
-                                    <th style="text-align:right">Deduções</th><th style="text-align:right">Líq OP</th>
-                                    <th style="text-align:right">Retenção</th><th style="text-align:right">Recompra</th>
-                                    <th style="text-align:right">Amort FOM</th><th style="text-align:right">Cta Gráfica</th>
-                                    <th style="text-align:right">Líq Liberado</th>
+                                    <th style="text-align:right">DeduÃ§Ãµes</th><th style="text-align:right">LÃ­q OP</th>
+                                    <th style="text-align:right">RetenÃ§Ã£o</th><th style="text-align:right">Recompra</th>
+                                    <th style="text-align:right">Amort FOM</th><th style="text-align:right">Cta GrÃ¡fica</th>
+                                    <th style="text-align:right">LÃ­q Liberado</th>
                                 </tr></thead>
                                 <tbody id="tabela-operacoes-body">
                                     <tr><td colspan="24" style="text-align:center;padding:36px;color:var(--gray-400);">Aguardando dados...</td></tr>
@@ -899,7 +899,7 @@
                     <div class="workbook-tab" data-pane="pane-diario" onclick="switchPane(this)"><span class="tab-dot green"></span> DIARIO</div>
                     <div class="workbook-tab" data-pane="pane-pm" onclick="switchPane(this)"><span class="tab-dot pink"></span> PM</div>
                     <div class="workbook-tab" data-pane="pane-fundos" onclick="switchPane(this)"><span class="tab-dot purple"></span> FUNDOS</div>
-                    <div class="workbook-tab" data-pane="pane-operacoes" onclick="switchPane(this)"><span class="tab-dot indigo"></span> OPERAÇÕES</div>
+                    <div class="workbook-tab" data-pane="pane-operacoes" onclick="switchPane(this)"><span class="tab-dot indigo"></span> OPERAÃ‡Ã•ES</div>
                     <div class="workbook-tab" data-pane="pane-td" onclick="switchPane(this)"><span class="tab-dot blue"></span> TD</div>
                 </div>
 
@@ -912,7 +912,7 @@
             <div class="modal-header-conta">
                 <div class="modal-header-left-conta">
                     <div class="modal-avatar-conta"><i class="fas fa-hand-holding-usd"></i></div>
-                    <div class="modal-título-conta"><h2 id="modal-título">Nova Conta a Receber</h2></div>
+                    <div class="modal-tÃ­tulo-conta"><h2 id="modal-tÃ­tulo">Nova Conta a Receber</h2></div>
                 </div>
                 <div class="modal-header-right-conta">
                     <button class="btn-fechar-omie" type="button" onclick="fecharModal()">Fechar <i class="fas fa-times"></i></button>
@@ -955,17 +955,17 @@
                         <button type="button" class="tab-conta active" data-tab="cr-detalhes">Detalhes</button>
                         <button type="button" class="tab-conta" data-tab="cr-impostos">Impostos Retidos</button>
                         <button type="button" class="tab-conta" data-tab="cr-departamentos">Departamentos</button>
-                        <button type="button" class="tab-conta" data-tab="cr-repetião">Repetião</button>
+                        <button type="button" class="tab-conta" data-tab="cr-repetiÃ£o">RepetiÃ£o</button>
                         <button type="button" class="tab-conta" data-tab="cr-recebimentos">Recebimentos</button>
-                        <button type="button" class="tab-conta" data-tab="cr-integração"><i class="fas fa-link" style="margin-right:4px;opacity:0.5;"></i> Integração Bancaria e CNAB</button>
+                        <button type="button" class="tab-conta" data-tab="cr-integraÃ§Ã£o"><i class="fas fa-link" style="margin-right:4px;opacity:0.5;"></i> IntegraÃ§Ã£o Bancaria e CNAB</button>
                         <button type="button" class="tab-conta" data-tab="cr-diversos">Diversos</button>
                     </div>
                     <div class="tab-content-conta">
                         <div class="tab-pane-conta active" id="tab-cr-detalhes">
                             <div class="form-row-conta">
                                 <div class="form-group-conta" style="flex:2;">
-                                    <label>Descrição</label>
-                                    <input type="text" id="descrição" placeholder="Ex: Venda de produtos, Servico prestado...">
+                                    <label>DescriÃ§Ã£o</label>
+                                    <input type="text" id="descriÃ§Ã£o" placeholder="Ex: Venda de produtos, Servico prestado...">
                                 </div>
                                 <div class="form-group-conta" style="max-width:150px;">
                                     <label>Nota Fiscal</label>
@@ -974,8 +974,8 @@
                             </div>
                             <div class="form-row-conta">
                                 <div class="form-group-conta">
-                                    <label>Data de Emissão</label>
-                                    <div class="input-icon-conta"><input type="date" id="cr-emissão"><i class="fas fa-calendar"></i></div>
+                                    <label>Data de EmissÃ£o</label>
+                                    <div class="input-icon-conta"><input type="date" id="cr-emissÃ£o"><i class="fas fa-calendar"></i></div>
                                 </div>
                                 <div class="form-group-conta">
                                     <label>Data de Registro</label>
@@ -994,7 +994,7 @@
                                 <div class="form-group-conta">
                                     <label>Status</label>
                                     <select id="cr-status">
-                                        <option value="">Automático</option>
+                                        <option value="">AutomÃ¡tico</option>
                                         <option value="a_vencer">A Vencer</option>
                                         <option value="vencida">Vencida</option>
                                         <option value="liquidada">Liquidada</option>
@@ -1040,10 +1040,10 @@
                             </div>
                         </div>
                         <div class="tab-pane-conta" id="tab-cr-departamentos">
-                            <div class="empty-state-conta"><span>=\(</span><p>Ainda nao foi informada nenhuma distribuião por departamentos para esta conta.</p><a href="#" class="link-ação" onclick="event.preventDefault()">Clique aqui para fazer a distribuião agora.</a></div>
+                            <div class="empty-state-conta"><span>=\(</span><p>Ainda nao foi informada nenhuma distribuiÃ£o por departamentos para esta conta.</p><a href="#" class="link-aÃ§Ã£o" onclick="event.preventDefault()">Clique aqui para fazer a distribuiÃ£o agora.</a></div>
                         </div>
-                        <div class="tab-pane-conta" id="tab-cr-repetião">
-                            <div class="empty-state-conta"><span>=\(</span><p>Ainda nao foi informada nenhuma repetião para esta conta.</p><a href="#" class="link-ação" onclick="event.preventDefault()">Clique aqui para incluir repeticoes agora.</a></div>
+                        <div class="tab-pane-conta" id="tab-cr-repetiÃ£o">
+                            <div class="empty-state-conta"><span>=\(</span><p>Ainda nao foi informada nenhuma repetiÃ£o para esta conta.</p><a href="#" class="link-aÃ§Ã£o" onclick="event.preventDefault()">Clique aqui para incluir repeticoes agora.</a></div>
                         </div>
                         <div class="tab-pane-conta" id="tab-cr-recebimentos">
                             <div class="recebimentos-layout">
@@ -1065,12 +1065,12 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="tab-pane-conta" id="tab-cr-integração">
-                            <div class="empty-state-conta"><span>&#128533;</span><p>Ainda nao temos suporte para integração bancaria CNAB para esta conta.</p></div>
+                        <div class="tab-pane-conta" id="tab-cr-integraÃ§Ã£o">
+                            <div class="empty-state-conta"><span>&#128533;</span><p>Ainda nao temos suporte para integraÃ§Ã£o bancaria CNAB para esta conta.</p></div>
                         </div>
                         <div class="tab-pane-conta" id="tab-cr-diversos">
                             <div class="form-row-conta">
-                                <div class="form-group-conta" style="max-width:150px;"><label>Nr Documento</label><input type="text" id="número-documento"></div>
+                                <div class="form-group-conta" style="max-width:150px;"><label>Nr Documento</label><input type="text" id="nÃºmero-documento"></div>
                                 <div class="form-group-conta"><label>Tipo de Documento</label><select id="cr-tipo-doc"><option value="outros">Outros</option><option value="nf">Nota Fiscal</option><option value="boleto">Boleto</option><option value="recibo">Recibo</option><option value="contrato">Contrato</option></select></div>
                                 <div class="form-group-conta" style="max-width:120px;"><label>Parcelas</label><input type="number" id="num-parcelas" min="1" max="48" value="1"></div>
                             </div>
@@ -1111,11 +1111,11 @@
                     <span class="input-hint">Selecione o arquivo - todas as colunas serao importadas automaticamente</span>
                 </div>
                 <div style="background:#dbeafe;border:1px solid #93c5fd;border-radius:8px;padding:12px;margin-top:12px;">
-                    <p style="font-size:12px;color:#1e40af;margin:0;"><i class="fas fa-info-circle"></i> <strong>Formato Aluforce (aba FATURAMENTO):</strong> EMPRESA, EMISSÃO, TIPO, NFe, PARCELA, CLIENTE, CNPJ, VALOR, VCTO, SITUAÇÃO, PORTADOR, STATUS, DIAS, POSIÇÃO, OBSERVAÇÃO</p>
-                    <p style="font-size:11px;color:#1e40af;margin:6px 0 0;">Também aceita planilha genérica com colunas: Cliente, Valor, Vencimento, Status.</p>
+                    <p style="font-size:12px;color:#1e40af;margin:0;"><i class="fas fa-info-circle"></i> <strong>Formato Aluforce (aba FATURAMENTO):</strong> EMPRESA, EMISSÃƒO, TIPO, NFe, PARCELA, CLIENTE, CNPJ, VALOR, VCTO, SITUAÃ‡ÃƒO, PORTADOR, STATUS, DIAS, POSIÃ‡ÃƒO, OBSERVAÃ‡ÃƒO</p>
+                    <p style="font-size:11px;color:#1e40af;margin:6px 0 0;">TambÃ©m aceita planilha genÃ©rica com colunas: Cliente, Valor, Vencimento, Status.</p>
                 </div>
                 <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:12px;margin-top:12px;">
-                    <p style="font-size:12px;color:#92400e;margin:0;"><i class="fas fa-exclamation-triangle"></i> <strong>Atenão:</strong> A importação substituira todos os registros importados anteriormente.</p>
+                    <p style="font-size:12px;color:#92400e;margin:0;"><i class="fas fa-exclamation-triangle"></i> <strong>AtenÃ£o:</strong> A importaÃ§Ã£o substituira todos os registros importados anteriormente.</p>
                 </div>
                 <div id="importar-progresso" style="display:none;margin-top:16px;text-align:center;">
                     <i class="fas fa-spinner fa-spin" style="font-size:24px;color:#059669;"></i>
@@ -1190,11 +1190,11 @@
                 var response = await fetch('/api/me', { credentials: 'include' });
                 if (response.ok) {
                     var user = await response.json();
-                    var primeiroNome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usuário');
+                    var primeiroNome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'UsuÃ¡rio');
                     var greetingTextEl = document.getElementById('greeting-text');
                     if (greetingTextEl) { var h = new Date().getHours(); greetingTextEl.textContent = h >= 18 || h < 5 ? 'Boa noite' : h >= 12 ? 'Boa tarde' : 'Bom dia'; }
                     document.getElementById('user-name').textContent = primeiroNome;
-                    var avatarNameMap = {'clemerson':'/avatars/Clemerson.png','isabela':'/avatars/Isabela.png','isabella':'/avatars/Isabela.png','thaina':'/avatars/Thaina.webp','thiago':'/avatars/Thiago.png','nicolas':'/avatars/NicolasDaniel.webp','nicolasdaniel':'/avatars/NicolasDaniel.webp','rh':'/avatars/Rh.webp','admin':'/avatars/admin.webp','ti':'/avatars/TI.webp','tialuforce':'/avatars/TI.webp','antonio':'/avatars/Antonio.webp','antônio':'/avatars/Antonio.webp','andreia':'/avatars/Andreia.webp','andréia':'/avatars/Andreia.webp','guilherme':'/avatars/GuilhermeBastos.png','marcelo':'/avatars/Marcelo.webp','financeiro':'/avatars/Financeiro.webp','douglas':'/avatars/Douglas.webp','hellen':'/avatars/Hellen.webp','helen':'/avatars/Hellen.webp','augusto':'/avatars/Augusto.png','renata':'/avatars/Renata.png','fabiano':'/avatars/Fabiano.png','fabiola':'/avatars/Fabiola.webp','marcia':'/avatars/Marcia.png','márcia':'/avatars/Marcia.png','ronaldo':'/avatars/Ronaldo.png','joao':'/avatars/JoaoVitor.png','joo':'/avatars/JoaoVitor.png','fernando':'/avatars/Fernando.png','robson':'/avatars/Robson.png','junior':'/avatars/Junior.png','bruno':'/avatars/Bruno.png','tatiane':'/avatars/Tatiane.png','felipesimoes':'/avatars/FelipeSimoes.png','felipe':'/avatars/FelipeSimoes.png','sergio':'/avatars/Sergio.png','lucas':'/avatars/Lucas.png','miqueias':'/avatars/Miqueias.png','lucio':'/avatars/Lucio.png','lcio':'/avatars/Lucio.png','jamesson':'/avatars/jamerson.svg'};
+                    var avatarNameMap = {'clemerson':'/avatars/Clemerson.png','isabela':'/avatars/Isabela.png','isabella':'/avatars/Isabela.png','thaina':'/avatars/Thaina.webp','thiago':'/avatars/Thiago.png','nicolas':'/avatars/NicolasDaniel.webp','nicolasdaniel':'/avatars/NicolasDaniel.webp','rh':'/avatars/Rh.webp','admin':'/avatars/admin.webp','ti':'/avatars/TI.webp','tialuforce':'/avatars/TI.webp','antonio':'/avatars/Antonio.webp','antÃ´nio':'/avatars/Antonio.webp','andreia':'/avatars/Andreia.webp','andrÃ©ia':'/avatars/Andreia.webp','guilherme':'/avatars/GuilhermeBastos.png','marcelo':'/avatars/Marcelo.webp','financeiro':'/avatars/Financeiro.webp','douglas':'/avatars/Douglas.webp','hellen':'/avatars/Hellen.webp','helen':'/avatars/Hellen.webp','augusto':'/avatars/Augusto.png','renata':'/avatars/Renata.png','fabiano':'/avatars/Fabiano.png','fabiola':'/avatars/Fabiola.webp','marcia':'/avatars/Marcia.png','mÃ¡rcia':'/avatars/Marcia.png','ronaldo':'/avatars/Ronaldo.png','joao':'/avatars/JoaoVitor.png','joo':'/avatars/JoaoVitor.png','fernando':'/avatars/Fernando.png','robson':'/avatars/Robson.png','junior':'/avatars/Junior.png','bruno':'/avatars/Bruno.png','tatiane':'/avatars/Tatiane.png','felipesimoes':'/avatars/FelipeSimoes.png','felipe':'/avatars/FelipeSimoes.png','sergio':'/avatars/Sergio.png','lucas':'/avatars/Lucas.png','miqueias':'/avatars/Miqueias.png','lucio':'/avatars/Lucio.png','lcio':'/avatars/Lucio.png','jamesson':'/avatars/jamerson.svg'};
                     var avatarUrl = null;
                     if (user.avatar && user.avatar !== '/avatars/default.webp') avatarUrl = user.avatar;
                     else if (user.foto && user.foto !== '/avatars/default.webp') avatarUrl = user.foto;
@@ -1204,7 +1204,7 @@
                     if (avatarUrl && userPhotoEl) { userPhotoEl.src = avatarUrl; userPhotoEl.style.display = 'block'; userPhotoEl.onerror = function() { this.style.display='none'; if(userInitialEl){userInitialEl.textContent=primeiroNome.charAt(0).toUpperCase();userInitialEl.style.display='flex';}}; if(userInitialEl) userInitialEl.style.display='none'; }
                     else if (userInitialEl) { userInitialEl.textContent = primeiroNome.charAt(0).toUpperCase(); userInitialEl.style.display='flex'; if(userPhotoEl) userPhotoEl.style.display='none'; }
                 }
-            } catch (error) { console.error('Erro ao carregar usuário:', error); }
+            } catch (error) { console.error('Erro ao carregar usuÃ¡rio:', error); }
         }
 
         async function init() {
@@ -1287,10 +1287,10 @@
             if (elVencidas) elVencidas.textContent = fmtMoeda(totalVencido);
             if (elRecebidas) elRecebidas.textContent = fmtMoeda(totalLiquidado);
 
-            if (elTotalMeta) elTotalMeta.innerHTML = '<i class="fas fa-layer-group"></i> ' + qtdAberto + ' títulos em aberto';
-            if (elVencendoMeta) elVencendoMeta.innerHTML = '<i class="fas fa-hourglass-half"></i> ' + qtdAVencer + ' títulos';
-            if (elVencidasMeta) elVencidasMeta.innerHTML = '<i class="fas fa-arrow-down"></i> ' + qtdVencido + ' títulos';
-            if (elRecebidasMeta) elRecebidasMeta.innerHTML = '<i class="fas fa-check"></i> ' + qtdLiquidado + ' títulos';
+            if (elTotalMeta) elTotalMeta.innerHTML = '<i class="fas fa-layer-group"></i> ' + qtdAberto + ' tÃ­tulos em aberto';
+            if (elVencendoMeta) elVencendoMeta.innerHTML = '<i class="fas fa-hourglass-half"></i> ' + qtdAVencer + ' tÃ­tulos';
+            if (elVencidasMeta) elVencidasMeta.innerHTML = '<i class="fas fa-arrow-down"></i> ' + qtdVencido + ' tÃ­tulos';
+            if (elRecebidasMeta) elRecebidasMeta.innerHTML = '<i class="fas fa-check"></i> ' + qtdLiquidado + ' tÃ­tulos';
         }
 
         function atualizarResumoComplementar(dados) {
@@ -1391,7 +1391,7 @@
                     var raw = r.data || r || [];
                     contas = Array.isArray(raw) ? raw : [];
                     popularFiltrosDinamicos();
-                    // Aplicar filtro padrão (Mês Atual) e atualizar tudo
+                    // Aplicar filtro padrÃ£o (MÃªs Atual) e atualizar tudo
                     var dadosFiltrados = getFilteredContas();
                     atualizarResumoExcel(dadosFiltrados);
                     atualizarResumoComplementar(dadosFiltrados);
@@ -1415,9 +1415,9 @@
             if (selCli) { selCli.innerHTML = '<option value="">Todos</option>' + clientes.map(function(c){ return '<option value="'+c+'">'+c+'</option>'; }).join(''); }
             
             // Popular meses dinamicamente
-            var selPer = document.getElementById('filtro-período');
+            var selPer = document.getElementById('filtro-perÃ­odo');
             if (selPer) {
-                // Remover opções de mês anteriores
+                // Remover opÃ§Ãµes de mÃªs anteriores
                 Array.from(selPer.options).forEach(function(opt) { if (/^\d{4}-\d{2}$/.test(opt.value)) opt.remove(); });
                 var mesesSet = {};
                 contas.forEach(function(c) {
@@ -1427,9 +1427,9 @@
                 });
                 var anoAtual = new Date().getFullYear();
                 for (var m = 1; m <= 12; m++) mesesSet[anoAtual + '-' + String(m).padStart(2, '0')] = true;
-                var nomesMeses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+                var nomesMeses = ['Janeiro','Fevereiro','MarÃ§o','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
                 var meses = Object.keys(mesesSet).sort();
-                var sep = document.createElement('option'); sep.disabled = true; sep.textContent = '── Meses ──'; selPer.appendChild(sep);
+                var sep = document.createElement('option'); sep.disabled = true; sep.textContent = 'â”€â”€ Meses â”€â”€'; selPer.appendChild(sep);
                 meses.forEach(function(mes) {
                     var parts = mes.split('-'); var opt = document.createElement('option');
                     opt.value = mes; opt.textContent = nomesMeses[parseInt(parts[1]) - 1] + '/' + parts[0]; selPer.appendChild(opt);
@@ -1445,9 +1445,9 @@
         }
 
         function getTableHeaders() {
-            if (currentView === 'completa') return ['Empresa','CNPJ Emp.','NFe','Parcela','Cliente','CNPJ/CPF','Emissão','Vencimento','Categoria','Conta Corrente','Documento','Boleto','Vendedor','Projeto','Valor','Vl.Liquido','Recebido','A Receber','Situação','Portador','Status','Dias','Ações'];
-            if (currentView === 'impostos') return ['Cliente','NFe','Parcela','Valor','PIS','COFINS','CSLL','IR','ISS','INSS','Vl.Liquido','Recebido','A Receber','Ações'];
-            return ['Empresa','NFe','Parcela','Cliente','CNPJ','Valor','Vencimento','Situação','Portador','Status','Dias','Ações'];
+            if (currentView === 'completa') return ['Empresa','CNPJ Emp.','NFe','Parcela','Cliente','CNPJ/CPF','EmissÃ£o','Vencimento','Categoria','Conta Corrente','Documento','Boleto','Vendedor','Projeto','Valor','Vl.Liquido','Recebido','A Receber','SituaÃ§Ã£o','Portador','Status','Dias','AÃ§Ãµes'];
+            if (currentView === 'impostos') return ['Cliente','NFe','Parcela','Valor','PIS','COFINS','CSLL','IR','ISS','INSS','Vl.Liquido','Recebido','A Receber','AÃ§Ãµes'];
+            return ['Empresa','NFe','Parcela','Cliente','CNPJ','Valor','Vencimento','SituaÃ§Ã£o','Portador','Status','Dias','AÃ§Ãµes'];
         }
 
         function renderizarTabela(dados, pesquisa) {
@@ -1469,18 +1469,18 @@
                 var hl = function(t) { if(!pesquisa||!t) return t||'-'; try{var e=pesquisa.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(new RegExp('('+e+')','gi'),'<span class="highlight">$1</span>');}catch(ex){return String(t);} };
                 var dias = parseInt(c.dias_vencido) || 0;
                 var diasStyle = dias > 0 ? 'color:#dc2626;font-weight:700;' : '';
-                var ações = '<td style="white-space:nowrap;"><button class="action-btn view" onclick="visualizarConta('+c.id+')" title="Visualizar"><i class="fas fa-eye"></i></button>';
-                if(st!=='recebido'&&st!=='pago'&&st!=='liquidado') ações += '<button class="action-btn success" onclick="abrirModalReceber('+c.id+','+(parseFloat(c.valor_total||c.valor)||0)+')" title="Receber"><i class="fas fa-check-circle"></i></button>';
-                ações += '<button class="action-btn edit" onclick="editarConta('+c.id+')" title="Editar"><i class="fas fa-edit"></i></button>';
-                ações += '<button class="action-btn danger" onclick="excluirConta('+c.id+')" title="Excluir"><i class="fas fa-trash"></i></button></td>';
+                var aÃ§Ãµes = '<td style="white-space:nowrap;"><button class="action-btn view" onclick="visualizarConta('+c.id+')" title="Visualizar"><i class="fas fa-eye"></i></button>';
+                if(st!=='recebido'&&st!=='pago'&&st!=='liquidado') aÃ§Ãµes += '<button class="action-btn success" onclick="abrirModalReceber('+c.id+','+(parseFloat(c.valor_total||c.valor)||0)+')" title="Receber"><i class="fas fa-check-circle"></i></button>';
+                aÃ§Ãµes += '<button class="action-btn edit" onclick="editarConta('+c.id+')" title="Editar"><i class="fas fa-edit"></i></button>';
+                aÃ§Ãµes += '<button class="action-btn danger" onclick="excluirConta('+c.id+')" title="Excluir"><i class="fas fa-trash"></i></button></td>';
 
                 if (currentView === 'completa') {
-                    return '<tr style="cursor:pointer;" ondblclick="visualizarConta('+c.id+')"><td>'+hl(c.empresa||'-')+'</td><td style="font-size:10px;">'+hl(c.cnpj_cpf||'-')+'</td><td>'+hl(c.nota_fiscal||'-')+'</td><td>'+(c.parcela_info||'-')+'</td><td><strong>'+hl(c.cliente_nome||'-')+'</strong></td><td style="font-size:10px;">'+hl(c.cnpj_cpf||'-')+'</td><td>'+fmtData(c.data_emissao)+'</td><td>'+fmtData(c.data_vencimento||c.vencimento)+'</td><td>'+(c.categoria||'-')+'</td><td>'+(c.centro_receita||'-')+'</td><td>'+(c.numero_documento||'-')+'</td><td>'+(c.numero_boleto||'-')+'</td><td>'+(c.vendedor||'-')+'</td><td>'+(c.projeto||'-')+'</td><td><strong>'+fmtMoeda(c.valor_total||c.valor)+'</strong></td><td>'+fmtMoeda(c.valor_liquido)+'</td><td style="color:#059669;">'+fmtMoeda(c.valor_recebido)+'</td><td><strong>'+fmtMoeda(c.a_receber)+'</strong></td><td><span style="font-size:11px;font-weight:600;">'+(c.situacao||'-')+'</span></td><td><span style="font-size:11px;">'+(c.portador||'-')+'</span></td><td>'+(badges[st]||badges.pendente)+'</td><td style="'+diasStyle+'">'+(dias||'-')+'</td>'+ações+'</tr>';
+                    return '<tr style="cursor:pointer;" ondblclick="visualizarConta('+c.id+')"><td>'+hl(c.empresa||'-')+'</td><td style="font-size:10px;">'+hl(c.cnpj_cpf||'-')+'</td><td>'+hl(c.nota_fiscal||'-')+'</td><td>'+(c.parcela_info||'-')+'</td><td><strong>'+hl(c.cliente_nome||'-')+'</strong></td><td style="font-size:10px;">'+hl(c.cnpj_cpf||'-')+'</td><td>'+fmtData(c.data_emissao)+'</td><td>'+fmtData(c.data_vencimento||c.vencimento)+'</td><td>'+(c.categoria||'-')+'</td><td>'+(c.centro_receita||'-')+'</td><td>'+(c.numero_documento||'-')+'</td><td>'+(c.numero_boleto||'-')+'</td><td>'+(c.vendedor||'-')+'</td><td>'+(c.projeto||'-')+'</td><td><strong>'+fmtMoeda(c.valor_total||c.valor)+'</strong></td><td>'+fmtMoeda(c.valor_liquido)+'</td><td style="color:#059669;">'+fmtMoeda(c.valor_recebido)+'</td><td><strong>'+fmtMoeda(c.a_receber)+'</strong></td><td><span style="font-size:11px;font-weight:600;">'+(c.situacao||'-')+'</span></td><td><span style="font-size:11px;">'+(c.portador||'-')+'</span></td><td>'+(badges[st]||badges.pendente)+'</td><td style="'+diasStyle+'">'+(dias||'-')+'</td>'+aÃ§Ãµes+'</tr>';
                 }
                 if (currentView === 'impostos') {
-                    return '<tr style="cursor:pointer;" ondblclick="visualizarConta('+c.id+')"><td><strong>'+hl(c.cliente_nome||'-')+'</strong></td><td>'+hl(c.nota_fiscal||'-')+'</td><td>'+(c.parcela_info||'-')+'</td><td><strong>'+fmtMoeda(c.valor_total||c.valor)+'</strong></td><td>'+fmtMoeda(c.valor_pis)+'</td><td>'+fmtMoeda(c.valor_cofins)+'</td><td>'+fmtMoeda(c.valor_csll)+'</td><td>'+fmtMoeda(c.valor_ir)+'</td><td>'+fmtMoeda(c.valor_iss)+'</td><td>'+fmtMoeda(c.valor_inss)+'</td><td><strong>'+fmtMoeda(c.valor_liquido)+'</strong></td><td style="color:#059669;">'+fmtMoeda(c.valor_recebido)+'</td><td><strong>'+fmtMoeda(c.a_receber)+'</strong></td>'+ações+'</tr>';
+                    return '<tr style="cursor:pointer;" ondblclick="visualizarConta('+c.id+')"><td><strong>'+hl(c.cliente_nome||'-')+'</strong></td><td>'+hl(c.nota_fiscal||'-')+'</td><td>'+(c.parcela_info||'-')+'</td><td><strong>'+fmtMoeda(c.valor_total||c.valor)+'</strong></td><td>'+fmtMoeda(c.valor_pis)+'</td><td>'+fmtMoeda(c.valor_cofins)+'</td><td>'+fmtMoeda(c.valor_csll)+'</td><td>'+fmtMoeda(c.valor_ir)+'</td><td>'+fmtMoeda(c.valor_iss)+'</td><td>'+fmtMoeda(c.valor_inss)+'</td><td><strong>'+fmtMoeda(c.valor_liquido)+'</strong></td><td style="color:#059669;">'+fmtMoeda(c.valor_recebido)+'</td><td><strong>'+fmtMoeda(c.a_receber)+'</strong></td>'+aÃ§Ãµes+'</tr>';
                 }
-                return '<tr style="cursor:pointer;" ondblclick="visualizarConta('+c.id+')"><td>'+hl(c.empresa||'-')+'</td><td>'+hl(c.nota_fiscal||'-')+'</td><td>'+(c.parcela_info||'-')+'</td><td><strong>'+hl(c.cliente_nome||'-')+'</strong></td><td style="font-size:11px;">'+hl(c.cnpj_cpf||c.cnpj_cliente||'-')+'</td><td><strong>'+fmtMoeda(c.valor_total||c.valor)+'</strong></td><td>'+fmtData(c.data_vencimento||c.vencimento)+'</td><td><span style="font-size:11px;font-weight:600;">'+(c.situacao||'-')+'</span></td><td><span style="font-size:11px;">'+(c.portador||'-')+'</span></td><td>'+(badges[st]||badges.pendente)+'</td><td style="'+diasStyle+'">'+(dias||'-')+'</td>'+ações+'</tr>';
+                return '<tr style="cursor:pointer;" ondblclick="visualizarConta('+c.id+')"><td>'+hl(c.empresa||'-')+'</td><td>'+hl(c.nota_fiscal||'-')+'</td><td>'+(c.parcela_info||'-')+'</td><td><strong>'+hl(c.cliente_nome||'-')+'</strong></td><td style="font-size:11px;">'+hl(c.cnpj_cpf||c.cnpj_cliente||'-')+'</td><td><strong>'+fmtMoeda(c.valor_total||c.valor)+'</strong></td><td>'+fmtData(c.data_vencimento||c.vencimento)+'</td><td><span style="font-size:11px;font-weight:600;">'+(c.situacao||'-')+'</span></td><td><span style="font-size:11px;">'+(c.portador||'-')+'</span></td><td>'+(badges[st]||badges.pendente)+'</td><td style="'+diasStyle+'">'+(dias||'-')+'</td>'+aÃ§Ãµes+'</tr>';
             }).join('');
         }
 
@@ -1537,10 +1537,10 @@
             var form = document.getElementById('form-conta');
             if (form) form.reset();
             document.getElementById('conta-id').value = '';
-            document.getElementById('modal-título').textContent = 'Nova Conta a Receber';
+            document.getElementById('modal-tÃ­tulo').textContent = 'Nova Conta a Receber';
             document.getElementById('conta-vencimento').value = new Date().toISOString().split('T')[0];
             document.getElementById('cr-nota-fiscal').value = '';
-            document.getElementById('cr-emissão').value = '';
+            document.getElementById('cr-emissÃ£o').value = '';
             document.getElementById('cr-registro').value = '';
             document.getElementById('cr-projeto').value = '';
             document.getElementById('cr-vendedor').value = '';
@@ -1563,9 +1563,9 @@
             resetTabsCR();
             if (id) {
                 var c = contas.find(function(x){return x.id===id;}); if (!c) return;
-                document.getElementById('modal-título').textContent = 'Editar Conta a Receber';
+                document.getElementById('modal-tÃ­tulo').textContent = 'Editar Conta a Receber';
                 document.getElementById('conta-id').value = c.id;
-                document.getElementById('descrição').value = c.descricao || '';
+                document.getElementById('descriÃ§Ã£o').value = c.descricao || '';
                 document.getElementById('cliente-id').value = c.cliente_id || '';
                 document.getElementById('categoria-id').value = c.categoria_id || '';
                 var val = parseFloat(c.valor_total || c.valor || 0);
@@ -1573,10 +1573,10 @@
                 document.getElementById('conta-vencimento').value = (c.data_vencimento||c.vencimento||'').split('T')[0];
                 document.getElementById('forma-pagamento').value = c.forma_recebimento || c.forma_pagamento || 'pix';
                 document.getElementById('observacoes').value = c.observacoes || '';
-                document.getElementById('número-documento').value = c.numero_documento || '';
+                document.getElementById('nÃºmero-documento').value = c.numero_documento || '';
                 document.getElementById('num-parcelas').value = c.num_parcelas || 1;
                 document.getElementById('cr-nota-fiscal').value = c.nota_fiscal || '';
-                document.getElementById('cr-emissão').value = (c.data_emissao||'').split('T')[0];
+                document.getElementById('cr-emissÃ£o').value = (c.data_emissao||'').split('T')[0];
                 document.getElementById('cr-registro').value = (c.data_registro||'').split('T')[0];
                 document.getElementById('cr-projeto').value = c.projeto || '';
                 document.getElementById('cr-vendedor').value = c.vendedor || '';
@@ -1644,14 +1644,14 @@
             var statusVal = document.getElementById('cr-status').value;
             var pagoNoDia = document.getElementById('cr-pago-no-dia').value;
             var aceitaTroca = document.getElementById('cr-aceita-troca').checked;
-            var dados = { descricao: document.getElementById('descrição').value, cliente_id: document.getElementById('cliente-id').value, categoria_id: document.getElementById('categoria-id').value, valor: parseMoeda(document.getElementById('conta-valor').value), data_vencimento: document.getElementById('conta-vencimento').value, vencimento: document.getElementById('conta-vencimento').value, forma_recebimento: document.getElementById('forma-pagamento').value, observacoes: document.getElementById('observacoes').value, numero_documento: document.getElementById('número-documento').value, num_parcelas: parseInt(document.getElementById('num-parcelas').value) || 1 };
+            var dados = { descricao: document.getElementById('descriÃ§Ã£o').value, cliente_id: document.getElementById('cliente-id').value, categoria_id: document.getElementById('categoria-id').value, valor: parseMoeda(document.getElementById('conta-valor').value), data_vencimento: document.getElementById('conta-vencimento').value, vencimento: document.getElementById('conta-vencimento').value, forma_recebimento: document.getElementById('forma-pagamento').value, observacoes: document.getElementById('observacoes').value, numero_documento: document.getElementById('nÃºmero-documento').value, num_parcelas: parseInt(document.getElementById('num-parcelas').value) || 1 };
             // [DEV SPEC 2.4] Novos campos
             if (statusVal) dados.status = statusVal;
             if (pagoNoDia) dados.pago_no_dia = pagoNoDia;
             dados.aceita_troca_factory = aceitaTroca;
-            // Validação: pago_no_dia não pode ser futuro
+            // ValidaÃ§Ã£o: pago_no_dia nÃ£o pode ser futuro
             if (pagoNoDia && new Date(pagoNoDia + 'T00:00:00') > new Date()) {
-                showToast('Data de pagamento não pode ser futura', 'warning'); return;
+                showToast('Data de pagamento nÃ£o pode ser futura', 'warning'); return;
             }
             try {
                 var url = id ? '/api/financeiro/contas-receber/'+id : '/api/financeiro/contas-receber';
@@ -1695,15 +1695,15 @@
             } catch(e) { showToast('Erro ao enviar cobrancas', 'error'); } finally { window._guardEnviarCobrancas = false; }
         }
         function getFilteredContas() {
-            var período = document.getElementById('filtro-período').value;
+            var perÃ­odo = document.getElementById('filtro-perÃ­odo').value;
             var status = document.getElementById('filtro-status').value;
             var portador = document.getElementById('filtro-portador') ? document.getElementById('filtro-portador').value : '';
-            var situacao = document.getElementById('filtro-situação') ? document.getElementById('filtro-situação').value : '';
+            var situacao = document.getElementById('filtro-situaÃ§Ã£o') ? document.getElementById('filtro-situaÃ§Ã£o').value : '';
             var clienteNome = document.getElementById('filtro-cliente-select').value;
             var pesquisa = document.getElementById('pesquisa-global').value.toLowerCase();
             var filtradas = contas.slice();
             var hoje = new Date(); hoje.setHours(0,0,0,0);
-            if (período && período !== 'todas') {
+            if (perÃ­odo && perÃ­odo !== 'todas') {
                 filtradas = filtradas.filter(function(c){
                     var vRaw = c.data_vencimento || c.vencimento || '';
                     var v = new Date(String(vRaw).slice(0,10) + 'T00:00:00');
@@ -1711,11 +1711,11 @@
                     if (isNaN(v.getTime())) return false;
                     var h = hoje;
                     // YYYY-MM month filter
-                    if (/^\d{4}-\d{2}$/.test(período)) {
-                        var p = período.split('-');
+                    if (/^\d{4}-\d{2}$/.test(perÃ­odo)) {
+                        var p = perÃ­odo.split('-');
                         return v.getFullYear() === parseInt(p[0]) && (v.getMonth()+1) === parseInt(p[1]);
                     }
-                    switch(período) {
+                    switch(perÃ­odo) {
                         case 'hoje': return v.getTime()===h.getTime();
                         case 'semana':{ var d=h.getDay(); var ini=new Date(h.getTime()-d*86400000); var fim=new Date(ini.getTime()+6*86400000); return v>=ini&&v<=fim; }
                         case 'mes': return v.getMonth()===h.getMonth()&&v.getFullYear()===h.getFullYear();
@@ -1763,7 +1763,7 @@
         var pesquisaTimeout;
         function pesquisarGlobal() { clearTimeout(pesquisaTimeout); var i=document.getElementById('pesquisa-global'); i.parentElement.querySelector('.btn-clear-search').style.display=i.value?'flex':'none'; pesquisaTimeout=setTimeout(function(){filtrarContas();},300); }
         function limparPesquisa() { document.getElementById('pesquisa-global').value=''; document.querySelector('.btn-clear-search').style.display='none'; filtrarContas(); }
-        function limparFiltros() { document.getElementById('pesquisa-global').value=''; document.getElementById('filtro-período').value='todas'; document.getElementById('filtro-status').value=''; document.getElementById('filtro-cliente-select').value=''; if(document.getElementById('filtro-portador'))document.getElementById('filtro-portador').value=''; if(document.getElementById('filtro-situação'))document.getElementById('filtro-situação').value=''; document.querySelector('.btn-clear-search').style.display='none'; filtrarContas(); }
+        function limparFiltros() { document.getElementById('pesquisa-global').value=''; document.getElementById('filtro-perÃ­odo').value='todas'; document.getElementById('filtro-status').value=''; document.getElementById('filtro-cliente-select').value=''; if(document.getElementById('filtro-portador'))document.getElementById('filtro-portador').value=''; if(document.getElementById('filtro-situaÃ§Ã£o'))document.getElementById('filtro-situaÃ§Ã£o').value=''; document.querySelector('.btn-clear-search').style.display='none'; filtrarContas(); }
 
         var contaVisualizando = null;
         async function visualizarConta(id) {
@@ -1816,7 +1816,7 @@
         function exportarExcel() {
             if(contas.length===0){showToast('Nao ha dados para exportar','warning');return;}
             var csvSafe=function(s){if(typeof s!=='string')return String(s==null?'':s);var v=s.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g,'');if(/^[=+\-@\t\r]/.test(v))v="'"+v;return v;};
-            var headers=['Empresa','NFe','Parcela','Cliente','CNPJ','Emissao','Vencimento','Categoria','Conta Corrente','Documento','Boleto','Vendedor','Projeto','Valor','PIS','COFINS','CSLL','IR','ISS','INSS','Valor Liquido','Recebido','A Receber','Situação','Portador','Status','Dias','Observacoes'];
+            var headers=['Empresa','NFe','Parcela','Cliente','CNPJ','Emissao','Vencimento','Categoria','Conta Corrente','Documento','Boleto','Vendedor','Projeto','Valor','PIS','COFINS','CSLL','IR','ISS','INSS','Valor Liquido','Recebido','A Receber','SituaÃ§Ã£o','Portador','Status','Dias','Observacoes'];
             var linhas=contas.map(function(c){return [
                 '"'+csvSafe(c.empresa||'')+'"','"'+csvSafe(c.nota_fiscal||'')+'"','"'+csvSafe(c.parcela_info||'')+'"',
                 '"'+csvSafe(c.cliente_nome||'').replace(/"/g,'""')+'"','"'+csvSafe(c.cnpj_cpf||c.cnpj_cliente||'')+'"',
@@ -1900,7 +1900,7 @@
                     for (var h = 0; h < Math.min(10, rawData.length); h++) {
                         if (rawData[h] && rawData[h].some(function(c){ return c === 'EMPRESA'; })) { headerRow = h; break; }
                     }
-                    if (headerRow < 0) throw new Error('Cabeçalho EMPRESA não encontrado na aba FATURAMENTO');
+                    if (headerRow < 0) throw new Error('CabeÃ§alho EMPRESA nÃ£o encontrado na aba FATURAMENTO');
 
                     var colMap = {};
                     rawData[headerRow].forEach(function(h, i) { if (h != null) colMap[String(h).trim()] = i; });
@@ -1916,7 +1916,7 @@
                         if (!statusRaw) statusRaw = 'pendente';
                         dados.push({
                             empresa:       String(row[colMap['EMPRESA']]  || ''),
-                            data_emissao:  parseDate(row[colMap['EMISSÃO']]),
+                            data_emissao:  parseDate(row[colMap['EMISSÃƒO']]),
                             tipo:          String(row[colMap['TIPO']]     || ''),
                             nota_fiscal:   String(row[colMap['NFe']]      || ''),
                             parcela_info:  String(row[colMap['P']]        || ''),
@@ -1924,13 +1924,13 @@
                             cnpj_cliente:  String(row[colMap['CNPJ']]     || ''),
                             valor:         valor,
                             data_vencimento: vcto,
-                            situacao:      String(row[colMap['SITUAÇÃO']] || ''),
+                            situacao:      String(row[colMap['SITUAÃ‡ÃƒO']] || ''),
                             portador:      String(row[colMap['PORTADOR']] || ''),
                             data_operacao: parseDate(row[colMap['DATA']]),
                             status:        statusRaw,
                             dias_vencido:  parseInt(row[colMap['DIAS']]) || 0,
-                            posicao:       String(row[colMap['POSIÇÃO']]  || ''),
-                            observacoes:   String(row[colMap['OBSERVAÇÃO']] || '')
+                            posicao:       String(row[colMap['POSIÃ‡ÃƒO']]  || ''),
+                            observacoes:   String(row[colMap['OBSERVAÃ‡ÃƒO']] || '')
                         });
                     }
                 } else {
@@ -1956,7 +1956,7 @@
                     }
                 }
 
-                if (dados.length === 0) throw new Error('Nenhum registro válido encontrado na planilha (verifique coluna VALOR P e VCTO)');
+                if (dados.length === 0) throw new Error('Nenhum registro vÃ¡lido encontrado na planilha (verifique coluna VALOR P e VCTO)');
 
                 var r = await fetch('/api/financeiro/importar/contas-receber', {
                     method: 'POST', credentials: 'include',
@@ -1967,17 +1967,17 @@
                 document.getElementById('importar-progresso').style.display = 'none';
                 if (r.ok && data.success) {
                     document.getElementById('importar-resultado').style.display = 'block';
-                    document.getElementById('importar-resultado').innerHTML = '<div style="background:#dcfce7;border:1px solid #86efac;border-radius:8px;padding:14px;text-align:center;"><i class="fas fa-check-circle" style="font-size:28px;color:#16a34a;"></i><p style="font-size:14px;font-weight:700;color:#166534;margin:8px 0 4px;">Importação Concluída!</p><p style="font-size:13px;color:#166534;margin:0;"><strong>'+data.importados+'</strong> registro(s) importado(s)'+(data.erros&&data.erros.length>0?', <span style="color:#dc2626;">'+data.erros.length+' erro(s)</span>':'')+'</p><p style="font-size:11px;color:#166534;margin-top:4px;">Aba: '+sheetName+'</p></div>';
+                    document.getElementById('importar-resultado').innerHTML = '<div style="background:#dcfce7;border:1px solid #86efac;border-radius:8px;padding:14px;text-align:center;"><i class="fas fa-check-circle" style="font-size:28px;color:#16a34a;"></i><p style="font-size:14px;font-weight:700;color:#166534;margin:8px 0 4px;">ImportaÃ§Ã£o ConcluÃ­da!</p><p style="font-size:13px;color:#166534;margin:0;"><strong>'+data.importados+'</strong> registro(s) importado(s)'+(data.erros&&data.erros.length>0?', <span style="color:#dc2626;">'+data.erros.length+' erro(s)</span>':'')+'</p><p style="font-size:11px;color:#166534;margin-top:4px;">Aba: '+sheetName+'</p></div>';
                     showToast(data.importados+' registros importados com sucesso!');
                     await init();
                 } else {
                     document.getElementById('importar-resultado').style.display = 'block';
-                    document.getElementById('importar-resultado').innerHTML = '<div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;padding:14px;text-align:center;"><i class="fas fa-exclamation-circle" style="font-size:28px;color:#dc2626;"></i><p style="font-size:13px;color:#991b1b;margin:8px 0 0;">'+(data.error||'Erro na importação')+'</p></div>';
-                    showToast(data.error || 'Erro na importação', 'error');
+                    document.getElementById('importar-resultado').innerHTML = '<div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;padding:14px;text-align:center;"><i class="fas fa-exclamation-circle" style="font-size:28px;color:#dc2626;"></i><p style="font-size:13px;color:#991b1b;margin:8px 0 0;">'+(data.error||'Erro na importaÃ§Ã£o')+'</p></div>';
+                    showToast(data.error || 'Erro na importaÃ§Ã£o', 'error');
                     document.getElementById('btn-importar').disabled = false;
                 }
             } catch(e) {
-                console.error('Erro importação:', e);
+                console.error('Erro importaÃ§Ã£o:', e);
                 document.getElementById('importar-progresso').style.display = 'none';
                 document.getElementById('importar-resultado').style.display = 'block';
                 document.getElementById('importar-resultado').innerHTML = '<div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;padding:14px;text-align:center;"><i class="fas fa-exclamation-circle" style="font-size:28px;color:#dc2626;"></i><p style="font-size:13px;color:#991b1b;margin:8px 0 0;">'+e.message+'</p></div>';
@@ -2023,7 +2023,7 @@
             if (!tbody) return;
             var fatTotais = document.getElementById('fat-totais');
             if (lista.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="13" style="text-align:center;padding:36px;color:var(--gray-400);">Nenhum dado disponível</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="13" style="text-align:center;padding:36px;color:var(--gray-400);">Nenhum dado disponÃ­vel</td></tr>';
                 return;
             }
             var hoje = new Date(); hoje.setHours(0,0,0,0);
@@ -2042,7 +2042,7 @@
                 var vencido = !liquidado && vencimento && vencimento < hoje;
                 var dias = parseInt(c.dias_vencido) || 0;
                 var diasStyle = dias > 0 ? 'color:#dc2626;font-weight:700;' : '';
-                var posição = liquidado ? 'LIQUIDADO' : (vencido ? 'VENCIDO' : 'A VENCER');
+                var posiÃ§Ã£o = liquidado ? 'LIQUIDADO' : (vencido ? 'VENCIDO' : 'A VENCER');
                 var posColor = liquidado ? '#059669' : (vencido ? '#dc2626' : '#2563eb');
                 var stBadge = liquidado
                     ? '<span style="color:#059669;font-weight:600;font-size:10px;">LIQUIDADO</span>'
@@ -2063,11 +2063,11 @@
                     '<td style="font-size:10px;">' + (c.portador || '-') + '</td>' +
                     '<td>' + stBadge + '</td>' +
                     '<td style="text-align:right;font-size:10px;' + diasStyle + '">' + (dias || '-') + '</td>' +
-                    '<td style="font-size:10px;font-weight:600;color:' + posColor + ';">' + posição + '</td>' +
+                    '<td style="font-size:10px;font-weight:600;color:' + posColor + ';">' + posiÃ§Ã£o + '</td>' +
                     '</tr>';
             });
             tbody.innerHTML = rows.join('');
-            if (fatTotais) fatTotais.textContent = lista.length + ' títulos é Total: ' + fmtMoeda(totalBruto);
+            if (fatTotais) fatTotais.textContent = lista.length + ' tÃ­tulos Ã© Total: ' + fmtMoeda(totalBruto);
         }
 
         function atualizarDisponivel(dados) {
@@ -2105,7 +2105,7 @@
             });
             var keys = Object.keys(porEmpresa).sort();
             if (keys.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:36px;color:var(--gray-400);">Nenhum dado disponível</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:36px;color:var(--gray-400);">Nenhum dado disponÃ­vel</td></tr>';
                 return;
             }
             var totNF=0,totF9=0,totDisp=0,totVenc=0,totLiq=0;
@@ -2138,7 +2138,7 @@
             if (!tbody) return;
             var diarioTotais = document.getElementById('diario-totais');
             var hoje = new Date(); hoje.setHours(0,0,0,0);
-            var diasSemana = ['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
+            var diasSemana = ['domingo','segunda-feira','terÃ§a-feira','quarta-feira','quinta-feira','sexta-feira','sÃ¡bado'];
             var porDia = {};
             var totalAV = 0, totalVenc = 0;
             lista.forEach(function(c) {
@@ -2165,7 +2165,7 @@
             });
             var keys = Object.keys(porDia).sort();
             if (keys.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:36px;color:var(--gray-400);">Nenhum dado disponível</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:36px;color:var(--gray-400);">Nenhum dado disponÃ­vel</td></tr>';
                 return;
             }
             var hojeKey = hoje.toISOString().split('T')[0];
@@ -2191,7 +2191,7 @@
                 '<td style="text-align:right;">' + fmtMoeda(totalAV + totalVenc) + '</td>' +
                 '<td></td></tr>');
             tbody.innerHTML = rows.join('');
-            if (diarioTotais) diarioTotais.textContent = 'Total: ' + fmtMoeda(totalAV + totalVenc) + ' é Vencido: ' + fmtMoeda(totalVenc);
+            if (diarioTotais) diarioTotais.textContent = 'Total: ' + fmtMoeda(totalAV + totalVenc) + ' Ã© Vencido: ' + fmtMoeda(totalVenc);
         }
 
         function atualizarPM(dados) {
@@ -2201,7 +2201,7 @@
             var kpis = document.getElementById('pm-kpis');
 
             // Read configurable inputs
-            var dtOpInput = document.getElementById('pm-dt-operação');
+            var dtOpInput = document.getElementById('pm-dt-operaÃ§Ã£o');
             var dPlusInput = document.getElementById('pm-dplus');
             var dtOp = dtOpInput && dtOpInput.value ? new Date(dtOpInput.value + 'T00:00:00') : new Date();
             dtOp.setHours(0,0,0,0);
@@ -2246,10 +2246,10 @@
             if (kpis) {
                 var dtOpFormatted = dtOp.toLocaleDateString('pt-BR');
                 kpis.innerHTML = [
-                    { label: 'DT Operação', value: dtOpFormatted, color: '#374151' },
+                    { label: 'DT OperaÃ§Ã£o', value: dtOpFormatted, color: '#374151' },
                     { label: 'Prazo Mdio + (simples)', value: pmMed.toFixed(1) + ' dias', color: '#ec4899' },
                     { label: 'PM Ponderado (D+' + dPlus + ')', value: pmPond.toFixed(2) + ' dias', color: '#6366f1' },
-                    { label: 'Total Bruto é ' + abertas.length + ' títulos', value: fmtMoeda(totVal), color: '#059669' }
+                    { label: 'Total Bruto Ã© ' + abertas.length + ' tÃ­tulos', value: fmtMoeda(totVal), color: '#059669' }
                 ].map(function(k){
                     return '<div style="background:#fff;border-radius:10px;padding:10px 14px;border:1px solid #e5e7eb;">' +
                         '<div style="font-size:10px;color:#6b7280;font-weight:500;margin-bottom:2px;">' + k.label + '</div>' +
@@ -2270,7 +2270,7 @@
                     '</tr>';
             });
             rows.push('<tr style="background:#f8fafc;font-weight:700;border-top:2px solid #e5e7eb;">' +
-                '<td>TOTAL (' + abertas.length + ' títulos)</td>' +
+                '<td>TOTAL (' + abertas.length + ' tÃ­tulos)</td>' +
                 '<td style="text-align:right;">' + fmtMoeda(totVal) + '</td>' +
                 '<td style="text-align:right;"></td>' +
                 '<td style="text-align:right;">PM: ' + pmPond.toFixed(1) + ' d</td>' +
@@ -2313,7 +2313,7 @@
             });
             var keys = Object.keys(porMes).sort();
             if (keys.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:36px;color:var(--gray-400);">Nenhum dado disponível</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:36px;color:var(--gray-400);">Nenhum dado disponÃ­vel</td></tr>';
                 return;
             }
             var totAV=0,totVenc=0,totLiq=0;
@@ -2341,12 +2341,12 @@
         }
     </script>
 
-    <!-- BASE - Dados de Referência -->
+    <!-- BASE - Dados de ReferÃªncia -->
     <script>
         (function carregarBase() {
             var portadores = ['ALUFORCE','AUGURI','CAPITAL ANNEX','CONTINENTAL','DEL MONTE','FAMA','H8','IGNIS','ITAU','LEPTA','ONIX','VALE RIO CLARO'];
             var status = ['A VENCER','VENCIDO'];
-            var situacao = ['A VISTA','CARTEIRA','DISPONÍVEL','OPERADO'];
+            var situacao = ['A VISTA','CARTEIRA','DISPONÃVEL','OPERADO'];
             var posicao = ['LIQUIDADO','RECOMPRADO'];
             var recomprado = ['A RECEBER','RECEBIDO'];
             var cartorio = ['FUNDO','ALUFORCE'];
@@ -2376,20 +2376,20 @@
         })();
     </script>
 
-    <!-- OPERAÇÕES DE CRÉDITO (com fórmulas) -->
+    <!-- OPERAÃ‡Ã•ES DE CRÃ‰DITO (com fÃ³rmulas) -->
     <script>
         var operacoesData = [];
         var operacoesFiltradas = [];
 
         /*
-         * FÓRMULAS DO EXCEL (Tabela13):
+         * FÃ“RMULAS DO EXCEL (Tabela13):
          * TOTAL_DEDUCOES (R) = DIF_MONET + TARIFAS + ISS_MONET + IOF + CPMF_COBR
          * TAXA_PERIODO  (H) = (VLR_BRUTO - LIQ_OP) / VLR_BRUTO
          * TMP           (I) = (TAXA_PERIODO * 30) / PRAZO_MEDIO
          * ISS_PERC      (N) = ISS_MONET / VLR_BRUTO / PRAZO_MEDIO * 30
          * LIQ_OP        (S) = VLR_BRUTO - TOTAL_DEDUCOES
-         * LIQ_LIB       (X) = Se PRORROGACAO="SIM" → 0;
-         *                      Senão: LIQ_OP - RETENCAO - RECOMPRA - CONTA_GRAFICA - AMORT_FOM
+         * LIQ_LIB       (X) = Se PRORROGACAO="SIM" â†’ 0;
+         *                      SenÃ£o: LIQ_OP - RETENCAO - RECOMPRA - CONTA_GRAFICA - AMORT_FOM
          */
         function calcularFormulas(o) {
             var vlr = parseFloat(o.vlr_bruto) || 0;
@@ -2405,17 +2405,17 @@
             var af = parseFloat(o.amort_fom) || 0;
             var prorrog = String(o.prorrogacao || '').trim().toUpperCase();
 
-            // Fórmula R: TOTAL_DEDUCOES
+            // FÃ³rmula R: TOTAL_DEDUCOES
             o._total_deducoes = dif + tar + issMonet + iof + cpmf;
-            // Fórmula S: LIQ_OP
+            // FÃ³rmula S: LIQ_OP
             o._liq_op = vlr - o._total_deducoes;
-            // Fórmula H: TAXA_PERIODO
+            // FÃ³rmula H: TAXA_PERIODO
             o._taxa_periodo = vlr > 0 ? (vlr - o._liq_op) / vlr : 0;
-            // Fórmula I: TMP (Taxa Mensal Ponderada)
+            // FÃ³rmula I: TMP (Taxa Mensal Ponderada)
             o._tmp = pm > 0 ? (o._taxa_periodo * 30) / pm : 0;
-            // Fórmula N: ISS_PERC
+            // FÃ³rmula N: ISS_PERC
             o._iss_perc = (vlr > 0 && pm > 0) ? (issMonet / vlr / pm * 30) : 0;
-            // Fórmula X: LIQ_LIB
+            // FÃ³rmula X: LIQ_LIB
             if (prorrog === 'SIM') {
                 o._liq_lib = 0;
             } else {
@@ -2431,7 +2431,7 @@
                 operacoesData = (json.data || []).map(calcularFormulas);
                 populaFiltrosOp();
                 filtrarOperacoes();
-            } catch(e) { console.error('Erro ao carregar operações:', e); }
+            } catch(e) { console.error('Erro ao carregar operaÃ§Ãµes:', e); }
         }
 
         function populaFiltrosOp() {
@@ -2442,7 +2442,7 @@
             var selEmp = document.getElementById('op-filtro-empresa');
             selEmp.innerHTML = '<option value="">Todas Empresas</option>' + empresas.map(function(e){return '<option value="'+e+'">'+e+'</option>';}).join('');
             var selInst = document.getElementById('op-filtro-instituicao');
-            selInst.innerHTML = '<option value="">Todas Instituições</option>' + instituicoes.map(function(i){return '<option value="'+i+'">'+i+'</option>';}).join('');
+            selInst.innerHTML = '<option value="">Todas InstituiÃ§Ãµes</option>' + instituicoes.map(function(i){return '<option value="'+i+'">'+i+'</option>';}).join('');
             var selTipo = document.getElementById('op-filtro-tipo');
             selTipo.innerHTML = '<option value="">Todos Tipos</option>' + tipos.map(function(t){return '<option value="'+t+'">'+t+'</option>';}).join('');
         }
@@ -2468,7 +2468,7 @@
         function renderOperacoes() {
             var tbody = document.getElementById('tabela-operacoes-body');
             if (!operacoesFiltradas.length) {
-                tbody.innerHTML = '<tr><td colspan="24" style="text-align:center;padding:36px;color:var(--gray-400);">Nenhuma operação encontrada</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="24" style="text-align:center;padding:36px;color:var(--gray-400);">Nenhuma operaÃ§Ã£o encontrada</td></tr>';
                 document.getElementById('op-totais').textContent = '';
                 return;
             }
@@ -2535,7 +2535,7 @@
             var issPercGeral = (totBruto > 0 && pmGeralPonderado > 0) ? (totIssMonet / totBruto / pmGeralPonderado * 30) : 0;
 
             rows.push('<tr style="background:#f8fafc;font-weight:700;border-top:2px solid #e5e7eb;">' +
-                '<td colspan="5">TOTAL (' + operacoesFiltradas.length + ' operações)</td>' +
+                '<td colspan="5">TOTAL (' + operacoesFiltradas.length + ' operaÃ§Ãµes)</td>' +
                 '<td style="text-align:right;">' + pmGeralPonderado.toFixed(1) + '</td>' +
                 '<td></td>' +
                 '<td style="text-align:right;color:#6366f1;">' + fmtPerc(taxaPeriodoTotal) + '</td>' +
@@ -2558,7 +2558,7 @@
                 '</tr>');
 
             tbody.innerHTML = rows.join('');
-            document.getElementById('op-totais').textContent = operacoesFiltradas.length + ' operações';
+            document.getElementById('op-totais').textContent = operacoesFiltradas.length + ' operaÃ§Ãµes';
             document.getElementById('op-filtro-info').textContent = operacoesFiltradas.length + ' de ' + operacoesData.length + ' registros';
         }
 
@@ -2584,11 +2584,11 @@
             };
 
             document.getElementById('op-kpis').innerHTML =
-                kpi('Vlr Bruto', fmtMoeda(totBruto), '#3b82f6', 'money-bill-wave', d.length + ' operações') +
-                kpi('Total Deduções', fmtMoeda(totDed), '#ef4444', 'minus-circle', 'Taxa período: ' + fmtPerc(taxaMedia)) +
-                kpi('Líq Operação', fmtMoeda(totLiqOp), '#f59e0b', 'calculator', 'Bruto - Deduções') +
-                kpi('Líq Liberado', fmtMoeda(totLiqLib), '#22c55e', 'hand-holding-usd', 'Líq OP - Ret - Rec - Amort') +
-                kpi('PM Médio', pmMedio.toFixed(1) + ' dias', '#8b5cf6', 'clock', 'TMP: ' + fmtPerc(tmpMedio));
+                kpi('Vlr Bruto', fmtMoeda(totBruto), '#3b82f6', 'money-bill-wave', d.length + ' operaÃ§Ãµes') +
+                kpi('Total DeduÃ§Ãµes', fmtMoeda(totDed), '#ef4444', 'minus-circle', 'Taxa perÃ­odo: ' + fmtPerc(taxaMedia)) +
+                kpi('LÃ­q OperaÃ§Ã£o', fmtMoeda(totLiqOp), '#f59e0b', 'calculator', 'Bruto - DeduÃ§Ãµes') +
+                kpi('LÃ­q Liberado', fmtMoeda(totLiqLib), '#22c55e', 'hand-holding-usd', 'LÃ­q OP - Ret - Rec - Amort') +
+                kpi('PM MÃ©dio', pmMedio.toFixed(1) + ' dias', '#8b5cf6', 'clock', 'TMP: ' + fmtPerc(tmpMedio));
         }
 
         function abrirModalImportarOp() {

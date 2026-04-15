@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -30,7 +30,7 @@
             --text-secondary: #64748b;
             --bg-gray: #f8fafc;
             --border-color: #e2e8f0;
-            --primary-dark: #1a1a2e;
+            --primary-dark: #ffffff;
             --sidebar-width: 48px;
             --header-height: 42px;
         }
@@ -45,7 +45,7 @@
         /* ======================================== HEADER SUPERIOR ======================================== */
 
 
-        /* ======================================== SISTEMA DE NOTIFICAÇÕES ======================================== */
+        /* ======================================== SISTEMA DE NOTIFICAÃ‡Ã•ES ======================================== */
 
 
         @keyframes pulse-badge { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
@@ -133,7 +133,7 @@
     <div class="app-container">
         <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
 
-        <!-- SIDEBAR - PADRÃO PCP (HTML estático, RBAC via JS) -->
+        <!-- SIDEBAR - PADRÃƒO PCP (HTML estÃ¡tico, RBAC via JS) -->
         <aside class="sidebar" id="mobile-sidebar">
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel">
                 <i class="fas fa-home"></i>
@@ -158,13 +158,13 @@
                 <a href="plano-contas.html" class="sidebar-btn" title="Plano de Contas">
                     <i class="fas fa-list-alt"></i>
                 </a>
-                <a href="orcamentos.html" class="sidebar-btn" title="Orçamentos">
+                <a href="orcamentos.html" class="sidebar-btn" title="OrÃ§amentos">
                     <i class="fas fa-calculator"></i>
                 </a>
-                <a href="conciliacao.html" class="sidebar-btn" title="Conciliação">
+                <a href="conciliacao.html" class="sidebar-btn" title="ConciliaÃ§Ã£o">
                     <i class="fas fa-balance-scale"></i>
                 </a>
-                <a href="relatorios.html" class="sidebar-btn" title="Relatórios">
+                <a href="relatorios.html" class="sidebar-btn" title="RelatÃ³rios">
                     <i class="fas fa-chart-bar"></i>
                 </a>
             </nav>
@@ -177,7 +177,7 @@
                 <a href="impostos.html" class="sidebar-btn" title="Impostos">
                     <i class="fas fa-percent"></i>
                 </a>
-                <button class="sidebar-btn" title="Configurações" id="btn-config" onclick="toggleConfiguracoes()">
+                <button class="sidebar-btn" title="ConfiguraÃ§Ãµes" id="btn-config" onclick="toggleConfiguracoes()">
                     <i class="fas fa-cog"></i>
                 </button>
             </div>
@@ -185,7 +185,7 @@
 
         <!-- Main Area -->
         <main class="main-area">
-            <!-- HEADER - PADRÃO PCP (HTML estático) -->
+            <!-- HEADER - PADRÃƒO PCP (HTML estÃ¡tico) -->
             <header class="header">
                 <div class="header-left">
                     <!-- Botao Menu Mobile -->
@@ -206,12 +206,12 @@
                     </button>
                     
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">UsuÃ¡rio</strong></span>
                     </div>
                 </div>
             </header>
 
-            <!-- Main Content - Padrão PCP -->
+            <!-- Main Content - PadrÃ£o PCP -->
             <div class="main-content">
 
             <div class="page-content">
@@ -238,13 +238,13 @@
                         <div class="metric-header">
                             <div class="metric-icon blue"><i class="fas fa-dollar-sign"></i></div>
                         </div>
-                        <div class="metric-label">Orçamento Total</div>
+                        <div class="metric-label">OrÃ§amento Total</div>
                     </div>
                     <div class="metric-card orange">
                         <div class="metric-header">
                             <div class="metric-icon orange"><i class="fas fa-chart-pie"></i></div>
                         </div>
-                        <div class="metric-label">Utilização Média</div>
+                        <div class="metric-label">UtilizaÃ§Ã£o MÃ©dia</div>
                     </div>
                 </div>
 
@@ -257,7 +257,7 @@
                         <div class="fp-search-bar">
                             <div class="fp-search-wrap">
                                 <i class="fas fa-search"></i>
-                                <input type="text" id="fp-search-centros" placeholder="Buscar por nome, departamento, responsável..." oninput="window._finPg['fp-pg-centros'].search(this.value)">
+                                <input type="text" id="fp-search-centros" placeholder="Buscar por nome, departamento, responsÃ¡vel..." oninput="window._finPg['fp-pg-centros'].search(this.value)">
                             </div>
                             <span class="fp-count" id="fp-info-centros"></span>
                         </div>
@@ -266,14 +266,14 @@
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Código</th>
+                                    <th>CÃ³digo</th>
                                     <th>Nome</th>
                                     <th>Departamento</th>
-                                    <th>Responsável</th>
-                                    <th>Orçamento</th>
-                                    <th>Utilização</th>
+                                    <th>ResponsÃ¡vel</th>
+                                    <th>OrÃ§amento</th>
+                                    <th>UtilizaÃ§Ã£o</th>
                                     <th>Status</th>
-                                    <th>Ações</th>
+                                    <th>AÃ§Ãµes</th>
                                 </tr>
                             </thead>
                             <tbody id="tabela-centros">
@@ -293,7 +293,7 @@
         </main>
     </div>
 
-    <!-- Modal Novo/Editar - Padrão SaaS Empresarial -->
+    <!-- Modal Novo/Editar - PadrÃ£o SaaS Empresarial -->
     <div class="modal-overlay-saas" id="modalCentro" onclick="if(event.target === this) fecharModal()">
         <div class="modal-saas modal-sm">
             <div class="modal-header-saas header-green">
@@ -302,7 +302,7 @@
                         <i class="fas fa-sitemap" id="modal-icon"></i>
                     </div>
                     <div class="modal-header-text-saas">
-                        <h2 id="modal-título">Novo Centro de Custo</h2>
+                        <h2 id="modal-tÃ­tulo">Novo Centro de Custo</h2>
                         <p id="modal-subtitulo">Configure um novo centro de custo ou departamento</p>
                     </div>
                     <button class="modal-close-saas" onclick="fecharModal()" title="Fechar"><i class="fas fa-times"></i></button>
@@ -312,17 +312,17 @@
                 <form id="formCentro">
                     <input type="hidden" id="centro-id">
 
-                    <!-- Seção: Identificação -->
+                    <!-- SeÃ§Ã£o: IdentificaÃ§Ã£o -->
                     <div class="form-section-saas">
                         <div class="form-section-title-saas">
                             <i class="fas fa-tag"></i>
-                            <span>Identificação</span>
-                            <span class="section-badge-saas">Obrigatório</span>
+                            <span>IdentificaÃ§Ã£o</span>
+                            <span class="section-badge-saas">ObrigatÃ³rio</span>
                         </div>
                         <div class="form-grid-saas">
                             <div class="form-group-saas">
-                                <label><i class="fas fa-hashtag"></i> Código <span class="required">*</span></label>
-                                <input type="text" id="centro-código" placeholder="Ex: CC001" required>
+                                <label><i class="fas fa-hashtag"></i> CÃ³digo <span class="required">*</span></label>
+                                <input type="text" id="centro-cÃ³digo" placeholder="Ex: CC001" required>
                             </div>
                             <div class="form-group-saas">
                                 <label><i class="fas fa-building"></i> Departamento</label>
@@ -331,10 +331,10 @@
                                     <option value="Administrativo">Administrativo</option>
                                     <option value="Comercial">Comercial</option>
                                     <option value="Financeiro">Financeiro</option>
-                                    <option value="Produção">Produção</option>
+                                    <option value="ProduÃ§Ã£o">ProduÃ§Ã£o</option>
                                     <option value="RH">Recursos Humanos</option>
                                     <option value="TI">Tecnologia</option>
-                                    <option value="Logística">Logística</option>
+                                    <option value="LogÃ­stica">LogÃ­stica</option>
                                 </select>
                             </div>
                             <div class="form-group-saas full">
@@ -344,22 +344,22 @@
                         </div>
                     </div>
 
-                    <!-- Seção: Gestão -->
+                    <!-- SeÃ§Ã£o: GestÃ£o -->
                     <div class="form-section-saas">
                         <div class="form-section-title-saas">
                             <i class="fas fa-users-cog icon-blue"></i>
-                            <span>Gestão e Orçamento</span>
+                            <span>GestÃ£o e OrÃ§amento</span>
                         </div>
                         <div class="form-grid-saas">
                             <div class="form-group-saas">
-                                <label><i class="fas fa-user-tie"></i> Responsável</label>
-                                <input type="text" id="centro-responsavel" placeholder="Nome do gestor responsável">
+                                <label><i class="fas fa-user-tie"></i> ResponsÃ¡vel</label>
+                                <input type="text" id="centro-responsavel" placeholder="Nome do gestor responsÃ¡vel">
                             </div>
                             <div class="form-group-saas">
-                                <label><i class="fas fa-dollar-sign"></i> Orçamento Mensal</label>
+                                <label><i class="fas fa-dollar-sign"></i> OrÃ§amento Mensal</label>
                                 <div class="valor-destaque-saas">
                                     <span class="currency-symbol">R$</span>
-                                    <input type="text" id="centro-orçamento" placeholder="0,00" oninput="formatarMoedaInput(this)">
+                                    <input type="text" id="centro-orÃ§amento" placeholder="0,00" oninput="formatarMoedaInput(this)">
                                 </div>
                             </div>
                             <div class="form-group-saas">
@@ -377,7 +377,7 @@
                 <div class="modal-footer-left-saas">
                     <div class="footer-info">
                         <i class="fas fa-info-circle"></i>
-                        <span>Campos com <span class="required-asterisk">*</span> são obrigatórios</span>
+                        <span>Campos com <span class="required-asterisk">*</span> sÃ£o obrigatÃ³rios</span>
                     </div>
                 </div>
                 <div class="modal-footer-right-saas">
@@ -399,7 +399,7 @@
         let centrosCusto = [];
         let editandoId = null;
 
-        // Paginação
+        // PaginaÃ§Ã£o
         const pgCentros = new FinPagination({
             containerId: 'fp-pg-centros',
             searchId: 'fp-search-centros',
@@ -407,8 +407,8 @@
             perPage: 30,
             getData: () => centrosCusto,
             searchFields: [
-                c => c.nome || c.descrição,
-                c => c.código,
+                c => c.nome || c.descriÃ§Ã£o,
+                c => c.cÃ³digo,
                 c => c.departamento,
                 c => c.responsavel || c.responsavel_nome
             ],
@@ -419,15 +419,15 @@
                     return;
                 }
                 tbody.innerHTML = pageData.map(c => {
-                    const utilizacao = c.orçamento_mensal > 0 ? Math.min((c.utilizado / c.orçamento_mensal) * 100, 100) : 0;
+                    const utilizacao = c.orÃ§amento_mensal > 0 ? Math.min((c.utilizado / c.orÃ§amento_mensal) * 100, 100) : 0;
                     const corBarra = utilizacao > 90 ? 'red' : utilizacao > 70 ? 'yellow' : 'green';
                     return `
                         <tr>
-                            <td><strong>${c.código || 'CC' + String(c.id).padStart(3, '0')}</strong></td>
-                            <td>${c.nome || c.descrição || '-'}</td>
+                            <td><strong>${c.cÃ³digo || 'CC' + String(c.id).padStart(3, '0')}</strong></td>
+                            <td>${c.nome || c.descriÃ§Ã£o || '-'}</td>
                             <td>${c.departamento || '-'}</td>
                             <td>${c.responsavel || c.responsavel_nome || '-'}</td>
-                            <td>${formatarMoeda(c.orçamento_mensal || c.orçamento || 0)}</td>
+                            <td>${formatarMoeda(c.orÃ§amento_mensal || c.orÃ§amento || 0)}</td>
                             <td style="min-width: 120px;">
                                 <div style="display: flex; align-items: center; gap: 8px;">
                                     <div class="progress-bar" style="flex: 1;">
@@ -449,13 +449,13 @@
         });
         window._finPg['fp-pg-centros'] = pgCentros;
 
-        // Carregar usuário
+        // Carregar usuÃ¡rio
         async function carregarUsuario() {
             try {
                 const response = await fetch('/api/me', { credentials: 'include' });
                 if (response.ok) {
                     const user = await response.json();
-                    const primeiroNome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usuário');
+                    const primeiroNome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'UsuÃ¡rio');
 
                     const hour = new Date().getHours();
                     let greeting = 'Bom dia';
@@ -480,7 +480,7 @@
                         fotoEl.onerror = () => { fotoEl.style.display = 'none'; if (inicialEl) { inicialEl.textContent = primeiroNome.charAt(0).toUpperCase(); inicialEl.style.display = 'flex'; } };
                     }
                 }
-            } catch (e) { console.error('Erro ao carregar usuário:', e); }
+            } catch (e) { console.error('Erro ao carregar usuÃ¡rio:', e); }
         }
 
         // Carregar centros de custo
@@ -507,13 +507,13 @@
             const total = centrosCusto.length;
             const ativos = centrosCusto.filter(c => c.ativo == 1 || c.ativo === true || c.ativo === 'ativo').length;
             const inativos = total - ativos;
-            const orçamentoTotal = centrosCusto.reduce((sum, c) => sum + parseFloat(c.orçamento_mensal || c.orçamento || 0), 0);
+            const orÃ§amentoTotal = centrosCusto.reduce((sum, c) => sum + parseFloat(c.orÃ§amento_mensal || c.orÃ§amento || 0), 0);
             const utilizadoTotal = centrosCusto.reduce((sum, c) => sum + parseFloat(c.utilizado || 0), 0);
-            const utilizacaoMedia = orçamentoTotal > 0 ? (utilizadoTotal / orçamentoTotal) * 100 : 0;
+            const utilizacaoMedia = orÃ§amentoTotal > 0 ? (utilizadoTotal / orÃ§amentoTotal) * 100 : 0;
 
             document.getElementById('stat-total').textContent = total;
             document.getElementById('stat-ativos').textContent = ativos;
-            document.getElementById('stat-orçamento').textContent = formatarMoeda(orçamentoTotal);
+            document.getElementById('stat-orÃ§amento').textContent = formatarMoeda(orÃ§amentoTotal);
             document.getElementById('stat-utilizacao').textContent = utilizacaoMedia.toFixed(1) + '%';
         }
 
@@ -528,7 +528,7 @@
 
         function abrirModal() {
             editandoId = null;
-            document.getElementById('modal-título').textContent = 'Novo Centro de Custo';
+            document.getElementById('modal-tÃ­tulo').textContent = 'Novo Centro de Custo';
             document.getElementById('formCentro').reset();
             document.getElementById('centro-id').value = '';
             document.getElementById('modalCentro').classList.add('active');
@@ -543,29 +543,29 @@
             if (!centro) return;
 
             editandoId = id;
-            document.getElementById('modal-título').textContent = 'Editar Centro de Custo';
+            document.getElementById('modal-tÃ­tulo').textContent = 'Editar Centro de Custo';
             document.getElementById('centro-id').value = centro.id;
-            document.getElementById('centro-código').value = centro.codigo || '';
-            document.getElementById('centro-nome').value = centro.nome || centro.descrição || '';
+            document.getElementById('centro-cÃ³digo').value = centro.codigo || '';
+            document.getElementById('centro-nome').value = centro.nome || centro.descriÃ§Ã£o || '';
             document.getElementById('centro-departamento').value = centro.departamento || '';
             document.getElementById('centro-responsavel').value = centro.responsavel || centro.responsavel_nome || '';
-            document.getElementById('centro-orçamento').value = formatarMoeda(centro.orçamento_mensal || centro.orçamento || 0);
+            document.getElementById('centro-orÃ§amento').value = formatarMoeda(centro.orÃ§amento_mensal || centro.orÃ§amento || 0);
             document.getElementById('centro-ativo').value = centro.ativo ? '1' : '0';
             document.getElementById('modalCentro').classList.add('active');
         }
 
         async function salvarCentro() {
             const dados = {
-                codigo: document.getElementById('centro-código').value,
+                codigo: document.getElementById('centro-cÃ³digo').value,
                 nome: document.getElementById('centro-nome').value,
                 departamento: document.getElementById('centro-departamento').value,
                 responsavel: document.getElementById('centro-responsavel').value,
-                orçamento_mensal: parseMoeda(document.getElementById('centro-orçamento').value),
+                orÃ§amento_mensal: parseMoeda(document.getElementById('centro-orÃ§amento').value),
                 ativo: document.getElementById('centro-ativo').value === '1'
             };
 
             if (!dados.nome) {
-                alert('Nome é obrigatório');
+                alert('Nome Ã© obrigatÃ³rio');
                 return;
             }
 
@@ -620,7 +620,7 @@
             const centro = centrosCusto.find(c => c.id === id);
             if (!centro) return;
 
-            const utilizacao = centro.orçamento_mensal > 0 ? ((centro.utilizado || 0) / centro.orçamento_mensal) * 100 : 0;
+            const utilizacao = centro.orÃ§amento_mensal > 0 ? ((centro.utilizado || 0) / centro.orÃ§amento_mensal) * 100 : 0;
             const utilizacaoCor = utilizacao >= 90 ? '#dc2626' : utilizacao >= 70 ? '#ea580c' : '#059669';
             const statusCor = centro.ativo ? '#059669' : '#dc2626';
             const statusTexto = centro.ativo ? 'Ativo' : 'Inativo';
@@ -628,23 +628,23 @@
             const mensagem = `
                 <div style="text-align:left; font-size:14px; line-height:1.8;">
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px 16px;">
-                        <div><span style="color:#9CA3AF; font-size:12px;">Código</span><br><strong>${centro.código || '-'}</strong></div>
+                        <div><span style="color:#9CA3AF; font-size:12px;">CÃ³digo</span><br><strong>${centro.cÃ³digo || '-'}</strong></div>
                         <div><span style="color:#9CA3AF; font-size:12px;">Departamento</span><br><strong>${centro.departamento || '-'}</strong></div>
-                        <div><span style="color:#9CA3AF; font-size:12px;">Responsável</span><br><strong>${centro.responsavel || '-'}</strong></div>
+                        <div><span style="color:#9CA3AF; font-size:12px;">ResponsÃ¡vel</span><br><strong>${centro.responsavel || '-'}</strong></div>
                         <div><span style="color:#9CA3AF; font-size:12px;">Status</span><br><strong style="color:${statusCor}">${statusTexto}</strong></div>
                     </div>
                     <hr style="border:none; border-top:1px solid #E5E7EB; margin:12px 0;">
                     <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
                         <div style="text-align:center; background:#f8fafc; border-radius:8px; padding:10px;">
-                            <div style="color:#9CA3AF; font-size:11px; margin-bottom:4px;">ORÇAMENTO</div>
-                            <div style="font-weight:700; color:#2563eb;">${formatarMoeda(centro.orçamento_mensal || 0)}</div>
+                            <div style="color:#9CA3AF; font-size:11px; margin-bottom:4px;">ORÃ‡AMENTO</div>
+                            <div style="font-weight:700; color:#2563eb;">${formatarMoeda(centro.orÃ§amento_mensal || 0)}</div>
                         </div>
                         <div style="text-align:center; background:#f8fafc; border-radius:8px; padding:10px;">
                             <div style="color:#9CA3AF; font-size:11px; margin-bottom:4px;">UTILIZADO</div>
                             <div style="font-weight:700; color:#ea580c;">${formatarMoeda(centro.utilizado || 0)}</div>
                         </div>
                         <div style="text-align:center; background:#f8fafc; border-radius:8px; padding:10px;">
-                            <div style="color:#9CA3AF; font-size:11px; margin-bottom:4px;">UTILIZAÇÃO</div>
+                            <div style="color:#9CA3AF; font-size:11px; margin-bottom:4px;">UTILIZAÃ‡ÃƒO</div>
                             <div style="font-weight:700; color:${utilizacaoCor};">${utilizacao.toFixed(1)}%</div>
                         </div>
                     </div>
@@ -653,7 +653,7 @@
 
             if (typeof ConfirmDialog !== 'undefined') {
                 ConfirmDialog.show({
-                    title: `Centro de Custo: ${centro.nome || centro.descrição}`,
+                    title: `Centro de Custo: ${centro.nome || centro.descriÃ§Ã£o}`,
                     message: mensagem,
                     type: 'info',
                     confirmText: 'OK',
@@ -662,7 +662,7 @@
                 });
             } else if (typeof showConfirmDialog === 'function') {
                 showConfirmDialog({
-                    title: `Centro de Custo: ${centro.nome || centro.descrição}`,
+                    title: `Centro de Custo: ${centro.nome || centro.descriÃ§Ã£o}`,
                     message: mensagem,
                     type: 'info',
                     confirmText: 'OK',
@@ -670,19 +670,19 @@
                     showCancel: false
                 });
             } else {
-                alert(`Centro de Custo: ${centro.nome || centro.descrição}\n\nCódigo: ${centro.código || '-'}\nDepartamento: ${centro.departamento || '-'}\nResponsável: ${centro.responsavel || '-'}\nOrçamento: ${formatarMoeda(centro.orçamento_mensal || 0)}\nUtilizado: ${formatarMoeda(centro.utilizado || 0)}\nUtilização: ${utilizacao.toFixed(1)}%\nStatus: ${statusTexto}`);
+                alert(`Centro de Custo: ${centro.nome || centro.descriÃ§Ã£o}\n\nCÃ³digo: ${centro.cÃ³digo || '-'}\nDepartamento: ${centro.departamento || '-'}\nResponsÃ¡vel: ${centro.responsavel || '-'}\nOrÃ§amento: ${formatarMoeda(centro.orÃ§amento_mensal || 0)}\nUtilizado: ${formatarMoeda(centro.utilizado || 0)}\nUtilizaÃ§Ã£o: ${utilizacao.toFixed(1)}%\nStatus: ${statusTexto}`);
             }
         }
 
         function exportarCSV() {
             if (centrosCusto.length === 0) {
-                alert('Não há dados para exportar');
+                alert('NÃ£o hÃ¡ dados para exportar');
                 return;
             }
 
-            let csv = 'Código,Nome,Departamento,Responsável,Orçamento,Utilizado,Status\n';
+            let csv = 'CÃ³digo,Nome,Departamento,ResponsÃ¡vel,OrÃ§amento,Utilizado,Status\n';
             centrosCusto.forEach(c => {
-                csv += `"${c.código || ''}","${c.nome || c.descrição || ''}","${c.departamento || ''}","${c.responsavel || ''}","${c.orçamento_mensal || 0}","${c.utilizado || 0}","${c.ativo ? 'Ativo' : 'Inativo'}"\n`;
+                csv += `"${c.cÃ³digo || ''}","${c.nome || c.descriÃ§Ã£o || ''}","${c.departamento || ''}","${c.responsavel || ''}","${c.orÃ§amento_mensal || 0}","${c.utilizado || 0}","${c.ativo ? 'Ativo' : 'Inativo'}"\n`;
             });
 
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -708,7 +708,7 @@
             input.value = formatarMoeda(valor);
         }
 
-        // Inicialização
+        // InicializaÃ§Ã£o
         document.addEventListener('DOMContentLoaded', function() {
             carregarUsuario();
             carregarCentros();
