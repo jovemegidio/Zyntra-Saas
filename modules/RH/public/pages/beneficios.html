@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
@@ -201,11 +201,9 @@
                 <a href="meus-holerites.html" class="sidebar-btn" title="Meus Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="dados-cadastrais.html" class="sidebar-btn" title="Dados Cadastrais"><i class="fas fa-id-card"></i></a>
                 <a href="beneficios.html" class="sidebar-btn active" title="Meus Benefícios"><i class="fas fa-gift"></i></a>
-                <a href="minhas-ferias.html" class="sidebar-btn" title="Minhas Férias"><i class="fas fa-umbrella-beach"></i></a>
                 <a href="espelho-ponto.html" class="sidebar-btn" title="Espelho de Ponto"><i class="fas fa-list-check"></i></a>
                 <a href="enviar-atestado.html" class="sidebar-btn" title="Enviar Atestado"><i class="fas fa-file-medical"></i></a>
-                <a href="autoavaliacao.html" class="sidebar-btn" title="Autoavaliação"><i class="fas fa-user-check"></i></a>
-                <a href="avaliacoes-recebidas.html" class="sidebar-btn" title="Avaliações Recebidas"><i class="fas fa-inbox"></i></a>
+                <a href="../solicitacoes.html" class="sidebar-btn" title="Minhas Solicitações"><i class="fas fa-clipboard-list"></i></a>
                 <a href="manual-colaborador.html" class="sidebar-btn" title="Manual do Colaborador"><i class="fas fa-book"></i></a>
             </nav>
             <div class="sidebar-bottom">
@@ -319,7 +317,7 @@
                     </button>
                 </div>
                 <div id="lista-benefícios-admin">
-                    <!-- Lista dinmica -->
+                    <!-- Lista dinâmica -->
                 </div>
             </div>
         </div>
@@ -339,7 +337,7 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label>Nome do Benefício *</label>
-                            <input type="text" id="benefício-nome" class="form-input" required placeholder="Ex: Vale Refeio">
+                            <input type="text" id="benefício-nome" class="form-input" required placeholder="Ex: Vale Refeição">
                         </div>
                         <div class="form-group">
                             <label>Fornecedor</label>
@@ -351,10 +349,10 @@
                             <label>Tipo *</label>
                             <select id="benefício-tipo" class="form-input" required>
                                 <option value="">Selecione...</option>
-                                <option value="health">Plano de Sade</option>
+                                <option value="health">Plano de Saúde</option>
                                 <option value="dental">Plano Odontolgico</option>
-                                <option value="food">Vale Alimentao/Refeio</option>
-                                <option value="telemedicine">CS Sade (Telemedicina)</option>
+                                <option value="food">Vale Alimentao/Refeição</option>
+                                <option value="telemedicine">CS Saúde (Telemedicina)</option>
                                 <option value="gym">Academia/Bem-estar</option>
                                 <option value="life">Seguro de Vida</option>
                                 <option value="education">Educao</option>
@@ -366,7 +364,7 @@
                             <select id="benefício-status" class="form-input" required>
                                 <option value="active">Ativo</option>
                                 <option value="pending">Pendente</option>
-                                <option value="inactive">Disponvel</option>
+                                <option value="inactive">disponível</option>
                             </select>
                         </div>
                     </div>
@@ -384,7 +382,7 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label>Informao Adicional</label>
+                            <label>Informação Adicional</label>
                             <input type="text" id="benefício-info" class="form-input" placeholder="Ex: Cobertura nacional">
                         </div>
                     </div>
@@ -421,7 +419,7 @@
             return div.innerHTML;
         }
 
-        // Benefícios padro da empresa (podem ser editados pelo admin)
+        // Benefícios Padrão da empresa (podem ser editados pelo admin)
         const benefíciosPadrao = [
             {
                 id: 1,
@@ -435,13 +433,13 @@
             },
             {
                 id: 2,
-                nome: 'CS Sade',
-                fornecedor: 'CS Sade',
+                nome: 'CS Saúde',
+                fornecedor: 'CS Saúde',
                 tipo: 'health',
                 status: 'active',
                 valor: 'Consulte o portal',
                 info: 'Telemedicina e consultas',
-                descrição: 'Plataforma de sade com telemedicina, consultas online e presenciais. Acesse: cssaude.app.br',
+                descrição: 'Plataforma de Saúde com telemedicina, consultas online e presenciais. Acesse: cssaude.app.br',
                 link: 'https://www.cssaude.app.br/'
             },
             {
@@ -452,7 +450,7 @@
                 status: 'active',
                 valor: 'Mensal',
                 info: 'Condicionado  pontualidade',
-                descrição: 'Cesta básica mensal concedida aos colaboradores que no possuem atrasos ou saídas antecipadas acima de 20 minutos no ms, com base nos registros de ponto importados do RHiD Cloud.',
+                descrição: 'Cesta básica mensal concedida aos colaboradores que não possuem atrasos ou saídas antecipadas acima de 20 minutos no mês, com base nos registros de ponto importados do RHiD Cloud.',
                 condicional: true,
                 condiçãoTipo: 'pontualidade'
             }
@@ -475,7 +473,7 @@
         const statusLabels = {
             'active': { text: 'Ativo', class: 'active' },
             'pending': { text: 'Pendente', class: 'pending' },
-            'inactive': { text: 'Disponvel', class: 'inactive' }
+            'inactive': { text: 'disponível', class: 'inactive' }
         };
 
         const avatarNameMap = {
@@ -511,7 +509,7 @@
             return null;
         }
 
-        // Helper: Obtm headers de Autenticação
+        // Helper: Obtém headers de Autenticação
         function getApiHeaders(json = false) {
             if (json) h['Content-Type'] = 'application/json';
             return h;
@@ -532,7 +530,7 @@
                     }
                 }
             } catch (e) {
-                console.warn('[Benefícios] API indisponvel, usando cache local:', e.message);
+                console.warn('[Benefícios] API indisponível, usando cache local:', e.message);
             }
             // Fallback: localStorage
             const saved = localStorage.getItem(STORAGE_KEY);
@@ -542,7 +540,7 @@
                 benefícios = [...benefíciosPadrao];
                 salvarBeneficiosLocal();
             }
-            // Garantir que todos os benefícios padro esto presentes (ex: Cesta Básica adicionada depois)
+            // Garantir que todos os benefícios Padrão esto presentes (ex: Cesta Básica adicionada depois)
             benefíciosPadrao.forEach(bp => {
                 const existe = benefícios.some(b => b.id === bp.id || b.nome === bp.nome);
                 if (!existe) {
@@ -598,7 +596,7 @@
                                 ` : ''}
                                 ${b.info ? `
                                 <div class="detail-item">
-                                    <div class="detail-label">Informao</div>
+                                    <div class="detail-label">Informação</div>
                                     <div class="detail-value">${escapeHtml(b.info)}</div>
                                 </div>
                                 ` : ''}
@@ -680,7 +678,7 @@
             }).join('');
         }
 
-        // Funes do Modal Gerenciar
+        // Funções do Modal Gerenciar
         function abrirModalGerenciar() {
             renderizarListaAdmin();
             document.getElementById('modalGerenciar').classList.add('show');
@@ -690,7 +688,7 @@
             document.getElementById('modalGerenciar').classList.remove('show');
         }
 
-        // === Mscara de Moeda ===
+        // === Máscara de Moeda ===
         function somenteNumeros(e) {
             const char = String.fromCharCode(e.which || e.keyCode);
             if (!/[0-9]/.test(char)) {
@@ -736,7 +734,7 @@
             return 'R$ ' + limpo;
         }
 
-        // Funes do Modal Benefício
+        // Funções do Modal Benefício
         function abrirModalNovoBeneficio() {
             document.getElementById('modal-benefício-título').innerHTML = '<i class="fas fa-gift"></i> Novo Benefício';
             document.getElementById('formBeneficio').reset();
@@ -878,7 +876,7 @@
 
         // Ações do funcionário
         function solicitarAdesao(id) {
-            showToast('Solicitao de adeso enviada ao RH!', 'success');
+            showToast('solicitação de adeso enviada ao RH!', 'success');
         }
 
         function ativarBeneficio(id) {
@@ -984,7 +982,7 @@
             }, 4000);
         }
 
-        // Helper: Obtm headers de Autenticação com o token
+        // Helper: Obtém headers de Autenticação com o token
         function getAuthHeaders(additionalHeaders = {}) {
             return {
                 ...additionalHeaders
@@ -1000,7 +998,7 @@
                 if (response.ok) {
                     const user = await response.json();
 
-                    // Atualizar saudao dinmica baseada na hora
+                    // Atualizar saudação dinâmica baseada na hora
                     const greetingTextEl = document.getElementById('greeting-text');
                     if (greetingTextEl) {
                         const hour = new Date().getHours();
@@ -1010,7 +1008,7 @@
                         greetingTextEl.textContent = greeting;
                     }
 
-                    // Usar apelido se disponvel, seno primeiro nome
+                    // Usar apelido se disponível, senão primeiro nome
                     const userName = user.apelido || user.nome || 'Usuário';
                     const primeiroNome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usuário');
                     let userAvatar = user.avatar && user.avatar !== '/avatars/default.webp' ? user.avatar : null;
@@ -1061,7 +1059,7 @@
                 if (!meResp.ok) return;
                 const me = await meResp.json();
 
-                // Buscar marcações do ms atual para o funcionário
+                // Buscar marcações do mês atual para o funcionário
                 const hoje = new Date();
                 const inicioMes = hoje.getFullYear() + '-' + String(hoje.getMonth() + 1).padStart(2, '0') + '-01';
                 const fimMes = hoje.toISOString().split('T')[0];
@@ -1091,7 +1089,7 @@
                     porDia[m.data].push(m);
                 });
 
-                // Horário padro: entrada 07:30, saída 17:18
+                // Horário Padrão: entrada 07:30, saída 17:18
                 const horarioEntrada = 7 * 60 + 30; // 450 min
                 const horarioSaida = 17 * 60 + 18;  // 1038 min
                 const toleranciaMax = 20; // 20 minutos
@@ -1128,7 +1126,7 @@
                         // No elegvel: remover da lista visvel para o colaborador (admin continua vendo)
                         if (!isAdmin) {
                             benefícios[cestaIndex].status = 'inactive';
-                            benefícios[cestaIndex].info = 'Indisponvel  verificar pontualidade';
+                            benefícios[cestaIndex].info = 'Indisponível  verificar pontualidade';
                         }
                     } else {
                         benefícios[cestaIndex].status = 'active';
@@ -1158,7 +1156,7 @@
             }
         });
     </script>
-    <!-- Sistema de Monitoramento de Conexo -->
+    <!-- Sistema de Monitoramento de Conexão -->
     <script src="/modules/_shared/connection-monitor.js?v=20260111" defer></script>
     <script src="/js/popup-confirmacao.js" defer></script>
     <script src="/js/auth-unified.js?v=20260214" defer></script>

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>    <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
     <meta charset="UTF-8">
@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="/modules/RH/public/css/rh-pages.css?v=20260209">
     
     <style>
-        /* === MEUS HOLERITES - CSS ESPECFICO === */
+        /* === MEUS HOLERITES - CSS ESPECÍFICO === */
 
         /* CONTENT AREA */
         .content-area {
@@ -365,7 +365,7 @@
         }
 
         /* ========================================
-           MODAL SAAS EMPRESARIAL - PADRO UNIFICADO
+           MODAL SAAS EMPRESARIAL - Padrão UNIFICADO
            ======================================== */
         .modal {
             position: fixed;
@@ -793,11 +793,9 @@
                 <a href="meus-holerites.html" class="sidebar-btn active" title="Meus Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="dados-cadastrais.html" class="sidebar-btn" title="Dados Cadastrais"><i class="fas fa-id-card"></i></a>
                 <a href="beneficios.html" class="sidebar-btn" title="Meus Benefícios"><i class="fas fa-gift"></i></a>
-                <a href="minhas-ferias.html" class="sidebar-btn" title="Minhas Férias"><i class="fas fa-umbrella-beach"></i></a>
                 <a href="espelho-ponto.html" class="sidebar-btn" title="Espelho de Ponto"><i class="fas fa-list-check"></i></a>
                 <a href="enviar-atestado.html" class="sidebar-btn" title="Enviar Atestado"><i class="fas fa-file-medical"></i></a>
-                <a href="autoavaliacao.html" class="sidebar-btn" title="Autoavaliação"><i class="fas fa-user-check"></i></a>
-                <a href="avaliacoes-recebidas.html" class="sidebar-btn" title="Avaliações Recebidas"><i class="fas fa-inbox"></i></a>
+                <a href="../solicitacoes.html" class="sidebar-btn" title="Minhas Solicitações"><i class="fas fa-clipboard-list"></i></a>
                 <a href="manual-colaborador.html" class="sidebar-btn" title="Manual do Colaborador"><i class="fas fa-book"></i></a>
             </nav>
             <div class="sidebar-bottom">
@@ -1003,7 +1001,7 @@
             return null;
         }
 
-        // Helper: Obtm headers de Autenticação com o token
+        // Helper: Obtém headers de Autenticação com o token
         function getAuthHeaders(additionalHeaders = {}) {
             return {
                 'Content-Type': 'application/json',
@@ -1030,7 +1028,7 @@
                 if (response.ok) {
                     currentUser = await response.json();
                     
-                    // Atualizar saudao dinmica baseada na hora
+                    // Atualizar saudação dinâmica baseada na hora
                     const greetingTextEl = document.getElementById('greeting-text');
                     if (greetingTextEl) {
                         const hour = new Date().getHours();
@@ -1040,7 +1038,7 @@
                         greetingTextEl.textContent = greeting;
                     }
                     
-                    // Usar apelido se disponvel, seno primeiro nome
+                    // Usar apelido se disponível, senão primeiro nome
                     const userName = currentUser.apelido || currentUser.nome || 'Usuário';
                     const primeiroNome = currentUser.apelido || (currentUser.nome ? currentUser.nome.split(' ')[0] : 'Usuário');
                     let userAvatar = currentUser.avatar && currentUser.avatar !== '/avatars/default.webp' ? currentUser.avatar : null;
@@ -1433,7 +1431,7 @@
             setTimeout(function() { toast.remove(); }, 4000);
         }
     </script>
-    <!-- Sistema de Monitoramento de Conexo -->
+    <!-- Sistema de Monitoramento de Conexão -->
     <script src="/modules/_shared/connection-monitor.js?v=20260111" defer></script>
     <script src="/js/popup-confirmacao.js" defer></script>
     <script src="/js/auth-unified.js?v=20260214" defer></script>

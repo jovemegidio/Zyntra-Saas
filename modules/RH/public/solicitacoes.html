@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="/css/modern-saas.css?v=20260210">
     <link rel="stylesheet" href="/modules/RH/public/css/rh-pages.css?v=20260210">
     <style>
-        /* === Solicitações - CSS ESPECFICO === */
+        /* === Solicitações - CSS ESPECÍFICO === */
 
         /* CONTENT AREA */
         .content-area { flex: 1; overflow-y: auto; padding: 24px; background: #ffffff; }
@@ -276,12 +276,10 @@
                 <a href="pages/folha.html" class="sidebar-btn" title="Folha de Pagamento"><i class="fas fa-money-check-alt"></i></a>
                 <a href="pages/gestao-ponto.html" class="sidebar-btn" title="Gestão do Ponto"><i class="fas fa-clock"></i></a>
                 <a href="pages/importar-ponto.html" class="sidebar-btn" title="Importar Ponto (Control iD)"><i class="fas fa-upload"></i></a>
-                <a href="pages/ferias.html" class="sidebar-btn" title="Férias"><i class="fas fa-umbrella-beach"></i></a>
                 <a href="pages/beneficios.html" class="sidebar-btn" title="Benefícios"><i class="fas fa-gift"></i></a>
                 <a href="pages/calendario-rh.html" class="sidebar-btn" title="Calendário RH"><i class="fas fa-calendar-alt"></i></a>
             </nav>
             <div class="sidebar-bottom">
-                <a href="pages/avaliacoes.html" class="sidebar-btn" title="Avaliações"><i class="fas fa-star"></i></a>
                 <a href="funcionario.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-user"></i></a>
             </div>
         </aside>
@@ -366,34 +364,34 @@
                         <div class="card-header">
                             <h3 class="card-title">
                                 <i class="fas fa-plus-circle"></i>
-                                Nova Solicitao
+                                Nova Solicitação
                             </h3>
                         </div>
                         <div class="card-body">
                             <form id="solicitação-form">
                                 <div class="form-group">
-                                    <label class="form-label">Tipo de Solicitao</label>
+                                    <label class="form-label">Tipo de Solicitação</label>
                                     <select class="form-select" id="tipo-solicitação" required>
                                         <option value="">Selecione o tipo</option>
                                         <option value="férias">Férias</option>
                                         <option value="folga">Folga / Abono</option>
                                         <option value="holerite">2 Via de Holerite</option>
-                                        <option value="declaracao">Declarao</option>
-                                        <option value="alteracao-dados">Alterao de Dados Cadastrais</option>
+                                        <option value="declaracao">Declaração</option>
+                                        <option value="alteracao-dados">Alteração de Dados Cadastrais</option>
                                         <option value="adiantamento">Adiantamento Salarial</option>
-                                        <option value="cs_saude">CS Sade</option>
+                                        <option value="cs_saude">CS Saúde</option>
                                         <option value="outros">Outros</option>
                                     </select>
                                 </div>
 
                                 <div class="form-group">
                                     <label class="form-label">Assunto</label>
-                                    <input type="text" class="form-input" id="assunto" placeholder="Resumo da solicitao" required>
+                                    <input type="text" class="form-input" id="assunto" placeholder="Resumo da Solicitação" required>
                                 </div>
 
                                 <div class="form-group">
                                     <label class="form-label">Descrição</label>
-                                    <textarea class="form-textarea" id="descrição" placeholder="Descreva sua solicitao em detalhes..." required></textarea>
+                                    <textarea class="form-textarea" id="descrição" placeholder="Descreva sua Solicitação em detalhes..." required></textarea>
                                 </div>
 
                                 <div class="form-group">
@@ -412,7 +410,7 @@
                                     </button>
                                     <button type="submit" class="btn btn-primary">
                                         <i class="fas fa-paper-plane"></i>
-                                        Enviar Solicitao
+                                        Enviar Solicitação
                                     </button>
                                 </div>
                             </form>
@@ -484,7 +482,7 @@
         function getStatusClass(status) {
             const s = (status || '').toLowerCase();
             if (s === 'pendente') return 'pending';
-            if (s === 'em anlise' || s === 'em analise') return 'processing';
+            if (s === 'em análise' || s === 'em analise') return 'processing';
             if (s === 'aprovada' || s === 'aprovado') return 'approved';
             if (s === 'recusada' || s === 'recusado') return 'rejected';
             return 'pending';
@@ -493,7 +491,7 @@
         function getStatusIcon(status) {
             const s = (status || '').toLowerCase();
             if (s === 'pendente') return 'fa-clock';
-            if (s === 'em anlise' || s === 'em analise') return 'fa-spinner';
+            if (s === 'em análise' || s === 'em analise') return 'fa-spinner';
             if (s === 'aprovada' || s === 'aprovado') return 'fa-check';
             if (s === 'recusada' || s === 'recusado') return 'fa-times';
             return 'fa-clock';
@@ -502,13 +500,13 @@
         function getStatusLabel(status) {
             const s = (status || '').toLowerCase();
             if (s === 'pendente') return 'Pendente';
-            if (s === 'em anlise' || s === 'em analise') return 'Em Anlise';
+            if (s === 'em análise' || s === 'em analise') return 'Em análise';
             if (s === 'aprovada' || s === 'aprovado') return 'Aprovada';
             if (s === 'recusada' || s === 'recusado') return 'Recusada';
             return status || 'Pendente';
         }
 
-        // Helper: Obtm headers de Autenticação com o token
+        // Helper: Obtém headers de Autenticação com o token
         function getAuthHeaders(additionalHeaders = {}) {
             return {
                 ...additionalHeaders
@@ -524,7 +522,7 @@
                 if (response.ok) {
                     const user = await response.json();
 
-                    // Atualizar saudao dinmica baseada na hora
+                    // Atualizar saudação dinâmica baseada na hora
                     const greetingTextEl = document.getElementById('greeting-text');
                     if (greetingTextEl) {
                         const hour = new Date().getHours();
@@ -534,10 +532,10 @@
                         greetingTextEl.textContent = greeting;
                     }
 
-                    // Usar apelido se disponvel, seno primeiro nome
+                    // Usar apelido se disponível, senão primeiro nome
                     const userName = user.apelido || user.nome || 'Usuário';
                     const primeiroNome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usuário');
-                    // Verificar mltiplos campos de foto
+                    // Verificar múltiplos campos de foto
                     let userAvatar = (user.avatar || user.foto || user.foto_perfil_url);
                     if (userAvatar === '/avatars/default.webp') userAvatar = null;
                     if (!userAvatar) userAvatar = getAvatarFromEmail(user.email, userName);
@@ -580,7 +578,7 @@
                 const solicitações = data.solicitações || [];
                 const stats = data.stats || {};
 
-                // Atualizar estatsticas
+                // Atualizar Estatísticas
                 document.getElementById('stat-total').textContent = stats.total || 0;
                 document.getElementById('stat-pending').textContent = (stats.pendentes || 0) + (stats.em_analise || 0);
                 document.getElementById('stat-approved').textContent = stats.aprovadas || 0;
@@ -601,7 +599,7 @@
                 requestsList.innerHTML = `
                     <div class="empty-state">
                         <i class="fas fa-inbox"></i>
-                        <h3>Nenhuma solicitao encontrada</h3>
+                        <h3>Nenhuma Solicitação encontrada</h3>
                         <p>Suas Solicitações aparecerão aqui</p>
                     </div>
                 `;
@@ -612,7 +610,7 @@
                 const statusClass = getStatusClass(sol.status);
                 const statusIcon = getStatusIcon(sol.status);
                 const statusLabel = getStatusLabel(sol.status);
-                const titulo = sol.assunto || sol.tipo || 'Solicitao';
+                const titulo = sol.assunto || sol.tipo || 'Solicitação';
                 const descrição = sol.descrição ? sol.descrição.substring(0, 100) + (sol.descrição.length > 100 ? '...' : '') : (sol.categoria || '');
 
                 return `
@@ -690,17 +688,17 @@
                     body: formData
                 });
 
-                if (!response.ok) throw new Error('Erro ao enviar solicitao');
+                if (!response.ok) throw new Error('Erro ao enviar Solicitação');
 
-                showToast('Solicitao enviada com sucesso!', 'success');
+                showToast('Solicitação enviada com sucesso!', 'success');
                 limparFormulario();
 
                 // Recarregar lista de Solicitações
                 await carregarSolicitacoes();
 
             } catch (error) {
-                console.error('Erro ao enviar solicitao:', error);
-                showToast('Erro ao enviar solicitao. Tente novamente.', 'error');
+                console.error('Erro ao enviar Solicitação:', error);
+                showToast('Erro ao enviar Solicitação. Tente novamente.', 'error');
             }
         });
 
@@ -709,7 +707,7 @@
             carregarSolicitacoes();
         });
     </script>
-    <!-- Sistema de Monitoramento de Conexo -->
+    <!-- Sistema de Monitoramento de Conexão -->
     <script src="/modules/_shared/connection-monitor.js?v=20260111" defer></script>
     <script src="/js/popup-confirmacao.js" defer></script>
     <script src="/js/unsaved-changes.js?v=20260108" defer></script>

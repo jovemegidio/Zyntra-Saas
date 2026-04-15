@@ -517,11 +517,9 @@
                 <a href="pages/meus-holerites.html" class="sidebar-btn" title="Meus Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="pages/dados-cadastrais.html" class="sidebar-btn" title="Dados Cadastrais"><i class="fas fa-id-card"></i></a>
                 <a href="pages/beneficios.html" class="sidebar-btn" title="Meus Benefícios"><i class="fas fa-gift"></i></a>
-                <a href="pages/minhas-ferias.html" class="sidebar-btn" title="Minhas Férias"><i class="fas fa-umbrella-beach"></i></a>
                 <a href="pages/espelho-ponto.html" class="sidebar-btn" title="Espelho de Ponto"><i class="fas fa-list-check"></i></a>
                 <a href="pages/enviar-atestado.html" class="sidebar-btn" title="Enviar Atestado"><i class="fas fa-file-medical"></i></a>
-                <a href="pages/autoavaliacao.html" class="sidebar-btn" title="Autoavaliação"><i class="fas fa-user-check"></i></a>
-                <a href="pages/avaliacoes-recebidas.html" class="sidebar-btn" title="Avaliações Recebidas"><i class="fas fa-inbox"></i></a>
+                <a href="solicitacoes.html" class="sidebar-btn" title="Minhas Solicitações"><i class="fas fa-clipboard-list"></i></a>
                 <a href="pages/manual-colaborador.html" class="sidebar-btn" title="Manual do Colaborador"><i class="fas fa-book"></i></a>
             </nav>
             <div class="sidebar-bottom">
@@ -570,7 +568,7 @@
                             <div class="welcome-stats">
                                 <div class="welcome-stat">
                                     <div class="welcome-metric-value" id="stat-dias-trabalhados">--</div>
-                                    <div class="welcome-metric-label">Dias no ms</div>
+                                    <div class="welcome-metric-label">Dias no mês</div>
                                 </div>
                                 <div class="welcome-stat">
                                     <div class="welcome-metric-value" id="stat-horas-mes">--</div>
@@ -640,7 +638,7 @@
                                 <div class="holerite-preview" id="holerite-preview">
                                     <div class="holerite-header">
                                         <span class="holerite-month" id="holerite-month">Carregando...</span>
-                                        <span class="holerite-status" id="holerite-status" style="display: none;">Disponvel</span>
+                                        <span class="holerite-status" id="holerite-status" style="display: none;">disponível</span>
                                     </div>
                                     <div class="holerite-value" id="holerite-value" style="display: none;"></div>
                                     <div class="holerite-label" id="holerite-label" style="display: none;">Valor líquido</div>
@@ -777,7 +775,7 @@
             return null;
         }
 
-        // Helper: Obtm headers de Autenticação com o token
+        // Helper: Obtém headers de Autenticação com o token
         function getAuthHeaders(additionalHeaders = {}) {
             return {
                 ...additionalHeaders
@@ -807,7 +805,7 @@
                 if (response.ok) {
                     const user = await response.json();
 
-                    // Atualizar saudao dinmica baseada na hora
+                    // Atualizar saudação dinâmica baseada na hora
                     const greetingTextEl = document.getElementById('greeting-text');
                     if (greetingTextEl) {
                         const hour = new Date().getHours();
@@ -817,10 +815,10 @@
                         greetingTextEl.textContent = greeting;
                     }
 
-                    // Usar apelido se disponvel, seno primeiro nome
+                    // Usar apelido se disponível, senão primeiro nome
                     const userName = user.apelido || user.nome || 'Usuário';
                     const primeiroNome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usuário');
-                    // Verificar mltiplos campos de foto
+                    // Verificar múltiplos campos de foto
                     let userAvatar = (user.avatar || user.foto || user.foto_perfil_url);
                     if (userAvatar === '/avatars/default.webp') userAvatar = null;
                     if (!userAvatar) {
@@ -869,7 +867,7 @@
                         if (welcomePhotoEl) welcomePhotoEl.style.display = 'none';
                     }
 
-                    // Atualizar estatsticas do welcome card
+                    // Atualizar Estatísticas do welcome card
                     const hoje = new Date();
                     const diaAtual = hoje.getDate();
                     const diasNoMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0).getDate();
@@ -971,7 +969,7 @@
 
                         if (monthEl) monthEl.textContent = `${mesNome} ${h.ano}`;
                         if (statusEl) {
-                            statusEl.textContent = 'Disponvel';
+                            statusEl.textContent = 'disponível';
                             statusEl.style.display = '';
                         }
                         if (valueEl) {
@@ -981,7 +979,7 @@
                         if (labelEl) labelEl.style.display = '';
                         if (btnEl) btnEl.style.display = '';
                     } else {
-                        // Nenhum holerite disponvel
+                        // Nenhum holerite disponível
                         mostrarSemHolerite(monthEl, statusEl, valueEl, labelEl, btnEl);
                     }
                 } else {
@@ -994,7 +992,7 @@
         }
 
         function mostrarSemHolerite(monthEl, statusEl, valueEl, labelEl, btnEl) {
-            if (monthEl) monthEl.textContent = 'Nenhum holerite disponvel';
+            if (monthEl) monthEl.textContent = 'Nenhum holerite disponível';
             if (statusEl) statusEl.style.display = 'none';
             if (valueEl) valueEl.style.display = 'none';
             if (labelEl) labelEl.style.display = 'none';
@@ -1168,7 +1166,7 @@
 
     <!-- Sistema de Chat e Suporte -->
 
-    <!-- Sistema de Monitoramento de Conexo -->
+    <!-- Sistema de Monitoramento de Conexão -->
     <script src="/modules/_shared/connection-monitor.js?v=20260111" defer></script>
     <script src="/js/popup-confirmacao.js" defer></script>
     <script src="/js/unsaved-changes.js?v=20260108" defer></script>

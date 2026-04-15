@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="/modules/RH/public/css/rh-pages.css?v=20260209">
 
     <style>
-        /* === Gestão de Solicitações - CSS ESPECFICO === */
+        /* === Gestão de Solicitações - CSS ESPECÍFICO === */
 
         /* CONTENT AREA */
         .content-area { flex: 1; overflow-y: auto; padding: 24px; background: #f8fafc; }
@@ -161,7 +161,7 @@
         .btn-reject { background: #fee2e2; color: #991b1b; }
         .btn-reject:hover { background: #fecaca; transform: scale(1.05); }
 
-        /* MODAL SAAS EMPRESARIAL - PADRO UNIFICADO */
+        /* MODAL SAAS EMPRESARIAL - Padrão UNIFICADO */
         .modal {
             display: none;
             position: fixed;
@@ -485,13 +485,10 @@
                 <a href="folha.html" class="sidebar-btn" title="Folha de Pagamento"><i class="fas fa-money-check-alt"></i></a>
                 <a href="gestao-ponto.html" class="sidebar-btn" title="Gestão do Ponto"><i class="fas fa-clock"></i></a>
                 <a href="importar-ponto.html" class="sidebar-btn" title="Importar Ponto (Control iD)"><i class="fas fa-upload"></i></a>
-                <a href="ferias.html" class="sidebar-btn" title="Gestão de Férias"><i class="fas fa-umbrella-beach"></i></a>
                 <a href="gestao-solicitacoes.html" class="sidebar-btn active" title="Gestão de Solicitações"><i class="fas fa-tasks"></i></a>
                 <a href="calendario-rh.html" class="sidebar-btn" title="Calendário RH"><i class="fas fa-calendar-alt"></i></a>
             </nav>
             <div class="sidebar-bottom">
-                <a href="avaliacoes.html" class="sidebar-btn" title="Avaliações"><i class="fas fa-star"></i></a>
-                <a href="aplicar-avaliacoes.html" class="sidebar-btn" title="Aplicar Avaliações"><i class="fas fa-clipboard-check"></i></a>
                 <a href="../funcionario.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-user"></i></a>
             </div>
         </aside>
@@ -627,7 +624,7 @@
                     </table>
                     <div class="empty-state" id="emptyState" style="display: none;">
                         <i class="fas fa-inbox"></i>
-                        <h3>Nenhuma solicitao encontrada</h3>
+                        <h3>Nenhuma Solicitação encontrada</h3>
                         <p>No h Solicitações com os filtros selecionados.</p>
                     </div>
                 </div>
@@ -640,7 +637,7 @@
         <div class="modal-overlay" onclick="fecharModal()"></div>
         <div class="modal-content">
             <div class="modal-header">
-                <h3><i class="fas fa-file-alt"></i> Detalhes da Solicitao</h3>
+                <h3><i class="fas fa-file-alt"></i> Detalhes da Solicitação</h3>
                 <button class="modal-close" onclick="fecharModal()"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body" id="modalBody"></div>
@@ -663,11 +660,11 @@
         <div class="modal-overlay" onclick="fecharModalAprovar()"></div>
         <div class="modal-content" style="max-width:440px;">
             <div class="modal-header">
-                <h3><i class="fas fa-check-circle"></i> Aprovar Solicitao</h3>
+                <h3><i class="fas fa-check-circle"></i> Aprovar Solicitação</h3>
                 <button class="modal-close" onclick="fecharModalAprovar()"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body">
-                <p style="color:#475569;margin-bottom:16px;">Tem certeza que deseja aprovar esta solicitao?</p>
+                <p style="color:#475569;margin-bottom:16px;">Tem certeza que deseja aprovar esta Solicitação?</p>
                 <textarea id="respostaAprovar" class="confirm-input" placeholder="Observação (opcional)..." rows="3" style="resize: vertical;"></textarea>
             </div>
             <div class="modal-footer">
@@ -684,7 +681,7 @@
         <div class="modal-overlay" onclick="fecharModalRejeitar()"></div>
         <div class="modal-content" style="max-width:440px;">
             <div class="modal-header">
-                <h3><i class="fas fa-times-circle"></i> Rejeitar Solicitao</h3>
+                <h3><i class="fas fa-times-circle"></i> Rejeitar Solicitação</h3>
                 <button class="modal-close" onclick="fecharModalRejeitar()"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body">
@@ -750,7 +747,7 @@
             const datePart = str.substring(0, 10);
             const parts = datePart.split('-');
             const dataFormatada = parts.length === 3 ? parts[2] + '/' + parts[1] + '/' + parts[0] : datePart;
-            // Extrair hora se disponvel (ex: 2024-09-02T14:30:00)
+            // Extrair hora se disponível (ex: 2024-09-02T14:30:00)
             const timeMatch = str.match(/T(\d{2}):(\d{2})/);
             if (timeMatch) return dataFormatada + ' ' + timeMatch[1] + ':' + timeMatch[2];
             return dataFormatada;
@@ -795,7 +792,7 @@
             }
         }
 
-        // Atualizar estatsticas
+        // Atualizar Estatísticas
         function atualizarStats() {
             const total = solicitações.length;
             const pendentes = solicitações.filter(s => s.status === 'Pendente' || s.status === 'Em Análise').length;
@@ -865,7 +862,7 @@
                     <div class="detail-item">
                         <div class="detail-icon"><i class="fas fa-hashtag"></i></div>
                         <div class="detail-content">
-                            <div class="detail-label">ID da Solicitao</div>
+                            <div class="detail-label">ID da Solicitação</div>
                             <div class="detail-value">#${solicitaçãoAtual.id}</div>
                         </div>
                     </div>
@@ -921,7 +918,7 @@
                     <div class="detail-item">
                         <div class="detail-icon"><i class="fas fa-calendar"></i></div>
                         <div class="detail-content">
-                            <div class="detail-label">Data da Solicitao</div>
+                            <div class="detail-label">Data da Solicitação</div>
                             <div class="detail-value">${formatarData(solicitaçãoAtual.created_at)}</div>
                         </div>
                     </div>
@@ -995,12 +992,12 @@
 
                 if (!response.ok) throw new Error('Erro');
 
-                showToast('success', 'Solicitao aprovada com sucesso!');
+                showToast('success', 'Solicitação aprovada com sucesso!');
                 fecharModalAprovar();
                 fecharModal();
                 carregarSolicitacoes();
             } catch (error) {
-                showToast('error', 'Erro ao aprovar solicitao');
+                showToast('error', 'Erro ao aprovar Solicitação');
             }
         }
 
@@ -1023,12 +1020,12 @@
 
                 if (!response.ok) throw new Error('Erro');
 
-                showToast('success', 'Solicitao rejeitada');
+                showToast('success', 'Solicitação rejeitada');
                 fecharModalRejeitar();
                 fecharModal();
                 carregarSolicitacoes();
             } catch (error) {
-                showToast('error', 'Erro ao rejeitar solicitao');
+                showToast('error', 'Erro ao rejeitar Solicitação');
             }
         }
 

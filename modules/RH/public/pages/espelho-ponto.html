@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
@@ -96,7 +96,7 @@
         .btn-outline { background: transparent; color: #64748b; border: 1px solid #e2e8f0; }
         .btn-outline:hover { background: #f8fafc; color: #1e293b; }
 
-        /* Stats Grid - Padro KPI Compras */
+        /* Stats Grid - Padrão KPI Compras */
 
 
         /* Table */
@@ -151,11 +151,9 @@
                 <a href="meus-holerites.html" class="sidebar-btn" title="Meus Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="dados-cadastrais.html" class="sidebar-btn" title="Dados Cadastrais"><i class="fas fa-id-card"></i></a>
                 <a href="beneficios.html" class="sidebar-btn" title="Meus Benefícios"><i class="fas fa-gift"></i></a>
-                <a href="minhas-ferias.html" class="sidebar-btn" title="Minhas Férias"><i class="fas fa-umbrella-beach"></i></a>
                 <a href="espelho-ponto.html" class="sidebar-btn active" title="Espelho de Ponto"><i class="fas fa-list-check"></i></a>
                 <a href="enviar-atestado.html" class="sidebar-btn" title="Enviar Atestado"><i class="fas fa-file-medical"></i></a>
-                <a href="autoavaliacao.html" class="sidebar-btn" title="Autoavaliação"><i class="fas fa-user-check"></i></a>
-                <a href="avaliacoes-recebidas.html" class="sidebar-btn" title="Avaliações Recebidas"><i class="fas fa-inbox"></i></a>
+                <a href="../solicitacoes.html" class="sidebar-btn" title="Minhas Solicitações"><i class="fas fa-clipboard-list"></i></a>
                 <a href="manual-colaborador.html" class="sidebar-btn" title="Manual do Colaborador"><i class="fas fa-book"></i></a>
             </nav>
             <div class="sidebar-bottom">
@@ -324,7 +322,7 @@
             return null;
         }
 
-        // Helper: Obtm headers de Autenticação com o token
+        // Helper: Obtém headers de Autenticação com o token
         function getAuthHeaders(additionalHeaders = {}) {
             const headers = { ...additionalHeaders };
             return headers;
@@ -339,7 +337,7 @@
                 if (response.ok) {
                     const user = await response.json();
                     
-                    // Atualizar saudao dinmica baseada na hora
+                    // Atualizar saudação dinâmica baseada na hora
                     const greetingTextEl = document.getElementById('greeting-text');
                     if (greetingTextEl) {
                         const hour = new Date().getHours();
@@ -349,7 +347,7 @@
                         greetingTextEl.textContent = greeting;
                     }
                     
-                    // Usar apelido se disponvel, seno primeiro nome
+                    // Usar apelido se disponível, senão primeiro nome
                     const userName = user.apelido || user.nome || 'Usuário';
                     const primeiroNome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usuário');
                     let userAvatar = user.avatar && user.avatar !== '/avatars/default.webp' ? user.avatar : null;
@@ -593,7 +591,7 @@
             carregarUsuarioLogado();
             carregarDadosEmpresa();
 
-            // Definir datas padro: mês atual
+            // Definir datas Padrão: mês atual
             const hoje = new Date();
             const primeiroDia = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
             const dataInicioEl = document.getElementById('data-inicio');
@@ -617,7 +615,7 @@
             setTimeout(function() { toast.remove(); }, 4000);
         }
     </script>
-    <!-- Sistema de Monitoramento de Conexo -->
+    <!-- Sistema de Monitoramento de Conexão -->
     <script src="/modules/_shared/connection-monitor.js?v=20260111" defer></script>
     <script src="/js/popup-confirmacao.js" defer></script>
     <script src="/js/auth-unified.js?v=20260214" defer></script>

@@ -69,7 +69,7 @@ module.exports = function createRHRoutes(deps) {
     // Self-service: rotas que qualquer funcionário autenticado pode acessar (seus próprios dados)
     // As demais rotas exigem permissão ao módulo RH
     // AUDIT-FIX: prefix match agora exige '/' após prefix para evitar match em /media, /memory etc.
-    const rhSelfServicePrefixes = ['/me', '/holerites/meu-ultimo', '/ferias/minhas/', '/ferias/saldo/', '/avaliacoes/funcionario/'];
+    const rhSelfServicePrefixes = ['/me', '/holerites/meu-ultimo', '/ferias/minhas/', '/ferias/saldo/', '/avaliacoes/funcionario/', '/funcionarios/aniversariantes', '/solicitacoes'];
     router.use((req, res, next) => {
         const isSelfService = rhSelfServicePrefixes.some(p => req.path === p || req.path.startsWith(p + '/'));
         if (isSelfService) return next();
@@ -241,6 +241,19 @@ module.exports = function createRHRoutes(deps) {
             next(error);
         }
     });
+
+    // API para listar aniversariantes do mês
+    router.get('/funcionarios/aniversariantes', asyncHandler(async (req, res) => {
+        const mes = parseInt(req.query.mes) || (new Date().getMonth() + 1);
+        const [rows] = await pool.query(
+            `SELECT id, nome_completo, cargo, departamento, data_nascimento, foto_perfil_url, foto_thumb_url
+             FROM funcionarios
+             WHERE MONTH(data_nascimento) = ? AND (status = 'Ativo' OR status = 'ativo')
+             ORDER BY DAY(data_nascimento)`,
+            [mes]
+        );
+        res.json(rows);
+    }));
 
     // API para listar cargos com estatísticas
     router.get('/cargos', authorizeAdmin, async (req, res, next) => {
