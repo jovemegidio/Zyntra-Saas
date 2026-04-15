@@ -350,7 +350,7 @@ function populateEmpresaForm(data) {
     // Preenche os campos do formulário
     const fields = ['razao_social', 'nome_fantasia', 'cnpj', 'inscricao_estadual', 
                    'inscricao_municipal', 'telefone', 'email', 'site', 'cep', 
-                   'estado', 'cidade', 'bairro', 'endereco', 'número', 'complemento'];
+                   'estado', 'cidade', 'bairro', 'endereco', 'numero', 'complemento'];
     
     fields.forEach(field => {
         const input = form.querySelector(`[name="${field}"]`);
@@ -358,6 +358,30 @@ function populateEmpresaForm(data) {
             input.value = data[field];
         }
     });
+
+    // Exibir preview do logo atual
+    if (data.logo_url) {
+        const logoPreview = document.getElementById('logo-preview');
+        if (logoPreview) {
+            const img = logoPreview.querySelector('img');
+            if (img) img.src = data.logo_url + '?v=' + Date.now();
+            logoPreview.style.display = 'block';
+        }
+        const logoName = form.querySelector('#input-logo')?.parentElement?.querySelector('.config-file-upload-name');
+        if (logoName) logoName.textContent = 'Logo atual carregado';
+    }
+
+    // Exibir preview do favicon atual
+    if (data.favicon_url) {
+        const faviconPreview = document.getElementById('favicon-preview');
+        if (faviconPreview) {
+            const img = faviconPreview.querySelector('img');
+            if (img) img.src = data.favicon_url + '?v=' + Date.now();
+            faviconPreview.style.display = 'block';
+        }
+        const faviconName = form.querySelector('#input-favicon')?.parentElement?.querySelector('.config-file-upload-name');
+        if (faviconName) faviconName.textContent = 'Favicon atual carregado';
+    }
 }
 
 /**
@@ -1750,14 +1774,51 @@ async function loadCertificadoData() {
  * Exibe informações do certificado
  */
 function displayCertificadoInfo(data) {
-    if (!data || !data.validade) return;
-
     const info = document.getElementById('certificado-info');
+    if (!info) return;
+
+    if (!data || !data.configurado) {
+        info.style.display = 'none';
+        return;
+    }
+
+    const validade = data.validade ? new Date(data.validade).toLocaleDateString('pt-BR') : '--';
+    const diasRestantes = data.diasRestantes || 0;
+    const nome = data.nome || 'Certificado Digital';
+    const cnpj = data.cnpj || '';
+    const statusCor = data.status === 'valido' ? '#22c55e' : data.status === 'expirando' ? '#f59e0b' : '#ef4444';
+    const statusTexto = data.status === 'valido' ? 'Válido' : data.status === 'expirando' ? 'Expirando' : 'Expirado';
+    const statusIcon = data.status === 'valido' ? 'check-circle' : data.status === 'expirando' ? 'exclamation-triangle' : 'times-circle';
+
+    info.style.display = 'block';
+    info.innerHTML = `
+        <div style="background: linear-gradient(135deg, #f0fdf4, #ecfdf5); border: 1px solid ${statusCor}40; border-radius: 12px; padding: 20px; margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                <div style="width: 42px; height: 42px; background: ${statusCor}20; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-${statusIcon}" style="font-size: 20px; color: ${statusCor};"></i>
+                </div>
+                <div style="flex: 1;">
+                    <strong style="display: block; font-size: 15px; color: #1f2937;">${nome}</strong>
+                    ${cnpj ? `<small style="color: #6b7280;">CNPJ: ${cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5')}</small>` : ''}
+                </div>
+                <span style="padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; background: ${statusCor}15; color: ${statusCor};">${statusTexto}</span>
+            </div>
+            <div style="display: flex; gap: 20px; font-size: 13px; color: #4b5563;">
+                <span><i class="fas fa-calendar-alt" style="margin-right: 4px;"></i> Validade: ${validade}</span>
+                <span><i class="fas fa-hourglass-half" style="margin-right: 4px;"></i> ${diasRestantes > 0 ? diasRestantes + ' dias restantes' : 'Expirado'}</span>
+            </div>
+            <div style="margin-top: 14px; display: flex; gap: 8px;">
+                <button onclick="excluirCertificado()" class="config-btn config-btn-danger" style="font-size: 13px; padding: 8px 16px; background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; border-radius: 8px; cursor: pointer;">
+                    <i class="fas fa-trash-alt"></i> Remover Certificado
+                </button>
+            </div>
+        </div>
+    `;
+
+    // Also update expiracao if it exists (legacy)
     const expiracao = document.getElementById('certificado-expiracao');
-    
-    if (info && expiracao) {
-        info.style.display = 'flex';
-        expiracao.textContent = new Date(data.validade).toLocaleDateString('pt-BR');
+    if (expiracao) {
+        expiracao.textContent = validade;
     }
 }
 
@@ -1801,6 +1862,29 @@ async function saveCertificadoConfig() {
     } catch (error) {
         console.error('Erro ao salvar certificado:', error);
         showNotification('Erro ao salvar certificado', 'error');
+    }
+}
+
+/**
+ * Exclui o certificado digital
+ */
+async function excluirCertificado() {
+    if (!confirm('Deseja realmente remover o certificado digital? Esta ação não pode ser desfeita.')) return;
+
+    try {
+        const response = await fetch('/api/configuracoes/certificado', {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            showNotification('Certificado removido com sucesso!', 'success');
+            loadCertificadoData();
+        } else {
+            throw new Error('Erro ao remover certificado');
+        }
+    } catch (error) {
+        console.error('Erro ao remover certificado:', error);
+        showNotification('Erro ao remover certificado', 'error');
     }
 }
 
@@ -2086,6 +2170,7 @@ window.showNovoProjetoForm = showNovoProjetoForm;
 window.editarProjeto = editarProjeto;
 window.excluirProjeto = excluirProjeto;
 window.saveCertificadoConfig = saveCertificadoConfig;
+window.excluirCertificado = excluirCertificado;
 window.saveNfeConfig = saveNfeConfig;
 window.saveVendaProdutosConfig = saveVendaProdutosConfig;
 window.loadVendaProdutosConfig = loadVendaProdutosConfig;

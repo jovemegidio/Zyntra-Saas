@@ -800,25 +800,35 @@
     display: flex;
     align-items: center;
     gap: 10px;
+    padding: 14px 16px;
+    border: 2px dashed var(--cfg-border);
+    border-radius: 12px;
+    background: var(--cfg-bg);
+    transition: var(--cfg-transition);
+}
+.config-file-upload:hover {
+    border-color: var(--cfg-primary);
+    background: var(--cfg-primary-light);
 }
 .config-file-upload-btn {
     display: inline-flex;
     align-items: center;
     gap: 6px;
     padding: 8px 16px;
-    background: var(--cfg-bg);
-    border: 1.5px solid var(--cfg-border);
+    background: var(--cfg-primary);
+    border: none;
     border-radius: 10px;
     font-size: 13px;
-    font-weight: 500;
-    color: var(--cfg-text-secondary);
+    font-weight: 600;
+    color: white;
     cursor: pointer;
     transition: var(--cfg-transition);
+    white-space: nowrap;
 }
 .config-file-upload-btn:hover {
-    border-color: var(--cfg-primary);
-    color: var(--cfg-primary);
-    background: var(--cfg-primary-light);
+    background: var(--cfg-primary-dark, #2563eb);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 .config-file-upload-name {
     font-size: 12px;

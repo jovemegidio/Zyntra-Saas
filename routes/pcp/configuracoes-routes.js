@@ -2504,6 +2504,35 @@ module.exports = function registerConfiguracoesRoutes(router, deps) {
         }
     });
 
+    // DELETE - Remover certificado digital
+    router.delete('/api/configuracoes/certificado', authenticateToken, authorizeAdmin, async (req, res) => {
+        try {
+            console.log('🗑️ Removendo certificado digital...');
+            const empresaId = 1;
+
+            // Limpar certificado da tabela nfe_configuracoes
+            await pool.query(`
+                UPDATE nfe_configuracoes
+                SET certificado_pfx = NULL,
+                    certificado_senha = NULL,
+                    certificado_validade = NULL,
+                    certificado_cnpj = NULL,
+                    certificado_nome = NULL,
+                    updated_at = NOW()
+                WHERE empresa_id = ?
+            `, [empresaId]);
+
+            // Limpar da tabela certificados_digitais
+            await pool.query('DELETE FROM certificados_digitais');
+
+            console.log('✅ Certificado removido com sucesso');
+            res.json({ success: true, message: 'Certificado removido com sucesso' });
+        } catch (error) {
+            console.error('❌ Erro ao remover certificado:', error);
+            res.status(500).json({ error: 'Erro ao remover certificado' });
+        }
+    });
+
     // GET - Buscar configuração de importação de NF-e
     router.get('/api/configuracoes/nfe-import', authenticateToken, async (req, res) => {
         try {
