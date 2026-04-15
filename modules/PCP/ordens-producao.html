@@ -772,8 +772,8 @@
             align-items: center;
             justify-content: space-between;
             padding: 16px 24px;
-            background: #ffffff;
-            border-top: 1px solid #e5e5e5;
+            background: linear-gradient(135deg, #3b82f6, #93c5fd);
+            border-top: none;
             flex-shrink: 0;
         }
 
@@ -783,9 +783,10 @@
             gap: 8px;
             font-size: 13px;
             font-weight: 600;
-            color: #475569;
+            color: #ffffff;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
         }
 
         .modal-ordem-footer .footer-actions {
@@ -807,25 +808,25 @@
         }
 
         .modal-ordem-footer .btn-cancelar {
-            background: #f1f5f9;
-            color: #475569;
-            border: 1px solid #e2e8f0;
+            background: rgba(255,255,255,0.2);
+            color: #ffffff;
+            border: 1px solid rgba(255,255,255,0.4);
         }
 
         .modal-ordem-footer .btn-cancelar:hover {
-            background: #e2e8f0;
-            color: #1e293b;
+            background: rgba(255,255,255,0.3);
+            color: #ffffff;
         }
 
         .modal-ordem-footer .btn-salvar {
-            background: linear-gradient(135deg, #dc2626, #b91c1c);
-            color: #ffffff;
-            box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+            background: rgba(255,255,255,0.95);
+            color: #1e293b;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
         }
 
         .modal-ordem-footer .btn-salvar:hover:not(:disabled) {
-            background: linear-gradient(135deg, #b91c1c, #991b1b);
-            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+            background: #ffffff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
             transform: translateY(-1px);
         }
 
@@ -2009,7 +2010,7 @@
                                 </div>
                                 <div class="form-group">
                                     <label>Setor de Produção</label>
-                                    <input type="text" id="modal-info-setor" value="Extrusão">
+                                    <input type="text" id="modal-info-setor" value="Produção" readonly style="background: #f0fdf4; color: #065f46; font-weight: 600; border: 1px solid #bbf7d0;">
                                 </div>
                                 <div class="form-group">
                                     <label>Data de Criação</label>
@@ -2017,7 +2018,7 @@
                                 </div>
                                 <div class="form-group">
                                     <label>Responsável</label>
-                                    <input type="text" id="modal-info-responsavel" value="Sistema">
+                                    <input type="text" id="modal-info-responsavel" value="Clemerson Leandro" readonly style="background: #f0fdf4; color: #065f46; font-weight: 600; border: 1px solid #bbf7d0;">
                                 </div>
                             </div>
                         </div>
@@ -3565,9 +3566,9 @@
             // Preencher aba de informações adicionais
             const infoFields = {
                 'modal-info-codigo': codigo,
-                'modal-info-setor': ordem.setor || 'Produção',
+                'modal-info-setor': 'Produção',
                 'modal-info-criacao': new Date(ordem.dataCriacao || new Date()).toLocaleDateString('pt-BR'),
-                'modal-info-responsavel': ordem.responsavel || 'Sistema'
+                'modal-info-responsavel': 'Clemerson Leandro'
             };
             for (const [id, val] of Object.entries(infoFields)) {
                 const el = document.getElementById(id);
@@ -4415,7 +4416,7 @@
                                 </div>
                                 <div class="info-item">
                                     <div class="label">Responsável</div>
-                                    <div class="value">${ordem.responsavel || 'Não atribuído'}</div>
+                                    <div class="value">Clemerson Leandro</div>
                                 </div>
                                 <div class="info-item">
                                     <div class="label">Prioridade</div>
@@ -4427,7 +4428,7 @@
                                 </div>
                                 <div class="info-item">
                                     <div class="label">Setor</div>
-                                    <div class="value">${ordem.setor || 'Produção'}</div>
+                                    <div class="value">Produção</div>
                                 </div>
                                 <div class="info-item">
                                     <div class="label">Código Interno</div>
@@ -5939,7 +5940,7 @@
                                     </div>
                                     <div>
                                         <p style="margin:0;font-size:12px;color:#64748b;">Responsável</p>
-                                        <p style="margin:4px 0 0;font-size:15px;font-weight:600;color:#0f172a;">${ordem.responsavel || 'Não definido'}</p>
+                                        <p style="margin:4px 0 0;font-size:15px;font-weight:600;color:#0f172a;">Clemerson Leandro</p>
                                     </div>
                                 </div>
                                 <div style="background:#fff;padding:18px 20px;border-radius:12px;display:flex;align-items:center;gap:14px;border:1px solid #e2e8f0;">
@@ -6007,32 +6008,52 @@
             const modal = document.getElementById('modal-preview-op');
             if (!modal) return;
 
-            const conteudo = modal.querySelector('div > div').innerHTML;
+            const container = modal.querySelector('div > div');
+            if (!container) return;
+
+            const headerEl = container.querySelector('div:first-child');
+            const bodyEl = container.querySelector('div:nth-child(2)');
+
             const printWindow = window.open('', '_blank');
             printWindow.document.write(`
+                <!DOCTYPE html>
                 <html>
                 <head>
-                    <title>Zyntra: Ordem de Produção</title>
+                    <title>Zyntra ERP — Ordem de Produção</title>
                     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
-    <!-- Mobile Enterprise Design System -->
-    <link rel="stylesheet" href="/css/design-system-mobile.css?v=20260202">
-    <link rel="stylesheet" href="/css/responsive-global.css?v=20260202">
-    <link rel="stylesheet" href="/css/mobile-master-2026.css?v=20260202">
-    <link rel="stylesheet" href="/css/mobile-enterprise-enhancements.css?v=20260202">
                     <style>
-                        body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+                        * { box-sizing: border-box; }
+                        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; background: #fff; }
                         @media print {
                             body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                            @page { size: A4; margin: 8mm; }
                             button { display: none !important; }
                         }
+                        .print-header { text-align: center; padding: 20px 0 10px; border-bottom: 3px solid #1e3a5f; margin-bottom: 0; }
+                        .print-header img { height: 45px; margin-bottom: 8px; }
+                        .print-header h1 { font-size: 14px; color: #1e3a5f; margin: 4px 0 0; letter-spacing: 2px; text-transform: uppercase; }
+                        .print-footer { text-align: center; padding: 12px 0; border-top: 2px solid #e2e8f0; margin-top: 20px; font-size: 10px; color: #94a3b8; }
+                        .print-signatures { display: flex; justify-content: space-around; margin-top: 40px; padding: 0 40px; }
+                        .print-signatures .sig-block { text-align: center; min-width: 180px; }
+                        .print-signatures .sig-line { border-top: 1px solid #334155; margin-top: 50px; padding-top: 8px; font-size: 12px; color: #475569; font-weight: 600; }
                     </style>
-</head>
-                <body>${conteudo}
-
-    <!-- Chat Corporativo (Teams) -->
-    <script src="/socket.io/socket.io.js"><\/script>
-    <script src="/chat-teams/chat-widget.js?v=20260615" defer><\/script>
-<\/body>
+                </head>
+                <body>
+                    <div class="print-header">
+                        <img src="/images/Logo%20Monocromatico%20-%20Azul%20-%20Aluforce.png" alt="Logo" onerror="this.style.display='none'">
+                        <h1>Ordem de Produção</h1>
+                    </div>
+                    ${headerEl ? headerEl.outerHTML : ''}
+                    ${bodyEl ? bodyEl.outerHTML : ''}
+                    <div class="print-signatures">
+                        <div class="sig-block"><div class="sig-line">Responsável Produção</div></div>
+                        <div class="sig-block"><div class="sig-line">Controle de Qualidade</div></div>
+                        <div class="sig-block"><div class="sig-line">Expedição</div></div>
+                    </div>
+                    <div class="print-footer">
+                        Documento gerado por Zyntra ERP &bull; ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'})} &bull; Este documento é de uso interno
+                    </div>
+                </body>
                 </html>
             `);
             printWindow.document.close();
@@ -6247,32 +6268,46 @@
             const modal = document.getElementById('modal-preview-mapa');
             if (!modal) return;
 
-            const conteudo = modal.querySelector('div > div').innerHTML;
+            // Get the inner content container (skip the overlay div)
+            const container = modal.querySelector('div > div');
+            if (!container) return;
+
+            // Extract header and body content from the modal
+            const headerEl = container.querySelector('div:first-child');
+            const bodyEl = container.querySelector('div:nth-child(2)');
+
             const printWindow = window.open('', '_blank');
             printWindow.document.write(`
+                <!DOCTYPE html>
                 <html>
                 <head>
-                    <title>Zyntra: Mapa de Custo</title>
+                    <title>Zyntra ERP — Mapa de Custo de Produção</title>
                     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
-    <!-- Mobile Enterprise Design System -->
-    <link rel="stylesheet" href="/css/design-system-mobile.css?v=20260202">
-    <link rel="stylesheet" href="/css/responsive-global.css?v=20260202">
-    <link rel="stylesheet" href="/css/mobile-master-2026.css?v=20260202">
-    <link rel="stylesheet" href="/css/mobile-enterprise-enhancements.css?v=20260202">
                     <style>
-                        body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+                        * { box-sizing: border-box; }
+                        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; background: #fff; }
                         @media print {
                             body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                            @page { size: A4; margin: 8mm; }
                             button { display: none !important; }
                         }
+                        .print-header { text-align: center; padding: 20px 0 10px; border-bottom: 3px solid #065f46; margin-bottom: 0; }
+                        .print-header img { height: 45px; margin-bottom: 8px; }
+                        .print-header h1 { font-size: 14px; color: #065f46; margin: 4px 0 0; letter-spacing: 2px; text-transform: uppercase; }
+                        .print-footer { text-align: center; padding: 12px 0; border-top: 2px solid #e2e8f0; margin-top: 20px; font-size: 10px; color: #94a3b8; }
                     </style>
-</head>
-                <body>${conteudo}
-
-    <!-- Chat Corporativo (Teams) -->
-    <script src="/socket.io/socket.io.js"><\/script>
-    <script src="/chat-teams/chat-widget.js?v=20260615" defer><\/script>
-<\/body>
+                </head>
+                <body>
+                    <div class="print-header">
+                        <img src="/images/Logo%20Monocromatico%20-%20Azul%20-%20Aluforce.png" alt="Logo" onerror="this.style.display='none'">
+                        <h1>Mapa de Custo de Produção</h1>
+                    </div>
+                    ${headerEl ? headerEl.outerHTML : ''}
+                    ${bodyEl ? bodyEl.outerHTML : ''}
+                    <div class="print-footer">
+                        Documento gerado por Zyntra ERP &bull; ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'})} &bull; Este documento é de uso interno
+                    </div>
+                </body>
                 </html>
             `);
             printWindow.document.close();
@@ -6826,6 +6861,15 @@
             if (!content) return;
 
             const conteudo = content.innerHTML;
+            const qtd = etiquetaQuantidadeFolha || 4;
+            const cols = qtd <= 2 ? qtd : 2;
+
+            // Replicate etiqueta multiple times in a grid layout
+            let etiquetasHtml = '';
+            for (let i = 0; i < qtd; i++) {
+                etiquetasHtml += `<div class="etiqueta-cell">${conteudo}</div>`;
+            }
+
             const printWindow = window.open('', '_blank');
             printWindow.document.write(`
                 <!DOCTYPE html>
@@ -6834,38 +6878,43 @@
                     <title>Zyntra: ${titulo}</title>
                     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
                     <style>
-                        * { box-sizing: border-box; }
+                        * { box-sizing: border-box; margin: 0; padding: 0; }
                         body {
                             font-family: 'Segoe UI', Arial, sans-serif;
-                            margin: 0;
-                            padding: 20px;
                             background: #fff;
                         }
+                        .etiquetas-grid {
+                            display: grid;
+                            grid-template-columns: repeat(${cols}, 1fr);
+                            gap: 8px;
+                            padding: 10px;
+                            width: 100%;
+                        }
+                        .etiqueta-cell {
+                            page-break-inside: avoid;
+                            break-inside: avoid;
+                        }
+                        .etiqueta-cell > div {
+                            padding: 12px !important;
+                        }
+                        .etiqueta-cell img { max-height: 35px !important; }
+                        ${qtd > 2 ? '.etiqueta-cell p, .etiqueta-cell span { font-size: 85% !important; }' : ''}
+                        ${qtd >= 6 ? '.etiqueta-cell p, .etiqueta-cell span { font-size: 75% !important; } .etiqueta-cell img { max-height: 25px !important; }' : ''}
                         @media print {
-                            body {
-                                -webkit-print-color-adjust: exact;
-                                print-color-adjust: exact;
-                                padding: 0;
-                            }
-                            @page {
-                                size: auto;
-                                margin: 10mm;
-                            }
+                            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                            @page { size: A4; margin: 5mm; }
+                            .etiquetas-grid { gap: 4px; padding: 0; }
                         }
                     </style>
-</head>
-                <body>${conteudo}
-
-    <!-- Chat Corporativo (Teams) -->
-    <script src="/socket.io/socket.io.js"><\/script>
-    <script src="/chat-teams/chat-widget.js?v=20260615" defer><\/script>
-<\/body>
+                </head>
+                <body>
+                    <div class="etiquetas-grid">${etiquetasHtml}</div>
+                </body>
                 </html>
             `);
             printWindow.document.close();
             setTimeout(() => {
                 printWindow.print();
-                // printWindow.close(); // Descomentar se quiser fechar após imprimir
             }, 500);
         }
 

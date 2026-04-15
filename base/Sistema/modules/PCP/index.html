@@ -19,6 +19,7 @@
     <!-- Sistema de Autenticação Unificado - DEVE ser carregado primeiro -->
     <script src="/js/auth-unified.js?v=20260326" defer></script>
     <script src="/js/inactivity-manager.js?v=20260324" defer></script>
+    <script src="/js/user-greeting-avatar.js?v=20260402" defer></script>
 
     <!-- Fonte Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
@@ -31,6 +32,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
         integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
     <!-- CSS PCP Padrão - Mesmo layout das outras páginas -->
+    <link rel="stylesheet" href="/css/z-index-scale.css">
     <link rel="stylesheet" href="css/pcp-layout.css">
     <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260216">
     <link rel="stylesheet" href="css/pcp-components.css">
@@ -2671,7 +2673,7 @@
             display: none;
             align-items: center;
             justify-content: center;
-            z-index: 9999;
+            z-index: var(--z-modal-parent, 1010);
             padding: var(--space-6);
         }
 
@@ -2819,26 +2821,36 @@
             right: 0 !important;
             bottom: 0 !important;
             z-index: 99999 !important;
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        #modal-nova-ordem.active {
+            display: block !important;
         }
 
         .modal-op-wrapper {
-            display: flex;
-            width: 95%;
-            max-width: 1200px;
-            max-height: 92vh;
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 1250px;
+            max-width: 100%;
             background: white;
-            border-radius: 16px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            animation: modalSlideIn 0.3s ease;
-            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            animation: slideInRight 0.3s ease;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
         }
 
         .modal-op-main {
-            flex: 1;
             display: flex;
-            flex-direction: column;
+            flex: 1;
             overflow: hidden;
-            min-width: 0;
+            min-height: 0;
         }
 
         .modal-op-header {
@@ -2846,14 +2858,15 @@
             justify-content: space-between;
             align-items: center;
             padding: 16px 24px;
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            color: white;
+            background: #fafafa;
+            border-bottom: 1px solid #e5e5e5;
+            flex-shrink: 0;
         }
 
         .modal-op-title {
             font-size: 18px;
             font-weight: 600;
-            color: white;
+            color: #1a1a1a;
             margin: 0;
             display: flex;
             align-items: center;
@@ -2861,43 +2874,120 @@
         }
 
         .modal-op-close {
-            background: rgba(255, 255, 255, 0.15);
-            border: none;
-            font-size: 14px;
-            color: white;
-            cursor: pointer;
             display: flex;
             align-items: center;
             gap: 8px;
             padding: 8px 16px;
-            border-radius: 8px;
+            background: transparent;
+            border: none;
+            color: #666;
+            font-size: 14px;
+            cursor: pointer;
             transition: all 0.2s;
+            flex-shrink: 0;
         }
 
         .modal-op-close:hover {
-            background: rgba(255, 255, 255, 0.25);
+            color: #1e293b;
         }
 
         .modal-op-body {
             flex: 1;
-            padding: 24px;
+            padding: 0;
             overflow-y: auto;
             background: #f8f9fa;
         }
 
+        /* Footer fixo com botões de ação */
+        .modal-op-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 24px;
+            background: #ffffff;
+            border-top: 1px solid #e5e5e5;
+            flex-shrink: 0;
+        }
+
+        .modal-op-footer .footer-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .modal-op-footer .footer-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .modal-op-footer .btn-footer {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .modal-op-footer .btn-cancelar {
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+        }
+
+        .modal-op-footer .btn-cancelar:hover {
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+
+        .modal-op-footer .btn-salvar {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            color: #ffffff;
+            box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+        }
+
+        .modal-op-footer .btn-salvar:hover {
+            background: linear-gradient(135deg, #b91c1c, #991b1b);
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+            transform: translateY(-1px);
+        }
+
         .modal-op-section {
             background: white;
-            border-radius: 12px;
-            padding: 20px;
+            border-radius: 14px;
+            padding: 22px;
             margin-bottom: 16px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+            border: 1px solid #f1f5f9;
         }
 
         .modal-op-product-row {
-            display: flex;
-            align-items: flex-end;
+            display: grid;
+            grid-template-columns: 48px 1fr 130px 80px 140px 180px;
+            align-items: end;
             gap: 16px;
-            flex-wrap: wrap;
+        }
+
+        @media (max-width: 1024px) {
+            .modal-op-product-row {
+                grid-template-columns: 48px 1fr 130px 80px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .modal-op-product-row {
+                grid-template-columns: 1fr 1fr;
+            }
+            .modal-op-product-row .modal-op-avatar { display: none; }
         }
 
         .modal-op-avatar {
@@ -2915,8 +3005,7 @@
         }
 
         .modal-op-product-field {
-            flex: 1;
-            min-width: 200px;
+            min-width: 0;
         }
 
         .modal-op-label {
@@ -2974,17 +3063,26 @@
             flex: 1;
             min-width: 140px;
             background: white;
-            border-radius: 10px;
-            padding: 14px 16px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            border-radius: 12px;
+            padding: 14px 18px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+            border: 1px solid #f1f5f9;
+            transition: all 0.2s ease;
+        }
+
+        .modal-op-value-field:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border-color: #e2e8f0;
         }
 
         .modal-op-value-field label {
             display: block;
-            font-size: 12px;
-            font-weight: 500;
+            font-size: 11.5px;
+            font-weight: 600;
             color: #64748b;
             margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
         }
 
         .modal-op-value-field input,
@@ -3011,11 +3109,12 @@
             border-radius: 12px 12px 0 0;
             border-bottom: 2px solid #e2e8f0;
             overflow-x: auto;
+            padding: 0 4px;
         }
 
         .modal-op-tab {
-            padding: 14px 20px;
-            font-size: 14px;
+            padding: 14px 18px;
+            font-size: 13.5px;
             font-weight: 500;
             color: #64748b;
             background: transparent;
@@ -3029,9 +3128,14 @@
             gap: 8px;
         }
 
+        .modal-op-tab i {
+            font-size: 13px;
+        }
+
         .modal-op-tab:hover {
             color: #1e293b;
-            background: #f8fafc;
+            background: #f1f5f9;
+            border-radius: 8px 8px 0 0;
         }
 
         .modal-op-tab.active {
@@ -3043,10 +3147,11 @@
             content: '';
             position: absolute;
             bottom: -2px;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: #1e293b;
+            left: 8px;
+            right: 8px;
+            height: 2.5px;
+            background: linear-gradient(90deg, #3b82f6, #2563eb);
+            border-radius: 2px 2px 0 0;
         }
 
         .modal-op-tab-content {
@@ -3112,11 +3217,13 @@
 
         .modal-op-table-container {
             overflow-x: auto;
+            margin: 0;
         }
 
         .modal-op-table {
             width: 100%;
             border-collapse: collapse;
+            table-layout: fixed;
         }
 
         .modal-op-table thead {
@@ -3124,13 +3231,15 @@
         }
 
         .modal-op-table th {
-            padding: 12px 16px;
+            padding: 10px 8px;
             text-align: left;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
             color: #475569;
             border-bottom: 1px solid #e2e8f0;
             white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .modal-op-table tbody tr {
@@ -3142,21 +3251,26 @@
         }
 
         .modal-op-table td {
-            padding: 12px 16px;
-            font-size: 14px;
+            padding: 8px 6px;
+            font-size: 13px;
             color: #334155;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         /* Campos inline editáveis na tabela de produtos */
         .embalagem-inline-select {
             width: 100%;
-            padding: 6px 8px;
+            padding: 5px 4px;
             border: 1px solid #e2e8f0;
             border-radius: 6px;
             font-size: 13px;
             background: white;
             cursor: pointer;
             transition: all 0.2s;
+            box-sizing: border-box;
+            overflow: visible;
+            white-space: nowrap;
         }
 
         .embalagem-inline-select:hover {
@@ -3208,8 +3322,8 @@
         .modal-op-info-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-            padding: 20px;
+            gap: 18px;
+            padding: 24px;
         }
 
         .modal-op-info-field {
@@ -3219,27 +3333,37 @@
         }
 
         .modal-op-info-field label {
-            font-size: 13px;
-            font-weight: 500;
-            color: #64748b;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: #475569;
+            letter-spacing: 0.01em;
         }
 
         .modal-op-info-field input,
         .modal-op-info-field select,
         .modal-op-info-field textarea {
-            padding: 12px 16px;
+            padding: 11px 14px;
             font-size: 14px;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            background: white;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 10px;
+            background: #fafbfc;
+            transition: all 0.2s ease;
         }
 
         .modal-op-info-field input:focus,
         .modal-op-info-field select:focus,
         .modal-op-info-field textarea:focus {
             outline: none;
-            border-color: #dc2626;
-            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            background: white;
+        }
+
+        .modal-op-info-field input:not(:placeholder-shown):not(:focus),
+        .modal-op-info-field select:not(:focus),
+        .modal-op-info-field textarea:not(:placeholder-shown):not(:focus) {
+            background: white;
+            border-color: #cbd5e1;
         }
 
         /* ===== Sidebar Destino Checkboxes - Design Moderno ===== */
@@ -3852,142 +3976,79 @@
             box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
         }
 
-        /* Sidebar - Design Moderno */
+        /* Sidebar - Design Limpo */
         .modal-op-sidebar {
-            width: 160px;
-            background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
-            border-left: 1px solid #e2e8f0;
-            padding: 16px 12px;
+            width: 180px;
+            background: #fafafa;
+            border-left: 1px solid #e5e5e5;
+            padding: 16px 0;
             display: flex;
             flex-direction: column;
-            gap: 6px;
             overflow-y: auto;
             flex-shrink: 0;
         }
 
+        .modal-op-sidebar-divider {
+            height: 1px;
+            background: #e5e5e5;
+            margin: 8px 0;
+        }
+
         .modal-op-sidebar-btn {
-            width: 100%;
-            padding: 11px 14px;
-            font-size: 12px;
-            font-weight: 500;
-            color: #475569;
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 10px;
-            cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 10px;
-            transition: all 0.2s ease;
+            gap: 12px;
+            padding: 12px 20px;
+            border: none;
+            background: transparent;
+            color: #475569;
+            font-size: 13px;
             text-align: left;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
         }
 
         .modal-op-sidebar-btn:hover {
-            background: #f8fafc;
-            border-color: #d1d5db;
-            transform: translateY(-1px);
-            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+            background: #f1f5f9;
+            color: #1e293b;
         }
 
         .modal-op-sidebar-btn i {
-            font-size: 14px;
-            width: 18px;
+            width: 16px;
             text-align: center;
-            opacity: 0.8;
+            font-size: 14px;
         }
 
         .modal-op-sidebar-btn.primary {
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            color: white;
-            border: none;
-            font-weight: 600;
-            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.25);
-        }
-
-        .modal-op-sidebar-btn.primary i {
-            opacity: 1;
-        }
-
-        .modal-op-sidebar-btn.primary:hover {
-            background: linear-gradient(135deg, #334155 0%, #1e293b 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.35);
+            color: #1e293b;
+            font-weight: 500;
         }
 
         .modal-op-sidebar-btn.highlight {
-            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-            color: white;
-            border: none;
+            color: #059669;
             font-weight: 600;
-            box-shadow: 0 2px 8px rgba(34, 197, 94, 0.25);
-        }
-
-        .modal-op-sidebar-btn.highlight i {
-            opacity: 1;
-        }
-
-        .modal-op-sidebar-btn.highlight:hover {
-            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 16px rgba(34, 197, 94, 0.35);
         }
 
         .modal-op-sidebar-btn.outline {
-            background: white;
-            color: #f59e0b;
-            border: 1px solid #fcd34d;
-        }
-
-        .modal-op-sidebar-btn.outline:hover {
-            background: #fffbeb;
-            border-color: #f59e0b;
+            color: #475569;
         }
 
         .modal-op-sidebar-btn.danger {
-            color: #6b7280;
-            background: #f9fafb;
+            color: #ef4444;
+            margin-top: auto;
         }
 
-        .modal-op-sidebar-btn.danger:hover {
-            background: #fef2f2;
-            color: #dc2626;
-            border-color: #fecaca;
+        @media (max-width: 900px) {
+            .modal-op-sidebar {
+                display: none;
+            }
         }
 
         /* Responsivo Modal OP */
         @media (max-width: 1024px) {
             .modal-op-wrapper {
-                flex-direction: column;
-                max-height: 95vh;
-            }
-
-            .modal-op-sidebar {
                 width: 100%;
-                flex-direction: row;
-                flex-wrap: wrap;
-                padding: 12px 16px;
-                border-left: none;
-                border-top: 1px solid #e2e8f0;
-                justify-content: center;
-            }
-
-            .modal-op-sidebar-btn {
-                width: auto;
-                padding: 8px 14px;
-            }
-
-            .modal-op-product-row {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .modal-op-values-row {
-                flex-direction: column;
-            }
-
-            .modal-op-value-field {
-                min-width: 100%;
             }
 
             .modal-op-info-grid {
@@ -3999,122 +4060,26 @@
            ESTILOS MOBILE COMPLETOS - MODAL NOVA ORDEM
            ============================================ */
         @media (max-width: 768px) {
-
-            /* Modal principal */
             .modal-op-wrapper {
                 width: 100% !important;
-                max-width: 100% !important;
-                height: 100vh !important;
-                max-height: 100vh !important;
-                border-radius: 0 !important;
-                margin: 0 !important;
             }
 
-            /* Header do modal */
             .modal-op-header {
                 padding: 12px 16px !important;
-                position: sticky;
-                top: 0;
-                z-index: 10;
+                flex-wrap: wrap;
+                gap: 8px;
             }
 
-            .modal-op-title {
-                font-size: 15px !important;
-            }
-
-            .modal-op-close {
-                padding: 8px 12px !important;
-                font-size: 13px !important;
-            }
-
-            .modal-op-close span {
-                display: none;
-            }
-
-            /* Body do modal */
             .modal-op-body {
                 padding: 12px !important;
-                height: calc(100vh - 120px);
-                overflow-y: auto;
-                -webkit-overflow-scrolling: touch;
             }
 
-            /* Seções */
-            .modal-op-section {
-                padding: 12px !important;
-                margin-bottom: 12px !important;
-                border-radius: 8px !important;
-            }
-
-            /* Avatar e campos da OP */
-            .modal-op-product-row {
-                gap: 10px !important;
-            }
-
-            .modal-op-avatar {
-                width: 36px !important;
-                height: 36px !important;
-                font-size: 12px !important;
-                border-radius: 8px !important;
-                display: none;
-            }
-
-            .modal-op-product-field {
-                min-width: 100% !important;
-                max-width: 100% !important;
-            }
-
-            .modal-op-input-lg {
-                padding: 10px 12px !important;
-                font-size: 14px !important;
-            }
-
-            .modal-op-date-field {
-                width: 100% !important;
-            }
-
-            .modal-op-input-date {
-                width: 100% !important;
-                padding: 10px 12px !important;
-            }
-
-            .modal-op-label {
-                font-size: 12px !important;
-                margin-bottom: 4px !important;
-            }
-
-            /* Linha de valores (vendedor, prazo, frete) */
-            .modal-op-values-row {
-                gap: 10px !important;
-                padding: 12px !important;
-            }
-
-            .modal-op-value-field {
-                flex: 1 1 100% !important;
-            }
-
-            .modal-op-value-field label {
-                font-size: 11px !important;
-                margin-bottom: 4px !important;
-            }
-
-            .modal-op-value-field input,
-            .modal-op-value-field select {
-                padding: 10px 12px !important;
-                font-size: 14px !important;
-            }
-
-            /* Abas do modal */
             .modal-op-tabs {
                 display: flex !important;
                 flex-wrap: nowrap !important;
                 overflow-x: auto !important;
                 -webkit-overflow-scrolling: touch;
-                gap: 4px !important;
-                padding: 8px 0 !important;
-                margin-bottom: 8px !important;
                 scrollbar-width: none;
-                -ms-overflow-style: none;
             }
 
             .modal-op-tabs::-webkit-scrollbar {
@@ -4126,16 +4091,12 @@
                 padding: 8px 12px !important;
                 font-size: 11px !important;
                 white-space: nowrap !important;
-                border-radius: 20px !important;
-                min-width: auto !important;
             }
 
             .modal-op-tab i {
-                margin-right: 4px !important;
-                font-size: 10px !important;
+                display: none !important;
             }
 
-            /* Grid de informações */
             .modal-op-info-grid {
                 display: flex !important;
                 flex-direction: column !important;
@@ -4147,56 +4108,6 @@
                 grid-column: span 1 !important;
             }
 
-            .modal-op-info-field label {
-                font-size: 11px !important;
-                margin-bottom: 4px !important;
-            }
-
-            .modal-op-info-field input,
-            .modal-op-info-field select,
-            .modal-op-info-field textarea {
-                padding: 10px 12px !important;
-                font-size: 14px !important;
-            }
-
-            /* Sidebar de ações (rodapé no mobile) */
-            .modal-op-sidebar {
-                position: fixed !important;
-                bottom: 0 !important;
-                left: 0 !important;
-                right: 0 !important;
-                width: 100% !important;
-                padding: 10px !important;
-                background: white !important;
-                border-top: 1px solid #e2e8f0 !important;
-                box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1) !important;
-                z-index: 100 !important;
-                display: flex !important;
-                flex-wrap: wrap !important;
-                gap: 8px !important;
-                justify-content: center !important;
-            }
-
-            .modal-op-sidebar-btn {
-                flex: 1 1 calc(33% - 8px) !important;
-                min-width: auto !important;
-                padding: 10px 8px !important;
-                font-size: 11px !important;
-                border-radius: 8px !important;
-            }
-
-            .modal-op-sidebar-btn i {
-                display: block !important;
-                margin: 0 auto 4px !important;
-                font-size: 16px !important;
-            }
-
-            .modal-op-sidebar-btn span {
-                display: block !important;
-                font-size: 10px !important;
-            }
-
-            /* Tabela de produtos */
             .modal-op-table-container {
                 overflow-x: auto !important;
                 -webkit-overflow-scrolling: touch;
@@ -4207,25 +4118,11 @@
                 font-size: 12px !important;
             }
 
-            .modal-op-table th,
-            .modal-op-table td {
-                padding: 8px 6px !important;
-            }
-
-            /* Modal de produto */
             .modal-produto-container {
                 width: 100% !important;
                 max-width: 100% !important;
                 height: 100vh !important;
                 border-radius: 0 !important;
-            }
-
-            .modal-produto-header {
-                padding: 12px 16px !important;
-            }
-
-            .modal-produto-header h3 {
-                font-size: 15px !important;
             }
 
             .modal-produto-body {
@@ -4245,42 +4142,14 @@
                 grid-column: span 1 !important;
             }
 
-            .modal-produto-field.full-width {
-                grid-column: span 1 !important;
-            }
-
-            .modal-produto-footer {
-                padding: 12px !important;
-                gap: 8px !important;
-            }
-
-            .modal-produto-footer button {
-                padding: 12px !important;
-                font-size: 13px !important;
-            }
-
-            /* Autocomplete mobile */
             .autocomplete-dropdown {
                 max-height: 200px !important;
             }
 
-            .autocomplete-item {
-                padding: 10px 12px !important;
-            }
-
-            .autocomplete-nome {
-                font-size: 13px !important;
-            }
-
-            .autocomplete-item-info {
-                flex-direction: column !important;
-                gap: 2px !important;
-                padding-left: 20px !important;
-            }
-
-            /* Ajuste do body para compensar footer fixo */
-            .modal-op-body {
-                padding-bottom: 100px !important;
+            .modal-op-footer {
+                padding: 12px 16px !important;
+                flex-wrap: wrap;
+                gap: 8px;
             }
         }
 
@@ -4290,25 +4159,9 @@
                 padding: 10px 12px !important;
             }
 
-            .modal-op-title {
-                font-size: 14px !important;
-            }
-
-            .modal-op-tab {
-                padding: 6px 10px !important;
-                font-size: 10px !important;
-            }
-
-            .modal-op-tab i {
-                display: none !important;
-            }
-
-            .modal-op-sidebar-btn {
-                flex: 1 1 calc(50% - 8px) !important;
-            }
-
-            .modal-op-sidebar-btn.danger {
-                flex: 1 1 100% !important;
+            .modal-op-footer .btn-footer {
+                padding: 8px 16px !important;
+                font-size: 12px !important;
             }
         }
 
@@ -4939,6 +4792,9 @@
                 <button class="sidebar-btn" title="Apontamentos" onclick="window.location.href='apontamentos.html'">
                     <i class="fas fa-stopwatch"></i>
                 </button>
+                <button class="sidebar-btn" title="Qualidade" onclick="window.location.href='pages/qualidade.html'">
+                    <i class="fas fa-award"></i>
+                </button>
                 <a href="pages/relatorios.html" class="sidebar-btn" title="Relatórios">
                     <i class="fas fa-chart-pie"></i>
                 </a>
@@ -4966,43 +4822,17 @@
                         <span class="brand-sep"
                             style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
+                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">&#8212;</span>
+                        <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">PCP</span>
                     </div>
                 </div>
                 <div class="header-right">
                     <button class="header-btn" title="Atualizar" onclick="location.reload()">
                         <i class="fas fa-sync-alt"></i>
                     </button>
-                    <div class="notification-container">
-                        <button class="header-btn notification-btn" title="Notificações" onclick="toggleNotificacoes()">
-                            <i class="fas fa-bell"></i>
-                            <span class="notification-badge" id="notification-count" style="display: none;">0</span>
-                        </button>
-                        <div class="notification-panel" id="notification-panel">
-                            <div class="notification-header">
-                                <h3><i class="fas fa-bell"></i> Notificações</h3>
-                                <div class="notification-actions">
-                                    <button onclick="marcarTodasLidas()" title="Marcar todas como lidas">
-                                        <i class="fas fa-check-double"></i>
-                                    </button>
-                                    <button onclick="limparNotificacoes()" title="Limpar todas">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="notification-list" id="notification-list">
-                                <div class="notification-empty">
-                                    <i class="fas fa-check-circle"></i>
-                                    <p>Nenhuma notificação</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Notificações removidas -->
                     <div class="user-greeting">
                         <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
-                        <div class="user-avatar" id="user-avatar">
-                            <img src="" alt="Foto do usuário" id="user-photo">
-                            <span id="user-initials">U</span>
-                        </div>
                     </div>
                 </div>
             </header>
@@ -5376,97 +5206,71 @@
     <!-- Modal: Nova Ordem de Produção -->
     <div class="modal-overlay" id="modal-nova-ordem">
         <div class="modal-op-wrapper">
-            <!-- área Principal do Modal -->
-            <div class="modal-op-main">
-                <!-- Header do Modal -->
-                <div class="modal-op-header">
-                    <h3 class="modal-op-title">Nova Ordem de Produção</h3>
-                    <button class="modal-op-close" onclick="hideModal('modal-nova-ordem')">
-                        Fechar <i class="fas fa-times"></i>
-                    </button>
-                </div>
-
-                <!-- Conteúdo do Modal -->
-                <div class="modal-op-body">
-                    <!-- Seção: Dados da OP -->
-                    <div class="modal-op-section">
-                        <div class="modal-op-product-row">
-                            <div class="modal-op-avatar">
-                                <span>OP</span>
-                            </div>
-                            <div class="modal-op-product-field">
-                                <label class="modal-op-label">Número da OP <i class="fas fa-hashtag"></i></label>
-                                <input type="text" class="modal-op-input-lg" id="op-número"
-                                    placeholder="OP Nº 2025/00001">
-                            </div>
-                            <div class="modal-op-product-field" style="max-width: 130px;">
-                                <label class="modal-op-label">Nº Orçamento</label>
-                                <input type="text" class="modal-op-input-lg" id="op-orçamento" placeholder="P-226">
-                            </div>
-                            <div class="modal-op-product-field" style="max-width: 80px;">
-                                <label class="modal-op-label">Revisão</label>
-                                <input type="text" class="modal-op-input-lg" id="op-revisao" placeholder="01" value="01"
-                                    style="text-align: center;">
-                            </div>
-                            <div class="modal-op-product-field" style="max-width: 140px;">
-                                <label class="modal-op-label">Nº Pedido <span style="color:#dc2626;">*</span></label>
-                                <input type="text" class="modal-op-input-lg" id="op-num-pedido" placeholder="PED-001"
-                                    required>
-                            </div>
-                            <div class="modal-op-date-field">
-                                <label class="modal-op-label">Data Liberação <span
-                                        style="color:#dc2626;">*</span></label>
-                                <input type="date" class="modal-op-input-date" id="op-data-liberacao" required>
-                            </div>
+            <!-- Header com campos inline -->
+            <div class="modal-op-header">
+                <div style="display: flex; align-items: center; gap: 16px; flex: 1; flex-wrap: wrap;">
+                    <!-- OP Badge -->
+                    <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #dc2626, #b91c1c); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 13px; flex-shrink: 0;">OP</div>
+                    <!-- Campos do Header -->
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; flex: 1;">
+                        <div style="min-width: 140px;">
+                            <label style="display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px; text-transform: uppercase;">Número da OP</label>
+                            <input type="text" id="op-número" placeholder="OP Nº 2025/00001" style="width: 100%; padding: 8px 10px; border: 1.5px solid #e2e8f0; border-radius: 6px; font-size: 13px; font-weight: 600;">
                         </div>
-                    </div>
-
-                    <!-- Seção: Vendedor e Frete -->
-                    <div class="modal-op-values-row">
-                        <div class="modal-op-value-field" style="flex: 2;">
-                            <label>Vendedor <span style="color:#dc2626;">*</span></label>
-                            <select id="op-vendedor" class="op-select-vendedor" required>
-                                <option value="">Selecione o vendedor...</option>
-                                <option value="Augusto Ladeira">Augusto Ladeira</option>
-                                <option value="Fabiola Souza">Fabiola Souza</option>
-                                <option value="Fabiano Marques">Fabiano Marques</option>
-                                <option value="Renata Nascimento">Renata Nascimento</option>
-                                <option value="Andreia Trovão">Andreia Trovão</option>
+                        <div style="min-width: 110px;">
+                            <label style="display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px; text-transform: uppercase;">Nº Orçamento</label>
+                            <input type="text" id="op-orçamento" placeholder="P-226" style="width: 100%; padding: 8px 10px; border: 1.5px solid #e2e8f0; border-radius: 6px; font-size: 13px;">
+                        </div>
+                        <div style="min-width: 70px; max-width: 80px;">
+                            <label style="display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px; text-transform: uppercase;">Revisão</label>
+                            <input type="text" id="op-revisao" placeholder="01" value="01" style="width: 100%; padding: 8px 10px; border: 1.5px solid #e2e8f0; border-radius: 6px; font-size: 13px; text-align: center;">
+                        </div>
+                        <div style="min-width: 110px;">
+                            <label style="display: block; font-size: 11px; font-weight: 600; color: #dc2626; margin-bottom: 4px; text-transform: uppercase; font-weight: 700;">Nº Pedido *</label>
+                            <input type="text" id="op-num-pedido" placeholder="PED-001" required style="width: 100%; padding: 8px 10px; border: 1.5px solid #e2e8f0; border-radius: 6px; font-size: 13px;">
+                        </div>
+                        <div style="min-width: 130px;">
+                            <label style="display: block; font-size: 11px; font-weight: 600; color: #dc2626; margin-bottom: 4px; text-transform: uppercase; font-weight: 700;">Data Liberação *</label>
+                            <input type="date" id="op-data-liberacao" required style="width: 100%; padding: 8px 10px; border: 1.5px solid #e2e8f0; border-radius: 6px; font-size: 13px;">
+                        </div>
+                        <div style="min-width: 130px;">
+                            <label style="display: block; font-size: 11px; font-weight: 600; color: #dc2626; margin-bottom: 4px; text-transform: uppercase; font-weight: 700;">Vendedor *</label>
+                            <select id="op-vendedor" required style="width: 100%; padding: 8px 10px; border: 1.5px solid #e2e8f0; border-radius: 6px; font-size: 13px; background: white;">
+                                <option value="">Selecione...</option>
                             </select>
                         </div>
-                        <div class="modal-op-value-field">
-                            <label>Prazo Entrega</label>
-                            <input type="text" id="op-prazo-entrega" placeholder="Ex: 15 dias úteis">
+                        <div style="min-width: 130px;">
+                            <label style="display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px; text-transform: uppercase;">Prazo Entrega</label>
+                            <input type="text" id="op-prazo-entrega" placeholder="Ex: 15 dias úteis" style="width: 100%; padding: 8px 10px; border: 1.5px solid #e2e8f0; border-radius: 6px; font-size: 13px;">
                         </div>
-                        <div class="modal-op-value-field">
-                            <label>Tipo Frete</label>
-                            <select id="op-tipo-frete" class="op-select-frete">
+                        <div style="min-width: 100px; max-width: 120px;">
+                            <label style="display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px; text-transform: uppercase;">Tipo Frete</label>
+                            <select id="op-tipo-frete" style="width: 100%; padding: 8px 10px; border: 1.5px solid #e2e8f0; border-radius: 6px; font-size: 13px; background: white;">
+                                <option value="">...</option>
                                 <option value="CIF">CIF</option>
                                 <option value="FOB">FOB</option>
+                                <option value="Redespacho">Redespacho</option>
                             </select>
                         </div>
                     </div>
+                </div>
+                <button class="modal-op-close" onclick="hideModal('modal-nova-ordem')" style="flex-shrink: 0;">
+                    Fechar <i class="fas fa-times"></i>
+                </button>
+            </div>
 
+            <!-- Área principal: conteúdo + sidebar -->
+            <div class="modal-op-main">
+                <!-- Conteúdo do Modal -->
+                <div class="modal-op-body">
                     <!-- Abas -->
-                    <div class="modal-op-tabs">
-                        <button class="modal-op-tab active" data-tab="cliente" onclick="switchOPTab('cliente')">
-                            <i class="fas fa-user-tie"></i> Dados do Cliente
-                        </button>
-                        <button class="modal-op-tab" data-tab="transportadora" onclick="switchOPTab('transportadora')">
-                            <i class="fas fa-truck"></i> Transportadora
-                        </button>
-                        <button class="modal-op-tab" data-tab="produtos" onclick="switchOPTab('produtos')">
-                            <i class="fas fa-boxes"></i> Produtos
-                        </button>
-                        <button class="modal-op-tab" data-tab="pagamento" onclick="switchOPTab('pagamento')">
-                            <i class="fas fa-credit-card"></i> Pagamento
-                        </button>
-                        <button class="modal-op-tab" data-tab="entrega" onclick="switchOPTab('entrega')">
-                            <i class="fas fa-shipping-fast"></i> Entrega
-                        </button>
-                        <button class="modal-op-tab" data-tab="obs" onclick="switchOPTab('obs')">
-                            <i class="fas fa-sticky-note"></i> Observações
-                        </button>
+                    <div class="modal-op-tabs" style="padding: 0 24px; margin-bottom: 0; background: white;">
+                        <button class="modal-op-tab active" data-tab="cliente" onclick="switchOPTab('cliente')">Dados do Cliente</button>
+                        <button class="modal-op-tab" data-tab="transportadora" onclick="switchOPTab('transportadora')">Transportadora</button>
+                        <button class="modal-op-tab" data-tab="produtos" onclick="switchOPTab('produtos')">Produtos</button>
+                        <button class="modal-op-tab" data-tab="pagamento" onclick="switchOPTab('pagamento')">Pagamento</button>
+                        <button class="modal-op-tab" data-tab="entrega" onclick="switchOPTab('entrega')">Entrega</button>
+                        <button class="modal-op-tab" data-tab="obs" onclick="switchOPTab('obs')">Observações</button>
                     </div>
 
                     <!-- Conteúdo das Abas -->
@@ -5574,16 +5378,16 @@
                                 <table class="modal-op-table">
                                     <thead>
                                         <tr>
-                                            <th style="width: 30px;"><input type="checkbox" id="op-select-all-produtos">
+                                            <th style="width: 28px; padding-left: 12px;"><input type="checkbox" id="op-select-all-produtos">
                                             </th>
-                                            <th style="width: 80px;">Código</th>
+                                            <th style="width: 65px;">Código</th>
                                             <th>Produto</th>
-                                            <th style="width: 55px;">Unid.</th>
-                                            <th style="width: 80px;">Embalagem</th>
-                                            <th style="width: 80px;">Lance(s)</th>
-                                            <th style="width: 55px;">Qtd</th>
-                                            <th style="width: 80px;">V. Un. R$</th>
-                                            <th style="width: 90px;">V. Total R$</th>
+                                            <th style="width: 95px;">Embalagem</th>
+                                            <th style="width: 75px;">Lance(s)</th>
+                                            <th style="width: 40px;">Qtd</th>
+                                            <th style="width: 35px;">Unid.</th>
+                                            <th style="width: 75px;">V. Un. R$</th>
+                                            <th style="width: 80px;">V. Total R$</th>
                                         </tr>
                                     </thead>
                                     <tbody id="op-produtos-tbody">
@@ -5606,41 +5410,42 @@
                         </div>
 
                         <!-- Aba: Pagamento -->
-                        <div class="modal-op-tab-pane" id="op-tab-pagamento">
+                        <div class="modal-op-tab-pane" id="op-tab-pagamento" style="padding: 24px;">
                             <!-- Título da Seção -->
                             <div
-                                style="background: linear-gradient(135deg, #fef3c7, #fde68a); padding: 12px 16px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #f59e0b;">
+                                style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); padding: 14px 20px; border-radius: 12px; margin-bottom: 24px; border-left: 5px solid #f59e0b; box-shadow: 0 1px 3px rgba(245,158,11,0.1);">
                                 <h4
-                                    style="margin: 0; color: #92400e; font-size: 14px; display: flex; align-items: center; gap: 8px;">
-                                    <i class="fas fa-file-invoice-dollar"></i>
+                                    style="margin: 0; color: #92400e; font-size: 13px; display: flex; align-items: center; gap: 10px; letter-spacing: 0.8px; font-weight: 700;">
+                                    <i class="fas fa-file-invoice-dollar" style="font-size: 15px; color: #d97706;"></i>
                                     CONDIÇÕES DE PAGAMENTO
                                 </h4>
                             </div>
 
                             <!-- Tabela de Formas de Pagamento -->
                             <div
-                                style="background: white; border: 2px solid #e2e8f0; border-radius: 12px; overflow: hidden; margin-bottom: 20px;">
+                                style="background: white; border: 1px solid #e2e8f0; border-radius: 14px; overflow: hidden; margin-bottom: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
                                 <!-- Header da Tabela -->
                                 <div
-                                    style="display: grid; grid-template-columns: 2fr 1fr 2fr 1.5fr; background: #fef3c7; padding: 12px 16px; border-bottom: 2px solid #e2e8f0;">
+                                    style="display: grid; grid-template-columns: 2.2fr 0.8fr 2fr 1.2fr; background: linear-gradient(135deg, #fefce8 0%, #fef9c3 100%); padding: 14px 20px; border-bottom: 1px solid #e5e7eb;">
                                     <span
-                                        style="font-weight: 700; color: #1e293b; font-size: 12px; text-transform: uppercase;">Formas
+                                        style="font-weight: 700; color: #78350f; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Formas
                                         de Pagamento</span>
                                     <span
-                                        style="font-weight: 700; color: #1e293b; font-size: 12px; text-transform: uppercase; text-align: center;">%</span>
+                                        style="font-weight: 700; color: #78350f; font-size: 11px; text-transform: uppercase; text-align: center; letter-spacing: 0.5px;">%</span>
                                     <span
-                                        style="font-weight: 700; color: #1e293b; font-size: 12px; text-transform: uppercase;">Método
+                                        style="font-weight: 700; color: #78350f; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Método
                                         de Pagamento</span>
                                     <span
-                                        style="font-weight: 700; color: #1e293b; font-size: 12px; text-transform: uppercase; text-align: right;">Valor
+                                        style="font-weight: 700; color: #78350f; font-size: 11px; text-transform: uppercase; text-align: right; letter-spacing: 0.5px;">Valor
                                         R$</span>
                                 </div>
 
                                 <!-- Linha 1: À Vista / Entrada -->
                                 <div
-                                    style="display: grid; grid-template-columns: 2fr 1fr 2fr 1.5fr; padding: 12px 16px; border-bottom: 1px solid #f1f5f9; align-items: center; gap: 12px;">
+                                    style="display: grid; grid-template-columns: 2.2fr 0.8fr 2fr 1.2fr; padding: 14px 20px; border-bottom: 1px solid #f1f5f9; align-items: center; gap: 14px; background: #fffef5; transition: background 0.15s;">
                                     <select id="op-forma-pagamento-1"
-                                        style="padding: 10px 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 13px; background: #fefce8;"
+                                        style="padding: 9px 12px; border: 1.5px solid #d4d4d8; border-radius: 8px; font-size: 13px; background: #fefce8; color: #1e293b; font-weight: 500; cursor: pointer; transition: border-color 0.2s; outline: none;"
+                                        onfocus="this.style.borderColor='#f59e0b'" onblur="this.style.borderColor='#d4d4d8'"
                                         onchange="calcularValoresPagamento()">
                                         <option value="A_VISTA">À VISTA</option>
                                         <option value="ENTRADA">ENTRADA</option>
@@ -5648,13 +5453,15 @@
                                     </select>
                                     <div style="position: relative;">
                                         <input type="number" id="op-percent-1" value="100" min="0" max="100"
-                                            style="width: 100%; padding: 10px 30px 10px 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; font-weight: 600; text-align: center; background: #fefce8;"
+                                            style="width: 100%; padding: 9px 28px 9px 10px; border: 1.5px solid #d4d4d8; border-radius: 8px; font-size: 14px; font-weight: 600; text-align: center; background: #fefce8; color: #1e293b; transition: border-color 0.2s; outline: none;"
+                                            onfocus="this.style.borderColor='#f59e0b'" onblur="this.style.borderColor='#d4d4d8'"
                                             oninput="calcularValoresPagamento()" onchange="calcularValoresPagamento()">
                                         <span
-                                            style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #64748b; font-weight: 600;">%</span>
+                                            style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #a1a1aa; font-weight: 600; font-size: 13px; pointer-events: none;">%</span>
                                     </div>
                                     <select id="op-metodo-pagamento-1"
-                                        style="padding: 10px 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 13px; background: white;">
+                                        style="padding: 9px 12px; border: 1.5px solid #d4d4d8; border-radius: 8px; font-size: 13px; background: white; color: #1e293b; font-weight: 500; cursor: pointer; transition: border-color 0.2s; outline: none;"
+                                        onfocus="this.style.borderColor='#f59e0b'" onblur="this.style.borderColor='#d4d4d8'">
                                         <option value="BOLETO">BOLETO</option>
                                         <option value="TRANSFERENCIA">TRANSFERÊNCIA</option>
                                         <option value="PIX">PIX</option>
@@ -5664,15 +5471,17 @@
                                     </select>
                                     <div style="text-align: right;">
                                         <span id="op-valor-pagamento-1"
-                                            style="font-size: 15px; font-weight: 700; color: #16a34a;">R$ 0,00</span>
+                                            style="font-size: 14px; font-weight: 700; color: #16a34a; font-family: 'Segoe UI', system-ui, sans-serif;">R$ 0,00</span>
                                     </div>
                                 </div>
 
                                 <!-- Linha 2: Entrega / Parcela -->
                                 <div
-                                    style="display: grid; grid-template-columns: 2fr 1fr 2fr 1.5fr; padding: 12px 16px; border-bottom: 1px solid #f1f5f9; align-items: center; gap: 12px;">
+                                    style="display: grid; grid-template-columns: 2.2fr 0.8fr 2fr 1.2fr; padding: 14px 20px; border-bottom: 1px solid #f1f5f9; align-items: center; gap: 14px; transition: background 0.15s;"
+                                    onmouseenter="this.style.background='#f8fafc'" onmouseleave="this.style.background='transparent'">
                                     <select id="op-forma-pagamento-2"
-                                        style="padding: 10px 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 13px; background: white;"
+                                        style="padding: 9px 12px; border: 1.5px solid #e4e4e7; border-radius: 8px; font-size: 13px; background: white; color: #71717a; font-weight: 500; cursor: pointer; transition: border-color 0.2s; outline: none;"
+                                        onfocus="this.style.borderColor='#f59e0b'" onblur="this.style.borderColor='#e4e4e7'"
                                         onchange="calcularValoresPagamento()">
                                         <option value="">Selecione...</option>
                                         <option value="ENTREGA">ENTREGA</option>
@@ -5681,13 +5490,15 @@
                                     </select>
                                     <div style="position: relative;">
                                         <input type="number" id="op-percent-2" value="0" min="0" max="100"
-                                            style="width: 100%; padding: 10px 30px 10px 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; font-weight: 600; text-align: center;"
+                                            style="width: 100%; padding: 9px 28px 9px 10px; border: 1.5px solid #e4e4e7; border-radius: 8px; font-size: 14px; font-weight: 600; text-align: center; color: #a1a1aa; transition: border-color 0.2s; outline: none;"
+                                            onfocus="this.style.borderColor='#f59e0b'" onblur="this.style.borderColor='#e4e4e7'"
                                             oninput="calcularValoresPagamento()" onchange="calcularValoresPagamento()">
                                         <span
-                                            style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #64748b; font-weight: 600;">%</span>
+                                            style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #d4d4d8; font-weight: 600; font-size: 13px; pointer-events: none;">%</span>
                                     </div>
                                     <select id="op-metodo-pagamento-2"
-                                        style="padding: 10px 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 13px; background: white;">
+                                        style="padding: 9px 12px; border: 1.5px solid #e4e4e7; border-radius: 8px; font-size: 13px; background: white; color: #71717a; font-weight: 500; cursor: pointer; transition: border-color 0.2s; outline: none;"
+                                        onfocus="this.style.borderColor='#f59e0b'" onblur="this.style.borderColor='#e4e4e7'">
                                         <option value="">-</option>
                                         <option value="BOLETO">BOLETO</option>
                                         <option value="TRANSFERENCIA">TRANSFERÊNCIA</option>
@@ -5697,15 +5508,17 @@
                                     </select>
                                     <div style="text-align: right;">
                                         <span id="op-valor-pagamento-2"
-                                            style="font-size: 15px; font-weight: 700; color: #64748b;">R$ 0,00</span>
+                                            style="font-size: 14px; font-weight: 700; color: #a1a1aa; font-family: 'Segoe UI', system-ui, sans-serif;">R$ 0,00</span>
                                     </div>
                                 </div>
 
                                 <!-- Linha 3: Adicional (opcional) -->
                                 <div
-                                    style="display: grid; grid-template-columns: 2fr 1fr 2fr 1.5fr; padding: 12px 16px; align-items: center; gap: 12px;">
+                                    style="display: grid; grid-template-columns: 2.2fr 0.8fr 2fr 1.2fr; padding: 14px 20px; align-items: center; gap: 14px; transition: background 0.15s;"
+                                    onmouseenter="this.style.background='#f8fafc'" onmouseleave="this.style.background='transparent'">
                                     <select id="op-forma-pagamento-3"
-                                        style="padding: 10px 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 13px; background: white;"
+                                        style="padding: 9px 12px; border: 1.5px solid #e4e4e7; border-radius: 8px; font-size: 13px; background: white; color: #71717a; font-weight: 500; cursor: pointer; transition: border-color 0.2s; outline: none;"
+                                        onfocus="this.style.borderColor='#f59e0b'" onblur="this.style.borderColor='#e4e4e7'"
                                         onchange="calcularValoresPagamento()">
                                         <option value="">Selecione...</option>
                                         <option value="PARCELA_2">PARCELA 2</option>
@@ -5714,13 +5527,15 @@
                                     </select>
                                     <div style="position: relative;">
                                         <input type="number" id="op-percent-3" value="0" min="0" max="100"
-                                            style="width: 100%; padding: 10px 30px 10px 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; font-weight: 600; text-align: center;"
+                                            style="width: 100%; padding: 9px 28px 9px 10px; border: 1.5px solid #e4e4e7; border-radius: 8px; font-size: 14px; font-weight: 600; text-align: center; color: #a1a1aa; transition: border-color 0.2s; outline: none;"
+                                            onfocus="this.style.borderColor='#f59e0b'" onblur="this.style.borderColor='#e4e4e7'"
                                             oninput="calcularValoresPagamento()" onchange="calcularValoresPagamento()">
                                         <span
-                                            style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #64748b; font-weight: 600;">%</span>
+                                            style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #d4d4d8; font-weight: 600; font-size: 13px; pointer-events: none;">%</span>
                                     </div>
                                     <select id="op-metodo-pagamento-3"
-                                        style="padding: 10px 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 13px; background: white;">
+                                        style="padding: 9px 12px; border: 1.5px solid #e4e4e7; border-radius: 8px; font-size: 13px; background: white; color: #71717a; font-weight: 500; cursor: pointer; transition: border-color 0.2s; outline: none;"
+                                        onfocus="this.style.borderColor='#f59e0b'" onblur="this.style.borderColor='#e4e4e7'">
                                         <option value="">-</option>
                                         <option value="BOLETO">BOLETO</option>
                                         <option value="TRANSFERENCIA">TRANSFERÊNCIA</option>
@@ -5730,22 +5545,20 @@
                                     </select>
                                     <div style="text-align: right;">
                                         <span id="op-valor-pagamento-3"
-                                            style="font-size: 15px; font-weight: 700; color: #64748b;">R$ 0,00</span>
+                                            style="font-size: 14px; font-weight: 700; color: #a1a1aa; font-family: 'Segoe UI', system-ui, sans-serif;">R$ 0,00</span>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Resumo e Total -->
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 4px;">
                                 <!-- Percentual Total -->
                                 <div
-                                    style="background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 12px; padding: 16px;">
-                                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                                        <span style="font-size: 13px; color: #64748b; font-weight: 600;">Total
-                                            Percentual:</span>
-                                        <span id="op-percent-total"
-                                            style="font-size: 20px; font-weight: 700; color: #1e293b;">100%</span>
-                                    </div>
+                                    style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between;">
+                                    <span style="font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px;">Total
+                                        Percentual:</span>
+                                    <span id="op-percent-total"
+                                        style="font-size: 22px; font-weight: 800; color: #1e293b; font-family: 'Segoe UI', system-ui, sans-serif;">100%</span>
                                     <div id="op-percent-alert"
                                         style="display: none; margin-top: 8px; padding: 8px 12px; background: #fef2f2; border-radius: 6px; color: #dc2626; font-size: 12px;">
                                         <i class="fas fa-exclamation-triangle"></i> O percentual deve totalizar 100%
@@ -5754,26 +5567,25 @@
 
                                 <!-- Valor Total -->
                                 <div
-                                    style="background: linear-gradient(135deg, #dcfce7, #bbf7d0); border: 2px solid #86efac; border-radius: 12px; padding: 16px;">
-                                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                                        <span style="font-size: 13px; color: #166534; font-weight: 600;">Valor Total
-                                            $:</span>
-                                        <span id="op-valor-total-pagamento"
-                                            style="font-size: 20px; font-weight: 700; color: #16a34a;">R$ 0,00</span>
-                                    </div>
+                                    style="background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border: 1px solid #a7f3d0; border-radius: 12px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between;">
+                                    <span style="font-size: 12px; color: #166534; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px;">Valor
+                                        Total:</span>
+                                    <span id="op-valor-total-pagamento"
+                                        style="font-size: 22px; font-weight: 800; color: #16a34a; font-family: 'Segoe UI', system-ui, sans-serif;">R$ 0,00</span>
                                 </div>
                             </div>
 
                             <!-- Condições Adicionais -->
                             <div style="margin-top: 20px;">
                                 <label
-                                    style="display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 8px;">
-                                    <i class="fas fa-info-circle" style="color: #64748b;"></i> Condições de Pagamento
+                                    style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.3px;">
+                                    <i class="fas fa-info-circle" style="color: #94a3b8; font-size: 13px;"></i> Condições de Pagamento
                                     (Observações)
                                 </label>
-                                <input type="text" id="op-condições-pagamento"
+                                <textarea id="op-condições-pagamento" rows="2"
                                     placeholder="Ex: 28 dias após o faturamento, 30/60/90 dias, etc."
-                                    style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px;">
+                                    style="width: 100%; padding: 12px 16px; border: 1.5px solid #e4e4e7; border-radius: 10px; font-size: 13px; resize: vertical; min-height: 44px; font-family: inherit; transition: border-color 0.2s; outline: none; color: #374151;"
+                                    onfocus="this.style.borderColor='#f59e0b'" onblur="this.style.borderColor='#e4e4e7'"></textarea>
                             </div>
                         </div>
 
@@ -5820,75 +5632,58 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Sidebar de Ações -->
+                <div class="modal-op-sidebar">
+                    <button type="button" class="modal-op-sidebar-btn primary" onclick="salvarOrdemProducao()">
+                        <i class="fas fa-save"></i> Salvar
+                    </button>
+                    <button type="button" class="modal-op-sidebar-btn highlight" onclick="gerarExcelOP()">
+                        <i class="fas fa-file-excel"></i> Gerar Excel
+                    </button>
+                    <button type="button" class="modal-op-sidebar-btn" onclick="gerarPdfOP()" style="color: #D32F2F; font-weight: 600;">
+                        <i class="fas fa-file-pdf"></i> Gerar PDF
+                    </button>
+                    <button type="button" class="modal-op-sidebar-btn" onclick="imprimirOP()">
+                        <i class="fas fa-print"></i> Imprimir
+                    </button>
+                    <button type="button" class="modal-op-sidebar-btn" onclick="duplicarOP()">
+                        <i class="fas fa-copy"></i> Duplicar
+                    </button>
+
+                    <div class="modal-op-sidebar-divider"></div>
+
+                    <button type="button" class="modal-op-sidebar-btn" onclick="buscarClienteOP()">
+                        <i class="fas fa-search"></i> Buscar Cliente
+                    </button>
+                    <button type="button" class="modal-op-sidebar-btn" onclick="buscarTransportadoraOP()">
+                        <i class="fas fa-truck"></i> Buscar Transp.
+                    </button>
+
+                    <div class="modal-op-sidebar-divider"></div>
+
+                    <button type="button" class="modal-op-sidebar-btn danger" onclick="limparFormOP()">
+                        <i class="fas fa-eraser"></i> Limpar
+                    </button>
+                    <button type="button" class="modal-op-sidebar-btn" onclick="hideModal('modal-nova-ordem')">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                </div>
             </div>
 
-            <!-- Sidebar de Ações -->
-            <div class="modal-op-sidebar">
-                <!-- Destino da OP - OCULTO: Toda OP vai automaticamente para Kanban e Multiplexado -->
-                <div class="modal-op-sidebar-section" style="display: none;">
-                    <label class="modal-op-sidebar-label">
-                        <i class="fas fa-share-alt"></i> Destino
-                    </label>
-                    <div class="modal-op-sidebar-checkboxes">
-                        <label class="modal-op-checkbox-label">
-                            <input type="checkbox" id="op-destino-kanban" checked disabled>
-                            <span class="modal-op-checkbox-text">
-                                Kanban
-                                <small>Quadro Visual</small>
-                            </span>
-                        </label>
-                        <label class="modal-op-checkbox-label">
-                            <input type="checkbox" id="op-destino-multiplexado" checked disabled>
-                            <span class="modal-op-checkbox-text">
-                                Controle
-                                <small>Multiplexado</small>
-                            </span>
-                        </label>
-                    </div>
+            <!-- Footer -->
+            <div class="modal-op-footer">
+                <div class="footer-status">
+                    <i class="fas fa-plus-circle" style="color: #4F46E5;"></i>
+                    <span>Nova Ordem de Produção</span>
                 </div>
-
-                <div class="modal-op-sidebar-divider" style="display: none;"></div>
-
-                <button type="button" class="modal-op-sidebar-btn primary" onclick="salvarOrdemProducao()">
-                    <i class="fas fa-save"></i> Salvar
-                </button>
-                <button type="button" class="modal-op-sidebar-btn highlight" onclick="gerarExcelOP()">
-                    <i class="fas fa-file-excel"></i> Gerar Excel
-                </button>
-                <button type="button" class="modal-op-sidebar-btn" onclick="imprimirOP()">
-                    <i class="fas fa-print"></i> Imprimir
-                </button>
-                <button type="button" class="modal-op-sidebar-btn" onclick="duplicarOP()">
-                    <i class="fas fa-copy"></i> Duplicar
-                </button>
-                <button type="button" class="modal-op-sidebar-btn" onclick="buscarClienteOP()">
-                    <i class="fas fa-search"></i> Buscar Cliente
-                </button>
-                <button type="button" class="modal-op-sidebar-btn" onclick="buscarTransportadoraOP()">
-                    <i class="fas fa-truck-loading"></i> Buscar Transp.
-                </button>
-                <button type="button" class="modal-op-sidebar-btn outline" onclick="limparFormOP()">
-                    <i class="fas fa-eraser"></i> Limpar
-                </button>
-                <button type="button" class="modal-op-sidebar-btn danger" onclick="hideModal('modal-nova-ordem')">
-                    <i class="fas fa-times"></i> Cancelar
-                </button>
-
-                <!-- Navegação Horizontal - Indicador de Scroll -->
-                <div class="modal-op-nav-indicator">
-                    <div class="modal-op-nav-track">
-                        <div class="modal-op-nav-thumb" id="op-sidebar-nav-thumb"></div>
-                    </div>
-                    <div class="modal-op-nav-arrows">
-                        <button type="button" class="modal-op-nav-arrow" onclick="scrollOpModalContent('left')"
-                            title="Rolar para esquerda">
-                            <i class="fas fa-chevron-left"></i>
-                        </button>
-                        <button type="button" class="modal-op-nav-arrow" onclick="scrollOpModalContent('right')"
-                            title="Rolar para direita">
-                            <i class="fas fa-chevron-right"></i>
-                        </button>
-                    </div>
+                <div class="footer-actions">
+                    <button type="button" class="btn-footer btn-cancelar" onclick="hideModal('modal-nova-ordem')">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button type="button" class="btn-footer btn-salvar" onclick="salvarOrdemProducao()">
+                        <i class="fas fa-save"></i> Salvar
+                    </button>
                 </div>
             </div>
         </div>
@@ -8888,6 +8683,9 @@
         // Auth via httpOnly cookie — token legado mantido vazio para compatibilidade
         const token = '';
 
+        // S5.4 FIX: XSS protection — sanitiza strings antes de innerHTML
+        function esc(s) { return String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
+
         // ============================================
         // SISTEMA DE CONFIRMAÇÃO PROFISSIONAL
         // ============================================
@@ -8987,18 +8785,23 @@
         // ============================================
         function navigateTo(viewName) {
             // Mapeamento de views para páginas separadas
+            // FIX: nomes SEM acento para coincidir com os arquivos reais no servidor
             const pageMap = {
                 'dashboard': 'index.html',
                 'estoque': 'pages/estoque.html',
                 'produtos': 'pages/estoque.html',
                 'materiais': 'pages/materiais.html',
                 'ordem-compra': 'pages/ordem-compra.html',
-                'ordens': 'ordens-produção.html',
-                'produção': 'pages/gestão-produção.html',
-                'gestão-produção': 'pages/gestão-produção.html',
+                'ordens': 'ordens-producao.html',
+                'produção': 'pages/gestao-producao.html',
+                'producao': 'pages/gestao-producao.html',
+                'gestão-produção': 'pages/gestao-producao.html',
+                'gestao-producao': 'pages/gestao-producao.html',
                 'faturamento': 'pages/faturamento.html',
+                'qualidade': 'pages/qualidade.html',
                 'apontamentos': 'apontamentos.html',
-                'relatórios': 'pages/relatórios.html'
+                'relatórios': 'pages/relatorios.html',
+                'relatorios': 'pages/relatorios.html'
             };
 
             // Redirecionar para a página correspondente
@@ -9064,7 +8867,7 @@
         // ============================================
         // NOTIFICAÇÕES - SISTEMA FUNCIONAL
         // ============================================
-        let notificaçõesCarregadas = false;
+        let notificacoesCarregadas = false;
 
         async function carregarNotificacoesBell() {
             const list = document.getElementById('notification-list');
@@ -9072,7 +8875,7 @@
             if (!list) return;
 
             // Mostrar loading na primeira vez
-            if (!notificaçõesCarregadas) {
+            if (!notificacoesCarregadas) {
                 list.innerHTML = `
                     <div style="text-align: center; padding: 24px;">
                         <div class="loading-spinner" style="margin: 0 auto; width: 24px; height: 24px;"></div>
@@ -9092,7 +8895,7 @@
 
                 const data = await response.json();
                 const alertas = data.alertas || [];
-                notificaçõesCarregadas = true;
+                notificacoesCarregadas = true;
 
                 // Atualizar badge
                 if (badge) {
@@ -9134,7 +8937,7 @@
                         </div>
                         <div style="flex: 1; min-width: 0;">
                             <div style="font-weight: 600; font-size: 12px; color: var(--gray-800); margin-bottom: 2px;">
-                                ${alerta.titulo}
+                                ${esc(alerta.titulo)}
                                 <span style="
                                     background: ${alerta.cor};
                                     color: white;
@@ -9146,11 +8949,11 @@
                                 ">${alerta.total}</span>
                             </div>
                             <div style="color: var(--gray-500); font-size: 11px; line-height: 1.4;">
-                                ${alerta.descrição}
+                                ${esc(alerta.descrição)}
                             </div>
                             ${alerta.detalhes ? `
                                 <div style="color: var(--gray-400); font-size: 10px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                    ${alerta.detalhes}
+                                    ${esc(alerta.detalhes)}
                                 </div>
                             ` : ''}
                         </div>
@@ -9204,7 +9007,7 @@
         }
 
         // Carregar badge na inicialização (sem abrir painel)
-        (async function initNotificacoesBadge() {
+        async function initNotificacoesBadge() {
             try {
                 const headers = { 'Content-Type': 'application/json' };
                 const response = await fetch('/api/pcp/alertas', {
@@ -9225,7 +9028,8 @@
             } catch (e) {
                 console.warn('Não foi possível carregar badge de notificações:', e);
             }
-        })();
+        }
+        initNotificacoesBadge();
 
         // Auto-refresh badge a cada 5 minutos
         setInterval(() => {
@@ -9491,7 +9295,7 @@
             document.body.appendChild(modal);
             modal.style.display = 'flex';
             document.body.classList.add('modal-open');
-            document.title = 'Aluforce: Custos & Precificação';
+            document.title = 'Zyntra: Custos & Precificação';
             await cpCarregarDados();
         }
 
@@ -9525,7 +9329,7 @@
                 document.getElementById('cp-footer-info').innerHTML = '<i class="fas fa-cube" style="margin-right:4px;"></i>' + _cpCache.length + ' produtos no sistema';
             } catch (err) {
                 console.error('Erro cpCarregarDados:', err);
-                document.getElementById('cp-content').innerHTML = '<div style="text-align:center;padding:40px;color:#ef4444;"><i class="fas fa-exclamation-triangle" style="font-size:24px;"></i><p>Erro: ' + err.message + '</p></div>';
+                document.getElementById('cp-content').innerHTML = '<div style="text-align:center;padding:40px;color:#ef4444;"><i class="fas fa-exclamation-triangle" style="font-size:24px;"></i><p>Erro: ' + esc(err.message) + '</p></div>';
             }
         }
 
@@ -9822,11 +9626,11 @@
                 tbody += `<tr style="background:${bgColor};" onmouseover="this.style.background='#f0f0ff'" onmouseout="this.style.background='${bgColor}'">
                     <td style="padding:8px 12px;font-weight:600;color:#7c3aed;font-size:12px;">${p.codigo}</td>
                     <td style="padding:8px 12px;font-size:12px;color:#374151;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${p.descricao}">${p.descricao}</td>
-                    <td style="padding:8px 12px;text-align:right;font-family:monospace;font-size:12px;font-weight:600;color:#ea580c;">R$ ${p._cmp.toFixed(4)}</td>
-                    <td style="padding:8px 12px;text-align:right;font-family:monospace;font-size:12px;font-weight:700;color:#1e40af;">R$ ${p._preco.toFixed(4)}</td>
-                    <td style="padding:8px 12px;text-align:center;font-size:12px;font-weight:600;color:#059669;">${p._mb_pct.toFixed(2)}%</td>
-                    <td style="padding:8px 12px;text-align:right;font-family:monospace;font-size:12px;font-weight:600;color:${mlColor};">R$ ${p._ml.toFixed(4)}</td>
-                    <td style="padding:8px 12px;text-align:center;"><span style="background:${mlColor}15;color:${mlColor};font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;">${p._ml_pct.toFixed(2)}%</span></td>
+                    <td style="padding:8px 12px;text-align:right;font-family:monospace;font-size:12px;font-weight:600;color:#ea580c;">R$ ${(p._cmp || 0).toFixed(4)}</td>
+                    <td style="padding:8px 12px;text-align:right;font-family:monospace;font-size:12px;font-weight:700;color:#1e40af;">R$ ${(p._preco || 0).toFixed(4)}</td>
+                    <td style="padding:8px 12px;text-align:center;font-size:12px;font-weight:600;color:#059669;">${(p._mb_pct || 0).toFixed(2)}%</td>
+                    <td style="padding:8px 12px;text-align:right;font-family:monospace;font-size:12px;font-weight:600;color:${mlColor};">R$ ${(p._ml || 0).toFixed(4)}</td>
+                    <td style="padding:8px 12px;text-align:center;"><span style="background:${mlColor}15;color:${mlColor};font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;">${(p._ml_pct || 0).toFixed(2)}%</span></td>
                     <td style="padding:8px 10px;text-align:center;">
                         <button onclick="_cpSimProduto=_cpCache.find(x=>x.codigo==='${p.codigo}');cpSwitchTab('simulador')" style="background:#f3f4f6;border:1px solid #e5e7eb;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:10px;color:#6b7280;" title="Simular"><i class="fas fa-calculator"></i></button>
                     </td>
@@ -9905,7 +9709,7 @@
                 Object.keys(r.matCosts).forEach(mat => {
                     if (r.matCosts[mat] > 0) {
                         const kgm = p.kg_m[mat] || 0;
-                        const prkg = _cpParâmetros.precos_kg[mat];
+                        const prkg = _cpParâmetros.precos_kg[mat] || 0;
                         const pct = r.cmp > 0 ? (r.matCosts[mat] / r.cmp * 100) : 0;
                         matRows += `<tr>
                             <td style="padding:6px 10px;font-size:12px;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${matColors[mat] || '#6b7280'};margin-right:6px;"></span>${matNames[mat] || mat}</td>
@@ -9924,7 +9728,7 @@
                 const despIcons = { bobina: 'fa-circle-notch', comissao: 'fa-handshake', custo_fixo: 'fa-building', financeira: 'fa-credit-card', icms: 'fa-landmark', difal: 'fa-balance-scale', pis_cofins: 'fa-file-invoice-dollar', icms_st: 'fa-file-contract', redespacho: 'fa-shipping-fast', frete: 'fa-truck' };
                 let despRows = '';
                 Object.keys(r.despTotal).forEach(d => {
-                    const pct = _cpParâmetros.despesas[d];
+                    const pct = _cpParâmetros.despesas[d] || 0;
                     despRows += `<tr>
                         <td style="padding:5px 10px;font-size:12px;"><i class="fas ${despIcons[d] || 'fa-minus'}" style="color:#7c3aed;margin-right:6px;font-size:10px;"></i>${despNames[d] || d}</td>
                         <td style="padding:5px 10px;text-align:right;font-size:12px;color:#6b7280;">${pct.toFixed(2)}%</td>
@@ -9952,7 +9756,7 @@
                             <tbody>${matRows}</tbody>
                             <tfoot><tr style="border-top:2px solid #e5e7eb;background:#fef3c7;">
                                 <td colspan="5" style="padding:8px 10px;font-size:12px;font-weight:700;color:#92400e;"><i class="fas fa-equals" style="margin-right:4px;"></i>CMP Total</td>
-                                <td style="padding:8px 10px;text-align:right;font-family:monospace;font-size:13px;font-weight:800;color:#ea580c;">R$ ${r.cmp.toFixed(4)}</td>
+                                <td style="padding:8px 10px;text-align:right;font-family:monospace;font-size:13px;font-weight:800;color:#ea580c;">R$ ${(r.cmp || 0).toFixed(4)}</td>
                                 <td style="padding:8px 10px;text-align:right;font-size:11px;font-weight:600;">100%</td>
                             </tr></tfoot>
                         </table>
@@ -9966,17 +9770,17 @@
                             <!-- CMP -->
                             <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed #e5e7eb;">
                                 <span style="font-size:12px;color:#374151;"><i class="fas fa-box" style="color:#ea580c;margin-right:6px;"></i>Custo MP (CMP)</span>
-                                <span style="font-family:monospace;font-size:12px;font-weight:600;color:#ea580c;">R$ ${r.cmp.toFixed(4)}</span>
+                                <span style="font-family:monospace;font-size:12px;font-weight:600;color:#ea580c;">R$ ${(r.cmp || 0).toFixed(4)}</span>
                             </div>
                             <!-- Markup -->
                             <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e5e7eb;">
                                 <span style="font-size:12px;color:#374151;"><i class="fas fa-plus-circle" style="color:#3b82f6;margin-right:6px;"></i>Markup (${_cpParâmetros.markup_pct}%)</span>
-                                <span style="font-family:monospace;font-size:12px;font-weight:600;color:#3b82f6;">R$ ${r.mb.toFixed(4)}</span>
+                                <span style="font-family:monospace;font-size:12px;font-weight:600;color:#3b82f6;">R$ ${(r.mb || 0).toFixed(4)}</span>
                             </div>
                             <!-- Preço -->
                             <div style="display:flex;justify-content:space-between;padding:8px 12px;margin:6px 0;background:#eff6ff;border-radius:8px;">
                                 <span style="font-size:13px;font-weight:700;color:#1e40af;"><i class="fas fa-tag" style="margin-right:6px;"></i>Preço Sugerido</span>
-                                <span style="font-family:monospace;font-size:15px;font-weight:800;color:#1e40af;">R$ ${r.preco.toFixed(4)}</span>
+                                <span style="font-family:monospace;font-size:15px;font-weight:800;color:#1e40af;">R$ ${(r.preco || 0).toFixed(4)}</span>
                             </div>
                             <!-- Despesas -->
                             <div style="font-size:11px;font-weight:600;color:#9ca3af;text-transform:uppercase;margin:8px 0 4px;">Despesas:</div>
@@ -10444,7 +10248,7 @@
         }
 
         // ============================================
-        // MODAIS + TÍTULO DINÂMICO (padrão Aluforce: nome do modal)
+        // MODAIS + TÍTULO DINÂMICO (padrão Zyntra: nome do modal)
         // ============================================
         const _pcpOriginalTitle = document.title; // Guarda título original da página
 
@@ -10471,7 +10275,7 @@
                 document.body.appendChild(overlay);
                 // Atualiza título da aba
                 const modalTitle = _getModalTitle(overlay);
-                if (modalTitle) document.title = 'Aluforce: ' + modalTitle;
+                if (modalTitle) document.title = 'Zyntra: ' + modalTitle;
             }
         }
 
@@ -10506,7 +10310,7 @@
                         if (el.classList.contains('modal-overlay')) {
                             if (el.classList.contains('active')) {
                                 const t = _getModalTitle(el);
-                                if (t) document.title = 'Aluforce: ' + t;
+                                if (t) document.title = 'Zyntra: ' + t;
                             } else {
                                 const anyOpen = document.querySelector('.modal-overlay.active');
                                 if (!anyOpen) document.title = _pcpOriginalTitle;
@@ -10548,7 +10352,7 @@
 
             notification.innerHTML = `
                 <i class="fas ${icons[type] || icons.info}"></i>
-                <span>${message}</span>
+                <span>${esc(message)}</span>
                 <button onclick="this.parentElement.remove()" style="background:none;border:none;color:inherit;cursor:pointer;margin-left:auto;">
                     <i class="fas fa-times"></i>
                 </button>
@@ -10744,6 +10548,9 @@
                 return;
             }
 
+            if (window._guardSalvarOP) return;
+            window._guardSalvarOP = true;
+
             console.log('?? Salvando OP Enterprise:', dados);
             console.log('?? Produtos:', dados.produtos?.length || 0);
 
@@ -10784,7 +10591,7 @@
                 produtos: (dados.produtos || []).map(p => ({
                     codigo: p.codigo || '',
                     descrição: p.descrição || '',
-                    embalagem: p.embalagem || '',
+                    embalagem: p.embalagem || 'Bobina',
                     codigo_cores: p.codigo_cores || '',
                     lances: p.lances || '',
                     quantidade: parseFloat(p.quantidade) || 0,
@@ -10846,7 +10653,7 @@
             // ========== ENVIO UNIFICADO ==========
             try {
                 const response = await fetch('/api/pcp/ordens-kanban', {
-                    credentials: 'include', method: 'POST',
+                    method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
                     body: JSON.stringify(payload)
@@ -10874,6 +10681,8 @@
                 console.error('Erro de conexão:', error);
                 showNotification('Erro de conexão. Tentando salvar localmente...', 'warning');
                 salvarOPLocal(dados);
+            } finally {
+                window._guardSalvarOP = false;
             }
         }
 
@@ -10998,6 +10807,7 @@
                 metodo_pagamento: document.getElementById('op-metodo-pagamento-1')?.value || 'BOLETO',
                 percentual_pagamento: parseFloat(document.getElementById('op-percent-1')?.value) || 100,
                 condições_pagamento: document.getElementById('op-condições-pagamento')?.value || '',
+                condicoes_pagamento: document.getElementById('op-condições-pagamento')?.value || '',
 
                 // Entrega
                 data_previsao_entrega: document.getElementById('op-data-entrega')?.value || '',
@@ -11151,9 +10961,9 @@
 
                         if (produtos && produtos.length > 0) {
                             dropdown.innerHTML = produtos.map(p => `
-                                <div class="autocomplete-item" onclick="selecionarProdutoCatalogo('${p.codigo}', '${(p.descrição || '').replace(/'/g, "\\'")}')">
-                                    <strong>${p.codigo}</strong>
-                                    <span>${p.descrição || ''}</span>
+                                <div class="autocomplete-item" onclick="selecionarProdutoCatalogo('${esc(p.codigo)}', '${esc((p.descrição || '').replace(/'/g, "\\'"))}')">
+                                    <strong>${esc(p.codigo)}</strong>
+                                    <span>${esc(p.descrição || '')}</span>
                                 </div>
                             `).join('');
                             dropdown.style.display = 'block';
@@ -11175,9 +10985,9 @@
                     }
 
                     dropdown.innerHTML = resultados.map(p => `
-                        <div class="autocomplete-item" onclick="selecionarProdutoCatalogo('${p.codigo}', '${p.descrição.replace(/'/g, "\\'")}')">
-                            <strong>${p.codigo}</strong>
-                            <span>${p.descrição}</span>
+                        <div class="autocomplete-item" onclick="selecionarProdutoCatalogo('${esc(p.codigo)}', '${esc(p.descrição.replace(/'/g, "\\'"))}')">
+                            <strong>${esc(p.codigo)}</strong>
+                            <span>${esc(p.descrição)}</span>
                         </div>
                     `).join('');
                     dropdown.style.display = 'block';
@@ -11273,6 +11083,7 @@
             const produto = {
                 codigo,
                 descrição: descriçãoFinal,
+                descricao: descriçãoFinal,
                 embalagem,
                 codigo_cores: codigoCores,
                 lances,
@@ -11535,9 +11346,9 @@
                 totalGeral += prod.total;
                 html += `
                     <tr>
-                        <td><input type="checkbox" class="op-produto-check" data-index="${index}"></td>
+                        <td style="padding-left: 12px;"><input type="checkbox" class="op-produto-check" data-index="${index}"></td>
                         <td><span class="prod-codigo-cell">${prod.codigo}</span></td>
-                        <td title="${prod.descrição}">${prod.descrição || '(VLOOKUP)'}</td>
+                        <td title="${prod.descrição}" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${prod.descrição && !prod.descrição.includes('VLOOKUP') ? prod.descrição : prod.codigo || 'Sem descrição'}</td>
                         <td>
                             <select class="embalagem-inline-select" data-index="${index}" onchange="atualizarEmbalagemProduto(${index}, this.value)">
                                 <option value="Bobina" ${prod.embalagem === 'Bobina' || !prod.embalagem ? 'selected' : ''}>Bobina</option>
@@ -11647,6 +11458,11 @@
                 return;
             }
 
+            // 🔧 FIX BUG-R4-25: Alertar usuário se houver mais de 15 produtos (limite do template)
+            if (dados.produtos && dados.produtos.length > 15) {
+                showNotification(`Atenção: O template suporta no máximo 15 produtos. ${dados.produtos.length - 15} produto(s) serão omitidos do Excel.`, 'warning');
+            }
+
             console.log('Gerando Excel com dados:', dados);
 
             // PRIMEIRO: Salvar no Kanban e Multiplexado automaticamente
@@ -11683,6 +11499,49 @@
                     console.error('Erro:', error);
                     mostrarAlertaPCP('Erro ao Gerar Excel', 'Verifique se a API está disponível.', 'error');
                 });
+        }
+
+        // Gerar PDF da OP via XSL-FO / Apache FOP
+        async function gerarPdfOP() {
+            const dados = coletarDadosOP();
+            if (!dados || !dados.cliente) {
+                mostrarAlertaPCP('Dados incompletos', 'Preencha pelo menos o cliente.', 'warning');
+                return;
+            }
+
+            // Salvar no Kanban silenciosamente antes
+            try {
+                await salvarOrdemProducaoSilencioso(dados);
+            } catch (err) {
+                console.warn('Erro ao salvar no Kanban/Multiplexado:', err);
+            }
+
+            // Gerar PDF
+            try {
+                const response = await fetch('/api/gerar-ordem-pdf', {
+                    credentials: 'include',
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dados)
+                });
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    const nomeCliente = (dados.cliente || 'Cliente').replace(/[/\\:*?"<>|]/g, '_').trim();
+                    a.download = `Ordem de Produção - ${nomeCliente}.pdf`;
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    showNotification('PDF gerado e ordem salva no Kanban/Multiplexado!', 'success');
+                } else {
+                    const errData = await response.json().catch(() => ({}));
+                    mostrarAlertaPCP('Erro ao Gerar PDF', errData.error || errData.detalhe || 'Verifique se o Apache FOP está instalado.', 'error');
+                }
+            } catch (error) {
+                console.error('Erro ao gerar PDF:', error);
+                mostrarAlertaPCP('Erro ao Gerar PDF', 'Verifique se a API está disponível.', 'error');
+            }
         }
 
         // Salvar ordem silenciosamente (para uso interno)
@@ -11811,8 +11670,9 @@
                     credentials: 'include'
                 });
                 const data = await response.json();
-                if (Array.isArray(data)) {
-                    clientesCache = data.map(c => ({
+                const clientesArray = Array.isArray(data) ? data : (data.data || data.clientes || []);
+                if (clientesArray.length > 0) {
+                    clientesCache = clientesArray.map(c => ({
                         id: c.id,
                         nome: c.nome || '',
                         razao_social: c.razao_social || c.nome || '',
@@ -11821,12 +11681,14 @@
                         contato: c.contato || '',
                         telefone: c.telefone || '',
                         email: c.email || '',
+                        endereco: c.endereco || '',
+                        bairro: c.bairro || '',
                         cidade: c.cidade || '',
-                        estado: c.estado || ''
+                        estado: c.estado || c.uf || '',
+                        cep: c.cep || '',
+                        email_nfe: c.email_nfe || c.email || ''
                     }));
-                    console.log(`? Cache de clientes carregado: ${clientesCache.length} clientes`);
-                } else if (data.clientes) {
-                    clientesCache = data.clientes;
+                    console.log(`✅ Cache de clientes carregado: ${clientesCache.length} clientes`);
                 }
             } catch (error) {
                 console.error('Erro ao carregar clientes:', error);
@@ -11880,6 +11742,25 @@
             document.getElementById('op-cliente-contato').value = cliente.contato || '';
             document.getElementById('op-cliente-fone').value = formatarTelefone(cliente.telefone || '');
             document.getElementById('op-cliente-email').value = cliente.email || '';
+
+            // Preencher endereço, CEP e email NF-e
+            let enderecoCliente = cliente.endereco || '';
+            if (enderecoCliente && cliente.bairro && !enderecoCliente.includes(cliente.bairro)) {
+                enderecoCliente += ', ' + cliente.bairro;
+            }
+            if (!enderecoCliente && cliente.bairro) {
+                enderecoCliente = cliente.bairro;
+            }
+            if (cliente.cidade) {
+                if (enderecoCliente) {
+                    enderecoCliente += ', ' + cliente.cidade + (cliente.estado ? '/' + cliente.estado : '');
+                } else {
+                    enderecoCliente = cliente.cidade + (cliente.estado ? '/' + cliente.estado : '');
+                }
+            }
+            document.getElementById('op-cliente-endereco').value = enderecoCliente;
+            document.getElementById('op-cliente-cep').value = formatarCEP(cliente.cep || '');
+            document.getElementById('op-cliente-email-nfe').value = cliente.email_nfe || cliente.email || '';
 
             // Esconder dropdown
             document.getElementById('op-cliente-dropdown').style.display = 'none';
@@ -11961,6 +11842,8 @@
         let transportadorasCache = [];
         let autocompleteTranspTimeout = null;
         let autocompleteTranspIndex = -1;
+        let _transpCacheLoading = false;
+        let _transpCacheCooldown = 0;
 
         // Buscar transportadoras para autocomplete
         async function buscarTransportadorasAutocomplete(termo) {
@@ -11997,9 +11880,13 @@
                         return;
                     }
 
-                    // Se Não tem cache, busca da API
-                    await carregarTransportadorasParaCache();
-                    buscarTransportadorasAutocomplete(termo);
+                    // Se não tem cache, busca da API (com cooldown para evitar flood)
+                    if (Date.now() > _transpCacheCooldown) {
+                        await carregarTransportadorasParaCache();
+                        if (transportadorasCache.length > 0) {
+                            buscarTransportadorasAutocomplete(termo);
+                        }
+                    }
                 } catch (error) {
                     console.error('Erro no autocomplete de transportadoras:', error);
                 }
@@ -12008,8 +11895,17 @@
 
         // Carregar transportadoras para cache
         async function carregarTransportadorasParaCache() {
+            if (_transpCacheLoading) return;
+            _transpCacheLoading = true;
             try {
-                const response = await fetch('/api/transportadoras');
+                const response = await fetch('/api/pcp/transportadoras', {
+                    credentials: 'include'
+                });
+                if (!response.ok) {
+                    // Cooldown de 30s ao receber erro do servidor
+                    _transpCacheCooldown = Date.now() + 30000;
+                    return;
+                }
                 const data = await response.json();
                 if (Array.isArray(data)) {
                     transportadorasCache = data;
@@ -12020,7 +11916,11 @@
                 }
                 console.log('Transportadoras carregadas:', transportadorasCache.length);
             } catch (error) {
+                // Cooldown de 30s ao receber erro
+                _transpCacheCooldown = Date.now() + 30000;
                 console.error('Erro ao carregar transportadoras:', error);
+            } finally {
+                _transpCacheLoading = false;
             }
         }
 
@@ -12156,6 +12056,32 @@
                 }, 100);
             }
         }
+
+        // Carregar vendedores da API
+        async function carregarVendedoresOP() {
+            try {
+                const response = await fetch('/api/pcp/vendedores?limit=50', { credentials: 'include' });
+                if (!response.ok) return;
+                const vendedores = await response.json();
+                const select = document.getElementById('op-vendedor');
+                if (!select || !Array.isArray(vendedores)) return;
+                // Manter a primeira opção "Selecione..."
+                select.innerHTML = '<option value="">Selecione...</option>';
+                vendedores.forEach(v => {
+                    const nome = v.nome || v.nome_completo || '';
+                    if (nome) {
+                        const opt = document.createElement('option');
+                        opt.value = nome;
+                        opt.textContent = nome;
+                        select.appendChild(opt);
+                    }
+                });
+            } catch (e) {
+                console.error('Erro ao carregar vendedores:', e);
+            }
+        }
+        // Carregar vendedores ao iniciar
+        carregarVendedoresOP();
 
         // Limpar formulário
         // Função interna de limpeza (sem confirmação) para uso programático
@@ -12696,7 +12622,7 @@
             }
 
             try {
-                const response = await fetch(`/api/pcp/produtos?${params.toString()}`);
+                const response = await fetch(`/api/pcp/produtos?${params.toString()}`, { credentials: 'include' });
                 const body = await response.json();
                 const produtos = body.produtos || body.rows || (Array.isArray(body) ? body : []);
                 const total = Number(body.total || produtos.length);
@@ -13267,6 +13193,9 @@
                 return;
             }
 
+            if (window._guardSalvarMaterial) return;
+            window._guardSalvarMaterial = true;
+
             // Converter valores para formato numérico
             const custoStr = document.getElementById('material-custo').value.replace(',', '.');
             const precoStr = document.getElementById('material-preco').value.replace(',', '.');
@@ -13309,6 +13238,8 @@
             } catch (error) {
                 console.error('Erro ao salvar material:', error);
                 showNotification('Erro ao salvar material', 'error');
+            } finally {
+                window._guardSalvarMaterial = false;
             }
         }
 
@@ -13321,6 +13252,9 @@
             );
 
             if (!confirmado) return;
+
+            if (window._guardExcluirMaterial) return;
+            window._guardExcluirMaterial = true;
 
             try {
                 const response = await fetch(`/api/pcp/materiais/${id}`, {
@@ -13336,6 +13270,8 @@
             } catch (error) {
                 console.error('Erro ao excluir material:', error);
                 showNotification('Erro ao excluir material', 'error');
+            } finally {
+                window._guardExcluirMaterial = false;
             }
         }
 
@@ -13535,6 +13471,9 @@
                 return;
             }
 
+            if (window._guardMovMaterial) return;
+            window._guardMovMaterial = true;
+
             // Calcular novo estoque
             let novoEstoque = estoqueAtual;
             if (tipoMovimentacaoMaterialAtual === 'entrada') {
@@ -13578,6 +13517,8 @@
             } catch (error) {
                 console.log('?? Erro na API, salvando localmente:', error);
                 salvarMovimentacaoMaterialLocal(movimentacao);
+            } finally {
+                window._guardMovMaterial = false;
             }
 
             // Atualizar estoque no campo
@@ -13669,6 +13610,10 @@
         // Abrir modal de baixa de material
         async function abrirBaixaMaterial(id) {
             try {
+                // AUDIT-FIX S6.2b: Remover modal anterior se existir (evita duplicatas)
+                const modalExistente = document.getElementById('modal-baixa-pcp');
+                if (modalExistente) modalExistente.remove();
+
                 const response = await fetch(`/api/pcp/materias-primas/${id}`, { credentials: 'include' });
                 if (!response.ok) {
                     showNotification('Material não encontrado', 'error');
@@ -13925,6 +13870,9 @@
                 return;
             }
 
+            if (window._guardBaixaPCP) return;
+            window._guardBaixaPCP = true;
+
             // Montar observação com detalhes dos recortes
             let obsUsuario = document.getElementById('baixa-obs').value || '';
             let recortesDetalhe = '';
@@ -13967,6 +13915,8 @@
             } catch (error) {
                 console.error('Erro:', error);
                 showNotification('Erro ao registrar baixa', 'error');
+            } finally {
+                window._guardBaixaPCP = false;
             }
         }
 
@@ -14495,6 +14445,9 @@
                 return;
             }
 
+            if (window._guardSalvarProduto) return;
+            window._guardSalvarProduto = true;
+
             // Pegar valores de estoque
             const estoqueInput = document.getElementById('pcp-produto-estoque');
             const estoqueMinimoInput = document.getElementById('pcp-produto-estoque-minimo');
@@ -14549,6 +14502,8 @@
             } catch (error) {
                 console.error('Erro ao salvar produto:', error);
                 showNotification('Erro ao salvar produto', 'error');
+            } finally {
+                window._guardSalvarProduto = false;
             }
         }
 
@@ -14642,6 +14597,10 @@
             }
             const confirmado = await mostrarConfirmacaoPCP('Excluir Produto', 'Deseja realmente excluir este produto? Esta ação não pode ser desfeita.', 'danger');
             if (!confirmado) return;
+
+            if (window._guardExcluirProduto) return;
+            window._guardExcluirProduto = true;
+
             try {
                 const response = await fetch(`/api/pcp/produtos/${produtoId}`, {
                     credentials: 'include', method: 'DELETE',
@@ -14657,6 +14616,8 @@
             } catch (error) {
                 console.error('Erro ao excluir:', error);
                 showNotification('Erro ao excluir produto', 'error');
+            } finally {
+                window._guardExcluirProduto = false;
             }
         }
 
@@ -15084,6 +15045,9 @@
                 return;
             }
 
+            if (window._guardConfirmarMov) return;
+            window._guardConfirmarMov = true;
+
             // Calcular novo estoque
             let novoEstoque = estoqueAtual;
             if (tipoMovimentacaoAtual === 'entrada') {
@@ -15126,6 +15090,8 @@
             } catch (error) {
                 console.log('?? Erro na API, salvando localmente:', error);
                 salvarMovimentacaoLocal(movimentacao);
+            } finally {
+                window._guardConfirmarMov = false;
             }
 
             // Atualizar estoque no campo
@@ -16066,6 +16032,9 @@
                 return;
             }
 
+            if (window._guardMovRapida) return;
+            window._guardMovRapida = true;
+
             // Calcular novo estoque
             let novoEstoque = estoqueAtual;
             if (tipo === 'entrada') novoEstoque = estoqueAtual + quantidade;
@@ -16098,6 +16067,8 @@
             } catch (error) {
                 console.error('Erro ao salvar movimentação:', error);
                 mostrarNotificacao('Movimentação registrada localmente', 'info');
+            } finally {
+                window._guardMovRapida = false;
             }
 
             fecharModalQuantidadeRapida();
@@ -16439,6 +16410,10 @@
         window.lancesEntrada = [];
 
         function abrirModalEntradaLances(id, codigo, nome, estoque) {
+            // AUDIT-FIX S6.2b: Remover modal anterior se existir (evita duplicatas)
+            const modalExistente = document.getElementById('modal-entrada-lances');
+            if (modalExistente) modalExistente.remove();
+
             const estoqueAtual = parseFloat(estoque || 0);
 
             const modalHtml = `
@@ -17996,11 +17971,11 @@
                         userPhotoEl.onerror = function () {
                             // Se a imagem falhar, mostrar iniciais
                             this.style.display = 'none';
-                            mostrarIniciaisAvatar(nomeCompleto, userAvatarDiv, userInitialsEl);
+                            if (userAvatarDiv) mostrarIniciaisAvatar(nomeCompleto, userAvatarDiv, userInitialsEl);
                         };
                         if (userInitialsEl) userInitialsEl.style.display = 'none';
                         console.log('Avatar carregado:', fotoUrl);
-                    } else {
+                    } else if (userAvatarDiv) {
                         // Sem foto - gerar avatar com iniciais
                         mostrarIniciaisAvatar(nomeCompleto, userAvatarDiv, userInitialsEl);
                         if (userPhotoEl) userPhotoEl.style.display = 'none';
@@ -18016,6 +17991,8 @@
 
                     console.log('Usuário carregado:', primeiroNome, 'Avatar:', fotoUrl ? fotoUrl : 'Iniciais');
 
+                    // === RESTRIÇÃO: Sidebar por perfil ===
+                    configurarSidebarPorRole(user);
                     // === RESTRIÇÃO: Usuários somente leitura no PCP ===
                     aplicarModoPCPSomenteLeitura(user);
                 } else {
@@ -18026,6 +18003,49 @@
                 console.error('Erro ao carregar dados do usuário:', error);
                 carregarUsuarioLocalStorage();
             }
+        }
+
+        // ============================================
+        // RESTRIÇÃO DE SIDEBAR POR ROLE (PCP operador → apenas 2 itens)
+        // ============================================
+        function configurarSidebarPorRole(user) {
+            const sidebarNav = document.querySelector('.sidebar-nav');
+            if (!sidebarNav) return;
+
+            const role = (user.role || user.cargo || '').toLowerCase();
+            const roles = (user.roles || []).map(r => r.toLowerCase());
+
+            // Roles com acesso completo ao módulo PCP
+            const rolesFullAccess = ['admin', 'administrador', 'supervisor', 'gerente', 'diretoria', 'ti', 'pcp', 'analista'];
+            const isFullAccess = user.is_admin === true || user.is_admin === 1 ||
+                                 rolesFullAccess.some(r => role.includes(r)) ||
+                                 roles.some(r => rolesFullAccess.some(a => r.includes(a)));
+
+            // Acesso completo → não altera a sidebar
+            if (isFullAccess) return;
+
+            // Operador: substitui sidebar por apenas Ordens de Produção e Apontamentos
+            sidebarNav.innerHTML = `
+                <a href="ordens-producao.html" class="sidebar-btn" title="Ordens de Produção">
+                    <i class="fas fa-clipboard-list"></i>
+                </a>
+                <a href="apontamentos.html" class="sidebar-btn" title="Apontamentos">
+                    <i class="fas fa-stopwatch"></i>
+                </a>
+            `;
+
+            const sidebarBottom = document.querySelector('.sidebar-bottom');
+            if (sidebarBottom) {
+                sidebarBottom.innerHTML = `
+                    <button class="sidebar-btn" title="Sair" onclick="fazerLogout()">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                `;
+            }
+
+            // Ocultar botões de ação que não fazem sentido para operadores
+            const btnNovaOrdem = document.getElementById('btn-nova-ordem');
+            if (btnNovaOrdem) btnNovaOrdem.style.setProperty('display', 'none', 'important');
         }
 
         // ============================================
@@ -18433,13 +18453,13 @@
                 }
 
                 // Filtro de período
-                if (período && pedido.created_at) {
+                if (periodo && pedido.created_at) {
                     const dataPedido = new Date(pedido.created_at);
                     const hoje = new Date();
                     hoje.setHours(23, 59, 59, 999);
 
                     let dataLimite = new Date();
-                    switch (período) {
+                    switch (periodo) {
                         case 'hoje':
                             dataLimite.setHours(0, 0, 0, 0);
                             break;
@@ -18746,6 +18766,9 @@
                     const opClienteContato = document.getElementById('op-cliente-contato');
                     const opClienteFone = document.getElementById('op-cliente-fone');
                     const opClienteEmail = document.getElementById('op-cliente-email');
+                    const opClienteEndereco = document.getElementById('op-cliente-endereco');
+                    const opClienteCep = document.getElementById('op-cliente-cep');
+                    const opClienteEmailNfe = document.getElementById('op-cliente-email-nfe');
 
                     // Usar razao_social ou nome_fantasia ou nome
                     const nomeCliente = clienteData.razao_social || clienteData.nome_fantasia || clienteData.nome || '';
@@ -18756,21 +18779,72 @@
                     if (opClienteFone) opClienteFone.value = formatarTelefone(clienteData.telefone) || '';
                     if (opClienteEmail) opClienteEmail.value = clienteData.email || '';
 
+                    // Preencher endereço completo, CEP e email NF-e
+                    if (opClienteEndereco) {
+                        const endParts = [
+                            clienteData.endereco || pedido.cliente_endereco || '',
+                            clienteData.numero || pedido.cliente_numero || '',
+                        ].filter(Boolean).join(', ');
+                        const bairroCidade = [
+                            clienteData.bairro || pedido.cliente_bairro || '',
+                            [clienteData.cidade || pedido.cliente_cidade || '', clienteData.estado || clienteData.uf || pedido.cliente_uf || ''].filter(Boolean).join('/')
+                        ].filter(Boolean).join(' - ');
+                        const endCompleto = [endParts, bairroCidade].filter(Boolean).join(' - ');
+                        opClienteEndereco.value = endCompleto;
+                    }
+                    if (opClienteCep) opClienteCep.value = formatarCEP(clienteData.cep || pedido.cliente_cep || '') || '';
+                    if (opClienteEmailNfe) opClienteEmailNfe.value = clienteData.email_nfe || clienteData.email || '';
+
                     console.log('? Dados preenchidos - Cliente:', nomeCliente);
                 }
 
                 // Preencher produtos na tabela
                 if (itens && itens.length > 0) {
                     // Limpar e popular o array produtosOP
-                    produtosOP = itens.map(item => ({
-                        codigo: item.codigo || '',
-                        descrição: item.descrição || item.produto || '',
-                        embalagem: item.embalagem || '',
-                        lances: item.lances || '',
-                        quantidade: parseFloat(item.quantidade) || 1,
-                        valor_unitario: parseFloat(item.preco_unitario) || 0,
-                        total: parseFloat(item.total) || (parseFloat(item.preco_unitario) * parseFloat(item.quantidade)) || 0
-                    }));
+                    produtosOP = itens.map(item => {
+                        // API retorna 'descricao' (sem acento) - mapear corretamente
+                        let desc = item.descricao || item.descrição || item.produto || '';
+                        // Se descrição contém VLOOKUP ou está vazia, tentar resolver pelo catálogo local
+                        if (!desc || desc.includes('VLOOKUP') || desc.includes('vlookup')) {
+                            const codigo = (item.codigo || '').toUpperCase();
+                            const catalogoMatch = catalogoProdutos.find(p => p.codigo.toUpperCase() === codigo);
+                            if (catalogoMatch) {
+                                desc = catalogoMatch.descrição;
+                            }
+                        }
+                        return {
+                            codigo: item.codigo || '',
+                            descrição: desc,
+                            embalagem: item.embalagem || 'Bobina',
+                            codigo_cores: item.codigo_cores || '',
+                            lances: item.lances || '',
+                            quantidade: parseFloat(item.quantidade) || 1,
+                            unidade_medida: item.unidade || item.unidade_medida || 'M',
+                            valor_unitario: parseFloat(item.preco_unitario) || 0,
+                            total: parseFloat(item.total || item.subtotal) || (parseFloat(item.preco_unitario) * parseFloat(item.quantidade)) || 0
+                        };
+                    });
+
+                    // Resolver descrições VLOOKUP/vazias via API para produtos não encontrados no catálogo local
+                    const produtosSemDesc = produtosOP.filter(p => !p.descrição || p.descrição.includes('VLOOKUP'));
+                    if (produtosSemDesc.length > 0) {
+                        for (const prod of produtosSemDesc) {
+                            if (prod.codigo) {
+                                try {
+                                    const resp = await fetch(`/api/pcp/produtos/autocomplete?q=${encodeURIComponent(prod.codigo)}`, { credentials: 'include' });
+                                    if (resp.ok) {
+                                        const produtos = await resp.json();
+                                        const match = produtos.find(p => p.codigo && p.codigo.toUpperCase() === prod.codigo.toUpperCase());
+                                        if (match && match.descrição) {
+                                            prod.descrição = match.descrição;
+                                        } else if (match && match.descricao) {
+                                            prod.descrição = match.descricao;
+                                        }
+                                    }
+                                } catch (e) { console.warn('Erro ao resolver produto:', prod.codigo, e); }
+                            }
+                        }
+                    }
 
                     // Usar função Padrão para renderizar a tabela com campos editáveis
                     atualizarTabelaProdutosOP();
@@ -18785,10 +18859,34 @@
                     if (opCondicoesPagamento) opCondicoesPagamento.value = pedido.condições_pagamento;
                 }
 
-                // Preencher observações (se houver descrição do pedido)
-                if (pedido.descrição) {
+                // Preencher observações (descrição do pedido + observações internas)
+                {
                     const opObservacoes = document.getElementById('op-observacoes');
-                    if (opObservacoes) opObservacoes.value = `Pedido #${pedidoId}${pedido.descrição}`;
+                    if (opObservacoes) {
+                        const partes = [];
+                        if (pedido.descrição || pedido.descricao) partes.push(pedido.descrição || pedido.descricao);
+                        if (pedido.obs_internas) partes.push(`[Obs. Internas] ${pedido.obs_internas}`);
+                        if (pedido.observacao || pedido.observacoes) partes.push(pedido.observacao || pedido.observacoes);
+                        opObservacoes.value = partes.length > 0 ? `Pedido #${pedidoId}\n${partes.join('\n')}` : `Pedido #${pedidoId}`;
+                    }
+                }
+
+                // Preencher tipo de frete do pedido
+                if (pedido.tipo_frete) {
+                    const opTipoFrete = document.getElementById('op-tipo-frete');
+                    if (opTipoFrete) {
+                        // Tentar selecionar opção correspondente (CIF, FOB, etc)
+                        const tipoFreteUpper = pedido.tipo_frete.toUpperCase();
+                        let found = false;
+                        for (let option of opTipoFrete.options) {
+                            if (option.value.toUpperCase() === tipoFreteUpper || option.text.toUpperCase() === tipoFreteUpper) {
+                                option.selected = true;
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found) opTipoFrete.value = pedido.tipo_frete;
+                    }
                 }
 
                 // Preencher dados da transportadora (se houver no pedido)
@@ -19275,6 +19373,9 @@
         async function criarOrdemProducao(event) {
             event.preventDefault();
 
+            if (window._guardCriarOP) return;
+            window._guardCriarOP = true;
+
             const dados = {
                 número: document.getElementById('op-número')?.value,
                 dataConclusao: document.getElementById('op-data-conclusao')?.value,
@@ -19319,6 +19420,8 @@
                 hideModal('modal-nova-ordem');
                 document.getElementById('form-nova-ordem')?.reset();
                 gerarNumeroOP();
+            } finally {
+                window._guardCriarOP = false;
             }
         }
 
@@ -20221,7 +20324,7 @@
                                                         <div style="font-weight: 700; color: #0f172a; font-size: 12px;">${item.codigo || '-'}</div>
                                                         ${item.codigo_composicao && item.codigo !== item.codigo_composicao ?
                                 '<div style="font-size: 10px; color: #dc2626; font-weight: 500;">\u2192 ' + item.codigo_composicao + '</div>' : ''}
-                                                        <div style="font-size: 10px; color: #94a3b8; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.descrição || ''}</div>
+                                                        <div style="font-size: 10px; color: #94a3b8; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.descricao || item.descrição || ''}</div>
                                                     </td>
                                                     <td style="padding: 10px; text-align: right; font-weight: 700; color: #0f172a; font-size: 13px;">${item.metros.toLocaleString('pt-BR')}</td>
                                                     <td style="padding: 10px; text-align: right; color: #d97706; font-weight: 600;">${item.al_kg.toFixed(1)}</td>
@@ -20257,7 +20360,7 @@
                                     <div style="font-weight: 800; color: #0f172a; font-size: 16px; letter-spacing: -0.3px;">${item.codigo}</div>
                                     ${item.codigo_composicao && item.codigo !== item.codigo_composicao ?
                             `<div style="font-size: 11px; color: #64748b; font-weight: 500;">Composição: <strong style="color: #dc2626;">${item.codigo_composicao}</strong></div>` : ''}
-                                    <div style="font-size: 12px; color: #64748b; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.descrição || 'Sem descrição'}</div>
+                                    <div style="font-size: 12px; color: #64748b; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.descricao || item.descrição || 'Sem descrição'}</div>
                                 </div>
                                 ${item.composicao_encontrada ?
                             '<div style="background: #ecfdf5; color: #059669; padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 600; white-space: nowrap; border: 1px solid #bbf7d0;"><i class="fas fa-check-circle" style="margin-right: 4px;"></i>Composição OK</div>' :
@@ -20475,18 +20578,20 @@
                             return;
                         }
 
-                        // Detectar categoria do cabo pelo nome do produto
-                        const nomeProd = (itens[0].descrição || itens[0].codigo || '').toUpperCase();
+                        // Detectar categoria do cabo pelo nome/código do produto
+                        const nomeProd = (itens[0].descricao || itens[0].descrição || itens[0].codigo || '').toUpperCase();
+                        const codigoProd = (itens[0].codigo || '').toUpperCase();
                         let catBobina = '';
-                        if (nomeProd.includes('QUADRUPLEX') || nomeProd.includes('QUADRIP')) catBobina = 'MULTIPLEX QUADRUPLEX';
-                        else if (nomeProd.includes('TRIPLEX')) catBobina = 'MULTIPLEX TRIPLEX';
-                        else if (nomeProd.includes('DUPLEX')) catBobina = 'MULTIPLEX DUPLEX';
-                        else if (nomeProd.includes('PROTEGIDO') || nomeProd.includes('XLPETR')) catBobina = 'PROTEGIDO AL/XLPETR';
-                        else if (nomeProd.includes('POTENCIA') || nomeProd.includes('POT\u00caNCIA') || nomeProd.includes('PVC')) catBobina = 'POT\u00caNCIA AL/XLPE/PVC';
+                        if (nomeProd.includes('QUADRUPLEX') || nomeProd.includes('QUADRIP') || codigoProd.startsWith('QDN')) catBobina = 'MULTIPLEX QUADRUPLEX';
+                        else if (nomeProd.includes('TRIPLEX') || codigoProd.startsWith('TRI')) catBobina = 'MULTIPLEX TRIPLEX';
+                        else if (nomeProd.includes('DUPLEX') || codigoProd.startsWith('DUN') || codigoProd.startsWith('DUP')) catBobina = 'MULTIPLEX DUPLEX';
+                        else if (nomeProd.includes('PROTEGIDO') || nomeProd.includes('XLPETR') || codigoProd.startsWith('PRO')) catBobina = 'PROTEGIDO AL/XLPETR';
+                        else if (nomeProd.includes('POTENCIA') || nomeProd.includes('POT\u00caNCIA') || nomeProd.includes('PVC') || codigoProd.startsWith('POT')) catBobina = 'POT\u00caNCIA AL/XLPE/PVC';
+                        else if (codigoProd.startsWith('UNI')) catBobina = 'UNIPOLAR AL/XLPE';
                         else catBobina = 'UNIPOLAR AL/XLPE';
 
-                        // Extrair seção (mm²) do nome do produto
-                        const secaoMatch = nomeProd.match(/(\d+)\s*mm/i) || nomeProd.match(/\s(\d+)\s/);
+                        // Extrair seção (mm²) do nome do produto ou do código (PRO70→70, DUN16→16, QDN35→35)
+                        const secaoMatch = nomeProd.match(/(\d+)\s*mm/i) || nomeProd.match(/\s(\d+)\s/) || codigoProd.match(/[A-Z](\d+)$/i);
                         const secaoBob = secaoMatch ? secaoMatch[1] : '';
 
                         const resultDiv = document.getElementById('bobina-pedido-result');
@@ -21355,6 +21460,9 @@
                 return;
             }
 
+            if (window._guardSalvarManut) return;
+            window._guardSalvarManut = true;
+
             try {
                 const url = isEdit
                     ? `/api/pcp/manutencoes/${manutencaoId}`
@@ -21379,6 +21487,8 @@
                 }
             } catch (error) {
                 showNotification('Erro: ' + error.message, 'error');
+            } finally {
+                window._guardSalvarManut = false;
             }
         }
 
@@ -21392,6 +21502,9 @@
             });
 
             if (!confirmado) return;
+
+            if (window._guardExcluirManut) return;
+            window._guardExcluirManut = true;
 
             try {
                 const response = await fetch(`/api/pcp/manutencoes/${manutencaoId}`, {
@@ -21407,6 +21520,8 @@
                 }
             } catch (error) {
                 showNotification('Erro: ' + error.message, 'error');
+            } finally {
+                window._guardExcluirManut = false;
             }
         }
 
@@ -21445,6 +21560,9 @@
                 return;
             }
 
+            if (window._guardSalvarMaquina) return;
+            window._guardSalvarMaquina = true;
+
             try {
                 const url = id ? `/api/pcp/maquinas/${id}` : '/api/pcp/maquinas';
                 const method = id ? 'PUT' : 'POST';
@@ -21466,6 +21584,8 @@
                 }
             } catch (error) {
                 showNotification('Erro: ' + error.message, 'error');
+            } finally {
+                window._guardSalvarMaquina = false;
             }
         }
 
@@ -21483,6 +21603,9 @@
             });
 
             if (!confirmado) return;
+
+            if (window._guardExcluirMaquina) return;
+            window._guardExcluirMaquina = true;
 
             try {
                 const response = await fetch(`/api/pcp/maquinas/${id}`, {
@@ -21505,6 +21628,8 @@
             } catch (error) {
                 console.error('Erro ao excluir máquina:', error);
                 showNotification('Erro: ' + error.message, 'error');
+            } finally {
+                window._guardExcluirMaquina = false;
             }
         }
 
@@ -21830,7 +21955,7 @@
                                 </div>
                                 <div>
                                     <h2 style="margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -0.3px;">${titulo}</h2>
-                                    <p style="margin: 3px 0 0; opacity: 0.85; font-size: 12px; font-weight: 500;">Aluforce: ${config.subtitulo}</p>
+                                    <p style="margin: 3px 0 0; opacity: 0.85; font-size: 12px; font-weight: 500;">Zyntra: ${config.subtitulo}</p>
                                 </div>
                             </div>
                             <button onclick="fecharModalDiario()" style="background: rgba(255,255,255,0.15); border: none; color: white; width: 40px; height: 40px; border-radius: 10px; cursor: pointer; font-size: 16px; transition: all 0.2s; -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);" onmouseover="this.style.background='rgba(255,255,255,0.25)'; this.style.transform='rotate(90deg)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'; this.style.transform='rotate(0deg)'">
@@ -23249,6 +23374,9 @@
                 return;
             }
 
+            if (window._guardSalvarOC) return;
+            window._guardSalvarOC = true;
+
             const dados = {
                 material_id: parseInt(materialId),
                 quantidade: parseFloat(quantidade),
@@ -23283,6 +23411,8 @@
                 }
             } catch (error) {
                 showNotification('Erro ao salvar: ' + error.message, 'error');
+            } finally {
+                window._guardSalvarOC = false;
             }
         }
 
@@ -24577,7 +24707,7 @@
     <!-- Chat Widget BOB AI --><!-- Chat Widget REMOVIDO --><!--
 <script src="/chat/widget.js?v=20260218" defer></script> -->
 
-    <!-- ALUFORCE: Confirm Dialog Profissional v2.0 -->
+    <!-- Zyntra: Confirm Dialog Profissional v2.0 -->
     <script src="/_shared/confirm-dialog.js?v=20260217"></script>
     <script src="/js/user-dropdown.js?v=20260223" defer></script>
 

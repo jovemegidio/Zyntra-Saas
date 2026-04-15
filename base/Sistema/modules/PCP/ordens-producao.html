@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
     <!-- CSS PCP Padrão - Mesmo layout das outras páginas -->
     <link rel="stylesheet" href="css/pcp-layout.css">
-    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260216">
+    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260711">
     <link rel="stylesheet" href="css/pcp-components.css">
 
     <style>
@@ -45,7 +45,7 @@
         }
 
         /* ========================================
-           ESTILOS ESPECéFICOS DO KANBAN
+           ESTILOS ESPECÍFICOS DO KANBAN
            Layout base vem do pcp-layout.css
            ======================================== */
 
@@ -358,6 +358,53 @@
         .card-menu:hover {
             background: #f5f5f5;
             color: var(--text-primary);
+        }
+
+        /* Context Menu do Card */
+        .card-context-menu {
+            position: absolute;
+            top: 36px;
+            right: 8px;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            z-index: 2000;
+            min-width: 180px;
+            padding: 4px 0;
+            animation: menuFadeIn 0.15s ease;
+        }
+        @keyframes menuFadeIn {
+            from { opacity: 0; transform: translateY(-6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .card-context-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            font-size: 13px;
+            color: #334155;
+            cursor: pointer;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+        }
+        .card-context-menu-item:hover {
+            background: #f1f5f9;
+        }
+        .card-context-menu-item i {
+            width: 16px;
+            text-align: center;
+            color: #64748b;
+        }
+        .card-context-menu-item.danger { color: #ef4444; }
+        .card-context-menu-item.danger i { color: #ef4444; }
+        .card-context-menu-separator {
+            height: 1px;
+            background: #e2e8f0;
+            margin: 4px 0;
         }
 
         .card-title {
@@ -725,8 +772,8 @@
             align-items: center;
             justify-content: space-between;
             padding: 16px 24px;
-            background: #ffffff;
-            border-top: 1px solid #e5e5e5;
+            background: linear-gradient(135deg, #3b82f6, #93c5fd);
+            border-top: none;
             flex-shrink: 0;
         }
 
@@ -736,9 +783,10 @@
             gap: 8px;
             font-size: 13px;
             font-weight: 600;
-            color: #475569;
+            color: #ffffff;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
         }
 
         .modal-ordem-footer .footer-actions {
@@ -760,25 +808,25 @@
         }
 
         .modal-ordem-footer .btn-cancelar {
-            background: #f1f5f9;
-            color: #475569;
-            border: 1px solid #e2e8f0;
+            background: rgba(255,255,255,0.2);
+            color: #ffffff;
+            border: 1px solid rgba(255,255,255,0.4);
         }
 
         .modal-ordem-footer .btn-cancelar:hover {
-            background: #e2e8f0;
-            color: #1e293b;
+            background: rgba(255,255,255,0.3);
+            color: #ffffff;
         }
 
         .modal-ordem-footer .btn-salvar {
-            background: linear-gradient(135deg, #dc2626, #b91c1c);
-            color: #ffffff;
-            box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+            background: rgba(255,255,255,0.95);
+            color: #1e293b;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
         }
 
         .modal-ordem-footer .btn-salvar:hover:not(:disabled) {
-            background: linear-gradient(135deg, #b91c1c, #991b1b);
-            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+            background: #ffffff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
             transform: translateY(-1px);
         }
 
@@ -1271,7 +1319,7 @@
         }
 
         /* ========================================
-           BOTéO NOVO APONTAMENTO
+           BOTÃO NOVO APONTAMENTO
            ======================================== */
         .btn-novo-apontamento {
             background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 50%, #a78bfa 100%);
@@ -1560,11 +1608,11 @@
     </style>
 
     <!-- Tooltips Profissionais -->
-    <link rel="stylesheet" href="/css/tooltips-professional.css?v=20260209">
+    <link rel="stylesheet" href="/css/tooltips-professional.css?v=20260711">
     <script src="/js/tooltips-professional.js?v=20260209"></script>
 
     <!-- PCP Header & Sidebar ? Design Institucional Refinado (DEVE SER O ÚLTIMO) -->
-    <link rel="stylesheet" href="css/pcp-header-sidebar.css?v=20260224">
+    <link rel="stylesheet" href="css/pcp-header-sidebar.css?v=20260711">
     <!-- Chat Widget BOB AI --><!-- Chat Widget REMOVIDO --><!--
     <link rel="stylesheet" href="/chat/widget.css?v=20260218"> -->
     <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260324">
@@ -1606,6 +1654,9 @@
                 <a href="apontamentos.html" class="sidebar-btn" title="Apontamentos">
                     <i class="fas fa-stopwatch"></i>
                 </a>
+                <a href="pages/qualidade.html" class="sidebar-btn" title="Qualidade">
+                    <i class="fas fa-award"></i>
+                </a>
                 <a href="pages/relatorios.html" class="sidebar-btn" title="Relatórios">
                     <i class="fas fa-chart-pie"></i>
                 </a>
@@ -1631,7 +1682,7 @@
                         <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
-                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">?</span>
+                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">—</span>
                         <span class="page-title" style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Ordens de Produção</span>
                     </div>
                 </div>
@@ -1640,17 +1691,10 @@
                     <button class="header-btn" title="Atualizar" onclick="location.reload()">
                         <i class="fas fa-sync-alt"></i>
                     </button>
-                    <button class="header-btn" title="Notificações">
-                        <i class="fas fa-bell"></i>
-                    </button>
+                    <!-- Notificações removidas -->
 
                     <div class="user-greeting">
                         <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
-                    </div>
-
-                    <div class="user-avatar" id="user-avatar">
-                        <img src="/avatars/default.webp" alt="" id="user-photo">
-                        <span id="user-initials" style="display:none;align-items:center;justify-content:center;width:100%;height:100%;color:white;font-weight:600;font-size:14px;border-radius:50%;">U</span>
                     </div>
                 </div>
             </header>
@@ -1966,15 +2010,15 @@
                                 </div>
                                 <div class="form-group">
                                     <label>Setor de Produção</label>
-                                    <input type="text" id="modal-info-setor" value="Extrusão">
+                                    <input type="text" id="modal-info-setor" value="Produção" readonly style="background: #f0fdf4; color: #065f46; font-weight: 600; border: 1px solid #bbf7d0;">
                                 </div>
                                 <div class="form-group">
                                     <label>Data de Criação</label>
                                     <input type="text" id="modal-info-criacao" readonly style="background: #f5f5f5;">
                                 </div>
                                 <div class="form-group">
-                                    <label>Responsével</label>
-                                    <input type="text" id="modal-info-responsavel" value="Sistema">
+                                    <label>Responsável</label>
+                                    <input type="text" id="modal-info-responsavel" value="Clemerson Leandro" readonly style="background: #f0fdf4; color: #065f46; font-weight: 600; border: 1px solid #bbf7d0;">
                                 </div>
                             </div>
                         </div>
@@ -2049,93 +2093,335 @@
         </div>
     </div>
 
-    <!-- Modal Nova Ordem de Produção -->
-    <div class="modal-overlay" id="modalNovaOrdem">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2><i class="fas fa-plus-circle"></i> Nova Ordem de Produção</h2>
-                <button class="modal-close" onclick="closeNovaOrdemModal()">
-                    <i class="fas fa-times"></i>
+    <!-- Modal Nova Ordem de Produção - Dashboard Style -->
+    <div class="modal-ordem-view" id="modalNovaOrdem">
+        <div class="modal-ordem-container" style="width: 1250px;">
+
+            <!-- Header -->
+            <div class="modal-ordem-header" style="padding: 16px 24px; background: #fafafa; border-bottom: 1px solid #e5e5e5;">
+                <div style="display: flex; align-items: center; gap: 16px; flex: 1; flex-wrap: wrap;">
+                    <!-- OP Badge -->
+                    <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #dc2626, #b91c1c); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 13px; flex-shrink: 0;">OP</div>
+                    <!-- Campos do Header -->
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; flex: 1;">
+                        <div style="min-width: 140px;">
+                            <label style="display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px; text-transform: uppercase;">Número da OP</label>
+                            <input type="text" id="opNumero" placeholder="OP Nº 2025/00001" style="width: 100%; padding: 8px 10px; border: 1.5px solid #e2e8f0; border-radius: 6px; font-size: 13px; font-weight: 600;">
+                        </div>
+                        <div style="min-width: 110px;">
+                            <label style="display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px; text-transform: uppercase;">Nº Orçamento</label>
+                            <input type="text" id="opOrcamento" placeholder="P-226" style="width: 100%; padding: 8px 10px; border: 1.5px solid #e2e8f0; border-radius: 6px; font-size: 13px;">
+                        </div>
+                        <div style="min-width: 70px; max-width: 80px;">
+                            <label style="display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px; text-transform: uppercase;">Revisão</label>
+                            <input type="text" id="opRevisao" placeholder="01" style="width: 100%; padding: 8px 10px; border: 1.5px solid #e2e8f0; border-radius: 6px; font-size: 13px;">
+                        </div>
+                        <div style="min-width: 110px;">
+                            <label style="display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px; text-transform: uppercase;">Nº Pedido</label>
+                            <input type="text" id="opPedido" placeholder="PED-001" style="width: 100%; padding: 8px 10px; border: 1.5px solid #e2e8f0; border-radius: 6px; font-size: 13px;">
+                        </div>
+                        <div style="min-width: 130px;">
+                            <label style="display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px; text-transform: uppercase;">Data Liberação</label>
+                            <input type="date" id="opDataLiberacao" style="width: 100%; padding: 8px 10px; border: 1.5px solid #e2e8f0; border-radius: 6px; font-size: 13px;">
+                        </div>
+                        <div style="min-width: 130px;">
+                            <label style="display: block; font-size: 11px; font-weight: 600; color: #dc2626; margin-bottom: 4px; text-transform: uppercase; font-weight: 700;">Vendedor *</label>
+                            <input type="text" id="opVendedor" placeholder="Selecione..." style="width: 100%; padding: 8px 10px; border: 1.5px solid #e2e8f0; border-radius: 6px; font-size: 13px;">
+                        </div>
+                        <div style="min-width: 130px;">
+                            <label style="display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px; text-transform: uppercase;">Prazo Entrega</label>
+                            <input type="date" id="opPrazoEntrega" style="width: 100%; padding: 8px 10px; border: 1.5px solid #e2e8f0; border-radius: 6px; font-size: 13px;">
+                        </div>
+                        <div style="min-width: 100px; max-width: 120px;">
+                            <label style="display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px; text-transform: uppercase;">Tipo Frete</label>
+                            <select id="opTipoFrete" style="width: 100%; padding: 8px 10px; border: 1.5px solid #e2e8f0; border-radius: 6px; font-size: 13px; background: white;">
+                                <option value="">...</option>
+                                <option value="CIF">CIF</option>
+                                <option value="FOB">FOB</option>
+                                <option value="Redespacho">Redespacho</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <button class="modal-ordem-close" onclick="closeNovaOrdemModal()" style="flex-shrink: 0;">
+                    Fechar <i class="fas fa-times"></i>
                 </button>
             </div>
-            <form id="formNovaOrdem" onsubmit="criarOrdemProducao(event)">
-                <div class="modal-body">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label>Número da OP <span class="required">*</span></label>
-                            <input type="text" id="opNumero" placeholder="Ex: OP Nº 2025/00001" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Conclusão Prevista <span class="required">*</span></label>
-                            <input type="date" id="opDataConclusao" required>
+
+            <!-- Body -->
+            <div class="modal-ordem-body">
+                <!-- Main Content -->
+                <div class="modal-ordem-main" style="padding: 0;">
+                    <!-- Abas -->
+                    <div class="ordem-tabs" style="padding: 0 24px; margin-bottom: 0; background: white;">
+                        <button class="ordem-tab active" onclick="switchNovaOrdemTab('dados-cliente')">Dados do Cliente</button>
+                        <button class="ordem-tab" onclick="switchNovaOrdemTab('transportadora')">Transportadora</button>
+                        <button class="ordem-tab" onclick="switchNovaOrdemTab('produtos')">Produtos</button>
+                        <button class="ordem-tab" onclick="switchNovaOrdemTab('pagamento')">Pagamento</button>
+                        <button class="ordem-tab" onclick="switchNovaOrdemTab('entrega')">Entrega</button>
+                        <button class="ordem-tab" onclick="switchNovaOrdemTab('observacoes-nova')">Observações</button>
+                    </div>
+
+                    <!-- Tab: Dados do Cliente -->
+                    <div class="ordem-tab-content active" id="nova-tab-dados-cliente" style="padding: 24px;">
+                        <div style="background: white; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                            <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 16px;">
+                                <div class="form-group" style="grid-column: 1 / -1;">
+                                    <label>Razão Social / Nome Fantasia <span class="required">*</span></label>
+                                    <input type="text" id="opCliente" placeholder="Nome completo do cliente" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>CNPJ / CPF</label>
+                                    <input type="text" id="opCpfCnpj" placeholder="00.000.000/0000-00">
+                                </div>
+                                <div class="form-group">
+                                    <label>Inscrição Estadual</label>
+                                    <input type="text" id="opInscricaoEstadual" placeholder="Inscrição Estadual">
+                                </div>
+                                <div class="form-group">
+                                    <label>Contato</label>
+                                    <input type="text" id="opContatoCliente" placeholder="Nome do contato">
+                                </div>
+                                <div class="form-group">
+                                    <label>Telefone</label>
+                                    <input type="tel" id="opFoneCliente" placeholder="(00) 00000-0000">
+                                </div>
+                                <div class="form-group">
+                                    <label>E-mail</label>
+                                    <input type="email" id="opEmailCliente" placeholder="contato@empresa.com">
+                                </div>
+                                <div class="form-group">
+                                    <label>E-mail para NF-e</label>
+                                    <input type="email" id="opEmailNfe" placeholder="nfe@empresa.com">
+                                </div>
+                            </div>
+                            <hr style="margin: 20px 0; border: none; border-top: 1px solid #e5e7eb;">
+                            <h4 style="font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 16px;"><i class="fas fa-map-marker-alt" style="color: #f59e0b;"></i> Endereço</h4>
+                            <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 16px;">
+                                <div class="form-group">
+                                    <label>CEP</label>
+                                    <input type="text" id="opCep" placeholder="00000-000">
+                                </div>
+                                <div class="form-group" style="grid-column: 1 / -1;">
+                                    <label>Endereço Completo</label>
+                                    <input type="text" id="opEndereco" placeholder="Rua, nº, bairro, cidade - UF">
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="form-section">
-                        <h3><i class="fas fa-cube"></i> Produto</h3>
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label>Código do Produto</label>
-                                <input type="text" id="opCodigoProduto" placeholder="Ex: TRN25C">
-                            </div>
-                            <div class="form-group">
-                                <label>Nome do Produto <span class="required">*</span></label>
-                                <input type="text" id="opNomeProduto" placeholder="Ex: ALUFORCE CB TRIPLEX 25MM" required>
-                            </div>
-                        </div>
-                        <div class="form-grid full">
-                            <div class="form-group">
-                                <label>Descrição Completa</label>
-                                <textarea id="opDescricao" rows="2" placeholder="Ex: NEUTRO NU PT/CZ"></textarea>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-section">
-                        <h3><i class="fas fa-calculator"></i> Quantidade</h3>
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label>Quantidade Total <span class="required">*</span></label>
-                                <input type="number" id="opQuantidade" placeholder="Ex: 5000" min="1" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Unidade de Medida</label>
-                                <select id="opUnidade">
-                                    <option value="M">Metros (M)</option>
-                                    <option value="KG">Quilogramas (KG)</option>
-                                    <option value="UN">Unidades (UN)</option>
-                                    <option value="PC">Peças (PC)</option>
-                                    <option value="CX">Caixas (CX)</option>
-                                </select>
+                    <!-- Tab: Transportadora -->
+                    <div class="ordem-tab-content" id="nova-tab-transportadora" style="padding: 24px;">
+                        <div style="background: white; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                            <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 16px;">
+                                <div class="form-group" style="grid-column: 1 / -1;">
+                                    <label>Nome da Transportadora</label>
+                                    <input type="text" id="opTransportadoraNome" placeholder="Nome da transportadora">
+                                </div>
+                                <div class="form-group">
+                                    <label>Telefone</label>
+                                    <input type="tel" id="opTransportadoraFone" placeholder="(00) 00000-0000">
+                                </div>
+                                <div class="form-group">
+                                    <label>CEP</label>
+                                    <input type="text" id="opTransportadoraCep" placeholder="00000-000">
+                                </div>
+                                <div class="form-group" style="grid-column: 1 / -1;">
+                                    <label>Endereço da Transportadora</label>
+                                    <input type="text" id="opTransportadoraEndereco" placeholder="Endereço completo da transportadora">
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="form-section">
-                        <h3><i class="fas fa-info-circle"></i> Informações Adicionais</h3>
-                        <div class="form-grid full">
+                    <!-- Tab: Produtos -->
+                    <div class="ordem-tab-content" id="nova-tab-produtos" style="padding: 24px;">
+                        <div style="background: white; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                            <p style="font-size: 13px; color: #6b7280; margin: 0 0 16px 0;"><i class="fas fa-info-circle" style="color: #6366f1;"></i> Adicione os produtos que comporão esta ordem. O valor total será calculado automaticamente.</p>
+                            <div style="overflow-x: auto;">
+                                <table class="itens-table" style="min-width: 900px;">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 90px;">Código</th>
+                                            <th style="width: 220px;">Produto</th>
+                                            <th style="width: 90px;">P. Líquido</th>
+                                            <th style="width: 80px;">Lote</th>
+                                            <th style="width: 100px;">Embalagem</th>
+                                            <th style="width: 90px;">Lance(s)</th>
+                                            <th style="width: 70px;">Qtde</th>
+                                            <th style="width: 90px;">Vlr Unit.</th>
+                                            <th style="width: 90px;">Total</th>
+                                            <th style="width: 40px;"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="nova-produtos-lista">
+                                        <tr>
+                                            <td><input type="text" placeholder="Código" class="np-codigo" style="width:100%; padding:6px 8px; border:1px solid #e5e7eb; border-radius:4px; font-size:12px;"></td>
+                                            <td><input type="text" placeholder="Nome do produto" class="np-nome" style="width:100%; padding:6px 8px; border:1px solid #e5e7eb; border-radius:4px; font-size:12px;"></td>
+                                            <td><input type="text" placeholder="Peso" class="np-peso" style="width:100%; padding:6px 8px; border:1px solid #e5e7eb; border-radius:4px; font-size:12px;"></td>
+                                            <td><input type="text" placeholder="Lote" class="np-lote" style="width:100%; padding:6px 8px; border:1px solid #e5e7eb; border-radius:4px; font-size:12px;"></td>
+                                            <td>
+                                                <select class="np-embalagem" style="width:100%; padding:6px 8px; border:1px solid #e5e7eb; border-radius:4px; font-size:12px; background:white;">
+                                                    <option value="Bobina">Bobina</option>
+                                                    <option value="Rolo">Rolo</option>
+                                                    <option value="Lance">Lance</option>
+                                                    <option value="Caixa">Caixa</option>
+                                                </select>
+                                            </td>
+                                            <td><input type="text" placeholder="1x100" class="np-lances" value="1x100" style="width:100%; padding:6px 8px; border:1px solid #e5e7eb; border-radius:4px; font-size:12px;"></td>
+                                            <td><input type="number" placeholder="0" min="1" class="np-qtde" onchange="calcularNovaOrdemLinha(this)" style="width:100%; padding:6px 8px; border:1px solid #e5e7eb; border-radius:4px; font-size:12px;"></td>
+                                            <td><input type="number" placeholder="0,00" step="0.01" class="np-valor" onchange="calcularNovaOrdemLinha(this)" style="width:100%; padding:6px 8px; border:1px solid #e5e7eb; border-radius:4px; font-size:12px;"></td>
+                                            <td><input type="number" placeholder="0,00" class="np-total" readonly style="width:100%; padding:6px 8px; border:1px solid #e5e7eb; border-radius:4px; font-size:12px; background:#f9fafb; color:#6b7280;"></td>
+                                            <td><button type="button" onclick="removerNovaProdutoLinha(this)" style="background:#ef4444; color:white; border:none; padding:5px 9px; border-radius:4px; cursor:pointer; font-size:13px; font-weight:600;">×</button></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <button type="button" onclick="adicionarNovaProdutoLinha()" style="margin-top: 12px; background: linear-gradient(135deg, #4F46E5, #6366F1); color: white; border: none; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer;">
+                                <i class="fas fa-plus"></i> Adicionar Produto
+                            </button>
+                            <div style="background: linear-gradient(135deg, #f0f9ff, #e0f2fe); border: 2px solid #0ea5e9; border-radius: 10px; padding: 16px; margin-top: 16px; display: flex; justify-content: space-between; align-items: center;">
+                                <div><span style="font-size: 12px; font-weight: 600; color: #0369a1;">VALOR TOTAL DA ORDEM</span></div>
+                                <div style="font-size: 24px; font-weight: 800; color: #0369a1;">R$ <span id="nova-ordem-total">0,00</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab: Pagamento -->
+                    <div class="ordem-tab-content" id="nova-tab-pagamento" style="padding: 24px;">
+                        <div style="background: white; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                            <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 16px;">
+                                <div class="form-group">
+                                    <label>Forma de Pagamento</label>
+                                    <select id="opFormaPagamento">
+                                        <option value="">Selecione...</option>
+                                        <option value="PARCELADO">PARCELADO</option>
+                                        <option value="À VISTA">À VISTA</option>
+                                        <option value="ANTECIPADO">ANTECIPADO</option>
+                                        <option value="ENTREGA">ENTREGA</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Método de Pagamento</label>
+                                    <select id="opMetodoPagamento">
+                                        <option value="">Selecione...</option>
+                                        <option value="TRANSFERÊNCIA">TRANSFERÊNCIA</option>
+                                        <option value="DEPÓSITO">DEPÓSITO</option>
+                                        <option value="FATURAMENTO">FATURAMENTO</option>
+                                        <option value="BOLETO">BOLETO</option>
+                                        <option value="PIX">PIX</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Percentual (%)</label>
+                                    <input type="number" id="opPercentualPagamento" step="0.01" min="0" max="100" placeholder="0,00">
+                                </div>
+                                <div class="form-group">
+                                    <label>Condição de Pagamento</label>
+                                    <input type="text" id="opCondicaoPagamento" placeholder="Ex: 30/60/90 dias">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab: Entrega -->
+                    <div class="ordem-tab-content" id="nova-tab-entrega" style="padding: 24px;">
+                        <div style="background: white; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                            <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 16px;">
+                                <div class="form-group">
+                                    <label>Endereço de Entrega</label>
+                                    <input type="text" id="opEnderecoEntrega" placeholder="Endereço de entrega (se diferente)">
+                                </div>
+                                <div class="form-group">
+                                    <label>CEP de Entrega</label>
+                                    <input type="text" id="opCepEntrega" placeholder="00000-000">
+                                </div>
+                                <div class="form-group">
+                                    <label>Cidade / UF</label>
+                                    <input type="text" id="opCidadeEntrega" placeholder="Cidade - UF">
+                                </div>
+                                <div class="form-group">
+                                    <label>Previsão de Entrega</label>
+                                    <input type="date" id="opDataConclusao">
+                                </div>
+                                <div class="form-group" style="grid-column: 1 / -1;">
+                                    <label>Instruções de Entrega</label>
+                                    <textarea id="opInstrucoesEntrega" rows="3" placeholder="Instruções especiais para entrega..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab: Observações -->
+                    <div class="ordem-tab-content" id="nova-tab-observacoes-nova" style="padding: 24px;">
+                        <div style="background: white; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
                             <div class="form-group">
-                                <label>Observações</label>
-                                <textarea id="opObservacoes" rows="3" placeholder="Observações sobre a ordem de produção..."></textarea>
+                                <label>Observações da Ordem de Produção</label>
+                                <textarea id="opObservacoes" rows="8" placeholder="Adicione observações sobre esta ordem de produção..."></textarea>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" onclick="closeNovaOrdemModal()">
+
+                <!-- Sidebar de Ações -->
+                <div class="modal-ordem-sidebar">
+                    <button class="sidebar-action primary" onclick="criarOrdemProducao()">
+                        <i class="fas fa-save"></i> Salvar
+                    </button>
+                    <button class="sidebar-action" onclick="criarOrdemEGerarExcel()" style="color: #059669; font-weight: 600;">
+                        <i class="fas fa-file-excel"></i> Gerar Excel
+                    </button>
+                    <button class="sidebar-action" onclick="criarOrdemEGerarPDF()" style="color: #D32F2F; font-weight: 600;">
+                        <i class="fas fa-file-pdf"></i> Gerar PDF
+                    </button>
+                    <button class="sidebar-action" onclick="imprimirNovaOrdem()">
+                        <i class="fas fa-print"></i> Imprimir
+                    </button>
+                    <button class="sidebar-action" onclick="duplicarNovaOrdem()">
+                        <i class="fas fa-copy"></i> Duplicar
+                    </button>
+
+                    <div class="sidebar-divider"></div>
+
+                    <button class="sidebar-action" onclick="buscarClienteNovaOrdem()">
+                        <i class="fas fa-search"></i> Buscar Cliente
+                    </button>
+                    <button class="sidebar-action" onclick="buscarTranspNovaOrdem()">
+                        <i class="fas fa-truck"></i> Buscar Transp.
+                    </button>
+
+                    <div class="sidebar-divider"></div>
+
+                    <button class="sidebar-action danger" onclick="limparNovaOrdem()">
+                        <i class="fas fa-eraser"></i> Limpar
+                    </button>
+                    <button class="sidebar-action" onclick="closeNovaOrdemModal()">
                         <i class="fas fa-times"></i> Cancelar
                     </button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-check"></i> Criar Ordem
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="modal-ordem-footer">
+                <div class="footer-status">
+                    <i class="fas fa-plus-circle" style="color: #4F46E5;"></i>
+                    <span>Nova Ordem de Produção</span>
+                </div>
+                <div class="footer-actions">
+                    <button type="button" class="btn-footer btn-cancelar" onclick="closeNovaOrdemModal()">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button type="button" class="btn-footer btn-salvar" onclick="criarOrdemProducao()">
+                        <i class="fas fa-save"></i> Salvar
                     </button>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
 
     <script>
         // ========================================
-        // VARIéVEIS GLOBAIS
+        // VARIÁVEIS GLOBAIS
         // ========================================
         let ordensProducao = [];
         let draggedCard = null;
@@ -2214,7 +2500,7 @@
         });
 
         // ========================================
-        // USUéRIO
+        // USUÁRIO
         // ========================================
 
         // Mapeamento de avatares por nome de usuário
@@ -2336,84 +2622,42 @@
             }
         }
 
-        // Configurar sidebar baseado na role do usuário
+        // ============================================
+        // RESTRIÇÃO DE SIDEBAR POR ROLE (espelho do index.html)
+        // ============================================
         function configurarSidebarPorRole(user) {
+            const sidebarNav = document.querySelector('.sidebar-nav');
+            if (!sidebarNav) return;
+
             const role = (user.role || user.cargo || '').toLowerCase();
             const roles = (user.roles || []).map(r => r.toLowerCase());
-            const nomeUsuario = (user.nome || '').toLowerCase();
 
-            // Roles com acesso completo
-            const rolesAdmin = ['admin', 'administrador', 'supervisor', 'gerente', 'diretoria', 'ti', 'pcp', 'analista'];
-            const isAdmin = rolesAdmin.some(r => role.includes(r)) || roles.some(r => rolesAdmin.some(a => r.includes(a)));
+            // Roles com acesso completo ao módulo PCP (idêntico ao index.html)
+            const rolesFullAccess = ['admin', 'administrador', 'supervisor', 'gerente', 'diretoria', 'ti', 'pcp', 'analista'];
+            const isFullAccess = user.is_admin === true || user.is_admin === 1 ||
+                                 rolesFullAccess.some(r => role.includes(r)) ||
+                                 roles.some(r => rolesFullAccess.some(a => r.includes(a)));
 
-            // Verificar se pode ver relatórios (admin ou Clemerson)
-            const podeVerRelatorios = isAdmin || nomeUsuario.includes('clemerson');
+            // Acesso completo → não altera a sidebar (mantém o HTML original com todos os itens)
+            if (isFullAccess) return;
 
-            const sidebarLinks = document.getElementById('sidebarLinks');
-            const btnHome = document.getElementById('btnHome');
+            // Operador: substitui sidebar por apenas Ordens de Produção e Apontamentos
+            sidebarNav.innerHTML = `
+                <a href="ordens-producao.html" class="sidebar-btn active" title="Ordens de Produção">
+                    <i class="fas fa-clipboard-list"></i>
+                </a>
+                <a href="apontamentos.html" class="sidebar-btn" title="Apontamentos">
+                    <i class="fas fa-stopwatch"></i>
+                </a>
+            `;
+
             const sidebarBottom = document.querySelector('.sidebar-bottom');
-
-            if (isAdmin) {
-                // Admin tem acesso completo
-                if (btnHome) btnHome.href = '/dashboard';
-                let linksHTML = `
-                    <a href="index.html" class="sidebar-btn" title="Dashboard PCP">
-                        <i class="fas fa-tachometer-alt"></i>
-                    </a>
-                    <a href="index.html" class="sidebar-btn" title="Produtos e Estoque" onclick="localStorage.setItem('pcp-view','produtos')">
-                        <i class="fas fa-boxes"></i>
-                    </a>
-                    <a href="index.html" class="sidebar-btn" title="Ordem de Compra" onclick="localStorage.setItem('pcp-view','ordem-compra')">
-                        <i class="fas fa-shopping-cart"></i>
-                    </a>
-                    <a href="ordens-producao.html" class="sidebar-btn active" title="Kanban Produção">
-                        <i class="fas fa-clipboard-list"></i>
-                    </a>
-                    <a href="index.html" class="sidebar-btn" title="Gestão de Produção" onclick="localStorage.setItem('pcp-view','gestao-producao')">
-                        <i class="fas fa-industry"></i>
-                    </a>
-                    <a href="apontamentos.html" class="sidebar-btn" title="Apontamentos">
-                        <i class="fas fa-stopwatch"></i>
-                    </a>
-                    <a href="pages/relatorios.html" class="sidebar-btn" title="Relatórios">
-                        <i class="fas fa-chart-pie"></i>
-                    </a>
+            if (sidebarBottom) {
+                sidebarBottom.innerHTML = `
+                    <button class="sidebar-btn" title="Sair" onclick="fazerLogout()">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
                 `;
-                if (sidebarLinks) sidebarLinks.innerHTML = linksHTML;
-                if (sidebarBottom) {
-                    sidebarBottom.innerHTML = `
-                        <button class="sidebar-btn" title="Configurações" onclick="abrirModalEtapasPCP()">
-                            <i class="fas fa-cog"></i>
-                        </button>
-                    `;
-                }
-            } else {
-                // Usuário de produção - acesso limitado
-                if (btnHome) btnHome.href = 'ordens-producao.html';
-                let linksHTML = `
-                    <a href="ordens-producao.html" class="sidebar-btn active" title="Kanban Produção">
-                        <i class="fas fa-clipboard-list"></i>
-                    </a>
-                    <a href="apontamentos.html" class="sidebar-btn" title="Meus Apontamentos">
-                        <i class="fas fa-stopwatch"></i>
-                    </a>
-                `;
-                // Adicionar relatórios apenas para Clemerson
-                if (podeVerRelatorios) {
-                    linksHTML += `
-                    <a href="pages/relatorios.html" class="sidebar-btn" title="Relatórios">
-                        <i class="fas fa-chart-pie"></i>
-                    </a>
-                    `;
-                }
-                if (sidebarLinks) sidebarLinks.innerHTML = linksHTML;
-                if (sidebarBottom) {
-                    sidebarBottom.innerHTML = `
-                        <button class="sidebar-btn" title="Sair" onclick="fazerLogout()">
-                            <i class="fas fa-sign-out-alt"></i>
-                        </button>
-                    `;
-                }
             }
         }
 
@@ -2689,22 +2933,77 @@
             localStorage.setItem('ordensProducao', JSON.stringify(ordensProducao));
         }
 
-        async function criarOrdemProducao(event) {
-            event.preventDefault();
+        async function criarOrdemProducao(gerarExcel, gerarPdf) {
+            // Coletar produtos da tabela
+            const produtos = [];
+            const tbody = document.getElementById('nova-produtos-lista');
+            tbody.querySelectorAll('tr').forEach(row => {
+                const codigo = row.querySelector('.np-codigo').value;
+                const nome = row.querySelector('.np-nome').value;
+                const peso = row.querySelector('.np-peso').value;
+                const lote = row.querySelector('.np-lote').value;
+                const embalagem = row.querySelector('.np-embalagem').value;
+                const lances = row.querySelector('.np-lances').value;
+                const qtde = parseFloat(row.querySelector('.np-qtde').value) || 0;
+                const valorUnit = parseFloat(row.querySelector('.np-valor').value) || 0;
+                const valorTotal = parseFloat(row.querySelector('.np-total').value) || 0;
+                if (codigo || nome || qtde > 0) {
+                    produtos.push({ codigo, nome, descrição: nome, peso_liquido: peso, lote, embalagem, lances, quantidade: qtde, valor_unitario: valorUnit, valor_total: valorTotal });
+                }
+            });
+
+            const qtdTotal = produtos.reduce((acc, p) => acc + (p.quantidade || 0), 0);
+            const produtoDesc = produtos.map(p => p.nome || p.codigo).filter(Boolean).join(', ').substring(0, 200);
 
             const novaOrdem = {
                 id: Date.now(),
+                número: document.getElementById('opNumero').value,
                 numero: document.getElementById('opNumero').value,
+                num_orçamento: document.getElementById('opOrcamento').value,
+                revisao: document.getElementById('opRevisao').value,
+                num_pedido: document.getElementById('opPedido').value,
+                número_pedido: document.getElementById('opPedido').value,
+                data_liberacao: document.getElementById('opDataLiberacao').value,
+                vendedor: document.getElementById('opVendedor').value,
+                prazo_entrega: document.getElementById('opPrazoEntrega').value,
+                tipo_frete: document.getElementById('opTipoFrete').value,
+                // Cliente
+                cliente: document.getElementById('opCliente').value,
+                cliente_nome: document.getElementById('opCliente').value,
+                cpf_cnpj: document.getElementById('opCpfCnpj').value,
+                cliente_cpf_cnpj: document.getElementById('opCpfCnpj').value,
+                inscricao_estadual: document.getElementById('opInscricaoEstadual').value,
+                contato_cliente: document.getElementById('opContatoCliente').value,
+                fone_cliente: document.getElementById('opFoneCliente').value,
+                email_cliente: document.getElementById('opEmailCliente').value,
+                email_nfe: document.getElementById('opEmailNfe').value,
+                cep_cliente: document.getElementById('opCep').value,
+                endereco_cliente: document.getElementById('opEndereco').value,
+                // Transportadora
+                transportadora_nome: document.getElementById('opTransportadoraNome').value,
+                transportadora_fone: document.getElementById('opTransportadoraFone').value,
+                transportadora_cep: document.getElementById('opTransportadoraCep').value,
+                // Pagamento
+                forma_pagamento: document.getElementById('opFormaPagamento').value,
+                metodo_pagamento: document.getElementById('opMetodoPagamento').value,
+                percentual_pagamento: parseFloat(document.getElementById('opPercentualPagamento').value) || 0,
+                condicao_pagamento: document.getElementById('opCondicaoPagamento').value,
+                // Entrega
+                endereco_entrega: document.getElementById('opEnderecoEntrega').value,
+                cep_entrega: document.getElementById('opCepEntrega').value,
+                cidade_entrega: document.getElementById('opCidadeEntrega').value,
+                instrucoes_entrega: document.getElementById('opInstrucoesEntrega').value,
+                // Observações
+                observacoes: document.getElementById('opObservacoes').value,
+                // Produtos
+                produtos: produtos,
+                produto: produtoDesc || document.getElementById('opCliente').value,
+                quantidade: qtdTotal || 1,
+                unidade: 'M',
+                dataConclusao: document.getElementById('opPrazoEntrega').value || document.getElementById('opDataConclusao').value || null,
+                data_previsao_entrega: document.getElementById('opPrazoEntrega').value || null,
                 status: 'a_produzir',
-                statusTexto: 'Em dia',
-                produto: document.getElementById('opNomeProduto').value,
-                descricao: document.getElementById('opDescricao').value || '',
-                codigo: document.getElementById('opCodigoProduto').value || '',
-                dataConclusao: document.getElementById('opDataConclusao').value,
-                quantidade: parseInt(document.getElementById('opQuantidade').value),
-                produzido: 0,
-                unidade: document.getElementById('opUnidade').value,
-                observacoes: document.getElementById('opObservacoes').value || ''
+                statusTexto: 'Em dia'
             };
 
             // Verificar se está atrasada
@@ -2738,10 +3037,81 @@
 
             renderizarKanban();
             closeNovaOrdemModal();
-            document.getElementById('formNovaOrdem').reset();
+            limparCamposNovaOrdem();
             gerarNumeroOP();
 
             showNotification('Ordem de produção criada com sucesso!', 'success');
+
+            // Se pediu para gerar Excel, chamar endpoint
+            if (gerarExcel) {
+                try {
+                    const excelResp = await fetch('/api/gerar-ordem-excel', {
+                        credentials: 'include',
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(novaOrdem)
+                    });
+                    if (excelResp.ok) {
+                        const blob = await excelResp.blob();
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `Ordem_Producao_${novaOrdem.numero || Date.now()}.xlsx`;
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                        document.body.removeChild(a);
+                        showNotification('Excel gerado com sucesso!', 'success');
+                    } else {
+                        showNotification('Erro ao gerar Excel.', 'error');
+                    }
+                } catch (exErr) {
+                    console.error('Erro ao gerar Excel:', exErr);
+                    showNotification('Erro ao gerar Excel.', 'error');
+                }
+            }
+
+            // Se pediu para gerar PDF, chamar endpoint XSL-FO
+            if (gerarPdf) {
+                try {
+                    const pdfResp = await fetch('/api/gerar-ordem-pdf', {
+                        credentials: 'include',
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(novaOrdem)
+                    });
+                    if (pdfResp.ok) {
+                        const blob = await pdfResp.blob();
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `Ordem_Producao_${novaOrdem.numero || Date.now()}.pdf`;
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                        document.body.removeChild(a);
+                        showNotification('PDF gerado com sucesso!', 'success');
+                    } else {
+                        const errData = await pdfResp.json().catch(() => ({}));
+                        showNotification(errData.error || 'Erro ao gerar PDF.', 'error');
+                    }
+                } catch (pdfErr) {
+                    console.error('Erro ao gerar PDF:', pdfErr);
+                    showNotification('Erro ao gerar PDF. Verifique se o Apache FOP está instalado.', 'error');
+                }
+            }
+        }
+
+        // Limpar apenas campos (sem confirmação)
+        function limparCamposNovaOrdem() {
+            document.querySelectorAll('#modalNovaOrdem input, #modalNovaOrdem textarea').forEach(el => {
+                if (el.id !== 'opNumero') el.value = '';
+            });
+            document.querySelectorAll('#modalNovaOrdem select').forEach(el => el.selectedIndex = 0);
+            const tbody = document.getElementById('nova-produtos-lista');
+            while (tbody.rows.length > 1) tbody.deleteRow(1);
+            tbody.rows[0].querySelectorAll('input').forEach(i => { i.value = ''; if (i.classList.contains('np-lances')) i.value = '1x100'; });
+            calcularNovaOrdemTotal();
         }
 
         async function atualizarStatusOrdem(ordemId, novoStatus) {
@@ -2750,6 +3120,16 @@
 
             const statusAntigo = ordem.status;
             ordem.status = novoStatus;
+
+            // Nomes amigáveis dos status
+            const statusNomes = {
+                'a_produzir': 'A Produzir',
+                'produzindo': 'Produzindo',
+                'qualidade': 'Qualidade',
+                'conferido': 'Conferido',
+                'concluido': 'Concluído',
+                'armazenado': 'Armazenado'
+            };
 
             // Atualizar status texto
             if (novoStatus === 'concluido' || novoStatus === 'armazenado') {
@@ -2763,11 +3143,11 @@
 
             if (!isLocalOrder) {
                 try {
-                    const response = await fetch(`/api/pcp/ordens-kanban/${ordemId}`, { credentials: 'include', method: 'PUT',
+                    const response = await fetch(`/api/pcp/ordens-kanban/${ordemId}`, {
                         credentials: 'include',
+                        method: 'PUT',
                         headers: {
-                            'Content-Type': 'application/json',
-
+                            'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({ status: novoStatus, origem: ordem.origem || 'kanban' })
                     });
@@ -2785,6 +3165,13 @@
             // Sempre salvar localmente para manter sincronizado
             salvarOrdensLocais();
             renderizarKanban();
+
+            // Notificação visual da mudança
+            const nomeStatus = statusNomes[novoStatus] || novoStatus;
+            const nomeOrdem = ordem.numero || ordem.codigo || `#${ordemId}`;
+            if (typeof showNotification === 'function') {
+                showNotification(`${nomeOrdem} movida para "${nomeStatus}"`, 'success');
+            }
         }
 
         // ========================================
@@ -2832,11 +3219,40 @@
             card.draggable = true;
             card.dataset.id = ordem.id;
 
-            // Adiciona evento de duplo clique para abrir modal de visualização
-            card.ondblclick = function(e) {
-                e.stopPropagation();
-                abrirModalOrdem(ordem.id);
-            };
+            // Duplo clique para abrir modal - usa pointerdown/pointerup pois click pode ser engolido pelo drag
+            let _lastPointerUp = 0;
+            let _pointerMoved = false;
+            let _pointerDownPos = null;
+
+            card.addEventListener('pointerdown', function(e) {
+                if (e.target.closest('.card-menu') || e.target.closest('.card-context-menu')) return;
+                _pointerMoved = false;
+                _pointerDownPos = { x: e.clientX, y: e.clientY };
+            });
+
+            card.addEventListener('pointermove', function(e) {
+                if (_pointerDownPos) {
+                    const dx = Math.abs(e.clientX - _pointerDownPos.x);
+                    const dy = Math.abs(e.clientY - _pointerDownPos.y);
+                    if (dx > 5 || dy > 5) _pointerMoved = true;
+                }
+            });
+
+            card.addEventListener('pointerup', function(e) {
+                if (e.button !== 0) return;
+                if (e.target.closest('.card-menu') || e.target.closest('.card-context-menu')) return;
+                if (_pointerMoved) { _pointerDownPos = null; return; }
+                _pointerDownPos = null;
+
+                const now = Date.now();
+                if (now - _lastPointerUp < 400) {
+                    _lastPointerUp = 0;
+                    fecharCardMenuGlobal();
+                    abrirModalOrdem(ordem.id);
+                } else {
+                    _lastPointerUp = now;
+                }
+            });
 
             const badgeStatusClass = ordem.statusTexto === 'Atrasada' ? 'atrasada' :
                                ordem.statusTexto === 'Concluída' ? 'concluida' : 'em-dia';
@@ -2949,10 +3365,152 @@
         function openNovaOrdemModal() {
             document.getElementById('modalNovaOrdem').classList.add('active');
             gerarNumeroOP();
+            // Ativar primeira aba
+            switchNovaOrdemTab('dados-cliente');
         }
 
         function closeNovaOrdemModal() {
             document.getElementById('modalNovaOrdem').classList.remove('active');
+        }
+
+        // Tab switching para Nova Ordem
+        function switchNovaOrdemTab(tabName) {
+            // Desativar todas as tabs
+            document.querySelectorAll('#modalNovaOrdem .ordem-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('#modalNovaOrdem .ordem-tab-content').forEach(c => c.classList.remove('active'));
+            // Ativar a tab clicada
+            const tabs = document.querySelectorAll('#modalNovaOrdem .ordem-tab');
+            const tabMap = ['dados-cliente', 'transportadora', 'produtos', 'pagamento', 'entrega', 'observacoes-nova'];
+            const idx = tabMap.indexOf(tabName);
+            if (idx >= 0 && tabs[idx]) tabs[idx].classList.add('active');
+            const content = document.getElementById('nova-tab-' + tabName);
+            if (content) content.classList.add('active');
+        }
+
+        // Funções de manipulação de produtos na Nova Ordem
+        function adicionarNovaProdutoLinha() {
+            const tbody = document.getElementById('nova-produtos-lista');
+            const newRow = tbody.rows[0].cloneNode(true);
+            newRow.querySelectorAll('input').forEach(input => {
+                input.value = '';
+                if (input.classList.contains('np-total')) input.value = '0.00';
+                if (input.classList.contains('np-lances')) input.value = '1x100';
+            });
+            newRow.querySelector('select').selectedIndex = 0;
+            tbody.appendChild(newRow);
+        }
+
+        function removerNovaProdutoLinha(btn) {
+            const tbody = document.getElementById('nova-produtos-lista');
+            if (tbody.rows.length > 1) {
+                btn.closest('tr').remove();
+                calcularNovaOrdemTotal();
+            } else {
+                showNotification('Você precisa ter pelo menos 1 produto na ordem.', 'warning');
+            }
+        }
+
+        function calcularNovaOrdemLinha(input) {
+            const row = input.closest('tr');
+            const qtde = parseFloat(row.querySelector('.np-qtde').value) || 0;
+            const valor = parseFloat(row.querySelector('.np-valor').value) || 0;
+            row.querySelector('.np-total').value = (qtde * valor).toFixed(2);
+            calcularNovaOrdemTotal();
+        }
+
+        function calcularNovaOrdemTotal() {
+            let total = 0;
+            document.querySelectorAll('#nova-produtos-lista .np-total').forEach(input => {
+                total += parseFloat(input.value) || 0;
+            });
+            const el = document.getElementById('nova-ordem-total');
+            if (el) el.textContent = total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        // Buscar cliente pelo nome/CNPJ
+        async function buscarClienteNovaOrdem() {
+            const termo = prompt('Digite o nome ou CNPJ do cliente:');
+            if (!termo) return;
+            try {
+                const resp = await fetch(`/api/vendas/clientes/buscar?termo=${encodeURIComponent(termo)}`, { credentials: 'include' });
+                if (resp.ok) {
+                    const clientes = await resp.json();
+                    if (clientes.length > 0) {
+                        const c = clientes[0];
+                        document.getElementById('opCliente').value = c.razao_social || c.nome_fantasia || '';
+                        document.getElementById('opCpfCnpj').value = c.cnpj || c.cpf || '';
+                        document.getElementById('opInscricaoEstadual').value = c.inscricao_estadual || '';
+                        document.getElementById('opContatoCliente').value = c.contato || '';
+                        document.getElementById('opFoneCliente').value = c.telefone || '';
+                        document.getElementById('opEmailCliente').value = c.email || '';
+                        document.getElementById('opCep').value = c.cep || '';
+                        document.getElementById('opEndereco').value = [c.endereco, c.numero, c.bairro, c.cidade, c.uf].filter(Boolean).join(', ');
+                        showNotification(`Cliente "${c.razao_social || c.nome_fantasia}" carregado!`, 'success');
+                    } else {
+                        showNotification('Nenhum cliente encontrado.', 'warning');
+                    }
+                }
+            } catch (e) {
+                console.warn('Erro ao buscar cliente:', e);
+            }
+        }
+
+        // Buscar transportadora
+        async function buscarTranspNovaOrdem() {
+            const termo = prompt('Digite o nome da transportadora:');
+            if (!termo) return;
+            try {
+                const resp = await fetch(`/api/transportadoras/buscar?termo=${encodeURIComponent(termo)}`, { credentials: 'include' });
+                if (resp.ok) {
+                    const lista = await resp.json();
+                    if (lista.length > 0) {
+                        const t = lista[0];
+                        document.getElementById('opTransportadoraNome').value = t.nome || t.razao_social || '';
+                        document.getElementById('opTransportadoraFone').value = t.telefone || '';
+                        document.getElementById('opTransportadoraCep').value = t.cep || '';
+                        document.getElementById('opTransportadoraEndereco').value = t.endereco || '';
+                        showNotification(`Transportadora "${t.nome || t.razao_social}" carregada!`, 'success');
+                    } else {
+                        showNotification('Nenhuma transportadora encontrada.', 'warning');
+                    }
+                }
+            } catch (e) {
+                console.warn('Erro ao buscar transportadora:', e);
+            }
+        }
+
+        // Limpar formulário
+        function limparNovaOrdem() {
+            if (!confirm('Limpar todos os campos da nova ordem?')) return;
+            document.querySelectorAll('#modalNovaOrdem input, #modalNovaOrdem textarea, #modalNovaOrdem select').forEach(el => {
+                if (el.type === 'select-one') el.selectedIndex = 0;
+                else if (el.id !== 'opNumero') el.value = '';
+            });
+            // Manter apenas uma linha de produto
+            const tbody = document.getElementById('nova-produtos-lista');
+            while (tbody.rows.length > 1) tbody.deleteRow(1);
+            tbody.rows[0].querySelectorAll('input').forEach(i => { i.value = ''; if (i.classList.contains('np-lances')) i.value = '1x100'; });
+            calcularNovaOrdemTotal();
+        }
+
+        // Imprimir nova ordem
+        function imprimirNovaOrdem() {
+            showNotification('Salve a ordem primeiro para imprimir.', 'info');
+        }
+
+        // Duplicar nova ordem
+        function duplicarNovaOrdem() {
+            showNotification('Salve a ordem primeiro para duplicar.', 'info');
+        }
+
+        // Gerar Excel da nova ordem
+        async function criarOrdemEGerarExcel() {
+            await criarOrdemProducao(true);
+        }
+
+        // Gerar PDF da nova ordem (XSL-FO / Apache FOP)
+        async function criarOrdemEGerarPDF() {
+            await criarOrdemProducao(false, true);
         }
 
         // ========================================
@@ -2962,7 +3520,7 @@
 
         function abrirModalOrdem(ordemId) {
             ordemAtualId = ordemId;
-            const ordem = ordensProducao.find(o => o.id === ordemId);
+            const ordem = ordensProducao.find(o => o.id == ordemId);
 
             if (!ordem) {
                 showNotification('Ordem não encontrada', 'error');
@@ -2973,7 +3531,7 @@
             document.getElementById('modal-ordem-titulo').textContent = `Ordem de Produção ${ordem.numero}`;
 
             // Preencher dados do produto
-            const codigo = ordem.codigo || ordem.produto.substring(0, 6).toUpperCase();
+            const codigo = ordem.codigo || (ordem.produto ? ordem.produto.substring(0, 6).toUpperCase() : 'N/A');
             document.getElementById('modal-produto-badge').textContent = codigo;
             document.getElementById('modal-produto-link').textContent = ordem.produto;
 
@@ -2984,46 +3542,56 @@
                 previsaoInput.value = data.toISOString().split('T')[0];
             }
 
-            // Atualizar Ícone de alerta baseado no status
+            // Atualizar ícone de alerta baseado no status
             const alertaIcon = document.querySelector('.previsao-alerta');
-            if (ordem.statusTexto === 'Atrasada') {
-                alertaIcon.style.display = 'inline';
-            } else {
-                alertaIcon.style.display = 'none';
+            if (alertaIcon) {
+                alertaIcon.style.display = ordem.statusTexto === 'Atrasada' ? 'inline' : 'none';
             }
 
             // Quantidade
-            document.getElementById('modal-quantidade').value = ordem.quantidade.toLocaleString('pt-BR', { minimumFractionDigits: 6 });
-            document.getElementById('modal-unidade').textContent = ordem.unidade || 'UN';
+            const modalQtd = document.getElementById('modal-quantidade');
+            if (modalQtd) modalQtd.value = (ordem.quantidade || 0).toLocaleString('pt-BR', { minimumFractionDigits: 6 });
+            const modalUnid = document.getElementById('modal-unidade');
+            if (modalUnid) modalUnid.textContent = ordem.unidade || 'UN';
 
             const statusQtd = ordem.produzido > 0
-                ? `${ordem.produzido.toLocaleString('pt-BR')} ${ordem.unidade} já produzidos`
+                ? `${ordem.produzido.toLocaleString('pt-BR')} ${ordem.unidade} j\u00e1 produzidos`
                 : 'mas nenhum ainda produzido';
-            document.getElementById('modal-quantidade-status').textContent = statusQtd;
+            const modalQtdStatus = document.getElementById('modal-quantidade-status');
+            if (modalQtdStatus) modalQtdStatus.textContent = statusQtd;
 
             // Carregar itens da ordem
             carregarItensOrdem(ordem);
 
             // Preencher aba de informações adicionais
-            document.getElementById('modal-info-codigo').value = codigo;
-            document.getElementById('modal-info-setor').value = ordem.setor || 'Produção';
-            document.getElementById('modal-info-criacao').value = new Date(ordem.dataCriacao || new Date()).toLocaleDateString('pt-BR');
-            document.getElementById('modal-info-responsavel').value = ordem.responsavel || 'Sistema';
+            const infoFields = {
+                'modal-info-codigo': codigo,
+                'modal-info-setor': 'Produção',
+                'modal-info-criacao': new Date(ordem.dataCriacao || new Date()).toLocaleDateString('pt-BR'),
+                'modal-info-responsavel': 'Clemerson Leandro'
+            };
+            for (const [id, val] of Object.entries(infoFields)) {
+                const el = document.getElementById(id);
+                if (el) el.value = val;
+            }
 
             // Preencher observações
-            document.getElementById('modal-observacoes').value = ordem.observacoes || '';
+            const obsEl = document.getElementById('modal-observacoes');
+            if (obsEl) obsEl.value = ordem.observacoes || '';
 
             // Atualizar status no footer
-            const statusFooter = document.getElementById('modal-status-footer');
+            const statusFooter = document.querySelector('#modalOrdemView .modal-ordem-footer');
             const statusText = document.getElementById('modal-status-text');
-            statusText.textContent = ordem.statusTexto || 'Em andamento';
+            if (statusText) statusText.textContent = ordem.statusTexto || 'Em andamento';
 
-            if (ordem.statusTexto === 'Atrasada') {
-                statusFooter.style.background = 'linear-gradient(135deg, #dc2626, #f87171)';
-            } else if (ordem.statusTexto === 'Concluída') {
-                statusFooter.style.background = 'linear-gradient(135deg, #22c55e, #86efac)';
-            } else {
-                statusFooter.style.background = 'linear-gradient(135deg, #3b82f6, #93c5fd)';
+            if (statusFooter) {
+                if (ordem.statusTexto === 'Atrasada') {
+                    statusFooter.style.background = 'linear-gradient(135deg, #dc2626, #f87171)';
+                } else if (ordem.statusTexto === 'Concluída') {
+                    statusFooter.style.background = 'linear-gradient(135deg, #22c55e, #86efac)';
+                } else {
+                    statusFooter.style.background = 'linear-gradient(135deg, #3b82f6, #93c5fd)';
+                }
             }
 
             // Reset tabs
@@ -3347,14 +3915,15 @@
                     showNotification('Item incluído com sucesso!', 'success');
                     document.getElementById('modal-incluir-item').remove();
                     // Recarregar itens da ordem
-                    carregarItensOrdem(ordemAtualId);
+                    const ordemObj = ordensProducao.find(o => o.id === ordemAtualId);
+                    if (ordemObj) carregarItensOrdem(ordemObj);
                 } else {
                     throw new Error('Erro ao incluir item');
                 }
             } catch (error) {
                 console.error('Erro:', error);
                 // Adicionar localmente na tabela
-                const tbody = document.getElementById('tabela-itens-ordem');
+                const tbody = document.getElementById('modal-itens-tbody');
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td style="text-align:center;"><i class="fas fa-edit" style="cursor:pointer;color:#2563eb;"></i> <i class="fas fa-trash" style="cursor:pointer;color:#dc2626;"></i></td>
@@ -3487,7 +4056,7 @@
 
                                     <label style="display:flex;align-items:center;gap:12px;cursor:pointer;">
                                         <input type="checkbox" id="opt-obs-estoque" style="width:18px;height:18px;accent-color:#dc2626;">
-                                        <span style="color:#374151;font-size:14px;"><strong>Exibir apenas observações</strong> de itens que utilizam o préprio estoque</span>
+                                        <span style="color:#374151;font-size:14px;"><strong>Exibir apenas observações</strong> de itens que utilizam o próprio estoque</span>
                                     </label>
 
                                     <label style="display:flex;align-items:center;gap:12px;cursor:pointer;">
@@ -3585,7 +4154,7 @@
 
                         <!-- Body -->
                         <div style="padding:24px;display:flex;gap:24px;overflow-y:auto;">
-                            <!-- Coluna Esquerda - Formulério -->
+                            <!-- Coluna Esquerda - Formulário -->
                             <div style="flex:0 0 45%;">
                                 <div style="margin-bottom:16px;">
                                     <label style="display:block;color:#6b7280;font-size:13px;margin-bottom:6px;">
@@ -3668,7 +4237,7 @@
         function enviarEmailOrdem() {
             const email = document.getElementById('email-para').value;
             if (!email) {
-                showNotification('Por favor, informe o e-mail do destinatério', 'error');
+                showNotification('Por favor, informe o e-mail do destinatário', 'error');
                 return;
             }
 
@@ -3716,7 +4285,7 @@
                 verde: '#38a169'
             };
 
-            // Dados da empresa (dinémico via API)
+            // Dados da empresa (dinâmico via API)
             const empresa = _dadosEmpresaPCP || {
                 razaoSocial: 'ALUFORCE',
                 cnpj: '', ie: '', endereco: '', cidadeEstado: '', cep: '', telefone: ''
@@ -3818,7 +4387,7 @@
 
                     <div class="linha-dupla"><div class="l1"></div><div class="l2"></div></div>
 
-                    <!-- Tétulo do Documento -->
+                    <!-- Título do Documento -->
                     <div class="titulo-doc">
                         <h1>ORDEM DE PRODUÇÃO</h1>
                         <div class="numero">Nº ${String(ordem.numero || ordem.codigo || ordem.id).padStart(5, '0')}</div>
@@ -3846,8 +4415,8 @@
                                     <div class="value">${ordem.dataConclusao ? new Date(ordem.dataConclusao).toLocaleDateString('pt-BR') : 'Não definida'}</div>
                                 </div>
                                 <div class="info-item">
-                                    <div class="label">Responsével</div>
-                                    <div class="value">${ordem.responsavel || 'Não atribuído'}</div>
+                                    <div class="label">Responsável</div>
+                                    <div class="value">Clemerson Leandro</div>
                                 </div>
                                 <div class="info-item">
                                     <div class="label">Prioridade</div>
@@ -3859,7 +4428,7 @@
                                 </div>
                                 <div class="info-item">
                                     <div class="label">Setor</div>
-                                    <div class="value">${ordem.setor || 'Produção'}</div>
+                                    <div class="value">Produção</div>
                                 </div>
                                 <div class="info-item">
                                     <div class="label">Código Interno</div>
@@ -3898,7 +4467,7 @@
 
                     <!-- Assinaturas -->
                     <div class="assinaturas">
-                        <div class="assinatura"><div class="assinatura-linha">Responsével Produção</div></div>
+                        <div class="assinatura"><div class="assinatura-linha">Responsável Produção</div></div>
                         <div class="assinatura"><div class="assinatura-linha">Controle de Qualidade</div></div>
                         <div class="assinatura"><div class="assinatura-linha">Expedição</div></div>
                     </div>
@@ -3964,7 +4533,7 @@
                 verde: '#38a169'
             };
 
-            // Dados da empresa (dinémico via API)
+            // Dados da empresa (dinâmico via API)
             const empresa = _dadosEmpresaPCP || {
                 razaoSocial: 'ALUFORCE',
                 cnpj: '', ie: '', endereco: '', cidadeEstado: '', cep: '', telefone: ''
@@ -4090,7 +4659,7 @@
 
                     <div class="linha-dupla"><div class="l1"></div><div class="l2"></div></div>
 
-                    <!-- Tétulo do Documento -->
+                    <!-- Título do Documento -->
                     <div class="titulo-doc">
                         <h1>MAPA DE CUSTO</h1>
                         <div class="numero">Nº ${String(ordem.numero || ordem.codigo || ordem.id).padStart(5, '0')}</div>
@@ -4220,7 +4789,6 @@
 
             // Buscar anexos da API
             fetch(`/api/pcp/ordens-producao/${ordemAtualId}/anexos`, {
-                credentials: 'include',
                 credentials: 'include'
             })
             .then(response => response.ok ? response.json() : { data: [] })
@@ -4341,9 +4909,9 @@
             }
 
             try {
-                const response = await fetch(`/api/pcp/ordens-producao/${ordemAtualId}/anexos`, { credentials: 'include', method: 'POST',
+                const response = await fetch(`/api/pcp/ordens-producao/${ordemAtualId}/anexos`, {
                     credentials: 'include',
-                    credentials: 'include',
+                    method: 'POST',
                     body: formData
                 });
 
@@ -4364,11 +4932,11 @@
             if (!confirm('Confirma exclusão do anexo?')) return;
 
             try {
-                await fetch(`/api/pcp/anexos/${anexoId}`, { credentials: 'include', method: 'DELETE',
+                await fetch(`/api/pcp/anexos/${anexoId}`, {
                     credentials: 'include',
-                    credentials: 'include'
+                    method: 'DELETE'
                 });
-                showNotification('Anexo excluédo!', 'success');
+                showNotification('Anexo excluído!', 'success');
                 document.getElementById('modal-anexos').remove();
                 verAnexosOrdem();
             } catch (error) {
@@ -4383,7 +4951,6 @@
 
             // Buscar histórico da API
             fetch(`/api/pcp/ordens-producao/${ordemAtualId}/historico`, {
-                credentials: 'include',
                 credentials: 'include'
             })
             .then(response => response.ok ? response.json() : { data: [] })
@@ -4512,7 +5079,6 @@
 
             // Buscar tarefas da API
             fetch(`/api/pcp/ordens-producao/${ordemAtualId}/tarefas`, {
-                credentials: 'include',
                 credentials: 'include'
             })
             .then(response => response.ok ? response.json() : { data: [] })
@@ -4664,9 +5230,9 @@
             if (!confirm('Confirma exclusão da tarefa?')) return;
 
             try {
-                await fetch(`/api/pcp/tarefas/${tarefaId}`, { credentials: 'include', method: 'DELETE',
+                await fetch(`/api/pcp/tarefas/${tarefaId}`, {
                     credentials: 'include',
-                    credentials: 'include'
+                    method: 'DELETE'
                 });
                 showNotification('Tarefa excluída!', 'success');
                 document.getElementById('modal-tarefas').remove();
@@ -4706,8 +5272,9 @@
 
                     if (!isLocalOrder) {
                         // Atualizar no banco de dados
-                        const response = await fetch(`/api/pcp/ordens-producao/${ordemAtualId}`, { credentials: 'include', method: 'PUT',
+                        const response = await fetch(`/api/pcp/ordens-producao/${ordemAtualId}`, {
                             credentials: 'include',
+                            method: 'PUT',
                             headers: {
                                 'Content-Type': 'application/json'
                             },
@@ -4781,7 +5348,6 @@
 
             // Buscar dados do pedido na API
             fetch(`/api/pedidos/${pedidoId}`, {
-                credentials: 'include',
                 credentials: 'include'
             })
             .then(response => {
@@ -4794,7 +5360,7 @@
             })
             .catch(error => {
                 console.error('Erro ao buscar pedido:', error);
-                // Mostrar modal com dados bésicos da ordem
+                // Mostrar modal com dados básicos da ordem
                 abrirModalPedidoVinculado({ id: pedidoId, numero: `P-${pedidoId}` }, ordem);
             });
         }
@@ -4810,7 +5376,7 @@
             const cidade = pedido.cidade || pedido.cliente_cidade || '-';
             const estado = pedido.estado || pedido.cliente_estado || '-';
 
-            // Itens do pedido se disponéveis
+            // Itens do pedido se disponíveis
             let itensHtml = '';
             if (pedido.itens && pedido.itens.length > 0) {
                 itensHtml = `
@@ -5048,8 +5614,9 @@
 
                     if (!isLocalOrder) {
                         // Tentar excluir do banco de dados
-                        const response = await fetch(`/api/pcp/ordens-producao/${ordemAtualId}`, { credentials: 'include', method: 'DELETE',
+                        const response = await fetch(`/api/pcp/ordens-producao/${ordemAtualId}`, {
                             credentials: 'include',
+                            method: 'DELETE',
                             headers: {
                                 'Content-Type': 'application/json'
                             }
@@ -5085,7 +5652,126 @@
         }
 
         function editarItemOrdem(index) {
-            showNotification('Edição de item em desenvolvimento', 'info');
+            if (!ordemAtualId) return;
+            const ordem = ordensProducao.find(o => o.id === ordemAtualId);
+            if (!ordem) return;
+
+            const rows = document.querySelectorAll('#modal-itens-tbody tr');
+            const row = rows[index];
+            if (!row) { showNotification('Item não encontrado', 'error'); return; }
+
+            const cells = row.querySelectorAll('td');
+            const descAtual = cells[1]?.textContent?.trim() || '';
+            const codAtual = cells[2]?.textContent?.trim() || '';
+            const qtdTexto = cells[3]?.textContent?.trim() || '0';
+            const qtdAtual = parseFloat(qtdTexto.replace(/[^\d,.-]/g, '').replace(',', '.')) || 0;
+            const unidAtual = qtdTexto.replace(/[\d.,\s]/g, '').trim() || 'UN';
+            const localAtual = cells[5]?.textContent?.trim() || 'ALMOXARIFADO';
+            const tipoAtual = cells[6]?.textContent?.trim() || 'MATÉRIA-PRIMA';
+
+            const modalHtml = `
+                <div id="modal-editar-item" style="position:fixed;inset:0;background:rgba(15,23,42,0.7);display:flex;align-items:center;justify-content:center;z-index:10005;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);">
+                    <div style="background:#fff;border-radius:16px;width:550px;max-width:95vw;box-shadow:0 25px 50px -12px rgba(0,0,0,0.4);overflow:hidden;">
+                        <div style="background:linear-gradient(135deg,#2563eb,#3b82f6);padding:20px;color:#fff;">
+                            <div style="display:flex;justify-content:space-between;align-items:center;">
+                                <div>
+                                    <h3 style="margin:0;font-size:18px;"><i class="fas fa-edit"></i> Editar Item</h3>
+                                    <p style="margin:5px 0 0;opacity:0.9;font-size:14px;">${ordem.numero || 'OP-' + ordem.id}</p>
+                                </div>
+                                <button onclick="document.getElementById('modal-editar-item').remove()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;width:36px;height:36px;border-radius:8px;cursor:pointer;font-size:18px;">&times;</button>
+                            </div>
+                        </div>
+                        <div style="padding:24px;">
+                            <div style="margin-bottom:20px;">
+                                <label style="display:block;margin-bottom:8px;font-weight:600;color:#374151;">Código do Material</label>
+                                <input type="text" id="edit-item-codigo" value="${codAtual}" style="width:100%;padding:12px 16px;border:2px solid #e5e7eb;border-radius:10px;font-size:14px;box-sizing:border-box;">
+                            </div>
+                            <div style="margin-bottom:20px;">
+                                <label style="display:block;margin-bottom:8px;font-weight:600;color:#374151;">Descrição</label>
+                                <input type="text" id="edit-item-descricao" value="${descAtual}" style="width:100%;padding:12px 16px;border:2px solid #e5e7eb;border-radius:10px;font-size:14px;box-sizing:border-box;">
+                            </div>
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+                                <div>
+                                    <label style="display:block;margin-bottom:8px;font-weight:600;color:#374151;">Quantidade</label>
+                                    <input type="number" id="edit-item-quantidade" value="${qtdAtual}" step="0.001" min="0" style="width:100%;padding:12px 16px;border:2px solid #e5e7eb;border-radius:10px;font-size:14px;box-sizing:border-box;">
+                                </div>
+                                <div>
+                                    <label style="display:block;margin-bottom:8px;font-weight:600;color:#374151;">Unidade</label>
+                                    <select id="edit-item-unidade" style="width:100%;padding:12px 16px;border:2px solid #e5e7eb;border-radius:10px;font-size:14px;box-sizing:border-box;background:#fff;">
+                                        <option value="KG" ${unidAtual === 'KG' ? 'selected' : ''}>KG</option>
+                                        <option value="M" ${unidAtual === 'M' ? 'selected' : ''}>M (Metro)</option>
+                                        <option value="UN" ${unidAtual === 'UN' ? 'selected' : ''}>UN (Unidade)</option>
+                                        <option value="L" ${unidAtual === 'L' ? 'selected' : ''}>L (Litro)</option>
+                                        <option value="PC" ${unidAtual === 'PC' ? 'selected' : ''}>PC (Peça)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+                                <div>
+                                    <label style="display:block;margin-bottom:8px;font-weight:600;color:#374151;">Tipo do Item</label>
+                                    <select id="edit-item-tipo" style="width:100%;padding:12px 16px;border:2px solid #e5e7eb;border-radius:10px;font-size:14px;box-sizing:border-box;background:#fff;">
+                                        <option value="MATÉRIA-PRIMA" ${tipoAtual.includes('PRIMA') ? 'selected' : ''}>Matéria-Prima</option>
+                                        <option value="COMPONENTE" ${tipoAtual === 'COMPONENTE' ? 'selected' : ''}>Componente</option>
+                                        <option value="EMBALAGEM" ${tipoAtual === 'EMBALAGEM' ? 'selected' : ''}>Embalagem</option>
+                                        <option value="INSUMO" ${tipoAtual === 'INSUMO' ? 'selected' : ''}>Insumo</option>
+                                        <option value="PRODUTO ACABADO" ${tipoAtual.includes('ACABADO') ? 'selected' : ''}>Produto Acabado</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="display:block;margin-bottom:8px;font-weight:600;color:#374151;">Local de Estoque</label>
+                                    <select id="edit-item-local" style="width:100%;padding:12px 16px;border:2px solid #e5e7eb;border-radius:10px;font-size:14px;box-sizing:border-box;background:#fff;">
+                                        <option value="ALMOXARIFADO" ${localAtual === 'ALMOXARIFADO' ? 'selected' : ''}>Almoxarifado</option>
+                                        <option value="PRODUÇÃO" ${localAtual === 'PRODUÇÃO' ? 'selected' : ''}>Produção</option>
+                                        <option value="DEPOSITO" ${localAtual === 'DEPOSITO' || localAtual === 'DEPÓSITO' ? 'selected' : ''}>Depósito</option>
+                                        <option value="EXTERNO" ${localAtual === 'EXTERNO' ? 'selected' : ''}>Externo</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="padding:20px;background:#f8f9fa;border-top:1px solid #e5e7eb;display:flex;justify-content:flex-end;gap:12px;">
+                            <button onclick="document.getElementById('modal-editar-item').remove()" style="padding:12px 24px;background:#6b7280;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;">
+                                <i class="fas fa-times"></i> Cancelar
+                            </button>
+                            <button onclick="salvarEdicaoItem(${index})" style="padding:12px 24px;background:#2563eb;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;">
+                                <i class="fas fa-check"></i> Salvar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
+        async function salvarEdicaoItem(index) {
+            const codigo = document.getElementById('edit-item-codigo').value.trim();
+            const descricao = document.getElementById('edit-item-descricao').value.trim();
+            const quantidade = parseFloat(document.getElementById('edit-item-quantidade').value) || 0;
+            const unidade = document.getElementById('edit-item-unidade').value;
+            const tipo = document.getElementById('edit-item-tipo').value;
+            const local = document.getElementById('edit-item-local').value;
+
+            if (quantidade <= 0) {
+                showNotification('Informe uma quantidade válida', 'error');
+                return;
+            }
+
+            // Atualizar na tabela visual
+            const rows = document.querySelectorAll('#modal-itens-tbody tr');
+            const row = rows[index];
+            if (row) {
+                const cells = row.querySelectorAll('td');
+                if (cells[1]) cells[1].textContent = descricao || codigo;
+                if (cells[2]) cells[2].textContent = codigo || '-';
+                if (cells[3]) cells[3].textContent = `${quantidade.toLocaleString('pt-BR', {minimumFractionDigits: 3})} ${unidade}`;
+                if (cells[5]) cells[5].textContent = local;
+                if (cells[6]) {
+                    const tipoClasse = tipo.toLowerCase().replace(/[^a-z]/g, '');
+                    cells[6].innerHTML = `<span class="tipo-badge tipo-${tipoClasse}">${tipo}</span>`;
+                }
+            }
+
+            document.getElementById('modal-editar-item').remove();
+            showNotification('Item atualizado com sucesso!', 'success');
         }
 
         async function removerItemOrdem(index) {
@@ -5098,6 +5784,15 @@
             });
 
             if (confirmado) {
+                const rows = document.querySelectorAll('#modal-itens-tbody tr');
+                const row = rows[index];
+                if (row) {
+                    row.remove();
+                    // Atualizar contador
+                    const remaining = document.querySelectorAll('#modal-itens-tbody tr').length;
+                    const countEl = document.getElementById('modal-itens-count');
+                    if (countEl) countEl.textContent = remaining > 0 ? `1 - ${remaining} de ${remaining} registros` : '0 registros';
+                }
                 showNotification('Item removido!', 'success');
             }
         }
@@ -5116,7 +5811,6 @@
 
             // Buscar itens da estrutura da API
             fetch(`/api/pcp/ordens-producao/${ordem.id}/itens`, {
-                credentials: 'include',
                 credentials: 'include'
             })
             .then(response => response.ok ? response.json() : Promise.reject('Erro na API'))
@@ -5245,8 +5939,8 @@
                                         <i class="fas fa-user" style="color:#6366f1;font-size:16px;"></i>
                                     </div>
                                     <div>
-                                        <p style="margin:0;font-size:12px;color:#64748b;">Responsével</p>
-                                        <p style="margin:4px 0 0;font-size:15px;font-weight:600;color:#0f172a;">${ordem.responsavel || 'Não definido'}</p>
+                                        <p style="margin:0;font-size:12px;color:#64748b;">Responsável</p>
+                                        <p style="margin:4px 0 0;font-size:15px;font-weight:600;color:#0f172a;">Clemerson Leandro</p>
                                     </div>
                                 </div>
                                 <div style="background:#fff;padding:18px 20px;border-radius:12px;display:flex;align-items:center;gap:14px;border:1px solid #e2e8f0;">
@@ -5314,32 +6008,52 @@
             const modal = document.getElementById('modal-preview-op');
             if (!modal) return;
 
-            const conteudo = modal.querySelector('div > div').innerHTML;
+            const container = modal.querySelector('div > div');
+            if (!container) return;
+
+            const headerEl = container.querySelector('div:first-child');
+            const bodyEl = container.querySelector('div:nth-child(2)');
+
             const printWindow = window.open('', '_blank');
             printWindow.document.write(`
+                <!DOCTYPE html>
                 <html>
                 <head>
-                    <title>Zyntra: Ordem de Produção</title>
+                    <title>Zyntra ERP — Ordem de Produção</title>
                     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
-    <!-- Mobile Enterprise Design System -->
-    <link rel="stylesheet" href="/css/design-system-mobile.css?v=20260202">
-    <link rel="stylesheet" href="/css/responsive-global.css?v=20260202">
-    <link rel="stylesheet" href="/css/mobile-master-2026.css?v=20260202">
-    <link rel="stylesheet" href="/css/mobile-enterprise-enhancements.css?v=20260202">
                     <style>
-                        body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+                        * { box-sizing: border-box; }
+                        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; background: #fff; }
                         @media print {
                             body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                            @page { size: A4; margin: 8mm; }
                             button { display: none !important; }
                         }
+                        .print-header { text-align: center; padding: 20px 0 10px; border-bottom: 3px solid #1e3a5f; margin-bottom: 0; }
+                        .print-header img { height: 45px; margin-bottom: 8px; }
+                        .print-header h1 { font-size: 14px; color: #1e3a5f; margin: 4px 0 0; letter-spacing: 2px; text-transform: uppercase; }
+                        .print-footer { text-align: center; padding: 12px 0; border-top: 2px solid #e2e8f0; margin-top: 20px; font-size: 10px; color: #94a3b8; }
+                        .print-signatures { display: flex; justify-content: space-around; margin-top: 40px; padding: 0 40px; }
+                        .print-signatures .sig-block { text-align: center; min-width: 180px; }
+                        .print-signatures .sig-line { border-top: 1px solid #334155; margin-top: 50px; padding-top: 8px; font-size: 12px; color: #475569; font-weight: 600; }
                     </style>
-</head>
-                <body>${conteudo}
-
-    <!-- Chat Corporativo (Teams) -->
-    <script src="/socket.io/socket.io.js"><\/script>
-    <script src="/chat-teams/chat-widget.js?v=20260615" defer><\/script>
-<\/body>
+                </head>
+                <body>
+                    <div class="print-header">
+                        <img src="/images/Logo%20Monocromatico%20-%20Azul%20-%20Aluforce.png" alt="Logo" onerror="this.style.display='none'">
+                        <h1>Ordem de Produção</h1>
+                    </div>
+                    ${headerEl ? headerEl.outerHTML : ''}
+                    ${bodyEl ? bodyEl.outerHTML : ''}
+                    <div class="print-signatures">
+                        <div class="sig-block"><div class="sig-line">Responsável Produção</div></div>
+                        <div class="sig-block"><div class="sig-line">Controle de Qualidade</div></div>
+                        <div class="sig-block"><div class="sig-line">Expedição</div></div>
+                    </div>
+                    <div class="print-footer">
+                        Documento gerado por Zyntra ERP &bull; ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'})} &bull; Este documento é de uso interno
+                    </div>
+                </body>
                 </html>
             `);
             printWindow.document.close();
@@ -5360,7 +6074,6 @@
 
             // Buscar itens da estrutura com custos
             fetch(`/api/pcp/ordens-producao/${ordem.id}/itens`, {
-                credentials: 'include',
                 credentials: 'include'
             })
             .then(response => response.ok ? response.json() : Promise.reject('Erro na API'))
@@ -5403,7 +6116,7 @@
                     `;
                 });
             } else {
-                itensHtml = `<tr><td colspan="7" style="padding:40px;text-align:center;color:#94a3b8;font-size:15px;"><i class="fas fa-calculator" style="font-size:32px;display:block;margin-bottom:12px;opacity:0.5;"></i>Sem itens de estrutura para célculo de custo</td></tr>`;
+                itensHtml = `<tr><td colspan="7" style="padding:40px;text-align:center;color:#94a3b8;font-size:15px;"><i class="fas fa-calculator" style="font-size:32px;display:block;margin-bottom:12px;opacity:0.5;"></i>Sem itens de estrutura para cálculo de custo</td></tr>`;
             }
 
             // Custos estimados
@@ -5555,32 +6268,46 @@
             const modal = document.getElementById('modal-preview-mapa');
             if (!modal) return;
 
-            const conteudo = modal.querySelector('div > div').innerHTML;
+            // Get the inner content container (skip the overlay div)
+            const container = modal.querySelector('div > div');
+            if (!container) return;
+
+            // Extract header and body content from the modal
+            const headerEl = container.querySelector('div:first-child');
+            const bodyEl = container.querySelector('div:nth-child(2)');
+
             const printWindow = window.open('', '_blank');
             printWindow.document.write(`
+                <!DOCTYPE html>
                 <html>
                 <head>
-                    <title>Zyntra: Mapa de Custo</title>
+                    <title>Zyntra ERP — Mapa de Custo de Produção</title>
                     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
-    <!-- Mobile Enterprise Design System -->
-    <link rel="stylesheet" href="/css/design-system-mobile.css?v=20260202">
-    <link rel="stylesheet" href="/css/responsive-global.css?v=20260202">
-    <link rel="stylesheet" href="/css/mobile-master-2026.css?v=20260202">
-    <link rel="stylesheet" href="/css/mobile-enterprise-enhancements.css?v=20260202">
                     <style>
-                        body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+                        * { box-sizing: border-box; }
+                        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; background: #fff; }
                         @media print {
                             body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                            @page { size: A4; margin: 8mm; }
                             button { display: none !important; }
                         }
+                        .print-header { text-align: center; padding: 20px 0 10px; border-bottom: 3px solid #065f46; margin-bottom: 0; }
+                        .print-header img { height: 45px; margin-bottom: 8px; }
+                        .print-header h1 { font-size: 14px; color: #065f46; margin: 4px 0 0; letter-spacing: 2px; text-transform: uppercase; }
+                        .print-footer { text-align: center; padding: 12px 0; border-top: 2px solid #e2e8f0; margin-top: 20px; font-size: 10px; color: #94a3b8; }
                     </style>
-</head>
-                <body>${conteudo}
-
-    <!-- Chat Corporativo (Teams) -->
-    <script src="/socket.io/socket.io.js"><\/script>
-    <script src="/chat-teams/chat-widget.js?v=20260615" defer><\/script>
-<\/body>
+                </head>
+                <body>
+                    <div class="print-header">
+                        <img src="/images/Logo%20Monocromatico%20-%20Azul%20-%20Aluforce.png" alt="Logo" onerror="this.style.display='none'">
+                        <h1>Mapa de Custo de Produção</h1>
+                    </div>
+                    ${headerEl ? headerEl.outerHTML : ''}
+                    ${bodyEl ? bodyEl.outerHTML : ''}
+                    <div class="print-footer">
+                        Documento gerado por Zyntra ERP &bull; ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'})} &bull; Este documento é de uso interno
+                    </div>
+                </body>
                 </html>
             `);
             printWindow.document.close();
@@ -5591,7 +6318,7 @@
         // FUNÇÕES DE ETIQUETAS
         // ========================================
 
-        // Variéveis globais para etiqueta
+        // Variáveis globais para etiqueta
         let etiquetaVariacaoSelecionada = '';
         let etiquetaQuantidadeFolha = 4;
         let etiquetaTipoAtual = '';
@@ -5612,7 +6339,7 @@
             etiquetaTipoAtual = tipo;
             const cabo = ordem.produto || ordem.produto_nome || '-';
 
-            // Extrair todas as posséveis variações do nome do produto
+            // Extrair todas as possíveis variações do nome do produto
             const variacoesProduto = extrairTodasVariacoes(cabo);
 
             // Também verificar se há variações cadastradas no produto (campo variacao da ordem)
@@ -5665,7 +6392,7 @@
             opcoesVariacao += '</optgroup>';
 
             // Opção: digitar manualmente
-            opcoesVariacao += '<option value="__custom__">✏️ Digitar manualmente...</option>';
+            opcoesVariacao += '<option value="__custom__">?? Digitar manualmente...</option>';
 
             const modalHtml = `
                 <div id="modal-selecao-etiqueta" style="position:fixed;inset:0;background:rgba(15,23,42,0.85);display:flex;align-items:center;justify-content:center;z-index:10006;padding:20px;-webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);animation:fadeIn 0.3s ease;">
@@ -5738,7 +6465,7 @@
                                 </p>
                             </div>
 
-                            <!-- Preview répido -->
+                            <!-- Preview rápido -->
                             <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px;display:flex;align-items:center;gap:12px;">
                                 <div style="width:36px;height:36px;background:#dcfce7;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                                     <i class="fas fa-check-circle" style="color:#16a34a;font-size:16px;"></i>
@@ -5746,7 +6473,7 @@
                                 <div>
                                     <p style="margin:0;font-size:13px;font-weight:600;color:#15803d;">Pronto para gerar</p>
                                     <p style="margin:2px 0 0;font-size:11px;color:#16a34a;" id="etiqueta-preview-info">
-                                        Variação: Automética | Quantidade: 4 por folha
+                                        Variação: Automática | Quantidade: 4 por folha
                                     </p>
                                 </div>
                             </div>
@@ -5773,7 +6500,7 @@
             atualizarPreviewInfo();
         }
 
-        // Extrair todas as variações posséveis do nome do produto
+        // Extrair todas as variações possíveis do nome do produto
         function extrairTodasVariacoes(nomeProduto) {
             if (!nomeProduto) return [];
             const resultado = [];
@@ -5783,7 +6510,7 @@
             if (cores) cores.forEach(c => resultado.push(c.toUpperCase()));
 
             // Tipos
-            const tipos = nomeProduto.match(/\b(NU|ISOLADO|BLINDADO|FLEXéVEL|RéGIDO)\b/gi);
+            const tipos = nomeProduto.match(/\b(NU|ISOLADO|BLINDADO|FLEXÍVEL|RÍGIDO)\b/gi);
             if (tipos) tipos.forEach(t => resultado.push(t.toUpperCase()));
 
             // Materiais
@@ -5829,7 +6556,7 @@
             const el = document.getElementById('etiqueta-preview-info');
             if (!el) return;
 
-            let variacaoTexto = 'Automética';
+            let variacaoTexto = 'Automática';
             const select = document.getElementById('etiqueta-variacao-select');
             if (select) {
                 if (select.value === '__custom__') {
@@ -5843,7 +6570,7 @@
             el.textContent = `Variação: ${variacaoTexto} | Quantidade: ${etiquetaQuantidadeFolha} por folha`;
         }
 
-        // Confirmar e gerar etiqueta com parémetros selecionados
+        // Confirmar e gerar etiqueta com parâmetros selecionados
         function confirmarGerarEtiqueta() {
             const select = document.getElementById('etiqueta-variacao-select');
             if (select && select.value === '__custom__') {
@@ -6100,7 +6827,7 @@
             // Padrões comuns de variação/cor em cabos
             const padroes = [
                 /\b(PRETO|BRANCO|VERMELHO|AZUL|VERDE|AMARELO|CINZA|MARROM|LARANJA|NEUTRO|FASE|TERRA)\b/gi,
-                /\b(NU|ISOLADO|BLINDADO|FLEXéVEL|RéGIDO)\b/gi,
+                /\b(NU|ISOLADO|BLINDADO|FLEXÍVEL|RÍGIDO)\b/gi,
                 /\b(PP|EPR|XLPE|PVC)\b/gi
             ];
 
@@ -6112,7 +6839,7 @@
                 }
             }
 
-            // Se não encontrou padrões, tentar pegar as últimas palavras apés mm² ou bitola
+            // Se não encontrou padrões, tentar pegar as últimas palavras após mm² ou bitola
             if (variacoes.length === 0) {
                 const partes = nomeProduto.split(/\s+/);
                 if (partes.length >= 2) {
@@ -6134,6 +6861,15 @@
             if (!content) return;
 
             const conteudo = content.innerHTML;
+            const qtd = etiquetaQuantidadeFolha || 4;
+            const cols = qtd <= 2 ? qtd : 2;
+
+            // Replicate etiqueta multiple times in a grid layout
+            let etiquetasHtml = '';
+            for (let i = 0; i < qtd; i++) {
+                etiquetasHtml += `<div class="etiqueta-cell">${conteudo}</div>`;
+            }
+
             const printWindow = window.open('', '_blank');
             printWindow.document.write(`
                 <!DOCTYPE html>
@@ -6142,38 +6878,43 @@
                     <title>Zyntra: ${titulo}</title>
                     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
                     <style>
-                        * { box-sizing: border-box; }
+                        * { box-sizing: border-box; margin: 0; padding: 0; }
                         body {
                             font-family: 'Segoe UI', Arial, sans-serif;
-                            margin: 0;
-                            padding: 20px;
                             background: #fff;
                         }
+                        .etiquetas-grid {
+                            display: grid;
+                            grid-template-columns: repeat(${cols}, 1fr);
+                            gap: 8px;
+                            padding: 10px;
+                            width: 100%;
+                        }
+                        .etiqueta-cell {
+                            page-break-inside: avoid;
+                            break-inside: avoid;
+                        }
+                        .etiqueta-cell > div {
+                            padding: 12px !important;
+                        }
+                        .etiqueta-cell img { max-height: 35px !important; }
+                        ${qtd > 2 ? '.etiqueta-cell p, .etiqueta-cell span { font-size: 85% !important; }' : ''}
+                        ${qtd >= 6 ? '.etiqueta-cell p, .etiqueta-cell span { font-size: 75% !important; } .etiqueta-cell img { max-height: 25px !important; }' : ''}
                         @media print {
-                            body {
-                                -webkit-print-color-adjust: exact;
-                                print-color-adjust: exact;
-                                padding: 0;
-                            }
-                            @page {
-                                size: auto;
-                                margin: 10mm;
-                            }
+                            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                            @page { size: A4; margin: 5mm; }
+                            .etiquetas-grid { gap: 4px; padding: 0; }
                         }
                     </style>
-</head>
-                <body>${conteudo}
-
-    <!-- Chat Corporativo (Teams) -->
-    <script src="/socket.io/socket.io.js"><\/script>
-    <script src="/chat-teams/chat-widget.js?v=20260615" defer><\/script>
-<\/body>
+                </head>
+                <body>
+                    <div class="etiquetas-grid">${etiquetasHtml}</div>
+                </body>
                 </html>
             `);
             printWindow.document.close();
             setTimeout(() => {
                 printWindow.print();
-                // printWindow.close(); // Descomentar se quiser fechar apés imprimir
             }, 500);
         }
 
@@ -6197,9 +6938,9 @@
             try {
                 showNotification('Gerando arquivo Excel...', 'info');
 
-                const response = await fetch(endpoint, { credentials: 'include', method: 'GET',
+                const response = await fetch(endpoint, {
                     credentials: 'include',
-                    credentials: 'include'
+                    method: 'GET'
                 });
 
                 if (!response.ok) {
@@ -6300,11 +7041,77 @@
         });
 
         // ========================================
-        // UTILITéRIOS
+        // UTILITÁRIOS
         // ========================================
         function showCardMenu(ordemId) {
-            // TODO: Implementar menu de contexto
-            console.log('Menu do card:', ordemId);
+            // Fechar menu existente
+            fecharCardMenuGlobal();
+
+            const ordem = ordensProducao.find(o => o.id == ordemId);
+            if (!ordem) return;
+
+            // Localizar o card e o botão de menu
+            const card = document.querySelector(`.kanban-card[data-id="${ordemId}"]`);
+            if (!card) return;
+
+            // Criar menu de contexto
+            const menu = document.createElement('div');
+            menu.className = 'card-context-menu';
+            menu.id = 'activeCardMenu';
+            menu.onclick = function(e) { e.stopPropagation(); };
+
+            menu.innerHTML = `
+                <button class="card-context-menu-item" onclick="fecharCardMenuGlobal(); abrirModalOrdem(${ordemId})">
+                    <i class="fas fa-eye"></i> Visualizar / Editar
+                </button>
+                <button class="card-context-menu-item" onclick="fecharCardMenuGlobal(); duplicarOrdem(${ordemId})">
+                    <i class="fas fa-copy"></i> Duplicar Ordem
+                </button>
+                <div class="card-context-menu-separator"></div>
+                <button class="card-context-menu-item" onclick="fecharCardMenuGlobal(); imprimirOrdemCard(${ordemId})">
+                    <i class="fas fa-print"></i> Imprimir OP
+                </button>
+                <div class="card-context-menu-separator"></div>
+                <button class="card-context-menu-item danger" onclick="fecharCardMenuGlobal(); excluirOrdem(${ordemId})">
+                    <i class="fas fa-trash-alt"></i> Excluir Ordem
+                </button>
+            `;
+
+            card.style.position = 'relative';
+            card.appendChild(menu);
+
+            // Fechar ao clicar fora
+            setTimeout(() => {
+                document.addEventListener('click', fecharCardMenuGlobal, { once: true });
+            }, 10);
+        }
+
+        function fecharCardMenuGlobal() {
+            const menu = document.getElementById('activeCardMenu');
+            if (menu) menu.remove();
+        }
+
+        function duplicarOrdem(ordemId) {
+            const ordem = ordensProducao.find(o => o.id == ordemId);
+            if (!ordem) return;
+            const nova = { ...ordem, id: Date.now(), numero: 'NOVA-' + (ordem.numero || ''), status: 'a_produzir', statusKanban: 'a_produzir', produzido: 0 };
+            ordensProducao.push(nova);
+            salvarOrdensLocais();
+            renderizarKanban();
+            showNotification('Ordem duplicada com sucesso', 'success');
+        }
+
+        function imprimirOrdemCard(ordemId) {
+            abrirModalOrdem(ordemId);
+            setTimeout(() => imprimirOrdem(), 300);
+        }
+
+        function excluirOrdem(ordemId) {
+            if (!confirm('Tem certeza que deseja excluir esta ordem de produção?')) return;
+            ordensProducao = ordensProducao.filter(o => o.id != ordemId);
+            salvarOrdensLocais();
+            renderizarKanban();
+            showNotification('Ordem excluída', 'success');
         }
 
         function showNotification(message, type = 'info') {
@@ -6568,7 +7375,7 @@
         }
 
         function atualizarColunasKanban() {
-            // Atualizar os tétulos das colunas do Kanban
+            // Atualizar os títulos das colunas do Kanban
             const colunaMap = {
                 'fila': 'A Produzir',
                 'producao': 'Produzindo',

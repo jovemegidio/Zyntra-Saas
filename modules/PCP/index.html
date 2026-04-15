@@ -18453,13 +18453,13 @@
                 }
 
                 // Filtro de período
-                if (período && pedido.created_at) {
+                if (periodo && pedido.created_at) {
                     const dataPedido = new Date(pedido.created_at);
                     const hoje = new Date();
                     hoje.setHours(23, 59, 59, 999);
 
                     let dataLimite = new Date();
-                    switch (período) {
+                    switch (periodo) {
                         case 'hoje':
                             dataLimite.setHours(0, 0, 0, 0);
                             break;
