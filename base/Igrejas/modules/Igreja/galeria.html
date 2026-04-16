@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Zyntra Igrejas — Galeria de Fotos</title>
+    <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/igreja.css">
+</head>
+<body>
+<a href="#main" class="skip-link">Pular para conteúdo</a>
+<div class="app-layout">
+    <aside class="sidebar" id="sidebar"></aside><div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <div class="main-area">
+        <header class="header" id="header"></header>
+        <div class="page-content" id="main">
+            <div class="page-header fade-in"><h1 class="page-title">📸 Galeria de Fotos</h1><p class="page-subtitle">Álbuns vinculados a eventos com visualizador fullscreen</p></div>
+            <div class="toolbar fade-in fade-in-1">
+                <div class="filter-chip active" onclick="filterAlbums('all',this)">Todos</div>
+                <div class="filter-chip" onclick="filterAlbums('culto',this)">Cultos</div>
+                <div class="filter-chip" onclick="filterAlbums('retiro',this)">Retiros</div>
+                <div class="filter-chip" onclick="filterAlbums('evento',this)">Eventos</div>
+                <button class="btn btn-primary" style="margin-left:auto" data-admin-only onclick="showToast('Upload de fotos em breve!','info')"><i class="fas fa-upload"></i> Enviar Fotos</button>
+            </div>
+            <div class="grid-3 fade-in fade-in-2" id="albums-grid"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Fullscreen viewer -->
+<div class="modal-overlay" id="modal-viewer" style="background:rgba(0,0,0,.9)">
+    <div style="position:absolute;top:20px;right:20px;z-index:10"><button class="btn btn-outline" onclick="closeModal('modal-viewer')" style="color:#fff;border-color:rgba(255,255,255,.3)"><i class="fas fa-times"></i></button></div>
+    <div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;gap:24px">
+        <button class="btn btn-outline" style="color:#fff;border-color:rgba(255,255,255,.2)" onclick="prevPhoto()"><i class="fas fa-chevron-left"></i></button>
+        <div style="width:70%;max-height:80vh;aspect-ratio:16/10;background:var(--bg-card);border-radius:16px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:1.5rem" id="viewer-image"><i class="fas fa-image" style="font-size:4rem"></i></div>
+        <button class="btn btn-outline" style="color:#fff;border-color:rgba(255,255,255,.2)" onclick="nextPhoto()"><i class="fas fa-chevron-right"></i></button>
+    </div>
+    <div style="position:absolute;bottom:24px;left:50%;transform:translateX(-50%);text-align:center"><div style="font-weight:600" id="viewer-title"></div><div style="font-size:.78rem;color:var(--text-muted)" id="viewer-count"></div></div>
+</div>
+
+<div id="a11y"></div>
+<script src="js/igreja.js"></script>
+<script>
+document.getElementById('sidebar').innerHTML = SIDEBAR_HTML;
+document.getElementById('header').innerHTML = getHeaderHTML('Galeria');
+document.getElementById('a11y').innerHTML = A11Y_HTML;
+
+var albums = [
+    {id:1,title:'Culto de Celebração — Abril',type:'culto',photos:24,date:'2026-04-13',color:'#7c3aed'},
+    {id:2,title:'Retiro de Jovens 2026',type:'retiro',photos:86,date:'2026-04-05',color:'#3b82f6'},
+    {id:3,title:'Conferência de Louvor',type:'evento',photos:45,date:'2026-03-28',color:'#ec4899'},
+    {id:4,title:'Batismo no Rio',type:'culto',photos:32,date:'2026-03-15',color:'#10b981'},
+    {id:5,title:'Festa das Crianças',type:'evento',photos:58,date:'2026-03-08',color:'#f59e0b'},
+    {id:6,title:'Culto Especial — Páscoa',type:'culto',photos:19,date:'2026-03-31',color:'#7c3aed'}
+];
+var viewerIdx = 0;
+var viewerAlbum = null;
+
+function filterAlbums(f,el){
+    document.querySelectorAll('.filter-chip').forEach(function(c){c.classList.remove('active')});
+    if(el)el.classList.add('active');
+    var list = f==='all'?albums:albums.filter(function(a){return a.type===f});
+    renderAlbums(list);
+}
+
+function renderAlbums(list){
+    var html='';
+    list.forEach(function(a){
+        html+='<div class="card" style="cursor:pointer" onclick="openViewer('+a.id+')"><div style="height:160px;background:linear-gradient(135deg,'+a.color+'40,'+a.color+'15);display:flex;align-items:center;justify-content:center;position:relative"><i class="fas fa-images" style="font-size:2.5rem;color:'+a.color+'"></i><div style="position:absolute;bottom:12px;right:12px;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);padding:4px 10px;border-radius:6px;font-size:.72rem"><i class="fas fa-image" style="margin-right:4px"></i>'+a.photos+'</div></div><div class="card-body"><h3 style="font-size:.88rem;font-weight:600;margin-bottom:4px">'+a.title+'</h3><p style="font-size:.72rem;color:var(--text-muted)"><i class="fas fa-calendar" style="margin-right:4px"></i>'+formatDate(a.date)+'</p></div></div>';
+    });
+    document.getElementById('albums-grid').innerHTML=html;
+}
+
+function openViewer(id){
+    viewerAlbum = albums.find(function(a){return a.id===id});
+    viewerIdx = 0;
+    updateViewer();
+    openModal('modal-viewer');
+}
+function updateViewer(){
+    if(!viewerAlbum) return;
+    document.getElementById('viewer-title').textContent = viewerAlbum.title;
+    document.getElementById('viewer-count').textContent = (viewerIdx+1)+' de '+viewerAlbum.photos;
+}
+function prevPhoto(){viewerIdx = Math.max(0,viewerIdx-1);updateViewer();}
+function nextPhoto(){if(viewerAlbum)viewerIdx = Math.min(viewerAlbum.photos-1,viewerIdx+1);updateViewer();}
+
+filterAlbums('all',document.querySelector('.filter-chip'));
+</script>
+</body>
+</html>

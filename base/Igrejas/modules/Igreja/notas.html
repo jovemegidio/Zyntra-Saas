@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Zyntra Igrejas — Notas de Culto</title>
+    <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/igreja.css">
+</head>
+<body>
+<a href="#main" class="skip-link">Pular para conteúdo</a>
+<div class="app-layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <div class="main-area">
+        <header class="header" id="header"></header>
+        <div class="page-content" id="main">
+            <div class="page-header fade-in">
+                <h1 class="page-title">📝 Notas de Culto</h1>
+                <p class="page-subtitle">Registre suas anotações durante os cultos e estudos</p>
+            </div>
+            <div class="toolbar fade-in fade-in-1">
+                <div class="search-box" style="flex:1"><i class="fas fa-search"></i><input class="form-control" placeholder="Buscar nas notas..." id="search-notes" oninput="filterNotes()"></div>
+                <select class="form-control" style="width:auto" id="filter-cat" onchange="filterNotes()"><option value="">Todas categorias</option><option value="culto">Culto</option><option value="ebd">EBD</option><option value="celula">Célula</option><option value="pessoal">Pessoal</option></select>
+                <button class="btn btn-primary" onclick="openModal('modal-note')"><i class="fas fa-plus"></i> Nova Nota</button>
+            </div>
+            <div class="grid-3 fade-in fade-in-2" id="notes-grid"></div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modal-note">
+    <div class="modal">
+        <div class="modal-header"><h2>Nova Nota de Culto</h2><button class="modal-close" onclick="closeModal('modal-note')"><i class="fas fa-times"></i></button></div>
+        <div class="modal-body">
+            <div class="form-group"><label>Título</label><input type="text" class="form-control" id="note-title" placeholder="Título da nota"></div>
+            <div class="form-group"><label>Categoria</label><select class="form-control" id="note-cat"><option value="culto">Culto</option><option value="ebd">EBD</option><option value="celula">Célula</option><option value="pessoal">Pessoal</option></select></div>
+            <div class="form-group"><label>Pregador / Líder</label><input type="text" class="form-control" id="note-speaker" placeholder="Nome do pregador"></div>
+            <div class="form-group"><label>Anotações</label><textarea class="form-control" rows="6" id="note-content" placeholder="Escreva suas anotações..."></textarea></div>
+        </div>
+        <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('modal-note')">Cancelar</button><button class="btn btn-primary" onclick="saveNote()"><i class="fas fa-save"></i> Salvar</button></div>
+    </div>
+</div>
+
+<div id="a11y"></div>
+<script src="js/igreja.js"></script>
+<script>
+document.getElementById('sidebar').innerHTML = SIDEBAR_HTML;
+document.getElementById('header').innerHTML = getHeaderHTML('Notas de Culto');
+document.getElementById('a11y').innerHTML = A11Y_HTML;
+
+var notes = [
+    {id:1,title:'Culto de Domingo — A Fé que Move',category:'culto',speaker:'Pr. Roberto',content:'Texto base: Hebreus 11. A fé é a certeza das coisas que se esperam. Precisamos exercitar nossa fé diariamente, não apenas nos momentos difíceis.',date:'2026-04-13'},
+    {id:2,title:'EBD — Epístola aos Romanos',category:'ebd',speaker:'Pra. Ana',content:'Capítulo 8 — Nenhuma condenação há para os que estão em Cristo Jesus. Estudo sobre a vida no Espírito e a liberdade em Cristo.',date:'2026-04-13'},
+    {id:3,title:'Célula — Servindo ao Próximo',category:'celula',speaker:'João Santos',content:'Devoção sobre Mateus 25:35-40. Discutimos formas práticas de servir a comunidade. Ação social marcada para próximo sábado.',date:'2026-04-09'},
+    {id:4,title:'Reflexões Pessoais',category:'pessoal',speaker:'—',content:'Tenho sentido Deus me direcionando para o ministério de louvor. Orar mais sobre isso durante a semana.',date:'2026-04-07'},
+    {id:5,title:'Culto de Quarta — Provisão Divina',category:'culto',speaker:'Pr. Roberto',content:'Filipenses 4:19 — Deus suprirá todas as necessidades segundo as suas riquezas. Testemunhos poderosos compartilhados pela igreja.',date:'2026-04-09'},
+    {id:6,title:'EBD — Frutos do Espírito',category:'ebd',speaker:'Pra. Ana',content:'Gálatas 5:22-23. Estudo sobre os 9 frutos do Espírito Santo. Amor, alegria, paz, paciência, benignidade, bondade, fidelidade, mansidão, domínio próprio.',date:'2026-04-06'}
+];
+
+function filterNotes(){
+    var search = (document.getElementById('search-notes').value||'').toLowerCase();
+    var cat = document.getElementById('filter-cat').value;
+    var filtered = notes.filter(function(n){
+        if(search && n.title.toLowerCase().indexOf(search)===-1 && n.content.toLowerCase().indexOf(search)===-1) return false;
+        if(cat && n.category!==cat) return false;
+        return true;
+    });
+    renderNotes(filtered);
+}
+
+function renderNotes(list){
+    var catColors = {culto:'#7c3aed',ebd:'#3b82f6',celula:'#10b981',pessoal:'#f59e0b'};
+    var catIcons = {culto:'fa-church',ebd:'fa-book-open',celula:'fa-people-group',pessoal:'fa-user'};
+    var html = '';
+    list.forEach(function(n){
+        var color = catColors[n.category]||'#7c3aed';
+        html += '<div class="card" style="cursor:pointer" onclick="viewNote('+n.id+')"><div style="height:4px;background:'+color+'"></div><div class="card-body"><div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><i class="fas '+catIcons[n.category]+'" style="color:'+color+'"></i><span class="badge" style="background:'+color+'20;color:'+color+'">'+n.category+'</span><span style="font-size:.7rem;color:var(--text-muted);margin-left:auto">'+formatDate(n.date)+'</span></div><h3 style="font-size:.9rem;font-weight:600;margin-bottom:6px">'+n.title+'</h3><p style="font-size:.78rem;color:var(--text-secondary);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">'+n.content+'</p><div style="margin-top:12px;font-size:.72rem;color:var(--text-muted)"><i class="fas fa-microphone" style="margin-right:4px"></i>'+n.speaker+'</div></div></div>';
+    });
+    document.getElementById('notes-grid').innerHTML = html || '<div class="empty-state" style="grid-column:1/-1"><i class="fas fa-sticky-note"></i><h3>Nenhuma nota encontrada</h3></div>';
+}
+
+function viewNote(id){ showToast('Abrindo nota...','info'); }
+
+function saveNote(){
+    var title = document.getElementById('note-title').value.trim();
+    var content = document.getElementById('note-content').value.trim();
+    if(!title||!content){showToast('Preencha título e conteúdo','warning');return;}
+    notes.unshift({id:Date.now(),title:title,category:document.getElementById('note-cat').value,speaker:document.getElementById('note-speaker').value||'—',content:content,date:new Date().toISOString().split('T')[0]});
+    closeModal('modal-note');
+    filterNotes();
+    showToast('Nota salva com sucesso!','success');
+}
+
+filterNotes();
+</script>
+</body>
+</html>

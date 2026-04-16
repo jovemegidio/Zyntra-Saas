@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Zyntra Igrejas — Formulários</title>
+    <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/igreja.css">
+</head>
+<body>
+<a href="#main" class="skip-link">Pular para conteúdo</a>
+<div class="app-layout">
+    <aside class="sidebar" id="sidebar"></aside><div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <div class="main-area">
+        <header class="header" id="header"></header>
+        <div class="page-content" id="main">
+            <div class="page-header fade-in"><h1 class="page-title">📋 Formulários & Pesquisas</h1><p class="page-subtitle">Crie formulários, enquetes e pesquisas de satisfação</p></div>
+
+            <!-- Formulários existentes -->
+            <div id="forms-grid" class="fade-in fade-in-1" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;margin-bottom:16px"></div>
+
+            <!-- Builder -->
+            <div class="card fade-in fade-in-2">
+                <div class="card-header"><h3 class="card-title"><i class="fas fa-plus-circle" style="color:var(--primary-light)"></i> Criar Novo Formulário</h3></div>
+                <div class="card-body">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                        <div class="form-group"><label>Título</label><input class="form-control" id="frm-title" placeholder="Ex: Pesquisa de satisfação"></div>
+                        <div class="form-group"><label>Tipo</label><select class="form-control" id="frm-type"><option value="pesquisa">Pesquisa</option><option value="inscricao">Inscrição</option><option value="feedback">Feedback</option><option value="enquete">Enquete</option></select></div>
+                    </div>
+                    <div class="form-group"><label>Descrição</label><textarea class="form-control" id="frm-desc" rows="2" placeholder="Descreva o objetivo do formulário..."></textarea></div>
+
+                    <!-- Campos -->
+                    <div style="margin:16px 0"><h4 style="font-size:.9rem;margin-bottom:12px"><i class="fas fa-list-ul"></i> Campos do Formulário</h4>
+                        <div id="fields-list" style="display:flex;flex-direction:column;gap:8px"></div>
+                        <div style="display:flex;gap:8px;margin-top:12px">
+                            <button class="btn btn-sm btn-outline" onclick="addField('text')"><i class="fas fa-font"></i> Texto</button>
+                            <button class="btn btn-sm btn-outline" onclick="addField('select')"><i class="fas fa-list"></i> Seleção</button>
+                            <button class="btn btn-sm btn-outline" onclick="addField('radio')"><i class="fas fa-dot-circle"></i> Radio</button>
+                            <button class="btn btn-sm btn-outline" onclick="addField('rating')"><i class="fas fa-star"></i> Avaliação</button>
+                            <button class="btn btn-sm btn-outline" onclick="addField('textarea')"><i class="fas fa-align-left"></i> Área Texto</button>
+                            <button class="btn btn-sm btn-outline" onclick="addField('checkbox')"><i class="fas fa-check-square"></i> Checkbox</button>
+                        </div>
+                    </div>
+
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+                        <div class="form-group"><label>Prazo</label><input class="form-control" type="date" id="frm-deadline"></div>
+                        <div class="form-group"><label>Público</label><select class="form-control" id="frm-audience"><option value="todos">Todos</option><option value="membros">Membros</option><option value="lideres">Líderes</option><option value="visitantes">Visitantes</option></select></div>
+                        <div class="form-group"><label>Anônimo</label><select class="form-control" id="frm-anon"><option value="nao">Não</option><option value="sim">Sim</option></select></div>
+                    </div>
+                    <div style="text-align:right"><button class="btn btn-primary" onclick="saveForm()"><i class="fas fa-save"></i> Publicar Formulário</button></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="a11y"></div>
+<script src="js/igreja.js"></script>
+<script>
+document.getElementById('sidebar').innerHTML = SIDEBAR_HTML;
+document.getElementById('header').innerHTML = getHeaderHTML('Formulários');
+document.getElementById('a11y').innerHTML = A11Y_HTML;
+
+var forms = [
+    {title:'Pesquisa de Satisfação — Culto',type:'pesquisa',responses:67,status:'ativo',created:'2024-01-15',deadline:'2024-02-15',color:'#7c3aed',icon:'fa-poll'},
+    {title:'Inscrição Retiro de Jovens',type:'inscricao',responses:34,status:'ativo',created:'2024-01-20',deadline:'2024-02-28',color:'#3b82f6',icon:'fa-clipboard-list'},
+    {title:'Feedback — EBD Trimestral',type:'feedback',responses:45,status:'encerrado',created:'2023-12-01',deadline:'2024-01-15',color:'#10b981',icon:'fa-comment-dots'},
+    {title:'Enquete — Horário do Culto',type:'enquete',responses:128,status:'encerrado',created:'2023-11-10',deadline:'2023-12-10',color:'#f59e0b',icon:'fa-vote-yea'},
+    {title:'Cadastro de Visitantes',type:'inscricao',responses:23,status:'ativo',created:'2024-01-01',deadline:'2024-12-31',color:'#ec4899',icon:'fa-user-plus'}
+];
+
+(function renderForms(){
+    var g=document.getElementById('forms-grid');
+    forms.forEach(function(f){
+        g.innerHTML+='\
+        <div class="card" style="overflow:hidden">\
+            <div style="height:6px;background:'+f.color+'"></div>\
+            <div class="card-body">\
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">\
+                    <div style="width:44px;height:44px;border-radius:10px;background:'+f.color+'22;display:flex;align-items:center;justify-content:center"><i class="fas '+f.icon+'" style="color:'+f.color+';font-size:1.1rem"></i></div>\
+                    <span class="badge '+(f.status==='ativo'?'badge-success':'badge-danger')+'">'+f.status.charAt(0).toUpperCase()+f.status.slice(1)+'</span>\
+                </div>\
+                <h3 style="font-size:.95rem;font-weight:700;margin-bottom:4px">'+f.title+'</h3>\
+                <p style="font-size:.78rem;color:var(--text-muted);margin-bottom:12px"><span class="badge badge-info" style="font-size:.65rem">'+f.type+'</span></p>\
+                <div style="display:flex;justify-content:space-between;font-size:.78rem;color:var(--text-secondary);margin-bottom:12px">\
+                    <span><i class="fas fa-inbox"></i> '+f.responses+' respostas</span>\
+                    <span><i class="fas fa-clock"></i> até '+formatDate(f.deadline)+'</span>\
+                </div>\
+                <div style="display:flex;gap:6px">\
+                    <button class="btn btn-sm btn-primary" style="flex:1" onclick="showToast(\'Visualizando respostas\',\'info\')"><i class="fas fa-chart-bar"></i> Respostas</button>\
+                    <button class="btn btn-sm btn-outline" onclick="showToast(\'Link copiado!\',\'success\')"><i class="fas fa-share-alt"></i></button>\
+                </div>\
+            </div>\
+        </div>';
+    });
+})();
+
+var fieldCount=0;
+function addField(type){
+    fieldCount++;
+    var icons={text:'fa-font',select:'fa-list',radio:'fa-dot-circle',rating:'fa-star',textarea:'fa-align-left',checkbox:'fa-check-square'};
+    var labels={text:'Texto Curto',select:'Seleção (dropdown)',radio:'Múltipla Escolha',rating:'Avaliação (1-5)',textarea:'Texto Longo',checkbox:'Caixa de Seleção'};
+    var fl=document.getElementById('fields-list');
+    fl.innerHTML+='\
+    <div style="display:flex;align-items:center;gap:8px;padding:10px;background:var(--bg-tertiary);border-radius:8px;border-left:3px solid var(--primary)" id="field-'+fieldCount+'">\
+        <i class="fas fa-grip-vertical" style="color:var(--text-muted);cursor:grab"></i>\
+        <i class="fas '+icons[type]+'" style="color:var(--primary-light)"></i>\
+        <input class="form-control" placeholder="Pergunta..." style="flex:1;margin:0">\
+        <span style="font-size:.72rem;color:var(--text-muted);white-space:nowrap">'+labels[type]+'</span>\
+        <label style="font-size:.72rem;display:flex;align-items:center;gap:4px"><input type="checkbox"> Obrigatório</label>\
+        <button class="btn btn-sm" style="color:var(--danger);padding:4px 8px" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>\
+    </div>';
+    showToast('Campo adicionado: '+labels[type],'info');
+}
+
+function saveForm(){
+    var t=document.getElementById('frm-title').value;
+    if(!t){showToast('Preencha o título','danger');return;}
+    showToast('Formulário publicado: '+t,'success');
+}
+</script>
+</body>
+</html>

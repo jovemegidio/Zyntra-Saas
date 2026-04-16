@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Zyntra">
+    <title>Zyntra: Igreja</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/jpeg" href="/igreja/images/favicon-zyntra.jpg">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
+
+    <!-- Prefetch: fundos carregam em segundo plano -->
+    <link rel="prefetch" as="image" href="/igreja/fundos/01.jpg">
+    <link rel="prefetch" as="image" href="/igreja/fundos/02.jpg">
+    <link rel="prefetch" as="image" href="/igreja/fundos/03.jpg">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --slate-50: #f8fafc;
+            --slate-100: #f1f5f9;
+            --slate-200: #e2e8f0;
+            --slate-500: #64748b;
+            --slate-600: #475569;
+            --slate-700: #334155;
+            --slate-900: #0f172a;
+            --blue-50: #eff6ff;
+            --blue-600: #2563eb;
+            --emerald-50: #ecfdf5;
+            --emerald-500: #10b981;
+            --emerald-600: #059669;
+            --orange-50: #fff7ed;
+            --orange-600: #ea580c;
+            --indigo-50: #eef2ff;
+            --indigo-600: #4f46e5;
+            --rose-50: #fff1f2;
+            --rose-600: #e11d48;
+            --pink-50: #fdf2f8;
+            --pink-500: #ec4899;
+            --pink-600: #db2777;
+        }
+
+        html,
+        body {
+            height: 100%;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: transparent;
+            color: var(--slate-900);
+            overflow-x: hidden;
+        }
+
+        /* Background Manager - fundos dinâmicos */
+        .dashboard-background {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            z-index: -2 !important;
+            background-size: cover !important;
+            background-position: center !important;
+            background-repeat: no-repeat !important;
+            transition: opacity 1.5s ease-in-out !important;
+        }
+
+        .dashboard-background-next {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            z-index: -3 !important;
+            background-size: cover !important;
+            background-position: center !important;
+            background-repeat: no-repeat !important;
+            transition: opacity 3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            opacity: 0;
+        }
+
+        /* Background classes */
+        .bg-image-1  { background-image: url('/igreja/fundos/01.jpg'); }
+        .bg-image-2  { background-image: url('/igreja/fundos/02.jpg'); }
+        .bg-image-3  { background-image: url('/igreja/fundos/03.jpg'); }
+        .bg-image-4  { background-image: url('/igreja/fundos/04.jpg'); }
+        .bg-image-5  { background-image: url('/igreja/fundos/05.jpg'); }
+        .bg-image-6  { background-image: url('/igreja/fundos/06.jpg'); }
+        .bg-image-7  { background-image: url('/igreja/fundos/07.jpg'); }
+        .bg-image-8  { background-image: url('/igreja/fundos/08.jpg'); }
+        .bg-image-9  { background-image: url('/igreja/fundos/09.jpg'); }
+        .bg-image-10 { background-image: url('/igreja/fundos/10.jpg'); }
+        .bg-image-11 { background-image: url('/igreja/fundos/11.jpg'); }
+        .bg-image-12 { background-image: url('/igreja/fundos/12.jpg'); }
+        .bg-image-13 { background-image: url('/igreja/fundos/13.jpg'); }
+
+        /* Fallback gradient animado */
+        .animated-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -3;
+            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 25%, #dbeafe 50%, #fce7f3 75%, #f8fafc 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            pointer-events: none;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Header - Efeito Vidro (Glassmorphism) */
+        .main-header,
+        #dashboard-area .main-header,
+        #dashboard-area.bg-contrast-light .main-header,
+        #dashboard-area.bg-contrast-dark .main-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 64px;
+            background: rgba(255, 255, 255, 0.45) !important;
+            -webkit-backdrop-filter: blur(24px) saturate(1.8) !important;
+            backdrop-filter: blur(24px) saturate(1.8) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3) !important;
+            z-index: 100;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.08) !important;
+        }
+
+        /* Logos brancas em fundo escuro */
+        #dashboard-area.bg-contrast-light .header-logo .logo-azul,
+        #dashboard-area.bg-contrast-light .header-logo .logo-zyntra-azul {
+            display: none !important;
+        }
+        #dashboard-area.bg-contrast-light .header-logo .logo-branca,
+        #dashboard-area.bg-contrast-light .header-logo .logo-zyntra-branca {
+            display: block !important;
+        }
+        #dashboard-area.bg-contrast-light .header-logo .logo-separator {
+            color: rgba(255,255,255,0.3) !important;
+        }
+
+        .header-content {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 24px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .header-logo img {
+            height: 32px;
+            width: auto;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-icon-btn,
+        #dashboard-area .header-icon-btn,
+        #dashboard-area.bg-contrast-light .header-icon-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: transparent !important;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--slate-600) !important;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .header-icon-btn:hover {
+            background: var(--slate-100) !important;
+            color: var(--slate-900) !important;
+            transform: scale(1.05);
+        }
+
+        .header-divider {
+            width: 1px;
+            height: 24px;
+            background: var(--slate-200);
+            margin: 0 8px;
+        }
+
+        .user-profile-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 6px 12px 6px 6px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .user-profile-header:hover {
+            background: var(--slate-100);
+        }
+
+        .user-avatar-header {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            overflow: hidden;
+        }
+
+        .user-avatar-header img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .user-name,
+        #dashboard-area .user-name,
+        #dashboard-area.bg-contrast-light .user-name {
+            font-weight: 500;
+            font-size: 14px;
+            color: var(--slate-900) !important;
+        }
+
+        /* User Dropdown */
+        .user-dropdown-menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            width: 280px;
+            background: white;
+            border: 1px solid var(--slate-200);
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.2s ease;
+            z-index: 1000;
+        }
+
+        .user-dropdown-menu.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+        }
+
+        .dropdown-avatar {
+            width: 48px;
+            height: 48px;
+            min-width: 48px;
+            min-height: 48px;
+            background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+            overflow: hidden;
+            flex-shrink: 0;
+            aspect-ratio: 1 / 1;
+        }
+
+        .dropdown-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            aspect-ratio: 1 / 1;
+        }
+
+        .dropdown-info {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .dropdown-user-name {
+            display: block;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--slate-900);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .dropdown-user-email {
+            display: block;
+            font-size: 12px;
+            color: var(--slate-500);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .dropdown-divider {
+            border: none;
+            height: 1px;
+            background: var(--slate-200);
+            margin: 0;
+        }
+
+        .dropdown-options {
+            padding: 8px;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border-radius: 10px;
+            font-size: 14px;
+            color: var(--slate-600);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .dropdown-item:hover {
+            background: var(--slate-100);
+            color: var(--slate-900);
+        }
+
+        .dropdown-item i {
+            width: 18px;
+            text-align: center;
+        }
+
+        .logout-item {
+            color: var(--rose-600);
+        }
+
+        .logout-item:hover {
+            background: var(--rose-50);
+            color: var(--rose-600);
+        }
+
+        /* Main Content */
+        .main-content {
+            min-height: 100vh;
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 80px 24px 40px;
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Greeting Section */
+        .greeting-section {
+            margin-bottom: 32px;
+            animation: fadeInDown 0.5s ease;
+        }
+
+        .greeting-date {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .greeting-date-text {
+            font-size: 14px;
+            color: #ffffff;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+        }
+
+        .greeting-time {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #1e3a5f;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 8px 16px;
+            border-radius: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            font-weight: 500;
+        }
+
+        .greeting-title {
+            font-family: 'Manrope', sans-serif;
+            font-size: clamp(28px, 4vw, 42px);
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 6px;
+            letter-spacing: -1px;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        .greeting-quote {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.9);
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Modules Grid - glassmorphism colorido */
+        .modules-grid {
+            display: flex !important;
+            flex-wrap: nowrap !important;
+            justify-content: center !important;
+            align-items: stretch !important;
+            gap: 14px;
+            margin-bottom: 40px;
+            animation: fadeInUp 0.5s ease 0.2s both;
+            max-width: 1060px;
+            width: 100%;
+            padding: 0 20px;
+            margin-left: auto;
+            margin-right: auto;
+            box-sizing: border-box;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .module-card {
+            background: var(--card-bg, rgba(59,130,246,0.85));
+            -webkit-backdrop-filter: blur(16px) saturate(1.4);
+            backdrop-filter: blur(16px) saturate(1.4);
+            border: 1px solid rgba(255,255,255,0.18);
+            border-radius: 18px;
+            padding: 22px 8px 16px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+            text-decoration: none;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: center !important;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.15);
+            flex: 1 1 0 !important;
+            min-width: 0 !important;
+            box-sizing: border-box !important;
+            color: #fff;
+            text-align: center;
+            gap: 8px;
+        }
+
+        .module-card .module-status,
+        .module-card .module-counter {
+            display: none !important;
+        }
+
+        .module-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 18px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .module-card::after {
+            display: none;
+        }
+
+        .module-card:hover {
+            transform: translateY(-6px) scale(1.03);
+            box-shadow: 0 16px 48px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.3);
+        }
+
+        .module-icon {
+            width: 48px;
+            height: 48px;
+            min-width: 48px;
+            min-height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-bottom: 0;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
+            flex-shrink: 0;
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .module-icon i {
+            width: 1em;
+            height: 1em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .module-card:hover .module-icon {
+            transform: scale(1.1);
+            background: rgba(255,255,255,0.3);
+        }
+
+        .module-info {
+            flex: 0 1 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            position: relative;
+            z-index: 1;
+            min-width: 0;
+            max-width: 100%;
+            overflow: hidden;
+        }
+
+        .module-title {
+            font-family: 'Inter', sans-serif;
+            font-size: 11.5px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 0;
+            line-height: 1.25;
+            letter-spacing: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.15);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            white-space: normal;
+            word-break: break-word;
+        }
+
+        .module-arrow {
+            display: none !important;
+        }
+
+        /* Staggered entrance animation */
+        .module-card { animation: cardEntrance 0.5s ease both; }
+        .module-card:nth-child(1) { animation-delay: 0.1s; }
+        .module-card:nth-child(2) { animation-delay: 0.15s; }
+        .module-card:nth-child(3) { animation-delay: 0.2s; }
+        .module-card:nth-child(4) { animation-delay: 0.25s; }
+        .module-card:nth-child(5) { animation-delay: 0.3s; }
+        .module-card:nth-child(6) { animation-delay: 0.35s; }
+        .module-card:nth-child(7) { animation-delay: 0.4s; }
+
+        @keyframes cardEntrance {
+            from { opacity: 0; transform: translateY(24px) scale(0.96); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* Module Colors - glassmorphism colorido */
+        .module-card.membros {
+            background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+        }
+        .module-card.oracao {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+        .module-card.grupos {
+            background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+        }
+        .module-card.eventos {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        }
+        .module-card.doacoes {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        .module-card.cursos {
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+        }
+        .module-card.transmissao {
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+        }
+
+        /* Responsive - tablets */
+        @media (max-width: 1024px) and (min-width: 769px) {
+            .modules-grid {
+                flex-wrap: wrap !important;
+                gap: 14px;
+                padding: 0 20px;
+            }
+            .module-card {
+                flex: 0 0 calc(25% - 11px) !important;
+                max-width: none;
+            }
+        }
+
+        /* Responsive - mobile */
+        @media (max-width: 768px) {
+            .header-content { padding: 0 16px; }
+            .main-content { padding: 80px 16px 40px; }
+            .user-name { display: none; }
+            .greeting-title { font-size: 28px; }
+            .modules-grid {
+                flex-wrap: wrap !important;
+                gap: 12px;
+                padding: 0 16px;
+            }
+            .module-card {
+                flex: 0 0 calc(33.33% - 8px) !important;
+                border-radius: 14px;
+                padding: 18px 10px 16px;
+            }
+            .module-icon {
+                width: 40px; height: 40px;
+                min-width: 40px; min-height: 40px;
+                font-size: 16px; border-radius: 11px;
+            }
+            .module-title { font-size: 11px; }
+        }
+
+        @media (max-width: 480px) {
+            .modules-grid {
+                flex-wrap: wrap !important;
+                gap: 10px;
+                padding: 0 12px;
+            }
+            .module-card {
+                flex: 0 0 calc(50% - 5px) !important;
+                padding: 18px 10px 16px;
+            }
+            .module-icon {
+                width: 38px; height: 38px;
+                min-width: 38px; min-height: 38px;
+                font-size: 15px; border-radius: 10px;
+            }
+            .module-title { font-size: 11px; }
+        }
+
+        /* ===== CONFIG BUTTON ===== */
+        .config-system-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0 auto 32px;
+            padding: 12px 28px;
+            background: rgba(255, 255, 255, 0.15);
+            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 14px;
+            color: #fff;
+            font-size: .85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .3s ease;
+            animation: fadeInUp .5s ease .5s both;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+        .config-system-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: translateY(-2px);
+        }
+        .config-system-btn i { font-size: 1rem; }
+
+        /* ===== MODAL CONFIGURAÇÕES ===== */
+        .modal-config { display: none; position: fixed; inset: 0; z-index: 99999; background: rgba(15,23,42,.6); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); align-items: center; justify-content: center; padding: 20px; }
+        .modal-config.active { display: flex; }
+        .modal-config-content { width: 100%; max-width: 880px; max-height: 85vh; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 24px 64px rgba(0,0,0,.5); animation: cfgSlideUp .3s cubic-bezier(.32,.72,0,1); }
+        @keyframes cfgSlideUp { from { opacity: 0; transform: translateY(24px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .modal-config-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .modal-config-brand { display: flex; align-items: center; gap: 12px; }
+        .modal-config-brand .config-icon { width: 36px; height: 36px; background: #7c3aed; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #fff; }
+        .modal-config-title { font-size: 1.05rem; font-weight: 700; color: #fff; }
+        .modal-config-search { flex: 1; max-width: 280px; margin: 0 20px; position: relative; }
+        .modal-config-search i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #64748b; font-size: .82rem; }
+        .modal-config-search input { width: 100%; padding: 9px 12px 9px 36px; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: .82rem; outline: none; transition: border .2s; }
+        .modal-config-search input:focus { border-color: #7c3aed; }
+        .modal-config-close { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 10px; color: #64748b; font-size: 1rem; transition: all .2s; background: none; border: none; cursor: pointer; }
+        .modal-config-close:hover { background: rgba(239,68,68,.15); color: #ef4444; }
+
+        .modal-config-tabs { display: flex; gap: 4px; padding: 12px 24px 0; border-bottom: 1px solid rgba(255,255,255,0.1); overflow-x: auto; scrollbar-width: none; }
+        .modal-config-tabs::-webkit-scrollbar { display: none; }
+        .modal-config-tab { padding: 10px 18px; font-size: .8rem; font-weight: 500; color: #64748b; border-bottom: 2px solid transparent; transition: all .2s; white-space: nowrap; cursor: pointer; background: none; border-top: none; border-left: none; border-right: none; }
+        .modal-config-tab:hover { color: #e2e8f0; }
+        .modal-config-tab.active { color: #a78bfa; border-bottom-color: #7c3aed; }
+
+        .modal-config-body { flex: 1; overflow-y: auto; padding: 20px 24px; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.1) transparent; }
+        .modal-config-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+        .modal-config-card { display: flex; align-items: center; gap: 14px; padding: 16px; background: rgba(30,41,59,0.6); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; cursor: pointer; transition: all .25s ease; text-decoration: none; }
+        .modal-config-card:hover { background: rgba(30,41,59,0.9); border-color: rgba(124,58,237,.3); transform: translateY(-2px); }
+        .modal-config-card-icon { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; }
+        .modal-config-card-icon.purple { background: rgba(124,58,237,.15); color: #a78bfa; }
+        .modal-config-card-icon.blue { background: rgba(59,130,246,.15); color: #60a5fa; }
+        .modal-config-card-icon.green { background: rgba(16,185,129,.15); color: #34d399; }
+        .modal-config-card-icon.amber { background: rgba(245,158,11,.15); color: #fbbf24; }
+        .modal-config-card-icon.pink { background: rgba(236,72,153,.15); color: #f472b6; }
+        .modal-config-card-icon.red { background: rgba(239,68,68,.15); color: #f87171; }
+        .modal-config-card-icon.cyan { background: rgba(6,182,212,.15); color: #22d3ee; }
+        .modal-config-card-icon.orange { background: rgba(249,115,22,.15); color: #fb923c; }
+        .modal-config-card-icon.teal { background: rgba(20,184,166,.15); color: #2dd4bf; }
+        .modal-config-card-content h3 { font-size: .85rem; font-weight: 600; color: #fff; margin-bottom: 2px; }
+        .modal-config-card-content p { font-size: .72rem; color: #94a3b8; line-height: 1.3; }
+        .modal-config-tab-content { display: none; }
+        .modal-config-tab-content.active { display: block; }
+        @media (max-width: 600px) { .modal-config-grid { grid-template-columns: 1fr; } .modal-config-content { max-height: 95vh; } .modal-config-header { flex-wrap: wrap; gap: 10px; } .modal-config-search { max-width: 100%; margin: 0; } }
+    </style>
+</head>
+
+<body>
+    <!-- Background Manager vai inserir o fundo aqui -->
+    <div class="animated-gradient"></div>
+
+    <div id="dashboard-area">
+        <header class="main-header">
+            <div class="header-content">
+                <div class="header-logo" style="display:flex;align-items:center;gap:12px;">
+                    <img src="/igreja/images/zyntra-sem-fundo.png" alt="Zyntra" class="logo-zyntra-azul" style="height:28px;object-fit:contain;">
+                    <img src="/igreja/images/zyntra-branco.png" alt="Zyntra" class="logo-zyntra-branca" id="logo-zyntra-branca" style="height:28px;object-fit:contain;display:none;">
+                    <span class="logo-separator" style="color:rgba(0,0,0,0.15);font-weight:200;font-size:20px;user-select:none;">×</span>
+                    <img src="/igreja/images/Logo - Igreja Teste - Azul.png" alt="IGREJA" class="logo-azul" id="logo-azul" style="height:26px;object-fit:contain;">
+                    <img src="/igreja/images/Logo - Igreja Teste.png" alt="IGREJA" class="logo-branca" id="logo-branca" style="height:26px;object-fit:contain;display:none;">
+                </div>
+
+                <div class="header-right">
+                    <button class="header-icon-btn" id="help-btn" title="Ajuda">
+                        <i class="fas fa-question-circle"></i>
+                    </button>
+
+                    <div class="header-divider"></div>
+
+                    <div class="user-profile-header" id="user-profile">
+                        <div class="user-avatar-header" id="user-avatar">U</div>
+                        <span class="user-name" id="user-name-display">Usuário</span>
+
+                        <div class="user-dropdown-menu" id="user-dropdown">
+                            <div class="dropdown-header">
+                                <div class="dropdown-avatar" id="dropdown-avatar">U</div>
+                                <div class="dropdown-info">
+                                    <span class="dropdown-user-name" id="dropdown-user-name">Usuário</span>
+                                    <span class="dropdown-user-email" id="dropdown-user-email">usuario@igreja.com.br</span>
+                                </div>
+                            </div>
+                            <hr class="dropdown-divider">
+                            <div class="dropdown-options">
+                                <div class="dropdown-item" id="profile-option">
+                                    <i class="fas fa-user"></i>
+                                    <span>Meu Perfil</span>
+                                </div>
+                                <div class="dropdown-item" id="preferences-option">
+                                    <i class="fas fa-sliders-h"></i>
+                                    <span>Preferências</span>
+                                </div>
+                                <hr class="dropdown-divider">
+                                <div class="dropdown-item logout-item" id="logout-option">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    <span>Sair</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <section class="greeting-section">
+                <div class="greeting-date">
+                    <span class="greeting-date-text" id="current-date"></span>
+                    <div class="greeting-time">
+                        <i class="fas fa-clock"></i>
+                        <span id="current-time"></span>
+                    </div>
+                </div>
+                <h1 class="greeting-title">Olá, <span id="greeting-name">Usuário</span></h1>
+                <p class="greeting-quote">A fé é a certeza daquilo que esperamos e a prova daquilo que não vemos.</p>
+            </section>
+
+            <section class="modules-grid">
+                <a href="membros.html" class="module-card membros" data-area="membros">
+                    <div class="module-icon"><i class="fas fa-users"></i></div>
+                    <div class="module-info"><div class="module-title">Membros</div></div>
+                </a>
+
+                <a href="oracao.html" class="module-card oracao" data-area="oracao">
+                    <div class="module-icon"><i class="fas fa-hands-praying"></i></div>
+                    <div class="module-info"><div class="module-title">Oração</div></div>
+                </a>
+
+                <a href="grupos.html" class="module-card grupos" data-area="grupos">
+                    <div class="module-icon"><i class="fas fa-people-group"></i></div>
+                    <div class="module-info"><div class="module-title">Grupos / Células</div></div>
+                </a>
+
+                <a href="eventos.html" class="module-card eventos" data-area="eventos">
+                    <div class="module-icon"><i class="fas fa-calendar-alt"></i></div>
+                    <div class="module-info"><div class="module-title">Eventos</div></div>
+                </a>
+
+                <a href="doacoes.html" class="module-card doacoes" data-area="doacoes">
+                    <div class="module-icon"><i class="fas fa-hand-holding-heart"></i></div>
+                    <div class="module-info"><div class="module-title">Doações</div></div>
+                </a>
+
+                <a href="cursos.html" class="module-card cursos" data-area="cursos">
+                    <div class="module-icon"><i class="fas fa-graduation-cap"></i></div>
+                    <div class="module-info"><div class="module-title">Cursos / EBD</div></div>
+                </a>
+
+                <a href="transmissao.html" class="module-card transmissao" data-area="transmissao">
+                    <div class="module-icon"><i class="fas fa-video"></i></div>
+                    <div class="module-info"><div class="module-title">Transmissão</div></div>
+                </a>
+            </section>
+
+            <!-- Config Button -->
+            <button class="config-system-btn" id="btn-open-config" type="button">
+                <i class="fas fa-cog"></i>
+                Configurações do Sistema
+            </button>
+        </main>
+    </div>
+
+    <!-- ===== MODAL CONFIGURAÇÕES DO SISTEMA ===== -->
+    <div id="modal-configuracoes" class="modal-config" aria-hidden="true">
+        <div class="modal-config-content">
+            <div class="modal-config-header">
+                <div class="modal-config-brand">
+                    <div class="config-icon"><i class="fas fa-cog"></i></div>
+                    <span class="modal-config-title">Configurações do Sistema</span>
+                </div>
+                <div class="modal-config-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Buscar funcionalidade..." id="config-search-input">
+                </div>
+                <button type="button" class="modal-config-close" id="btn-fechar-config" title="Fechar (ESC)" aria-label="Fechar modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-config-tabs">
+                <button class="modal-config-tab active" data-tab="espiritual">Espiritual</button>
+                <button class="modal-config-tab" data-tab="comunidade">Comunidade</button>
+                <button class="modal-config-tab" data-tab="financeiro-ed">Financeiro & Educação</button>
+                <button class="modal-config-tab" data-tab="operacional">Operacional</button>
+            </div>
+            <div class="modal-config-body">
+                <!-- Aba Espiritual -->
+                <div class="modal-config-tab-content active" id="tab-espiritual">
+                    <div class="modal-config-grid">
+                        <div class="modal-config-card" onclick="location.href='biblia.html'" tabindex="0">
+                            <div class="modal-config-card-icon purple"><i class="fas fa-book-bible"></i></div>
+                            <div class="modal-config-card-content"><h3>Bíblia</h3><p>Leitura e estudo bíblico</p></div>
+                        </div>
+                        <div class="modal-config-card" onclick="location.href='devocionais.html'" tabindex="0">
+                            <div class="modal-config-card-icon amber"><i class="fas fa-sun"></i></div>
+                            <div class="modal-config-card-content"><h3>Devocionais</h3><p>Devocionais diários para a comunidade</p></div>
+                        </div>
+                        <div class="modal-config-card" onclick="location.href='notas.html'" tabindex="0">
+                            <div class="modal-config-card-icon blue"><i class="fas fa-sticky-note"></i></div>
+                            <div class="modal-config-card-content"><h3>Notas de Culto</h3><p>Anotações de pregações e estudos</p></div>
+                        </div>
+                        <div class="modal-config-card" onclick="location.href='mensagens.html'" tabindex="0">
+                            <div class="modal-config-card-icon teal"><i class="fas fa-microphone"></i></div>
+                            <div class="modal-config-card-content"><h3>Pregações</h3><p>Acervo de pregações e mensagens</p></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Aba Comunidade -->
+                <div class="modal-config-tab-content" id="tab-comunidade">
+                    <div class="modal-config-grid">
+                        <div class="modal-config-card" onclick="location.href='timeline.html'" tabindex="0">
+                            <div class="modal-config-card-icon blue"><i class="fas fa-stream"></i></div>
+                            <div class="modal-config-card-content"><h3>Timeline</h3><p>Feed de atividades da comunidade</p></div>
+                        </div>
+                        <div class="modal-config-card" onclick="location.href='galeria.html'" tabindex="0">
+                            <div class="modal-config-card-icon pink"><i class="fas fa-images"></i></div>
+                            <div class="modal-config-card-content"><h3>Galeria</h3><p>Fotos e mídias da igreja</p></div>
+                        </div>
+                        <div class="modal-config-card" onclick="location.href='testemunhos.html'" tabindex="0">
+                            <div class="modal-config-card-icon green"><i class="fas fa-comment-dots"></i></div>
+                            <div class="modal-config-card-content"><h3>Testemunhos</h3><p>Mural de testemunhos dos membros</p></div>
+                        </div>
+                        <div class="modal-config-card" onclick="location.href='presenca.html'" tabindex="0">
+                            <div class="modal-config-card-icon cyan"><i class="fas fa-qrcode"></i></div>
+                            <div class="modal-config-card-content"><h3>Check-in</h3><p>Controle de presença por QR Code</p></div>
+                        </div>
+                        <div class="modal-config-card" onclick="location.href='downloads.html'" tabindex="0">
+                            <div class="modal-config-card-icon orange"><i class="fas fa-download"></i></div>
+                            <div class="modal-config-card-content"><h3>Downloads</h3><p>Materiais e documentos para download</p></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Aba Financeiro & Educação -->
+                <div class="modal-config-tab-content" id="tab-financeiro-ed">
+                    <div class="modal-config-grid">
+                        <div class="modal-config-card" onclick="location.href='financeiro.html'" tabindex="0">
+                            <div class="modal-config-card-icon green"><i class="fas fa-chart-pie"></i></div>
+                            <div class="modal-config-card-content"><h3>Gestão Financeira</h3><p>Controle financeiro completo da igreja</p></div>
+                        </div>
+                        <div class="modal-config-card" onclick="location.href='formularios.html'" tabindex="0">
+                            <div class="modal-config-card-icon blue"><i class="fas fa-file-alt"></i></div>
+                            <div class="modal-config-card-content"><h3>Formulários</h3><p>Criação e gerenciamento de formulários</p></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Aba Operacional -->
+                <div class="modal-config-tab-content" id="tab-operacional">
+                    <div class="modal-config-grid">
+                        <div class="modal-config-card" onclick="location.href='voluntarios.html'" tabindex="0">
+                            <div class="modal-config-card-icon purple"><i class="fas fa-hands-helping"></i></div>
+                            <div class="modal-config-card-content"><h3>Voluntários</h3><p>Gestão de voluntários e escalas</p></div>
+                        </div>
+                        <div class="modal-config-card" onclick="location.href='notificacoes.html'" tabindex="0">
+                            <div class="modal-config-card-icon red"><i class="fas fa-bell"></i></div>
+                            <div class="modal-config-card-content"><h3>Notificações</h3><p>Gerenciar notificações push</p></div>
+                        </div>
+                        <div class="modal-config-card" onclick="location.href='banners.html'" tabindex="0">
+                            <div class="modal-config-card-icon amber"><i class="fas fa-image"></i></div>
+                            <div class="modal-config-card-content"><h3>Banners</h3><p>Banners e destaques do app</p></div>
+                        </div>
+                        <div class="modal-config-card" onclick="location.href='paginas.html'" tabindex="0">
+                            <div class="modal-config-card-icon teal"><i class="fas fa-file-alt"></i></div>
+                            <div class="modal-config-card-content"><h3>Páginas</h3><p>Gerenciar páginas personalizadas</p></div>
+                        </div>
+                        <div class="modal-config-card" onclick="location.href='configuracoes.html'" tabindex="0">
+                            <div class="modal-config-card-icon cyan"><i class="fas fa-sliders-h"></i></div>
+                            <div class="modal-config-card-content"><h3>Configurações</h3><p>Configurações gerais do sistema</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // ========================================
+    // Background Manager — Igreja (13 fundos)
+    // ========================================
+    (function() {
+        'use strict';
+
+        var AUTO_CHANGE_INTERVAL = 60000;
+        var TRANSITION_DURATION = 3000;
+
+        var BACKGROUNDS = [
+            { id: 'image-1',  cls: 'bg-image-1',  url: '/igreja/fundos/01.jpg' },
+            { id: 'image-2',  cls: 'bg-image-2',  url: '/igreja/fundos/02.jpg' },
+            { id: 'image-3',  cls: 'bg-image-3',  url: '/igreja/fundos/03.jpg' },
+            { id: 'image-4',  cls: 'bg-image-4',  url: '/igreja/fundos/04.jpg' },
+            { id: 'image-5',  cls: 'bg-image-5',  url: '/igreja/fundos/05.jpg' },
+            { id: 'image-6',  cls: 'bg-image-6',  url: '/igreja/fundos/06.jpg' },
+            { id: 'image-7',  cls: 'bg-image-7',  url: '/igreja/fundos/07.jpg' },
+            { id: 'image-8',  cls: 'bg-image-8',  url: '/igreja/fundos/08.jpg' },
+            { id: 'image-9',  cls: 'bg-image-9',  url: '/igreja/fundos/09.jpg' },
+            { id: 'image-10', cls: 'bg-image-10', url: '/igreja/fundos/10.jpg' },
+            { id: 'image-11', cls: 'bg-image-11', url: '/igreja/fundos/11.jpg' },
+            { id: 'image-12', cls: 'bg-image-12', url: '/igreja/fundos/12.jpg' },
+            { id: 'image-13', cls: 'bg-image-13', url: '/igreja/fundos/13.jpg' }
+        ];
+
+        // Church backgrounds are generally darker/warmer — treat most as dark
+        var LIGHT_BACKGROUNDS = ['image-3', 'image-5', 'image-7'];
+
+        var currentIndex = 0;
+        var bgEl = null;
+        var bgNextEl = null;
+        var autoTimer = null;
+        var isTransitioning = false;
+        var preloaded = {};
+
+        function preloadImage(idx) {
+            return new Promise(function(resolve) {
+                var bg = BACKGROUNDS[idx];
+                if (!bg || preloaded[idx]) { resolve(); return; }
+                var img = new Image();
+                img.onload = function() { preloaded[idx] = true; resolve(); };
+                img.onerror = function() { resolve(); };
+                img.src = bg.url;
+            });
+        }
+
+        function createElements() {
+            bgEl = document.createElement('div');
+            bgEl.className = 'dashboard-background';
+            bgEl.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:-2;background-size:cover;background-position:center;background-repeat:no-repeat;transition:opacity ' + TRANSITION_DURATION + 'ms cubic-bezier(0.4,0,0.2,1);opacity:1;';
+
+            bgNextEl = document.createElement('div');
+            bgNextEl.className = 'dashboard-background-next';
+            bgNextEl.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:-3;background-size:cover;background-position:center;background-repeat:no-repeat;transition:opacity ' + TRANSITION_DURATION + 'ms cubic-bezier(0.4,0,0.2,1);opacity:0;';
+
+            document.body.insertBefore(bgNextEl, document.body.firstChild);
+            document.body.insertBefore(bgEl, document.body.firstChild);
+        }
+
+        function applyContrast(bgId) {
+            var isLight = LIGHT_BACKGROUNDS.indexOf(bgId) !== -1;
+            var area = document.getElementById('dashboard-area');
+            if (!area) return;
+
+            if (isLight) {
+                area.classList.add('bg-contrast-dark');
+                area.classList.remove('bg-contrast-light');
+            } else {
+                area.classList.add('bg-contrast-light');
+                area.classList.remove('bg-contrast-dark');
+            }
+
+            var useBranca = !isLight;
+            var logoAzul = document.getElementById('logo-azul');
+            var logoBranca = document.getElementById('logo-branca');
+            var logoZA = document.querySelector('.logo-zyntra-azul');
+            var logoZB = document.getElementById('logo-zyntra-branca');
+            var sep = document.querySelector('.logo-separator');
+            if (logoAzul)  logoAzul.style.display  = useBranca ? 'none' : '';
+            if (logoBranca) logoBranca.style.display = useBranca ? 'block' : 'none';
+            if (logoZA)    logoZA.style.display     = useBranca ? 'none' : '';
+            if (logoZB)    logoZB.style.display     = useBranca ? 'block' : 'none';
+            if (sep)       sep.style.color          = useBranca ? 'rgba(255,255,255,0.3)' : '';
+        }
+
+        function applyBackground(idx, animate) {
+            if (isTransitioning && animate) return;
+            var bg = BACKGROUNDS[idx];
+            if (!bg) return;
+
+            if (animate) {
+                isTransitioning = true;
+                bgNextEl.className = 'dashboard-background-next ' + bg.cls;
+                bgNextEl.style.opacity = '0';
+                bgNextEl.style.zIndex = '-1';
+
+                requestAnimationFrame(function() {
+                    bgNextEl.style.opacity = '1';
+                    bgEl.style.opacity = '0';
+
+                    setTimeout(function() { applyContrast(bg.id); }, TRANSITION_DURATION * 0.3);
+
+                    setTimeout(function() {
+                        bgEl.className = 'dashboard-background ' + bg.cls;
+                        bgEl.style.opacity = '1';
+                        bgEl.style.zIndex = '-2';
+                        bgNextEl.style.opacity = '0';
+                        bgNextEl.style.zIndex = '-3';
+                        bgNextEl.className = 'dashboard-background-next';
+                        isTransitioning = false;
+                    }, TRANSITION_DURATION);
+                });
+            } else {
+                bgEl.className = 'dashboard-background ' + bg.cls;
+                applyContrast(bg.id);
+            }
+            currentIndex = idx;
+        }
+
+        function nextBg() {
+            var next = (currentIndex + 1) % BACKGROUNDS.length;
+            preloadImage(next).then(function() {
+                applyBackground(next, true);
+                preloadImage((next + 1) % BACKGROUNDS.length);
+            });
+        }
+
+        function startAuto() {
+            if (autoTimer) clearInterval(autoTimer);
+            autoTimer = setInterval(function() {
+                if (!document.hidden && !isTransitioning) nextBg();
+            }, AUTO_CHANGE_INTERVAL);
+        }
+
+        function init() {
+            createElements();
+            currentIndex = Math.floor(Math.random() * BACKGROUNDS.length);
+            preloadImage(currentIndex).then(function() {
+                applyBackground(currentIndex, false);
+                preloadImage((currentIndex + 1) % BACKGROUNDS.length);
+            });
+            startAuto();
+            document.addEventListener('visibilitychange', function() {
+                if (document.hidden) {
+                    if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
+                } else {
+                    startAuto();
+                }
+            });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    })();
+
+    // ========================================
+    // Date/Time
+    // ========================================
+    function updateDateTime() {
+        var now = new Date();
+        var dateEl = document.getElementById('current-date');
+        var timeEl = document.getElementById('current-time');
+        if (dateEl) dateEl.textContent = now.toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        if (timeEl) timeEl.textContent = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    }
+    updateDateTime();
+    setInterval(updateDateTime, 60000);
+
+    // ========================================
+    // Auth + Greeting
+    // ========================================
+    (function() {
+        var auth = null;
+        try { auth = JSON.parse(sessionStorage.getItem('zyntra_igreja_auth') || 'null'); } catch(e) {}
+        if (!auth) {
+            window.location.href = 'login.html';
+            return;
+        }
+
+        var firstName = (auth.name || 'Usuário').split(' ')[0];
+        var initial = firstName.charAt(0).toUpperCase();
+
+        var greetEl = document.getElementById('greeting-name');
+        if (greetEl) greetEl.textContent = firstName;
+
+        var nameDisplay = document.getElementById('user-name-display');
+        if (nameDisplay) nameDisplay.textContent = firstName;
+
+        var ddName = document.getElementById('dropdown-user-name');
+        if (ddName) ddName.textContent = auth.name || 'Usuário';
+
+        var ddEmail = document.getElementById('dropdown-user-email');
+        if (ddEmail) ddEmail.textContent = auth.email || 'usuario@igreja.com.br';
+
+        var avatar = document.getElementById('user-avatar');
+        if (avatar) avatar.textContent = initial;
+
+        var ddAvatar = document.getElementById('dropdown-avatar');
+        if (ddAvatar) ddAvatar.textContent = initial;
+    })();
+
+    // ========================================
+    // User Dropdown
+    // ========================================
+    (function() {
+        var profile = document.getElementById('user-profile');
+        var dropdown = document.getElementById('user-dropdown');
+        if (!profile || !dropdown) return;
+
+        profile.addEventListener('click', function(e) {
+            e.stopPropagation();
+            dropdown.classList.toggle('active');
+        });
+
+        document.addEventListener('click', function() {
+            dropdown.classList.remove('active');
+        });
+
+        var logoutBtn = document.getElementById('logout-option');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', function() {
+                sessionStorage.removeItem('zyntra_igreja_auth');
+                window.location.href = 'login.html';
+            });
+        }
+    })();
+
+    // ========================================
+    // Modal Configurações
+    // ========================================
+    (function() {
+        var modal = document.getElementById('modal-configuracoes');
+        var btnOpen = document.getElementById('btn-open-config');
+        var btnClose = document.getElementById('btn-fechar-config');
+        var searchInput = document.getElementById('config-search-input');
+
+        if (!modal || !btnOpen || !btnClose) return;
+
+        btnOpen.addEventListener('click', function() {
+            modal.classList.add('active');
+            modal.setAttribute('aria-hidden', 'false');
+            if (searchInput) setTimeout(function() { searchInput.focus(); }, 100);
+        });
+
+        function closeConfig() {
+            modal.classList.remove('active');
+            modal.setAttribute('aria-hidden', 'true');
+        }
+        btnClose.addEventListener('click', closeConfig);
+        modal.addEventListener('click', function(e) { if (e.target === modal) closeConfig(); });
+        document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && modal.classList.contains('active')) closeConfig(); });
+
+        var tabs = modal.querySelectorAll('.modal-config-tab');
+        var contents = modal.querySelectorAll('.modal-config-tab-content');
+        tabs.forEach(function(tab) {
+            tab.addEventListener('click', function() {
+                var target = tab.dataset.tab;
+                tabs.forEach(function(t) { t.classList.remove('active'); });
+                contents.forEach(function(c) { c.classList.remove('active'); });
+                tab.classList.add('active');
+                var tabContent = document.getElementById('tab-' + target);
+                if (tabContent) tabContent.classList.add('active');
+            });
+        });
+
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                var query = this.value.toLowerCase().trim();
+                var cards = modal.querySelectorAll('.modal-config-card');
+                cards.forEach(function(card) {
+                    var text = card.textContent.toLowerCase();
+                    card.style.display = (!query || text.indexOf(query) !== -1) ? '' : 'none';
+                });
+                if (query) {
+                    contents.forEach(function(c) { c.classList.add('active'); });
+                    tabs.forEach(function(t) { t.classList.remove('active'); });
+                } else {
+                    contents.forEach(function(c) { c.classList.remove('active'); });
+                    tabs.forEach(function(t) { t.classList.remove('active'); });
+                    tabs[0].classList.add('active');
+                    contents[0].classList.add('active');
+                }
+            });
+        }
+    })();
+    </script>
+</body>
+</html>

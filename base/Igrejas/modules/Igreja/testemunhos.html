@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Zyntra Igrejas — Testemunhos</title>
+    <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/igreja.css">
+</head>
+<body>
+<a href="#main" class="skip-link">Pular para conteúdo</a>
+<div class="app-layout">
+    <aside class="sidebar" id="sidebar"></aside><div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <div class="main-area">
+        <header class="header" id="header"></header>
+        <div class="page-content" id="main">
+            <div class="page-header fade-in"><h1 class="page-title">🙌 Testemunhos</h1><p class="page-subtitle">Compartilhe o que Deus tem feito na sua vida</p></div>
+            <div style="display:flex;gap:16px;margin-bottom:20px;flex-wrap:wrap" class="fade-in fade-in-1">
+                <button class="btn btn-primary" onclick="openModal('modal-testimony')"><i class="fas fa-plus"></i> Compartilhar Testemunho</button>
+            </div>
+            <div id="testimonies" class="fade-in fade-in-2"></div>
+        </div>
+    </div>
+</div>
+<div class="modal-overlay" id="modal-testimony">
+    <div class="modal">
+        <div class="modal-header"><h2>Compartilhar Testemunho</h2><button class="modal-close" onclick="closeModal('modal-testimony')"><i class="fas fa-times"></i></button></div>
+        <div class="modal-body">
+            <div class="form-group"><label>Título</label><input type="text" class="form-control" id="test-title" placeholder="Ex: Deus me curou!"></div>
+            <div class="form-group"><label>Seu Testemunho</label><textarea class="form-control" rows="5" id="test-text" placeholder="Conte o que Deus fez na sua vida..."></textarea></div>
+            <div class="form-group"><label>Versículo relacionado (opcional)</label><input type="text" class="form-control" id="test-verse" placeholder="Ex: Salmo 23:1"></div>
+        </div>
+        <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('modal-testimony')">Cancelar</button><button class="btn btn-primary" onclick="submitTestimony()"><i class="fas fa-heart"></i> Publicar</button></div>
+    </div>
+</div>
+<div id="a11y"></div>
+<script src="js/igreja.js"></script>
+<script>
+document.getElementById('sidebar').innerHTML = SIDEBAR_HTML;
+document.getElementById('header').innerHTML = getHeaderHTML('Testemunhos');
+document.getElementById('a11y').innerHTML = A11Y_HTML;
+
+var testimonies = [
+    {id:1,author:'Maria Silva',title:'Cura da minha mãe',text:'Minha mãe estava internada há 2 semanas com um quadro grave. A igreja toda orou e, glória a Deus, ela recebeu alta completamente curada! Os médicos ficaram surpresos.',verse:'Isaías 53:5',date:'2026-04-14',likes:89},
+    {id:2,author:'João Santos',title:'Novo emprego após 3 meses',text:'Estava desempregado e desesperado. A célula orou comigo e em 2 semanas recebi 3 propostas de emprego! Deus é fiel e nunca nos abandona.',verse:'Filipenses 4:19',date:'2026-04-10',likes:56},
+    {id:3,author:'Ana Oliveira',title:'Restauração do casamento',text:'Meu casamento estava à beira do divórcio. Através do acompanhamento pastoral e muita oração, Deus restaurou nosso relacionamento. Hoje somos mais unidos que nunca!',verse:'Marcos 10:9',date:'2026-04-05',likes:112},
+    {id:4,author:'Lucas Ferreira',title:'Libertação dos vícios',text:'Lutei durante anos contra vícios que destruíam minha vida. No retiro da igreja, Deus me libertou completamente. Hoje estou limpo há 1 ano e servindo no ministério!',verse:'João 8:36',date:'2026-03-28',likes:145}
+];
+
+function renderTestimonies(){
+    var html='';
+    testimonies.forEach(function(t){
+        html+='<div class="card" style="margin-bottom:16px"><div class="card-body"><div style="display:flex;align-items:center;gap:12px;margin-bottom:16px"><div class="timeline-avatar" style="background:linear-gradient(135deg,var(--primary),var(--accent))">'+t.author.charAt(0)+'</div><div><div style="font-weight:600;font-size:.88rem">'+t.author+'</div><div style="font-size:.7rem;color:var(--text-muted)">'+formatDate(t.date)+'</div></div></div><h3 style="font-size:1rem;font-weight:700;margin-bottom:10px;color:var(--primary-light)">🙌 '+t.title+'</h3><p style="font-size:.88rem;line-height:1.8;color:var(--text-secondary);margin-bottom:16px">'+t.text+'</p>'+(t.verse?'<div style="background:rgba(124,58,237,.06);padding:12px 16px;border-radius:8px;border-left:3px solid var(--primary);font-size:.82rem;font-style:italic;margin-bottom:16px"><i class="fas fa-book-bible" style="margin-right:6px;color:var(--primary-light)"></i>'+t.verse+'</div>':'')+'<div style="display:flex;gap:16px;padding-top:12px;border-top:1px solid var(--border)"><button class="btn btn-sm" style="color:var(--text-secondary)" onclick="likeTestimony('+t.id+')"><i class="fas fa-heart" style="color:var(--danger);margin-right:4px"></i>'+t.likes+' Amém</button><button class="btn btn-sm" style="color:var(--text-secondary)"><i class="fas fa-share"></i> Compartilhar</button></div></div></div>';
+    });
+    document.getElementById('testimonies').innerHTML=html;
+}
+
+function likeTestimony(id){var t=testimonies.find(function(x){return x.id===id});if(t){t.likes++;renderTestimonies();}}
+
+function submitTestimony(){
+    var title=document.getElementById('test-title').value.trim();
+    var text=document.getElementById('test-text').value.trim();
+    if(!title||!text){showToast('Preencha título e testemunho','warning');return;}
+    var auth=JSON.parse(sessionStorage.getItem('zyntra_igreja_auth')||'{}');
+    testimonies.unshift({id:Date.now(),author:auth.name||'Membro',title:title,text:text,verse:document.getElementById('test-verse').value.trim(),date:new Date().toISOString().split('T')[0],likes:0});
+    closeModal('modal-testimony');renderTestimonies();showToast('Testemunho publicado! Glória a Deus! 🙌','success');
+}
+renderTestimonies();
+</script>
+</body>
+</html>

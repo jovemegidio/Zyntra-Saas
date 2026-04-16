@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Zyntra Igrejas — Devocionais</title>
+    <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/igreja.css">
+</head>
+<body>
+<a href="#main" class="skip-link">Pular para conteúdo</a>
+<div class="app-layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <div class="main-area">
+        <header class="header" id="header"></header>
+        <div class="page-content" id="main">
+            <div class="page-header fade-in">
+                <h1 class="page-title">🌅 Devocionais Diários</h1>
+                <p class="page-subtitle">Alimento espiritual diário com versículos e reflexões</p>
+            </div>
+
+            <!-- Navegação de dias -->
+            <div class="card fade-in fade-in-1" style="margin-bottom:16px">
+                <div class="card-body" style="display:flex;align-items:center;justify-content:space-between">
+                    <button class="btn btn-outline" onclick="changeDay(-1)"><i class="fas fa-chevron-left"></i> Anterior</button>
+                    <div style="text-align:center">
+                        <div style="font-size:1.1rem;font-weight:700" id="devocional-date"></div>
+                        <div style="font-size:.78rem;color:var(--text-secondary)" id="devocional-weekday"></div>
+                    </div>
+                    <button class="btn btn-outline" onclick="changeDay(1)">Próximo <i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+
+            <div class="card fade-in fade-in-2">
+                <div class="card-header"><h3 class="card-title" id="devocional-title"></h3></div>
+                <div class="card-body">
+                    <!-- Versículo do dia -->
+                    <div style="background:linear-gradient(135deg,rgba(124,58,237,.1),rgba(245,158,11,.05));border-left:4px solid var(--primary);padding:20px;border-radius:0 12px 12px 0;margin-bottom:24px">
+                        <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--primary-light);margin-bottom:8px;font-weight:600">Versículo do Dia</div>
+                        <p style="font-size:1.05rem;font-style:italic;line-height:1.8;margin-bottom:8px" id="devocional-verse"></p>
+                        <span style="font-size:.82rem;color:var(--text-secondary);font-weight:600" id="devocional-ref"></span>
+                    </div>
+
+                    <!-- Reflexão -->
+                    <div style="margin-bottom:24px">
+                        <h3 style="font-size:.9rem;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px"><i class="fas fa-lightbulb" style="color:var(--accent)"></i> Reflexão</h3>
+                        <p style="font-size:.88rem;line-height:1.9;color:var(--text-secondary)" id="devocional-text"></p>
+                    </div>
+
+                    <!-- Oração -->
+                    <div style="background:rgba(16,185,129,.06);padding:20px;border-radius:12px;border:1px solid rgba(16,185,129,.15)">
+                        <h3 style="font-size:.9rem;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px"><i class="fas fa-hands-praying" style="color:var(--success)"></i> Oração do Dia</h3>
+                        <p style="font-size:.85rem;font-style:italic;color:var(--text-secondary);line-height:1.8" id="devocional-prayer"></p>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" style="margin-top:16px" data-admin-only onclick="openModal('modal-devocional')"><i class="fas fa-plus"></i> Criar Devocional</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modal-devocional">
+    <div class="modal">
+        <div class="modal-header"><h2>Novo Devocional</h2><button class="modal-close" onclick="closeModal('modal-devocional')"><i class="fas fa-times"></i></button></div>
+        <div class="modal-body">
+            <div class="form-group"><label>Título</label><input type="text" class="form-control" placeholder="Título do devocional"></div>
+            <div class="form-group"><label>Versículo</label><input type="text" class="form-control" placeholder="Ex: João 3:16"></div>
+            <div class="form-group"><label>Reflexão</label><textarea class="form-control" rows="4" placeholder="Escreva a reflexão..."></textarea></div>
+            <div class="form-group"><label>Oração</label><textarea class="form-control" rows="3" placeholder="Oração sugerida..."></textarea></div>
+        </div>
+        <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('modal-devocional')">Cancelar</button><button class="btn btn-primary" onclick="closeModal('modal-devocional');showToast('Devocional criado!','success')">Publicar</button></div>
+    </div>
+</div>
+
+<div id="a11y"></div>
+<script src="js/igreja.js"></script>
+<script>
+document.getElementById('sidebar').innerHTML = SIDEBAR_HTML;
+document.getElementById('header').innerHTML = getHeaderHTML('Devocionais');
+document.getElementById('a11y').innerHTML = A11Y_HTML;
+
+var devocionais = [
+    { title:'A Força da Fé', verse:'"Porque pela graça sois salvos, por meio da fé; e isso não vem de vós; é dom de Deus."', ref:'Efésios 2:8', text:'A fé não é apenas acreditar, é confiar plenamente em Deus mesmo quando não vemos o caminho. Hoje, permita que sua fé seja maior que seus medos. Lembre-se de que Deus já preparou tudo o que você precisa — basta dar o próximo passo com confiança.', prayer:'Senhor, aumenta a minha fé. Ajuda-me a confiar em Ti em todos os momentos, especialmente nos mais difíceis. Que eu nunca esqueça que Tu és fiel. Amém.' },
+    { title:'Renovando as Forças', verse:'"Mas os que esperam no Senhor renovarão as suas forças, subirão com asas como águias."', ref:'Isaías 40:31', text:'Em meio à correria do dia a dia, é fácil nos sentirmos esgotados. Mas Deus promete renovar nossas forças quando depositamos nEle nossa esperança. Hoje, pare um momento, respire e entregue suas preocupações ao Senhor.', prayer:'Pai, renova as minhas forças hoje. Que eu possa voar alto como águia, sustentado pelas Tuas mãos. Em nome de Jesus. Amém.' },
+    { title:'O Amor que Transforma', verse:'"Nisto conhecerão todos que sois meus discípulos, se vos amardes uns aos outros."', ref:'João 13:35', text:'O amor cristão é a marca mais poderosa que podemos deixar no mundo. Não é apenas sentimento — é ação, é escolha diária. Hoje, procure uma forma prática de demonstrar amor ao próximo.', prayer:'Deus de amor, ensina-me a amar como Tu amas. Que minha vida seja um reflexo do Teu amor incondicional. Amém.' },
+    { title:'Paz em Meio à Tempestade', verse:'"Deixo-vos a paz, a minha paz vos dou; não vo-la dou como o mundo a dá."', ref:'João 14:27', text:'A paz que Jesus oferece não depende das circunstâncias. É uma paz sobrenatural que guarda nosso coração mesmo quando tudo parece desmoronar. Hoje, receba essa paz e permita que ela governe sua vida.', prayer:'Senhor Jesus, eu recebo a Tua paz hoje. Que ela governe meu coração e minha mente em todas as situações. Amém.' },
+    { title:'Propósito Divino', verse:'"Porque eu bem sei os pensamentos que tenho a vosso respeito, diz o Senhor; pensamentos de paz e não de mal."', ref:'Jeremias 29:11', text:'Deus tem um plano específico para a sua vida. Mesmo quando o caminho parece incerto, confie que Ele está trabalhando nos bastidores. Seu futuro está seguro nas mãos do Criador.', prayer:'Pai, ajuda-me a confiar no Teu plano para minha vida. Que eu caminhe com fé, sabendo que Teus pensamentos para mim são de paz. Amém.' }
+];
+
+var currentDay = 0;
+
+function renderDevocional(){
+    var d = devocionais[((currentDay % devocionais.length)+devocionais.length) % devocionais.length];
+    var date = new Date();
+    date.setDate(date.getDate()+currentDay);
+    var weekdays = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
+    document.getElementById('devocional-date').textContent = date.toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+    document.getElementById('devocional-weekday').textContent = weekdays[date.getDay()];
+    document.getElementById('devocional-title').innerHTML = '<i class="fas fa-sun" style="color:var(--accent)"></i> '+d.title;
+    document.getElementById('devocional-verse').textContent = d.verse;
+    document.getElementById('devocional-ref').textContent = '— '+d.ref;
+    document.getElementById('devocional-text').textContent = d.text;
+    document.getElementById('devocional-prayer').textContent = d.prayer;
+}
+function changeDay(n){ currentDay+=n; renderDevocional(); }
+renderDevocional();
+</script>
+</body>
+</html>

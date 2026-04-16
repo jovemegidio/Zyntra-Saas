@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Zyntra Igrejas — Membros</title>
+    <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/igreja.css">
+</head>
+<body>
+<a href="#main" class="skip-link">Pular para conteúdo</a>
+<div class="app-layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <div class="main-area">
+        <header class="header" id="header"></header>
+        <div class="page-content" id="main">
+            <div class="page-header fade-in">
+                <h1 class="page-title">👥 Gestão de Membros</h1>
+                <p class="page-subtitle">Cadastro, filtros e gestão completa dos membros da igreja</p>
+            </div>
+            <div class="toolbar fade-in fade-in-1">
+                <div class="search-box" style="flex:1"><i class="fas fa-search"></i><input type="text" class="form-control" placeholder="Buscar membro..." id="search-member" oninput="filterMembers()"></div>
+                <select class="form-control" style="width:auto" id="filter-status" onchange="filterMembers()"><option value="">Todos Status</option><option value="ativo">Ativo</option><option value="inativo">Inativo</option></select>
+                <select class="form-control" style="width:auto" id="filter-role" onchange="filterMembers()"><option value="">Todos Perfis</option><option value="membro">Membro</option><option value="lider">Líder</option><option value="voluntario">Voluntário</option></select>
+                <button class="btn btn-primary" onclick="openModal('modal-member')" data-admin-only><i class="fas fa-plus"></i> Novo Membro</button>
+            </div>
+            <div class="card fade-in fade-in-2">
+                <div class="card-body">
+                    <div class="table-container">
+                        <table><thead><tr><th>Membro</th><th>Email</th><th>Telefone</th><th>Perfil</th><th>Status</th><th>Batizado</th><th>Grupos</th><th>Ações</th></tr></thead>
+                        <tbody id="members-table"></tbody></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal novo membro -->
+<div class="modal-overlay" id="modal-member">
+    <div class="modal">
+        <div class="modal-header"><h2><i class="fas fa-user-plus"></i> Novo Membro</h2><button class="modal-close" onclick="closeModal('modal-member')"><i class="fas fa-times"></i></button></div>
+        <div class="modal-body">
+            <div class="form-row">
+                <div class="form-group"><label>Nome Completo</label><input type="text" class="form-control" placeholder="Nome do membro"></div>
+                <div class="form-group"><label>Email</label><input type="email" class="form-control" placeholder="email@exemplo.com"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Telefone</label><input type="text" class="form-control" placeholder="(11) 99999-9999"></div>
+                <div class="form-group"><label>Perfil</label><select class="form-control"><option>Membro</option><option>Líder</option><option>Voluntário</option></select></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Data Nascimento</label><input type="date" class="form-control"></div>
+                <div class="form-group"><label>Batizado</label><select class="form-control"><option value="false">Não</option><option value="true">Sim</option></select></div>
+            </div>
+        </div>
+        <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('modal-member')">Cancelar</button><button class="btn btn-primary" onclick="closeModal('modal-member');showToast('Membro cadastrado com sucesso!','success')"><i class="fas fa-check"></i> Salvar</button></div>
+    </div>
+</div>
+
+<div id="a11y"></div>
+<script src="js/igreja.js"></script>
+<script>
+document.getElementById('sidebar').innerHTML = SIDEBAR_HTML;
+document.getElementById('header').innerHTML = getHeaderHTML('Membros');
+document.getElementById('a11y').innerHTML = A11Y_HTML;
+
+function filterMembers(){
+    var search = document.getElementById('search-member').value.toLowerCase();
+    var status = document.getElementById('filter-status').value;
+    var role = document.getElementById('filter-role').value;
+    var filtered = MOCK.members.filter(function(m){
+        if(search && m.name.toLowerCase().indexOf(search)===-1 && m.email.toLowerCase().indexOf(search)===-1) return false;
+        if(status && m.status !== status) return false;
+        if(role && m.role !== role) return false;
+        return true;
+    });
+    renderMembers(filtered);
+}
+
+function renderMembers(list){
+    var tb = document.getElementById('members-table');
+    tb.innerHTML = '';
+    list.forEach(function(m){
+        var roleBadge = m.role==='admin'?'badge-danger':m.role==='lider'?'badge-info':'badge-purple';
+        var statusBadge = m.status==='ativo'?'badge-success':'badge-warning';
+        var groups = m.groups.length ? m.groups.join(', ') : '<span style="color:var(--text-muted)">—</span>';
+        tb.innerHTML += '<tr><td><div style="display:flex;align-items:center;gap:10px"><div class="user-avatar" style="width:32px;height:32px;font-size:.75rem">' + m.name.charAt(0) + '</div><span style="font-weight:500">' + m.name + '</span></div></td><td>' + m.email + '</td><td>' + m.phone + '</td><td><span class="badge ' + roleBadge + '">' + m.role + '</span></td><td><span class="badge ' + statusBadge + '">' + m.status + '</span></td><td>' + (m.baptized?'<i class="fas fa-check-circle" style="color:var(--success)"></i>':'<i class="fas fa-minus-circle" style="color:var(--text-muted)"></i>') + '</td><td style="font-size:.75rem">' + groups + '</td><td><div class="table-actions"><button class="btn-edit" title="Editar"><i class="fas fa-pen"></i></button><button class="btn-delete" title="Remover"><i class="fas fa-trash"></i></button></div></td></tr>';
+    });
+}
+filterMembers();
+</script>
+</body>
+</html>

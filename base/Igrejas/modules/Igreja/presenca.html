@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Zyntra Igrejas — Check-in de Presença</title>
+    <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/igreja.css">
+</head>
+<body>
+<a href="#main" class="skip-link">Pular para conteúdo</a>
+<div class="app-layout">
+    <aside class="sidebar" id="sidebar"></aside><div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <div class="main-area">
+        <header class="header" id="header"></header>
+        <div class="page-content" id="main">
+            <div class="page-header fade-in"><h1 class="page-title">📱 Check-in de Presença</h1><p class="page-subtitle">QR Code por evento, histórico de frequência com métricas</p></div>
+
+            <div class="stats-grid fade-in fade-in-1">
+                <div class="stat-card"><div class="stat-icon purple"><i class="fas fa-qrcode"></i></div><div class="stat-info"><h3>342</h3><p>Check-ins Hoje</p></div></div>
+                <div class="stat-card"><div class="stat-icon green"><i class="fas fa-chart-line"></i></div><div class="stat-info"><h3>78%</h3><p>Taxa de Presença</p></div></div>
+                <div class="stat-card"><div class="stat-icon blue"><i class="fas fa-calendar-check"></i></div><div class="stat-info"><h3>52</h3><p>Eventos com Check-in</p></div></div>
+                <div class="stat-card"><div class="stat-icon amber"><i class="fas fa-crown"></i></div><div class="stat-info"><h3>Maria S.</h3><p>Mais Frequente</p></div></div>
+            </div>
+
+            <div class="grid-2 fade-in fade-in-2">
+                <!-- QR Code Scanner -->
+                <div class="card">
+                    <div class="card-header"><h3 class="card-title"><i class="fas fa-qrcode"></i> Scanner de QR Code</h3></div>
+                    <div class="card-body">
+                        <div class="checkin-area">
+                            <div class="qr-scanner"><i class="fas fa-camera" style="font-size:3rem"></i></div>
+                            <p style="font-size:.85rem;color:var(--text-secondary);margin-bottom:16px">Aponte a câmera para o QR Code do evento</p>
+                            <button class="btn btn-primary" onclick="simulateCheckin()"><i class="fas fa-camera"></i> Abrir Scanner</button>
+                            <div style="margin-top:16px"><span style="font-size:.78rem;color:var(--text-muted)">ou insira o código manualmente:</span><div style="display:flex;gap:8px;margin-top:8px;max-width:300px;margin:8px auto 0"><input type="text" class="form-control" placeholder="CODE-XXXX" id="manual-code"><button class="btn btn-sm btn-primary" onclick="simulateCheckin()"><i class="fas fa-check"></i></button></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- QR Code do evento (admin) -->
+                <div class="card" data-admin-only>
+                    <div class="card-header"><h3 class="card-title"><i class="fas fa-calendar"></i> Gerar QR Code do Evento</h3></div>
+                    <div class="card-body">
+                        <div class="form-group"><label>Selecionar Evento</label><select class="form-control" id="event-select"></select></div>
+                        <div style="text-align:center;padding:24px">
+                            <div style="width:200px;height:200px;background:#fff;border-radius:16px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;border:8px solid var(--primary)"><div style="display:grid;grid-template-columns:repeat(5,1fr);gap:3px;padding:16px"id="qr-art"></div></div>
+                            <p style="font-size:.85rem;font-weight:600" id="qr-code-text">EV-2026-0419</p>
+                            <p style="font-size:.72rem;color:var(--text-muted)">Válido por 4 horas após início do evento</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Histórico -->
+            <div class="card fade-in fade-in-3" style="margin-top:16px">
+                <div class="card-header"><h3 class="card-title"><i class="fas fa-history"></i> Histórico de Frequência</h3></div>
+                <div class="card-body">
+                    <div class="table-container">
+                        <table>
+                            <thead><tr><th>Membro</th><th>Evento</th><th>Data</th><th>Horário</th><th>Método</th></tr></thead>
+                            <tbody id="checkin-history"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="a11y"></div>
+<script src="js/igreja.js"></script>
+<script>
+document.getElementById('sidebar').innerHTML = SIDEBAR_HTML;
+document.getElementById('header').innerHTML = getHeaderHTML('Check-in');
+document.getElementById('a11y').innerHTML = A11Y_HTML;
+
+// Populate event select
+var sel = document.getElementById('event-select');
+MOCK.events.forEach(function(e){sel.innerHTML+='<option value="'+e.id+'">'+e.title+' — '+formatDate(e.date)+'</option>'});
+
+// QR art
+var art = document.getElementById('qr-art');
+for(var i=0;i<25;i++){var filled=Math.random()>.4;art.innerHTML+='<div style="width:12px;height:12px;background:'+(filled?'#1e1b4b':'#e2e8f0')+';border-radius:2px"></div>';}
+
+// History
+var history = [
+    {member:'Maria Silva',event:'Culto de Celebração',date:'2026-04-13',time:'19:02',method:'QR Code'},
+    {member:'João Santos',event:'Culto de Celebração',date:'2026-04-13',time:'19:05',method:'QR Code'},
+    {member:'Pedro Costa',event:'Culto de Celebração',date:'2026-04-13',time:'18:58',method:'Manual'},
+    {member:'Ana Oliveira',event:'EBD — Escola Bíblica',date:'2026-04-13',time:'09:03',method:'QR Code'},
+    {member:'Lucas Ferreira',event:'Culto de Celebração',date:'2026-04-13',time:'19:10',method:'QR Code'},
+    {member:'Beatriz Lima',event:'Ministério Infantil',date:'2026-04-13',time:'09:01',method:'Manual'},
+    {member:'Rafael Souza',event:'Culto de Celebração',date:'2026-04-06',time:'19:00',method:'QR Code'},
+    {member:'Maria Silva',event:'EBD — Escola Bíblica',date:'2026-04-06',time:'08:55',method:'QR Code'}
+];
+var tb = document.getElementById('checkin-history');
+history.forEach(function(h){
+    tb.innerHTML+='<tr><td>'+h.member+'</td><td>'+h.event+'</td><td>'+formatDate(h.date)+'</td><td>'+h.time+'</td><td><span class="badge '+(h.method==='QR Code'?'badge-purple':'badge-info')+'">'+h.method+'</span></td></tr>';
+});
+
+function simulateCheckin(){showToast('✅ Check-in realizado com sucesso!','success');}
+</script>
+</body>
+</html>

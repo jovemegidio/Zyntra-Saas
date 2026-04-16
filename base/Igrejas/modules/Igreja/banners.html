@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Zyntra Igrejas — Banners</title>
+    <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/igreja.css">
+</head>
+<body>
+<a href="#main" class="skip-link">Pular para conteúdo</a>
+<div class="app-layout">
+    <aside class="sidebar" id="sidebar"></aside><div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <div class="main-area">
+        <header class="header" id="header"></header>
+        <div class="page-content" id="main">
+            <div class="page-header fade-in"><h1 class="page-title">🖼️ Banners</h1><p class="page-subtitle">Banners rotativos com agendamento para o app e site</p></div>
+
+            <!-- Preview carousel -->
+            <div class="card fade-in fade-in-1" style="margin-bottom:16px">
+                <div class="card-header"><h3 class="card-title"><i class="fas fa-eye" style="color:var(--primary-light)"></i> Preview Ativo</h3>
+                    <div style="display:flex;gap:8px"><button class="btn btn-sm btn-outline" onclick="prevBanner()"><i class="fas fa-chevron-left"></i></button><button class="btn btn-sm btn-outline" onclick="nextBanner()"><i class="fas fa-chevron-right"></i></button></div>
+                </div>
+                <div class="card-body" style="padding:0;overflow:hidden;border-radius:0 0 12px 12px">
+                    <div id="banner-preview" style="height:200px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:700;color:#fff;transition:background .5s;position:relative"></div>
+                    <div style="display:flex;justify-content:center;gap:6px;padding:12px" id="banner-dots"></div>
+                </div>
+            </div>
+
+            <!-- Novo banner -->
+            <div class="card fade-in fade-in-2" style="margin-bottom:16px">
+                <div class="card-header"><h3 class="card-title"><i class="fas fa-plus-circle"></i> Novo Banner</h3></div>
+                <div class="card-body">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                        <div class="form-group"><label>Título</label><input class="form-control" id="b-title" placeholder="Título do banner"></div>
+                        <div class="form-group"><label>Link (destino)</label><input class="form-control" id="b-link" placeholder="Ex: eventos.html"></div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+                        <div class="form-group"><label>Início</label><input class="form-control" type="date" id="b-start"></div>
+                        <div class="form-group"><label>Fim</label><input class="form-control" type="date" id="b-end"></div>
+                        <div class="form-group"><label>Posição</label><select class="form-control" id="b-pos"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
+                    </div>
+                    <div class="form-group"><label>Imagem (URL ou upload)</label><input class="form-control" id="b-img" placeholder="https://... ou selecione arquivo"></div>
+                    <div style="text-align:right"><button class="btn btn-primary" onclick="saveBanner()"><i class="fas fa-save"></i> Salvar Banner</button></div>
+                </div>
+            </div>
+
+            <!-- Lista de banners -->
+            <div class="card fade-in fade-in-3">
+                <div class="card-header"><h3 class="card-title"><i class="fas fa-list"></i> Banners Cadastrados</h3></div>
+                <div class="card-body"><div class="table-container"><table><thead><tr><th>Pos</th><th>Título</th><th>Período</th><th>Status</th><th>Cliques</th><th>Ações</th></tr></thead><tbody id="banners-table"></tbody></table></div></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="a11y"></div>
+<script src="js/igreja.js"></script>
+<script>
+document.getElementById('sidebar').innerHTML = SIDEBAR_HTML;
+document.getElementById('header').innerHTML = getHeaderHTML('Banners');
+document.getElementById('a11y').innerHTML = A11Y_HTML;
+
+var banners = [
+    {pos:1,title:'Retiro de Jovens 2024',start:'2024-01-15',end:'2024-02-15',status:'ativo',clicks:156,bg:'linear-gradient(135deg,#7c3aed,#ec4899)'},
+    {pos:2,title:'Campanha Missionária',start:'2024-01-01',end:'2024-03-31',status:'ativo',clicks:89,bg:'linear-gradient(135deg,#10b981,#3b82f6)'},
+    {pos:3,title:'Escola Bíblica — Inscrições',start:'2024-02-01',end:'2024-02-28',status:'agendado',clicks:0,bg:'linear-gradient(135deg,#f59e0b,#ef4444)'},
+    {pos:4,title:'Culto de Natal (encerrado)',start:'2023-12-01',end:'2023-12-26',status:'expirado',clicks:423,bg:'linear-gradient(135deg,#6366f1,#8b5cf6)'},
+    {pos:5,title:'Aniversário da Igreja',start:'2024-03-01',end:'2024-03-15',status:'agendado',clicks:0,bg:'linear-gradient(135deg,#14b8a6,#0ea5e9)'}
+];
+
+var currentBanner=0;
+function renderPreview(){
+    var b=banners.filter(function(x){return x.status==='ativo'||x.status==='agendado'});
+    if(!b.length)return;
+    var cur=b[currentBanner%b.length];
+    var el=document.getElementById('banner-preview');
+    el.style.background=cur.bg;el.textContent=cur.title;
+    var dots=document.getElementById('banner-dots');dots.innerHTML='';
+    b.forEach(function(_,i){dots.innerHTML+='<div style="width:8px;height:8px;border-radius:50%;background:'+(i===currentBanner%b.length?'var(--primary)':'var(--bg-tertiary)')+'"></div>';});
+}
+function prevBanner(){currentBanner--;if(currentBanner<0)currentBanner=banners.length-1;renderPreview();}
+function nextBanner(){currentBanner++;renderPreview();}
+
+(function renderTable(){
+    var tb=document.getElementById('banners-table');
+    banners.forEach(function(b){
+        var statusBadge=b.status==='ativo'?'badge-success':b.status==='agendado'?'badge-warning':'badge-danger';
+        tb.innerHTML+='<tr><td style="font-weight:700;text-align:center">'+b.pos+'</td><td style="font-weight:500">'+b.title+'</td><td style="font-size:.82rem">'+formatDate(b.start)+' — '+formatDate(b.end)+'</td><td><span class="badge '+statusBadge+'">'+b.status.charAt(0).toUpperCase()+b.status.slice(1)+'</span></td><td>'+b.clicks+'</td><td><button class="btn btn-sm btn-outline" onclick="showToast(\'Editando banner\',\'info\')"><i class="fas fa-edit"></i></button> <button class="btn btn-sm btn-outline" style="color:var(--danger)" onclick="showToast(\'Banner removido\',\'danger\')"><i class="fas fa-trash"></i></button></td></tr>';
+    });
+})();
+
+function saveBanner(){
+    var t=document.getElementById('b-title').value;
+    if(!t){showToast('Preencha o título','danger');return;}
+    showToast('Banner salvo: '+t,'success');
+}
+renderPreview();setInterval(function(){currentBanner++;renderPreview();},5000);
+</script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Zyntra Igrejas — Financeiro</title>
+    <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/igreja.css">
+</head>
+<body>
+<a href="#main" class="skip-link">Pular para conteúdo</a>
+<div class="app-layout">
+    <aside class="sidebar" id="sidebar"></aside><div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <div class="main-area">
+        <header class="header" id="header"></header>
+        <div class="page-content" id="main">
+            <div class="page-header fade-in"><h1 class="page-title">💰 Financeiro</h1><p class="page-subtitle">Receitas, despesas e fluxo de caixa</p></div>
+
+            <!-- KPIs -->
+            <div class="stats-grid fade-in fade-in-1">
+                <div class="stat-card"><div class="stat-icon" style="background:linear-gradient(135deg,#10b981,#059669)"><i class="fas fa-arrow-up"></i></div><div class="stat-info"><span class="stat-label">Receita (mês)</span><span class="stat-value" id="kpi-receita">R$ 0</span></div></div>
+                <div class="stat-card"><div class="stat-icon" style="background:linear-gradient(135deg,#ef4444,#dc2626)"><i class="fas fa-arrow-down"></i></div><div class="stat-info"><span class="stat-label">Despesa (mês)</span><span class="stat-value" id="kpi-despesa">R$ 0</span></div></div>
+                <div class="stat-card"><div class="stat-icon" style="background:linear-gradient(135deg,#7c3aed,#6d28d9)"><i class="fas fa-wallet"></i></div><div class="stat-info"><span class="stat-label">Saldo Atual</span><span class="stat-value" id="kpi-saldo">R$ 0</span></div></div>
+                <div class="stat-card"><div class="stat-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706)"><i class="fas fa-chart-line"></i></div><div class="stat-info"><span class="stat-label">Previsão Próx. Mês</span><span class="stat-value" id="kpi-previsao">R$ 0</span></div></div>
+            </div>
+
+            <!-- Barra receita vs despesa -->
+            <div class="card fade-in fade-in-2" style="margin-top:16px">
+                <div class="card-header"><h3 class="card-title"><i class="fas fa-chart-bar" style="color:var(--primary-light)"></i> Receita vs Despesa</h3></div>
+                <div class="card-body">
+                    <div id="bar-chart" style="display:flex;flex-direction:column;gap:16px">
+                        <div style="display:flex;align-items:center;gap:12px"><span style="width:60px;font-size:.82rem;color:var(--text-secondary)">Receita</span><div style="flex:1;background:var(--bg-tertiary);border-radius:8px;overflow:hidden;height:28px"><div id="bar-receita" style="height:100%;background:linear-gradient(90deg,#10b981,#34d399);border-radius:8px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-size:.75rem;font-weight:700;color:#fff;transition:width .8s"></div></div></div>
+                        <div style="display:flex;align-items:center;gap:12px"><span style="width:60px;font-size:.82rem;color:var(--text-secondary)">Despesa</span><div style="flex:1;background:var(--bg-tertiary);border-radius:8px;overflow:hidden;height:28px"><div id="bar-despesa" style="height:100%;background:linear-gradient(90deg,#ef4444,#f87171);border-radius:8px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-size:.75rem;font-weight:700;color:#fff;transition:width .8s"></div></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transações -->
+            <div class="card fade-in fade-in-3" style="margin-top:16px">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-exchange-alt"></i> Transações</h3>
+                    <div style="display:flex;gap:8px">
+                        <select class="form-control" style="width:auto" id="filter-cat" onchange="filterTx()"><option value="">Todas categorias</option><option value="dizimo">Dízimo</option><option value="oferta">Oferta</option><option value="salario">Salário</option><option value="manutencao">Manutenção</option><option value="energia">Energia</option><option value="aluguel">Aluguel</option></select>
+                        <select class="form-control" style="width:auto" id="filter-dir" onchange="filterTx()"><option value="">Entradas/Saídas</option><option value="entrada">Entradas</option><option value="saida">Saídas</option></select>
+                        <button class="btn btn-primary btn-sm" onclick="openModal('tx-modal')"><i class="fas fa-plus"></i> Nova</button>
+                    </div>
+                </div>
+                <div class="card-body"><div class="table-container"><table><thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Tipo</th><th>Valor</th></tr></thead><tbody id="tx-table"></tbody></table></div></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal nova transação -->
+<div class="modal-overlay" id="tx-modal">
+    <div class="modal" style="max-width:480px">
+        <div class="modal-header"><h3 class="modal-title">Nova Transação</h3><button class="btn-close" onclick="closeModal('tx-modal')"><i class="fas fa-times"></i></button></div>
+        <div class="modal-body">
+            <div class="form-group"><label>Descrição</label><input class="form-control" id="tx-desc" placeholder="Ex: Dízimo do mês"></div>
+            <div class="form-group"><label>Categoria</label><select class="form-control" id="tx-cat"><option value="dizimo">Dízimo</option><option value="oferta">Oferta</option><option value="campanha">Campanha</option><option value="salario">Salário</option><option value="manutencao">Manutenção</option><option value="energia">Energia</option><option value="aluguel">Aluguel</option><option value="outros">Outros</option></select></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                <div class="form-group"><label>Tipo</label><select class="form-control" id="tx-dir"><option value="entrada">Entrada</option><option value="saida">Saída</option></select></div>
+                <div class="form-group"><label>Valor</label><input class="form-control" id="tx-val" type="number" placeholder="0,00"></div>
+            </div>
+        </div>
+        <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('tx-modal')">Cancelar</button><button class="btn btn-primary" onclick="saveTx()">Salvar</button></div>
+    </div>
+</div>
+
+<div id="a11y"></div>
+<script src="js/igreja.js"></script>
+<script>
+document.getElementById('sidebar').innerHTML = SIDEBAR_HTML;
+document.getElementById('header').innerHTML = getHeaderHTML('Financeiro');
+document.getElementById('a11y').innerHTML = A11Y_HTML;
+
+var transactions = MOCK.finance.transactions.slice();
+
+function calcKPIs(){
+    var rec=0,desp=0;
+    transactions.forEach(function(t){t.direction==='entrada'?rec+=t.value:desp+=t.value;});
+    document.getElementById('kpi-receita').textContent=formatCurrency(rec);
+    document.getElementById('kpi-despesa').textContent=formatCurrency(desp);
+    document.getElementById('kpi-saldo').textContent=formatCurrency(rec-desp);
+    document.getElementById('kpi-previsao').textContent=formatCurrency(rec*1.05);
+    var max=Math.max(rec,desp);
+    document.getElementById('bar-receita').style.width=(rec/max*100)+'%';
+    document.getElementById('bar-receita').textContent=formatCurrency(rec);
+    document.getElementById('bar-despesa').style.width=(desp/max*100)+'%';
+    document.getElementById('bar-despesa').textContent=formatCurrency(desp);
+}
+
+function filterTx(){
+    var cat=document.getElementById('filter-cat').value;
+    var dir=document.getElementById('filter-dir').value;
+    var list=transactions.filter(function(t){
+        if(cat&&t.category!==cat)return false;
+        if(dir&&t.direction!==dir)return false;
+        return true;
+    });
+    renderTx(list);
+}
+
+function renderTx(list){
+    var tb=document.getElementById('tx-table');tb.innerHTML='';
+    list.forEach(function(t){
+        var isIn=t.direction==='entrada';
+        tb.innerHTML+='<tr><td>'+formatDate(t.date)+'</td><td>'+t.description+'</td><td><span class="badge badge-info">'+t.category+'</span></td><td><span class="badge '+(isIn?'badge-success':'badge-danger')+'">'+(isIn?'↑ Entrada':'↓ Saída')+'</span></td><td style="font-weight:600;color:'+(isIn?'var(--success)':'var(--danger)')+'">'+(isIn?'+':'-')+formatCurrency(t.value)+'</td></tr>';
+    });
+}
+
+function saveTx(){
+    transactions.unshift({date:'2024-02-01',description:document.getElementById('tx-desc').value||'Nova Transação',category:document.getElementById('tx-cat').value,direction:document.getElementById('tx-dir').value,value:parseFloat(document.getElementById('tx-val').value)||0});
+    closeModal('tx-modal');filterTx();calcKPIs();showToast('Transação registrada!','success');
+}
+
+calcKPIs();filterTx();
+</script>
+</body>
+</html>

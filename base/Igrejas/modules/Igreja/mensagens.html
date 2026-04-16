@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Zyntra Igrejas — Mensagens & Pregações</title>
+    <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/igreja.css">
+</head>
+<body>
+<a href="#main" class="skip-link">Pular para conteúdo</a>
+<div class="app-layout">
+    <aside class="sidebar" id="sidebar"></aside><div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <div class="main-area">
+        <header class="header" id="header"></header>
+        <div class="page-content" id="main">
+            <div class="page-header fade-in"><h1 class="page-title">🎤 Mensagens & Pregações</h1><p class="page-subtitle">Arquivo de sermões, estudos e palestras</p></div>
+
+            <!-- Search -->
+            <div class="card fade-in fade-in-1" style="margin-bottom:16px">
+                <div class="card-body" style="display:flex;gap:8px;flex-wrap:wrap">
+                    <input type="text" class="form-control" placeholder="Buscar mensagem..." id="search-msg" onkeyup="filterMsgs()" style="flex:1;min-width:200px">
+                    <select class="form-control" style="width:auto" id="filter-type" onchange="filterMsgs()"><option value="">Todos tipos</option><option value="video">Vídeo</option><option value="audio">Áudio</option><option value="texto">Texto</option></select>
+                    <select class="form-control" style="width:auto" id="filter-series" onchange="filterMsgs()"><option value="">Todas séries</option><option value="fe">Série: Fé</option><option value="familia">Série: Família</option><option value="avivamento">Série: Avivamento</option></select>
+                </div>
+            </div>
+
+            <!-- Lista -->
+            <div id="msgs-list" class="fade-in fade-in-2"></div>
+        </div>
+    </div>
+</div>
+<div id="a11y"></div>
+<script src="js/igreja.js"></script>
+<script>
+document.getElementById('sidebar').innerHTML = SIDEBAR_HTML;
+document.getElementById('header').innerHTML = getHeaderHTML('Mensagens');
+document.getElementById('a11y').innerHTML = A11Y_HTML;
+
+var messages = [
+    {title:'O Poder da Fé',speaker:'Pr. Roberto Silva',date:'2024-01-28',type:'video',series:'fe',duration:'45min',views:234,thumb:'🎬',description:'Uma reflexão profunda sobre Hebreus 11 e como a fé move montanhas.'},
+    {title:'Família nos Planos de Deus',speaker:'Pra. Ana Oliveira',date:'2024-01-21',type:'video',series:'familia',duration:'38min',views:189,thumb:'🎬',description:'O propósito divino para o casamento e a criação dos filhos.'},
+    {title:'Avivamento Agora',speaker:'Pr. Roberto Silva',date:'2024-01-14',type:'audio',series:'avivamento',duration:'52min',views:312,thumb:'🎵',description:'Clamor por um derramamento do Espírito Santo em nosso tempo.'},
+    {title:'A Graça que Transforma',speaker:'Pr. Carlos Lima',date:'2024-01-07',type:'texto',series:'fe',duration:'12min leitura',views:98,thumb:'📄',description:'Estudo sobre Efésios 2:8-9 e a salvação pela graça.'},
+    {title:'Esposa Virtuosa',speaker:'Pra. Ana Oliveira',date:'2023-12-31',type:'audio',series:'familia',duration:'41min',views:156,thumb:'🎵',description:'O exemplo de Provérbios 31 para a mulher cristã.'},
+    {title:'Reavivados pela Palavra',speaker:'Pr. Roberto Silva',date:'2023-12-24',type:'video',series:'avivamento',duration:'55min',views:428,thumb:'🎬',description:'Culto especial de Natal com mensagem sobre o renascimento espiritual.'},
+    {title:'Os Filhos são Herança do Senhor',speaker:'Ev. Pedro Costa',date:'2023-12-17',type:'texto',series:'familia',duration:'8min leitura',views:67,thumb:'📄',description:'Reflexão sobre Salmo 127 e a bênção dos filhos.'},
+    {title:'Fé para Vencer Gigantes',speaker:'Pr. Roberto Silva',date:'2023-12-10',type:'video',series:'fe',duration:'48min',views:275,thumb:'🎬',description:'A história de Davi e Golias aplicada aos nossos desafios.'}
+];
+
+function filterMsgs(){
+    var q=document.getElementById('search-msg').value.toLowerCase();
+    var type=document.getElementById('filter-type').value;
+    var series=document.getElementById('filter-series').value;
+    var list=messages.filter(function(m){
+        if(q&&m.title.toLowerCase().indexOf(q)<0&&m.speaker.toLowerCase().indexOf(q)<0)return false;
+        if(type&&m.type!==type)return false;
+        if(series&&m.series!==series)return false;
+        return true;
+    });
+    renderMsgs(list);
+}
+
+function renderMsgs(list){
+    var c=document.getElementById('msgs-list');c.innerHTML='';
+    if(!list.length){c.innerHTML='<div class="card"><div class="card-body" style="text-align:center;padding:40px;color:var(--text-muted)">Nenhuma mensagem encontrada</div></div>';return;}
+    list.forEach(function(m){
+        var typeI=m.type==='video'?'fa-video':m.type==='audio'?'fa-headphones':'fa-file-alt';
+        var typeBg=m.type==='video'?'#ef4444':m.type==='audio'?'#3b82f6':'#10b981';
+        c.innerHTML+='\
+        <div class="card" style="margin-bottom:12px;cursor:pointer" onclick="playMsg(\''+m.title+'\')"> \
+            <div class="card-body" style="display:flex;gap:16px;align-items:center">\
+                <div style="width:80px;height:80px;border-radius:12px;background:linear-gradient(135deg,'+typeBg+','+typeBg+'88);display:flex;align-items:center;justify-content:center;font-size:2rem;flex-shrink:0">'+m.thumb+'</div>\
+                <div style="flex:1;min-width:0">\
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><h3 style="font-size:1rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+m.title+'</h3><span class="badge" style="background:'+typeBg+'22;color:'+typeBg+';font-size:.7rem"><i class="fas '+typeI+'"></i> '+m.type.charAt(0).toUpperCase()+m.type.slice(1)+'</span></div>\
+                    <p style="font-size:.82rem;color:var(--text-secondary);margin-bottom:6px">'+m.description+'</p>\
+                    <div style="display:flex;gap:16px;font-size:.75rem;color:var(--text-muted)">\
+                        <span><i class="fas fa-user"></i> '+m.speaker+'</span>\
+                        <span><i class="fas fa-calendar"></i> '+formatDate(m.date)+'</span>\
+                        <span><i class="fas fa-clock"></i> '+m.duration+'</span>\
+                        <span><i class="fas fa-eye"></i> '+m.views+' views</span>\
+                    </div>\
+                </div>\
+                <button class="btn btn-primary btn-sm" style="flex-shrink:0"><i class="fas fa-play"></i></button>\
+            </div>\
+        </div>';
+    });
+}
+
+function playMsg(title){showToast('Reproduzindo: '+title,'info');}
+filterMsgs();
+</script>
+</body>
+</html>

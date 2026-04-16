@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Zyntra Igrejas — Notificações</title>
+    <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/igreja.css">
+</head>
+<body>
+<a href="#main" class="skip-link">Pular para conteúdo</a>
+<div class="app-layout">
+    <aside class="sidebar" id="sidebar"></aside><div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <div class="main-area">
+        <header class="header" id="header"></header>
+        <div class="page-content" id="main">
+            <div class="page-header fade-in"><h1 class="page-title">🔔 Notificações</h1><p class="page-subtitle">Envio de avisos push e comunicados à congregação</p></div>
+
+            <!-- KPIs -->
+            <div class="stats-grid fade-in fade-in-1">
+                <div class="stat-card"><div class="stat-icon" style="background:linear-gradient(135deg,#7c3aed,#6d28d9)"><i class="fas fa-paper-plane"></i></div><div class="stat-info"><span class="stat-label">Enviadas (mês)</span><span class="stat-value">24</span></div></div>
+                <div class="stat-card"><div class="stat-icon" style="background:linear-gradient(135deg,#10b981,#059669)"><i class="fas fa-envelope-open"></i></div><div class="stat-info"><span class="stat-label">Taxa de Abertura</span><span class="stat-value">78%</span></div></div>
+                <div class="stat-card"><div class="stat-icon" style="background:linear-gradient(135deg,#3b82f6,#2563eb)"><i class="fas fa-users"></i></div><div class="stat-info"><span class="stat-label">Alcance</span><span class="stat-value">342</span></div></div>
+                <div class="stat-card"><div class="stat-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706)"><i class="fas fa-clock"></i></div><div class="stat-info"><span class="stat-label">Agendadas</span><span class="stat-value">3</span></div></div>
+            </div>
+
+            <!-- Nova notificação -->
+            <div class="card fade-in fade-in-2" style="margin-top:16px">
+                <div class="card-header"><h3 class="card-title"><i class="fas fa-plus-circle" style="color:var(--primary-light)"></i> Nova Notificação</h3></div>
+                <div class="card-body">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                        <div class="form-group"><label>Título</label><input class="form-control" id="notif-title" placeholder="Título da notificação"></div>
+                        <div class="form-group"><label>Público</label><select class="form-control" id="notif-audience"><option value="todos">Todos os membros</option><option value="lideres">Líderes</option><option value="jovens">Jovens</option><option value="voluntarios">Voluntários</option></select></div>
+                    </div>
+                    <div class="form-group"><label>Mensagem</label><textarea class="form-control" id="notif-body" rows="3" placeholder="Escreva a mensagem..."></textarea></div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+                        <div class="form-group"><label>Canal</label><select class="form-control" id="notif-channel"><option value="push">Push</option><option value="email">E-mail</option><option value="sms">SMS</option><option value="whatsapp">WhatsApp</option></select></div>
+                        <div class="form-group"><label>Prioridade</label><select class="form-control" id="notif-priority"><option value="normal">Normal</option><option value="urgente">Urgente</option><option value="baixa">Baixa</option></select></div>
+                        <div class="form-group"><label>Agendar</label><input class="form-control" type="datetime-local" id="notif-schedule"></div>
+                    </div>
+                    <div style="display:flex;gap:8px;justify-content:flex-end">
+                        <button class="btn btn-outline" onclick="showToast('Rascunho salvo','info')"><i class="fas fa-save"></i> Salvar Rascunho</button>
+                        <button class="btn btn-primary" onclick="sendNotif()"><i class="fas fa-paper-plane"></i> Enviar Agora</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Histórico -->
+            <div class="card fade-in fade-in-3" style="margin-top:16px">
+                <div class="card-header"><h3 class="card-title"><i class="fas fa-history"></i> Histórico de Notificações</h3></div>
+                <div class="card-body"><div class="table-container"><table><thead><tr><th>Data</th><th>Título</th><th>Canal</th><th>Público</th><th>Enviadas</th><th>Abertas</th><th>Taxa</th></tr></thead><tbody id="notif-table"></tbody></table></div></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="a11y"></div>
+<script src="js/igreja.js"></script>
+<script>
+document.getElementById('sidebar').innerHTML = SIDEBAR_HTML;
+document.getElementById('header').innerHTML = getHeaderHTML('Notificações');
+document.getElementById('a11y').innerHTML = A11Y_HTML;
+
+var notifs = [
+    {date:'2024-01-28',title:'Culto especial de oração — quarta',channel:'push',audience:'todos',sent:342,opened:278},
+    {date:'2024-01-26',title:'Inscrições abertas — Retiro Jovem',channel:'whatsapp',audience:'jovens',sent:89,opened:76},
+    {date:'2024-01-24',title:'Escala atualizada — Fevereiro',channel:'email',audience:'voluntarios',sent:47,opened:41},
+    {date:'2024-01-21',title:'Aniversário da igreja — convite',channel:'push',audience:'todos',sent:342,opened:301},
+    {date:'2024-01-18',title:'Reunião de liderança — sábado',channel:'push',audience:'lideres',sent:15,opened:14},
+    {date:'2024-01-15',title:'Campanha missionária — Doação',channel:'email',audience:'todos',sent:342,opened:198},
+    {date:'2024-01-12',title:'Novo estudo bíblico — quartas',channel:'sms',audience:'todos',sent:342,opened:0},
+    {date:'2024-01-10',title:'Escola Bíblica — nova apostila',channel:'push',audience:'todos',sent:342,opened:256}
+];
+
+(function renderNotifs(){
+    var tb=document.getElementById('notif-table');
+    notifs.forEach(function(n){
+        var rate=n.sent>0?Math.round(n.opened/n.sent*100):0;
+        var channelIcon=n.channel==='push'?'fa-bell':n.channel==='email'?'fa-envelope':n.channel==='sms'?'fa-sms':'fa-brands fa-whatsapp';
+        var rateColor=rate>=70?'var(--success)':rate>=40?'var(--warning)':'var(--danger)';
+        tb.innerHTML+='<tr><td>'+formatDate(n.date)+'</td><td style="font-weight:500">'+n.title+'</td><td><span class="badge badge-info"><i class="fas '+channelIcon+'"></i> '+n.channel.toUpperCase()+'</span></td><td>'+n.audience+'</td><td>'+n.sent+'</td><td>'+n.opened+'</td><td style="font-weight:700;color:'+rateColor+'">'+rate+'%</td></tr>';
+    });
+})();
+
+function sendNotif(){
+    var t=document.getElementById('notif-title').value;
+    if(!t){showToast('Preencha o título','danger');return;}
+    showToast('Notificação enviada: '+t,'success');
+    document.getElementById('notif-title').value='';
+    document.getElementById('notif-body').value='';
+}
+</script>
+</body>
+</html>

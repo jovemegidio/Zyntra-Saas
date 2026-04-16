@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0d1117">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Zyntra">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Zyntra">
+    <meta name="msapplication-TileColor" content="#0d1117">
+    <meta name="format-detection" content="telephone=no">
+
+    <title>Zyntra: Igreja</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/jpeg" href="/igreja/images/favicon-zyntra.jpg">
+
+    <!-- Fonte Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- CSS Principal do Login -->
+    <link rel="stylesheet" href="/igreja/css/login.css">
+</head>
+
+<body>
+    <div class="login-page">
+        <!-- ===== BACKGROUND LAYERS ===== -->
+        <div class="bg-layer">
+            <div class="bg-image"></div>
+            <div class="bg-dark-overlay"></div>
+            <div class="bg-gradient-overlay theme-0" id="bg-gradient"></div>
+            <div class="bg-orb bg-orb-1" id="bg-orb-1"></div>
+            <div class="bg-orb bg-orb-2" id="bg-orb-2"></div>
+            <div class="particles-container" id="particles"></div>
+            <div class="theme-dots" id="theme-dots">
+                <button class="theme-dot active" data-theme="0" aria-label="Tema 1"></button>
+                <button class="theme-dot" data-theme="1" aria-label="Tema 2"></button>
+                <button class="theme-dot" data-theme="2" aria-label="Tema 3"></button>
+                <button class="theme-dot" data-theme="3" aria-label="Tema 4"></button>
+            </div>
+        </div>
+
+        <!-- ===== MAIN CONTENT ===== -->
+        <div class="login-content" id="login-content">
+            <div class="glass-card">
+                <!-- Header with Avatar -->
+                <div class="login-header">
+                    <div class="logo-crossfade" id="logo-crossfade">
+                        <img src="/igreja/images/zyntra-branco.png" alt="Zyntra" class="login-logo logo-zyntra active" onerror="this.style.display='none'">
+                    </div>
+
+                    <div class="avatar-container" id="avatar-container">
+                        <div class="avatar-box" id="avatar-box">
+                            <div class="avatar-icon" id="avatar-icon">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="avatar-ring"></div>
+                    </div>
+
+                    <h1 class="login-greeting" id="login-greeting">Bem-vindo de volta</h1>
+                    <p class="login-subtitle" id="login-subtitle">Entre na sua conta para continuar</p>
+                </div>
+
+                <!-- Login Form -->
+                <form id="login-form" class="login-form-content" autocomplete="on">
+
+                    <!-- Email Field -->
+                    <div id="email-group">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <div class="input-wrapper">
+                            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="2" y="4" width="20" height="16" rx="2" />
+                                <path d="M22 7l-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                            </svg>
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                class="form-input"
+                                placeholder="seu@email.com"
+                                autocomplete="email"
+                                required
+                            >
+                        </div>
+                        <div class="field-error" id="email-error" style="display:none;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                            </svg>
+                            <span></span>
+                        </div>
+                    </div>
+                    </div>
+
+                    <!-- Password Field -->
+                    <div class="form-group">
+                        <div class="label-row">
+                            <label for="password">Senha</label>
+                        </div>
+                        <div class="input-wrapper">
+                            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                            </svg>
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                class="form-input password-input"
+                                placeholder="••••••••"
+                                autocomplete="current-password"
+                                required
+                            >
+                            <button type="button" class="password-toggle-btn" id="password-toggle" tabindex="-1" title="Mostrar/Ocultar senha">
+                                <svg id="eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                                </svg>
+                                <svg id="eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;">
+                                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                                    <line x1="1" y1="1" x2="23" y2="23"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="field-error" id="password-error" style="display:none;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                            </svg>
+                            <span></span>
+                        </div>
+                    </div>
+
+                    <!-- Remember Me -->
+                    <div class="remember-row">
+                        <div class="custom-checkbox">
+                            <input type="checkbox" id="remember-me" name="remember">
+                            <div class="checkbox-visual">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                    <polyline points="20 6 9 17 4 12"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <label for="remember-me" class="remember-label">Lembrar de mim por 30 dias</label>
+                    </div>
+
+                    <!-- Error/Success Message -->
+                    <div id="error-message" class="login-message" role="alert"></div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" id="login-submit-btn" class="login-submit-btn">
+                        <span class="btn-content">
+                            <span class="btn-text-default">
+                                Entrar
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+                                </svg>
+                            </span>
+                            <span class="btn-text-loading">
+                                <svg class="spinner-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                                </svg>
+                                Entrando...
+                            </span>
+                            <span class="btn-text-success">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="20 6 9 17 4 12"/>
+                                </svg>
+                                Login realizado!
+                            </span>
+                        </span>
+                    </button>
+                </form>
+
+                <!-- Demo Credentials Info -->
+                <div style="margin-top:20px;padding-top:16px;border-top:1px solid hsla(210,40%,98%,0.08);">
+                    <p style="font-size:11px;color:hsla(215,20%,65%,0.8);text-align:center;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px;font-weight:600">Credenciais de demonstra&ccedil;&atilde;o</p>
+                    <div id="demo-credentials" style="display:grid;gap:6px;font-size:12px;"></div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <p class="login-footer">
+                &copy; 2026 Zyntra &mdash; Plataforma ERP Completa | Desenvolvido por Ag&ecirc;ncia do Japa
+            </p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/igreja/js/login-igreja.js"></script>
+</body>
+
+</html>

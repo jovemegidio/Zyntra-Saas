@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Zyntra Igrejas — Voluntários</title>
+    <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/igreja.css">
+</head>
+<body>
+<a href="#main" class="skip-link">Pular para conteúdo</a>
+<div class="app-layout">
+    <aside class="sidebar" id="sidebar"></aside><div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <div class="main-area">
+        <header class="header" id="header"></header>
+        <div class="page-content" id="main">
+            <div class="page-header fade-in"><h1 class="page-title">🤝 Voluntários</h1><p class="page-subtitle">Equipes de serviço e escalas ministeriais</p></div>
+
+            <!-- KPIs -->
+            <div class="stats-grid fade-in fade-in-1">
+                <div class="stat-card"><div class="stat-icon" style="background:linear-gradient(135deg,#7c3aed,#6d28d9)"><i class="fas fa-users"></i></div><div class="stat-info"><span class="stat-label">Total Voluntários</span><span class="stat-value">47</span></div></div>
+                <div class="stat-card"><div class="stat-icon" style="background:linear-gradient(135deg,#10b981,#059669)"><i class="fas fa-layer-group"></i></div><div class="stat-info"><span class="stat-label">Ministérios</span><span class="stat-value">8</span></div></div>
+                <div class="stat-card"><div class="stat-icon" style="background:linear-gradient(135deg,#3b82f6,#2563eb)"><i class="fas fa-calendar-check"></i></div><div class="stat-info"><span class="stat-label">Escalados Domingo</span><span class="stat-value">18</span></div></div>
+                <div class="stat-card"><div class="stat-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706)"><i class="fas fa-star"></i></div><div class="stat-info"><span class="stat-label">Taxa Presença</span><span class="stat-value">92%</span></div></div>
+            </div>
+
+            <!-- Filtro ministério -->
+            <div class="toolbar fade-in fade-in-2" style="display:flex;gap:8px;margin:16px 0;flex-wrap:wrap">
+                <button class="btn btn-sm filter-chip active" onclick="filterVol('all',this)">Todos</button>
+                <button class="btn btn-sm filter-chip" onclick="filterVol('louvor',this)">🎵 Louvor</button>
+                <button class="btn btn-sm filter-chip" onclick="filterVol('recepcao',this)">🤗 Recepção</button>
+                <button class="btn btn-sm filter-chip" onclick="filterVol('midia',this)">📹 Mídia</button>
+                <button class="btn btn-sm filter-chip" onclick="filterVol('infantil',this)">👶 Infantil</button>
+                <button class="btn btn-sm filter-chip" onclick="filterVol('intercessao',this)">🙏 Intercessão</button>
+                <button class="btn btn-sm filter-chip" onclick="filterVol('diaconia',this)">🍞 Diaconia</button>
+                <button class="btn btn-sm filter-chip" onclick="filterVol('ensino',this)">📖 Ensino</button>
+                <button class="btn btn-sm filter-chip" onclick="filterVol('som',this)">🔊 Som/Técnica</button>
+            </div>
+
+            <!-- Escala da semana -->
+            <div class="card fade-in fade-in-3" style="margin-bottom:16px">
+                <div class="card-header"><h3 class="card-title"><i class="fas fa-calendar-alt" style="color:var(--primary-light)"></i> Escala da Semana</h3>
+                    <button class="btn btn-primary btn-sm" onclick="showToast('Escala gerada automaticamente!','success')"><i class="fas fa-magic"></i> Gerar Escala</button>
+                </div>
+                <div class="card-body"><div class="table-container"><table><thead><tr><th>Dia</th><th>Ministério</th><th>Voluntários</th><th>Status</th></tr></thead><tbody id="schedule-table"></tbody></table></div></div>
+            </div>
+
+            <!-- Cards voluntários -->
+            <div id="vol-grid" class="fade-in fade-in-4" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px"></div>
+        </div>
+    </div>
+</div>
+<div id="a11y"></div>
+<script src="js/igreja.js"></script>
+<script>
+document.getElementById('sidebar').innerHTML = SIDEBAR_HTML;
+document.getElementById('header').innerHTML = getHeaderHTML('Voluntários');
+document.getElementById('a11y').innerHTML = A11Y_HTML;
+
+var volunteers = [
+    {name:'Carlos Mendes',ministry:'louvor',role:'Guitarrista',photo:'🎸',status:'ativo',joined:'2022-03-15'},
+    {name:'Juliana Reis',ministry:'louvor',role:'Vocal',photo:'🎤',status:'ativo',joined:'2021-08-20'},
+    {name:'Fernando Alves',ministry:'som',role:'Operador de Som',photo:'🔊',status:'ativo',joined:'2023-01-10'},
+    {name:'Patrícia Lima',ministry:'recepcao',role:'Recepcionista',photo:'🤗',status:'ativo',joined:'2022-06-05'},
+    {name:'Lucas Martins',ministry:'midia',role:'Câmera',photo:'📹',status:'ativo',joined:'2023-04-22'},
+    {name:'Camila Santos',ministry:'infantil',role:'Professora',photo:'👶',status:'ativo',joined:'2021-11-30'},
+    {name:'Ricardo Souza',ministry:'intercessao',role:'Intercessor',photo:'🙏',status:'ativo',joined:'2020-07-15'},
+    {name:'Amanda Costa',ministry:'diaconia',role:'Diaconisa',photo:'🍞',status:'ativo',joined:'2022-09-01'},
+    {name:'Marcos Oliveira',ministry:'ensino',role:'Professor EBD',photo:'📖',status:'ativo',joined:'2021-03-12'},
+    {name:'Bruna Ferreira',ministry:'midia',role:'Designer',photo:'🎨',status:'ativo',joined:'2023-07-18'},
+    {name:'Thiago Nascimento',ministry:'som',role:'Iluminação',photo:'💡',status:'ferias',joined:'2022-12-03'},
+    {name:'Débora Rocha',ministry:'louvor',role:'Tecladista',photo:'🎹',status:'ativo',joined:'2023-02-28'}
+];
+
+var schedule = [
+    {day:'Domingo (Manhã)',ministry:'louvor',vols:'Carlos, Juliana, Débora',status:'confirmado'},
+    {day:'Domingo (Manhã)',ministry:'som',vols:'Fernando',status:'confirmado'},
+    {day:'Domingo (Manhã)',ministry:'recepcao',vols:'Patrícia + 2',status:'confirmado'},
+    {day:'Domingo (Manhã)',ministry:'midia',vols:'Lucas, Bruna',status:'confirmado'},
+    {day:'Domingo (Manhã)',ministry:'infantil',vols:'Camila + 1',status:'pendente'},
+    {day:'Quarta (Culto)',ministry:'louvor',vols:'Juliana, Débora',status:'confirmado'},
+    {day:'Quarta (Culto)',ministry:'intercessao',vols:'Ricardo + 3',status:'confirmado'},
+    {day:'Sábado (Jovens)',ministry:'louvor',vols:'Carlos + banda',status:'pendente'}
+];
+
+(function renderSchedule(){
+    var tb=document.getElementById('schedule-table');
+    schedule.forEach(function(s){
+        tb.innerHTML+='<tr><td style="font-weight:600">'+s.day+'</td><td><span class="badge badge-purple">'+s.ministry+'</span></td><td>'+s.vols+'</td><td><span class="badge '+(s.status==='confirmado'?'badge-success':'badge-warning')+'">'+s.status.charAt(0).toUpperCase()+s.status.slice(1)+'</span></td></tr>';
+    });
+})();
+
+function filterVol(min,btn){
+    document.querySelectorAll('.filter-chip').forEach(function(b){b.classList.remove('active')});
+    if(btn)btn.classList.add('active');
+    var list=min==='all'?volunteers:volunteers.filter(function(v){return v.ministry===min});
+    renderVol(list);
+}
+
+function renderVol(list){
+    var g=document.getElementById('vol-grid');g.innerHTML='';
+    list.forEach(function(v){
+        var statusBadge=v.status==='ativo'?'badge-success':'badge-warning';
+        g.innerHTML+='\
+        <div class="card">\
+            <div class="card-body" style="text-align:center">\
+                <div style="font-size:3rem;margin-bottom:8px">'+v.photo+'</div>\
+                <h3 style="font-size:1rem;font-weight:700;margin-bottom:4px">'+v.name+'</h3>\
+                <p style="font-size:.82rem;color:var(--text-secondary);margin-bottom:8px">'+v.role+'</p>\
+                <div style="display:flex;justify-content:center;gap:8px;margin-bottom:8px">\
+                    <span class="badge badge-purple">'+v.ministry+'</span>\
+                    <span class="badge '+statusBadge+'">'+v.status.charAt(0).toUpperCase()+v.status.slice(1)+'</span>\
+                </div>\
+                <p style="font-size:.72rem;color:var(--text-muted)">Desde '+formatDate(v.joined)+'</p>\
+            </div>\
+        </div>';
+    });
+}
+filterVol('all',document.querySelector('.filter-chip'));
+</script>
+</body>
+</html>

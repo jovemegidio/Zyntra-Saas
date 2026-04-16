@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Zyntra Igrejas — Cursos & EBD</title>
+    <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/igreja.css">
+</head>
+<body>
+<a href="#main" class="skip-link">Pular para conteúdo</a>
+<div class="app-layout">
+    <aside class="sidebar" id="sidebar"></aside><div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <div class="main-area">
+        <header class="header" id="header"></header>
+        <div class="page-content" id="main">
+            <div class="page-header fade-in"><h1 class="page-title">📚 Cursos & EBD</h1><p class="page-subtitle">Escola Bíblica Dominical e cursos de formação</p></div>
+
+            <!-- Filtros -->
+            <div class="toolbar fade-in fade-in-1" style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+                <button class="btn btn-sm filter-chip active" data-cat="all" onclick="filterCourses('all',this)">Todos</button>
+                <button class="btn btn-sm filter-chip" data-cat="ebd" onclick="filterCourses('ebd',this)">EBD</button>
+                <button class="btn btn-sm filter-chip" data-cat="teologia" onclick="filterCourses('teologia',this)">Teologia</button>
+                <button class="btn btn-sm filter-chip" data-cat="lideranca" onclick="filterCourses('lideranca',this)">Liderança</button>
+                <button class="btn btn-sm filter-chip" data-cat="discipulado" onclick="filterCourses('discipulado',this)">Discipulado</button>
+                <button class="btn btn-sm filter-chip" data-cat="musica" onclick="filterCourses('musica',this)">Música</button>
+            </div>
+
+            <!-- Grid de cursos -->
+            <div id="courses-grid" class="fade-in fade-in-2" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px"></div>
+        </div>
+    </div>
+</div>
+<div id="a11y"></div>
+<script src="js/igreja.js"></script>
+<script>
+document.getElementById('sidebar').innerHTML = SIDEBAR_HTML;
+document.getElementById('header').innerHTML = getHeaderHTML('Cursos & EBD');
+document.getElementById('a11y').innerHTML = A11Y_HTML;
+
+var courses = MOCK.courses;
+
+function filterCourses(cat,btn){
+    document.querySelectorAll('.filter-chip').forEach(function(b){b.classList.remove('active')});
+    if(btn)btn.classList.add('active');
+    var list=cat==='all'?courses:courses.filter(function(c){return c.category===cat});
+    renderCourses(list);
+}
+
+function renderCourses(list){
+    var g=document.getElementById('courses-grid');g.innerHTML='';
+    if(!list.length){g.innerHTML='<p style="color:var(--text-muted);text-align:center;grid-column:1/-1;padding:40px">Nenhum curso encontrado</p>';return;}
+    list.forEach(function(c){
+        var levelBadge=c.level==='basico'?'badge-success':c.level==='intermediario'?'badge-warning':'badge-danger';
+        var catIcon=c.category==='ebd'?'fa-church':c.category==='teologia'?'fa-scroll':c.category==='lideranca'?'fa-user-tie':c.category==='discipulado'?'fa-route':'fa-music';
+        var progress=c.progress||0;
+        g.innerHTML+='\
+        <div class="card course-card">\
+            <div class="card-body">\
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">\
+                    <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));display:flex;align-items:center;justify-content:center"><i class="fas '+catIcon+'" style="color:#fff;font-size:1.2rem"></i></div>\
+                    <span class="badge '+levelBadge+'">'+c.level.charAt(0).toUpperCase()+c.level.slice(1)+'</span>\
+                </div>\
+                <h3 style="font-size:1.05rem;font-weight:700;margin-bottom:4px">'+c.title+'</h3>\
+                <p style="font-size:.82rem;color:var(--text-secondary);margin-bottom:12px">'+c.description+'</p>\
+                <div style="display:flex;gap:16px;margin-bottom:12px;font-size:.78rem;color:var(--text-muted)">\
+                    <span><i class="fas fa-book-open"></i> '+c.lessons+' aulas</span>\
+                    <span><i class="fas fa-clock"></i> '+c.duration+'</span>\
+                    <span><i class="fas fa-users"></i> '+c.enrolled+' alunos</span>\
+                </div>\
+                <div style="margin-bottom:12px">\
+                    <div style="display:flex;justify-content:space-between;font-size:.75rem;margin-bottom:4px"><span>Progresso</span><span style="font-weight:600">'+progress+'%</span></div>\
+                    <div style="height:6px;background:var(--bg-tertiary);border-radius:3px;overflow:hidden"><div style="height:100%;width:'+progress+'%;background:linear-gradient(90deg,var(--primary),var(--primary-light));border-radius:3px;transition:width .5s"></div></div>\
+                </div>\
+                <button class="btn btn-primary btn-sm" style="width:100%">'+(progress>0?'<i class="fas fa-play"></i> Continuar':'<i class="fas fa-plus"></i> Inscrever-se')+'</button>\
+            </div>\
+        </div>';
+    });
+}
+filterCourses('all',document.querySelector('[data-cat="all"]'));
+</script>
+</body>
+</html>

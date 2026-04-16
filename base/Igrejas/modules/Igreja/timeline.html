@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Zyntra Igrejas — Timeline</title>
+    <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/igreja.css">
+</head>
+<body>
+<a href="#main" class="skip-link">Pular para conteúdo</a>
+<div class="app-layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <div class="main-area">
+        <header class="header" id="header"></header>
+        <div class="page-content" id="main">
+            <div class="page-header fade-in">
+                <h1 class="page-title">📰 Timeline / Mural</h1>
+                <p class="page-subtitle">Feed social da comunidade — publicações, curtidas e interações</p>
+            </div>
+
+            <!-- Criar publicação -->
+            <div class="card fade-in fade-in-1" style="margin-bottom:20px">
+                <div class="card-body" style="display:flex;gap:12px;align-items:flex-start">
+                    <div class="user-avatar" id="post-avatar">P</div>
+                    <div style="flex:1">
+                        <textarea class="form-control" rows="2" id="post-text" placeholder="Compartilhe algo com a comunidade..." style="margin-bottom:10px"></textarea>
+                        <div style="display:flex;align-items:center;justify-content:space-between">
+                            <div style="display:flex;gap:12px">
+                                <button class="btn btn-sm btn-outline"><i class="fas fa-image"></i> Foto</button>
+                                <button class="btn btn-sm btn-outline"><i class="fas fa-video"></i> Vídeo</button>
+                            </div>
+                            <button class="btn btn-sm btn-primary" onclick="createPost()"><i class="fas fa-paper-plane"></i> Publicar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="timeline-feed" class="fade-in fade-in-2"></div>
+        </div>
+    </div>
+</div>
+<div id="a11y"></div>
+<script src="js/igreja.js"></script>
+<script>
+document.getElementById('sidebar').innerHTML = SIDEBAR_HTML;
+document.getElementById('header').innerHTML = getHeaderHTML('Timeline');
+document.getElementById('a11y').innerHTML = A11Y_HTML;
+
+var posts = [
+    {id:1,author:'Pr. Roberto Silva',type:'devotional',text:'🌅 "O Senhor é o meu pastor, nada me faltará." — Salmo 23:1\n\nQue neste dia possamos descansar na certeza de que Deus cuida de nós!',likes:45,comments:8,time:'há 1h'},
+    {id:2,author:'Maria Silva',type:'testimony',text:'🙌 Glória a Deus! Quero compartilhar que recebi a notícia da cura da minha mãe! Obrigada a todos que oraram. Deus é fiel!',likes:128,comments:32,time:'há 3h'},
+    {id:3,author:'Ministério de Louvor',type:'announcement',text:'🎵 Ensaio especial neste sábado às 15h! Estamos preparando um repertório especial para a conferência de maio. Todos os músicos estão convocados!',likes:23,comments:5,time:'há 5h'},
+    {id:4,author:'Pedro Costa',type:'photo',text:'📸 Registro do retiro de jovens do último final de semana. Foi um tempo maravilhoso na presença de Deus! #RetiroJovens2026',likes:89,comments:15,time:'há 8h'},
+    {id:5,author:'Igreja Vida Nova',type:'announcement',text:'📢 ATENÇÃO: Inscrições abertas para a Conferência de Mulheres! Vagas limitadas. Link na bio. Não fique de fora! 🌸',likes:67,comments:12,time:'há 12h'},
+    {id:6,author:'João Santos',type:'text',text:'Que pregação incrível ontem! O Pr. Roberto falou sobre a importância de servir ao próximo. Deus tocou meu coração profundamente. 🔥',likes:34,comments:6,time:'há 1d'}
+];
+
+function renderTimeline(){
+    var typeIcons = {devotional:'📖',testimony:'🙌',announcement:'📢',photo:'📸',text:'💬'};
+    var html = '';
+    posts.forEach(function(p){
+        html += '<div class="card" style="margin-bottom:16px"><div class="card-body"><div style="display:flex;align-items:center;gap:12px;margin-bottom:14px"><div class="timeline-avatar">'+p.author.charAt(0)+'</div><div><div style="font-weight:600;font-size:.85rem">'+p.author+' <span style="color:var(--text-muted);font-weight:400">'+typeIcons[p.type]+'</span></div><div style="font-size:.7rem;color:var(--text-muted)">'+p.time+'</div></div></div><p style="font-size:.88rem;line-height:1.8;white-space:pre-line;margin-bottom:16px">'+p.text+'</p>'+(p.type==='photo'?'<div style="height:200px;background:linear-gradient(135deg,#312e81,#1e1b4b);border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);margin-bottom:16px"><i class="fas fa-image" style="font-size:2rem"></i></div>':'')+'<div style="display:flex;gap:20px;padding-top:12px;border-top:1px solid var(--border)"><button class="btn btn-sm" style="color:var(--text-secondary)" onclick="likePost('+p.id+')"><i class="fas fa-heart" style="color:var(--danger);margin-right:4px"></i>'+p.likes+'</button><button class="btn btn-sm" style="color:var(--text-secondary)"><i class="fas fa-comment" style="margin-right:4px"></i>'+p.comments+'</button><button class="btn btn-sm" style="color:var(--text-secondary)"><i class="fas fa-share" style="margin-right:4px"></i>Compartilhar</button></div></div></div>';
+    });
+    document.getElementById('timeline-feed').innerHTML = html;
+}
+
+function likePost(id){
+    var p=posts.find(function(x){return x.id===id});
+    if(p){p.likes++;renderTimeline();}
+}
+
+function createPost(){
+    var text = document.getElementById('post-text').value.trim();
+    if(!text){showToast('Escreva algo para publicar','warning');return;}
+    var auth = JSON.parse(sessionStorage.getItem('zyntra_igreja_auth')||'{}');
+    posts.unshift({id:Date.now(),author:auth.name||'Membro',type:'text',text:text,likes:0,comments:0,time:'agora'});
+    document.getElementById('post-text').value='';
+    renderTimeline();
+    showToast('Publicação criada!','success');
+}
+
+renderTimeline();
+</script>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Zyntra Igrejas — Pedidos de Oração</title>
+    <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/igreja.css">
+</head>
+<body>
+<a href="#main" class="skip-link">Pular para conteúdo</a>
+<div class="app-layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <div class="main-area">
+        <header class="header" id="header"></header>
+        <div class="page-content" id="main">
+            <div class="page-header fade-in">
+                <h1 class="page-title">🙏 Pedidos de Oração</h1>
+                <p class="page-subtitle">Mural interativo — ore e interceda pelos irmãos</p>
+            </div>
+            <div class="toolbar fade-in fade-in-1">
+                <div class="filter-chip active" onclick="filterPrayers('all',this)">Todos</div>
+                <div class="filter-chip" onclick="filterPrayers('orando',this)">🙏 Orando</div>
+                <div class="filter-chip" onclick="filterPrayers('respondido',this)">✅ Respondidos</div>
+                <button class="btn btn-primary" style="margin-left:auto" onclick="openModal('modal-prayer')"><i class="fas fa-plus"></i> Novo Pedido</button>
+            </div>
+            <div id="prayers-list" class="fade-in fade-in-2"></div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modal-prayer">
+    <div class="modal">
+        <div class="modal-header"><h2>Novo Pedido de Oração</h2><button class="modal-close" onclick="closeModal('modal-prayer')"><i class="fas fa-times"></i></button></div>
+        <div class="modal-body">
+            <div class="form-group"><label>Seu Pedido</label><textarea class="form-control" rows="4" placeholder="Compartilhe seu pedido de oração..." id="prayer-text"></textarea></div>
+            <div class="form-group"><label><input type="checkbox" id="prayer-anon"> Publicar anonimamente</label></div>
+        </div>
+        <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('modal-prayer')">Cancelar</button><button class="btn btn-primary" onclick="submitPrayer()"><i class="fas fa-hands-praying"></i> Enviar Pedido</button></div>
+    </div>
+</div>
+
+<div id="a11y"></div>
+<script src="js/igreja.js"></script>
+<script>
+document.getElementById('sidebar').innerHTML = SIDEBAR_HTML;
+document.getElementById('header').innerHTML = getHeaderHTML('Oração');
+document.getElementById('a11y').innerHTML = A11Y_HTML;
+
+var currentFilter = 'all';
+function filterPrayers(f,el){
+    currentFilter=f;
+    document.querySelectorAll('.filter-chip').forEach(function(c){c.classList.remove('active')});
+    if(el) el.classList.add('active');
+    renderPrayers();
+}
+
+function renderPrayers(){
+    var list = MOCK.prayers;
+    if(currentFilter!=='all') list = list.filter(function(p){return p.status===currentFilter});
+    var html = '';
+    list.forEach(function(p){
+        var statusCls = p.status==='respondido'?'badge-success':'badge-warning';
+        var statusTxt = p.status==='respondido'?'✅ Respondido':'🙏 Orando';
+        html += '<div class="prayer-card"><div class="prayer-header"><div class="timeline-avatar">'+p.author.charAt(0)+'</div><div><div style="font-weight:600;font-size:.85rem">'+p.author+'</div><div style="font-size:.7rem;color:var(--text-muted)">'+formatDate(p.date)+'</div></div><span class="badge '+statusCls+'" style="margin-left:auto">'+statusTxt+'</span></div><div class="prayer-text">'+p.text+'</div><div class="prayer-footer"><span style="font-size:.72rem;color:var(--text-muted)"><i class="fas fa-heart" style="color:var(--danger);margin-right:4px"></i>'+p.intercessors+' intercessores</span><button class="btn btn-sm btn-outline" onclick="intercede('+p.id+')"><i class="fas fa-hands-praying"></i> Estou orando</button></div></div>';
+    });
+    document.getElementById('prayers-list').innerHTML = html;
+}
+
+function intercede(id){
+    var p = MOCK.prayers.find(function(x){return x.id===id});
+    if(p){p.intercessors++;renderPrayers();showToast('Obrigado por orar! 🙏','success');}
+}
+
+function submitPrayer(){
+    var text = document.getElementById('prayer-text').value.trim();
+    if(!text){showToast('Escreva seu pedido de oração','warning');return;}
+    var auth = JSON.parse(sessionStorage.getItem('zyntra_igreja_auth')||'{}');
+    var anon = document.getElementById('prayer-anon').checked;
+    MOCK.prayers.unshift({id:Date.now(),author:anon?'Anônimo':auth.name||'Membro',text:text,status:'orando',intercessors:0,date:new Date().toISOString().split('T')[0]});
+    closeModal('modal-prayer');
+    document.getElementById('prayer-text').value='';
+    renderPrayers();
+    showToast('Pedido de oração enviado!','success');
+}
+
+renderPrayers();
+</script>
+</body>
+</html>

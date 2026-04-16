@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Zyntra Igrejas — Páginas Personalizadas</title>
+    <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/igreja.css">
+</head>
+<body>
+<a href="#main" class="skip-link">Pular para conteúdo</a>
+<div class="app-layout">
+    <aside class="sidebar" id="sidebar"></aside><div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <div class="main-area">
+        <header class="header" id="header"></header>
+        <div class="page-content" id="main">
+            <div class="page-header fade-in"><h1 class="page-title">📄 Páginas Personalizadas</h1><p class="page-subtitle">CMS — crie páginas customizadas para a congregação</p></div>
+
+            <!-- Nova página -->
+            <div class="card fade-in fade-in-1" style="margin-bottom:16px">
+                <div class="card-header"><h3 class="card-title"><i class="fas fa-plus-circle" style="color:var(--primary-light)"></i> Nova Página</h3></div>
+                <div class="card-body">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                        <div class="form-group"><label>Título</label><input class="form-control" id="pg-title" placeholder="Ex: Nossa História"></div>
+                        <div class="form-group"><label>Slug (URL)</label><input class="form-control" id="pg-slug" placeholder="Ex: nossa-historia"></div>
+                    </div>
+                    <div class="form-group"><label>Conteúdo</label><textarea class="form-control" id="pg-content" rows="8" placeholder="Escreva o conteúdo da página... (suporta HTML básico)" style="font-family:monospace;font-size:.85rem"></textarea></div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+                        <div class="form-group"><label>Status</label><select class="form-control" id="pg-status"><option value="rascunho">Rascunho</option><option value="publicado">Publicado</option></select></div>
+                        <div class="form-group"><label>Visibilidade</label><select class="form-control" id="pg-vis"><option value="publico">Público</option><option value="membros">Somente Membros</option><option value="lideres">Somente Líderes</option></select></div>
+                        <div class="form-group"><label>Menu</label><select class="form-control" id="pg-menu"><option value="nao">Não exibir no menu</option><option value="principal">Menu Principal</option><option value="rodape">Rodapé</option></select></div>
+                    </div>
+                    <div style="text-align:right"><button class="btn btn-primary" onclick="savePage()"><i class="fas fa-save"></i> Salvar Página</button></div>
+                </div>
+            </div>
+
+            <!-- Páginas existentes -->
+            <div class="card fade-in fade-in-2">
+                <div class="card-header"><h3 class="card-title"><i class="fas fa-file-alt"></i> Páginas Cadastradas</h3></div>
+                <div class="card-body"><div class="table-container"><table><thead><tr><th>Título</th><th>Slug</th><th>Status</th><th>Visibilidade</th><th>Atualizado</th><th>Ações</th></tr></thead><tbody id="pages-table"></tbody></table></div></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="a11y"></div>
+<script src="js/igreja.js"></script>
+<script>
+document.getElementById('sidebar').innerHTML = SIDEBAR_HTML;
+document.getElementById('header').innerHTML = getHeaderHTML('Páginas');
+document.getElementById('a11y').innerHTML = A11Y_HTML;
+
+var pages = [
+    {title:'Nossa História',slug:'nossa-historia',status:'publicado',vis:'publico',updated:'2024-01-20'},
+    {title:'Equipe Pastoral',slug:'equipe-pastoral',status:'publicado',vis:'publico',updated:'2024-01-15'},
+    {title:'Missão e Visão',slug:'missao-visao',status:'publicado',vis:'publico',updated:'2023-12-10'},
+    {title:'Horários de Culto',slug:'horarios',status:'publicado',vis:'publico',updated:'2024-01-28'},
+    {title:'Como Chegar',slug:'como-chegar',status:'publicado',vis:'publico',updated:'2023-11-05'},
+    {title:'Política de Privacidade',slug:'privacidade',status:'publicado',vis:'publico',updated:'2023-10-01'},
+    {title:'Manual do Líder (restrito)',slug:'manual-lider',status:'publicado',vis:'lideres',updated:'2024-01-12'},
+    {title:'Página Teste',slug:'teste',status:'rascunho',vis:'membros',updated:'2024-01-25'}
+];
+
+(function renderPages(){
+    var tb=document.getElementById('pages-table');
+    pages.forEach(function(p){
+        var statusBadge=p.status==='publicado'?'badge-success':'badge-warning';
+        var visBadge=p.vis==='publico'?'badge-info':p.vis==='membros'?'badge-purple':'badge-danger';
+        tb.innerHTML+='<tr><td style="font-weight:600">'+p.title+'</td><td style="font-family:monospace;font-size:.82rem;color:var(--primary-light)">/'+p.slug+'</td><td><span class="badge '+statusBadge+'">'+p.status.charAt(0).toUpperCase()+p.status.slice(1)+'</span></td><td><span class="badge '+visBadge+'">'+p.vis.charAt(0).toUpperCase()+p.vis.slice(1)+'</span></td><td style="font-size:.82rem">'+formatDate(p.updated)+'</td><td><button class="btn btn-sm btn-outline" onclick="editPage(\''+p.slug+'\')"><i class="fas fa-edit"></i></button> <button class="btn btn-sm btn-outline" onclick="previewPage(\''+p.slug+'\')"><i class="fas fa-eye"></i></button> <button class="btn btn-sm btn-outline" style="color:var(--danger)" onclick="showToast(\'Página removida\',\'danger\')"><i class="fas fa-trash"></i></button></td></tr>';
+    });
+})();
+
+function savePage(){
+    var t=document.getElementById('pg-title').value;
+    if(!t){showToast('Preencha o título','danger');return;}
+    showToast('Página salva: '+t,'success');
+    document.getElementById('pg-title').value='';document.getElementById('pg-slug').value='';document.getElementById('pg-content').value='';
+}
+function editPage(slug){showToast('Editando: /'+slug,'info');}
+function previewPage(slug){showToast('Preview: /'+slug,'info');}
+</script>
+</body>
+</html>

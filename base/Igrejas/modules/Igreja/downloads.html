@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Zyntra Igrejas — Downloads</title>
+    <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/igreja.css">
+</head>
+<body>
+<a href="#main" class="skip-link">Pular para conteúdo</a>
+<div class="app-layout">
+    <aside class="sidebar" id="sidebar"></aside><div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <div class="main-area">
+        <header class="header" id="header"></header>
+        <div class="page-content" id="main">
+            <div class="page-header fade-in"><h1 class="page-title">📥 Downloads & E-books</h1><p class="page-subtitle">Materiais em PDF, EPUB e apostilas para estudo</p></div>
+
+            <!-- Filtros -->
+            <div class="toolbar fade-in fade-in-1" style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+                <button class="btn btn-sm filter-chip active" data-f="all" onclick="filterDl('all',this)">Todos</button>
+                <button class="btn btn-sm filter-chip" data-f="ebook" onclick="filterDl('ebook',this)">E-books</button>
+                <button class="btn btn-sm filter-chip" data-f="apostila" onclick="filterDl('apostila',this)">Apostilas</button>
+                <button class="btn btn-sm filter-chip" data-f="devocional" onclick="filterDl('devocional',this)">Devocionais</button>
+                <button class="btn btn-sm filter-chip" data-f="liturgia" onclick="filterDl('liturgia',this)">Liturgia</button>
+            </div>
+
+            <div id="dl-grid" class="fade-in fade-in-2" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px"></div>
+        </div>
+    </div>
+</div>
+<div id="a11y"></div>
+<script src="js/igreja.js"></script>
+<script>
+document.getElementById('sidebar').innerHTML = SIDEBAR_HTML;
+document.getElementById('header').innerHTML = getHeaderHTML('Downloads');
+document.getElementById('a11y').innerHTML = A11Y_HTML;
+
+var downloads = [
+    {title:'Bíblia de Estudo NVI',type:'ebook',format:'PDF',size:'12.4 MB',downloads:584,cover:'📖',color:'#7c3aed',desc:'Bíblia completa com notas de estudo, mapas e concordância.'},
+    {title:'Apostila de Discipulado',type:'apostila',format:'PDF',size:'3.2 MB',downloads:312,cover:'📝',color:'#3b82f6',desc:'12 lições fundamentais para novos convertidos.'},
+    {title:'Devocional 365 Dias',type:'devocional',format:'EPUB',size:'5.8 MB',downloads:445,cover:'🙏',color:'#10b981',desc:'Um ano de devocionais diários com reflexões profundas.'},
+    {title:'Hinário Completo',type:'liturgia',format:'PDF',size:'8.1 MB',downloads:267,cover:'🎵',color:'#f59e0b',desc:'500+ hinos tradicionais e contemporâneos com cifras.'},
+    {title:'Manual do Líder de Célula',type:'apostila',format:'PDF',size:'2.7 MB',downloads:198,cover:'👥',color:'#ec4899',desc:'Guia prático para liderança de pequenos grupos.'},
+    {title:'Teologia Sistemática Básica',type:'ebook',format:'EPUB',size:'15.3 MB',downloads:156,cover:'📚',color:'#6366f1',desc:'Introdução às doutrinas fundamentais da fé cristã.'},
+    {title:'Devocionais para Família',type:'devocional',format:'PDF',size:'4.5 MB',downloads:289,cover:'🏠',color:'#14b8a6',desc:'30 devocionais para fazer em família com crianças.'},
+    {title:'Ordem de Culto Modelo',type:'liturgia',format:'PDF',size:'1.1 MB',downloads:423,cover:'⛪',color:'#8b5cf6',desc:'Modelos de liturgia para diferentes tipos de culto.'},
+    {title:'Guia de Oração Intercessória',type:'ebook',format:'PDF',size:'2.9 MB',downloads:178,cover:'✝️',color:'#ef4444',desc:'Princípios e roteiros para oração intercessória eficaz.'},
+    {title:'Apostila Escola Bíblica',type:'apostila',format:'PDF',size:'6.3 MB',downloads:534,cover:'🎓',color:'#0ea5e9',desc:'Material trimestral para EBD — Antigo Testamento Vol. 1.'}
+];
+
+function filterDl(cat,btn){
+    document.querySelectorAll('.filter-chip').forEach(function(b){b.classList.remove('active')});
+    if(btn)btn.classList.add('active');
+    var list=cat==='all'?downloads:downloads.filter(function(d){return d.type===cat});
+    renderDl(list);
+}
+
+function renderDl(list){
+    var g=document.getElementById('dl-grid');g.innerHTML='';
+    list.forEach(function(d){
+        g.innerHTML+='\
+        <div class="card" style="overflow:hidden">\
+            <div style="height:100px;background:linear-gradient(135deg,'+d.color+','+d.color+'88);display:flex;align-items:center;justify-content:center;font-size:3rem">'+d.cover+'</div>\
+            <div class="card-body">\
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">\
+                    <h3 style="font-size:.95rem;font-weight:700">'+d.title+'</h3>\
+                    <span class="badge badge-info" style="font-size:.65rem;flex-shrink:0">'+d.format+'</span>\
+                </div>\
+                <p style="font-size:.78rem;color:var(--text-secondary);margin-bottom:12px;line-height:1.4">'+d.desc+'</p>\
+                <div style="display:flex;justify-content:space-between;align-items:center;font-size:.75rem;color:var(--text-muted);margin-bottom:12px">\
+                    <span><i class="fas fa-hdd"></i> '+d.size+'</span>\
+                    <span><i class="fas fa-download"></i> '+d.downloads+' downloads</span>\
+                </div>\
+                <button class="btn btn-primary btn-sm" style="width:100%" onclick="doDownload(\''+d.title+'\')"><i class="fas fa-download"></i> Baixar '+d.format+'</button>\
+            </div>\
+        </div>';
+    });
+}
+
+function doDownload(title){showToast('Baixando: '+title,'success');}
+filterDl('all',document.querySelector('[data-f="all"]'));
+</script>
+</body>
+</html>

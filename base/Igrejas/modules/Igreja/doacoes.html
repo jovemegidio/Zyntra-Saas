@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Zyntra Igrejas — Doações</title>
+    <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/igreja.css">
+</head>
+<body>
+<a href="#main" class="skip-link">Pular para conteúdo</a>
+<div class="app-layout">
+    <aside class="sidebar" id="sidebar"></aside><div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <div class="main-area">
+        <header class="header" id="header"></header>
+        <div class="page-content" id="main">
+            <div class="page-header fade-in"><h1 class="page-title">💝 Doações</h1><p class="page-subtitle">PIX, cartão e transferência — contribua com a obra de Deus</p></div>
+
+            <!-- Métodos de doação -->
+            <div class="donation-methods fade-in fade-in-1" style="margin-bottom:24px">
+                <div class="donation-method" onclick="showDonationMethod('pix')"><i class="fas fa-qrcode"></i><h3>PIX</h3><p>Instantâneo e sem taxas</p></div>
+                <div class="donation-method" onclick="showDonationMethod('card')"><i class="fas fa-credit-card"></i><h3>Cartão de Crédito</h3><p>Visa, Master, Elo</p></div>
+                <div class="donation-method" onclick="showDonationMethod('transfer')"><i class="fas fa-university"></i><h3>Transferência</h3><p>TED / DOC bancário</p></div>
+            </div>
+
+            <!-- PIX QR Code -->
+            <div class="card fade-in fade-in-2" id="pix-section" style="margin-bottom:16px">
+                <div class="card-header"><h3 class="card-title"><i class="fas fa-qrcode" style="color:var(--primary-light)"></i> Doação via PIX</h3></div>
+                <div class="card-body" style="text-align:center">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:600px;margin:0 auto">
+                        <div>
+                            <div class="form-group"><label>Tipo</label><select class="form-control"><option>Dízimo</option><option>Oferta</option><option>Campanha Missionária</option><option>Construção do Templo</option></select></div>
+                            <div class="form-group"><label>Valor</label><input type="number" class="form-control" placeholder="R$ 0,00" id="pix-value"></div>
+                            <button class="btn btn-primary" onclick="generatePix()"><i class="fas fa-qrcode"></i> Gerar QR Code PIX</button>
+                        </div>
+                        <div>
+                            <div style="width:180px;height:180px;background:#fff;border-radius:16px;margin:0 auto;display:flex;align-items:center;justify-content:center;border:6px solid var(--primary)" id="pix-qr">
+                                <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:2px;padding:12px" id="pix-art"></div>
+                            </div>
+                            <p style="font-size:.78rem;color:var(--text-muted);margin-top:12px">Chave PIX: <strong>igreja@zyntra.church</strong></p>
+                            <button class="btn btn-sm btn-outline" style="margin-top:8px" onclick="copyPix()"><i class="fas fa-copy"></i> Copiar chave</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Histórico -->
+            <div class="card fade-in fade-in-3">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-history"></i> Histórico de Doações</h3>
+                    <div style="display:flex;gap:8px">
+                        <select class="form-control" style="width:auto" id="filter-type" onchange="filterDonations()"><option value="">Todos tipos</option><option value="dizimo">Dízimo</option><option value="oferta">Oferta</option><option value="campanha">Campanha</option><option value="missoes">Missões</option></select>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-container"><table><thead><tr><th>Membro</th><th>Tipo</th><th>Valor</th><th>Data</th><th>Método</th></tr></thead><tbody id="donations-table"></tbody></table></div>
+                </div>
+                <div class="card-footer" style="display:flex;justify-content:space-between">
+                    <span style="font-size:.82rem;color:var(--text-secondary)">Total: <strong id="donations-total" style="color:var(--success)"></strong></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="a11y"></div>
+<script src="js/igreja.js"></script>
+<script>
+document.getElementById('sidebar').innerHTML = SIDEBAR_HTML;
+document.getElementById('header').innerHTML = getHeaderHTML('Doações');
+document.getElementById('a11y').innerHTML = A11Y_HTML;
+
+// PIX art
+var art=document.getElementById('pix-art');for(var i=0;i<36;i++){art.innerHTML+='<div style="width:10px;height:10px;background:'+(Math.random()>.4?'#1e1b4b':'#e2e8f0')+';border-radius:1px"></div>';}
+
+function showDonationMethod(m){showToast('Método '+m.toUpperCase()+' selecionado','info');}
+function generatePix(){showToast('QR Code PIX gerado!','success');}
+function copyPix(){navigator.clipboard.writeText('igreja@zyntra.church').then(function(){showToast('Chave PIX copiada!','success')});}
+
+function filterDonations(){
+    var type=document.getElementById('filter-type').value;
+    var list=type?MOCK.donations.filter(function(d){return d.type===type}):MOCK.donations;
+    renderDonations(list);
+}
+
+function renderDonations(list){
+    var tb=document.getElementById('donations-table');tb.innerHTML='';var total=0;
+    list.forEach(function(d){
+        total+=d.value;
+        var typeBadge=d.type==='dizimo'?'badge-purple':d.type==='oferta'?'badge-info':d.type==='campanha'?'badge-success':'badge-warning';
+        var methodIcon=d.method==='PIX'?'fa-qrcode':d.method==='Cartão'?'fa-credit-card':d.method==='Transferência'?'fa-university':'fa-money-bill';
+        tb.innerHTML+='<tr><td>'+d.member+'</td><td><span class="badge '+typeBadge+'">'+d.type.charAt(0).toUpperCase()+d.type.slice(1)+'</span></td><td style="font-weight:600;color:var(--success)">'+formatCurrency(d.value)+'</td><td>'+formatDate(d.date)+'</td><td><i class="fas '+methodIcon+'" style="margin-right:6px;color:var(--text-muted)"></i>'+d.method+'</td></tr>';
+    });
+    document.getElementById('donations-total').textContent=formatCurrency(total);
+}
+filterDonations();
+</script>
+</body>
+</html>

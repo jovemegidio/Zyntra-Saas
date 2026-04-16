@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Zyntra Igrejas — Eventos</title>
+    <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/igreja.css">
+</head>
+<body>
+<a href="#main" class="skip-link">Pular para conteúdo</a>
+<div class="app-layout">
+    <aside class="sidebar" id="sidebar"></aside><div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <div class="main-area">
+        <header class="header" id="header"></header>
+        <div class="page-content" id="main">
+            <div class="page-header fade-in"><h1 class="page-title">📅 Eventos & Agenda</h1><p class="page-subtitle">Calendário de eventos com inscrições e detalhes</p></div>
+            <div class="tabs fade-in fade-in-1">
+                <div class="tab active" onclick="showView('cards',this)">📋 Cards</div>
+                <div class="tab" onclick="showView('calendar',this)">📅 Calendário</div>
+            </div>
+            <div class="toolbar fade-in fade-in-1">
+                <div class="filter-chip active" onclick="filterEvents('all',this)">Todos</div>
+                <div class="filter-chip" onclick="filterEvents('culto',this)">⛪ Cultos</div>
+                <div class="filter-chip" onclick="filterEvents('jovens',this)">🎤 Jovens</div>
+                <div class="filter-chip" onclick="filterEvents('retiro',this)">🏕 Retiros</div>
+                <div class="filter-chip" onclick="filterEvents('conferencia',this)">🎙 Conferências</div>
+                <button class="btn btn-primary" style="margin-left:auto" data-admin-only onclick="openModal('modal-event')"><i class="fas fa-plus"></i> Novo Evento</button>
+            </div>
+            <div id="events-view" class="fade-in fade-in-2"></div>
+            <div id="calendar-view" style="display:none" class="fade-in fade-in-2"></div>
+        </div>
+    </div>
+</div>
+<div class="modal-overlay" id="modal-event">
+    <div class="modal">
+        <div class="modal-header"><h2>Novo Evento</h2><button class="modal-close" onclick="closeModal('modal-event')"><i class="fas fa-times"></i></button></div>
+        <div class="modal-body">
+            <div class="form-group"><label>Título</label><input type="text" class="form-control" placeholder="Nome do evento"></div>
+            <div class="form-row"><div class="form-group"><label>Data</label><input type="date" class="form-control"></div><div class="form-group"><label>Horário</label><input type="time" class="form-control"></div></div>
+            <div class="form-row"><div class="form-group"><label>Local</label><input type="text" class="form-control" placeholder="Local"></div><div class="form-group"><label>Vagas</label><input type="number" class="form-control" placeholder="Quantidade"></div></div>
+            <div class="form-group"><label>Categoria</label><select class="form-control"><option value="culto">Culto</option><option value="jovens">Jovens</option><option value="retiro">Retiro</option><option value="conferencia">Conferência</option><option value="ebd">EBD</option></select></div>
+        </div>
+        <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('modal-event')">Cancelar</button><button class="btn btn-primary" onclick="closeModal('modal-event');showToast('Evento criado!','success')">Salvar</button></div>
+    </div>
+</div>
+<div id="a11y"></div>
+<script src="js/igreja.js"></script>
+<script>
+document.getElementById('sidebar').innerHTML = SIDEBAR_HTML;
+document.getElementById('header').innerHTML = getHeaderHTML('Eventos');
+document.getElementById('a11y').innerHTML = A11Y_HTML;
+
+var currentView='cards';
+function showView(v,el){
+    currentView=v;
+    document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active')});
+    if(el)el.classList.add('active');
+    document.getElementById('events-view').style.display=v==='cards'?'':'none';
+    document.getElementById('calendar-view').style.display=v==='calendar'?'':'none';
+    if(v==='calendar')renderCalendar();
+}
+
+function filterEvents(f,el){
+    document.querySelectorAll('.filter-chip').forEach(function(c){c.classList.remove('active')});
+    if(el)el.classList.add('active');
+    var list=f==='all'?MOCK.events:MOCK.events.filter(function(e){return e.category===f});
+    renderEvents(list);
+}
+
+function renderEvents(list){
+    var html='<div class="grid-2">';
+    list.forEach(function(ev){
+        var pct=Math.round(ev.enrolled/ev.spots*100);
+        var d=new Date(ev.date);
+        var months=['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
+        html+='<div class="event-card"><div class="event-banner" style="background:linear-gradient(135deg,'+ev.color+'80,'+ev.color+'30)"><i class="fas fa-calendar-alt"></i><div class="event-date"><span class="day">'+d.getDate()+'</span><span class="month">'+months[d.getMonth()]+'</span></div></div><div class="event-body"><h3>'+ev.title+'</h3><p><i class="fas fa-clock" style="margin-right:4px"></i>'+ev.time+' · <i class="fas fa-map-marker-alt" style="margin-right:4px"></i>'+ev.location+'</p><div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;font-size:.72rem;margin-bottom:4px"><span>'+ev.enrolled+'/'+ev.spots+' inscritos</span><span>'+pct+'%</span></div><div class="progress-bar"><div class="progress-fill purple" style="width:'+pct+'%"></div></div></div><button class="btn btn-sm btn-primary" onclick="showToast(\'Inscrição realizada!\',\'success\')"><i class="fas fa-check"></i> Inscrever-se</button></div></div>';
+    });
+    html+='</div>';
+    document.getElementById('events-view').innerHTML=html;
+}
+
+function renderCalendar(){
+    var today=new Date();var y=today.getFullYear();var m=today.getMonth();
+    var months=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    var first=new Date(y,m,1).getDay();var days=new Date(y,m+1,0).getDate();
+    var html='<div class="card"><div class="card-header"><h3 class="card-title"><i class="fas fa-calendar"></i> '+months[m]+' '+y+'</h3></div><div class="card-body"><div class="schedule-grid" style="margin-top:0"><div class="schedule-day"><div class="day-name">Dom</div></div><div class="schedule-day"><div class="day-name">Seg</div></div><div class="schedule-day"><div class="day-name">Ter</div></div><div class="schedule-day"><div class="day-name">Qua</div></div><div class="schedule-day"><div class="day-name">Qui</div></div><div class="schedule-day"><div class="day-name">Sex</div></div><div class="schedule-day"><div class="day-name">Sáb</div></div>';
+    for(var i=0;i<first;i++) html+='<div class="schedule-day" style="opacity:.3"></div>';
+    for(var d=1;d<=days;d++){
+        var dateStr=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+        var evts=MOCK.events.filter(function(e){return e.date===dateStr});
+        var hasEvent=evts.length>0;
+        html+='<div class="schedule-day'+(hasEvent?' has-event':'')+'">'+d+(hasEvent?'<div style="margin-top:4px;font-size:.6rem;color:var(--primary-light)">'+evts[0].title.substring(0,12)+'...</div>':'')+'</div>';
+    }
+    html+='</div></div></div>';
+    document.getElementById('calendar-view').innerHTML=html;
+}
+
+filterEvents('all',document.querySelector('.filter-chip'));
+</script>
+</body>
+</html>
