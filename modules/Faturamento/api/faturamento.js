@@ -46,10 +46,19 @@ module.exports = (pool, authenticateToken) => {
     // ============================================================
     // HELPER: Enviar DANFE por email ao cliente
     // ============================================================
+    // Emails fixos que SEMPRE recebem DANFE
+    const DANFE_DESTINATARIOS_FIXOS = ['logistica@aluforce.ind.br', 'aluforce@aluforce.ind.br'];
+
     async function enviarDanfeEmail(nfeId, clienteEmail, clienteNome, numeroNfe, valorTotal) {
-        if (!isEmailConfigured() || !clienteEmail) {
-            console.log(`[FATURAMENTO-EMAIL] Email não enviado: ${!clienteEmail ? 'email do cliente não informado' : 'SMTP não configurado'}`);
-            return { enviado: false, motivo: !clienteEmail ? 'Email do cliente não informado' : 'SMTP não configurado' };
+        if (!isEmailConfigured()) {
+            console.log(`[FATURAMENTO-EMAIL] Email não enviado: SMTP não configurado`);
+            return { enviado: false, motivo: 'SMTP não configurado' };
+        }
+
+        // Montar lista de destinatários: fixos + cliente (se tiver)
+        const destinatarios = [...DANFE_DESTINATARIOS_FIXOS];
+        if (clienteEmail && !destinatarios.includes(clienteEmail.toLowerCase())) {
+            destinatarios.push(clienteEmail);
         }
 
         try {
@@ -81,22 +90,24 @@ module.exports = (pool, authenticateToken) => {
                 </div>
             `;
 
+            const anexo = [{
+                filename: `DANFE-${numeroNfe}.pdf`,
+                content: pdfBuffer,
+                contentType: 'application/pdf'
+            }];
+
             const result = await sendEmail(
-                clienteEmail,
+                destinatarios.join(', '),
                 `NF-e ${numeroNfe} - DANFE`,
                 html,
                 `DANFE da NF-e ${numeroNfe}. Valor: R$ ${(valorTotal || 0).toFixed(2)}`,
-                [{
-                    filename: `DANFE-${numeroNfe}.pdf`,
-                    content: pdfBuffer,
-                    contentType: 'application/pdf'
-                }]
+                anexo
             );
 
             if (result.success) {
-                console.log(`[FATURAMENTO-EMAIL] ✅ DANFE enviada para ${clienteEmail} (NF-e ${numeroNfe})`);
+                console.log(`[FATURAMENTO-EMAIL] ✅ DANFE enviada para ${destinatarios.join(', ')} (NF-e ${numeroNfe})`);
             }
-            return { enviado: result.success, messageId: result.messageId, erro: result.error };
+            return { enviado: result.success, destinatarios, messageId: result.messageId, erro: result.error };
         } catch (err) {
             console.error(`[FATURAMENTO-EMAIL] ❌ Erro ao enviar DANFE por email:`, err.message);
             return { enviado: false, motivo: err.message };
