@@ -17604,6 +17604,18 @@ td{padding:5px 8px;border-bottom:1px solid #e5e7eb;font-size:10px}
                 avatar.textContent = iniciais;
             }
 
+            // Buscar dados completos do cliente/empresa para atualizar pedidoAtual
+            const fetchId = tipo === 'cliente' ? (itemId || empresaId) : empresaId;
+            const endpoint = tipo === 'cliente' ? `/api/vendas/clientes/${fetchId}` : `/api/vendas/empresas/${fetchId}`;
+            fetch(endpoint, { credentials: 'include', headers: getAuthHeaders() })
+                .then(r => r.ok ? r.json() : null)
+                .then(dados => {
+                    if (dados && pedidoAtual) {
+                        atualizarDadosCliente(dados);
+                    }
+                })
+                .catch(err => console.warn('Erro ao buscar dados do cliente:', err));
+
             const tipoLabel = tipo === 'empresa' ? 'Empresa' : 'Cliente';
             showNotification(`${tipoLabel} selecionado: ${nome}`, 'success');
         }

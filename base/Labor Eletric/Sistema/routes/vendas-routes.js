@@ -416,17 +416,10 @@ module.exports = function createVendasRoutes(deps) {
                 if (existing.length > 0) {
                     empresaFinalId = existing[0].id;
                 }
-                // AUDIT-FIX 2026-04-03: Removida auto-criação de empresa com CNPJ falso (TMP-...)
-                // Se empresa não encontrada, buscar empresa padrão (id=1) para evitar NOT NULL
-                if (!empresaFinalId) {
-                    const [defaultEmp] = await connection.query('SELECT id FROM empresas ORDER BY id ASC LIMIT 1');
-                    if (defaultEmp.length > 0) {
-                        empresaFinalId = defaultEmp[0].id;
-                    }
-                }
+                // Se empresa não encontrada, empresa_id fica NULL — NÃO usar fallback genérico
             }
 
-            if (!empresaFinalId && !nomeCliente) {
+            if (!empresaFinalId && !clienteFinalId && !nomeCliente) {
                 await connection.rollback();
                 connection.release();
                 return res.status(400).json({ message: 'Informe o cliente ou empresa.' });

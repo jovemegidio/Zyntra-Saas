@@ -1,8 +1,8 @@
 ﻿/**
- * ALUFORCE - Login Page v2.0
- * Modern glassmorphism login with animated backgrounds
- * All backend integration preserved from v1
+ * LABOR ENERGY - Login Page v2.0
+ * Standalone instance — sem path prefix
  */
+window.__BASE_PATH = '';
 document.addEventListener('DOMContentLoaded', () => {
   // ==================== DOM ELEMENTS ====================
   const loginForm = document.getElementById('login-form');
@@ -148,10 +148,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ==================== MULTI-COMPANY ROUTING ====================
   // Mapeia domínios de email para o base path de cada empresa
-  const COMPANY_DOMAINS = {
-    '@energy.com.br': '/labor-energy',
-    '@laboreletric.com.br': '/labor-eletric'
-  };
+  // Standalone instance: sem path prefix (corre em porta dedicada)
+  const COMPANY_DOMAINS = {};
 
   function getCompanyBasePath(email) {
     if (!email) return window.__BASE_PATH || '';
@@ -692,7 +690,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.appendChild(banner);
 
     document.getElementById('remember-continue').addEventListener('click', () => {
-      window.location.href = '/dashboard';
+      // Multi-company: redirecionar para o dashboard correto baseado no email do usuário
+      const _rememberCompanyPath = getCompanyBasePath(userEmail);
+      window.location.href = _rememberCompanyPath ? _rememberCompanyPath + '/dashboard' : '/dashboard';
     });
 
     document.getElementById('remember-switch').addEventListener('click', async () => {

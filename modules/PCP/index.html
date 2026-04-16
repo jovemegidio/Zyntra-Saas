@@ -18770,30 +18770,30 @@
                     const opClienteCep = document.getElementById('op-cliente-cep');
                     const opClienteEmailNfe = document.getElementById('op-cliente-email-nfe');
 
-                    // PRIORIDADE: dados JOINados do pedido (sempre corretos) > dados da empresa/cliente
-                    const nomeCliente = pedido.cliente_nome || pedido.cliente || clienteData.razao_social || clienteData.nome_fantasia || clienteData.nome || '';
+                    // Usar dados frescos do cliente (clienteData) com fallback para dados do pedido
+                    const nomeCliente = clienteData.razao_social || clienteData.nome_fantasia || clienteData.nome || pedido.cliente_nome || pedido.cliente || '';
                     if (opCliente) opCliente.value = nomeCliente;
                     if (opClienteId) opClienteId.value = clienteData.id || pedido.cliente_id || '';
-                    if (opClienteCnpj) opClienteCnpj.value = formatarCNPJCPF(pedido.cliente_cnpj || clienteData.cnpj || clienteData.cnpj_cpf) || '';
-                    if (opClienteContato) opClienteContato.value = pedido.cliente_contato || clienteData.contato || clienteData.responsavel || '';
-                    if (opClienteFone) opClienteFone.value = formatarTelefone(pedido.cliente_telefone || clienteData.telefone) || '';
-                    if (opClienteEmail) opClienteEmail.value = pedido.cliente_email || clienteData.email || '';
+                    if (opClienteCnpj) opClienteCnpj.value = formatarCNPJCPF(clienteData.cnpj || clienteData.cnpj_cpf || pedido.cliente_cnpj) || '';
+                    if (opClienteContato) opClienteContato.value = clienteData.contato || clienteData.responsavel || pedido.cliente_contato || '';
+                    if (opClienteFone) opClienteFone.value = formatarTelefone(clienteData.telefone || pedido.cliente_telefone) || '';
+                    if (opClienteEmail) opClienteEmail.value = clienteData.email || pedido.cliente_email || '';
 
                     // Preencher endereço completo, CEP e email NF-e
                     if (opClienteEndereco) {
                         const endParts = [
-                            pedido.cliente_endereco || clienteData.endereco || '',
-                            pedido.cliente_numero || clienteData.numero || '',
+                            clienteData.endereco || pedido.cliente_endereco || '',
+                            clienteData.numero || pedido.cliente_numero || '',
                         ].filter(Boolean).join(', ');
                         const bairroCidade = [
-                            pedido.cliente_bairro || clienteData.bairro || '',
-                            [pedido.cliente_cidade || clienteData.cidade || '', pedido.cliente_uf || clienteData.estado || clienteData.uf || ''].filter(Boolean).join('/')
+                            clienteData.bairro || pedido.cliente_bairro || '',
+                            [clienteData.cidade || pedido.cliente_cidade || '', clienteData.estado || clienteData.uf || pedido.cliente_uf || ''].filter(Boolean).join('/')
                         ].filter(Boolean).join(' - ');
                         const endCompleto = [endParts, bairroCidade].filter(Boolean).join(' - ');
                         opClienteEndereco.value = endCompleto;
                     }
-                    if (opClienteCep) opClienteCep.value = formatarCEP(pedido.cliente_cep || clienteData.cep || '') || '';
-                    if (opClienteEmailNfe) opClienteEmailNfe.value = clienteData.email_nfe || pedido.cliente_email || clienteData.email || '';
+                    if (opClienteCep) opClienteCep.value = formatarCEP(clienteData.cep || pedido.cliente_cep || '') || '';
+                    if (opClienteEmailNfe) opClienteEmailNfe.value = clienteData.email_nfe || clienteData.email || '';
 
                     console.log('? Dados preenchidos - Cliente:', nomeCliente);
                 }

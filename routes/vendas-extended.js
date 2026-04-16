@@ -893,18 +893,19 @@ module.exports = function createVendasExtendedRoutes(deps) {
                        p.created_at as data_criacao,
                        p.transportadora_id,
                        p.transportadora_nome,
-                       c.nome as cliente_nome,
+                       COALESCE(c.nome, c.razao_social, c.nome_fantasia, e.nome_fantasia, e.razao_social) as cliente_nome_resolved,
                        c.razao_social as cliente_razao_social,
                        c.nome_fantasia as cliente_nome_fantasia,
-                       COALESCE(c.cnpj, c.cnpj_cpf) as cliente_cnpj,
-                       c.inscricao_estadual as cliente_ie,
-                       c.email as cliente_email,
-                       c.telefone as cliente_telefone,
-                       c.endereco as cliente_endereco,
-                       c.bairro as cliente_bairro,
-                       c.cidade as cliente_cidade,
-                       c.estado as cliente_estado,
-                       c.cep as cliente_cep,
+                       COALESCE(c.cnpj, c.cnpj_cpf, e.cnpj) as cliente_cnpj,
+                       COALESCE(c.inscricao_estadual, e.inscricao_estadual) as cliente_ie,
+                       COALESCE(c.email, e.email) as cliente_email,
+                       COALESCE(c.telefone, e.telefone) as cliente_telefone,
+                       COALESCE(c.contato, e.contato) as cliente_contato,
+                       COALESCE(c.endereco, e.endereco) as cliente_endereco,
+                       COALESCE(c.bairro, e.bairro) as cliente_bairro,
+                       COALESCE(c.cidade, e.cidade) as cliente_cidade,
+                       COALESCE(c.estado, e.estado) as cliente_estado,
+                       COALESCE(c.cep, e.cep) as cliente_cep,
                        e.nome_fantasia as empresa_nome, e.cnpj as empresa_cnpj,
                        u.nome as vendedor_nome,
                        t.razao_social as transp_razao_social,
@@ -928,6 +929,15 @@ module.exports = function createVendasExtendedRoutes(deps) {
 
             // Formatar o pedido para compatibilidade com o frontend
             const pedido = pedidos[0];
+
+            // Garantir que cliente_nome use o valor armazenado (p.cliente_nome) com fallback para JOIN
+            if (!pedido.cliente_nome && pedido.cliente_nome_resolved) {
+                pedido.cliente_nome = pedido.cliente_nome_resolved;
+            }
+            // Alias: frontend também usa pedido.cliente
+            if (!pedido.cliente) {
+                pedido.cliente = pedido.cliente_nome || pedido.cliente_nome_resolved || '';
+            }
 
             // Buscar itens da tabela pedido_itens
             let itensDB = [];

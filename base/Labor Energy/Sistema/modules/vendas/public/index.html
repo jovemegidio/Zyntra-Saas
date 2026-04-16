@@ -17616,6 +17616,8 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
         function selecionarClienteEdit(empresaId, nome, cnpj, tipo, itemId) {
             document.getElementById('edit-cliente').value = nome;
             document.getElementById('edit-cliente-id').value = empresaId || itemId;
+            document.getElementById('edit-cliente-tipo').value = tipo || 'empresa';
+            document.getElementById('edit-cliente-item-id').value = itemId || '';
             editClienteSelecionadoId = empresaId || itemId;
             document.getElementById('dropdown-edit-clientes').style.display = 'none';
 
@@ -17625,6 +17627,18 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                 const iniciais = nome.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase();
                 avatar.textContent = iniciais;
             }
+
+            // Buscar dados completos do cliente/empresa para atualizar pedidoAtual
+            const fetchId = tipo === 'cliente' ? (itemId || empresaId) : empresaId;
+            const endpoint = tipo === 'cliente' ? `/api/vendas/clientes/${fetchId}` : `/api/vendas/empresas/${fetchId}`;
+            fetch(endpoint, { credentials: 'include', headers: getAuthHeaders() })
+                .then(r => r.ok ? r.json() : null)
+                .then(dados => {
+                    if (dados && pedidoAtual) {
+                        atualizarDadosCliente(dados);
+                    }
+                })
+                .catch(err => console.warn('Erro ao buscar dados do cliente:', err));
 
             const tipoLabel = tipo === 'empresa' ? 'Empresa' : 'Cliente';
             showNotification(`${tipoLabel} selecionado: ${nome}`, 'success');
