@@ -576,9 +576,9 @@ module.exports = (pool, authenticateToken) => {
             // AUDITORIA ENTERPRISE: Log de geração de NF-e fiscal
             console.log(`[FATURAMENTO-AUDIT] ✅ NF-e ${proximoNumero} gerada por usuário ${usuario_id} para pedido ${pedido_id}. Valor: R$ ${valorTotal.toFixed(2)}`);
 
-            // Enviar DANFE por email ao cliente (assíncrono, não bloqueia resposta)
+            // Enviar DANFE por email AUTOMATICAMENTE (assíncrono, não bloqueia resposta)
             let emailResult = null;
-            if (enviar_email) {
+            {
                 const emailDestinatario = pedido.cliente_email_nfe || pedido.cliente_email;
                 enviarDanfeEmail(nfe_id, emailDestinatario, pedido.cliente_nome, proximoNumero, valorTotal)
                     .then(r => { emailResult = r; })

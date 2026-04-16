@@ -6377,6 +6377,9 @@
                             style="display: none;">
                             <i class="fas fa-receipt"></i> Ver Recibo
                         </button>
+                        <button id="btn-enviar-sefaz-pedido" class="sidebar-action-btn" onclick="enviarSefazPedido()" style="display: none; background: #059669; color: white;">
+                            <i class="fas fa-paper-plane"></i> Enviar à SEFAZ
+                        </button>
                     </div>
 
                     <div class="sidebar-divider"></div>
@@ -19962,6 +19965,54 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
         });
 
         // ========================================
+        // AÇÕES - ENVIAR SEFAZ (PEDIDO INDIVIDUAL)
+        // ========================================
+        async function enviarSefazPedido() {
+            if (!pedidoAtual) return showNotification('Nenhum pedido selecionado', 'warning');
+            if (window._enviandoSefazPedido) return;
+
+            const nfeId = pedidoAtual.nfe_id;
+            if (!nfeId) {
+                return showNotification('NF-e não encontrada para este pedido. Verifique se foi faturado corretamente.', 'warning');
+            }
+
+            if (!confirm(`Deseja enviar a NF-e ${pedidoAtual.nf || ''} do pedido #${pedidoAtual.id} para a SEFAZ?`)) return;
+
+            window._enviandoSefazPedido = true;
+            const btn = document.getElementById('btn-enviar-sefaz-pedido');
+            if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...'; }
+
+            try {
+                const response = await fetch(`/api/faturamento/nfes/${nfeId}/enviar-sefaz`, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    showNotification(`NF-e autorizada pela SEFAZ! Protocolo: ${result.protocolo || 'OK'}`, 'success');
+                    if (btn) btn.style.display = 'none';
+                    // Atualizar dados do pedido
+                    if (pedidoAtual) {
+                        pedidoAtual.protocolo_sefaz = result.protocolo;
+                    }
+                    carregarDados();
+                } else {
+                    const msg = result.message || result.motivo || 'Erro ao enviar à SEFAZ';
+                    showNotification(msg, 'error');
+                }
+            } catch (error) {
+                console.error('[SEFAZ-PEDIDO] Erro:', error);
+                showNotification('Erro de conexão ao enviar à SEFAZ', 'error');
+            } finally {
+                window._enviandoSefazPedido = false;
+                if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar à SEFAZ'; }
+            }
+        }
+
+        // ========================================
         // AÇÕES - COMUNICAR SEFAZ
         // ========================================
         function comunicarSefaz() {
@@ -20446,6 +20497,7 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
             const sidebarDocsFiscais = document.getElementById('sidebar-docs-fiscais');
             const btnVerDanfe = document.getElementById('btn-ver-danfe');
             const btnVerRecibo = document.getElementById('btn-ver-recibo');
+            const btnEnviarSefaz = document.getElementById('btn-enviar-sefaz-pedido');
             const btnFaturar = document.querySelector('.sidebar-action-btn.btn-faturar');
 
             if (sidebarDocsFiscais) {
@@ -20499,8 +20551,11 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                         jaFaturado
                     });
 
+                    // Mostrar "Enviar à SEFAZ" quando faturado e NF gerada (status pendente na SEFAZ)
+                    const mostrarSefaz = statusAtual === 'faturado' && temNF && usuarioLogado.canFaturar;
+
                     // Mostrar a div apenas se algum botão estiver visível
-                    sidebarDocsFiscais.style.display = (mostrarDanfe || mostrarRecibo) ? 'block' : 'none';
+                    sidebarDocsFiscais.style.display = (mostrarDanfe || mostrarRecibo || mostrarSefaz) ? 'block' : 'none';
 
                     if (btnVerDanfe) {
                         btnVerDanfe.style.display = mostrarDanfe ? 'flex' : 'none';
@@ -20508,6 +20563,10 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
 
                     if (btnVerRecibo) {
                         btnVerRecibo.style.display = mostrarRecibo ? 'flex' : 'none';
+                    }
+
+                    if (btnEnviarSefaz) {
+                        btnEnviarSefaz.style.display = mostrarSefaz ? 'flex' : 'none';
                     }
                 } else {
                     console.log('[DOCS_FISCAIS] Sem permissão ou sem pedido');
