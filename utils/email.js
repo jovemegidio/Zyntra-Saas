@@ -53,7 +53,7 @@ async function sendEmail(to, subject, html, text, attachments) {
 
     try {
         const mailOptions = {
-            from: `"Zyntra ERP" <${process.env.SMTP_USER}>`,
+            from: `"Zyntra" <${process.env.SMTP_USER}>`,
             to: to,
             subject: subject,
             text: text || html.replace(/<[^>]*>/g, ''),
