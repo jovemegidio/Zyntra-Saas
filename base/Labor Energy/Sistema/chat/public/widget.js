@@ -346,9 +346,12 @@
 
   // ==================== ÁUDIO ====================
   function initAudio() {
-    $('afw-btn-mic').addEventListener('click', startRec);
-    $('afw-audio-cancel').addEventListener('click', cancelRec);
-    $('afw-audio-send').addEventListener('click', stopAndSendRec);
+    const btnMic = $('afw-btn-mic');
+    const btnCancel = $('afw-audio-cancel');
+    const btnSend = $('afw-audio-send');
+    if (btnMic) btnMic.addEventListener('click', startRec);
+    if (btnCancel) btnCancel.addEventListener('click', cancelRec);
+    if (btnSend) btnSend.addEventListener('click', stopAndSendRec);
   }
 
   async function startRec() {
