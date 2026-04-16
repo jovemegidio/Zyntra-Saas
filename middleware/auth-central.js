@@ -29,8 +29,8 @@ if (!JWT_SECRET) {
     process.exit(1);
 }
 
-// TC-AUTH-03-001: Inactivity timeout — 4 horas (em milissegundos)
-const SESSION_INACTIVITY_MS = parseInt(process.env.SESSION_INACTIVITY_TIMEOUT_MS, 10) || 4 * 60 * 60 * 1000;
+// TC-AUTH-03-001: Inactivity timeout — 15 minutos (em milissegundos)
+const SESSION_INACTIVITY_MS = parseInt(process.env.SESSION_INACTIVITY_TIMEOUT_MS, 10) || 15 * 60 * 1000;
 
 // ============================================================
 // 1. AUTENTICAÇÃO — Verificação de JWT

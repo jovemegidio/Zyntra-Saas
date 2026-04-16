@@ -36,7 +36,7 @@ function _log403(userId, userEmail, method, path, code, detail) {
 }
 
 // Inactivity timeout: 30 minutos (em milissegundos)
-const SESSION_INACTIVITY_MS = parseInt(process.env.SESSION_INACTIVITY_TIMEOUT_MS, 10) || 30 * 60 * 1000;
+const SESSION_INACTIVITY_MS = parseInt(process.env.SESSION_INACTIVITY_TIMEOUT_MS, 10) || 15 * 60 * 1000;
 
 // ============================================================
 // 1. AUTENTICAÇÃO — Verificação de JWT

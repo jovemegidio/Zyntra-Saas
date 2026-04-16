@@ -1615,16 +1615,18 @@ try {
 // =================================================================
 const authenticateToken = authCentral.authenticateToken;
 
-// Middleware para autorizar admin ou comercial para Vendas/CRM
+// Middleware para autorizar admin, comercial ou financeiro para Vendas/CRM
 const authorizeAdminOrComercial = (req, res, next) => {
     const role = String(req.user?.role || '').toLowerCase().trim();
     const isAdm = role === 'admin' || role === 'administrador' ||
                   req.user?.is_admin === 1 || req.user?.is_admin === true || req.user?.is_admin === '1';
     const isComercial = role === 'comercial';
-    if (isAdm || isComercial) {
+    const isFinanceiro = role === 'financeiro';
+    const isGerente = role === 'gerente' || role === 'gerente_comercial' || role === 'supervisor' || role === 'diretor' || role === 'diretoria';
+    if (isAdm || isComercial || isFinanceiro || isGerente) {
         return next();
     }
-    return res.status(403).json({ message: 'Acesso negado. Requer privilégios de administrador ou comercial.' });
+    return res.status(403).json({ message: 'Acesso negado. Requer privilégios de administrador, comercial ou financeiro.' });
 };
 
 // =================================================================
