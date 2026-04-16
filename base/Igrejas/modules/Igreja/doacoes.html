@@ -6,7 +6,7 @@
     <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="css/igreja.css">
+    <link rel="stylesheet" href="css/igreja.css?v=20260416">
 </head>
 <body>
 <a href="#main" class="skip-link">Pular para conteúdo</a>
@@ -26,20 +26,30 @@
 
             <!-- PIX QR Code -->
             <div class="card fade-in fade-in-2" id="pix-section" style="margin-bottom:16px">
-                <div class="card-header"><h3 class="card-title"><i class="fas fa-qrcode" style="color:var(--primary-light)"></i> Doação via PIX</h3></div>
+                <div class="card-header"><h3 class="card-title"><i class="fas fa-qrcode" style="color:var(--primary-light)"></i> Doação via PIX</h3><span class="badge badge-info" id="asaas-env-badge">...</span></div>
                 <div class="card-body" style="text-align:center">
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:600px;margin:0 auto">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:700px;margin:0 auto">
                         <div>
-                            <div class="form-group"><label>Tipo</label><select class="form-control"><option>Dízimo</option><option>Oferta</option><option>Campanha Missionária</option><option>Construção do Templo</option></select></div>
-                            <div class="form-group"><label>Valor</label><input type="number" class="form-control" placeholder="R$ 0,00" id="pix-value"></div>
-                            <button class="btn btn-primary" onclick="generatePix()"><i class="fas fa-qrcode"></i> Gerar QR Code PIX</button>
+                            <div class="form-group"><label>Nome do Doador</label><input type="text" class="form-control" placeholder="Nome completo" id="pix-donor-name"></div>
+                            <div class="form-group"><label>CPF/CNPJ</label><input type="text" class="form-control" placeholder="000.000.000-00" id="pix-donor-cpf"></div>
+                            <div class="form-group"><label>Tipo de Doação</label><select class="form-control" id="pix-type"><option value="Dízimo">Dízimo</option><option value="Oferta">Oferta</option><option value="Campanha Missionária">Campanha Missionária</option><option value="Construção do Templo">Construção do Templo</option></select></div>
+                            <div class="form-group"><label>Valor (R$)</label><input type="number" class="form-control" placeholder="0,00" id="pix-value" min="1" step="0.01"></div>
+                            <button class="btn btn-primary" id="btn-generate-pix" onclick="generatePixCharge()"><i class="fas fa-qrcode"></i> Gerar QR Code PIX</button>
                         </div>
                         <div>
-                            <div style="width:180px;height:180px;background:#fff;border-radius:16px;margin:0 auto;display:flex;align-items:center;justify-content:center;border:6px solid var(--primary)" id="pix-qr">
-                                <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:2px;padding:12px" id="pix-art"></div>
+                            <div id="pix-qr-container" style="width:200px;height:200px;background:#f8fafc;border-radius:16px;margin:0 auto;display:flex;align-items:center;justify-content:center;border:4px solid var(--primary);overflow:hidden">
+                                <div id="pix-qr-placeholder" style="text-align:center;padding:16px"><i class="fas fa-qrcode" style="font-size:48px;color:#cbd5e1"></i><p style="font-size:.75rem;color:var(--text-muted);margin-top:8px">Preencha os dados e clique em Gerar QR Code</p></div>
+                                <img id="pix-qr-img" style="display:none;width:100%;height:100%;object-fit:contain" alt="QR Code PIX">
                             </div>
-                            <p style="font-size:.78rem;color:var(--text-muted);margin-top:12px">Chave PIX: <strong>igreja@zyntra.church</strong></p>
-                            <button class="btn btn-sm btn-outline" style="margin-top:8px" onclick="copyPix()"><i class="fas fa-copy"></i> Copiar chave</button>
+                            <div id="pix-payload-area" style="display:none;margin-top:12px">
+                                <p style="font-size:.78rem;color:var(--text-muted)">PIX Copia e Cola:</p>
+                                <textarea id="pix-payload" readonly style="width:100%;height:60px;font-size:.7rem;resize:none;border:1px solid var(--border-color);border-radius:8px;padding:8px;background:var(--bg-secondary)"></textarea>
+                                <button class="btn btn-sm btn-outline" style="margin-top:8px" onclick="copyPixPayload()"><i class="fas fa-copy"></i> Copiar Código PIX</button>
+                            </div>
+                            <div id="pix-status-area" style="display:none;margin-top:12px">
+                                <span class="badge" id="pix-status-badge">Aguardando pagamento...</span>
+                                <button class="btn btn-sm btn-outline" style="margin-top:8px" onclick="checkPixStatus()"><i class="fas fa-sync"></i> Verificar Pagamento</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -64,18 +74,107 @@
     </div>
 </div>
 <div id="a11y"></div>
-<script src="js/igreja.js"></script>
+<script src="js/igreja.js?v=20260416"></script>
 <script>
 document.getElementById('sidebar').innerHTML = SIDEBAR_HTML;
 document.getElementById('header').innerHTML = getHeaderHTML('Doações');
 document.getElementById('a11y').innerHTML = A11Y_HTML;
 
-// PIX art
-var art=document.getElementById('pix-art');for(var i=0;i<36;i++){art.innerHTML+='<div style="width:10px;height:10px;background:'+(Math.random()>.4?'#1e1b4b':'#e2e8f0')+';border-radius:1px"></div>';}
+var currentPaymentId = null;
+
+// Verificar config Asaas
+fetch('/igreja/api/asaas/config').then(function(r){return r.json()}).then(function(d){
+    var badge = document.getElementById('asaas-env-badge');
+    if(d.configured){
+        badge.textContent = d.environment === 'production' ? '🟢 Produção' : '🟡 Sandbox';
+        badge.className = 'badge ' + (d.environment === 'production' ? 'badge-success' : 'badge-warning');
+    } else {
+        badge.textContent = '🔴 Não configurado';
+        badge.className = 'badge badge-danger';
+    }
+}).catch(function(){});
 
 function showDonationMethod(m){showToast('Método '+m.toUpperCase()+' selecionado','info');}
-function generatePix(){showToast('QR Code PIX gerado!','success');}
-function copyPix(){navigator.clipboard.writeText('igreja@zyntra.church').then(function(){showToast('Chave PIX copiada!','success')});}
+
+function generatePixCharge(){
+    var name = document.getElementById('pix-donor-name').value.trim();
+    var cpf = document.getElementById('pix-donor-cpf').value.trim().replace(/\D/g,'');
+    var type = document.getElementById('pix-type').value;
+    var value = parseFloat(document.getElementById('pix-value').value);
+
+    if(!name){showToast('Informe o nome do doador','error');return;}
+    if(!value || value < 1){showToast('Informe um valor válido (mínimo R$ 1,00)','error');return;}
+
+    var btn = document.getElementById('btn-generate-pix');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando...';
+
+    // 1) Criar ou buscar cliente
+    var customerPromise;
+    if(cpf){
+        customerPromise = fetch('/igreja/api/asaas/customers?cpfCnpj='+cpf).then(function(r){return r.json()}).then(function(d){
+            if(d.data && d.data.length > 0) return d.data[0].id;
+            return fetch('/igreja/api/asaas/customers',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:name,cpfCnpj:cpf})}).then(function(r){return r.json()}).then(function(c){return c.id;});
+        });
+    } else {
+        customerPromise = fetch('/igreja/api/asaas/customers',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:name})}).then(function(r){return r.json()}).then(function(c){return c.id;});
+    }
+
+    customerPromise.then(function(customerId){
+        if(!customerId){throw new Error('Erro ao criar cliente no Asaas');}
+        // 2) Criar cobrança PIX
+        return fetch('/igreja/api/asaas/payments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({customer:customerId,value:value,description:type+' - '+name})}).then(function(r){return r.json()});
+    }).then(function(payment){
+        if(!payment.id){throw new Error(payment.errors ? payment.errors[0].description : 'Erro ao criar cobrança');}
+        currentPaymentId = payment.id;
+        showToast('Cobrança PIX criada! ID: '+payment.id,'success');
+        // 3) Obter QR Code
+        return fetch('/igreja/api/asaas/payments/'+payment.id+'/pixQrCode').then(function(r){return r.json()});
+    }).then(function(qr){
+        if(qr.encodedImage){
+            document.getElementById('pix-qr-placeholder').style.display='none';
+            var img = document.getElementById('pix-qr-img');
+            img.src = 'data:image/png;base64,' + qr.encodedImage;
+            img.style.display = 'block';
+        }
+        if(qr.payload){
+            document.getElementById('pix-payload').value = qr.payload;
+            document.getElementById('pix-payload-area').style.display='block';
+        }
+        document.getElementById('pix-status-area').style.display='block';
+        document.getElementById('pix-status-badge').textContent='⏳ Aguardando pagamento...';
+        document.getElementById('pix-status-badge').className='badge badge-warning';
+    }).catch(function(err){
+        showToast('Erro: '+err.message,'error');
+        console.error('PIX Error:', err);
+    }).finally(function(){
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-qrcode"></i> Gerar QR Code PIX';
+    });
+}
+
+function copyPixPayload(){
+    var payload = document.getElementById('pix-payload').value;
+    if(payload){navigator.clipboard.writeText(payload).then(function(){showToast('Código PIX copiado!','success')});}
+}
+
+function checkPixStatus(){
+    if(!currentPaymentId){showToast('Nenhuma cobrança gerada','error');return;}
+    fetch('/igreja/api/asaas/payments/'+currentPaymentId).then(function(r){return r.json()}).then(function(p){
+        var badge = document.getElementById('pix-status-badge');
+        var statusMap = {
+            'PENDING':'⏳ Pendente','RECEIVED':'✅ Recebido!','CONFIRMED':'✅ Confirmado!',
+            'OVERDUE':'⚠️ Vencido','REFUNDED':'↩️ Estornado','RECEIVED_IN_CASH':'💵 Dinheiro',
+            'REFUND_REQUESTED':'↩️ Estorno solicitado','CHARGEBACK_REQUESTED':'⚠️ Chargeback',
+            'CHARGEBACK_DISPUTE':'⚠️ Disputa','AWAITING_CHARGEBACK_REVERSAL':'⚠️ Aguardando',
+            'DUNNING_REQUESTED':'📩 Negativação','DUNNING_RECEIVED':'📩 Negativação recebida',
+            'AWAITING_RISK_ANALYSIS':'🔍 Análise de risco'
+        };
+        badge.textContent = statusMap[p.status] || p.status;
+        badge.className = 'badge ' + (p.status === 'RECEIVED' || p.status === 'CONFIRMED' ? 'badge-success' : p.status === 'PENDING' ? 'badge-warning' : 'badge-danger');
+        showToast('Status: ' + (statusMap[p.status] || p.status), p.status === 'RECEIVED' || p.status === 'CONFIRMED' ? 'success' : 'info');
+    }).catch(function(e){showToast('Erro: '+e.message,'error');});
+}
 
 function filterDonations(){
     var type=document.getElementById('filter-type').value;
@@ -93,7 +192,16 @@ function renderDonations(list){
     });
     document.getElementById('donations-total').textContent=formatCurrency(total);
 }
-filterDonations();
+
+// Carregar cobranças reais do Asaas e mesclar com mock
+fetch('/igreja/api/asaas/payments?status=RECEIVED').then(function(r){return r.json()}).then(function(d){
+    if(d.data && d.data.length > 0){
+        d.data.forEach(function(p){
+            MOCK.donations.unshift({member:p.description||'Doação PIX',type:'dizimo',value:p.value,date:p.paymentDate||p.dueDate,method:'PIX'});
+        });
+    }
+    filterDonations();
+}).catch(function(){filterDonations();});
 </script>
 </body>
 </html>

@@ -185,75 +185,75 @@ window.MOCK = {
     }
 };
 
-// ===== SIDEBAR HTML (shared) =====
-window.SIDEBAR_HTML = `
-<div class="sidebar-header">
-    <div class="logo-icon">⛪</div>
-    <div class="logo-text">Zyntra<span>Gestão de Igrejas</span></div>
-</div>
-<nav class="sidebar-nav">
-    <div class="nav-group">
-        <div class="nav-group-title">Principal</div>
-        <a href="dashboard.html" class="nav-item"><i class="fas fa-th-large"></i><span class="nav-label">Dashboard</span></a>
-        <a href="membros.html" class="nav-item"><i class="fas fa-users"></i><span class="nav-label">Membros</span></a>
-    </div>
-    <div class="nav-group">
-        <div class="nav-group-title">Espiritual</div>
-        <a href="biblia.html" class="nav-item"><i class="fas fa-book-bible"></i><span class="nav-label">Bíblia</span></a>
-        <a href="devocionais.html" class="nav-item"><i class="fas fa-sun"></i><span class="nav-label">Devocionais</span></a>
-        <a href="oracao.html" class="nav-item"><i class="fas fa-hands-praying"></i><span class="nav-label">Oração</span><span class="nav-badge">5</span></a>
-        <a href="notas.html" class="nav-item"><i class="fas fa-sticky-note"></i><span class="nav-label">Notas de Culto</span></a>
-    </div>
-    <div class="nav-group">
-        <div class="nav-group-title">Comunidade</div>
-        <a href="grupos.html" class="nav-item"><i class="fas fa-people-group"></i><span class="nav-label">Grupos / Células</span></a>
-        <a href="timeline.html" class="nav-item"><i class="fas fa-stream"></i><span class="nav-label">Timeline</span></a>
-        <a href="galeria.html" class="nav-item"><i class="fas fa-images"></i><span class="nav-label">Galeria</span></a>
-        <a href="testemunhos.html" class="nav-item"><i class="fas fa-comment-dots"></i><span class="nav-label">Testemunhos</span></a>
-    </div>
-    <div class="nav-group">
-        <div class="nav-group-title">Agenda</div>
-        <a href="eventos.html" class="nav-item"><i class="fas fa-calendar-alt"></i><span class="nav-label">Eventos</span></a>
-        <a href="transmissao.html" class="nav-item"><i class="fas fa-video"></i><span class="nav-label">Transmissão</span></a>
-        <a href="presenca.html" class="nav-item"><i class="fas fa-qrcode"></i><span class="nav-label">Check-in</span></a>
-    </div>
-    <div class="nav-group">
-        <div class="nav-group-title">Financeiro</div>
-        <a href="doacoes.html" class="nav-item"><i class="fas fa-hand-holding-heart"></i><span class="nav-label">Doações</span></a>
-        <a href="financeiro.html" class="nav-item"><i class="fas fa-chart-pie"></i><span class="nav-label">Gestão Financeira</span></a>
-    </div>
-    <div class="nav-group">
-        <div class="nav-group-title">Educação</div>
-        <a href="cursos.html" class="nav-item"><i class="fas fa-graduation-cap"></i><span class="nav-label">Cursos / EBD</span></a>
-        <a href="mensagens.html" class="nav-item"><i class="fas fa-microphone"></i><span class="nav-label">Pregações</span></a>
-        <a href="downloads.html" class="nav-item"><i class="fas fa-download"></i><span class="nav-label">Downloads</span></a>
-    </div>
-    <div class="nav-group" data-admin-only>
-        <div class="nav-group-title">Operacional</div>
-        <a href="voluntarios.html" class="nav-item"><i class="fas fa-hands-helping"></i><span class="nav-label">Voluntários</span></a>
-        <a href="notificacoes.html" class="nav-item"><i class="fas fa-bell"></i><span class="nav-label">Notificações</span></a>
-        <a href="banners.html" class="nav-item"><i class="fas fa-image"></i><span class="nav-label">Banners</span></a>
-        <a href="paginas.html" class="nav-item"><i class="fas fa-file-alt"></i><span class="nav-label">Páginas</span></a>
-        <a href="configuracoes.html" class="nav-item"><i class="fas fa-cog"></i><span class="nav-label">Configurações</span></a>
-    </div>
-</nav>
-<div class="sidebar-footer">
-    <button class="sidebar-toggle" onclick="toggleSidebar()"><i class="fas fa-chevron-left"></i><span class="sidebar-footer-text">Recolher</span></button>
-</div>`;
+// ===== SIDEBAR NAV ITEMS =====
+var SIDEBAR_ITEMS = [
+    { page:'dashboard.html', icon:'fa-chart-line', title:'Dashboard' },
+    { page:'membros.html', icon:'fa-users', title:'Membros' },
+    { page:'oracao.html', icon:'fa-hands-praying', title:'Oração' },
+    { page:'grupos.html', icon:'fa-people-group', title:'Grupos / Células' },
+    { page:'eventos.html', icon:'fa-calendar-alt', title:'Eventos' },
+    { page:'doacoes.html', icon:'fa-hand-holding-heart', title:'Doações' },
+    { page:'cursos.html', icon:'fa-graduation-cap', title:'Cursos / EBD' },
+    { page:'transmissao.html', icon:'fa-video', title:'Transmissão' },
+    { divider:true },
+    { page:'biblia.html', icon:'fa-book-bible', title:'Bíblia' },
+    { page:'devocionais.html', icon:'fa-sun', title:'Devocionais' },
+    { page:'notas.html', icon:'fa-sticky-note', title:'Notas de Culto' },
+    { page:'mensagens.html', icon:'fa-microphone', title:'Pregações' },
+    { page:'timeline.html', icon:'fa-stream', title:'Timeline' },
+    { page:'galeria.html', icon:'fa-images', title:'Galeria' },
+    { page:'testemunhos.html', icon:'fa-comment-dots', title:'Testemunhos' },
+    { page:'downloads.html', icon:'fa-download', title:'Downloads' },
+    { page:'presenca.html', icon:'fa-qrcode', title:'Check-in' }
+];
+var SIDEBAR_BOTTOM_ITEMS = [
+    { page:'financeiro.html', icon:'fa-chart-pie', title:'Gestão Financeira' },
+    { page:'voluntarios.html', icon:'fa-hands-helping', title:'Voluntários', admin:true },
+    { page:'notificacoes.html', icon:'fa-bell', title:'Notificações', admin:true },
+    { page:'configuracoes.html', icon:'fa-cog', title:'Configurações', admin:true }
+];
 
-// ===== HEADER HTML (shared) =====
+// Build sidebar HTML dynamically
+function buildSidebarHTML() {
+    var html = '<a href="dashboard.html" class="sidebar-logo" title="Voltar ao Painel"><i class="fas fa-home"></i></a>';
+    html += '<nav class="sidebar-nav">';
+    SIDEBAR_ITEMS.forEach(function(item) {
+        if (item.divider) { html += '<div class="sidebar-divider"></div>'; return; }
+        var active = (currentPage === item.page) ? ' active' : '';
+        html += '<button class="sidebar-btn' + active + '" title="' + item.title + '" onclick="window.location.href=\'' + item.page + '\'"><i class="fas ' + item.icon + '"></i></button>';
+    });
+    html += '</nav>';
+    html += '<div class="sidebar-bottom">';
+    var auth = getAuth();
+    SIDEBAR_BOTTOM_ITEMS.forEach(function(item) {
+        if (item.admin && (!auth || auth.role !== 'admin')) return;
+        var active = (currentPage === item.page) ? ' active' : '';
+        html += '<button class="sidebar-btn' + active + '" title="' + item.title + '" onclick="window.location.href=\'' + item.page + '\'"><i class="fas ' + item.icon + '"></i></button>';
+    });
+    html += '</div>';
+    return html;
+}
+
+// Expose globally for sub-pages that reference SIDEBAR_HTML directly
+window.SIDEBAR_HTML = buildSidebarHTML();
+window.buildSidebarHTML = buildSidebarHTML;
+
+// ===== HEADER HTML (shared) — Aluforce dual-branding =====
 window.getHeaderHTML = function(title) {
     var auth = getAuth() || { name:'Usuário' };
     return '<div class="header-left">' +
         '<button class="mobile-menu-btn header-btn" onclick="toggleMobileSidebar()"><i class="fas fa-bars"></i></button>' +
-        '<div class="header-brand"><img src="/images/zyntra-branco.png" alt="Zyntra" onerror="this.style.display=\'none\'"><span class="separator">—</span><span>' + title + '</span></div>' +
+        '<div class="header-brand" style="display:flex;align-items:center;gap:10px;">' +
+            '<img src="/igreja/images/Zyntra - Sem Fundo.png" alt="Zyntra" style="height:22px;object-fit:contain;">' +
+            '<span style="color:rgba(0,0,0,0.15);font-weight:200;font-size:16px;user-select:none;">×</span>' +
+            '<img src="/igreja/images/Logo - Igreja Teste - Azul.png" alt="IGREJA TESTE" style="height:20px;object-fit:contain;">' +
+            '<span style="color:rgba(0,0,0,0.18);font-weight:200;font-size:14px;user-select:none;margin:0 2px;">—</span>' +
+            '<span style="font-size:13px;font-weight:500;color:var(--header-text-bold,#1e293b);letter-spacing:0.3px;">' + title + '</span>' +
+        '</div>' +
         '</div>' +
         '<div class="header-right">' +
-        '<span id="greeting-text" style="font-size:.82rem;color:var(--text-secondary)"></span>' +
         '<button class="header-btn" onclick="location.reload()" title="Atualizar"><i class="fas fa-sync-alt"></i></button>' +
-        '<button class="header-btn" onclick="openModal(\'modal-notifications\')" title="Notificações"><i class="fas fa-bell"></i><span class="badge"></span></button>' +
-        '<div class="user-avatar" id="user-avatar" title="Perfil" onclick="doLogout()">' + auth.name.charAt(0) + '</div>' +
-        '<span id="user-name" style="font-size:.82rem;font-weight:600">' + auth.name.split(' ')[0] + '</span>' +
+        '<div class="user-greeting"><span id="greeting-text"></span>, <strong id="user-name">' + auth.name.split(' ')[0] + '</strong></span></div>' +
         '</div>';
 };
 
@@ -271,8 +271,9 @@ window.A11Y_HTML = `
 // ===== INIT =====
 document.addEventListener('DOMContentLoaded', function() {
     requireAuth();
-    restoreSidebar();
-    setActiveNav();
+    // Inject sidebar
+    var sidebarEl = document.getElementById('sidebar');
+    if (sidebarEl) sidebarEl.innerHTML = buildSidebarHTML();
     setGreeting();
     // Close mobile sidebar on overlay click
     var overlay = document.getElementById('sidebar-overlay');

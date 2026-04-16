@@ -771,7 +771,11 @@ module.exports = function createMiscRoutes(deps) {
                     transportadora: p.transportadora || p.transportadora_nome || p.metodo_envio || null,
                     transportadora_id: p.transportadora_id || null,
                     nf: p.nf || p.nota_fiscal || null,
+                    numero_pedido: p.numero_pedido || p.id,
                     data_pedido: p.created_at,
+                    created_at: p.created_at,
+                    data_criacao: p.created_at,
+                    data_inclusao: p.created_at,
                     observacao: p.observacao,
                     mensagem: p.observacao,
                     // Campos de transporte

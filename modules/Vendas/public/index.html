@@ -10079,6 +10079,7 @@
 
                         const item = {
                             id: pedido.id,
+                            numero_pedido: pedido.numero_pedido || pedido.id,
                             cliente: pedido.cliente || pedido.cliente_nome || 'Cliente não informado',
                             cliente_id: pedido.cliente_id || null,
                             empresa_id: pedido.empresa_id || null,
@@ -10103,7 +10104,7 @@
                             itens: pedido.itens || [],
                             _statusOriginal: pedido.status,
                             // Campos de data para filtros/relatórios
-                            data_inclusao: pedido.data_inclusao || pedido.data_criacao || pedido.created_at || null,
+                            data_inclusao: pedido.data_inclusao || pedido.data_criacao || pedido.data_pedido || pedido.created_at || null,
                             data_previsao: pedido.data_previsao || pedido.data_prevista || null,
                             data_faturamento: pedido.data_faturamento || pedido.data_faturado || null,
                             // Campos de faturamento parcial (F9)
