@@ -896,7 +896,7 @@ function buildDanfeCtx(pedido, itens, opts = {}) {
 
     return {
         marcaAguaClasse: opts.preview ? 'watermark-logo' : '',
-        marcaAguaTexto: opts.preview && resolvedLogo ? '<img src="' + resolvedLogo + '" alt="ALUFORCE">' : '',
+        marcaAguaTexto: opts.preview && resolvedLogo ? '<img src="' + resolvedLogo + '" alt="Zyntra">' : '',
         avisoTopo: opts.preview ? 'DOCUMENTO DE PRÉVIA — NÃO POSSUI VALOR FISCAL' : '',
         _isPreview: opts.preview || false,
         paginaAtual: '1',

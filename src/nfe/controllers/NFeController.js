@@ -1054,7 +1054,7 @@ class NFeController {
             const [cfgRows] = await this.pool.query("SELECT * FROM configuracoes WHERE chave = 'empresa_emitente' LIMIT 1").catch(() => [[]]);
             const cfg = cfgRows && cfgRows[0] ? JSON.parse(cfgRows[0].valor || '{}') : {};
             const emit = {
-                razaoSocial: cfg.razaoSocial || row.emitente_nome || row.emitente_razao_social || (process.env.EMITENTE_RAZAO_SOCIAL || 'ALUFORCE'),
+                razaoSocial: cfg.razaoSocial || row.emitente_nome || row.emitente_razao_social || (process.env.EMITENTE_RAZAO_SOCIAL || 'ALUFORCE INDUSTRIA E COMERCIO LTDA'),
                 nomeFantasia: cfg.nomeFantasia || (process.env.EMITENTE_NOME_FANTASIA || 'ALUFORCE'),
                 cnpj: cfg.cnpj || row.emitente_cnpj || '',
                 ie: cfg.ie || row.emitente_ie || '',
@@ -1130,7 +1130,7 @@ class NFeController {
 </div>
 <div class="danfe">
   <div class="danfe-header">
-    <div><h1>ALUFORCE</h1><div style="font-size:11px;opacity:0.8;">${emit.razaoSocial}</div></div>
+    <div><h1>${emit.nomeFantasia || 'ALUFORCE'}</h1><div style="font-size:11px;opacity:0.8;">${emit.razaoSocial}</div></div>
     <div style="text-align:center;">
       <div style="font-size:16px;font-weight:700;letter-spacing:2px;">ESPELHO DE NF-e</div>
       <div class="espelho-badge" style="margin-top:6px;">⚠ SEM VALOR FISCAL — PRÉ-AUTORIZAÇÃO</div>
@@ -1194,7 +1194,7 @@ class NFeController {
     <div class="t-item"><label>Subtotal</label><span>R$ ${fmt(totalItens)}</span></div>
     <div class="t-item"><label>VALOR TOTAL NF-e</label><span style="font-size:18px;">R$ ${fmt(nfe.valor_total || totalItens)}</span></div>
   </div>
-  <div class="footer-bar">Documento sem valor fiscal • Gerado em ${new Date().toLocaleString('pt-BR')} • Sistema Zyntra / Aluforce | NF-e Nº ${nfe.numero || '—'} — Série ${nfe.serie || '1'}</div>
+  <div class="footer-bar">Documento sem valor fiscal • Gerado em ${new Date().toLocaleString('pt-BR')} • Zyntra ERP | NF-e Nº ${nfe.numero || '—'} — Série ${nfe.serie || '1'}</div>
 </div>
 </body></html>`;
 

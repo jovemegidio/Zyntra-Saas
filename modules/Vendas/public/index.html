@@ -6027,6 +6027,8 @@
                                         placeholder="Digite para buscar cliente..." style="width: 100%;"
                                         autocomplete="off">
                                     <input type="hidden" id="edit-cliente-id">
+                                    <input type="hidden" id="edit-cliente-tipo">
+                                    <input type="hidden" id="edit-cliente-item-id">
                                     <div id="dropdown-edit-clientes"
                                         style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); max-height: 250px; overflow-y: auto; z-index: 9999;">
                                     </div>
@@ -6925,6 +6927,8 @@
                                             placeholder="Digite o nome ou código do cliente" class="orcamento-input"
                                             autocomplete="off">
                                         <input type="hidden" id="novo-cliente-id">
+                                        <input type="hidden" id="novo-cliente-tipo">
+                                        <input type="hidden" id="novo-cliente-item-id">
                                         <button type="button" class="btn-input-action" onclick="buscarClientes()"><i
                                                 class="fas fa-search"></i></button>
                                     </div>
@@ -11650,9 +11654,13 @@
             const condicaoFinal = condicaoPagamento || novasParcelas;
 
             // Preparar dados para enviar à API
+            const editTipo = document.getElementById('edit-cliente-tipo')?.value || 'empresa';
+            const editItemId = document.getElementById('edit-cliente-item-id')?.value || null;
+            const editEmpresaId = document.getElementById('edit-cliente-id')?.value || null;
             const dadosAtualizacao = {
                 cliente: novoCliente,
-                cliente_id: document.getElementById('edit-cliente-id')?.value || null,
+                empresa_id: editEmpresaId,
+                cliente_id: editTipo === 'cliente' ? (editItemId || editEmpresaId) : null,
                 vendedor_nome: novoVendedor,
                 parcelas: condicaoFinal,
                 observacao: novaObs,
@@ -11744,6 +11752,8 @@
 
                 const cliente = document.getElementById('edit-cliente').value;
                 const clienteId = document.getElementById('edit-cliente-id')?.value || null;
+                const editTipoNovo = document.getElementById('edit-cliente-tipo')?.value || 'empresa';
+                const editItemIdNovo = document.getElementById('edit-cliente-item-id')?.value || null;
                 const vendedor = document.getElementById('edit-vendedor').value;
                 const parcelas = document.getElementById('edit-parcelas')?.value || '';
                 const obs = document.getElementById('edit-observacoes')?.value || '';
@@ -11826,8 +11836,9 @@
                     body: JSON.stringify({
                         status: 'orcamento',
                         valor: valorTotal,
+                        empresa_id: clienteId || null,
                         cliente_nome: cliente,
-                        cliente_id: clienteId,
+                        cliente_id: editTipoNovo === 'cliente' ? (editItemIdNovo || clienteId || null) : null,
                         vendedor_nome: vendedor,
                         parcelas: condicaoFinalNovo,
                         observacao: obs,
@@ -17616,6 +17627,8 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
         function selecionarClienteEdit(empresaId, nome, cnpj, tipo, itemId) {
             document.getElementById('edit-cliente').value = nome;
             document.getElementById('edit-cliente-id').value = empresaId || itemId;
+            document.getElementById('edit-cliente-tipo').value = tipo || 'empresa';
+            document.getElementById('edit-cliente-item-id').value = itemId || '';
             editClienteSelecionadoId = empresaId || itemId;
             document.getElementById('dropdown-edit-clientes').style.display = 'none';
 
@@ -18139,6 +18152,8 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
         function selecionarCliente(empresaId, nome, cnpj, tipo, itemId) {
             document.getElementById('novo-cliente').value = nome;
             document.getElementById('novo-cliente-id').value = empresaId || itemId;
+            document.getElementById('novo-cliente-tipo').value = tipo || 'empresa';
+            document.getElementById('novo-cliente-item-id').value = itemId || '';
             clienteSelecionadoId = empresaId || itemId;
             document.getElementById('dropdown-clientes').style.display = 'none';
 
@@ -19456,6 +19471,8 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
         async function salvarNovoOrcamento() {
             const cliente = document.getElementById('novo-cliente').value.trim();
             const clienteId = document.getElementById('novo-cliente-id').value;
+            const clienteTipo = document.getElementById('novo-cliente-tipo').value || 'empresa';
+            const clienteItemId = document.getElementById('novo-cliente-item-id').value;
             const valorTotal = parseFloat(document.getElementById('novo-valor-total').value.replace('.', '').replace(',', '.')) || 0;
             const condicaoPagamento = document.getElementById('novo-condicao-pagamento')?.value || '';
             const vendedorId = document.getElementById('novo-vendedor-id').value;
@@ -19521,6 +19538,7 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         empresa_id: clienteId || null,
+                        cliente_id: clienteTipo === 'cliente' ? (clienteItemId || clienteId || null) : null,
                         cliente_nome: cliente.toUpperCase(),
                         vendedor_id: vendedorId,
                         valor: valorTotal,

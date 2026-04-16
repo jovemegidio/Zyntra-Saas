@@ -2483,7 +2483,7 @@ apiVendasRouter.post('/pedidos', upload.array('anexos', 8), async (req, res, nex
         // Inserir pedido (dentro da transação) - TODOS OS CAMPOS
         const [result] = await connection.query(
             `INSERT INTO pedidos (
-                empresa_id, cliente_id, vendedor_id, valor, descricao, frete, redespacho, observacao, status,
+                empresa_id, cliente_id, cliente_nome, vendedor_id, valor, descricao, frete, redespacho, observacao, status,
                 condicao_pagamento, cenario_fiscal, data_previsao, departamento,
                 transportadora_nome, tipo_frete, metodo_envio, endereco_entrega, municipio_entrega,
                 prazo_entrega, placa_veiculo, veiculo_uf, rntrc, qtd_volumes, especie_volumes,
@@ -2491,9 +2491,9 @@ apiVendasRouter.post('/pedidos', upload.array('anexos', 8), async (req, res, nex
                 outras_despesas, numero_lacre, codigo_rastreio, observacao_cliente, info_complementar,
                 campos_obs_nfe, dados_adicionais_nf, projeto, contato, categoria, prioridade,
                 conta_corrente, pedido_cliente, contrato_venda, nf, desconto_pct
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
-                empresaFinalId, cliente_id, vendedor_id, valor, descrição, frete || 0.00, redespacho || false, observacao, status,
+                empresaFinalId, cliente_id, cliente_nome, vendedor_id, valor, descrição, frete || 0.00, redespacho || false, observacao, status,
                 condicao_pagamento, cenario_fiscal, previsao_faturamento, departamento,
                 transportadora_nome, tipo_frete, metodo_envio, endereco_entrega, municipio_entrega,
                 prazo_entrega, placa_veiculo, veiculo_uf, rntrc, qtd_volumes, especie_volumes,
@@ -2614,6 +2614,7 @@ apiVendasRouter.put('/pedidos/:id', upload.array('anexos', 8), async (req, res, 
     const { id } = req.params;
     // parse básico para multipart compat
     const empresa_id = req.body.empresa_id || req.body.empresaId;
+    const cliente_id = req.body.cliente_id || req.body.clienteId || null;
     const descrição = req.body.descrição;
     const frete = req.body.frete ? parseFloat(req.body.frete) : 0.00;
     const redespacho = req.body.redespacho === '1' || req.body.redespacho === true || req.body.redespacho === 'true';
@@ -2643,18 +2644,14 @@ apiVendasRouter.put('/pedidos/:id', upload.array('anexos', 8), async (req, res, 
             return res.status(403).json({ message: 'Acesso negado: somente o vendedor responsável ou admin podem editar este pedido.' });
         }
 
-        // F2-04: Bloquear edição total quando pedido já faturado/recibo/entregue
-        const STATUS_BLOQUEADO_EDICAO = ['faturado', 'recibo', 'entregue'];
-        if (STATUS_BLOQUEADO_EDICAO.includes(existing.status)) {
-            return res.status(403).json({ message: `Pedido com status "${existing.status}" não pode ser editado. Apenas pedidos em orçamento, análise ou aprovados podem ser alterados.` });
-        }
+        // F2-04: Bloquear edição total quando pedido já faturado/recibo/entregue (coberto pelo lock acima)
 
         const vendedorParaAtualizar = isAdmin && vendedor_id ? vendedor_id : existing.vendedor_id;
 
         // F1-02: NÃO aceitar body.valor — valor é calculado server-side pelo total dos itens
         const [result] = await pool.query(
-            `UPDATE pedidos SET empresa_id = ?, descrição = ?, frete = ?, redespacho = ?, observacao = ?, vendedor_id = ? WHERE id = ?`,
-            [empresa_id, descrição || null, frete || 0.00, redespacho || false, observacao || null, vendedorParaAtualizar, id]
+            `UPDATE pedidos SET empresa_id = ?, cliente_id = ?, descrição = ?, frete = ?, redespacho = ?, observacao = ?, vendedor_id = ? WHERE id = ?`,
+            [empresa_id, cliente_id || null, descrição || null, frete || 0.00, redespacho || false, observacao || null, vendedorParaAtualizar, id]
         );
         if (result.affectedRows === 0) {
             return res.status(404).json({ message: 'Pedido não encontrado.' });

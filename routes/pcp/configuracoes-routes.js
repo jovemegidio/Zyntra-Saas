@@ -2370,7 +2370,7 @@ module.exports = function registerConfiguracoesRoutes(router, deps) {
                 LIMIT 1
             `, [empresaId]);
 
-            if (nfeConfig && nfeConfig.length > 0 && nfeConfig[0].tem_certificado) {
+            if (nfeConfig && nfeConfig.length > 0 && (nfeConfig[0].tem_certificado || nfeConfig[0].validade || nfeConfig[0].nome)) {
                 const cert = nfeConfig[0];
                 const diasRestantes = cert.validade ?
                     Math.ceil((new Date(cert.validade) - new Date()) / (1000 * 60 * 60 * 24)) : null;
@@ -2381,7 +2381,7 @@ module.exports = function registerConfiguracoesRoutes(router, deps) {
                     cnpj: cert.cnpj,
                     nome: cert.nome,
                     diasRestantes: diasRestantes,
-                    status: diasRestantes > 30 ? 'valido' : diasRestantes > 0 ? 'expirando' : 'expirado',
+                    status: diasRestantes !== null ? (diasRestantes > 30 ? 'valido' : diasRestantes > 0 ? 'expirando' : 'expirado') : null,
                     created_at: cert.created_at,
                     updated_at: cert.updated_at
                 });
@@ -2396,9 +2396,14 @@ module.exports = function registerConfiguracoesRoutes(router, deps) {
             `);
 
             if (rows.length > 0) {
+                const cert = rows[0];
+                const diasRestantes = cert.validade ?
+                    Math.ceil((new Date(cert.validade) - new Date()) / (1000 * 60 * 60 * 24)) : null;
                 res.json({
                     configurado: true,
-                    ...rows[0]
+                    ...cert,
+                    diasRestantes: diasRestantes,
+                    status: diasRestantes !== null ? (diasRestantes > 30 ? 'valido' : diasRestantes > 0 ? 'expirando' : 'expirado') : null
                 });
             } else {
                 res.json({

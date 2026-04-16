@@ -45,20 +45,26 @@ function initEmailTransporter() {
 }
 
 // Função auxiliar para enviar emails
-async function sendEmail(to, subject, html, text) {
+async function sendEmail(to, subject, html, text, attachments) {
     if (!emailTransporter || !process.env.SMTP_USER) {
         logger.warn(`[EMAIL] Email não enviado (SMTP não configurado): ${subject}`);
         return { success: false, error: 'SMTP não configurado' };
     }
 
     try {
-        const info = await emailTransporter.sendMail({
-            from: `"ALUFORCE Sistema" <${process.env.SMTP_USER}>`,
+        const mailOptions = {
+            from: `"Zyntra ERP" <${process.env.SMTP_USER}>`,
             to: to,
             subject: subject,
-            text: text || html.replace(/<[^>]*>/g, ''), // Fallback text
+            text: text || html.replace(/<[^>]*>/g, ''),
             html: html
-        });
+        };
+
+        if (attachments && Array.isArray(attachments) && attachments.length > 0) {
+            mailOptions.attachments = attachments;
+        }
+
+        const info = await emailTransporter.sendMail(mailOptions);
 
         logger.info(`[EMAIL] ✅ Email enviado: ${subject} → ${to} (ID: ${info.messageId})`);
         return { success: true, messageId: info.messageId };

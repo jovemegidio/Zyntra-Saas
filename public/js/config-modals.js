@@ -56,7 +56,8 @@ async function abrirConfiguracao(tipo) {
         'sla': 'modal-sla',
         'nfse': 'modal-nfse',
         'custos-precificacao': 'modal-custos-precificacao',
-        'espelho-nf': 'modal-espelho-nf'
+        'espelho-nf': 'modal-espelho-nf',
+        'baixar-aplicativo': 'modal-baixar-aplicativo'
     };
 
     const modalId = modalMap[tipo];
@@ -1853,6 +1854,15 @@ async function saveCertificadoConfig() {
         });
 
         if (response.ok) {
+            const result = await response.json();
+            // Auto-fill the validity date from the extracted certificate info
+            if (result.info && result.info.validade) {
+                const validadeInput = form.querySelector('[name="certificado_validade"]');
+                if (validadeInput) {
+                    const dt = new Date(result.info.validade);
+                    validadeInput.value = dt.toISOString().split('T')[0];
+                }
+            }
             showNotification('Certificado salvo com sucesso!', 'success');
             closeConfigModal('modal-certificado');
             loadCertificadoData();
@@ -2156,6 +2166,47 @@ function maskTelefone(value) {
     }
 }
 
+// =========================
+// INSTALAÇÃO PWA (App Desktop/Mobile)
+// =========================
+
+let deferredPWAPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPWAPrompt = e;
+    console.log('[PWA] Prompt de instalação capturado');
+});
+
+window.addEventListener('appinstalled', () => {
+    deferredPWAPrompt = null;
+    console.log('[PWA] App instalado com sucesso');
+    const infoEl = document.getElementById('pwa-install-info');
+    if (infoEl) infoEl.style.display = 'block';
+    const btnEl = document.getElementById('btn-instalar-pwa');
+    if (btnEl) {
+        btnEl.disabled = true;
+        btnEl.innerHTML = '<i class="fas fa-check"></i> Aplicativo Instalado';
+    }
+});
+
+async function instalarPWA() {
+    if (deferredPWAPrompt) {
+        deferredPWAPrompt.prompt();
+        const { outcome } = await deferredPWAPrompt.userChoice;
+        if (outcome === 'accepted') {
+            showNotification('Aplicativo instalado com sucesso!', 'success');
+        }
+        deferredPWAPrompt = null;
+    } else if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+        showNotification('O aplicativo já está instalado neste dispositivo.', 'info');
+        const infoEl = document.getElementById('pwa-install-info');
+        if (infoEl) infoEl.style.display = 'block';
+    } else {
+        showNotification('Para instalar, use o ícone na barra de endereço do navegador (Chrome/Edge).', 'info');
+    }
+}
+
 // Exportar funções globalmente
 window.abrirConfiguracao = abrirConfiguracao;
 window.closeConfigModal = closeConfigModal;
@@ -2181,6 +2232,7 @@ window.loadClientesFornecedoresConfig = loadClientesFornecedoresConfig;
 window.saveFinanceConfig = saveFinanceConfig;
 window.loadFinancasConfig = loadFinancasConfig;
 window.loadCustosPrecificacaoData = loadCustosPrecificacaoData;
+window.instalarPWA = instalarPWA;
 // Tipos de Entrega
 window.abrirModalTiposEntrega = abrirModalTiposEntrega;
 window.abrirFormTipoEntrega = abrirFormTipoEntrega;

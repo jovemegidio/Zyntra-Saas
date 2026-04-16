@@ -287,11 +287,10 @@
             const headerInstitucional = `
         <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:16px;border-bottom:3px solid #1e40af;margin-bottom:20px;">
             <div style="display:flex;align-items:center;gap:12px;">
-                <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:28px;filter:invert(1) brightness(0);" onerror="this.style.display='none'">
-                <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;filter:invert(1) brightness(0);margin-left:6px;" onerror="this.style.display='none'">
+                <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:28px;filter:invert(1) brightness(0);" onerror="this.style.display='none'">
                 <div style="border-left:2px solid #e2e8f0;padding-left:12px;">
-                    <h2 style="margin:0;font-size:16px;color:#1e293b;font-weight:700;">ALUFORCE SISTEMAS</h2>
-                    <p style="margin:0;font-size:10px;color:#94a3b8;letter-spacing:1px;">ZYNTRA ERP — GESTÃO EMPRESARIAL INTEGRADA</p>
+                    <h2 style="margin:0;font-size:16px;color:#1e293b;font-weight:700;">ZYNTRA ERP</h2>
+                    <p style="margin:0;font-size:10px;color:#94a3b8;letter-spacing:1px;">GESTÃO EMPRESARIAL INTEGRADA</p>
                 </div>
             </div>
             <div style="text-align:right;">
@@ -360,7 +359,7 @@
                         </tr></tfoot>
                     </table>
                     <div style="margin-top:24px;padding-top:12px;border-top:1px solid #e2e8f0;text-align:center;font-size:10px;color:#94a3b8;">
-                        Relatório gerado pelo Sistema Aluforce • ${new Date().toLocaleString('pt-BR')} • Página 1/1
+                        Relatório gerado pelo Zyntra ERP • ${new Date().toLocaleString('pt-BR')} • Página 1/1
                     </div>`;
                         return;
                     }
@@ -393,7 +392,7 @@
                         <tfoot><tr style="background:#f8fafc;font-weight:700;"><td style="padding:10px 8px;border-top:2px solid #cbd5e1;">Total</td><td style="padding:10px 8px;text-align:right;border-top:2px solid #cbd5e1;">${lista.length}</td><td style="padding:10px 8px;text-align:right;border-top:2px solid #cbd5e1;color:#1e40af;">${formatarMoeda(totalGeral)}</td></tr></tfoot>
                     </table>
                     <div style="margin-top:24px;padding-top:12px;border-top:1px solid #e2e8f0;text-align:center;font-size:10px;color:#94a3b8;">
-                        Relatório gerado pelo Sistema Aluforce • ${new Date().toLocaleString('pt-BR')}
+                        Relatório gerado pelo Zyntra ERP • ${new Date().toLocaleString('pt-BR')}
                     </div>`;
                         return;
                     }
@@ -420,7 +419,7 @@
                         <tfoot><tr style="background:#f8fafc;font-weight:700;"><td colspan="2" style="padding:10px 8px;border-top:2px solid #cbd5e1;">Total: ${clientes.length} cliente(s)</td><td style="padding:10px 8px;text-align:right;border-top:2px solid #cbd5e1;">${lista.length}</td><td style="padding:10px 8px;text-align:right;border-top:2px solid #cbd5e1;color:#1e40af;">${formatarMoeda(totalGeral)}</td><td style="padding:10px 8px;text-align:right;border-top:2px solid #cbd5e1;">100%</td></tr></tfoot>
                     </table>
                     <div style="margin-top:24px;padding-top:12px;border-top:1px solid #e2e8f0;text-align:center;font-size:10px;color:#94a3b8;">
-                        Relatório gerado pelo Sistema Aluforce • ${new Date().toLocaleString('pt-BR')}
+                        Relatório gerado pelo Zyntra ERP • ${new Date().toLocaleString('pt-BR')}
                     </div>`;
                         return;
                     }
@@ -454,7 +453,7 @@
                         <tfoot><tr style="background:#f8fafc;font-weight:700;"><td colspan="5" style="padding:10px 8px;border-top:2px solid #cbd5e1;">Total: ${pedidos.length} pedido(s)</td></tr></tfoot>
                     </table>
                     <div style="margin-top:24px;padding-top:12px;border-top:1px solid #e2e8f0;text-align:center;font-size:10px;color:#94a3b8;">
-                        Relatório gerado pelo Sistema Aluforce • ${new Date().toLocaleString('pt-BR')}
+                        Relatório gerado pelo Zyntra ERP • ${new Date().toLocaleString('pt-BR')}
                     </div>`;
                     } catch (e) { content.innerHTML = headerInstitucional + '<p style="text-align:center;color:#ef4444;">Erro ao carregar dados de logística</p>'; }
                     return;
@@ -468,7 +467,7 @@
                 <p style="font-size:13px;">O relatório <strong>"${título}"</strong> será habilitado quando o módulo correspondente estiver integrado à API.</p>
             </div>
             <div style="margin-top:24px;padding-top:12px;border-top:1px solid #e2e8f0;text-align:center;font-size:10px;color:#94a3b8;">
-                Relatório gerado pelo Sistema Aluforce • ${new Date().toLocaleString('pt-BR')}
+                Relatório gerado pelo Zyntra ERP • ${new Date().toLocaleString('pt-BR')}
             </div>`;
 
             } catch (e) {
@@ -506,7 +505,7 @@
                 XLSX.utils.book_append_sheet(wb, ws, 'Dados' + (tables.length > 1 ? '_' + (i + 1) : ''));
             });
             // Summary sheet
-            const summaryData = [['Relatório', titulo], ['Emitido em', new Date().toLocaleString('pt-BR')], ['Sistema', 'Aluforce / Zyntra ERP']];
+            const summaryData = [['Relatório', titulo], ['Emitido em', new Date().toLocaleString('pt-BR')], ['Sistema', 'Zyntra ERP']];
             const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
             XLSX.utils.book_append_sheet(wb, wsSummary, 'Info');
             XLSX.writeFile(wb, 'relatorio_' + titulo.replace(/[^a-zA-Z0-9\u00C0-\u024F]/g, '_') + '_' + new Date().toISOString().slice(0, 10) + '.xlsx');
@@ -541,7 +540,7 @@
     </style></head><body>
     <div class="print-header">
         <div class="brand">
-            <div style="background:#1e40af;color:white;padding:6px 14px;border-radius:4px;"><span class="brand-name">ALUFORCE</span></div>
+            <div style="background:#1e40af;color:white;padding:6px 14px;border-radius:4px;"><span class="brand-name">ZYNTRA</span></div>
             <div style="border-left:2px solid #e2e8f0;padding-left:10px;"><div style="font-size:15px;font-weight:700;color:#1e40af;">Zyntra ERP</div><div class="brand-sub">GEST\u00C3O EMPRESARIAL INTEGRADA</div></div>
         </div>
         <div class="print-meta"><strong>${titulo}</strong><span>Emitido em: ${new Date().toLocaleString('pt-BR')}</span></div>
