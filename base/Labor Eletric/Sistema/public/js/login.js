@@ -97,31 +97,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // returnTo detectado — será aplicado após login bem-sucedido
   }
 
-  // ==================== SESSÃO EXPIRADA: TOAST DE AVISO ====================
-  const loginReason = urlParams.get('reason');
-  if (loginReason === 'session_expired') {
-    // Exibir aviso de sessão expirada após o DOM estar pronto
-    setTimeout(() => {
-      try {
-        if (typeof window.showToast === 'function') {
-          window.showToast('warning', 'Sessão expirada', 'Sua sessão expirou por inatividade. Faça login novamente.', 6000);
-        } else {
-          // Fallback: criar toast inline se showToast não estiver disponível na login page
-          const toast = document.createElement('div');
-          toast.className = 'session-expired-toast';
-          toast.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Sua sessão expirou por inatividade. Faça login novamente.';
-          toast.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#f59e0b;color:#fff;padding:12px 24px;border-radius:8px;font-size:14px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,.2);display:flex;align-items:center;gap:8px;animation:fadeIn .3s ease';
-          document.body.appendChild(toast);
-          setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity .5s'; setTimeout(() => toast.remove(), 500); }, 6000);
-        }
-      } catch (e) { /* ignore toast errors */ }
-    }, 300);
-    // Limpar o parâmetro da URL sem recarregar (evita re-exibir ao refresh)
-    const cleanUrl = new URL(window.location);
-    cleanUrl.searchParams.delete('reason');
-    window.history.replaceState({}, '', cleanUrl.toString());
-  }
-
   // Limpeza preventiva ao abrir a tela de login
   try { if (window.AluforceAuth && typeof AluforceAuth.clearAuth === 'function') AluforceAuth.clearAuth(); } catch {}
   try { ['chatSupportUser','chatSupportConversations','chatSupportTickets','chatUser','supportTickets','chatVoiceEnabled'].forEach(k => localStorage.removeItem(k)); } catch {}
@@ -171,6 +146,22 @@ document.addEventListener('DOMContentLoaded', () => {
     return fetch(path, options);
   }
 
+  // ==================== MULTI-COMPANY ROUTING ====================
+  // Mapeia domínios de email para o base path de cada empresa
+  const COMPANY_DOMAINS = {
+    '@energy.com.br': '/labor-energy',
+    '@laboreletric.com.br': '/labor-eletric'
+  };
+
+  function getCompanyBasePath(email) {
+    if (!email) return window.__BASE_PATH || '';
+    const emailLower = email.toLowerCase();
+    for (const [domain, basePath] of Object.entries(COMPANY_DOMAINS)) {
+      if (emailLower.endsWith(domain)) return basePath;
+    }
+    return window.__BASE_PATH || '';
+  }
+
   // ==================== AVATAR SYSTEM ====================
   const avatarNameMap = {
     'ti': 'TI.webp', 'tialuforce': 'TI.webp', 'admin': 'admin.webp',
@@ -201,7 +192,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function fetchUserPhotoFromAPI(email) {
     try {
-      const response = await fetch(`/api/public/usuarios/foto/${encodeURIComponent(email)}`);
+      // Multi-company: buscar foto no backend correto
+      const _photoBasePath = getCompanyBasePath(email);
+      const _photoPrefix = (_photoBasePath && !window.__BASE_PATH) ? _photoBasePath : '';
+      const response = await fetch(`${_photoPrefix}/api/public/usuarios/foto/${encodeURIComponent(email)}`);
       if (!response.ok) return null;
       const data = await response.json();
       if (data.success && data.foto) return { foto: data.foto, nome: data.nome || null, apelido: data.apelido || null };
@@ -315,7 +309,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Fallback: local avatars
-    const dominiosPermitidos = ['aluforce', 'lumiereassesoria', 'lumiereassessoria'];
+    const dominiosPermitidos = ['aluforce', 'lumiereassesoria', 'lumiereassessoria', 'energy', 'laboreletric'];
     const domainMatch = emailParts[1] && dominiosPermitidos.some(d => emailParts[1].includes(d));
 
     if (domainMatch) {
@@ -326,7 +320,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setAvatarInitials(firstName);
       }
     } else {
-      setAvatarUser();
+      setAvatarInitials(firstName);
     }
   }
 
@@ -340,12 +334,12 @@ document.addEventListener('DOMContentLoaded', () => {
       avatarBox.appendChild(img);
     };
     img.onerror = () => {
-      const dominiosPermitidos = ['aluforce', 'lumiereassesoria', 'lumiereassessoria'];
+      const dominiosPermitidos = ['aluforce', 'lumiereassesoria', 'lumiereassessoria', 'energy', 'laboreletric'];
       const domainMatch = domain && dominiosPermitidos.some(d => domain.includes(d));
       if (domainMatch) {
         setAvatarInitials(firstName);
       } else {
-        setAvatarUser();
+        setAvatarInitials(firstName);
       }
     };
   }
@@ -817,7 +811,11 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         loginPayload.email = username;
       }
-      const response = await apiFetch('/api/login', {
+      // Multi-company: detectar empresa pelo domínio do email
+      const _companyPath = getCompanyBasePath(username);
+      const _needsPrefix = _companyPath && !window.__BASE_PATH;
+      const _loginUrl = _needsPrefix ? _companyPath + '/api/login' : '/api/login';
+      const response = await apiFetch(_loginUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -891,10 +889,16 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) {}
         if (redirectTo === '/index.html' || redirectTo === '/index.html/') redirectTo = '/dashboard';
 
+        // Multi-company: garantir que o redirect inclui o base path correto
+        if (_companyPath && !redirectTo.startsWith(_companyPath)) {
+          redirectTo = _companyPath + redirectTo;
+        }
+
         // Remember me token
         if (rememberCheckbox && rememberCheckbox.checked && data.user) {
           try {
-            await apiFetch('/api/auth/create-remember-token', {
+            const _rememberUrl = _needsPrefix ? _companyPath + '/api/auth/create-remember-token' : '/api/auth/create-remember-token';
+            await apiFetch(_rememberUrl, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               credentials: 'include',
@@ -907,12 +911,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Preload
         try {
-          const linkCSS = document.createElement('link'); linkCSS.rel = 'prefetch'; linkCSS.href = '/css/skeleton-loader.css'; document.head.appendChild(linkCSS);
-          const linkJS = document.createElement('link'); linkJS.rel = 'prefetch'; linkJS.href = '/js/performance-utils.js'; document.head.appendChild(linkJS);
+          const _cssHref = _companyPath ? _companyPath + '/css/skeleton-loader.css' : '/css/skeleton-loader.css';
+          const _jsHref = _companyPath ? _companyPath + '/js/performance-utils.js' : '/js/performance-utils.js';
+          const linkCSS = document.createElement('link'); linkCSS.rel = 'prefetch'; linkCSS.href = _cssHref; document.head.appendChild(linkCSS);
+          const linkJS = document.createElement('link'); linkJS.rel = 'prefetch'; linkJS.href = _jsHref; document.head.appendChild(linkJS);
         } catch(e) {}
 
         try {
-          const meResp = await apiFetch('/api/me', {
+          const _meUrl = _needsPrefix ? _companyPath + '/api/me' : '/api/me';
+          const meResp = await apiFetch(_meUrl, {
             credentials: 'include'
           });
           if (meResp.ok) {
@@ -926,22 +933,27 @@ document.addEventListener('DOMContentLoaded', () => {
               const decodedReturn = decodeURIComponent(returnTo);
               if (decodedReturn.startsWith('/') && !decodedReturn.startsWith('//')) {
                 finalRedirect = decodedReturn;
+                // Garantir base path no returnTo tamb\u00e9m
+                if (_companyPath && !finalRedirect.startsWith(_companyPath)) {
+                  finalRedirect = _companyPath + finalRedirect;
+                }
               }
             }
             window.location.href = finalRedirect;
             return;
           } else {
-            throw new Error('Sessão não confirmada.');
+            throw new Error('Sess\u00e3o n\u00e3o confirmada.');
           }
         } catch (e) {
-          throw new Error('Falha ao verificar sessão: ' + e.message);
+          throw new Error('Falha ao verificar sess\u00e3o: ' + e.message);
         }
       }
 
       // No redirect suggested - verify session
       if (rememberCheckbox && rememberCheckbox.checked && data.user) {
         try {
-          await apiFetch('/api/auth/create-remember-token', {
+          const _rememberUrl2 = _needsPrefix ? _companyPath + '/api/auth/create-remember-token' : '/api/auth/create-remember-token';
+          await apiFetch(_rememberUrl2, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
@@ -951,7 +963,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       try {
-        const meResp = await apiFetch('/api/me', {
+        const _meUrl2 = _needsPrefix ? _companyPath + '/api/me' : '/api/me';
+        const meResp = await apiFetch(_meUrl2, {
           credentials: 'include'
         });
         if (meResp.ok) {
@@ -960,17 +973,22 @@ document.addEventListener('DOMContentLoaded', () => {
           localStorage.setItem('userData', freshJson);
           sessionStorage.setItem('tabUserData', freshJson);
 
-          let finalRedirect = '/dashboard';
+          let finalRedirect = _companyPath ? _companyPath + '/dashboard' : '/dashboard';
           if (returnTo) {
             const decodedReturn = decodeURIComponent(returnTo);
-            if (decodedReturn.startsWith('/') && !decodedReturn.startsWith('//')) finalRedirect = decodedReturn;
+            if (decodedReturn.startsWith('/') && !decodedReturn.startsWith('//')) {
+              finalRedirect = decodedReturn;
+              if (_companyPath && !finalRedirect.startsWith(_companyPath)) {
+                finalRedirect = _companyPath + finalRedirect;
+              }
+            }
           }
           window.location.href = finalRedirect;
         } else {
-          throw new Error('Falha ao autenticar sessão.');
+          throw new Error('Falha ao autenticar sess\u00e3o.');
         }
       } catch (e) {
-        throw new Error('Falha ao autenticar sessão. Tente novamente.');
+        throw new Error('Falha ao autenticar sess\u00e3o. Tente novamente.');
       }
     } catch (error) {
       console.error('[LOGIN] ❌ Erro no login:', error);

@@ -18,7 +18,7 @@ const router = express.Router();
 // Persistido no banco (colunas login_attempts, locked_until na tabela usuarios)
 // com cache in-memory como fallback se o DB estiver indisponível
 // ============================================================================
-const MAX_LOGIN_ATTEMPTS = 4;
+const MAX_LOGIN_ATTEMPTS = 5;
 const LOCKOUT_DURATION_MS = 15 * 60 * 1000; // 15 minutos
 const loginAttemptsCache = new Map(); // fallback in-memory
 
@@ -238,7 +238,7 @@ router.post('/login', validate(schemas.login), async (req, res) => {
             if (cpf.length !== 11) {
                 return res.status(400).json({ message: 'CPF deve conter 11 dígitos.' });
             }
-            if (isDevMode) console.log('[AUTH/LOGIN] Tentativa de login por CPF:', `${cpf.substring(0, 3) }...`);
+            if (isDevMode) console.log('[AUTH/LOGIN] Tentativa de login por CPF:', cpf.substring(0, 3) + '...');
 
             // Look up email AND senha from funcionarios table by CPF
             try {
@@ -247,8 +247,8 @@ router.post('/login', validate(schemas.login), async (req, res) => {
                     [cpf]
                 );
                 if (!funcRows.length) {
-                    await recordFailedLogin(`cpf:${ cpf}`);
-                    return res.status(401).json({ message: 'CPF ou senha incorretos.' });
+                    await recordFailedLogin('cpf:' + cpf);
+                    return res.status(401).json({ message: 'Login ou senha incorretos.' });
                 }
                 email = funcRows[0].email;
                 funcSenha = funcRows[0].senha || null;
@@ -263,24 +263,29 @@ router.post('/login', validate(schemas.login), async (req, res) => {
 
         if (isDevMode) console.log('[AUTH/LOGIN] Tentativa de login para:', email);
 
-        // Se o usuário digitou apenas o login sem @, adicionar @aluforce.ind.br
+        // Se o usuário digitou apenas o login sem @, adicionar domínio padrão
         if (email && !email.includes('@')) {
-            email = `${email }@aluforce.ind.br`;
+            email = `${email}${process.env.DEFAULT_EMAIL_DOMAIN || '@aluforce.ind.br'}`;
         }
 
-        // Domínios permitidos para login
-        const dominiosPermitidos = [
+        // Domínios permitidos para login (configurável via .env)
+        const defaultDomains = [
             '@aluforce.ind.br',
             '@aluforce.com',
-            '@lumiereassesoria.com.br', // Consultoria parceira (grafia alternativa)
-            '@lumiereassessoria.com.br', // Consultoria parceira (grafia oficial com SS)
-            '@zyntra.com.br' // Zyntra Demo
+            '@energy.com.br',
+            '@laboreletric.com.br',
+            '@lumiereassesoria.com.br',   // Consultoria parceira (grafia alternativa)
+            '@lumiereassessoria.com.br',  // Consultoria parceira (grafia oficial com SS)
+            '@zyntra.com.br'             // Zyntra Demo
         ];
+        const dominiosPermitidos = process.env.ALLOWED_EMAIL_DOMAINS
+            ? process.env.ALLOWED_EMAIL_DOMAINS.split(',').map(d => d.trim())
+            : defaultDomains;
 
         const emailValido = dominiosPermitidos.some(dominio => email && email.endsWith(dominio));
 
         if (!isCpfLogin && (!email || !emailValido)) {
-            return res.status(401).json({ message: 'Apenas e-mails @aluforce.ind.br, @aluforce.com e @lumiereassessoria.com.br são permitidos.' });
+            return res.status(401).json({ message: 'E-mail não autorizado. Domínios permitidos: ' + dominiosPermitidos.join(', ') });
         }
 
         // ========================================
@@ -337,14 +342,14 @@ router.post('/login', validate(schemas.login), async (req, res) => {
                         // Sincronizar senha do funcionarios → usuarios (para que a senha usada no RH funcione)
                         if (f.senha) {
                             await safeQuery(
-                                'UPDATE usuarios SET senha_hash = ?, password_hash = ? WHERE id = ?',
+                                `UPDATE usuarios SET senha_hash = ?, password_hash = ? WHERE id = ?`,
                                 [f.senha, f.senha, foundUser.id]
                             );
                         }
                         // Sincronizar foto se usuarios tem NULL
                         if ((!foundUser.foto || !foundUser.avatar) && f.foto_perfil_url) {
                             await safeQuery(
-                                'UPDATE usuarios SET foto = COALESCE(foto, ?), avatar = COALESCE(avatar, ?) WHERE id = ?',
+                                `UPDATE usuarios SET foto = COALESCE(foto, ?), avatar = COALESCE(avatar, ?) WHERE id = ?`,
                                 [f.foto_perfil_url, f.foto_perfil_url, foundUser.id]
                             );
                         }
@@ -408,7 +413,7 @@ router.post('/login', validate(schemas.login), async (req, res) => {
                         `SELECT email FROM funcionarios
                          WHERE LOWER(nome_completo) LIKE ? ESCAPE '\\\\' AND LOWER(nome_completo) LIKE ? ESCAPE '\\\\'
                          LIMIT 1`,
-                        [`${escapeLike(firstName) }%`, `%${ escapeLike(lastName) }%`]
+                        [escapeLike(firstName) + '%', '%' + escapeLike(lastName) + '%']
                     );
                     if (funcMatch.length && funcMatch[0].email) {
                         const realEmail = funcMatch[0].email;
@@ -431,7 +436,7 @@ router.post('/login', validate(schemas.login), async (req, res) => {
             // ACCOUNT LOCKOUT: registrar tentativa falha mesmo sem usuário encontrado
             await recordFailedLogin(email);
             // AUDIT-FIX SEC-007: Generic message prevents user enumeration
-            return res.status(401).json({ message: isCpfLogin ? 'CPF ou senha incorretos.' : 'Email ou senha incorretos.' });
+            return res.status(401).json({ message: 'Login ou senha incorretos.' });
         }
         const user = rows[0];
 
@@ -449,7 +454,7 @@ router.post('/login', validate(schemas.login), async (req, res) => {
             await auditLog('login_blocked_inactive', user.id, `Login bloqueado - status=${statusUsuario}: ${user.email}`, req);
             console.log(`🚫 Login bloqueado - Usuário inativo (status=${statusUsuario}): ${user.email}`);
             return res.status(403).json({
-                message: 'Acesso negado. Seu usuário foi desativado. Entre em contato com o departamento de TI.'
+                message: 'Conta desativada. Contate o administrador.'
             });
         }
         // ========================================
@@ -488,7 +493,7 @@ router.post('/login', validate(schemas.login), async (req, res) => {
                         const hashedPw = await bcrypt.hash(password, 12);
                         // If possible, update to a hash field
                         const hashFieldName = hashField === 'senha' ? 'senha_hash' : hashField;
-                        await safeQuery('UPDATE usuarios SET senha_hash = ? WHERE id = ?', [hashedPw, user.id]);
+                        await safeQuery(`UPDATE usuarios SET senha_hash = ? WHERE id = ?`, [hashedPw, user.id]);
                         console.log(`[AUTH/LOGIN] 🔒 Auto-migrated plaintext password to bcrypt for user ${user.id}`);
                     } catch (migrationErr) {
                         console.error('[AUTH/LOGIN] ⚠️ Failed to auto-migrate password:', migrationErr.message);
@@ -536,12 +541,11 @@ router.post('/login', validate(schemas.login), async (req, res) => {
                 });
             }
             // AUDIT-FIX SEC-007: Same message as user-not-found to prevent enumeration
-            return res.status(401).json({ message: isCpfLogin ? 'CPF ou senha incorretos.' : 'Email ou senha incorretos.' });
+            return res.status(401).json({ message: 'Login ou senha incorretos.' });
         }
 
         // ACCOUNT LOCKOUT: login bem-sucedido, resetar contador
         await resetLoginAttempts(email);
-        console.log(`[AUTH/LOGIN] \u2705 Login bem-sucedido: ${email} (IP: ${req.ip}) — contador de tentativas resetado`);
 
         // ════════════════════════════════════════════════════════════════
         // 🔐 2FA - AUTENTICAÇÃO DE DOIS FATORES VIA EMAIL
@@ -552,9 +556,9 @@ router.post('/login', validate(schemas.login), async (req, res) => {
         const requires2FA = await twoFactorService.requires2FA(pool, user.id);
 
         if (requires2FA) {
-            try {
+        try {
             // Criar tabela de dispositivos confiáveis se não existir
-                await safeQuery(`
+            await safeQuery(`
                 CREATE TABLE IF NOT EXISTS auth_trusted_devices (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     usuario_id INT NOT NULL,
@@ -569,57 +573,57 @@ router.post('/login', validate(schemas.login), async (req, res) => {
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             `);
 
-                // 🔍 Verificar se o dispositivo já é confiável (cookie OU body param)
-                const trustedDeviceCookie = req.cookies && req.cookies['trusted_device_2fa'];
-                const trustedDeviceBody = trustedDeviceToken; // Backup via localStorage
-                const trustedTokenToCheck = trustedDeviceCookie || trustedDeviceBody || null;
+            // 🔍 Verificar se o dispositivo já é confiável (cookie OU body param)
+            const trustedDeviceCookie = req.cookies && req.cookies['trusted_device_2fa'];
+            const trustedDeviceBody = trustedDeviceToken; // Backup via localStorage
+            const trustedTokenToCheck = trustedDeviceCookie || trustedDeviceBody || null;
 
-                console.log(`[AUTH/2FA] 🔍 Verificando dispositivo confiável para userId ${user.id}`);
-                console.log(`[AUTH/2FA]   - Cookie trusted_device_2fa: ${trustedDeviceCookie ? 'PRESENTE' : 'AUSENTE'}`);
-                console.log(`[AUTH/2FA]   - Body trustedDeviceToken: ${trustedDeviceBody ? 'PRESENTE' : 'AUSENTE'}`);
+            console.log(`[AUTH/2FA] 🔍 Verificando dispositivo confiável para userId ${user.id}`);
+            console.log(`[AUTH/2FA]   - Cookie trusted_device_2fa: ${trustedDeviceCookie ? 'PRESENTE' : 'AUSENTE'}`);
+            console.log(`[AUTH/2FA]   - Body trustedDeviceToken: ${trustedDeviceBody ? 'PRESENTE' : 'AUSENTE'}`);
 
-                if (trustedTokenToCheck) {
+            if (trustedTokenToCheck) {
                 // Limpar dispositivos expirados
-                    await safeQuery('DELETE FROM auth_trusted_devices WHERE expira_em < NOW()');
+                await safeQuery('DELETE FROM auth_trusted_devices WHERE expira_em < NOW()');
 
-                    const [trustedRows] = await safeQuery(
-                        'SELECT 1 FROM auth_trusted_devices WHERE device_token = ? AND usuario_id = ? AND expira_em > NOW()',
-                        [trustedTokenToCheck, user.id]
-                    );
+                const [trustedRows] = await safeQuery(
+                    'SELECT 1 FROM auth_trusted_devices WHERE device_token = ? AND usuario_id = ? AND expira_em > NOW()',
+                    [trustedTokenToCheck, user.id]
+                );
 
-                    console.log(`[AUTH/2FA]   - Registros encontrados no DB: ${trustedRows ? trustedRows.length : 0}`);
+                console.log(`[AUTH/2FA]   - Registros encontrados no DB: ${trustedRows ? trustedRows.length : 0}`);
 
-                    if (trustedRows && trustedRows.length > 0) {
-                        console.log(`[AUTH/2FA] ✅ Dispositivo confiável encontrado para ${user.email} - pulando 2FA (via ${trustedDeviceCookie ? 'cookie' : 'localStorage'})`);
+                if (trustedRows && trustedRows.length > 0) {
+                    console.log(`[AUTH/2FA] ✅ Dispositivo confiável encontrado para ${user.email} - pulando 2FA (via ${trustedDeviceCookie ? 'cookie' : 'localStorage'})`);
 
-                        // Renovar o cookie caso tenha vindo só pelo body (cookie perdido)
-                        if (!trustedDeviceCookie && trustedDeviceBody) {
-                            console.log('[AUTH/2FA] 🔄 Renovando cookie trusted_device_2fa (estava ausente)');
-                            const trustedCookieOpts = {
-                                httpOnly: true,
-                                path: '/',
-                                maxAge: 30 * 24 * 60 * 60 * 1000,
-                                sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax'
-                            };
-                            if (process.env.NODE_ENV === 'production') {
-                                trustedCookieOpts.secure = true;
-                            }
-                            res.cookie('trusted_device_2fa', trustedDeviceBody, trustedCookieOpts);
+                    // Renovar o cookie caso tenha vindo só pelo body (cookie perdido)
+                    if (!trustedDeviceCookie && trustedDeviceBody) {
+                        console.log(`[AUTH/2FA] 🔄 Renovando cookie trusted_device_2fa (estava ausente)`);
+                        const trustedCookieOpts = {
+                            httpOnly: true,
+                            path: '/',
+                            maxAge: 30 * 24 * 60 * 60 * 1000,
+                            sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax'
+                        };
+                        if (process.env.NODE_ENV === 'production') {
+                            trustedCookieOpts.secure = true;
                         }
-
-                        // Throw para sair do try e cair no login normal
-                        const skipError = new Error('SKIP_2FA_TRUSTED_DEVICE');
-                        skipError.skipToLogin = true;
-                        throw skipError;
-                    } else {
-                        console.log(`[AUTH/2FA] ⚠️ Token de dispositivo presente mas não encontrado no DB para user ${user.id}`);
+                        res.cookie('trusted_device_2fa', trustedDeviceBody, trustedCookieOpts);
                     }
-                } else {
-                    console.log('[AUTH/2FA] ℹ️ Nenhum token de dispositivo confiável encontrado - 2FA será exigido');
-                }
 
-                // Criar tabela de códigos 2FA se não existir
-                await safeQuery(`
+                    // Throw para sair do try e cair no login normal
+                    const skipError = new Error('SKIP_2FA_TRUSTED_DEVICE');
+                    skipError.skipToLogin = true;
+                    throw skipError;
+                } else {
+                    console.log(`[AUTH/2FA] ⚠️ Token de dispositivo presente mas não encontrado no DB para user ${user.id}`);
+                }
+            } else {
+                console.log(`[AUTH/2FA] ℹ️ Nenhum token de dispositivo confiável encontrado - 2FA será exigido`);
+            }
+
+            // Criar tabela de códigos 2FA se não existir
+            await safeQuery(`
                 CREATE TABLE IF NOT EXISTS auth_2fa_codes (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     pending_token VARCHAR(100) NOT NULL UNIQUE,
@@ -635,74 +639,74 @@ router.post('/login', validate(schemas.login), async (req, res) => {
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             `);
 
-                // Gerar código de 6 dígitos
-                const codigo2FA = crypto.randomInt(100000, 999999).toString();
-                const pendingToken = uuidv4();
-                const expiraEm = new Date(Date.now() + 5 * 60 * 1000); // 5 minutos
+            // Gerar código de 6 dígitos
+            const codigo2FA = crypto.randomInt(100000, 999999).toString();
+            const pendingToken = uuidv4();
+            const expiraEm = new Date(Date.now() + 5 * 60 * 1000); // 5 minutos
 
-                // Limpar códigos antigos deste usuário
-                await safeQuery('DELETE FROM auth_2fa_codes WHERE usuario_id = ? OR expira_em < NOW()', [user.id]);
+            // Limpar códigos antigos deste usuário
+            await safeQuery('DELETE FROM auth_2fa_codes WHERE usuario_id = ? OR expira_em < NOW()', [user.id]);
 
-                // Salvar código no banco
-                await safeQuery(
-                    'INSERT INTO auth_2fa_codes (pending_token, usuario_id, codigo, email, expira_em) VALUES (?, ?, ?, ?, ?)',
-                    [pendingToken, user.id, codigo2FA, user.email, expiraEm]
-                );
+            // Salvar código no banco
+            await safeQuery(
+                'INSERT INTO auth_2fa_codes (pending_token, usuario_id, codigo, email, expira_em) VALUES (?, ?, ?, ?, ?)',
+                [pendingToken, user.id, codigo2FA, user.email, expiraEm]
+            );
 
-                // Capturar informações do dispositivo para o email
-                const loginIP = req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || req.connection.remoteAddress || 'Desconhecido';
-                const loginUA = req.headers['user-agent'] || 'Desconhecido';
-                const loginDate = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+            // Capturar informações do dispositivo para o email
+            const loginIP = req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || req.connection.remoteAddress || 'Desconhecido';
+            const loginUA = req.headers['user-agent'] || 'Desconhecido';
+            const loginDate = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
 
-                // Extrair navegador e SO do user-agent
-                const parseBrowser = (ua) => {
-                    if (!ua || ua === 'Desconhecido') return 'Desconhecido';
-                    let browser = 'Navegador desconhecido';
-                    let os = '';
-                    if (ua.includes('Edg/')) browser = `Edge ${ (ua.match(/Edg\/(\d+)/) || [])[1]}`;
-                    else if (ua.includes('Chrome/')) browser = `Chrome ${ (ua.match(/Chrome\/(\d+)/) || [])[1]}`;
-                    else if (ua.includes('Firefox/')) browser = `Firefox ${ (ua.match(/Firefox\/(\d+)/) || [])[1]}`;
-                    else if (ua.includes('Safari/') && !ua.includes('Chrome')) browser = 'Safari';
-                    if (ua.includes('Windows NT 10')) os = 'Windows 10';
-                    else if (ua.includes('Windows NT')) os = 'Windows';
-                    else if (ua.includes('Mac OS X')) os = 'macOS';
-                    else if (ua.includes('Linux')) os = 'Linux';
-                    else if (ua.includes('Android')) os = 'Android';
-                    else if (ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS';
-                    return os ? `${browser} no ${os}` : browser;
-                };
-                const browserInfo = parseBrowser(loginUA);
+            // Extrair navegador e SO do user-agent
+            const parseBrowser = (ua) => {
+                if (!ua || ua === 'Desconhecido') return 'Desconhecido';
+                let browser = 'Navegador desconhecido';
+                let os = '';
+                if (ua.includes('Edg/')) browser = 'Edge ' + (ua.match(/Edg\/(\d+)/)||[])[1];
+                else if (ua.includes('Chrome/')) browser = 'Chrome ' + (ua.match(/Chrome\/(\d+)/)||[])[1];
+                else if (ua.includes('Firefox/')) browser = 'Firefox ' + (ua.match(/Firefox\/(\d+)/)||[])[1];
+                else if (ua.includes('Safari/') && !ua.includes('Chrome')) browser = 'Safari';
+                if (ua.includes('Windows NT 10')) os = 'Windows 10';
+                else if (ua.includes('Windows NT')) os = 'Windows';
+                else if (ua.includes('Mac OS X')) os = 'macOS';
+                else if (ua.includes('Linux')) os = 'Linux';
+                else if (ua.includes('Android')) os = 'Android';
+                else if (ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS';
+                return os ? `${browser} no ${os}` : browser;
+            };
+            const browserInfo = parseBrowser(loginUA);
 
-                // Enviar email com o código em BACKGROUND (não bloqueia a resposta)
-                // O código já foi salvo no banco, então mesmo que o email demore, o usuário pode aguardar
-                const emailPromise = (async () => {
-                    let emailEnviado = false;
-                    let emailErro = null;
+            // Enviar email com o código em BACKGROUND (não bloqueia a resposta)
+            // O código já foi salvo no banco, então mesmo que o email demore, o usuário pode aguardar
+            const emailPromise = (async () => {
+                let emailEnviado = false;
+                let emailErro = null;
 
-                    for (let tentativa = 1; tentativa <= 3; tentativa++) {
-                        try {
-                            const nodemailer = require('nodemailer');
-                            const transporter = nodemailer.createTransport({
-                                host: process.env.SMTP_HOST || 'mail.aluforce.ind.br',
-                                port: parseInt(process.env.SMTP_PORT) || 465,
-                                secure: (process.env.SMTP_SECURE !== 'false'),
-                                auth: {
-                                    user: process.env.SMTP_USER,
-                                    pass: process.env.SMTP_PASS
-                                },
-                                tls: { rejectUnauthorized: process.env.NODE_ENV === 'production' },
-                                connectionTimeout: 10000,
-                                greetingTimeout: 10000,
-                                socketTimeout: 15000
-                            });
+                for (let tentativa = 1; tentativa <= 3; tentativa++) {
+                    try {
+                        const nodemailer = require('nodemailer');
+                        const transporter = nodemailer.createTransport({
+                            host: process.env.SMTP_HOST || 'mail.aluforce.ind.br',
+                            port: parseInt(process.env.SMTP_PORT) || 465,
+                            secure: (process.env.SMTP_SECURE !== 'false'),
+                            auth: {
+                                user: process.env.SMTP_USER,
+                                pass: process.env.SMTP_PASS
+                            },
+                            tls: { rejectUnauthorized: process.env.NODE_ENV === 'production' },
+                            connectionTimeout: 10000,
+                            greetingTimeout: 10000,
+                            socketTimeout: 15000
+                        });
 
-                            const nomeUsuario = (user.nome || user.email.split('@')[0]).split(' ')[0];
+                    const nomeUsuario = (user.nome || user.email.split('@')[0]).split(' ')[0];
 
-                            await transporter.sendMail({
-                                from: `"Zyntra" <${process.env.SMTP_USER || 'sistema@aluforce.ind.br'}>`,
-                                to: user.email,
-                                subject: 'Código de verificação Zyntra',
-                                html: `
+                    await transporter.sendMail({
+                        from: `"Zyntra" <${process.env.SMTP_USER || 'sistema@aluforce.ind.br'}>`,
+                        to: user.email,
+                        subject: `Código de verificação Zyntra`,
+                        html: `
 <div style="margin:0;padding:0;background-color:#1a1a2e;width:100%;">
   <table role="presentation" cellpadding="0" cellspacing="0" width="100%" bgcolor="#1a1a2e" style="background-color:#1a1a2e;">
     <tr><td align="center" bgcolor="#1a1a2e" style="padding:32px 16px;background-color:#1a1a2e;">
@@ -762,53 +766,53 @@ router.post('/login', validate(schemas.login), async (req, res) => {
   </table>
 </div>
                         `
-                            });
-
-                            emailEnviado = true;
-                            console.log(`[AUTH/2FA] ✅ Código 2FA enviado para ${user.email} (tentativa ${tentativa})`);
-                            break; // Sucesso, sair do loop de retry
-
-                        } catch (retryErr) {
-                            emailErro = retryErr;
-                            console.error(`[AUTH/2FA] ⚠️ Tentativa ${tentativa}/3 falhou:`, retryErr.message);
-                            if (tentativa < 3) {
-                                // Aguardar antes de retentar (1s, 2s)
-                                await new Promise(r => setTimeout(r, tentativa * 1000));
-                            }
-                        }
-                    }
-
-                    if (!emailEnviado) {
-                        console.error('[AUTH/2FA] ❌ Todas as 3 tentativas de envio falharam:', emailErro?.message);
-                        // Nota: o código já foi salvo no banco, o usuário pode solicitar reenvio
-                    }
-                })().catch(err => {
-                    console.error('[AUTH/2FA] ❌ Erro no envio assíncrono do email:', err.message);
-                });
-
-                // Responder IMEDIATAMENTE ao cliente (email é enviado em background)
-                // O código 2FA já foi salvo no banco de dados
-                const emailParts = user.email.split('@');
-                const maskedEmail = `${emailParts[0].substring(0, 2) }***@${ emailParts[1]}`;
-
-                return res.json({
-                    requires2FA: true,
-                    pendingToken,
-                    maskedEmail,
-                    message: 'Código de verificação enviado para seu email.'
-                });
-            } catch (twoFAErr) {
-                if (twoFAErr.skipToLogin) {
-                    console.log('[AUTH/2FA] ✅ Dispositivo confiável - prosseguindo para login direto');
-                // Cai no fluxo normal de login abaixo
-                } else {
-                    console.error('[AUTH/2FA] ⚠️ Erro no sistema 2FA:', twoFAErr.message);
-                    // SECURITY: Do NOT allow login without 2FA on failure (prevents 2FA bypass)
-                    return res.status(503).json({
-                        message: 'Serviço de verificação temporariamente indisponível. Tente novamente em alguns instantes.'
                     });
+
+                    emailEnviado = true;
+                    console.log(`[AUTH/2FA] ✅ Código 2FA enviado para ${user.email} (tentativa ${tentativa})`);
+                    break; // Sucesso, sair do loop de retry
+
+                } catch (retryErr) {
+                    emailErro = retryErr;
+                    console.error(`[AUTH/2FA] ⚠️ Tentativa ${tentativa}/3 falhou:`, retryErr.message);
+                    if (tentativa < 3) {
+                        // Aguardar antes de retentar (1s, 2s)
+                        await new Promise(r => setTimeout(r, tentativa * 1000));
+                    }
                 }
             }
+
+            if (!emailEnviado) {
+                console.error('[AUTH/2FA] ❌ Todas as 3 tentativas de envio falharam:', emailErro?.message);
+                // Nota: o código já foi salvo no banco, o usuário pode solicitar reenvio
+            }
+            })().catch(err => {
+                console.error('[AUTH/2FA] ❌ Erro no envio assíncrono do email:', err.message);
+            });
+
+            // Responder IMEDIATAMENTE ao cliente (email é enviado em background)
+            // O código 2FA já foi salvo no banco de dados
+            const emailParts = user.email.split('@');
+            const maskedEmail = emailParts[0].substring(0, 2) + '***@' + emailParts[1];
+
+            return res.json({
+                requires2FA: true,
+                pendingToken: pendingToken,
+                maskedEmail: maskedEmail,
+                message: 'Código de verificação enviado para seu email.'
+            });
+        } catch (twoFAErr) {
+            if (twoFAErr.skipToLogin) {
+                console.log('[AUTH/2FA] ✅ Dispositivo confiável - prosseguindo para login direto');
+                // Cai no fluxo normal de login abaixo
+            } else {
+                console.error('[AUTH/2FA] ⚠️ Erro no sistema 2FA:', twoFAErr.message);
+                // SECURITY: Do NOT allow login without 2FA on failure (prevents 2FA bypass)
+                return res.status(503).json({
+                    message: 'Serviço de verificação temporariamente indisponível. Tente novamente em alguns instantes.'
+                });
+            }
+        }
         } // fim do if (requires2FA)
         // ════════════════════════════════════════════════════════════════
 
@@ -829,7 +833,7 @@ router.post('/login', validate(schemas.login), async (req, res) => {
             email: user.email,
             role: user.role,
             setor: user.setor || null,
-            deviceId,
+            deviceId: deviceId,
             type: 'access'
         }, JWT_SECRET, { algorithm: 'HS256', audience: 'aluforce', expiresIn: refreshTokenModule.ACCESS_TOKEN_EXPIRY });
 
@@ -867,8 +871,8 @@ router.post('/login', validate(schemas.login), async (req, res) => {
         }
         // Também retorna dados do usuário para uso imediato no cliente (AJAX)
         // Inclui `redirectTo` (absoluto) para que clientes que usam fetch possam redirecionar a página facilmente.
-        const baseUrl = `${req.protocol || 'http' }://${ req.get('host') || req.headers.host || 'localhost'}`;
-        const redirectTo = `${baseUrl }/dashboard`;
+        const baseUrl = (req.protocol || 'http') + '://' + (req.get('host') || req.headers.host || 'localhost');
+        const redirectTo = baseUrl + '/dashboard';
         // SECURITY: Token is NOT included in JSON response.
         // Authentication is handled exclusively via httpOnly cookie (set above).
         // This eliminates XSS token theft via localStorage.
@@ -893,7 +897,7 @@ router.post('/login', validate(schemas.login), async (req, res) => {
                     if (user.areas) {
                         try {
                             areas = typeof user.areas === 'string' ? JSON.parse(user.areas) : (Array.isArray(user.areas) ? user.areas : []);
-                        } catch (e) {
+                        } catch(e) {
                             areas = String(user.areas).split(',').map(a => a.trim()).filter(a => a);
                         }
                     }
@@ -904,7 +908,7 @@ router.post('/login', validate(schemas.login), async (req, res) => {
                             const fn = (user.nome || '').split(' ')[0].toLowerCase() || (user.email || '').split('@')[0].split('.')[0].toLowerCase();
                             const serverAreas = permServer.getUserAreas(fn);
                             if (serverAreas && serverAreas.length > 0) areas = serverAreas;
-                        } catch (e) { /* fallback silencioso */ }
+                        } catch(e) {}
                     }
                     // Admin: todas as áreas
                     if (user.is_admin) {
@@ -937,6 +941,16 @@ router.post('/login', validate(schemas.login), async (req, res) => {
         })();
 
         auditLog('LOGIN_SUCCESS', user.id, `Login bem-sucedido: ${user.email}`, req);
+
+        // TC-AUTH-01-001: Registrar sessão no Redis para controle de inatividade
+        try {
+            const cacheService = require('../../services/cache');
+            const sessionKey = `session_activity:${user.id}:${deviceId}`;
+            await cacheService.cacheSet(sessionKey, Date.now(), 4 * 60 * 60 * 1000 + 60000); // 4h + 1min margem (TC-AUTH-03-001)
+            console.log(`[AUTH/LOGIN] 📡 Sessão registrada no Redis: ${sessionKey}`);
+        } catch (redisErr) {
+            console.warn('[AUTH/LOGIN] ⚠️ Redis session registration failed (non-blocking):', redisErr.message);
+        }
     } catch (error) {
         // Log completo no servidor (stack quando disponível)
         console.error('Erro detalhado no login:', error.stack || error);
@@ -1036,7 +1050,7 @@ router.post('/auth/refresh', async (req, res) => {
         const jwtLib = require('jsonwebtoken');
         let decoded;
         try {
-            decoded = jwtLib.verify(oldRefreshToken, process.env.REFRESH_SECRET || `${JWT_SECRET }_refresh`);
+            decoded = jwtLib.verify(oldRefreshToken, process.env.REFRESH_SECRET || JWT_SECRET + '_refresh');
         } catch (e) {
             return res.status(401).json({ code: 'INVALID_REFRESH_TOKEN', message: 'Refresh token inválido ou expirado.' });
         }
@@ -1214,7 +1228,7 @@ router.post('/auth/verify-user-data', async (req, res) => {
         console.log('[AUTH/VERIFY-DATA] ✅ Dados verificados, reset token gerado (expira em 15min)');
         res.json({
             success: true,
-            resetToken, // Client stores this temporarily for step 3
+            resetToken: resetToken, // Client stores this temporarily for step 3
             message: 'Dados verificados com sucesso.'
         });
     } catch (error) {
@@ -1517,7 +1531,7 @@ router.post('/auth/validate-remember-token', async (req, res) => {
             email: user.email,
             role: user.role,
             setor: user.setor || null,
-            deviceId,
+            deviceId: deviceId,
             type: 'access'
         }, JWT_SECRET, { algorithm: 'HS256', audience: 'aluforce', expiresIn: refreshTokenModule.ACCESS_TOKEN_EXPIRY });
 
@@ -1543,7 +1557,7 @@ router.post('/auth/validate-remember-token', async (req, res) => {
 
         res.json({
             success: true,
-            user,
+            user: user,
             message: 'Login automático realizado com sucesso.'
         });
     } catch (error) {
@@ -1637,7 +1651,7 @@ router.post('/verify-2fa', async (req, res) => {
             await safeQuery('UPDATE auth_2fa_codes SET tentativas = tentativas + 1 WHERE pending_token = ?', [pendingToken]);
             const restantes = 4 - registro.tentativas;
             return res.status(401).json({
-                message: `Código incorreto. ${restantes > 0 ? `${restantes } tentativa(s) restante(s).` : 'Última tentativa.'}`,
+                message: `Código incorreto. ${restantes > 0 ? restantes + ' tentativa(s) restante(s).' : 'Última tentativa.'}`,
                 attemptsLeft: restantes
             });
         }
@@ -1669,7 +1683,7 @@ router.post('/verify-2fa', async (req, res) => {
             email: user.email,
             role: user.role,
             setor: user.setor || null,
-            deviceId,
+            deviceId: deviceId,
             type: 'access'
         }, JWT_SECRET, { algorithm: 'HS256', audience: 'aluforce', expiresIn: refreshTokenModule.ACCESS_TOKEN_EXPIRY });
 
@@ -1754,8 +1768,8 @@ router.post('/verify-2fa', async (req, res) => {
             }
         }
 
-        const baseUrl = `${req.protocol || 'http' }://${ req.get('host') || req.headers.host || 'localhost'}`;
-        const redirectTo = `${baseUrl }/dashboard`;
+        const baseUrl = (req.protocol || 'http') + '://' + (req.get('host') || req.headers.host || 'localhost');
+        const redirectTo = baseUrl + '/dashboard';
 
         // SECURITY: Token is NOT included in JSON response — delivered only via httpOnly cookie
         const payload = {
@@ -1778,7 +1792,7 @@ router.post('/verify-2fa', async (req, res) => {
                     if (user.areas) {
                         try {
                             areas = typeof user.areas === 'string' ? JSON.parse(user.areas) : (Array.isArray(user.areas) ? user.areas : []);
-                        } catch (e) {
+                        } catch(e) {
                             areas = String(user.areas).split(',').map(a => a.trim()).filter(a => a);
                         }
                     }
@@ -1788,7 +1802,7 @@ router.post('/verify-2fa', async (req, res) => {
                             const fn = (user.nome || '').split(' ')[0].toLowerCase() || (user.email || '').split('@')[0].split('.')[0].toLowerCase();
                             const serverAreas = permServer.getUserAreas(fn);
                             if (serverAreas && serverAreas.length > 0) areas = serverAreas;
-                        } catch (e) { /* fallback silencioso */ }
+                        } catch(e) {}
                     }
                     if (user.is_admin) {
                         areas = ['vendas', 'rh', 'pcp', 'financeiro', 'nfe', 'compras', 'ti'];
@@ -1872,9 +1886,9 @@ router.post('/resend-2fa', async (req, res) => {
                 const parseBrowserResend = (ua) => {
                     if (!ua || ua === 'Desconhecido') return 'Desconhecido';
                     let browser = 'Navegador desconhecido', os = '';
-                    if (ua.includes('Edg/')) browser = `Edge ${ (ua.match(/Edg\/(\d+)/) || [])[1]}`;
-                    else if (ua.includes('Chrome/')) browser = `Chrome ${ (ua.match(/Chrome\/(\d+)/) || [])[1]}`;
-                    else if (ua.includes('Firefox/')) browser = `Firefox ${ (ua.match(/Firefox\/(\d+)/) || [])[1]}`;
+                    if (ua.includes('Edg/')) browser = 'Edge ' + (ua.match(/Edg\/(\d+)/)||[])[1];
+                    else if (ua.includes('Chrome/')) browser = 'Chrome ' + (ua.match(/Chrome\/(\d+)/)||[])[1];
+                    else if (ua.includes('Firefox/')) browser = 'Firefox ' + (ua.match(/Firefox\/(\d+)/)||[])[1];
                     else if (ua.includes('Safari/') && !ua.includes('Chrome')) browser = 'Safari';
                     if (ua.includes('Windows NT 10')) os = 'Windows 10';
                     else if (ua.includes('Windows NT')) os = 'Windows';
@@ -1889,7 +1903,7 @@ router.post('/resend-2fa', async (req, res) => {
                 await transporter.sendMail({
                     from: `"Zyntra" <${process.env.SMTP_USER || 'sistema@aluforce.ind.br'}>`,
                     to: emailDestinatario,
-                    subject: 'Novo código de verificação Zyntra',
+                    subject: `Novo código de verificação Zyntra`,
                     html: `
 <div style="margin:0;padding:0;background-color:#1a1a2e;width:100%;">
   <table role="presentation" cellpadding="0" cellspacing="0" width="100%" bgcolor="#1a1a2e" style="background-color:#1a1a2e;">
@@ -1949,7 +1963,7 @@ router.post('/resend-2fa', async (req, res) => {
         }
 
         const emailParts = emailDestinatario.split('@');
-        const maskedEmail = `${emailParts[0].substring(0, 2) }***@${ emailParts[1]}`;
+        const maskedEmail = emailParts[0].substring(0, 2) + '***@' + emailParts[1];
 
         res.json({ success: true, maskedEmail, message: 'Novo código enviado com sucesso!' });
 
@@ -2004,11 +2018,6 @@ router.post('/auth/force-change-password', async (req, res) => {
         // Atualiza senha_hash (coluna canônica) e remove flag de temporária
         await safeQuery('UPDATE usuarios SET senha_hash = ?, senha_temporaria = 0 WHERE id = ?', [senhaHash, userId]);
         console.log(`[AUTH/FORCE-CHANGE] ✅ Senha definitiva salva para userId: ${userId}`);
-
-        // AUDIT-FIX R3: Invalidar todas as sessões existentes (forçar re-login com nova senha)
-        try {
-            await safeQuery('DELETE FROM refresh_tokens WHERE user_id = ?', [userId]);
-        } catch (e) { /* tabela pode não existir */ }
 
         auditLog('PASSWORD_FORCE_CHANGE', userId, 'Troca obrigatória de senha temporária', req);
 
@@ -2231,37 +2240,19 @@ router.get('/me', async (req, res) => {
         }
 
         const [rows] = await safeQuery(
-            'SELECT id, nome, email, role, is_admin, avatar, foto, login, setor, areas FROM usuarios WHERE id = ? LIMIT 1',
+            'SELECT id, nome, email, role, is_admin, avatar, foto, login, setor FROM usuarios WHERE id = ? LIMIT 1',
             [userId]
         );
         if (!rows.length) {
             return res.status(404).json({ message: 'Usuário não encontrado' });
         }
         const u = rows[0];
-
-        // Parse áreas do usuário
-        let areas = [];
-        if (u.areas) {
-            if (Array.isArray(u.areas)) {
-                areas = u.areas;
-            } else if (typeof u.areas === 'string') {
-                try { areas = JSON.parse(u.areas); } catch (e) {
-                    areas = u.areas.split(',').map(a => a.trim()).filter(Boolean);
-                }
-            }
-        }
-        // Admin tem acesso a tudo
-        if (u.is_admin) {
-            areas = ['dashboard','pcp','vendas','compras','financeiro','nfe','rh','faturamento','admin'];
-        }
-
         res.json({
             id: u.id,
             nome: u.nome,
             email: u.email,
             role: u.role,
             is_admin: u.is_admin,
-            areas: areas,
             avatar: u.avatar || u.foto,
             foto: u.foto || u.avatar,
             login: u.login,

@@ -263,24 +263,29 @@ router.post('/login', validate(schemas.login), async (req, res) => {
 
         if (isDevMode) console.log('[AUTH/LOGIN] Tentativa de login para:', email);
 
-        // Se o usuário digitou apenas o login sem @, adicionar @aluforce.ind.br
+        // Se o usuário digitou apenas o login sem @, adicionar domínio padrão
         if (email && !email.includes('@')) {
-            email = email + '@aluforce.ind.br';
+            email = `${email}${process.env.DEFAULT_EMAIL_DOMAIN || '@aluforce.ind.br'}`;
         }
 
-        // Domínios permitidos para login
-        const dominiosPermitidos = [
+        // Domínios permitidos para login (configurável via .env)
+        const defaultDomains = [
             '@aluforce.ind.br',
             '@aluforce.com',
+            '@energy.com.br',
+            '@laboreletric.com.br',
             '@lumiereassesoria.com.br',   // Consultoria parceira (grafia alternativa)
             '@lumiereassessoria.com.br',  // Consultoria parceira (grafia oficial com SS)
             '@zyntra.com.br'             // Zyntra Demo
         ];
+        const dominiosPermitidos = process.env.ALLOWED_EMAIL_DOMAINS
+            ? process.env.ALLOWED_EMAIL_DOMAINS.split(',').map(d => d.trim())
+            : defaultDomains;
 
         const emailValido = dominiosPermitidos.some(dominio => email && email.endsWith(dominio));
 
         if (!isCpfLogin && (!email || !emailValido)) {
-            return res.status(401).json({ message: 'Apenas e-mails @aluforce.ind.br, @aluforce.com e @lumiereassessoria.com.br são permitidos.' });
+            return res.status(401).json({ message: 'E-mail não autorizado. Domínios permitidos: ' + dominiosPermitidos.join(', ') });
         }
 
         // ========================================
