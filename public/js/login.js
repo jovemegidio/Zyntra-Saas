@@ -692,7 +692,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.appendChild(banner);
 
     document.getElementById('remember-continue').addEventListener('click', () => {
-      window.location.href = '/dashboard';
+      // Multi-company: redirecionar para o dashboard correto baseado no email do usuário
+      const _rememberCompanyPath = getCompanyBasePath(userEmail);
+      window.location.href = _rememberCompanyPath ? _rememberCompanyPath + '/dashboard' : '/dashboard';
     });
 
     document.getElementById('remember-switch').addEventListener('click', async () => {

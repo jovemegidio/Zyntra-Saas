@@ -681,6 +681,7 @@ apiVendasRouter.get('/kanban/pedidos', authenticateToken, async (req, res) => {
                 p.total_ipi,
                 p.total_icms_st,
                 p.total_icms,
+                p.cliente_nome,
                 COALESCE(c.nome, e.nome_fantasia) AS empresa_nome,
                 u.nome AS vendedor_nome,
                 -- Dados completos do cliente para recibo/impressão
@@ -781,8 +782,8 @@ apiVendasRouter.get('/kanban/pedidos', authenticateToken, async (req, res) => {
             return {
                 id: p.id,
                 numero: `${labelNumero} Nº ${p.id}`,
-                cliente: p.empresa_nome || 'Cliente não informado',
-                cliente_nome: p.empresa_nome,
+                cliente: p.cliente_nome || p.empresa_nome || 'Cliente não informado',
+                cliente_nome: p.cliente_nome || p.empresa_nome,
                 cliente_id: p.cliente_id,
                 empresa_id: p.empresa_id,
                 // Dados completos do cliente para recibo/impressão
@@ -1436,7 +1437,7 @@ apiVendasRouter.get('/comissoes', async (req, res, next) => {
                 p.valor,
                 p.status,
                 p.created_at,
-                e.nome_fantasia as cliente_nome,
+                COALESCE(p.cliente_nome, e.nome_fantasia) as cliente_nome,
                 u.id as vendedor_id,
                 u.nome as vendedor_nome,
                 COALESCE(u.comissao_percentual, 1.0) as percentual_comissao,
@@ -2043,7 +2044,7 @@ apiVendasRouter.get('/pedidos', async (req, res, next) => {
                    p.data_previsao, p.data_entrega, p.data_faturamento,
                    p.transportadora_nome, p.transportadora_id, p.condicao_pagamento, p.nf,
                    p.tipo_faturamento, p.percentual_faturado, p.valor_faturado, p.numero_nf,
-                   COALESCE(c.nome, e.nome_fantasia, e.razao_social, 'Cliente não informado') AS cliente_nome,
+                   COALESCE(p.cliente_nome, c.nome, e.nome_fantasia, e.razao_social, 'Cliente não informado') AS cliente_nome,
                    e.nome_fantasia AS empresa_nome,
                    u.nome AS vendedor_nome
             FROM pedidos p
@@ -2064,7 +2065,27 @@ apiVendasRouter.get('/pedidos', async (req, res, next) => {
 apiVendasRouter.get('/pedidos/:id', async (req, res, next) => {
     try {
         const { id } = req.params;
-        const [rows] = await pool.query('SELECT * FROM pedidos WHERE id = ?', [id]);
+        const [rows] = await pool.query(`
+            SELECT p.*,
+                   COALESCE(c.nome, e.nome_fantasia, e.razao_social) AS cliente_nome_completo,
+                   u.nome AS vendedor_nome,
+                   COALESCE(c.cnpj, c.cnpj_cpf, c.cpf, e.cnpj) AS cliente_cnpj,
+                   COALESCE(c.inscricao_estadual, e.inscricao_estadual) AS cliente_ie,
+                   COALESCE(c.endereco, e.endereco) AS cliente_endereco,
+                   c.numero AS cliente_numero,
+                   c.complemento AS cliente_complemento,
+                   COALESCE(c.bairro, e.bairro) AS cliente_bairro,
+                   COALESCE(c.cidade, e.cidade) AS cliente_cidade,
+                   COALESCE(c.estado, e.estado) AS cliente_uf,
+                   COALESCE(c.cep, e.cep) AS cliente_cep,
+                   COALESCE(c.telefone, e.telefone) AS cliente_telefone,
+                   COALESCE(c.email, e.email) AS cliente_email,
+                   COALESCE(c.contato, c.responsavel) AS cliente_contato
+            FROM pedidos p
+            LEFT JOIN clientes c ON p.cliente_id = c.id
+            LEFT JOIN empresas e ON p.empresa_id = e.id
+            LEFT JOIN usuarios u ON p.vendedor_id = u.id
+            WHERE p.id = ?`, [id]);
         if (rows.length === 0) {
             return res.status(404).json({ message: "Pedido não encontrado." });
         }
@@ -3057,7 +3078,7 @@ apiVendasRouter.put('/pedidos/:id/status', async (req, res, next) => {
         try {
             // Buscar dados do pedido para contexto na notificação
             const [pedidoInfo] = await pool.query(`
-                SELECT p.id, p.status, p.vendedor_id, c.nome as cliente_nome, u.nome as vendedor_nome
+                SELECT p.id, p.status, p.vendedor_id, COALESCE(p.cliente_nome, c.nome) as cliente_nome, u.nome as vendedor_nome
                 FROM pedidos p
                 LEFT JOIN clientes c ON p.cliente_id = c.id
                 LEFT JOIN usuarios u ON p.vendedor_id = u.id
@@ -3673,7 +3694,7 @@ apiVendasRouter.patch('/pedidos/:id', async (req, res, next) => {
         // Buscar pedido atualizado para retornar
         const [updatedRows] = await pool.query(`
             SELECT p.*,
-                   c.nome as cliente_nome,
+                   COALESCE(p.cliente_nome, c.nome) as cliente_nome,
                    u.nome as vendedor_nome
             FROM pedidos p
             LEFT JOIN clientes c ON p.cliente_id = c.id
@@ -7120,8 +7141,8 @@ app.get('/api/pedidos', authenticateToken, async (req, res) => {
                 p.created_at as data_pedido,
                 p.vendedor_id,
                 p.data_previsao,
-                e.nome_fantasia AS cliente_nome,
-                e.cnpj AS cliente_cnpj,
+                COALESCE(p.cliente_nome, e.nome_fantasia) AS cliente_nome,
+                COALESCE(e.cnpj) AS cliente_cnpj,
                 u.nome AS vendedor_nome
             FROM pedidos p
             LEFT JOIN empresas e ON p.empresa_id = e.id
