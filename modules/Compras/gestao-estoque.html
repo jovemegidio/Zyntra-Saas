@@ -1,4 +1,4 @@
-ï»¿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <!-- Favicon -->
@@ -12,9 +12,9 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Zyntra: GestÃ£o de Estoque MP</title>
+    <title>Zyntra: Gestão de Estoque MP</title>
 
-    <!-- Sistema de AutenticaÃ§Ã£o Unificado -->
+    <!-- Sistema de Autenticação Unificado -->
     <script src="/js/auth-unified.js?v=20260301" defer></script>
     <script src="/js/inactivity-manager.js?v=20260324" defer></script>
 
@@ -27,22 +27,22 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
 
-    <!-- CSS PadrÃ£o Global -->
+    <!-- CSS Padrão Global -->
     <link rel="stylesheet" href="/modules/Compras/css/compras-layout.css?v=20260301">
     <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260301">
     <link rel="stylesheet" href="/css/skeleton-loader.css?v=20260301">
     <link rel="stylesheet" href="/css/popup-confirmacao.css?v=20260301">
     <style>
         .fa-duotone { font-family: "Font Awesome 6 Free" !important; font-weight: 900 !important; }
-        /* DiferenÃ§a card */
+        /* Diferença card */
         .diferenca-card { padding: 12px; border-radius: 10px; text-align: center; margin-top: 8px; }
         .diferenca-card.positivo { background: #f0fdf4; border: 1px solid #22c55e; }
         .diferenca-card.negativo { background: #fef2f2; border: 1px solid #ef4444; }
         .diferenca-card.neutro { background: #f8fafc; border: 1px solid #e2e8f0; }
         .diferenca-card .valor { font-size: 1.5rem; font-weight: 700; }
         .diferenca-card .texto { font-size: 0.75rem; margin-top: 4px; }
-        /* HistÃ³rico timeline */
-        .histÃ³rico-timeline { max-height: 400px; overflow-y: auto; }
+        /* Histórico timeline */
+        .histórico-timeline { max-height: 400px; overflow-y: auto; }
         /* Toast */
         .toast-container { position: fixed; top: 60px; right: 16px; z-index: 10000; display: flex; flex-direction: column; gap: 8px; }
 
@@ -93,8 +93,8 @@
         .btn-saida:hover { background: #dc2626; color: #fff; }
         .btn-editar { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
         .btn-editar:hover { background: #2563eb; color: #fff; }
-        .btn-histÃ³rico { background: #f5f3ff; color: #7c3aed; border: 1px solid #ddd6fe; }
-        .btn-histÃ³rico:hover { background: #7c3aed; color: #fff; }
+        .btn-histórico { background: #f5f3ff; color: #7c3aed; border: 1px solid #ddd6fe; }
+        .btn-histórico:hover { background: #7c3aed; color: #fff; }
         .btn-excluir { background: #fef2f2; color: #ef4444; border: 1px solid #fecaca; }
         .btn-excluir:hover { background: #ef4444; color: #fff; }
 
@@ -186,15 +186,15 @@
             <nav class="sidebar-nav">
                 <button class="sidebar-btn" title="Dashboard" onclick="window.location.href='index.html'"><i class="fas fa-chart-line"></i></button>
                 <button class="sidebar-btn" title="Pedidos" onclick="window.location.href='pedidos.html'"><i class="fas fa-shopping-cart"></i></button>
-                <button class="sidebar-btn" title="CotaÃ§Ãµes" onclick="window.location.href='cotacoes.html'"><i class="fas fa-file-invoice-dollar"></i></button>
+                <button class="sidebar-btn" title="Cotações" onclick="window.location.href='cotacoes.html'"><i class="fas fa-file-invoice-dollar"></i></button>
                 <button class="sidebar-btn" title="Fornecedores" onclick="window.location.href='fornecedores.html'"><i class="fas fa-users"></i></button>
-                <button class="sidebar-btn" title="RequisiÃ§Ãµes" onclick="window.location.href='requisicoes.html'"><i class="fas fa-clipboard-list"></i></button>
+                <button class="sidebar-btn" title="Requisições" onclick="window.location.href='requisicoes.html'"><i class="fas fa-clipboard-list"></i></button>
                 <button class="sidebar-btn" title="Recebimento" onclick="window.location.href='recebimento.html'"><i class="fas fa-truck-loading"></i></button>
             </nav>
             <div class="sidebar-bottom">
                 <button class="sidebar-btn active" title="Estoque MP" onclick="window.location.href='gestao-estoque.html'"><i class="fas fa-boxes"></i></button>
                 <button class="sidebar-btn" title="QR Code Estoque" onclick="toggleQrCodePanel()"><i class="fas fa-qrcode"></i></button>
-                <button class="sidebar-btn" title="RelatÃ³rios" onclick="window.location.href='relatorios.html'"><i class="fas fa-chart-bar"></i></button>
+                <button class="sidebar-btn" title="Relatórios" onclick="window.location.href='relatorios.html'"><i class="fas fa-chart-bar"></i></button>
             </div>
         </aside>
 
@@ -207,7 +207,7 @@
                         <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
-                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">â€”</span>
+                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">—</span>
                         <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Estoque MP</span>
                     </div>
                 </div>
@@ -215,7 +215,7 @@
                     <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
                     
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">UsuÃ¡rio</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
                     </div>
                 </div>
             </header>
@@ -225,9 +225,9 @@
                 <div class="page-header">
                     <div class="page-header-top">
                         <div class="page-actions">
-                            <button class="btn btn-secondary" onclick="abrirEntradaRapida()"><i class="fas fa-arrow-down"></i> Entrada RÃ¡pida</button>
+                            <button class="btn btn-secondary" onclick="abrirEntradaRapida()"><i class="fas fa-arrow-down"></i> Entrada Rápida</button>
                             <button class="btn btn-secondary" onclick="abrirSaidaRapida()"><i class="fas fa-arrow-up"></i> Dar Baixa</button>
-                            <button class="btn btn-secondary" onclick="verHistoricoGeral()"><i class="fas fa-history"></i> HistÃ³rico</button>
+                            <button class="btn btn-secondary" onclick="verHistoricoGeral()"><i class="fas fa-history"></i> Histórico</button>
                             <button class="btn btn-secondary" onclick="toggleQrCodePanel()" id="btn-qrcode-toggle" style="background:#6366f1;color:#fff;border-color:#6366f1;"><i class="fas fa-qrcode"></i> QR Code</button>
                             <button class="btn btn-primary" onclick="abrirModalNovoMaterial()"><i class="fas fa-plus"></i> Novo Material</button>
                         </div>
@@ -242,7 +242,7 @@
                                 <i class="fas fa-qrcode" style="font-size:1.3rem;color:#fff;"></i>
                                 <div>
                                     <h3 style="margin:0;color:#fff;font-size:1rem;font-weight:700;">QR Code - Estoque</h3>
-                                    <p style="margin:0;color:rgba(255,255,255,0.7);font-size:0.75rem;">Escaneie, gere etiquetas ou registre movimentaÃ§Ãµes por cÃ³digo</p>
+                                    <p style="margin:0;color:rgba(255,255,255,0.7);font-size:0.75rem;">Escaneie, gere etiquetas ou registre movimentações por código</p>
                                 </div>
                             </div>
                             <div style="display:flex;gap:8px;align-items:center;">
@@ -268,18 +268,18 @@
                                             </div>
                                             <div id="qr-inline-placeholder" style="text-align:center;color:#8b949e;">
                                                 <i class="fas fa-camera" style="font-size:2.5rem;opacity:0.3;margin-bottom:8px;display:block;"></i>
-                                                <p style="font-size:0.85rem;">Clique para iniciar a cÃ¢mera</p>
+                                                <p style="font-size:0.85rem;">Clique para iniciar a câmera</p>
                                             </div>
                                         </div>
                                         <div style="display:flex;gap:8px;margin-top:10px;">
-                                            <button id="qr-inline-btn-start" onclick="qrInlineStartCamera()" class="btn btn-secondary" style="flex:1;font-size:0.8rem;"><i class="fas fa-camera"></i> Iniciar CÃ¢mera</button>
+                                            <button id="qr-inline-btn-start" onclick="qrInlineStartCamera()" class="btn btn-secondary" style="flex:1;font-size:0.8rem;"><i class="fas fa-camera"></i> Iniciar Câmera</button>
                                             <button id="qr-inline-btn-stop" onclick="qrInlineStopCamera()" class="btn btn-secondary" style="flex:1;font-size:0.8rem;display:none;background:#ef4444;color:#fff;border-color:#ef4444;"><i class="fas fa-stop"></i> Parar</button>
                                         </div>
                                     </div>
                                     <div id="qr-inline-result-panel">
                                         <div style="text-align:center;padding:40px 20px;color:#94a3b8;">
                                             <i class="fas fa-qrcode" style="font-size:2.5rem;opacity:0.2;margin-bottom:8px;display:block;"></i>
-                                            <p style="font-size:0.85rem;">Escaneie um QR Code ou use a aba "Manual" para buscar por cÃ³digo</p>
+                                            <p style="font-size:0.85rem;">Escaneie um QR Code ou use a aba "Manual" para buscar por código</p>
                                         </div>
                                     </div>
                                 </div>
@@ -289,9 +289,9 @@
                             <div id="qr-tab-manual" class="qr-tab-content" style="display:none;">
                                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
                                     <div>
-                                        <label style="font-size:0.8rem;font-weight:600;color:#475569;margin-bottom:6px;display:block;">CÃ³digo do Material</label>
+                                        <label style="font-size:0.8rem;font-weight:600;color:#475569;margin-bottom:6px;display:block;">Código do Material</label>
                                         <div style="display:flex;gap:8px;">
-                                            <input type="text" id="qr-inline-manual-code" placeholder="Digite o cÃ³digo ou descriÃ§Ã£o..." style="flex:1;padding:10px 14px;border:1px solid #e2e8f0;border-radius:8px;font-size:0.9rem;" autocomplete="off" oninput="qrInlineManualAutocomplete(this.value)">
+                                            <input type="text" id="qr-inline-manual-code" placeholder="Digite o código ou descrição..." style="flex:1;padding:10px 14px;border:1px solid #e2e8f0;border-radius:8px;font-size:0.9rem;" autocomplete="off" oninput="qrInlineManualAutocomplete(this.value)">
                                             <button onclick="qrInlineSearchManual()" class="btn btn-primary" style="padding:10px 18px;"><i class="fas fa-search"></i></button>
                                         </div>
                                         <div id="qr-inline-manual-suggestions" style="max-height:280px;overflow-y:auto;margin-top:10px;"></div>
@@ -299,7 +299,7 @@
                                     <div id="qr-inline-manual-result">
                                         <div style="text-align:center;padding:40px 20px;color:#94a3b8;">
                                             <i class="fas fa-search" style="font-size:2.5rem;opacity:0.2;margin-bottom:8px;display:block;"></i>
-                                            <p style="font-size:0.85rem;">Busque um material para ver detalhes e registrar movimentaÃ§Ã£o</p>
+                                            <p style="font-size:0.85rem;">Busque um material para ver detalhes e registrar movimentação</p>
                                         </div>
                                     </div>
                                 </div>
@@ -310,7 +310,7 @@
                                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
                                     <div>
                                         <label style="font-size:0.8rem;font-weight:600;color:#475569;margin-bottom:6px;display:block;">Buscar Material para Gerar Etiqueta</label>
-                                        <input type="text" id="qr-inline-gen-search" placeholder="Digite cÃ³digo ou descriÃ§Ã£o..." style="width:100%;padding:10px 14px;border:1px solid #e2e8f0;border-radius:8px;font-size:0.9rem;" oninput="qrInlineSearchGenerate(this.value)" autocomplete="off">
+                                        <input type="text" id="qr-inline-gen-search" placeholder="Digite código ou descrição..." style="width:100%;padding:10px 14px;border:1px solid #e2e8f0;border-radius:8px;font-size:0.9rem;" oninput="qrInlineSearchGenerate(this.value)" autocomplete="off">
                                         <div id="qr-inline-gen-results" style="max-height:280px;overflow-y:auto;margin-top:10px;"></div>
                                     </div>
                                     <div id="qr-inline-gen-preview" style="text-align:center;padding:20px;">
@@ -358,7 +358,7 @@
                 <div class="filters-bar">
                     <div class="search-box" style="flex:1;min-width:200px;">
                         <i class="fas fa-search"></i>
-                        <input type="text" id="busca-input" placeholder="Buscar por cÃ³digo ou descriÃ§Ã£o..." oninput="filtrarEstoque()">
+                        <input type="text" id="busca-input" placeholder="Buscar por código ou descrição..." oninput="filtrarEstoque()">
                     </div>
                     <select id="filtro-tipo" class="form-select" onchange="filtrarEstoque()" style="padding:8px 12px;border:1px solid var(--gray-300);border-radius:var(--radius-md);font-size:0.8rem;min-width:150px;">
                         <option value="">Todos os Tipos</option>
@@ -369,9 +369,9 @@
                         <option value="0">Inativos</option>
                     </select>
                     <select id="filtro-vinculado" class="form-select" onchange="filtrarEstoque()" style="padding:8px 12px;border:1px solid var(--gray-300);border-radius:var(--radius-md);font-size:0.8rem;min-width:130px;">
-                        <option value="">VinculaÃ§Ã£o</option>
+                        <option value="">Vinculação</option>
                         <option value="1">Vinculados</option>
-                        <option value="0">NÃ£o vinculados</option>
+                        <option value="0">Não vinculados</option>
                     </select>
                 </div>
 
@@ -393,15 +393,15 @@
                             <table class="data-table">
                                 <thead>
                                     <tr>
-                                        <th><input type="checkbox" id="select-all" onchange="toggleSelectAll(this)" title="Selecionar todos da pÃ¡gina"></th>
-                                        <th>CÃ³digo</th>
+                                        <th><input type="checkbox" id="select-all" onchange="toggleSelectAll(this)" title="Selecionar todos da página"></th>
+                                        <th>Código</th>
                                         <th>Material</th>
                                         <th>Tipo</th>
                                         <th>Unidade</th>
                                         <th>Custo Unit.</th>
                                         <th>Status</th>
                                         <th>Vinculado</th>
-                                        <th style="width:170px">AÃ§Ãµes</th>
+                                        <th style="width:170px">Ações</th>
                                     </tr>
                                 </thead>
                                 <tbody id="materiais-tbody">
@@ -413,9 +413,9 @@
                             <span class="pag-info" id="pag-info">Mostrando 0 de 0</span>
                             <div class="pag-btns" id="pag-btns"></div>
                             <select id="por-pagina" onchange="filtrarEstoque()">
-                                <option value="50">50/pÃ¡gina</option>
-                                <option value="100">100/pÃ¡gina</option>
-                                <option value="200">200/pÃ¡gina</option>
+                                <option value="50">50/página</option>
+                                <option value="100">100/página</option>
+                                <option value="200">200/página</option>
                                 <option value="999">Todos</option>
                             </select>
                         </div>
@@ -436,27 +436,27 @@
             </div>
             <div class="modal-body">
                 <div class="form-grid cols-2">
-                    <div class="form-group"><label>CÃ³digo *</label><input type="text" id="novo-material-codigo" required></div>
+                    <div class="form-group"><label>Código *</label><input type="text" id="novo-material-codigo" required></div>
                     <div class="form-group">
                         <label>Tipo</label>
                         <select id="novo-material-tipo">
                             <option value="">Sem tipo</option>
                             <option value="Veia Multiplex">Veia Multiplex</option>
-                            <option value="Veia PotÃªncia">Veia PotÃªncia</option>
+                            <option value="Veia Potência">Veia Potência</option>
                             <option value="Cabo/Fio">Cabo / Fio</option>
                             <option value="Bobina/Embalagem">Bobina / Embalagem</option>
-                            <option value="Corda de AlumÃ­nio">Corda de AlumÃ­nio</option>
+                            <option value="Corda de Alumínio">Corda de Alumínio</option>
                             <option value="Cordinha">Cordinha</option>
                             <option value="Filamento">Filamento</option>
                             <option value="Polietileno">Polietileno</option>
                             <option value="PVC">PVC</option>
                             <option value="XLPE">XLPE</option>
                             <option value="Pigmento">Pigmento</option>
-                            <option value="ServiÃ§o">ServiÃ§o</option>
+                            <option value="Serviço">Serviço</option>
                             <option value="Outros">Outros</option>
                         </select>
                     </div>
-                    <div class="form-group" style="grid-column:span 2;"><label>DescriÃ§Ã£o *</label><input type="text" id="novo-material-descricao" required placeholder="Ex: VEIA MULTIPLEX 25MM PRETA"></div>
+                    <div class="form-group" style="grid-column:span 2;"><label>Descrição *</label><input type="text" id="novo-material-descricao" required placeholder="Ex: VEIA MULTIPLEX 25MM PRETA"></div>
                     <div class="form-group"><label>NCM</label><input type="text" id="novo-material-ncm" placeholder="Ex: 3917.39.00" maxlength="12"></div>
                     <div class="form-group">
                         <label>Unidade</label>
@@ -466,9 +466,9 @@
                             <option value="MT">MT</option><option value="RL">RL</option>
                         </select>
                     </div>
-                    <div class="form-group"><label>Custo UnitÃ¡rio (R$)</label><input type="number" id="novo-material-custo" step="0.01" min="0"></div>
+                    <div class="form-group"><label>Custo Unitário (R$)</label><input type="number" id="novo-material-custo" step="0.01" min="0"></div>
                     <div class="form-group"><label>Qtd. Estoque Inicial</label><input type="number" id="novo-material-qtd-estoque" step="0.01" min="0" value="0"></div>
-                    <div class="form-group"><label>Estoque MÃ­nimo</label><input type="number" id="novo-material-minimo" min="0" value="0"></div>
+                    <div class="form-group"><label>Estoque Mínimo</label><input type="number" id="novo-material-minimo" min="0" value="0"></div>
                     <div class="form-group">
                         <label>Status</label>
                         <select id="novo-material-ativo"><option value="1">Ativo</option><option value="0">Inativo</option></select>
@@ -497,8 +497,8 @@
                     <div class="form-group"><label>Quantidade *</label><input type="number" id="entrada-qtd" min="1" required></div>
                     <div class="form-group"><label>Custo Unit. (R$)</label><input type="number" id="entrada-custo" step="0.01" min="0"></div>
                 </div>
-                <div class="form-group"><label>NÂº Documento/NF</label><input type="text" id="entrada-documento"></div>
-                <div class="form-group"><label>ObservaÃ§Ãµes</label><textarea id="entrada-obs" rows="2"></textarea></div>
+                <div class="form-group"><label>Nº Documento/NF</label><input type="text" id="entrada-documento"></div>
+                <div class="form-group"><label>Observações</label><textarea id="entrada-obs" rows="2"></textarea></div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="fecharModal('modal-entrada')">Cancelar</button>
@@ -507,11 +507,11 @@
         </div>
     </div>
 
-    <!-- Modal: SaÃ­da / Dar Baixa -->
+    <!-- Modal: Saída / Dar Baixa -->
     <div class="modal-overlay" id="modal-saida">
         <div class="modal" style="max-width:500px;">
             <div class="modal-header">
-                <h3><i class="fas fa-arrow-up" style="color:#dc2626;"></i> Dar Baixa / SaÃ­da de Estoque</h3>
+                <h3><i class="fas fa-arrow-up" style="color:#dc2626;"></i> Dar Baixa / Saída de Estoque</h3>
                 <button class="modal-close" onclick="fecharModal('modal-saida')">&times;</button>
             </div>
             <div class="modal-body">
@@ -521,29 +521,29 @@
                     <input type="text" id="saida-nome" readonly style="background:#f1f5f9;font-weight:600;">
                     <small id="saida-variacao-info" style="color:#6366f1;font-size:11px;margin-top:4px;display:block;"></small>
                 </div>
-                <div class="form-group"><label>DisponÃ­vel</label><input type="text" id="saida-disponivel" readonly style="background:#f1f5f9;"></div>
+                <div class="form-group"><label>Disponível</label><input type="text" id="saida-disponivel" readonly style="background:#f1f5f9;"></div>
                 <div class="form-grid cols-2">
                     <div class="form-group"><label>Quantidade *</label><input type="number" id="saida-qtd" min="1" required oninput="validarSaida()"></div>
-                    <div class="form-group"><label>Destino *</label><input type="text" id="saida-destino" placeholder="ProduÃ§Ã£o, PCP, ManutenÃ§Ã£o..."></div>
+                    <div class="form-group"><label>Destino *</label><input type="text" id="saida-destino" placeholder="Produção, PCP, Manutenção..."></div>
                 </div>
-                <div class="form-group"><label>NÂº Documento</label><input type="text" id="saida-documento"></div>
-                <div class="form-group"><label>ObservaÃ§Ãµes</label><textarea id="saida-obs" rows="2"></textarea></div>
+                <div class="form-group"><label>Nº Documento</label><input type="text" id="saida-documento"></div>
+                <div class="form-group"><label>Observações</label><textarea id="saida-obs" rows="2"></textarea></div>
                 <div id="saida-aviso" style="display:none;padding:10px 14px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;font-size:13px;color:#dc2626;margin-top:8px;">
-                    <i class="fas fa-exclamation-triangle"></i> Quantidade superior ao disponÃ­vel!
+                    <i class="fas fa-exclamation-triangle"></i> Quantidade superior ao disponível!
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="fecharModal('modal-saida')">Cancelar</button>
-                <button class="btn btn-primary" id="btn-confirmar-saida" onclick="confirmarSaida()" style="background:#dc2626;border-color:#dc2626;"><i class="fas fa-check"></i> Confirmar SaÃ­da</button>
+                <button class="btn btn-primary" id="btn-confirmar-saida" onclick="confirmarSaida()" style="background:#dc2626;border-color:#dc2626;"><i class="fas fa-check"></i> Confirmar Saída</button>
             </div>
         </div>
     </div>
 
-    <!-- Modal: HistÃ³rico -->
+    <!-- Modal: Histórico -->
     <div class="modal-overlay" id="modal-historico">
         <div class="modal" style="max-width:600px;">
             <div class="modal-header">
-                <h3><i class="fas fa-history"></i> HistÃ³rico de MovimentaÃ§Ãµes</h3>
+                <h3><i class="fas fa-history"></i> Histórico de Movimentações</h3>
                 <button class="modal-close" onclick="fecharModal('modal-historico')">&times;</button>
             </div>
             <div class="modal-body historico-timeline" id="historico-content">
@@ -559,7 +559,7 @@
     <div class="modal-overlay" id="modal-ajuste">
         <div class="modal" style="max-width:500px;">
             <div class="modal-header">
-                <h3><i class="fas fa-balance-scale"></i> Ajuste de InventÃ¡rio</h3>
+                <h3><i class="fas fa-balance-scale"></i> Ajuste de Inventário</h3>
                 <button class="modal-close" onclick="fecharModal('modal-ajuste')">&times;</button>
             </div>
             <div class="modal-body">
@@ -571,20 +571,20 @@
                 </div>
                 <div class="diferenca-card neutro" id="ajuste-diferenca-card" style="display:none;">
                     <div class="valor" id="ajuste-diferenca-valor">0</div>
-                    <div class="texto" id="ajuste-diferenca-texto">Sem diferenÃ§a</div>
+                    <div class="texto" id="ajuste-diferenca-texto">Sem diferença</div>
                 </div>
                 <div class="form-group" style="margin-top:12px;">
                     <label>Motivo *</label>
                     <select id="ajuste-motivo" required>
                         <option value="">Selecione</option>
-                        <option value="inventario">InventÃ¡rio FÃ­sico</option>
+                        <option value="inventario">Inventário Físico</option>
                         <option value="avaria">Avaria/Perda</option>
-                        <option value="correcao">CorreÃ§Ã£o de Sistema</option>
+                        <option value="correcao">Correção de Sistema</option>
                         <option value="outro">Outro</option>
                     </select>
                 </div>
-                <div class="form-group"><label>NÂº Documento</label><input type="text" id="ajuste-documento"></div>
-                <div class="form-group"><label>ObservaÃ§Ãµes</label><textarea id="ajuste-obs" rows="2"></textarea></div>
+                <div class="form-group"><label>Nº Documento</label><input type="text" id="ajuste-documento"></div>
+                <div class="form-group"><label>Observações</label><textarea id="ajuste-obs" rows="2"></textarea></div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="fecharModal('modal-ajuste')">Cancelar</button>
@@ -609,8 +609,8 @@
                         <i class="fas fa-cube" style="color:#2563eb;font-size:16px;"></i>
                     </div>
                     <div style="flex:1;min-width:0;">
-                        <div id="editar-info-cÃ³digo" style="font-size:11px;color:#64748b;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;"></div>
-                        <div id="editar-info-descriÃ§Ã£o" style="font-size:14px;font-weight:600;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+                        <div id="editar-info-código" style="font-size:11px;color:#64748b;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;"></div>
+                        <div id="editar-info-descrição" style="font-size:14px;font-weight:600;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
                     </div>
                     <div id="editar-info-status" style="flex-shrink:0;"></div>
                 </div>
@@ -622,37 +622,37 @@
                         <div id="editar-estoque-atual" style="font-size:1.2rem;font-weight:700;color:#15803d;margin-top:2px;">0</div>
                     </div>
                     <div style="padding:10px 14px;background:#fefce8;border:1px solid #fde68a;border-radius:8px;text-align:center;">
-                        <div style="font-size:10px;color:#ca8a04;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Estoque MÃ­n.</div>
+                        <div style="font-size:10px;color:#ca8a04;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Estoque Mín.</div>
                         <div id="editar-estoque-min-info" style="font-size:1.2rem;font-weight:700;color:#a16207;margin-top:2px;">0</div>
                     </div>
                     <div style="padding:10px 14px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;text-align:center;">
                         <div style="font-size:10px;color:#2563eb;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Vinculado</div>
-                        <div id="editar-vinculado" style="font-size:1.2rem;font-weight:700;color:#1d4ed8;margin-top:2px;">â€”</div>
+                        <div id="editar-vinculado" style="font-size:1.2rem;font-weight:700;color:#1d4ed8;margin-top:2px;">—</div>
                     </div>
                 </div>
 
                 <div class="form-grid cols-2">
-                    <div class="form-group"><label>CÃ³digo *</label><input type="text" id="editar-codigo" required></div>
+                    <div class="form-group"><label>Código *</label><input type="text" id="editar-codigo" required></div>
                     <div class="form-group"><label>NCM</label><input type="text" id="editar-ncm" placeholder="Ex: 3917.39.00" maxlength="12"></div>
                 </div>
-                <div class="form-group"><label>DescriÃ§Ã£o *</label><input type="text" id="editar-descricao" required></div>
+                <div class="form-group"><label>Descrição *</label><input type="text" id="editar-descricao" required></div>
                 <div class="form-grid cols-2">
                     <div class="form-group">
                         <label>Tipo</label>
                         <select id="editar-tipo">
                             <option value="">Sem tipo</option>
                             <option value="Veia Multiplex">Veia Multiplex</option>
-                            <option value="Veia PotÃªncia">Veia PotÃªncia</option>
+                            <option value="Veia Potência">Veia Potência</option>
                             <option value="Cabo/Fio">Cabo / Fio</option>
                             <option value="Bobina/Embalagem">Bobina / Embalagem</option>
-                            <option value="Corda de AlumÃ­nio">Corda de AlumÃ­nio</option>
+                            <option value="Corda de Alumínio">Corda de Alumínio</option>
                             <option value="Cordinha">Cordinha</option>
                             <option value="Filamento">Filamento</option>
                             <option value="Polietileno">Polietileno</option>
                             <option value="PVC">PVC</option>
                             <option value="XLPE">XLPE</option>
                             <option value="Pigmento">Pigmento</option>
-                            <option value="ServiÃ§o">ServiÃ§o</option>
+                            <option value="Serviço">Serviço</option>
                             <option value="Outros">Outros</option>
                         </select>
                     </div>
@@ -666,8 +666,8 @@
                     </div>
                 </div>
                 <div class="form-grid cols-2">
-                    <div class="form-group"><label>Custo UnitÃ¡rio (R$)</label><input type="number" id="editar-custo" step="0.0001" min="0"></div>
-                    <div class="form-group"><label>Estoque MÃ­nimo</label><input type="number" id="editar-estoque-min" step="0.01" min="0"></div>
+                    <div class="form-group"><label>Custo Unitário (R$)</label><input type="number" id="editar-custo" step="0.0001" min="0"></div>
+                    <div class="form-group"><label>Estoque Mínimo</label><input type="number" id="editar-estoque-min" step="0.01" min="0"></div>
                 </div>
                 <div class="form-group">
                     <label>Status</label>
@@ -676,20 +676,20 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="fecharModal('modal-editar')">Cancelar</button>
-                <button class="btn btn-primary" onclick="salvarEdicao()"><i class="fas fa-save"></i> Salvar AlteraÃ§Ãµes</button>
+                <button class="btn btn-primary" onclick="salvarEdicao()"><i class="fas fa-save"></i> Salvar Alterações</button>
             </div>
         </div>
     </div>
 
-    <!-- Modal: Seletor de Material (para entrada/saÃ­da rÃ¡pida) -->
+    <!-- Modal: Seletor de Material (para entrada/saída rápida) -->
     <div class="modal-overlay" id="modal-seletor">
         <div class="modal" style="max-width:700px;max-height:80vh;display:flex;flex-direction:column;">
             <div class="modal-header">
-                <h3><i class="fas fa-search"></i> <span id="seletor-tÃ­tulo">Selecionar Material</span></h3>
+                <h3><i class="fas fa-search"></i> <span id="seletor-título">Selecionar Material</span></h3>
                 <button class="modal-close" onclick="fecharModal('modal-seletor')">&times;</button>
             </div>
             <div style="padding:12px 20px;border-bottom:1px solid #e2e8f0;">
-                <input type="text" id="seletor-busca" placeholder="Buscar material por nome ou cÃ³digo..." oninput="filtrarSeletor()" style="width:100%;padding:10px 14px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px;">
+                <input type="text" id="seletor-busca" placeholder="Buscar material por nome ou código..." oninput="filtrarSeletor()" style="width:100%;padding:10px 14px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px;">
             </div>
             <div class="modal-body" style="flex:1;overflow:auto;padding:0;" id="seletor-lista">
                 <p style="text-align:center;color:#94a3b8;padding:40px;">Carregando materiais...</p>
@@ -707,7 +707,7 @@
     </script>
 
     <!-- Module Scripts -->
-    <script src="/modules/Compras/js/compras-utils.js?v=20260301"></script>
+    <script src="/modules/Compras/js/compras-utils.js?v=20260416"></script>
     <script src="/js/popup-confirmacao.js?v=20260301"></script>
     <script src="/modules/Compras/compras-user-loader.js?v=20260301"></script>
     <script src="/modules/Compras/gestao-estoque.js?v=20260610"></script>
@@ -783,7 +783,7 @@
             document.getElementById('qr-inline-btn-stop').style.display = 'block';
             qrInlineStartScanning();
         } catch (err) {
-            showToast('Erro ao acessar cÃ¢mera: ' + err.message, 'error');
+            showToast('Erro ao acessar câmera: ' + err.message, 'error');
         }
     }
 
@@ -860,8 +860,8 @@
                 const items = data.materiais || data.estoque || [];
                 if (items.length === 0) { container.innerHTML = '<p style="color:#94a3b8;font-size:0.8rem;padding:8px;">Nenhum resultado</p>'; return; }
                 container.innerHTML = items.slice(0, 8).map(m => {
-                    const nome = escapeHtml(m.descricao || m.nome || 'â€”');
-                    const cod = escapeHtml(m.codigo || m.codigo_material || 'â€”');
+                    const nome = escapeHtml(m.descricao || m.nome || '—');
+                    const cod = escapeHtml(m.codigo || m.codigo_material || '—');
                     const est = m.quantidade_estoque || m.estoque_atual || 0;
                     return '<div onclick="qrInlineSelectSuggestion(\'' + cod.replace(/'/g, "\\'") + '\')" style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#f8fafc;border-radius:8px;margin-bottom:4px;cursor:pointer;border:1px solid #e2e8f0;transition:border-color 0.15s;" onmouseover="this.style.borderColor=\'#6366f1\'" onmouseout="this.style.borderColor=\'#e2e8f0\'">' +
                         '<div><div style="font-weight:600;font-size:0.82rem;">' + nome + '</div><div style="font-size:0.7rem;color:#64748b;font-family:monospace;">' + cod + '</div></div>' +
@@ -896,19 +896,19 @@
             if (!response.ok) throw new Error('Erro ao buscar');
             const data = await response.json();
             const items = data.materiais || data.estoque || (Array.isArray(data) ? data : []);
-            const match = items.find(m => m.codigo === code || m.cÃ³digo === code) || items[0];
+            const match = items.find(m => m.codigo === code || m.código === code) || items[0];
             if (!match) {
-                panel.innerHTML = '<div style="text-align:center;padding:20px;color:#ef4444;"><i class="fas fa-exclamation-triangle" style="font-size:1.5rem;margin-bottom:8px;display:block;"></i><p>Material nÃ£o encontrado</p></div>';
+                panel.innerHTML = '<div style="text-align:center;padding:20px;color:#ef4444;"><i class="fas fa-exclamation-triangle" style="font-size:1.5rem;margin-bottom:8px;display:block;"></i><p>Material não encontrado</p></div>';
                 return;
             }
             qrInlineSelectedMaterial = match;
             const estoque = match.quantidade_estoque || match.estoque || 0;
             const minimo = match.estoque_minimo || match.minimo || 0;
             const status = estoque <= 0 ? 'critico' : estoque <= minimo ? 'baixo' : 'adequado';
-            const statusLabel = estoque <= 0 ? 'CrÃ­tico' : estoque <= minimo ? 'Baixo' : 'Adequado';
+            const statusLabel = estoque <= 0 ? 'Crítico' : estoque <= minimo ? 'Baixo' : 'Adequado';
             const statusColor = estoque <= 0 ? '#ef4444' : estoque <= minimo ? '#f59e0b' : '#22c55e';
-            const nome = match.descricao || match.descriÃ§Ã£o || match.nome || 'â€”';
-            const codigo = match.codigo || match.cÃ³digo || 'â€”';
+            const nome = match.descricao || match.descrição || match.nome || '—';
+            const codigo = match.codigo || match.código || '—';
             panel.innerHTML = 
                 '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:16px;">' +
                     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">' +
@@ -918,12 +918,12 @@
                     '</div>' +
                     '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;">' +
                         '<div style="text-align:center;padding:10px;background:#fff;border-radius:8px;border:1px solid #e2e8f0;"><div style="font-size:1.3rem;font-weight:800;color:#1e293b;">' + estoque + '</div><div style="font-size:0.7rem;color:#64748b;">Atual</div></div>' +
-                        '<div style="text-align:center;padding:10px;background:#fff;border-radius:8px;border:1px solid #e2e8f0;"><div style="font-size:1.3rem;font-weight:800;color:#1e293b;">' + minimo + '</div><div style="font-size:0.7rem;color:#64748b;">MÃ­nimo</div></div>' +
+                        '<div style="text-align:center;padding:10px;background:#fff;border-radius:8px;border:1px solid #e2e8f0;"><div style="font-size:1.3rem;font-weight:800;color:#1e293b;">' + minimo + '</div><div style="font-size:0.7rem;color:#64748b;">Mínimo</div></div>' +
                         '<div style="text-align:center;padding:10px;background:#fff;border-radius:8px;border:1px solid #e2e8f0;"><div style="font-size:1.3rem;font-weight:800;color:#1e293b;">' + (match.unidade || 'UN') + '</div><div style="font-size:0.7rem;color:#64748b;">Unidade</div></div>' +
                     '</div>' +
                     '<div style="display:flex;gap:8px;">' +
                         '<button onclick="qrInlineMovement(\'entrada\')" class="btn btn-secondary" style="flex:1;background:#22c55e;color:#fff;border-color:#22c55e;font-size:0.8rem;"><i class="fas fa-arrow-down"></i> Entrada</button>' +
-                        '<button onclick="qrInlineMovement(\'saida\')" class="btn btn-secondary" style="flex:1;background:#ef4444;color:#fff;border-color:#ef4444;font-size:0.8rem;"><i class="fas fa-arrow-up"></i> SaÃ­da / Baixa</button>' +
+                        '<button onclick="qrInlineMovement(\'saida\')" class="btn btn-secondary" style="flex:1;background:#ef4444;color:#fff;border-color:#ef4444;font-size:0.8rem;"><i class="fas fa-arrow-up"></i> Saída / Baixa</button>' +
                     '</div>' +
                 '</div>';
         } catch (err) {
@@ -937,19 +937,19 @@
         const id = mat.id || mat.material_id;
         if (tipo === 'entrada') {
             if (typeof abrirEntrada === 'function') {
-                abrirEntrada(id, mat.descricao || mat.descriÃ§Ã£o || '', mat.quantidade_estoque || mat.estoque || 0);
+                abrirEntrada(id, mat.descricao || mat.descrição || '', mat.quantidade_estoque || mat.estoque || 0);
             } else {
                 const el = document.getElementById('entrada-id'); if (el) el.value = id;
-                const n = document.getElementById('entrada-nome'); if (n) n.value = mat.descricao || mat.descriÃ§Ã£o || '';
+                const n = document.getElementById('entrada-nome'); if (n) n.value = mat.descricao || mat.descrição || '';
                 const ea = document.getElementById('entrada-estoque-atual'); if (ea) ea.value = mat.quantidade_estoque || mat.estoque || 0;
                 abrirModal('modal-entrada');
             }
         } else {
             if (typeof abrirSaida === 'function') {
-                abrirSaida(id, mat.descricao || mat.descriÃ§Ã£o || '', mat.quantidade_estoque || mat.estoque || 0);
+                abrirSaida(id, mat.descricao || mat.descrição || '', mat.quantidade_estoque || mat.estoque || 0);
             } else {
                 const el = document.getElementById('saida-id'); if (el) el.value = id;
-                const n = document.getElementById('saida-nome'); if (n) n.value = mat.descricao || mat.descriÃ§Ã£o || '';
+                const n = document.getElementById('saida-nome'); if (n) n.value = mat.descricao || mat.descrição || '';
                 const d = document.getElementById('saida-disponivel'); if (d) d.value = mat.quantidade_estoque || mat.estoque || 0;
                 abrirModal('modal-saida');
             }
@@ -967,9 +967,9 @@
             const items = data.materiais || data.estoque || (Array.isArray(data) ? data : []);
             if (items.length === 0) { container.innerHTML = '<p style="color:#94a3b8;font-size:0.8rem;padding:10px;">Nenhum material encontrado</p>'; return; }
             container.innerHTML = items.slice(0, 10).map(m => {
-                const nome = escapeHtml(m.descricao || m.descriÃ§Ã£o || m.nome || 'â€”');
-                const cod = escapeHtml(m.codigo || m.cÃ³digo || 'â€”');
-                return '<div onclick="qrInlineGenerateFor(\'' + (m.codigo || m.cÃ³digo || '') + '\', \'' + nome.replace(/'/g, "\\'") + '\')" style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:#f8fafc;border-radius:8px;margin-bottom:6px;cursor:pointer;border:1px solid #e2e8f0;transition:all 0.15s;" onmouseover="this.style.borderColor=\'#6366f1\'" onmouseout="this.style.borderColor=\'#e2e8f0\'">' +
+                const nome = escapeHtml(m.descricao || m.descrição || m.nome || '—');
+                const cod = escapeHtml(m.codigo || m.código || '—');
+                return '<div onclick="qrInlineGenerateFor(\'' + (m.codigo || m.código || '') + '\', \'' + nome.replace(/'/g, "\\'") + '\')" style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:#f8fafc;border-radius:8px;margin-bottom:6px;cursor:pointer;border:1px solid #e2e8f0;transition:all 0.15s;" onmouseover="this.style.borderColor=\'#6366f1\'" onmouseout="this.style.borderColor=\'#e2e8f0\'">' +
                     '<div><div style="font-weight:600;font-size:0.85rem;">' + nome + '</div><div style="font-size:0.7rem;color:#64748b;font-family:monospace;">' + cod + '</div></div>' +
                     '<i class="fas fa-qrcode" style="color:#6366f1;"></i></div>';
             }).join('');
