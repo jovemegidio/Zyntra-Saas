@@ -1,9 +1,21 @@
 ﻿/**
  * COMPRAS MODULE - Utilitarios Centralizados
  * @description Biblioteca de funcoes utilitarias para o modulo de Compras
- * @version 2.0.0 - Enterprise Grade
+ * @version 2.0.1 - Enterprise Grade
  * @author ALUFORCE Team
  */
+
+// Garante que todas as chamadas fetch do módulo Compras usem cookies httpOnly (padrão Zyntra)
+(function() {
+    if (window.__comprasFetchPatched) return;
+    window.__comprasFetchPatched = true;
+    const _origFetch = window.fetch;
+    window.fetch = function(input, init) {
+        init = init || {};
+        if (!init.credentials) init.credentials = 'include';
+        return _origFetch.call(this, input, init);
+    };
+})();
 
 (function(global) {
     'use strict';

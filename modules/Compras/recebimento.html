@@ -461,10 +461,9 @@
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
         btn.disabled = true;
         try {
-            const token = localStorage.getItem('token');
             const r = await fetch(`${API_BASE}/nf-entrada/importar-xml-texto`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ xml })
             });
             const d = await r.json();
@@ -520,10 +519,9 @@
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Consultando chave...';
         btn.disabled = true;
         try {
-            const token = localStorage.getItem('token');
             const r = await fetch(`${API_BASE}/nf-entrada/importar-chave`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ chave })
             });
             const d = await r.json();
@@ -587,8 +585,7 @@
     async function carregarNFsEntrada() {
         const tbody = document.getElementById('nfEntradaTableBody');
         try {
-            const token = localStorage.getItem('token');
-            const r = await fetch(`${API_BASE}/nf-entrada?limite=100`, { headers: { 'Authorization': `Bearer ${token}` } });
+            const r = await fetch(`${API_BASE}/nf-entrada?limite=100`, { headers: {  } });
             if (!r.ok) throw new Error('Erro ao carregar');
             const d = await r.json();
             const notas = d.notas || d || [];
@@ -624,8 +621,7 @@
     /* ========== Data Loading ========== */
     async function carregarEstatisticas() {
         try {
-            const token = localStorage.getItem('token');
-            const r = await fetch(`${API_BASE}/recebimento/stats`, { headers: { 'Authorization': `Bearer ${token}` } });
+            const r = await fetch(`${API_BASE}/recebimento/stats`, { headers: {  } });
             if (r.ok) {
                 const d = await r.json();
                 document.getElementById('totalPendentes').textContent = d.pendentes || 0;
@@ -637,8 +633,7 @@
         } catch (e) { /* fallback */ }
         // Fallback: calculate from pedidos
         try {
-            const token = localStorage.getItem('token');
-            const r = await fetch(`${API_BASE}/pedidos`, { headers: { 'Authorization': `Bearer ${token}` } });
+            const r = await fetch(`${API_BASE}/pedidos`, { headers: {  } });
             if (r.ok) {
                 const d = await r.json();
                 const all = d.pedidos || d || [];
@@ -652,9 +647,8 @@
 
     async function carregarPedidos() {
         try {
-            const token = localStorage.getItem('token');
             let url = `${API_BASE}/recebimento/pedidos?status=${currentFilter}&page=${currentPage}&limit=${pageSize}`;
-            const r = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
+            const r = await fetch(url, { headers: {  } });
             if (r.ok) {
                 const d = await r.json();
                 pedidosData = d.pedidos || d || [];
@@ -665,8 +659,7 @@
         } catch (e) { /* fallback */ }
         // Fallback
         try {
-            const token = localStorage.getItem('token');
-            const r = await fetch(`${API_BASE}/pedidos`, { headers: { 'Authorization': `Bearer ${token}` } });
+            const r = await fetch(`${API_BASE}/pedidos`, { headers: {  } });
             if (r.ok) {
                 const d = await r.json();
                 const all = d.pedidos || d || [];
@@ -731,8 +724,7 @@
     /* ========== View Details ========== */
     async function verDetalhes(pedidoId) {
         try {
-            const token = localStorage.getItem('token');
-            const r = await fetch(`${API_BASE}/pedidos/${pedidoId}`, { headers: { 'Authorization': `Bearer ${token}` } });
+            const r = await fetch(`${API_BASE}/pedidos/${pedidoId}`, { headers: {  } });
             const d = await r.json();
             const p = d.pedido || d;
             let itensHtml = '';
@@ -760,8 +752,7 @@
     /* ========== Receiving ========== */
     async function abrirRecebimento(pedidoId) {
         try {
-            const token = localStorage.getItem('token');
-            const r = await fetch(`${API_BASE}/pedidos/${pedidoId}`, { headers: { 'Authorization': `Bearer ${token}` } });
+            const r = await fetch(`${API_BASE}/pedidos/${pedidoId}`, { headers: {  } });
             const d = await r.json();
             const p = d.pedido || d;
             document.getElementById('pedidoId').value = p.id;
@@ -825,10 +816,9 @@
                 body.itens.push({ quantidade_recebida: parseFloat(qtdInput.value) || 0, conforme: conformeInput?.checked ?? true });
             }
         });
-            const token = localStorage.getItem('token');
             const r = await fetch(`${API_BASE}/pedidos/${pedidoId}/receber`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body)
             });
             if (!r.ok) throw new Error('Erro ao registrar');
@@ -856,8 +846,7 @@
         btn.disabled = true;
         const resultado = document.getElementById('resultadoBuscaSefaz');
         try {
-            const token = localStorage.getItem('token');
-            const r = await fetch(`${API_BASE}/nfe/consultar/${chave}`, { headers: { 'Authorization': `Bearer ${token}` } });
+            const r = await fetch(`${API_BASE}/nfe/consultar/${chave}`, { headers: {  } });
             if (!r.ok) throw new Error('NF-e não encontrada');
             const d = await r.json();
             dadosNfeSefaz = d;

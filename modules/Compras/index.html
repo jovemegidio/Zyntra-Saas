@@ -332,9 +332,7 @@
         // === Carregar KPIs ===
         async function carregarKPIs() {
             try {
-                const token = localStorage.getItem('token');
                 const response = await fetch('/api/compras/dashboard', {
-                    headers: { 'Authorization': `Bearer ${token}` },
                     credentials: 'include'
                 });
 
@@ -407,9 +405,7 @@
         // === Carregar Requisições ===
         async function carregarRequisicoes() {
             try {
-                const token = localStorage.getItem('token');
                 const response = await fetch('/api/compras/requisicoes?limit=5', {
-                    headers: { 'Authorization': `Bearer ${token}` },
                     credentials: 'include'
                 });
 
@@ -518,7 +514,11 @@
                             beginAtZero: true,
                             grid: { color: '#f3f4f6' },
                             ticks: {
-                                callback: (v) => 'R$ ' + (v / 1000) + 'K',
+                                callback: (v) => {
+                                    if (v >= 1000000) return 'R$ ' + (v / 1000000).toFixed(1) + 'M';
+                                    if (v >= 1000) return 'R$ ' + Math.round(v / 1000) + 'K';
+                                    return 'R$ ' + v.toLocaleString('pt-BR');
+                                },
                                 color: '#9ca3af',
                                 font: { size: 11, family: 'Inter' }
                             }

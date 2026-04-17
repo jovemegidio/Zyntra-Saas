@@ -833,6 +833,18 @@
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
 
     <script>
+    // Garante credentials: 'include' em todas as chamadas fetch (padrão Zyntra - httpOnly cookies)
+    (function() {
+        if (window.__comprasFetchPatched) return;
+        window.__comprasFetchPatched = true;
+        const _origFetch = window.fetch;
+        window.fetch = function(input, init) {
+            init = init || {};
+            if (!init.credentials) init.credentials = 'include';
+            return _origFetch.call(this, input, init);
+        };
+    })();
+
     // ==================== STATE ====================
     let currentMaterial = null;
     let currentAction = null;
@@ -843,9 +855,7 @@
 
     // ==================== AUTH ====================
     function getAuthHeaders() {
-        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
         return {
-            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
         };
     }
@@ -1288,5 +1298,17 @@
         return div.innerHTML;
     }
     </script>
+
+    <!-- Chat Widget BOB AI -->
+    <link rel="stylesheet" href="/chat/widget.css?v=20260416">
+    <script src="/chat/widget.js?v=20260416" defer></script>
+
+    <!-- Enterprise Shared -->
+    <script src="/_shared/accessibility-widget.js?v=20260301"></script>
+
+    <!-- Chat Corporativo (Teams) -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
+    <script src="/js/user-dropdown.js?v=20260319" defer></script>
 </body>
 </html>

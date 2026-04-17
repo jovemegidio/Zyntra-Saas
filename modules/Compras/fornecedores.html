@@ -429,9 +429,8 @@
         try {
             const url = id ? `/api/compras/fornecedores/${id}` : '/api/compras/fornecedores';
             const method = id ? 'PUT' : 'POST';
-            const token = localStorage.getItem('token');
             const r = await fetch(url, {
-                method, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                method, headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(dados)
             });
             if (!r.ok) throw new Error('Erro ao salvar');
@@ -443,8 +442,7 @@
 
     async function editarFornecedorModal(id) {
         try {
-            const token = localStorage.getItem('token');
-            const r = await fetch(`/api/compras/fornecedores/${id}`, { headers: { 'Authorization': `Bearer ${token}` } });
+            const r = await fetch(`/api/compras/fornecedores/${id}`, { headers: {  } });
             const d = await r.json();
             const f = d.fornecedor || d;
             document.getElementById('fornecedorId').value = f.id || id;
@@ -486,8 +484,7 @@
 
     async function visualizarFornecedorModal(id) {
         try {
-            const token = localStorage.getItem('token');
-            const r = await fetch(`/api/compras/fornecedores/${id}`, { headers: { 'Authorization': `Bearer ${token}` } });
+            const r = await fetch(`/api/compras/fornecedores/${id}`, { headers: {  } });
             const d = await r.json();
             const f = d.fornecedor || d;
             document.getElementById('viewFornNome').innerHTML = '<i class="fas fa-building"></i> ' + (f.razao_social || f.nome_fantasia || 'Fornecedor');
@@ -546,9 +543,8 @@
         if (!ok) return;
         _excluindoFornecedor = true;
         try {
-            const token = localStorage.getItem('token');
             const r = await fetch(`/api/compras/fornecedores/${id}`, {
-                method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` }
+                method: 'DELETE', headers: {  }
             });
             if (!r.ok) { const err = await r.json().catch(() => ({})); throw new Error(err.error || 'Erro ao excluir'); }
             if (typeof fornecedoresManager !== 'undefined') fornecedoresManager.carregarFornecedores();
