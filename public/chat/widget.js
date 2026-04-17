@@ -851,14 +851,15 @@
       grid.appendChild(s);
     });
 
-    $('afw-btn-emoji').addEventListener('click', (e) => {
+    const btnEmoji = $('afw-btn-emoji');
+    if (btnEmoji) btnEmoji.addEventListener('click', (e) => {
       e.stopPropagation();
       $('afw-emoji-picker').classList.toggle('hidden');
     });
 
     document.addEventListener('click', (e) => {
       const picker = $('afw-emoji-picker');
-      if (!picker.contains(e.target) && e.target !== $('afw-btn-emoji')) {
+      if (picker && !picker.contains(e.target) && e.target !== $('afw-btn-emoji')) {
         picker.classList.add('hidden');
       }
     });

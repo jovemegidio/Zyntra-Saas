@@ -371,6 +371,31 @@ function createProdutosRouter(pool, authenticateToken, io) {
         }
     });
 
+    // GET /api/produtos/unidades-medida
+    router.get('/unidades-medida', authenticateToken, async (req, res) => {
+        try {
+            const [rows] = await pool.query(`
+                SELECT id, sigla, nome, tipo, ativo
+                FROM produto_unidades_medida
+                WHERE ativo = 1
+                ORDER BY sigla ASC
+            `);
+            res.json({ success: true, data: rows });
+        } catch (error) {
+            // Table may not exist — return common defaults
+            res.json({ success: true, data: [
+                { id: 1, sigla: 'UN', nome: 'Unidade', tipo: 'quantidade', ativo: 1 },
+                { id: 2, sigla: 'KG', nome: 'Quilograma', tipo: 'peso', ativo: 1 },
+                { id: 3, sigla: 'M', nome: 'Metro', tipo: 'comprimento', ativo: 1 },
+                { id: 4, sigla: 'CX', nome: 'Caixa', tipo: 'quantidade', ativo: 1 },
+                { id: 5, sigla: 'PC', nome: 'Peça', tipo: 'quantidade', ativo: 1 },
+                { id: 6, sigla: 'L', nome: 'Litro', tipo: 'volume', ativo: 1 },
+                { id: 7, sigla: 'M2', nome: 'Metro Quadrado', tipo: 'area', ativo: 1 },
+                { id: 8, sigla: 'TON', nome: 'Tonelada', tipo: 'peso', ativo: 1 }
+            ]});
+        }
+    });
+
     return router;
 }
 

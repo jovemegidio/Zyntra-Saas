@@ -3058,8 +3058,8 @@ module.exports = function createRHRoutes(deps) {
         }
     });
 
-    // GET /api/rh/configuracoes/ponto-eletrônico
-    router.get('/configuracoes/ponto-eletrônico', async (req, res) => {
+    // GET /api/rh/configuracoes/ponto-eletrônico (both formats)
+    router.get(['/configuracoes/ponto-eletrônico', '/configuracoes/ponto-eletronico'], async (req, res) => {
         try {
             const [rows] = await pool.query(
                 "SELECT chave, valor FROM rh_configuracoes WHERE categoria = 'ponto_eletrônico'"
@@ -3092,8 +3092,8 @@ module.exports = function createRHRoutes(deps) {
         }
     });
 
-    // PUT /api/rh/configuracoes/ponto-eletrônico
-    router.put('/configuracoes/ponto-eletrônico', authorizeAdmin, async (req, res) => {
+    // PUT /api/rh/configuracoes/ponto-eletrônico (both formats)
+    router.put(['/configuracoes/ponto-eletrônico', '/configuracoes/ponto-eletronico'], authorizeAdmin, async (req, res) => {
         try {
             const { entrada, saida_almoco, retorno_almoco, saida, tolerancia_atraso, horas_extras_auto, notificar_gestores } = req.body;
             const configs = { entrada, saida_almoco, retorno_almoco, saida, tolerancia_atraso, horas_extras_auto, notificar_gestores };

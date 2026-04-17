@@ -366,6 +366,17 @@ module.exports = function registerAllRoutes(app, deps) {
     } catch (_) {}
 
     // ============================================================
+    // 10b. Company Settings (departamentos, empresa-config, etc.)
+    // ============================================================
+    try {
+        const createCompanySettings = require('./companySettings');
+        app.use('/api', createCompanySettings({ pool, authenticateToken, requireAdmin: authorizeAdmin }));
+        console.log('[ROUTES] ✅ Company Settings routes mounted at /api (departamentos, empresa-config)');
+    } catch (err) {
+        console.error('[ROUTES] ❌ Failed to load companySettings:', err.message);
+    }
+
+    // ============================================================
     // 9.4. Dashboard API (KPIs, Alerts, Modules)
     // AUDIT-FIX: Adicionado authenticateToken — era público
     // ============================================================
