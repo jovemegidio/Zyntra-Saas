@@ -32,7 +32,7 @@
             --header-height: 42px;
             --tab-height: 40px;
             --primary-orange: #225cfa;
-            --primary-dark: #1a1a2e;
+            --primary-dark: #ffffff;
             --bg-gray: #f5f5f5;
             --border-color: #e5e5e5;
             --text-primary: #1a1a1a;
@@ -1540,7 +1540,6 @@
                 <button class="sidebar-btn" title="Comissões" onclick="window.location.href='comissoes.html'"><i class="fas fa-percentage"></i></button>
             </nav>
             <div class="sidebar-bottom">
-                <button class="sidebar-btn" title="Configurações"><i class="fas fa-cog"></i></button>
             </div>
         </aside>
 
@@ -1576,7 +1575,7 @@
                 <button class="tab active">Pedidos</button>
                 <div class="tabs-actions">
                     <button class="tab-action-btn" title="Atualizar" onclick="carregarPedidos()"><i class="fas fa-sync-alt"></i></button>
-                    <button class="tab-action-btn" title="Configurações" onclick="showToast('Configurações em breve disponíveis', 'info')"><i class="fas fa-cog"></i></button>
+
                 </div>
             </div>
 
@@ -1904,12 +1903,13 @@
             tbody.innerHTML = pedidosPagina.map(p => {
                 const isChecked = selectedIds.has(p.id) ? 'checked' : '';
                 // Verificar se o usuário pode editar este pedido específico
-                const podeEditar = perms.podeEditarPedido ? perms.podeEditarPedido(p.vendedor_id) : true;
+                const podeEditarOwner = perms.podeEditarPedido ? perms.podeEditarPedido(p.vendedor_id) : true;
+                const podeEditar = podeEditarOwner && !pedidoBloqueadoPorStatus(p);
 
                 // Botão de editar: desabilitado se não pode editar, ou mostra dica
                 const btnEditar = podeEditar
                     ? `<button class="action-btn" title="Editar" onclick="editarPedido(${p.id})"><i class="fas fa-edit"></i></button>`
-                    : `<button class="action-btn" title="Sem permissão para editar este pedido" disabled style="opacity: 0.4; cursor: not-allowed;"><i class="fas fa-edit"></i></button>`;
+                    : `<button class="action-btn" title="${pedidoBloqueadoPorStatus(p) ? 'Pedido bloqueado para edição neste status' : 'Sem permissão para editar este pedido'}" disabled style="opacity: 0.4; cursor: not-allowed;"><i class="fas fa-${pedidoBloqueadoPorStatus(p) ? 'lock' : 'edit'}"></i></button>`;
 
                 // Quick status change dropdown
                 const statusOptions = ['orcamento','aprovado','faturado','entregue','cancelado'];
@@ -1971,7 +1971,8 @@
 
             // Verificar permissões do usuário logado
             const perms = window.ALUFORCE_PERMISSIONS || {};
-            const podeEditar = perms.podeEditarPedido ? perms.podeEditarPedido(pedido.vendedor_id) : true;
+            const podeEditarOwner = perms.podeEditarPedido ? perms.podeEditarPedido(pedido.vendedor_id) : true;
+            const podeEditar = podeEditarOwner && !pedidoBloqueadoPorStatus(pedido);
 
             // Criar modal de visualização se não existir
             let modal = document.getElementById('modal-visualizar');
@@ -2062,7 +2063,7 @@
                     <button class="modal-tab" onclick="switchDetalhesTab(this, 'tab-vis-info')" style="padding:10px 20px;border:none;background:transparent;font-size:13px;font-weight:600;color:#6b7280;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all 0.2s;">
                         <i class="fas fa-info-circle"></i> Informações
                     </button>
-                    ${pedido.observação ? `<button class="modal-tab" onclick="switchDetalhesTab(this, 'tab-vis-obs')" style="padding:10px 20px;border:none;background:transparent;font-size:13px;font-weight:600;color:#6b7280;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all 0.2s;">
+                    ${pedido.observacao || pedido.observacoes ? `<button class="modal-tab" onclick="switchDetalhesTab(this, 'tab-vis-obs')" style="padding:10px 20px;border:none;background:transparent;font-size:13px;font-weight:600;color:#6b7280;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all 0.2s;">
                         <i class="fas fa-comment"></i> Observações
                     </button>` : ''}
                 </div>
@@ -2116,11 +2117,11 @@
                     </div>
                 </div>
 
-                ${pedido.observação ? `
-                <!-- Tab: Observações -->
+                ${pedido.observacao || pedido.observacoes ? `
+                <!-- Tab: Observacoes -->
                 <div id="tab-vis-obs" class="tab-content-vis" style="display:none;">
                     <div style="background:#f9fafb;border-radius:8px;padding:20px;">
-                        <p style="color:#374151;font-size:14px;line-height:1.6;white-space:pre-wrap;">${pedido.observacao}</p>
+                        <p style="color:#374151;font-size:14px;line-height:1.6;white-space:pre-wrap;">${pedido.observacao || pedido.observacoes || ''}</p>
                     </div>
                 </div>` : ''}
             `;
@@ -2200,9 +2201,15 @@
             // VERIFICAÇÃO DE SEGURANÇA: Checar permissão antes de abrir edição
             // ========================================
             const perms = window.ALUFORCE_PERMISSIONS || {};
-            const podeEditar = perms.podeEditarPedido ? perms.podeEditarPedido(pedido.vendedor_id) : true;
+            const podeEditarOwner = perms.podeEditarPedido ? perms.podeEditarPedido(pedido.vendedor_id) : true;
 
-            if (!podeEditar) {
+            // Verificar bloqueio por status (só ti@aluforce.ind.br pode editar)
+            if (pedidoBloqueadoPorStatus(pedido)) {
+                showToast(`Pedido com status "${pedido.status}" está bloqueado para edição. Somente TI pode editar.`, 'warning');
+                return;
+            }
+
+            if (!podeEditarOwner) {
                 // Mostrar alerta de que não pode editar
                 const isSupervisor = perms.isSupervisor || false;
                 if (isSupervisor) {
@@ -2242,7 +2249,7 @@
 
                         <!-- Container Principal -->
                         <div class="modal-container-omie">
-                            <!-- Área de Conteúdo Principal -->
+                            <!-- �?rea de Conteúdo Principal -->
                             <div class="modal-main-content">
                                 <!-- Seção do Cliente -->
                                 <div class="cliente-section">
@@ -3858,6 +3865,15 @@
         }
 
         // Carregar dados do usuário logado via API
+        let _pedidosUserEmail = '';
+        const _STATUS_BLOQUEADO_EDICAO = ['faturado', 'faturar', 'aprovado', 'pedido-aprovado', 'orcamento', 'orçamento', 'analise', 'analise-credito', 'recibo', 'entregue'];
+        const _EMAIL_EDICAO_LIBERADO = 'ti@aluforce.ind.br';
+        function pedidoBloqueadoPorStatus(pedido) {
+            if (!pedido) return false;
+            const st = (pedido.status || '').toLowerCase();
+            if (!_STATUS_BLOQUEADO_EDICAO.includes(st)) return false;
+            return _pedidosUserEmail !== _EMAIL_EDICAO_LIBERADO;
+        }
         async function carregarUsuarioLogado() {
             try {
                 const response = await fetchWithTimeout('/api/me', { headers: getAuthHeaders() }, 15000);
@@ -3871,6 +3887,7 @@
                 if (response.ok) {
                     const user = await response.json();
                     console.log('[Pedidos] Usuário carregado:', user.nome);
+                    _pedidosUserEmail = (user.email || '').toLowerCase();
 
                     // Usar apelido se disponível, senão primeiro+último nome
                     const userName = user.apelido || user.nome || 'Usuário';
@@ -3959,7 +3976,7 @@
             const existente = document.getElementById('modal-alerta-parcelas');
             if (existente) existente.remove();
 
-            // Ícones por tipo
+            // �?cones por tipo
             const icones = {
                 warning: 'fas fa-exclamation',
                 error: 'fas fa-times',

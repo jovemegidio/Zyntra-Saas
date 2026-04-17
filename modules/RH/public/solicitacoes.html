@@ -269,7 +269,8 @@
         <!-- Sidebar -->
         <aside class="sidebar" id="mobile-sidebar">
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel de Controle"><i class="fas fa-home"></i></a>
-            <nav class="sidebar-nav">
+            <!-- sidebar-nav oculta por padrão; visível apenas para admins RH via JS -->
+            <nav class="sidebar-nav" id="rh-admin-nav" style="display:none;">
                 <a href="areaadm.html" class="sidebar-btn" title="Dashboard RH"><i class="fas fa-chart-pie"></i></a>
                 <a href="pages/funcionarios.html" class="sidebar-btn" title="FUNCIONÁRIOS"><i class="fas fa-users"></i></a>
                 <a href="gestao-holerites.html" class="sidebar-btn" title="Gestão de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
@@ -560,8 +561,14 @@
                     // Mostrar boto admin apenas para Usuários ESPECÍFICOS
                     const adminEmails = ['rh@aluforce.ind.br', 'ti@aluforce.ind.br', 'andreia@aluforce.ind.br', 'douglas@aluforce.ind.br', 'fernando@aluforce.ind.br', 'adm@aluforce.ind.br'];
                     const btnAdmin = document.getElementById('btn-admin');
-                    if (btnAdmin && user.email && adminEmails.includes(user.email.toLowerCase())) {
+                    const isRhAdmin = user.email && adminEmails.includes(user.email.toLowerCase());
+                    if (btnAdmin && isRhAdmin) {
                         btnAdmin.style.display = 'flex';
+                    }
+                    // Mostrar sidebar admin apenas para admins de RH
+                    const rhAdminNav = document.getElementById('rh-admin-nav');
+                    if (rhAdminNav && isRhAdmin) {
+                        rhAdminNav.style.display = '';
                     }
                 }
             } catch (error) {
