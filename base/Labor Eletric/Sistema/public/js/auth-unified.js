@@ -442,7 +442,7 @@
             loginUrl = `${AUTH_CONFIG.loginUrl}?returnTo=${returnTo}`;
         }
 
-        window.location.href = loginUrl;
+        window.location.assign(loginUrl);
     }
 
     // =========================================================================
@@ -685,7 +685,7 @@
                 await _originalFetch('/api/logout', { method: 'POST', credentials: 'include' });
             } catch (e) { /* ignore network errors during logout */ }
             clearAuthData();
-            window.location.href = AUTH_CONFIG.loginUrl;
+            window.location.assign(AUTH_CONFIG.loginUrl);
         }
     };
 

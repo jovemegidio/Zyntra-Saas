@@ -1768,8 +1768,7 @@ router.post('/verify-2fa', async (req, res) => {
             }
         }
 
-        const baseUrl = (req.protocol || 'http') + '://' + (req.get('host') || req.headers.host || 'localhost');
-        const redirectTo = baseUrl + '/dashboard';
+        const redirectTo = '/dashboard';
 
         // SECURITY: Token is NOT included in JSON response — delivered only via httpOnly cookie
         const payload = {
