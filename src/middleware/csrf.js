@@ -25,6 +25,8 @@ const CSRF_CONFIG = {
         '/api/auth/login',
         '/api/auth/refresh',
         '/api/webhook',
+        '/api/n8n',
+        '/api/whatsapp-alertas',
         '/api/health',
         '/api/status'
     ]

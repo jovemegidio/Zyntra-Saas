@@ -150,7 +150,10 @@ app.post('/api/auth/refresh', async (req, res) => {
         if (!refreshToken) {
             return res.status(401).json({ message: 'Refresh token não encontrado', code: 'AUTH_MISSING' });
         }
-        const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET || process.env.SECRET_KEY;
+        const crypto = require('crypto');
+        const JWT_SECRET_BASE = process.env.JWT_SECRET || process.env.SECRET_KEY;
+        const JWT_REFRESH_SECRET = process.env.REFRESH_SECRET || 
+            crypto.createHmac('sha256', JWT_SECRET_BASE).update('refresh-token-secret').digest('hex');
         try {
             const payload = jwt.verify(refreshToken, JWT_REFRESH_SECRET, { algorithms: ['HS256'] });
             const JWT_SECRET = process.env.JWT_SECRET || process.env.SECRET_KEY;

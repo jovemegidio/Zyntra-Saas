@@ -5,6 +5,7 @@
  * @module routes/financeiro-extended
  */
 const express = require('express');
+const { safeAddColumn, safeAddIndex } = require('../utils/safe-alter');
 
 module.exports = function createFinanceiroExtendedRoutes(deps) {
     const { pool, authenticateToken, authorizeArea, writeAuditLog, jwt, JWT_SECRET, cacheMiddleware, CACHE_CONFIG, checkFinanceiroPermission } = deps;
@@ -15,10 +16,10 @@ module.exports = function createFinanceiroExtendedRoutes(deps) {
     // ============================================================
     (async () => {
         try {
-            await pool.query(`ALTER TABLE contas_pagar ADD COLUMN IF NOT EXISTS mes_referencia VARCHAR(7) NULL COMMENT 'Mês de referência YYYY-MM'`);
-            await pool.query(`ALTER TABLE contas_pagar ADD INDEX IF NOT EXISTS idx_cp_mes_referencia (mes_referencia)`);
-            await pool.query(`ALTER TABLE contas_receber ADD COLUMN IF NOT EXISTS mes_referencia VARCHAR(7) NULL COMMENT 'Mês de referência YYYY-MM'`);
-            await pool.query(`ALTER TABLE contas_receber ADD INDEX IF NOT EXISTS idx_cr_mes_referencia (mes_referencia)`);
+            await safeAddColumn(pool, 'contas_pagar', 'mes_referencia', "VARCHAR(7) NULL COMMENT 'Mês de referência YYYY-MM'");
+            await safeAddIndex(pool, 'contas_pagar', 'idx_cp_mes_referencia', 'mes_referencia');
+            await safeAddColumn(pool, 'contas_receber', 'mes_referencia', "VARCHAR(7) NULL COMMENT 'Mês de referência YYYY-MM'");
+            await safeAddIndex(pool, 'contas_receber', 'idx_cr_mes_referencia', 'mes_referencia');
             // Preencher mes_referencia para registros existentes que ainda não têm
             await pool.query(`UPDATE contas_pagar SET mes_referencia = DATE_FORMAT(COALESCE(data_vencimento, data_pagamento, data_emissao, data_criacao), '%Y-%m') WHERE mes_referencia IS NULL AND COALESCE(data_vencimento, data_pagamento, data_emissao, data_criacao) IS NOT NULL`);
             await pool.query(`UPDATE contas_receber SET mes_referencia = DATE_FORMAT(COALESCE(data_vencimento, data_recebimento, data_emissao, data_criacao), '%Y-%m') WHERE mes_referencia IS NULL AND COALESCE(data_vencimento, data_recebimento, data_emissao, data_criacao) IS NOT NULL`);

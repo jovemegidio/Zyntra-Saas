@@ -1875,7 +1875,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'modules', 'RH', 'public
 // ============================================================
 // AUDIT-FIX R2: REFRESH_SECRET não deve derivar do JWT_SECRET
 const crypto = require('crypto');
-const REFRESH_SECRET = process.env.REFRESH_SECRET || crypto.createHash('sha256').update(JWT_SECRET + 'refresh_salt_zyntra_2026').digest('hex');
+const REFRESH_SECRET = process.env.REFRESH_SECRET || crypto.createHmac('sha256', JWT_SECRET).update('refresh-token-secret').digest('hex');
 
 function authenticatePage(req, res, next) {
     // SECURITY FIX: Exige token válido para servir páginas protegidas

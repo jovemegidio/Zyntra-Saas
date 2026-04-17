@@ -164,7 +164,7 @@ function createClientesRouter(pool, authenticateToken, registrarAuditLog) {
                 ativo !== undefined ? (ativo ? 1 : 0) : 1,
                 req.user?.nome || null, req.user?.nome || null, req.user?.nome || null
             ]);
-            /
+
             // Audit log
             if (registrarAuditLog) {
                 registrarAuditLog({

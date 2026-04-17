@@ -33,7 +33,7 @@ async function seedPermissions(pool) {
     let allUsers = [];
     try {
         const [funcs] = await pool.query(
-            "SELECT id, LOWER(TRIM(SUBSTRING_INDEX(COALESCE(nome_completo, nome, email), ' ', 1))) as first_name, email, 'funcionarios' as source FROM funcionarios"
+            "SELECT id, LOWER(TRIM(SUBSTRING_INDEX(COALESCE(nome_completo, email), ' ', 1))) as first_name, email, 'funcionarios' as source FROM funcionarios"
         );
         allUsers = allUsers.concat(funcs);
     } catch (e) { console.log('[SEED-PERM] funcionarios table:', e.message); }

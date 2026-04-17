@@ -1048,9 +1048,12 @@ router.post('/auth/refresh', async (req, res) => {
 
         // Detectar possível reuso de token revogado (ataque)
         const jwtLib = require('jsonwebtoken');
+        const crypto = require('crypto');
+        const REFRESH_SECRET = process.env.REFRESH_SECRET || 
+            crypto.createHmac('sha256', JWT_SECRET).update('refresh-token-secret').digest('hex');
         let decoded;
         try {
-            decoded = jwtLib.verify(oldRefreshToken, process.env.REFRESH_SECRET || JWT_SECRET + '_refresh');
+            decoded = jwtLib.verify(oldRefreshToken, REFRESH_SECRET);
         } catch (e) {
             return res.status(401).json({ code: 'INVALID_REFRESH_TOKEN', message: 'Refresh token inválido ou expirado.' });
         }
