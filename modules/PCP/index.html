@@ -798,11 +798,14 @@
             z-index: 1;
             width: 24px;
             height: 24px;
-            display: flex;
+            flex-shrink: 0;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
             border-radius: 50%;
             background: var(--gray-100);
+            line-height: 1;
+            text-align: center;
         }
 
         .quick-action-btn:hover>i.fa-chevron-right {
@@ -11501,7 +11504,7 @@
                 });
         }
 
-        // Gerar PDF da OP via XSL-FO / Apache FOP
+        // Gerar PDF da OP via janela de impressão (client-side)
         async function gerarPdfOP() {
             const dados = coletarDadosOP();
             if (!dados || !dados.cliente) {
@@ -11516,32 +11519,112 @@
                 console.warn('Erro ao salvar no Kanban/Multiplexado:', err);
             }
 
-            // Gerar PDF
-            try {
-                const response = await fetch('/api/gerar-ordem-pdf', {
-                    credentials: 'include',
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(dados)
-                });
-                if (response.ok) {
-                    const blob = await response.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    const nomeCliente = (dados.cliente || 'Cliente').replace(/[/\\:*?"<>|]/g, '_').trim();
-                    a.download = `Ordem de Produção - ${nomeCliente}.pdf`;
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                    showNotification('PDF gerado e ordem salva no Kanban/Multiplexado!', 'success');
-                } else {
-                    const errData = await response.json().catch(() => ({}));
-                    mostrarAlertaPCP('Erro ao Gerar PDF', errData.error || errData.detalhe || 'Verifique se o Apache FOP está instalado.', 'error');
-                }
-            } catch (error) {
-                console.error('Erro ao gerar PDF:', error);
-                mostrarAlertaPCP('Erro ao Gerar PDF', 'Verifique se a API está disponível.', 'error');
+            const nomeCliente = dados.cliente || 'Cliente';
+            const numOP = document.getElementById('op-número')?.value || ('OP ' + new Date().getFullYear());
+            const dataFormatada = new Date().toLocaleString('pt-BR');
+
+            const prodsRows = (dados.produtos || []).map(function(p, i) {
+                const bg = i % 2 === 0 ? '#fff' : '#f8fafc';
+                const vlr = parseFloat(p.valor_total || 0).toFixed(2).replace('.', ',');
+                return '<tr style="background:' + bg + '">'
+                    + '<td style="padding:6px 8px;font-size:10px;font-weight:600;color:#1e40af;border-bottom:1px solid #f1f5f9;">' + (p.codigo || '-') + '</td>'
+                    + '<td style="padding:6px 8px;font-size:10px;border-bottom:1px solid #f1f5f9;">' + (p.descrição || p.descricao || '-') + '</td>'
+                    + '<td style="padding:6px 8px;font-size:10px;text-align:right;border-bottom:1px solid #f1f5f9;">' + (p.largura || '-') + '</td>'
+                    + '<td style="padding:6px 8px;font-size:10px;text-align:right;border-bottom:1px solid #f1f5f9;">' + (p.esp || p.espessura || '-') + '</td>'
+                    + '<td style="padding:6px 8px;font-size:10px;text-align:right;border-bottom:1px solid #f1f5f9;">' + (p.quantidade || '0') + ' ' + (p.unidade_medida || 'UN') + '</td>'
+                    + '<td style="padding:6px 8px;font-size:10px;text-align:right;border-bottom:1px solid #f1f5f9;">' + (p.peso_bruto || p.peso || '-') + '</td>'
+                    + '<td style="padding:6px 8px;font-size:10px;text-align:right;border-bottom:1px solid #f1f5f9;font-weight:700;color:#1e293b;">R$&nbsp;' + vlr + '</td>'
+                    + '</tr>';
+            }).join('');
+
+            const pgtoRows = (dados.formas_pagamento || []).map(function(fp) {
+                const vlr = parseFloat(fp.valor || 0).toFixed(2).replace('.', ',');
+                return '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #f1f5f9;font-size:11px;">'
+                    + '<span>' + (fp.forma || '') + (fp.metodo ? ' — ' + fp.metodo : '') + '</span>'
+                    + '<span><b>' + (fp.percentual || 0) + '%</b> = R$&nbsp;' + vlr + '</span>'
+                    + '</div>';
+            }).join('') || '<div style="font-size:11px;color:#9ca3af;">Não informado</div>';
+
+            const prod = dados.produção || {};
+            const prodSection = prod.extrusora ? (
+                '<div class="section-title">⚙️ Produção</div>'
+                + '<div class="info-grid">'
+                + '<div class="info-item"><label>Extrusora</label><span>' + prod.extrusora + '</span></div>'
+                + '<div class="info-item"><label>Seção</label><span>' + (prod.secao || '-') + '</span></div>'
+                + '<div class="info-item"><label>Bobinas</label><span>' + (prod.bobinas || 0) + '</span></div>'
+                + '<div class="info-item"><label>Metragem</label><span>' + (prod.metragem || 0) + ' m</span></div>'
+                + '</div>'
+            ) : '';
+
+            const obsSection = dados.observacoes
+                ? '<div class="section-title">📝 Observações</div><div style="padding:8px;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;font-size:10px;">' + dados.observacoes + '</div>'
+                : '';
+
+            const pdfHTML = '<!DOCTYPE html><html><head><meta charset="utf-8">'
+                + '<title>' + numOP + ' - ' + nomeCliente + '</title>'
+                + '<style>'
+                + '@page{size:A4 portrait;margin:10mm 12mm;}'
+                + '@media print{.no-print{display:none!important;}body{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}}'
+                + '*{box-sizing:border-box;}body{font-family:"Segoe UI",Arial,sans-serif;color:#1e293b;margin:0;padding:0;font-size:11px;background:#fff;}'
+                + '.print-btn{position:fixed;top:12px;right:12px;background:#1e293b;color:#fff;border:none;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.2);z-index:999;}'
+                + '.header{background:linear-gradient(135deg,#1e293b 0%,#334155 100%);color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;}'
+                + '.section-title{background:#f1f5f9;border-left:3px solid #3b82f6;padding:5px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#374151;margin:12px 0 6px;}'
+                + '.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}'
+                + '.info-item{font-size:10px;}.info-item label{font-weight:700;color:#6b7280;display:block;font-size:9px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:1px;}'
+                + '.info-item span{color:#1e293b;}'
+                + 'table{width:100%;border-collapse:collapse;}'
+                + 'th{padding:5px 8px;text-align:left;font-size:9px;font-weight:700;text-transform:uppercase;color:#374151;background:#f1f5f9;border-bottom:2px solid #cbd5e1;}'
+                + '.footer{margin-top:16px;border-top:1px solid #e2e8f0;padding:6px 0;display:flex;justify-content:space-between;font-size:8px;color:#64748b;}'
+                + '</style></head><body>'
+                + '<button class="print-btn no-print" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>'
+                + '<div class="header">'
+                + '<div style="display:flex;align-items:center;gap:12px;">'
+                + '<img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="" style="height:36px;object-fit:contain;" onerror="this.style.display=\'none\'">'
+                + '<div><div style="font-size:16px;font-weight:800;">ORDEM DE PRODUÇÃO</div><div style="font-size:9px;opacity:0.7;">Gerado em ' + dataFormatada + '</div></div>'
+                + '</div>'
+                + '<div style="text-align:right;"><div style="font-size:20px;font-weight:800;">' + numOP + '</div><div style="font-size:10px;opacity:0.7;">Rev. ' + (dados.revisao || '01') + '</div></div>'
+                + '</div>'
+                + '<div style="padding:12px 20px;">'
+                + '<div class="section-title">📋 Dados do Pedido</div>'
+                + '<div class="info-grid">'
+                + '<div class="info-item"><label>Nº Orçamento</label><span>' + (dados.número_orçamento || '-') + '</span></div>'
+                + '<div class="info-item"><label>Nº Pedido</label><span>' + (dados.número_pedido || '-') + '</span></div>'
+                + '<div class="info-item"><label>Data Liberação</label><span>' + (dados.data_liberacao || '-') + '</span></div>'
+                + '<div class="info-item"><label>Vendedor</label><span>' + (dados.vendedor || '-') + '</span></div>'
+                + '<div class="info-item"><label>Prazo Entrega</label><span>' + (dados.prazo_entrega || '-') + '</span></div>'
+                + '<div class="info-item"><label>Tipo Frete</label><span>' + (dados.tipo_frete || '-') + '</span></div>'
+                + '</div>'
+                + '<div class="section-title">🏢 Cliente</div>'
+                + '<div class="info-grid">'
+                + '<div class="info-item"><label>Nome</label><span>' + (dados.cliente || '-') + '</span></div>'
+                + '<div class="info-item"><label>CNPJ/CPF</label><span>' + (dados.cpf_cnpj || '-') + '</span></div>'
+                + '<div class="info-item"><label>Contato</label><span>' + (dados.contato || '-') + '</span></div>'
+                + '<div class="info-item"><label>Telefone</label><span>' + (dados.telefone || '-') + '</span></div>'
+                + '<div class="info-item"><label>E-mail</label><span>' + (dados.email || '-') + '</span></div>'
+                + '<div class="info-item"><label>Endereço</label><span>' + (dados.endereco_cliente || '-') + '</span></div>'
+                + '</div>'
+                + '<div class="section-title">📦 Produtos</div>'
+                + '<table><thead><tr>'
+                + '<th>Código</th><th>Descrição</th><th style="text-align:right">Largura</th><th style="text-align:right">Esp.</th><th style="text-align:right">Qtd</th><th style="text-align:right">Peso</th><th style="text-align:right">Valor Total</th>'
+                + '</tr></thead><tbody>'
+                + (prodsRows || '<tr><td colspan="7" style="padding:12px;text-align:center;color:#9ca3af;">Nenhum produto informado</td></tr>')
+                + '</tbody></table>'
+                + '<div class="section-title">💰 Pagamento</div>'
+                + '<div style="padding:4px 0;">' + pgtoRows + '</div>'
+                + '<div style="font-size:10px;margin-top:4px;color:#6b7280;">Condições: ' + (dados.condições_pagamento || dados.condicoes_pagamento || '-') + '</div>'
+                + obsSection
+                + prodSection
+                + '<div class="footer"><div>Ordem de Produção · ' + nomeCliente + '</div><div>Gerado em ' + dataFormatada + ' · Zyntra ERP</div></div>'
+                + '</div></body></html>';
+
+            const pdfWin = window.open('', '_blank');
+            if (!pdfWin) {
+                mostrarAlertaPCP('Popup bloqueado', 'Permita popups para gerar o PDF.', 'error');
+                return;
             }
+            pdfWin.document.write(pdfHTML);
+            pdfWin.document.close();
+            showNotification('PDF gerado e ordem salva! Use Ctrl+P para salvar como PDF.', 'success');
         }
 
         // Salvar ordem silenciosamente (para uso interno)
