@@ -26,21 +26,16 @@ class ComprasDashboard {
 
     async carregarDados() {
         try {
-            const headers = { 'Authorization': `Bearer ${token}` };
-
             // Carregar dados do dashboard
             const [statsRes, pedidosRes, fornecedoresRes] = await Promise.all([
                 fetch('/api/compras/dashboard', {
-                    credentials: 'include',
-                    headers
+                    credentials: 'include'
                 }).catch(() => null),
                 fetch('/api/compras/pedidos', {
-                    credentials: 'include',
-                    headers
+                    credentials: 'include'
                 }).catch(() => null),
                 fetch('/api/compras/fornecedores', {
-                    credentials: 'include',
-                    headers
+                    credentials: 'include'
                 }).catch(() => null)
             ]);
 

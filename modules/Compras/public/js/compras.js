@@ -120,16 +120,8 @@ class ComprasNavigation {
 
     async loadUserInfo() {
         try {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                window.location.href = '/';
-                return;
-            }
-
             const response = await fetch('/api/auth/me', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
+                credentials: 'include'
             });
 
             const data = await response.json();

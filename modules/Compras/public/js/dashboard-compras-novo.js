@@ -32,9 +32,8 @@
         let alertas = [];
 
         try {
-            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
             const response = await fetch('/api/compras/dashboard', {
-                headers: { 'Authorization': `Bearer ${token}` }
+                credentials: 'include'
             });
             if (response.ok) {
                 const data = await response.json();

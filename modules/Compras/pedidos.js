@@ -18,10 +18,7 @@ function escapeHtml(str) {
 
 // Função para obter headers de autenticação
 function getAuthHeaders() {
-    const token = localStorage.getItem('token') || localStorage.getItem('authToken');
-    const headers = { 'Content-Type': 'application/json' };
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-    return headers;
+    return { 'Content-Type': 'application/json' };
 }
 
 // Mostrar toast de notificação (usa ComprasUtils se disponível)

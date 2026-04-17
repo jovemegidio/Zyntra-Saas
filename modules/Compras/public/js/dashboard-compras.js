@@ -16,11 +16,8 @@ class ComprasDashboard {
 
     async loadData() {
         try {
-            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
             const response = await fetch('/api/compras/dashboard', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
+                credentials: 'include'
             });
 
             if (!response.ok) throw new Error(`HTTP ${response.status}`);

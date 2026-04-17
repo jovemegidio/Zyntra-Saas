@@ -14,11 +14,7 @@ let usuarioLogado = { nome: 'Admin', departamento: 'Compras', nivel: 'gerente' }
 
 // Função para obter headers de autenticação
 function getAuthHeaders() {
-    const token = localStorage.getItem('token');
-    return {
-        'Content-Type': 'application/json',
-        'Authorization': token ? `Bearer ${token}` : ''
-    };
+    return { 'Content-Type': 'application/json' };
 }
 
 // Mostrar toast de notificação

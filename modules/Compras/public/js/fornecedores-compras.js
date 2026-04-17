@@ -14,11 +14,8 @@ class FornecedoresCompras {
 
     async loadFornecedores() {
         try {
-            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
             const response = await fetch('/api/compras/fornecedores', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
+                credentials: 'include'
             });
 
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
