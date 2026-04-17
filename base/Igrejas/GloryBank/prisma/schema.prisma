@@ -1,0 +1,155 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String   @id @default(cuid())
+  name            String
+  email           String   @unique
+  cpfCnpj         String   @unique @map("cpf_cnpj")
+  phone           String
+  passwordHash    String   @map("password_hash")
+  asaasCustomerId String?  @unique @map("asaas_customer_id")
+  asaasAccountId  String?  @unique @map("asaas_account_id")
+  asaasWalletId   String?  @map("asaas_wallet_id")
+  asaasApiKey     String?  @map("asaas_api_key")
+  birthDate       DateTime? @map("birth_date")
+  address         String?
+  addressNumber   String?  @map("address_number")
+  province        String?
+  postalCode      String?  @map("postal_code")
+  city            String?
+  state           String?
+  twoFactorSecret  String?  @map("two_factor_secret")
+  twoFactorEnabled Boolean  @default(false) @map("two_factor_enabled")
+  isActive        Boolean  @default(true) @map("is_active")
+  isVerified      Boolean  @default(false) @map("is_verified")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  sessions           Session[]
+  transactions       Transaction[]
+  notifications      Notification[]
+  scheduledTransfers ScheduledTransfer[]
+  cardRequests       CardRequest[]
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  token     String   @unique
+  userAgent String?  @map("user_agent")
+  ipAddress String?  @map("ip_address")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@map("sessions")
+}
+
+model Transaction {
+  id              String            @id @default(cuid())
+  userId          String            @map("user_id")
+  asaasId         String?           @unique @map("asaas_id")
+  type            TransactionType
+  status          TransactionStatus @default(PENDING)
+  amount          Decimal           @db.Decimal(12, 2)
+  fee             Decimal?          @db.Decimal(12, 2)
+  description     String?
+  pixKey          String?           @map("pix_key")
+  pixKeyType      String?           @map("pix_key_type")
+  boletoUrl       String?           @map("boleto_url")
+  boletoBarCode   String?           @map("boleto_bar_code")
+  recipientName   String?           @map("recipient_name")
+  recipientCpfCnpj String?         @map("recipient_cpf_cnpj")
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([type])
+  @@index([status])
+  @@index([createdAt])
+  @@map("transactions")
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  title     String
+  message   String
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("notifications")
+}
+
+enum TransactionType {
+  PIX_SENT
+  PIX_RECEIVED
+  BOLETO_CREATED
+  BOLETO_PAID
+  TRANSFER_SENT
+  TRANSFER_RECEIVED
+  DEPOSIT
+  WITHDRAWAL
+}
+
+enum TransactionStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  FAILED
+  REFUNDED
+}
+
+model ScheduledTransfer {
+  id            String   @id @default(cuid())
+  userId        String   @map("user_id")
+  pixKey        String   @map("pix_key")
+  pixKeyType    String   @map("pix_key_type")
+  amount        Decimal  @db.Decimal(12, 2)
+  description   String?
+  scheduledDate DateTime @map("scheduled_date")
+  recurrence    String?  // ONCE, WEEKLY, MONTHLY
+  status        String   @default("SCHEDULED") // SCHEDULED, EXECUTED, CANCELLED
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([scheduledDate])
+  @@map("scheduled_transfers")
+}
+
+model CardRequest {
+  id          String    @id @default(cuid())
+  userId      String    @map("user_id")
+  cardType    String    @map("card_type") // VIRTUAL, PHYSICAL
+  status      String    @default("PENDING") // PENDING, APPROVED, ACTIVE, BLOCKED
+  lastFour    String?   @map("last_four")
+  brand       String    @default("Visa")
+  cardName    String?   @map("card_name")
+  requestedAt DateTime  @default(now()) @map("requested_at")
+  approvedAt  DateTime? @map("approved_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("card_requests")
+}

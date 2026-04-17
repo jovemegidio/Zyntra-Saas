@@ -1,0 +1,115 @@
+﻿@import "tailwindcss";
+
+:root {
+  --gb-primary: #e30613;
+  --gb-primary-dark: #bf0010;
+  --gb-primary-light: #ff4d4d;
+  --gb-gold: #D97706;
+  --gb-gold-light: #F59E0B;
+  --gb-dark: #f5f6f8;
+  --gb-dark-card: #ffffff;
+  --gb-dark-border: rgba(0,0,0,0.08);
+  --gb-dark-hover: #eef0f4;
+  --gb-text: #1a1a2e;
+  --gb-text-muted: #64748B;
+  --gb-text-dim: #94A3B8;
+  --gb-danger: #EF4444;
+  --gb-warning: #F59E0B;
+  --gb-info: #3B82F6;
+  --gb-success: #22C55E;
+  --background: #f5f6f8;
+  --foreground: #1a1a2e;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Scrollbar */
+* { scrollbar-width: thin; scrollbar-color: #d1d5db transparent; }
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background-color: #d1d5db; border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background-color: #9ca3af; }
+
+/* Banking card shimmer */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.shimmer {
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.03) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+/* Glassmorphism */
+.glass {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px) saturate(1.4);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #e30613, #ff4d4d);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Focus ring */
+*:focus-visible { outline: 2px solid #e30613; outline-offset: 2px; }
+
+/* Entrance animations */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-in-up              { animation: fadeInUp 0.3s ease both; }
+.fade-in-up-delay-1      { animation: fadeInUp 0.3s 0.06s ease both; }
+.fade-in-up-delay-2      { animation: fadeInUp 0.3s 0.12s ease both; }
+.fade-in-up-delay-3      { animation: fadeInUp 0.3s 0.18s ease both; }
+.fade-in-up-delay-4      { animation: fadeInUp 0.3s 0.24s ease both; }
+
+/* Reduce motion support */
+@media (prefers-reduced-motion: reduce) {
+  .fade-in-up, .fade-in-up-delay-1, .fade-in-up-delay-2,
+  .fade-in-up-delay-3, .fade-in-up-delay-4 {
+    animation: none;
+  }
+  * { transition-duration: 0.01ms !important; }
+}
+
+/* Selection */
+::selection { background: rgba(124, 58, 237, 0.3); color: #f1f5f9; }
+
+/* Smooth page transitions */
+.page-enter              { opacity: 0; transform: translateY(8px); }
+.page-enter-active       { opacity: 1; transform: translateY(0); transition: all 0.3s ease; }
+
+/* Mobile touch improvements */
+@media (max-width: 1023px) {
+  a, button { touch-action: manipulation; }
+}
+
+/* Tabular numbers for amounts */
+.tabular-nums { font-variant-numeric: tabular-nums; }
+

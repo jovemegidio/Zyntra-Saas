@@ -842,12 +842,14 @@ router.post('/login', validate(schemas.login), async (req, res) => {
             path: '/'
         };
 
-        // Em produção, usar secure e sameSite strict
-        if (process.env.NODE_ENV === 'production') {
+        // Em produção com HTTPS, usar secure e sameSite strict
+        // Detectar HTTPS real (via req.secure ou header X-Forwarded-Proto)
+        const isSecureConnection = req.secure || req.get('X-Forwarded-Proto') === 'https';
+        if (process.env.NODE_ENV === 'production' && isSecureConnection) {
             cookieOptions.secure = true;
             cookieOptions.sameSite = 'strict';
         } else {
-            // Em desenvolvimento (localhost), não usar secure mas permitir sameSite lax
+            // HTTP ou desenvolvimento: não usar secure, sameSite lax
             cookieOptions.sameSite = 'lax';
         }
         // Access token cookie: 15 minutos
@@ -869,10 +871,8 @@ router.post('/login', validate(schemas.login), async (req, res) => {
             // Redireciona para index.html (painel de controle)
             return res.redirect('/index.html');
         }
-        // Também retorna dados do usuário para uso imediato no cliente (AJAX)
-        // Inclui `redirectTo` (absoluto) para que clientes que usam fetch possam redirecionar a página facilmente.
-        const baseUrl = (req.protocol || 'http') + '://' + (req.get('host') || req.headers.host || 'localhost');
-        const redirectTo = baseUrl + '/dashboard';
+        // Retorna path relativo para que o client-side possa prefixar o base path da empresa
+        const redirectTo = '/dashboard';
         // SECURITY: Token is NOT included in JSON response.
         // Authentication is handled exclusively via httpOnly cookie (set above).
         // This eliminates XSS token theft via localStorage.
