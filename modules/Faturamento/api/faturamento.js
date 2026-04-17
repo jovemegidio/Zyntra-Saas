@@ -681,18 +681,18 @@ module.exports = (pool, authenticateToken) => {
                 SELECT * FROM (
                     SELECT
                         n.id,
-                        'nfe' as origem,
-                        n.numero,
+                        'nfe' COLLATE utf8mb4_general_ci as origem,
+                        n.numero COLLATE utf8mb4_general_ci as numero,
                         COALESCE(n.serie, 1) as serie,
                         n.cliente_id,
-                        COALESCE(n.destinatario_nome, c.nome) as cliente_nome,
-                        COALESCE(n.destinatario_nome, c.nome) as destinatario,
+                        COALESCE(n.destinatario_nome, c.nome) COLLATE utf8mb4_general_ci as cliente_nome,
+                        COALESCE(n.destinatario_nome, c.nome) COLLATE utf8mb4_general_ci as destinatario,
                         COALESCE(n.valor_total, 0) as valor,
-                        n.status,
+                        n.status COLLATE utf8mb4_general_ci as status,
                         n.data_emissao,
-                        n.natureza_operacao as observacoes,
-                        n.chave_acesso,
-                        n.protocolo_autorizacao as protocolo,
+                        n.natureza_operacao COLLATE utf8mb4_general_ci as observacoes,
+                        n.chave_acesso COLLATE utf8mb4_general_ci as chave_acesso,
+                        n.protocolo_autorizacao COLLATE utf8mb4_general_ci as protocolo,
                         n.pedido_id
                     FROM nfes n
                     LEFT JOIN clientes c ON n.cliente_id = c.id
@@ -1195,11 +1195,11 @@ module.exports = (pool, authenticateToken) => {
                 FROM (
                     SELECT
                         COUNT(*) as total_nfes,
-                        SUM(CASE WHEN status = 'autorizada' THEN 1 ELSE 0 END) as autorizadas,
-                        SUM(CASE WHEN status = 'pendente' OR status = 'digitacao' OR status = 'emitida' THEN 1 ELSE 0 END) as pendentes,
-                        SUM(CASE WHEN status = 'cancelada' THEN 1 ELSE 0 END) as canceladas,
-                        SUM(CASE WHEN status = 'autorizada' THEN COALESCE(valor_total, 0) ELSE 0 END) as valor_total_faturado,
-                        SUM(CASE WHEN status = 'autorizada' AND MONTH(data_emissao) = MONTH(NOW()) AND YEAR(data_emissao) = YEAR(NOW()) THEN COALESCE(valor_total, 0) ELSE 0 END) as valor_mes_atual
+                        SUM(CASE WHEN status COLLATE utf8mb4_general_ci = 'autorizada' THEN 1 ELSE 0 END) as autorizadas,
+                        SUM(CASE WHEN status COLLATE utf8mb4_general_ci = 'pendente' OR status COLLATE utf8mb4_general_ci = 'digitacao' OR status COLLATE utf8mb4_general_ci = 'emitida' THEN 1 ELSE 0 END) as pendentes,
+                        SUM(CASE WHEN status COLLATE utf8mb4_general_ci = 'cancelada' THEN 1 ELSE 0 END) as canceladas,
+                        SUM(CASE WHEN status COLLATE utf8mb4_general_ci = 'autorizada' THEN COALESCE(valor_total, 0) ELSE 0 END) as valor_total_faturado,
+                        SUM(CASE WHEN status COLLATE utf8mb4_general_ci = 'autorizada' AND MONTH(data_emissao) = MONTH(NOW()) AND YEAR(data_emissao) = YEAR(NOW()) THEN COALESCE(valor_total, 0) ELSE 0 END) as valor_mes_atual
                     FROM nfes
 
                     UNION ALL
