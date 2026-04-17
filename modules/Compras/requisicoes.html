@@ -12,9 +12,9 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Zyntra: Requisições de Compra</title>
+    <title>Zyntra: Requisiï¿½ï¿½es de Compra</title>
 
-    <!-- Sistema de Autenticação Unificado -->
+    <!-- Sistema de Autenticaï¿½ï¿½o Unificado -->
     <script src="/js/auth-unified.js?v=20260326" defer></script>
     <script src="/js/inactivity-manager.js?v=20260324" defer></script>
 
@@ -27,7 +27,7 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
 
-    <!-- CSS Padrão Global -->
+    <!-- CSS Padrï¿½o Global -->
     <link rel="stylesheet" href="/modules/Compras/css/compras-layout.css?v=20260301">
     <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260301">
     <link rel="stylesheet" href="/css/skeleton-loader.css?v=20260301">
@@ -137,22 +137,22 @@
         .priority-option label:hover {
             color: var(--gray-700); background: rgba(255,255,255,0.7);
         }
-        /* Selecionado é Baixa (verde) */
+        /* Selecionado ï¿½ Baixa (verde) */
         .priority-option input[value="baixa"]:checked + label {
             background: #ecfdf5; color: #059669; border-color: #a7f3d0;
             box-shadow: 0 1px 3px rgba(5,150,105,0.12);
         }
-        /* Selecionado é Normal (azul) */
+        /* Selecionado ï¿½ Normal (azul) */
         .priority-option input[value="normal"]:checked + label {
             background: #eff6ff; color: #2563eb; border-color: #bfdbfe;
             box-shadow: 0 1px 3px rgba(37,99,235,0.12);
         }
-        /* Selecionado é Alta (amber) */
+        /* Selecionado ï¿½ Alta (amber) */
         .priority-option input[value="alta"]:checked + label {
             background: #fffbeb; color: #d97706; border-color: #fde68a;
             box-shadow: 0 1px 3px rgba(217,119,6,0.12);
         }
-        /* Selecionado é Urgente (vermelho) */
+        /* Selecionado ï¿½ Urgente (vermelho) */
         .priority-option input[value="urgente"]:checked + label {
             background: #fef2f2; color: #dc2626; border-color: #fecaca;
             box-shadow: 0 1px 3px rgba(220,38,38,0.15);
@@ -247,7 +247,7 @@
     <link rel="stylesheet" href="/chat/widget.css?v=20260301">
     <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260326">
 </head>
-<body>
+<body class="dark-mode">
     <div class="app-container">
         <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
 
@@ -257,15 +257,15 @@
             <nav class="sidebar-nav">
                 <button class="sidebar-btn" title="Dashboard" onclick="window.location.href='index.html'"><i class="fas fa-chart-line"></i></button>
                 <button class="sidebar-btn" title="Pedidos" onclick="window.location.href='pedidos.html'"><i class="fas fa-shopping-cart"></i></button>
-                <button class="sidebar-btn" title="Cotações" onclick="window.location.href='cotacoes.html'"><i class="fas fa-file-invoice-dollar"></i></button>
+                <button class="sidebar-btn" title="Cotaï¿½ï¿½es" onclick="window.location.href='cotacoes.html'"><i class="fas fa-file-invoice-dollar"></i></button>
                 <button class="sidebar-btn" title="Fornecedores" onclick="window.location.href='fornecedores.html'"><i class="fas fa-users"></i></button>
-                <button class="sidebar-btn active" title="Requisições" onclick="window.location.href='requisicoes.html'"><i class="fas fa-clipboard-list"></i></button>
+                <button class="sidebar-btn active" title="Requisiï¿½ï¿½es" onclick="window.location.href='requisicoes.html'"><i class="fas fa-clipboard-list"></i></button>
                 <button class="sidebar-btn" title="Recebimento" onclick="window.location.href='recebimento.html'"><i class="fas fa-truck-loading"></i></button>
             </nav>
             <div class="sidebar-bottom">
                 <button class="sidebar-btn" title="Estoque MP" onclick="window.location.href='gestao-estoque.html'"><i class="fas fa-boxes"></i></button>
                 <button class="sidebar-btn" title="QR Code Estoque" onclick="window.location.href='qrcode-estoque.html'"><i class="fas fa-qrcode"></i></button>
-                <button class="sidebar-btn" title="Relatórios" onclick="window.location.href='relatorios.html'"><i class="fas fa-chart-bar"></i></button>
+                <button class="sidebar-btn" title="Relatï¿½rios" onclick="window.location.href='relatorios.html'"><i class="fas fa-chart-bar"></i></button>
             </div>
         </aside>
 
@@ -279,7 +279,7 @@
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;"></span>
-                        <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Requisições</span>
+                        <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Requisiï¿½ï¿½es</span>
                     </div>
                 </div>
                 <div class="header-right">
@@ -287,7 +287,7 @@
                     <button class="header-btn" title="Exportar CSV" onclick="exportarDados()"><i class="fas fa-download"></i></button>
                     
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuï¿½rio</strong></span>
                     </div>
                 </div>
             </header>
@@ -297,7 +297,7 @@
                 <div class="page-header">
                     <div class="page-header-top">
                         <div class="page-actions">
-                            <button class="btn btn-primary" onclick="abrirModalNovaRequisicao()"><i class="fas fa-plus"></i> Nova Requisição</button>
+                            <button class="btn btn-primary" onclick="abrirModalNovaRequisicao()"><i class="fas fa-plus"></i> Nova Requisiï¿½ï¿½o</button>
                         </div>
                     </div>
                 </div>
@@ -307,7 +307,7 @@
                     <div class="metric-card purple">
                         <div class="metric-header"><div class="metric-icon purple"><i class="fas fa-clipboard-list"></i></div></div>
                         <div class="metric-value" id="totalRequisicoes">0</div>
-                        <div class="metric-label">Total Requisições</div>
+                        <div class="metric-label">Total Requisiï¿½ï¿½es</div>
                     </div>
                     <div class="metric-card orange">
                         <div class="metric-header"><div class="metric-icon orange"><i class="fas fa-clock"></i></div></div>
@@ -322,7 +322,7 @@
                     <div class="metric-card blue">
                         <div class="metric-header"><div class="metric-icon blue"><i class="fas fa-file-invoice-dollar"></i></div></div>
                         <div class="metric-value" id="requisicoesCotacao">0</div>
-                        <div class="metric-label">Em Cotação</div>
+                        <div class="metric-label">Em Cotaï¿½ï¿½o</div>
                     </div>
                 </div>
 
@@ -330,13 +330,13 @@
         <div class="filters-bar">
             <div class="search-box">
                 <i class="fas fa-search"></i>
-                <input type="text" id="searchRequisicao" placeholder="Buscar Requisição...">
+                <input type="text" id="searchRequisicao" placeholder="Buscar Requisiï¿½ï¿½o...">
             </div>
             <div class="filter-buttons">
                 <button class="filter-btn active" onclick="filtrarRequisicoes('todos', this)">Todas</button>
                 <button class="filter-btn" onclick="filtrarRequisicoes('pendente', this)">Pendentes</button>
                 <button class="filter-btn" onclick="filtrarRequisicoes('aprovado', this)">Aprovadas</button>
-                <button class="filter-btn" onclick="filtrarRequisicoes('cotação', this)">Em Cotação</button>
+                <button class="filter-btn" onclick="filtrarRequisicoes('cotaï¿½ï¿½o', this)">Em Cotaï¿½ï¿½o</button>
                 <button class="filter-btn" onclick="filtrarRequisicoes('rascunho', this)">Rascunhos</button>
             </div>
         </div>
@@ -349,14 +349,14 @@
                         <thead>
                             <tr>
                                 <th style="width:50px">#</th>
-                                <th>Nº Requisição</th>
+                                <th>Nï¿½ Requisiï¿½ï¿½o</th>
                                 <th>Solicitante</th>
                                 <th>Data</th>
                                 <th>Centro de Custo</th>
                                 <th>Prioridade</th>
                                 <th>Valor Est.</th>
                                 <th>Status</th>
-                                <th style="width:120px">Ações</th>
+                                <th style="width:120px">Aï¿½ï¿½es</th>
                             </tr>
                         </thead>
                         <tbody id="requisicoesTableBody">
@@ -370,21 +370,21 @@
         </main><!-- /main-area -->
     </div><!-- /app-container -->
 
-    <!-- Modal: Nova Requisição -->
+    <!-- Modal: Nova Requisiï¿½ï¿½o -->
     <div class="modal-overlay" id="modalNovaRequisicao">
         <div class="modal" style="max-width:760px;">
             <div class="modal-header">
-                <h3><i class="fas fa-clipboard-list"></i> Nova Requisição de Compra</h3>
+                <h3><i class="fas fa-clipboard-list"></i> Nova Requisiï¿½ï¿½o de Compra</h3>
                 <button class="modal-close" onclick="fecharModalNovaRequisicao()">&times;</button>
             </div>
             <form id="formNovaRequisicao" onsubmit="event.preventDefault();">
                 <div class="modal-body" style="max-height:60vh; overflow-y:auto;">
-                    <!-- Seção: Informações Gerais -->
+                    <!-- Seï¿½ï¿½o: Informaï¿½ï¿½es Gerais -->
                     <div style="margin-bottom:var(--space-4);">
-                        <h4 style="font-size:0.8rem; font-weight:600; color:var(--gray-500); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:var(--space-3);"><i class="fas fa-info-circle" style="margin-right:6px; color:var(--primary-500);"></i>Informações Gerais</h4>
+                        <h4 style="font-size:0.8rem; font-weight:600; color:var(--gray-500); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:var(--space-3);"><i class="fas fa-info-circle" style="margin-right:6px; color:var(--primary-500);"></i>Informaï¿½ï¿½es Gerais</h4>
                         <div class="form-grid cols-3">
                             <div class="form-group">
-                                <label>Nº Requisição</label>
+                                <label>Nï¿½ Requisiï¿½ï¿½o</label>
                                 <input type="text" class="form-control" id="reqNumero" readonly>
                             </div>
                             <div class="form-group">
@@ -392,7 +392,7 @@
                                 <input type="text" class="form-control" id="reqSolicitante" readonly>
                             </div>
                             <div class="form-group">
-                                <label>Data Solicitação</label>
+                                <label>Data Solicitaï¿½ï¿½o</label>
                                 <input type="date" class="form-control" id="reqDataSolicitacao" readonly>
                             </div>
                         </div>
@@ -412,7 +412,7 @@
                         </div>
                     </div>
 
-                    <!-- Seção: Prioridade -->
+                    <!-- Seï¿½ï¿½o: Prioridade -->
                     <div style="margin-bottom:var(--space-4);">
                         <div class="form-group" style="margin-bottom:0;">
                             <label>Prioridade</label>
@@ -437,7 +437,7 @@
                         </div>
                     </div>
 
-                    <!-- Seção: Justificativa -->
+                    <!-- Seï¿½ï¿½o: Justificativa -->
                     <div style="margin-bottom:var(--space-4);">
                         <div class="form-group" style="margin-bottom:0;">
                             <label>Justificativa <span class="required">*</span></label>
@@ -445,10 +445,10 @@
                         </div>
                     </div>
 
-                    <!-- Seção: Itens da Requisição -->
+                    <!-- Seï¿½ï¿½o: Itens da Requisiï¿½ï¿½o -->
                     <div style="padding-top:var(--space-4); border-top:1.5px solid var(--gray-200); margin-bottom:var(--space-4);">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--space-3);">
-                            <h4 style="font-size:0.8rem; font-weight:600; color:var(--gray-500); text-transform:uppercase; letter-spacing:0.5px;"><i class="fas fa-boxes" style="margin-right:6px; color:var(--primary-500);"></i>Itens da Requisição</h4>
+                            <h4 style="font-size:0.8rem; font-weight:600; color:var(--gray-500); text-transform:uppercase; letter-spacing:0.5px;"><i class="fas fa-boxes" style="margin-right:6px; color:var(--primary-500);"></i>Itens da Requisiï¿½ï¿½o</h4>
                             <button type="button" class="btn btn-primary btn-sm" onclick="adicionarItemReq()"><i class="fas fa-plus"></i> Adicionar Item</button>
                         </div>
                         <div id="itensContainer"></div>
@@ -459,17 +459,17 @@
                         </div>
                     </div>
 
-                    <!-- Seção: Informações Adicionais -->
+                    <!-- Seï¿½ï¿½o: Informaï¿½ï¿½es Adicionais -->
                     <div style="padding-top:var(--space-4); border-top:1.5px solid var(--gray-200);">
-                        <h4 style="font-size:0.8rem; font-weight:600; color:var(--gray-500); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:var(--space-3);"><i class="fas fa-paperclip" style="margin-right:6px; color:var(--primary-500);"></i>Informações Adicionais</h4>
+                        <h4 style="font-size:0.8rem; font-weight:600; color:var(--gray-500); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:var(--space-3);"><i class="fas fa-paperclip" style="margin-right:6px; color:var(--primary-500);"></i>Informaï¿½ï¿½es Adicionais</h4>
                         <div class="form-grid cols-1">
                             <div class="form-group">
                                 <label>Fornecedores Sugeridos</label>
-                                <input type="text" class="form-control" id="fornecedoresSugeridos" placeholder="Opcional é separe por vrgula">
+                                <input type="text" class="form-control" id="fornecedoresSugeridos" placeholder="Opcional ï¿½ separe por vrgula">
                             </div>
                             <div class="form-group">
-                                <label>Observações</label>
-                                <textarea class="form-control" id="reqObservacoes" rows="2" placeholder="Observações adicionais..."></textarea>
+                                <label>Observaï¿½ï¿½es</label>
+                                <textarea class="form-control" id="reqObservacoes" rows="2" placeholder="Observaï¿½ï¿½es adicionais..."></textarea>
                             </div>
                             <div class="form-group">
                                 <label>Anexos</label>
@@ -477,7 +477,7 @@
                                     <input type="file" id="reqAnexos" multiple onchange="handleAnexos(this)">
                                     <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
                                     <div class="upload-text"><strong>Clique para enviar</strong> ou arraste arquivos aqui</div>
-                                    <div class="upload-hint">PDF, imagens, planilhas é máx. 10MB por arquivo</div>
+                                    <div class="upload-hint">PDF, imagens, planilhas ï¿½ mï¿½x. 10MB por arquivo</div>
                                 </div>
                                 <div class="anexos-list" id="anexosList"></div>
                             </div>
@@ -488,18 +488,18 @@
                     <button type="button" class="btn btn-secondary" id="btnCancelarRequisicao" onclick="fecharModalNovaRequisicao()">Cancelar</button>
                     <div style="display:flex; gap:var(--space-2);">
                         <button type="button" class="btn btn-secondary" id="btnSalvarRascunho" onclick="salvarRascunho()"><i class="fas fa-save"></i> Salvar Rascunho</button>
-                        <button type="button" class="btn btn-primary" id="btnEnviarRequisicao" onclick="enviarRequisicao()"><i class="fas fa-paper-plane"></i> Enviar Requisição</button>
+                        <button type="button" class="btn btn-primary" id="btnEnviarRequisicao" onclick="enviarRequisicao()"><i class="fas fa-paper-plane"></i> Enviar Requisiï¿½ï¿½o</button>
                     </div>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Modal: Visualizar Requisição -->
+    <!-- Modal: Visualizar Requisiï¿½ï¿½o -->
     <div class="modal-overlay" id="modalVisualizarRequisicao">
         <div class="modal" style="max-width:640px;">
             <div class="modal-header">
-                <h3><i class="fas fa-eye"></i> Requisição <span id="viewReqNumero"></span></h3>
+                <h3><i class="fas fa-eye"></i> Requisiï¿½ï¿½o <span id="viewReqNumero"></span></h3>
                 <button class="modal-close" onclick="fecharModalVisualizar()">&times;</button>
             </div>
             <div class="modal-body" id="viewReqContent" style="max-height:60vh; overflow-y:auto;">
@@ -516,7 +516,7 @@
     let requisicoesData = [];
     let materiaisData = [];
     let centrosCustoData = [];
-    let usuárioLogado = null;
+    let usuï¿½rioLogado = null;
     let filtroAtual = 'todos';
     let termoBusca = '';
     let itemCounter = 0;
@@ -541,7 +541,7 @@
     async function carregarUsuarioLogado() {
         try {
             const r = await fetch('/api/me', { credentials: 'include' });
-            if (r.ok) { usuárioLogado = await r.json(); }
+            if (r.ok) { usuï¿½rioLogado = await r.json(); }
         } catch (e) { console.log('Erro user:', e); }
     }
 
@@ -556,7 +556,7 @@
                 const data = await r.json();
                 requisicoesData = data.requisicoes || data || [];
             }
-        } catch (e) { console.log('Erro requisiães:', e); requisicoesData = []; }
+        } catch (e) { console.log('Erro requisiï¿½es:', e); requisicoesData = []; }
         atualizarContadores();
         filtrarRequisicoes(filtroAtual);
     }
@@ -588,7 +588,7 @@
         if (status !== 'todos') dados = dados.filter(r => r.status === status);
         if (termoBusca) {
             const t = termoBusca.toLowerCase();
-            dados = dados.filter(r => (r.número || '').toLowerCase().includes(t) || (r.solicitante || '').toLowerCase().includes(t));
+            dados = dados.filter(r => (r.nï¿½mero || '').toLowerCase().includes(t) || (r.solicitante || '').toLowerCase().includes(t));
         }
         renderizarTabela(dados);
     }
@@ -596,15 +596,15 @@
     function renderizarTabela(dados) {
         const tbody = document.getElementById('requisicoesTableBody');
         if (!dados.length) {
-            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding:var(--space-8); color:var(--gray-400);"><i class="fas fa-inbox"></i> Nenhuma Requisição encontrada</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding:var(--space-8); color:var(--gray-400);"><i class="fas fa-inbox"></i> Nenhuma Requisiï¿½ï¿½o encontrada</td></tr>';
             return;
         }
         tbody.innerHTML = dados.map((r, i) => `
             <tr>
                 <td>${i + 1}</td>
-                <td><strong>${r.número || '-'}</strong></td>
+                <td><strong>${r.nï¿½mero || '-'}</strong></td>
                 <td>${r.solicitante || '-'}</td>
-                <td>${formatarData(r.data_solicitação)}</td>
+                <td>${formatarData(r.data_solicitaï¿½ï¿½o)}</td>
                 <td>${r.centro_custo || '-'}</td>
                 <td><span class="badge badge-${r.prioridade === 'urgente' ? 'urgent' : r.prioridade === 'alta' ? 'pending' : r.prioridade === 'normal' ? 'in-progress' : 'approved'}">${r.prioridade || 'normal'}</span></td>
                 <td>${formatarMoeda(r.valor_estimado)}</td>
@@ -624,10 +624,10 @@
         document.getElementById('totalRequisicoes').textContent = requisicoesData.length;
         document.getElementById('requisicoesPendentes').textContent = requisicoesData.filter(r => r.status === 'pendente' || r.status === 'urgente').length;
         document.getElementById('requisicoesAprovadas').textContent = requisicoesData.filter(r => r.status === 'aprovado' || r.status === 'aprovada').length;
-        document.getElementById('requisicoesCotacao').textContent = requisicoesData.filter(r => r.status === 'cotação' || r.status === 'em_cotação').length;
+        document.getElementById('requisicoesCotacao').textContent = requisicoesData.filter(r => r.status === 'cotaï¿½ï¿½o' || r.status === 'em_cotaï¿½ï¿½o').length;
     }
 
-    /* ========== Modal: Nova Requisição ========== */
+    /* ========== Modal: Nova Requisiï¿½ï¿½o ========== */
     async function abrirModalNovaRequisicao() {
         editingId = null;
         document.getElementById('formNovaRequisicao').reset();
@@ -636,18 +636,18 @@
         document.getElementById('itensContainer').innerHTML = '';
         document.getElementById('anexosList').innerHTML = '';
         document.getElementById('reqDataSolicitacao').value = new Date().toISOString().split('T')[0];
-        if (usuárioLogado) document.getElementById('reqSolicitante').value = usuárioLogado.nome || usuárioLogado.name || 'Usuário';
+        if (usuï¿½rioLogado) document.getElementById('reqSolicitante').value = usuï¿½rioLogado.nome || usuï¿½rioLogado.name || 'Usuï¿½rio';
         // Populate CC
         const sel = document.getElementById('reqCentroCusto');
-        sel.innerHTML = '<option value="">Selecione</option>' + centrosCustoData.map(c => `<option value="${c.id || c.nome}">${c.nome || c.descrição}</option>`).join('');
+        sel.innerHTML = '<option value="">Selecione</option>' + centrosCustoData.map(c => `<option value="${c.id || c.nome}">${c.nome || c.descriï¿½ï¿½o}</option>`).join('');
         // Get next number
         try {
             const r = await fetch('/api/compras/requisicoes/proximo-numero', { credentials: 'include' });
-            if (r.ok) { const d = await r.json(); document.getElementById('reqNumero').value = d.número || d.proximo_número || ''; }
+            if (r.ok) { const d = await r.json(); document.getElementById('reqNumero').value = d.nï¿½mero || d.proximo_nï¿½mero || ''; }
         } catch (e) { document.getElementById('reqNumero').value = 'RC-' + String(requisicoesData.length + 1).padStart(3, '0'); }
-        // Restaurar título do modal para criação
+        // Restaurar tï¿½tulo do modal para criaï¿½ï¿½o
         const modalTitle = document.querySelector('#modalNovaRequisicao .modal-header h3');
-        if (modalTitle) modalTitle.innerHTML = '<i class="fas fa-clipboard-list"></i> Nova Requisição de Compra';
+        if (modalTitle) modalTitle.innerHTML = '<i class="fas fa-clipboard-list"></i> Nova Requisiï¿½ï¿½o de Compra';
         adicionarItemReq();
         document.getElementById('modalNovaRequisicao').classList.add('active');
     }
@@ -659,7 +659,7 @@
     function adicionarItemReq() {
         itemCounter++;
         const id = itemCounter;
-        const materiaisOptions = materiaisData.map(m => `<option value="${m.nome || m.descrição}">${m.código ? m.código + ' - ' : ''}${m.nome || m.descrição}</option>`).join('');
+        const materiaisOptions = materiaisData.map(m => `<option value="${m.nome || m.descriï¿½ï¿½o}">${m.cï¿½digo ? m.cï¿½digo + ' - ' : ''}${m.nome || m.descriï¿½ï¿½o}</option>`).join('');
         const html = `
         <div class="item-card" id="item-${id}">
             <div class="item-header">
@@ -681,7 +681,7 @@
                     <select class="form-control" id="itemUnidade-${id}"><option value="UN">UN</option><option value="KG">KG</option><option value="M">M</option><option value="L">L</option><option value="CX">CX</option><option value="PC">PC</option></select>
                 </div>
                 <div class="form-group">
-                    <label>Preço Unit. Est.</label>
+                    <label>Preï¿½o Unit. Est.</label>
                     <input type="text" class="form-control" id="itemPreco-${id}" value="R$ 0,00" oninput="mascaraMoedaInput(this)" onblur="formatarPrecoBlur(this); calcularSubtotal(${id})" onchange="calcularSubtotal(${id})">
                 </div>
                 <div class="form-group">
@@ -689,7 +689,7 @@
                     <input type="text" class="form-control" id="itemSubtotal-${id}" readonly value="R$ 0,00">
                 </div>
                 <div class="form-group" style="grid-column:span 2;">
-                    <label>Especificação</label>
+                    <label>Especificaï¿½ï¿½o</label>
                     <input type="text" class="form-control" id="itemSpec-${id}" placeholder="Detalhes adicionais...">
                 </div>
             </div>
@@ -700,7 +700,7 @@
 
     function removerItem(id) {
         const items = document.querySelectorAll('.item-card');
-        if (items.length <= 1) { showToast('Mínimo 1 item na Requisição', 'warning'); return; }
+        if (items.length <= 1) { showToast('Mï¿½nimo 1 item na Requisiï¿½ï¿½o', 'warning'); return; }
         document.getElementById('item-' + id)?.remove();
         atualizarResumoItens();
     }
@@ -730,7 +730,7 @@
     }
 
     function buscarPrecoMaterial(input, itemId) {
-        const mat = materiaisData.find(m => (m.nome || m.descrição) === input.value);
+        const mat = materiaisData.find(m => (m.nome || m.descriï¿½ï¿½o) === input.value);
         if (mat && mat.preco_unitario) {
             document.getElementById('itemPreco-' + itemId).value = formatarMoeda(mat.preco_unitario);
             calcularSubtotal(itemId);
@@ -748,8 +748,8 @@
         const justificativa = document.getElementById('reqJustificativa').value;
         if (status !== 'rascunho' && !justificativa) { showToast('Preencha a justificativa', 'warning'); return; }
 
-        const número = document.getElementById('reqNumero').value;
-        if (!número) { showToast('Número da Requisição não gerado. Feche e reabra o formulário.', 'warning'); return; }
+        const nï¿½mero = document.getElementById('reqNumero').value;
+        if (!nï¿½mero) { showToast('Nï¿½mero da Requisiï¿½ï¿½o nï¿½o gerado. Feche e reabra o formulï¿½rio.', 'warning'); return; }
 
         const items = [];
         document.querySelectorAll('.item-card').forEach(card => {
@@ -757,7 +757,7 @@
             const qtd = parseFloat(document.getElementById('itemQtd-' + id)?.value) || 0;
             const preco = parseMoeda(document.getElementById('itemPreco-' + id)?.value);
             items.push({
-                descrição: document.getElementById('itemMaterial-' + id)?.value || '',
+                descriï¿½ï¿½o: document.getElementById('itemMaterial-' + id)?.value || '',
                 quantidade: qtd,
                 unidade: document.getElementById('itemUnidade-' + id)?.value || 'UN',
                 valor_estimado: preco,
@@ -769,14 +769,14 @@
         if (items.length === 0) { showToast('Adicione pelo menos 1 item', 'warning'); return; }
 
         const prioridade = document.querySelector('input[name="prioridade"]:checked')?.value || 'normal';
-        const solicitante = document.getElementById('reqSolicitante')?.value || (usuárioLogado ? (usuárioLogado.nome || usuárioLogado.name) : 'Usuário');
-        const solicitante_id = usuárioLogado ? (usuárioLogado.id || null) : null;
+        const solicitante = document.getElementById('reqSolicitante')?.value || (usuï¿½rioLogado ? (usuï¿½rioLogado.nome || usuï¿½rioLogado.name) : 'Usuï¿½rio');
+        const solicitante_id = usuï¿½rioLogado ? (usuï¿½rioLogado.id || null) : null;
         const body = {
-            número,
+            nï¿½mero,
             solicitante,
             solicitante_id,
             centro_custo: document.getElementById('reqCentroCusto').value || null,
-            data_solicitação: document.getElementById('reqDataSolicitacao')?.value || new Date().toISOString().split('T')[0],
+            data_solicitaï¿½ï¿½o: document.getElementById('reqDataSolicitacao')?.value || new Date().toISOString().split('T')[0],
             data_necessidade: document.getElementById('reqDataNecessidade').value || null,
             projeto: document.getElementById('reqProjeto').value || null,
             prioridade, justificativa, status, itens: items,
@@ -784,7 +784,7 @@
             observacoes: document.getElementById('reqObservacoes').value || null
         };
 
-        // Desabilitar botões e marcar como salvando
+        // Desabilitar botï¿½es e marcar como salvando
         salvandoRequisicao = true;
         const btnEnviar = document.getElementById('btnEnviarRequisicao');
         const btnRascunho = document.getElementById('btnSalvarRascunho');
@@ -800,18 +800,18 @@
                 credentials: 'include',
                 body: JSON.stringify(body)
             });
-            if (!r.ok) { const err = await r.json().catch(() => ({})); throw new Error(err.message || 'Erro ao salvar Requisição'); }
+            if (!r.ok) { const err = await r.json().catch(() => ({})); throw new Error(err.message || 'Erro ao salvar Requisiï¿½ï¿½o'); }
             fecharModalNovaRequisicao();
             carregarRequisicoes();
-            showToast(editingId ? 'Requisição atualizada com sucesso!' : (status === 'rascunho' ? 'Rascunho salvo com sucesso!' : 'Requisição enviada com sucesso!'), 'success');
+            showToast(editingId ? 'Requisiï¿½ï¿½o atualizada com sucesso!' : (status === 'rascunho' ? 'Rascunho salvo com sucesso!' : 'Requisiï¿½ï¿½o enviada com sucesso!'), 'success');
             editingId = null;
         } catch (e) {
             showToast('Erro: ' + e.message, 'error');
-            console.error('[Requisição] Erro ao salvar:', e);
+            console.error('[Requisiï¿½ï¿½o] Erro ao salvar:', e);
         } finally {
-            // Restaurar botões
+            // Restaurar botï¿½es
             salvandoRequisicao = false;
-            if (btnEnviar) { btnEnviar.disabled = false; btnEnviar.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Requisição'; }
+            if (btnEnviar) { btnEnviar.disabled = false; btnEnviar.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Requisiï¿½ï¿½o'; }
             if (btnRascunho) { btnRascunho.disabled = false; }
         }
     }
@@ -822,27 +822,27 @@
             const r = await fetch(`/api/compras/requisicoes/${id}`, { credentials: 'include' });
             const d = await r.json();
             const req = d.requisicao || d;
-            document.getElementById('viewReqNumero').textContent = req.número || '';
+            document.getElementById('viewReqNumero').textContent = req.nï¿½mero || '';
             let itensHtml = '';
             if (req.itens && req.itens.length) {
-                itensHtml = '<table class="data-table" style="font-size:0.8rem;"><thead><tr><th>Material</th><th>Qtd</th><th>Un</th><th>Preço</th><th>Subtotal</th></tr></thead><tbody>' +
-                    req.itens.map(it => `<tr><td>${it.descrição || it.material || '-'}</td><td>${it.quantidade}</td><td>${it.unidade}</td><td>${formatarMoeda(it.valor_estimado || it.preco_unitario)}</td><td>${formatarMoeda(it.subtotal || (it.quantidade || 0) * (it.valor_estimado || it.preco_unitario || 0))}</td></tr>`).join('') +
+                itensHtml = '<table class="data-table" style="font-size:0.8rem;"><thead><tr><th>Material</th><th>Qtd</th><th>Un</th><th>Preï¿½o</th><th>Subtotal</th></tr></thead><tbody>' +
+                    req.itens.map(it => `<tr><td>${it.descriï¿½ï¿½o || it.material || '-'}</td><td>${it.quantidade}</td><td>${it.unidade}</td><td>${formatarMoeda(it.valor_estimado || it.preco_unitario)}</td><td>${formatarMoeda(it.subtotal || (it.quantidade || 0) * (it.valor_estimado || it.preco_unitario || 0))}</td></tr>`).join('') +
                     '</tbody></table>';
             }
             document.getElementById('viewReqContent').innerHTML =
-                '<div class="view-section"><h4>Informações Gerais</h4><div class="view-grid">' +
-                '<div class="view-item"><label>Nº Requisição</label><p>' + (req.número || '-') + '</p></div>' +
+                '<div class="view-section"><h4>Informaï¿½ï¿½es Gerais</h4><div class="view-grid">' +
+                '<div class="view-item"><label>Nï¿½ Requisiï¿½ï¿½o</label><p>' + (req.nï¿½mero || '-') + '</p></div>' +
                 '<div class="view-item"><label>Solicitante</label><p>' + (req.solicitante || '-') + '</p></div>' +
-                '<div class="view-item"><label>Data</label><p>' + formatarData(req.data_solicitação) + '</p></div>' +
+                '<div class="view-item"><label>Data</label><p>' + formatarData(req.data_solicitaï¿½ï¿½o) + '</p></div>' +
                 '<div class="view-item"><label>Centro de Custo</label><p>' + (req.centro_custo || '-') + '</p></div>' +
                 '<div class="view-item"><label>Prioridade</label><p><span class="badge badge-' + (req.prioridade === 'urgente' ? 'urgent' : 'pending') + '">' + (req.prioridade || 'normal') + '</span></p></div>' +
                 '<div class="view-item"><label>Status</label><p><span class="badge badge-' + getStatusClass(req.status) + '">' + getStatusLabel(req.status) + '</span></p></div>' +
                 '</div></div>' +
                 '<div class="view-section"><h4>Justificativa</h4><p style="font-size:0.85rem; color:var(--gray-700);">' + (req.justificativa || '-') + '</p></div>' +
                 (itensHtml ? '<div class="view-section"><h4>Itens</h4>' + itensHtml + '</div>' : '') +
-                (req.observacoes ? '<div class="view-section"><h4>Observações</h4><p style="font-size:0.85rem; color:var(--gray-700);">' + req.observacoes + '</p></div>' : '');
+                (req.observacoes ? '<div class="view-section"><h4>Observaï¿½ï¿½es</h4><p style="font-size:0.85rem; color:var(--gray-700);">' + req.observacoes + '</p></div>' : '');
             document.getElementById('modalVisualizarRequisicao').classList.add('active');
-        } catch (e) { showToast('Erro ao carregar Requisição', 'error'); }
+        } catch (e) { showToast('Erro ao carregar Requisiï¿½ï¿½o', 'error'); }
     }
 
     function fecharModalVisualizar() {
@@ -852,13 +852,13 @@
     async function editarRequisicao(id) {
         try {
             const r = await fetch(`/api/compras/requisicoes/${id}`, { credentials: 'include' });
-            if (!r.ok) throw new Error('Erro ao buscar Requisição');
+            if (!r.ok) throw new Error('Erro ao buscar Requisiï¿½ï¿½o');
             const d = await r.json();
             const req = d.requisicao || d;
-            if (req.status !== 'rascunho' && req.status !== 'pendente') { showToast('Esta Requisição não pode ser editada', 'warning'); return; }
+            if (req.status !== 'rascunho' && req.status !== 'pendente') { showToast('Esta Requisiï¿½ï¿½o nï¿½o pode ser editada', 'warning'); return; }
             await abrirModalNovaRequisicao();
             editingId = id;
-            document.getElementById('reqNumero').value = req.número || '';
+            document.getElementById('reqNumero').value = req.nï¿½mero || '';
             document.getElementById('reqJustificativa').value = req.justificativa || '';
             document.getElementById('reqObservacoes').value = req.observacoes || '';
             // Preencher campos adicionais
@@ -882,7 +882,7 @@
                 req.itens.forEach(it => {
                     adicionarItemReq();
                     const itemId = itemCounter;
-                    document.getElementById('itemMaterial-' + itemId).value = it.descrição || it.material || '';
+                    document.getElementById('itemMaterial-' + itemId).value = it.descriï¿½ï¿½o || it.material || '';
                     document.getElementById('itemQtd-' + itemId).value = it.quantidade || 1;
                     const unSel = document.getElementById('itemUnidade-' + itemId);
                     if (unSel && it.unidade) unSel.value = it.unidade;
@@ -892,22 +892,22 @@
                     if (specEl) specEl.value = it.observacao || '';
                 });
             }
-            // Atualizar título do modal para edião
+            // Atualizar tï¿½tulo do modal para ediï¿½o
             const modalTitle = document.querySelector('#modalNovaRequisicao .modal-header h3');
-            if (modalTitle) modalTitle.innerHTML = '<i class="fas fa-edit"></i> Editar Requisição de Compra';
-        } catch (e) { showToast('Erro ao carregar para edião', 'error'); console.error('[Requisição] Erro edião:', e); }
+            if (modalTitle) modalTitle.innerHTML = '<i class="fas fa-edit"></i> Editar Requisiï¿½ï¿½o de Compra';
+        } catch (e) { showToast('Erro ao carregar para ediï¿½o', 'error'); console.error('[Requisiï¿½ï¿½o] Erro ediï¿½o:', e); }
     }
 
     let _excluindoRequisicao = false;
     async function excluirRequisicao(id) {
         if (_excluindoRequisicao) return;
-        if (!confirm('Excluir esta Requisição?')) return;
+        if (!confirm('Excluir esta Requisiï¿½ï¿½o?')) return;
         _excluindoRequisicao = true;
         try {
             const r = await fetch(`/api/compras/requisicoes/${id}`, { method: 'DELETE', credentials: 'include' });
-            if (!r.ok) { const err = await r.json().catch(() => ({})); throw new Error(err.error || err.message || 'Erro ao excluir Requisição'); }
+            if (!r.ok) { const err = await r.json().catch(() => ({})); throw new Error(err.error || err.message || 'Erro ao excluir Requisiï¿½ï¿½o'); }
             carregarRequisicoes();
-            showToast('Requisição excluída com sucesso!', 'success');
+            showToast('Requisiï¿½ï¿½o excluï¿½da com sucesso!', 'success');
         } catch (e) { showToast('Erro: ' + e.message, 'error'); } finally { _excluindoRequisicao = false; }
     }
 
@@ -961,7 +961,7 @@
         const bom = '\uFEFF';
         let csv = bom + 'N;Solicitante;Data;Centro Custo;Prioridade;Valor;Status\n';
         requisicoesData.forEach(r => {
-            csv += `${r.número};${r.solicitante};${formatarData(r.data_solicitação)};${r.centro_custo};${r.prioridade};${r.valor_estimado || 0};${r.status}\n`;
+            csv += `${r.nï¿½mero};${r.solicitante};${formatarData(r.data_solicitaï¿½ï¿½o)};${r.centro_custo};${r.prioridade};${r.valor_estimado || 0};${r.status}\n`;
         });
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
@@ -972,11 +972,11 @@
 
     /* ========== Helpers ========== */
     function getStatusClass(s) {
-        const map = { pendente: 'pending', aprovado: 'approved', aprovada: 'approved', rascunho: 'in-progress', cotação: 'in-progress', em_cotação: 'in-progress', rejeitado: 'cancelled', rejeitada: 'cancelled', cancelado: 'cancelled', urgente: 'urgent', finalizada: 'approved' };
+        const map = { pendente: 'pending', aprovado: 'approved', aprovada: 'approved', rascunho: 'in-progress', cotaï¿½ï¿½o: 'in-progress', em_cotaï¿½ï¿½o: 'in-progress', rejeitado: 'cancelled', rejeitada: 'cancelled', cancelado: 'cancelled', urgente: 'urgent', finalizada: 'approved' };
         return map[s] || 'pending';
     }
     function getStatusLabel(s) {
-        const map = { pendente: 'Pendente', aprovado: 'Aprovada', aprovada: 'Aprovada', rascunho: 'Rascunho', cotação: 'Em Cotação', em_cotação: 'Em Cotação', rejeitado: 'Rejeitada', rejeitada: 'Rejeitada', cancelado: 'Cancelado', urgente: 'Urgente', finalizada: 'Finalizada' };
+        const map = { pendente: 'Pendente', aprovado: 'Aprovada', aprovada: 'Aprovada', rascunho: 'Rascunho', cotaï¿½ï¿½o: 'Em Cotaï¿½ï¿½o', em_cotaï¿½ï¿½o: 'Em Cotaï¿½ï¿½o', rejeitado: 'Rejeitada', rejeitada: 'Rejeitada', cancelado: 'Cancelado', urgente: 'Urgente', finalizada: 'Finalizada' };
         return map[s] || s || '-';
     }
     function formatarData(d) { if (!d) return '-'; try { return new Date(d).toLocaleDateString('pt-BR'); } catch (e) { return d; } }
@@ -1000,7 +1000,7 @@
     /* ========== Toast Notification System ========== */
     function showToast(message, type = 'success', duration = 4000) {
         const container = document.getElementById('toastContainer');
-        if (!container) { console.warn('Toast container não encontrado'); return; }
+        if (!container) { console.warn('Toast container nï¿½o encontrado'); return; }
         const icons = {
             success: 'fa-check',
             error: 'fa-xmark',

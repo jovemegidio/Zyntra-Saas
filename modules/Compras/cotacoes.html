@@ -12,9 +12,9 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Zyntra: Cotações</title>
+    <title>Zyntra: Cotaï¿½ï¿½es</title>
 
-    <!-- Sistema de Autenticação Unificado -->
+    <!-- Sistema de Autenticaï¿½ï¿½o Unificado -->
     <script src="/js/auth-unified.js?v=20260326" defer></script>
     <script src="/js/inactivity-manager.js?v=20260324" defer></script>
 
@@ -27,7 +27,7 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
 
-    <!-- CSS Padrão Global -->
+    <!-- CSS Padrï¿½o Global -->
     <link rel="stylesheet" href="/modules/Compras/css/compras-layout.css?v=20260301">
     <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260301">
     <link rel="stylesheet" href="/css/skeleton-loader.css?v=20260301">
@@ -110,7 +110,7 @@
     <link rel="stylesheet" href="/chat/widget.css?v=20260301">
     <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260326">
 </head>
-<body>
+<body class="dark-mode">
     <div class="app-container">
         <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
 
@@ -120,15 +120,15 @@
             <nav class="sidebar-nav">
                 <button class="sidebar-btn" title="Dashboard" onclick="window.location.href='index.html'"><i class="fas fa-chart-line"></i></button>
                 <button class="sidebar-btn" title="Pedidos" onclick="window.location.href='pedidos.html'"><i class="fas fa-shopping-cart"></i></button>
-                <button class="sidebar-btn active" title="Cotações" onclick="window.location.href='cotacoes.html'"><i class="fas fa-file-invoice-dollar"></i></button>
+                <button class="sidebar-btn active" title="Cotaï¿½ï¿½es" onclick="window.location.href='cotacoes.html'"><i class="fas fa-file-invoice-dollar"></i></button>
                 <button class="sidebar-btn" title="Fornecedores" onclick="window.location.href='fornecedores.html'"><i class="fas fa-users"></i></button>
-                <button class="sidebar-btn" title="Requisições" onclick="window.location.href='requisicoes.html'"><i class="fas fa-clipboard-list"></i></button>
+                <button class="sidebar-btn" title="Requisiï¿½ï¿½es" onclick="window.location.href='requisicoes.html'"><i class="fas fa-clipboard-list"></i></button>
                 <button class="sidebar-btn" title="Recebimento" onclick="window.location.href='recebimento.html'"><i class="fas fa-truck-loading"></i></button>
             </nav>
             <div class="sidebar-bottom">
                 <button class="sidebar-btn" title="Estoque MP" onclick="window.location.href='gestao-estoque.html'"><i class="fas fa-boxes"></i></button>
                 <button class="sidebar-btn" title="QR Code Estoque" onclick="window.location.href='qrcode-estoque.html'"><i class="fas fa-qrcode"></i></button>
-                <button class="sidebar-btn" title="Relatórios" onclick="window.location.href='relatorios.html'"><i class="fas fa-chart-bar"></i></button>
+                <button class="sidebar-btn" title="Relatï¿½rios" onclick="window.location.href='relatorios.html'"><i class="fas fa-chart-bar"></i></button>
             </div>
         </aside>
 
@@ -141,14 +141,14 @@
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;"></span>
-                        <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Cotações</span>
+                        <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Cotaï¿½ï¿½es</span>
                     </div>
                 </div>
                 <div class="header-right">
                     <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
                     
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuï¿½rio</strong></span>
                     </div>
                 </div>
             </header>
@@ -158,7 +158,7 @@
                     <div class="page-header-top">
                         <div class="page-actions">
                             <button class="btn btn-secondary" onclick="cotacoesManager.exportar()"><i class="fas fa-download"></i> Exportar</button>
-                            <button class="btn btn-primary" onclick="abrirModalNovaCotacao()"><i class="fas fa-plus"></i> Nova Cotação</button>
+                            <button class="btn btn-primary" onclick="abrirModalNovaCotacao()"><i class="fas fa-plus"></i> Nova Cotaï¿½ï¿½o</button>
                         </div>
                     </div>
                 </div>
@@ -168,12 +168,12 @@
                     <div class="metric-card purple">
                         <div class="metric-header"><div class="metric-icon purple"><i class="fas fa-file-invoice-dollar"></i></div></div>
                         <div class="metric-value" id="totalCotacoes">0</div>
-                        <div class="metric-label">Total Cotações</div>
+                        <div class="metric-label">Total Cotaï¿½ï¿½es</div>
                     </div>
                     <div class="metric-card orange">
                         <div class="metric-header"><div class="metric-icon orange"><i class="fas fa-search-dollar"></i></div></div>
                         <div class="metric-value" id="cotacoesAnalise">0</div>
-                        <div class="metric-label">Em Análise</div>
+                        <div class="metric-label">Em Anï¿½lise</div>
                     </div>
                     <div class="metric-card green">
                         <div class="metric-header"><div class="metric-icon green"><i class="fas fa-check-circle"></i></div></div>
@@ -183,36 +183,36 @@
                     <div class="metric-card blue">
                         <div class="metric-header"><div class="metric-icon blue"><i class="fas fa-percentage"></i></div></div>
                         <div class="metric-value" id="economiaMedia">0%</div>
-                        <div class="metric-label">Economia Média</div>
+                        <div class="metric-label">Economia Mï¿½dia</div>
                     </div>
                 </div>
 
                 <!-- Filters -->
                 <div class="filters-bar">
-                    <div class="search-box"><i class="fas fa-search"></i><input type="text" id="searchCotacao" placeholder="Buscar por código, fornecedor, material..." oninput="cotacoesManager.filtrar()"></div>
+                    <div class="search-box"><i class="fas fa-search"></i><input type="text" id="searchCotacao" placeholder="Buscar por cï¿½digo, fornecedor, material..." oninput="cotacoesManager.filtrar()"></div>
                     <button class="filter-btn active" onclick="cotacoesManager.filtrarPorStatus('todos')"><i class="fas fa-list"></i> Todas</button>
                     <button class="filter-btn" onclick="cotacoesManager.filtrarPorStatus('Rascunho')"><i class="fas fa-edit"></i> Rascunho</button>
                     <button class="filter-btn" onclick="cotacoesManager.filtrarPorStatus('Enviada')"><i class="fas fa-paper-plane"></i> Enviadas</button>
-                    <button class="filter-btn" onclick="cotacoesManager.filtrarPorStatus('Em Análise')"><i class="fas fa-search-dollar"></i> Em Análise</button>
+                    <button class="filter-btn" onclick="cotacoesManager.filtrarPorStatus('Em Anï¿½lise')"><i class="fas fa-search-dollar"></i> Em Anï¿½lise</button>
                     <button class="filter-btn" onclick="cotacoesManager.filtrarPorStatus('Aprovada')"><i class="fas fa-check-circle"></i> Aprovadas</button>
                 </div>
 
                 <!-- Table -->
                 <div class="card">
-                    <div class="card-header"><h3 class="card-title"><i class="fas fa-table"></i> Lista de Cotações</h3></div>
+                    <div class="card-header"><h3 class="card-title"><i class="fas fa-table"></i> Lista de Cotaï¿½ï¿½es</h3></div>
                     <div class="card-body no-padding">
                         <table class="data-table">
                             <thead>
                                 <tr>
                                     <th style="width:40px;"><input type="checkbox" title="Selecionar todos"></th>
-                                    <th>Código</th>
+                                    <th>Cï¿½digo</th>
                                     <th>Data</th>
                                     <th>Solicitante</th>
                                     <th>Materiais</th>
                                     <th>Fornecedores</th>
                                     <th>Melhor Oferta</th>
                                     <th>Status</th>
-                                    <th>Ações</th>
+                                    <th>Aï¿½ï¿½es</th>
                                 </tr>
                             </thead>
                             <tbody id="cotacoesTableBody"></tbody>
@@ -227,11 +227,11 @@
         </main>
     </div>
 
-    <!-- Modal Nova Cotação -->
+    <!-- Modal Nova Cotaï¿½ï¿½o -->
     <div class="modal-overlay" id="modalNovaCotacao">
         <div class="modal" style="max-width:800px;">
             <div class="modal-header">
-                <h3><i class="fas fa-plus-circle"></i> <span id="modalCotacaoTitulo">Nova Cotação de Compra</span></h3>
+                <h3><i class="fas fa-plus-circle"></i> <span id="modalCotacaoTitulo">Nova Cotaï¿½ï¿½o de Compra</span></h3>
                 <button class="modal-close" onclick="fecharModalCotacao()"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body">
@@ -241,8 +241,8 @@
 
                     <div class="form-row">
                         <div class="form-group" style="grid-column:span 2;">
-                            <label>Descrição/Título da Cotação <span class="required">*</span></label>
-                            <input type="text" id="cotDescricao" class="form-control" placeholder="Ex: Cotação de Chapas de Alumínio" required>
+                            <label>Descriï¿½ï¿½o/Tï¿½tulo da Cotaï¿½ï¿½o <span class="required">*</span></label>
+                            <input type="text" id="cotDescricao" class="form-control" placeholder="Ex: Cotaï¿½ï¿½o de Chapas de Alumï¿½nio" required>
                         </div>
                     </div>
                     <div class="form-row">
@@ -270,13 +270,13 @@
                                 <option value="M2">M - Metro Quadrado</option>
                                 <option value="M">M - Metro Linear</option>
                                 <option value="KG">KG - Quilograma</option>
-                                <option value="PC">PC - Peça</option>
+                                <option value="PC">PC - Peï¿½a</option>
                             </select>
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label>Fornecedores para Cotação</label>
+                        <label>Fornecedores para Cotaï¿½ï¿½o</label>
                         <!-- Fornecedores carregados dinamicamente via carregarFornecedores() -->
                         <div id="fornecedoresContainer" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;">
                             <span style="color:var(--gray-400);font-size:13px;"><i class="fas fa-spinner fa-spin"></i> Carregando fornecedores...</span>
@@ -284,14 +284,14 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Observações</label>
-                        <textarea id="cotObservacoes" class="form-control" rows="3" placeholder="Observações adicionais para os fornecedores..."></textarea>
+                        <label>Observaï¿½ï¿½es</label>
+                        <textarea id="cotObservacoes" class="form-control" rows="3" placeholder="Observaï¿½ï¿½es adicionais para os fornecedores..."></textarea>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="fecharModalCotacao()">Cancelar</button>
-                <button class="btn btn-primary" onclick="salvarCotacao()"><i class="fas fa-save"></i> Salvar Cotação</button>
+                <button class="btn btn-primary" onclick="salvarCotacao()"><i class="fas fa-save"></i> Salvar Cotaï¿½ï¿½o</button>
             </div>
         </div>
     </div>
@@ -335,7 +335,7 @@
                     const data = await r.json();
                     const materiais = data.produtos || data || [];
                     select.innerHTML = '<option value="">Selecione o material...</option>' +
-                        materiais.map(m => `<option value="${m.id}">${m.nome || m.descrição || m.name}</option>`).join('');
+                        materiais.map(m => `<option value="${m.id}">${m.nome || m.descriï¿½ï¿½o || m.name}</option>`).join('');
                 }
             } catch (e) {
                 console.error('Erro ao carregar materiais:', e);
@@ -344,17 +344,17 @@
 
         async function abrirModalNovaCotacao() {
             document.getElementById('modalNovaCotacao').classList.add('active');
-            document.getElementById('modalCotacaoTitulo').textContent = 'Nova Cotação de Compra';
+            document.getElementById('modalCotacaoTitulo').textContent = 'Nova Cotaï¿½ï¿½o de Compra';
             document.getElementById('formCotacao').reset();
             document.getElementById('cotacaoId').value = '';
             document.getElementById('cotacaoNumero').value = '';
             // Carregar materiais e fornecedores dinamicamente
             carregarMateriaisCotacao();
             carregarFornecedores();
-            // Buscar próximo número
+            // Buscar prï¿½ximo nï¿½mero
             try {
                 const r = await fetch('/api/compras/cotacoes/proximo-numero', { headers: {  } });
-                if (r.ok) { const d = await r.json(); document.getElementById('cotacaoNumero').value = d.número || d.proximo_número || ''; }
+                if (r.ok) { const d = await r.json(); document.getElementById('cotacaoNumero').value = d.nï¿½mero || d.proximo_nï¿½mero || ''; }
             } catch (e) { document.getElementById('cotacaoNumero').value = 'COT-' + String(Date.now()).slice(-4); }
         }
 
@@ -368,12 +368,12 @@
             _salvandoCotacao = true;
             const btn = event && event.target ? event.target : null;
             if (btn) btn.disabled = true;
-            const descrição = document.getElementById('cotDescricao').value;
+            const descriï¿½ï¿½o = document.getElementById('cotDescricao').value;
             const validade = document.getElementById('cotValidade').value;
             const material = document.getElementById('cotMaterial').value;
             const quantidade = document.getElementById('cotQuantidade').value;
-            if (!descrição || !validade || !material || !quantidade) {
-                showToast('Por favor, preencha todos os campos obrigatórios.', 'warning');
+            if (!descriï¿½ï¿½o || !validade || !material || !quantidade) {
+                showToast('Por favor, preencha todos os campos obrigatï¿½rios.', 'warning');
                 _salvandoCotacao = false; if (btn) btn.disabled = false;
                 return;
             }
@@ -382,8 +382,8 @@
             const fornecedores_ids = Array.from(fornecedoresChecked).map(cb => parseInt(cb.value));
 
             const body = {
-                número: document.getElementById('cotacaoNumero').value,
-                descrição: descrição,
+                nï¿½mero: document.getElementById('cotacaoNumero').value,
+                descriï¿½ï¿½o: descriï¿½ï¿½o,
                 data_abertura: new Date().toISOString().split('T')[0],
                 data_validade: validade,
                 quantidade: parseFloat(quantidade),
@@ -405,17 +405,17 @@
 
                 if (!r.ok) {
                     const err = await r.json().catch(() => ({}));
-                    throw new Error(err.message || 'Erro ao salvar cotação');
+                    throw new Error(err.message || 'Erro ao salvar cotaï¿½ï¿½o');
                 }
 
-                showToast(cotaçãoId ? 'Cotação atualizada com sucesso!' : 'Cotação salva com sucesso!', 'success');
+                showToast(cotaï¿½ï¿½oId ? 'Cotaï¿½ï¿½o atualizada com sucesso!' : 'Cotaï¿½ï¿½o salva com sucesso!', 'success');
                 fecharModalCotacao();
 
                 // Recarregar dados na tabela
-                if (typeof cotaçõesManager !== 'undefined') {
-                    await cotaçõesManager.carregarDados();
-                    cotaçõesManager.atualizarCards();
-                    cotaçõesManager.renderizarTabela();
+                if (typeof cotaï¿½ï¿½esManager !== 'undefined') {
+                    await cotaï¿½ï¿½esManager.carregarDados();
+                    cotaï¿½ï¿½esManager.atualizarCards();
+                    cotaï¿½ï¿½esManager.renderizarTabela();
                 }
             } catch (e) {
                 showToast('Erro: ' + e.message, 'error');
@@ -429,11 +429,11 @@
         });
     </script>
 
-    <!-- Modal: Visualizar Cotação -->
+    <!-- Modal: Visualizar Cotaï¿½ï¿½o -->
     <div class="modal-overlay" id="modalVisualizarCotacao">
         <div class="modal" style="max-width:700px;">
             <div class="modal-header">
-                <h3><i class="fas fa-eye"></i> Detalhes da Cotação</h3>
+                <h3><i class="fas fa-eye"></i> Detalhes da Cotaï¿½ï¿½o</h3>
                 <button class="modal-close" onclick="document.getElementById('modalVisualizarCotacao').classList.remove('active')">&times;</button>
             </div>
             <div class="modal-body" id="viewCotacaoBody" style="max-height:60vh; overflow-y:auto;">

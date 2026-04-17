@@ -12,9 +12,9 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Zyntra: Relatórios de Compras</title>
+    <title>Zyntra: Relatï¿½rios de Compras</title>
 
-    <!-- Sistema de Autenticação Unificado -->
+    <!-- Sistema de Autenticaï¿½ï¿½o Unificado -->
     <script src="/js/auth-unified.js?v=20260326" defer></script>
     <script src="/js/inactivity-manager.js?v=20260324" defer></script>
 
@@ -27,7 +27,7 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
 
-    <!-- CSS Padrão Global -->
+    <!-- CSS Padrï¿½o Global -->
     <link rel="stylesheet" href="/modules/Compras/css/compras-layout.css?v=20260301">
     <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260301">
     <link rel="stylesheet" href="/css/skeleton-loader.css?v=20260301">
@@ -56,8 +56,8 @@
         .rc-movimentacoes .report-icon { background: linear-gradient(135deg, #10b981, #059669); }
         .rc-criticos::before { background: linear-gradient(90deg, #ef4444, #f87171); }
         .rc-criticos .report-icon { background: linear-gradient(135deg, #ef4444, #dc2626); }
-        .rc-cotações::before { background: linear-gradient(90deg, #06b6d4, #22d3ee); }
-        .rc-cotações .report-icon { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+        .rc-cotaï¿½ï¿½es::before { background: linear-gradient(90deg, #06b6d4, #22d3ee); }
+        .rc-cotaï¿½ï¿½es .report-icon { background: linear-gradient(135deg, #06b6d4, #0891b2); }
         /* Tables section */
         .tables-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
         @media (max-width: 1024px) { .tables-grid { grid-template-columns: 1fr; } }
@@ -82,7 +82,7 @@
     <link rel="stylesheet" href="/chat/widget.css?v=20260301">
     <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260326">
 </head>
-<body>
+<body class="dark-mode">
     <div class="app-container">
         <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
 
@@ -92,15 +92,15 @@
             <nav class="sidebar-nav">
                 <button class="sidebar-btn" title="Dashboard" onclick="window.location.href='index.html'"><i class="fas fa-chart-line"></i></button>
                 <button class="sidebar-btn" title="Pedidos" onclick="window.location.href='pedidos.html'"><i class="fas fa-shopping-cart"></i></button>
-                <button class="sidebar-btn" title="Cotações" onclick="window.location.href='cotacoes.html'"><i class="fas fa-file-invoice-dollar"></i></button>
+                <button class="sidebar-btn" title="Cotaï¿½ï¿½es" onclick="window.location.href='cotacoes.html'"><i class="fas fa-file-invoice-dollar"></i></button>
                 <button class="sidebar-btn" title="Fornecedores" onclick="window.location.href='fornecedores.html'"><i class="fas fa-users"></i></button>
-                <button class="sidebar-btn" title="Requisições" onclick="window.location.href='requisicoes.html'"><i class="fas fa-clipboard-list"></i></button>
+                <button class="sidebar-btn" title="Requisiï¿½ï¿½es" onclick="window.location.href='requisicoes.html'"><i class="fas fa-clipboard-list"></i></button>
                 <button class="sidebar-btn" title="Recebimento" onclick="window.location.href='recebimento.html'"><i class="fas fa-truck-loading"></i></button>
             </nav>
             <div class="sidebar-bottom">
                 <button class="sidebar-btn" title="Estoque MP" onclick="window.location.href='gestao-estoque.html'"><i class="fas fa-boxes"></i></button>
                 <button class="sidebar-btn" title="QR Code Estoque" onclick="window.location.href='qrcode-estoque.html'"><i class="fas fa-qrcode"></i></button>
-                <button class="sidebar-btn active" title="Relatórios" onclick="window.location.href='relatorios.html'"><i class="fas fa-chart-bar"></i></button>
+                <button class="sidebar-btn active" title="Relatï¿½rios" onclick="window.location.href='relatorios.html'"><i class="fas fa-chart-bar"></i></button>
             </div>
         </aside>
 
@@ -114,14 +114,14 @@
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;"></span>
-                        <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Relatórios</span>
+                        <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Relatï¿½rios</span>
                     </div>
                 </div>
                 <div class="header-right">
                     <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
                     
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuï¿½rio</strong></span>
                     </div>
                 </div>
             </header>
@@ -133,8 +133,8 @@
                 <div class="page-header">
                     <div class="page-header-top">
                         <div>
-                            <h1 class="page-title"><i class="fas fa-chart-bar"></i> Relatórios de Compras</h1>
-                            <p class="page-subtitle">Geração e exportação de relatórios do módulo de compras</p>
+                            <h1 class="page-title"><i class="fas fa-chart-bar"></i> Relatï¿½rios de Compras</h1>
+                            <p class="page-subtitle">Geraï¿½ï¿½o e exportaï¿½ï¿½o de relatï¿½rios do mï¿½dulo de compras</p>
                         </div>
                     </div>
                 </div>
@@ -159,7 +159,7 @@
                     <div class="metric-card red">
                         <div class="metric-header"><div class="metric-icon red"><i class="fas fa-exclamation-triangle"></i></div></div>
                         <div class="metric-value" id="stat-criticos">0</div>
-                        <div class="metric-label">Mat. Críticos</div>
+                        <div class="metric-label">Mat. Crï¿½ticos</div>
                     </div>
                 </div>
 
@@ -169,54 +169,54 @@
                         <span class="pdf-badge">PDF</span>
                         <div class="report-card-header">
                             <div class="report-icon"><i class="fas fa-shopping-cart"></i></div>
-                            <h3>Relatório de Pedidos</h3>
+                            <h3>Relatï¿½rio de Pedidos</h3>
                         </div>
-                        <p>Histórico completo de pedidos de compra com valores, fornecedores e status.</p>
+                        <p>Histï¿½rico completo de pedidos de compra com valores, fornecedores e status.</p>
                         <span class="report-action"><i class="fas fa-file-pdf"></i> Exportar PDF</span>
                     </div>
                     <div class="report-card rc-fornecedores" onclick="RelatoriosCompras.abrirModalRelatorio('fornecedores')">
                         <span class="pdf-badge">PDF</span>
                         <div class="report-card-header">
                             <div class="report-icon"><i class="fas fa-users"></i></div>
-                            <h3>Relatório de Fornecedores</h3>
+                            <h3>Relatï¿½rio de Fornecedores</h3>
                         </div>
-                        <p>Cadastro de fornecedores, avaliações, categorias e dados de contato.</p>
+                        <p>Cadastro de fornecedores, avaliaï¿½ï¿½es, categorias e dados de contato.</p>
                         <span class="report-action"><i class="fas fa-file-pdf"></i> Exportar PDF</span>
                     </div>
                     <div class="report-card rc-estoque" onclick="RelatoriosCompras.abrirModalRelatorio('estoque')">
                         <span class="pdf-badge">PDF</span>
                         <div class="report-card-header">
                             <div class="report-icon"><i class="fas fa-boxes"></i></div>
-                            <h3>Relatório de Estoque</h3>
+                            <h3>Relatï¿½rio de Estoque</h3>
                         </div>
-                        <p>Posição de estoque, materiais críticos, custos e níveis de reposição.</p>
+                        <p>Posiï¿½ï¿½o de estoque, materiais crï¿½ticos, custos e nï¿½veis de reposiï¿½ï¿½o.</p>
                         <span class="report-action"><i class="fas fa-file-pdf"></i> Exportar PDF</span>
                     </div>
                     <div class="report-card rc-movimentacoes" onclick="RelatoriosCompras.abrirModalRelatorio('movimentacoes')">
                         <span class="pdf-badge">PDF</span>
                         <div class="report-card-header">
                             <div class="report-icon"><i class="fas fa-exchange-alt"></i></div>
-                            <h3>Movimentações</h3>
+                            <h3>Movimentaï¿½ï¿½es</h3>
                         </div>
-                        <p>Entradas, saídas e ajustes de estoque por período com rastreabilidade.</p>
+                        <p>Entradas, saï¿½das e ajustes de estoque por perï¿½odo com rastreabilidade.</p>
                         <span class="report-action"><i class="fas fa-file-pdf"></i> Exportar PDF</span>
                     </div>
                     <div class="report-card rc-criticos" onclick="RelatoriosCompras.abrirModalRelatorio('criticos')">
                         <span class="pdf-badge">PDF</span>
                         <div class="report-card-header">
                             <div class="report-icon"><i class="fas fa-exclamation-triangle"></i></div>
-                            <h3>Materiais Críticos</h3>
+                            <h3>Materiais Crï¿½ticos</h3>
                         </div>
-                        <p>Materiais abaixo do estoque mínimo que necessitam de reposição urgente.</p>
+                        <p>Materiais abaixo do estoque mï¿½nimo que necessitam de reposiï¿½ï¿½o urgente.</p>
                         <span class="report-action"><i class="fas fa-file-pdf"></i> Exportar PDF</span>
                     </div>
-                    <div class="report-card rc-cotações" onclick="RelatoriosCompras.abrirModalRelatorio('cotações')">
+                    <div class="report-card rc-cotaï¿½ï¿½es" onclick="RelatoriosCompras.abrirModalRelatorio('cotaï¿½ï¿½es')">
                         <span class="pdf-badge">PDF</span>
                         <div class="report-card-header">
                             <div class="report-icon"><i class="fas fa-file-invoice-dollar"></i></div>
-                            <h3>Relatório de Cotações</h3>
+                            <h3>Relatï¿½rio de Cotaï¿½ï¿½es</h3>
                         </div>
-                        <p>Análise comparativa de cotações, economia obtida e fornecedores selecionados.</p>
+                        <p>Anï¿½lise comparativa de cotaï¿½ï¿½es, economia obtida e fornecedores selecionados.</p>
                         <span class="report-action"><i class="fas fa-file-pdf"></i> Exportar PDF</span>
                     </div>
                 </div>
@@ -225,7 +225,7 @@
                 <div class="tables-grid">
             <div class="card">
                 <div class="card-header" style="padding:var(--space-3) var(--space-4); border-bottom:1px solid var(--gray-100);">
-                    <h3 style="font-size:0.85rem; font-weight:600; color:var(--gray-800);"><i class="fas fa-clock"></i> últimos Pedidos</h3>
+                    <h3 style="font-size:0.85rem; font-weight:600; color:var(--gray-800);"><i class="fas fa-clock"></i> ï¿½ltimos Pedidos</h3>
                 </div>
                 <div class="card-body" style="padding:0;">
                     <table class="data-table" id="tabela-pedidos">
@@ -240,12 +240,12 @@
             </div>
             <div class="card">
                 <div class="card-header" style="padding:var(--space-3) var(--space-4); border-bottom:1px solid var(--gray-100);">
-                    <h3 style="font-size:0.85rem; font-weight:600; color:var(--gray-800);"><i class="fas fa-exclamation-triangle" style="color:var(--danger-500);"></i> Materiais Críticos</h3>
+                    <h3 style="font-size:0.85rem; font-weight:600; color:var(--gray-800);"><i class="fas fa-exclamation-triangle" style="color:var(--danger-500);"></i> Materiais Crï¿½ticos</h3>
                 </div>
                 <div class="card-body" style="padding:0;">
                     <table class="data-table" id="tabela-criticos">
                         <thead>
-                            <tr><th>Material</th><th>Atual</th><th>Mínimo</th><th>Status</th></tr>
+                            <tr><th>Material</th><th>Atual</th><th>Mï¿½nimo</th><th>Status</th></tr>
                         </thead>
                         <tbody id="tbody-criticos">
                             <tr><td colspan="4" style="text-align:center; padding:var(--space-6); color:var(--gray-400);"><i class="fas fa-spinner fa-spin"></i></td></tr>
@@ -269,8 +269,8 @@
         if (overlay) overlay.classList.toggle('active');
     }
 
-    /* ========== RelatóriosCompras ========== */
-    const RelatóriosCompras = {
+    /* ========== Relatï¿½riosCompras ========== */
+    const Relatï¿½riosCompras = {
         init() {
             this.carregarDados();
             this.configurarBotoes();
@@ -306,7 +306,7 @@
             }
             tbody.innerHTML = pedidos.slice(0, 10).map(p =>
                 `<tr>
-                    <td><strong>${p.numero || p.número || p.numero_pedido || p.id}</strong></td>
+                    <td><strong>${p.numero || p.nï¿½mero || p.numero_pedido || p.id}</strong></td>
                     <td>${p.fornecedor || p.fornecedor_nome || p.nome_fornecedor || p.razao_social || '-'}</td>
                     <td>${this.formatarMoeda(p.valor_total)}</td>
                     <td><span class="badge badge-${this.getStatusClass(p.status)}">${this.formatarStatus(p.status)}</span></td>
@@ -327,7 +327,7 @@
                 document.getElementById('stat-criticos').textContent = materiais.length;
                 const tbody = document.getElementById('tbody-criticos');
                 if (!materiais.length) {
-                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:var(--space-4); color:var(--gray-400);">Nenhum material crítico</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:var(--space-4); color:var(--gray-400);">Nenhum material crï¿½tico</td></tr>';
                     return;
                 }
                 tbody.innerHTML = materiais.slice(0, 10).map(m => {
@@ -335,10 +335,10 @@
                     const min = m.estoque_minimo || m.minimo || 0;
                     const pct = min > 0 ? (atual / min * 100) : 0;
                     return `<tr>
-                        <td>${m.descricao || m.nome || m.descrição || m.codigo_material || '-'}</td>
+                        <td>${m.descricao || m.nome || m.descriï¿½ï¿½o || m.codigo_material || '-'}</td>
                         <td style="font-weight:600; color:var(--danger-500);">${atual}</td>
                         <td>${min}</td>
-                        <td><span class="badge badge-${pct <= 50 ? 'urgent' : 'pending'}">${pct <= 50 ? 'Crítico' : 'Baixo'}</span></td>
+                        <td><span class="badge badge-${pct <= 50 ? 'urgent' : 'pending'}">${pct <= 50 ? 'Crï¿½tico' : 'Baixo'}</span></td>
                     </tr>`;
                 }).join('');
             } catch (e) { console.log('Erro materiais:', e); }
@@ -369,13 +369,13 @@
             <div class="modal-overlay active" id="modal-relatorio" onclick="if(event.target===this) RelatoriosCompras.fecharModal();">
                 <div class="modal" style="max-width:500px;">
                     <div class="modal-header">
-                        <h3><i class="${configs.icon}"></i> ${configs.título}</h3>
+                        <h3><i class="${configs.icon}"></i> ${configs.tï¿½tulo}</h3>
                         <button class="modal-close" onclick="RelatoriosCompras.fecharModal()">&times;</button>
                     </div>
                     <div class="modal-body">
-                        <p style="font-size:0.85rem; color:var(--gray-600); margin-bottom:var(--space-4);">${configs.descrição}</p>
+                        <p style="font-size:0.85rem; color:var(--gray-600); margin-bottom:var(--space-4);">${configs.descriï¿½ï¿½o}</p>
                         <div class="form-grid cols-2">
-                            <div class="form-group"><label>Data Início</label><input type="date" id="data-inicio"></div>
+                            <div class="form-group"><label>Data Inï¿½cio</label><input type="date" id="data-inicio"></div>
                             <div class="form-group"><label>Data Fim</label><input type="date" id="data-fim"></div>
                         </div>
                         <div style="display:flex; align-items:center; gap:12px; margin-top:var(--space-3); padding:14px 18px; background:linear-gradient(135deg, #fef2f2, #fff1f2); border:1px solid #fecaca; border-radius:12px;">
@@ -383,8 +383,8 @@
                                 <i class="fas fa-file-pdf" style="color:#fff; font-size:1.1rem;"></i>
                             </div>
                             <div>
-                                <div style="font-size:0.85rem; font-weight:600; color:#1e293b;">Exportação em PDF</div>
-                                <div style="font-size:0.75rem; color:#64748b;">Documento profissional pronto para impressão</div>
+                                <div style="font-size:0.85rem; font-weight:600; color:#1e293b;">Exportaï¿½ï¿½o em PDF</div>
+                                <div style="font-size:0.75rem; color:#64748b;">Documento profissional pronto para impressï¿½o</div>
                             </div>
                         </div>
                     </div>
@@ -404,12 +404,12 @@
 
         getConfigRelatorio(tipo) {
             const configs = {
-                pedidos: { título: 'Relatório de Pedidos', descrição: 'Exportar histórico de pedidos de compra com valores, fornecedores e status.', icon: 'fas fa-shopping-cart' },
-                fornecedores: { titulo: 'Relatório de Fornecedores', descrição: 'Exportar cadastro de fornecedores com contatos, categorias e avaliações.', icon: 'fas fa-users' },
-                estoque: { titulo: 'Relatório de Estoque', descrição: 'Exportar posição atual de estoque com custos e níveis de reposição.', icon: 'fas fa-boxes' },
-                movimentacoes: { titulo: 'Movimentações de Estoque', descrição: 'Exportar entradas, saídas e ajustes de estoque por período.', icon: 'fas fa-exchange-alt' },
-                criticos: { titulo: 'Materiais Críticos', descrição: 'Exportar materiais abaixo do estoque mínimo que precisam de reposição.', icon: 'fas fa-exclamation-triangle' },
-                cotações: { titulo: 'Relatório de Cotações', descrição: 'Exportar análise comparativa de cotações e economia obtida.', icon: 'fas fa-file-invoice-dollar' }
+                pedidos: { tï¿½tulo: 'Relatï¿½rio de Pedidos', descriï¿½ï¿½o: 'Exportar histï¿½rico de pedidos de compra com valores, fornecedores e status.', icon: 'fas fa-shopping-cart' },
+                fornecedores: { titulo: 'Relatï¿½rio de Fornecedores', descriï¿½ï¿½o: 'Exportar cadastro de fornecedores com contatos, categorias e avaliaï¿½ï¿½es.', icon: 'fas fa-users' },
+                estoque: { titulo: 'Relatï¿½rio de Estoque', descriï¿½ï¿½o: 'Exportar posiï¿½ï¿½o atual de estoque com custos e nï¿½veis de reposiï¿½ï¿½o.', icon: 'fas fa-boxes' },
+                movimentacoes: { titulo: 'Movimentaï¿½ï¿½es de Estoque', descriï¿½ï¿½o: 'Exportar entradas, saï¿½das e ajustes de estoque por perï¿½odo.', icon: 'fas fa-exchange-alt' },
+                criticos: { titulo: 'Materiais Crï¿½ticos', descriï¿½ï¿½o: 'Exportar materiais abaixo do estoque mï¿½nimo que precisam de reposiï¿½ï¿½o.', icon: 'fas fa-exclamation-triangle' },
+                cotaï¿½ï¿½es: { titulo: 'Relatï¿½rio de Cotaï¿½ï¿½es', descriï¿½ï¿½o: 'Exportar anï¿½lise comparativa de cotaï¿½ï¿½es e economia obtida.', icon: 'fas fa-file-invoice-dollar' }
             };
             return configs[tipo] || configs.pedidos;
         },
@@ -425,10 +425,10 @@
             this.mostrarLoading();
             try {
                 await this.exportarPDF(tipo, dataInicio, dataFim);
-                this.mostrarToast('Relatório PDF gerado com sucesso!', 'success');
+                this.mostrarToast('Relatï¿½rio PDF gerado com sucesso!', 'success');
             } catch(e) {
                 console.error('Erro ao gerar PDF:', e);
-                this.mostrarToast('Erro ao gerar Relatório: ' + e.message, 'error');
+                this.mostrarToast('Erro ao gerar Relatï¿½rio: ' + e.message, 'error');
             }
             this.esconderLoading();
         },
@@ -472,13 +472,13 @@
                         }
                         break;
                     }
-                    case 'cotações': {
+                    case 'cotaï¿½ï¿½es': {
                         const r = await fetch('/api/compras/cotacoes', { headers });
-                        if (r.ok) { const d = await r.json(); return d.cotações || d.data || d || []; }
+                        if (r.ok) { const d = await r.json(); return d.cotaï¿½ï¿½es || d.data || d || []; }
                         break;
                     }
                 }
-            } catch(e) { console.log('Erro fetch Relatório:', e); }
+            } catch(e) { console.log('Erro fetch Relatï¿½rio:', e); }
             return [];
         },
 
@@ -489,34 +489,34 @@
                 case 'pedidos':
                     headers = ['N', 'Fornecedor', 'Data', 'Valor Total', 'Status'];
                     resumo = { 'Total de Pedidos': arr.length, 'Valor Total': this.formatarMoeda(arr.reduce((s,p) => s + (parseFloat(p.valor_total)||0), 0)), 'Aprovados': arr.filter(p => p.status==='aprovado').length, 'Pendentes': arr.filter(p => p.status==='pendente').length };
-                    rows = arr.map(p => `<tr><td class="font-bold">${p.número||p.id||'-'}</td><td>${p.fornecedor||p.fornecedor_nome||'-'}</td><td>${this.formatarData(p.data_pedido||p.created_at)}</td><td class="text-right font-bold">${this.formatarMoeda(p.valor_total)}</td><td><span class="badge badge-${this.getBadgeClass(p.status)}">${this.formatarStatus(p.status)}</span></td></tr>`);
+                    rows = arr.map(p => `<tr><td class="font-bold">${p.nï¿½mero||p.id||'-'}</td><td>${p.fornecedor||p.fornecedor_nome||'-'}</td><td>${this.formatarData(p.data_pedido||p.created_at)}</td><td class="text-right font-bold">${this.formatarMoeda(p.valor_total)}</td><td><span class="badge badge-${this.getBadgeClass(p.status)}">${this.formatarStatus(p.status)}</span></td></tr>`);
                     break;
                 case 'fornecedores':
-                    headers = ['Nome / Razão Social', 'CNPJ/CPF', 'Telefone', 'Email', 'Categoria', 'Status'];
+                    headers = ['Nome / Razï¿½o Social', 'CNPJ/CPF', 'Telefone', 'Email', 'Categoria', 'Status'];
                     resumo = { 'Total Fornecedores': arr.length, 'Ativos': arr.filter(f => f.ativo!==0 && f.status!=='inativo').length };
                     rows = arr.map(f => `<tr><td class="font-bold">${f.nome||f.razao_social||'-'}</td><td>${f.cnpj||f.cpf||'-'}</td><td>${f.telefone||'-'}</td><td>${f.email||'-'}</td><td>${f.categoria||'-'}</td><td><span class="badge badge-${f.ativo!==0?'success':'secondary'}">${f.ativo!==0?'Ativo':'Inativo'}</span></td></tr>`);
                     break;
                 case 'estoque':
-                    headers = ['Código', 'Material', 'Tipo', 'Unidade', 'Qtd. Atual', 'Mínimo', 'Custo Unit.', 'Status'];
+                    headers = ['Cï¿½digo', 'Material', 'Tipo', 'Unidade', 'Qtd. Atual', 'Mï¿½nimo', 'Custo Unit.', 'Status'];
                     const totalEst = arr.reduce((s,m) => s + parseFloat(m.quantidade_estoque||m.estoque_atual||m.quantidade||0), 0);
                     const totalCusto = arr.reduce((s,m) => s + (parseFloat(m.custo_unitario||0) * parseFloat(m.quantidade_estoque||m.estoque_atual||m.quantidade||0)), 0);
-                    resumo = { 'Total Materiais': arr.length, 'Qtd. Total Estoque': Math.round(totalEst), 'Valor em Estoque': this.formatarMoeda(totalCusto), 'Abaixo do Mínimo': arr.filter(m => (m.quantidade_estoque||m.estoque_atual||m.quantidade||0) <= (m.estoque_minimo||m.minimo||0) && (m.estoque_minimo||m.minimo||0) > 0).length };
-                    rows = arr.map(m => { const a = m.quantidade_estoque||m.estoque_atual||m.quantidade||0; const mn = m.estoque_minimo||m.minimo||0; const cr = mn>0 && a<=mn; return `<tr><td class="font-bold">${m.codigo_material||m.código||'-'}</td><td>${m.descrição||m.nome||'-'}</td><td>${m.tipo||'-'}</td><td class="text-center">${m.unidade_medida||m.unidade||'-'}</td><td class="text-right font-bold" style="${cr?'color:#dc2626;':''}">${a}</td><td class="text-right">${mn}</td><td class="text-right">${this.formatarMoeda(m.custo_unitario)}</td><td><span class="badge badge-${cr?'danger':'success'}">${cr?'Crítico':'Normal'}</span></td></tr>`; });
+                    resumo = { 'Total Materiais': arr.length, 'Qtd. Total Estoque': Math.round(totalEst), 'Valor em Estoque': this.formatarMoeda(totalCusto), 'Abaixo do Mï¿½nimo': arr.filter(m => (m.quantidade_estoque||m.estoque_atual||m.quantidade||0) <= (m.estoque_minimo||m.minimo||0) && (m.estoque_minimo||m.minimo||0) > 0).length };
+                    rows = arr.map(m => { const a = m.quantidade_estoque||m.estoque_atual||m.quantidade||0; const mn = m.estoque_minimo||m.minimo||0; const cr = mn>0 && a<=mn; return `<tr><td class="font-bold">${m.codigo_material||m.cï¿½digo||'-'}</td><td>${m.descriï¿½ï¿½o||m.nome||'-'}</td><td>${m.tipo||'-'}</td><td class="text-center">${m.unidade_medida||m.unidade||'-'}</td><td class="text-right font-bold" style="${cr?'color:#dc2626;':''}">${a}</td><td class="text-right">${mn}</td><td class="text-right">${this.formatarMoeda(m.custo_unitario)}</td><td><span class="badge badge-${cr?'danger':'success'}">${cr?'Crï¿½tico':'Normal'}</span></td></tr>`; });
                     break;
                 case 'movimentacoes':
-                    headers = ['Data', 'Material', 'Tipo', 'Quantidade', 'Responsável', 'Observação'];
-                    resumo = { 'Total Movimentações': arr.length, 'Entradas': arr.filter(m => m.tipo==='entrada').length, 'Saídas': arr.filter(m => m.tipo==='saida').length };
-                    rows = arr.map(m => `<tr><td>${this.formatarData(m.data||m.created_at)}</td><td class="font-bold">${m.material||m.descrição||'-'}</td><td><span class="badge badge-${m.tipo==='entrada'?'success':'warning'}">${m.tipo==='entrada'?'Entrada':'Saída'}</span></td><td class="text-right font-bold">${m.quantidade||0}</td><td>${m.responsavel||m.usuário||'-'}</td><td>${m.observação||'-'}</td></tr>`);
+                    headers = ['Data', 'Material', 'Tipo', 'Quantidade', 'Responsï¿½vel', 'Observaï¿½ï¿½o'];
+                    resumo = { 'Total Movimentaï¿½ï¿½es': arr.length, 'Entradas': arr.filter(m => m.tipo==='entrada').length, 'Saï¿½das': arr.filter(m => m.tipo==='saida').length };
+                    rows = arr.map(m => `<tr><td>${this.formatarData(m.data||m.created_at)}</td><td class="font-bold">${m.material||m.descriï¿½ï¿½o||'-'}</td><td><span class="badge badge-${m.tipo==='entrada'?'success':'warning'}">${m.tipo==='entrada'?'Entrada':'Saï¿½da'}</span></td><td class="text-right font-bold">${m.quantidade||0}</td><td>${m.responsavel||m.usuï¿½rio||'-'}</td><td>${m.observaï¿½ï¿½o||'-'}</td></tr>`);
                     break;
                 case 'criticos':
-                    headers = ['Código', 'Material', 'Qtd. Atual', 'Estoque Mínimo', 'Diferena', 'Criticidade'];
-                    resumo = { 'Materiais Críticos': arr.length, 'Necessitam Reposição Urgente': arr.length };
-                    rows = arr.map(m => { const a = m.estoque_atual||m.quantidade||m.quantidade_estoque||0; const mn = m.estoque_minimo||m.minimo||0; const diff = a - mn; const pct = mn>0?(a/mn*100):0; return `<tr><td class="font-bold">${m.codigo_material||m.código||'-'}</td><td>${m.descrição||m.nome||'-'}</td><td class="text-right font-bold" style="color:#dc2626;">${a}</td><td class="text-right">${mn}</td><td class="text-right font-bold" style="color:#dc2626;">${diff}</td><td><span class="badge badge-${pct<=25?'danger':'warning'}">${pct<=25?'Urgente':'Atenão'}</span></td></tr>`; });
+                    headers = ['Cï¿½digo', 'Material', 'Qtd. Atual', 'Estoque Mï¿½nimo', 'Diferena', 'Criticidade'];
+                    resumo = { 'Materiais Crï¿½ticos': arr.length, 'Necessitam Reposiï¿½ï¿½o Urgente': arr.length };
+                    rows = arr.map(m => { const a = m.estoque_atual||m.quantidade||m.quantidade_estoque||0; const mn = m.estoque_minimo||m.minimo||0; const diff = a - mn; const pct = mn>0?(a/mn*100):0; return `<tr><td class="font-bold">${m.codigo_material||m.cï¿½digo||'-'}</td><td>${m.descriï¿½ï¿½o||m.nome||'-'}</td><td class="text-right font-bold" style="color:#dc2626;">${a}</td><td class="text-right">${mn}</td><td class="text-right font-bold" style="color:#dc2626;">${diff}</td><td><span class="badge badge-${pct<=25?'danger':'warning'}">${pct<=25?'Urgente':'Atenï¿½o'}</span></td></tr>`; });
                     break;
-                case 'cotações':
-                    headers = ['N', 'Título / descrição', 'Fornecedor', 'Valor', 'Data', 'Status'];
-                    resumo = { 'Total Cotações': arr.length, 'Valor Total': this.formatarMoeda(arr.reduce((s,c) => s + (parseFloat(c.valor_total||c.valor||0)), 0)) };
-                    rows = arr.map(c => `<tr><td class="font-bold">${c.número||c.id||'-'}</td><td>${c.título||c.descrição||'-'}</td><td>${c.fornecedor||c.fornecedor_nome||'-'}</td><td class="text-right font-bold">${this.formatarMoeda(c.valor_total||c.valor)}</td><td>${this.formatarData(c.data||c.created_at)}</td><td><span class="badge badge-${this.getBadgeClass(c.status)}">${this.formatarStatus(c.status)}</span></td></tr>`);
+                case 'cotaï¿½ï¿½es':
+                    headers = ['N', 'Tï¿½tulo / descriï¿½ï¿½o', 'Fornecedor', 'Valor', 'Data', 'Status'];
+                    resumo = { 'Total Cotaï¿½ï¿½es': arr.length, 'Valor Total': this.formatarMoeda(arr.reduce((s,c) => s + (parseFloat(c.valor_total||c.valor||0)), 0)) };
+                    rows = arr.map(c => `<tr><td class="font-bold">${c.nï¿½mero||c.id||'-'}</td><td>${c.tï¿½tulo||c.descriï¿½ï¿½o||'-'}</td><td>${c.fornecedor||c.fornecedor_nome||'-'}</td><td class="text-right font-bold">${this.formatarMoeda(c.valor_total||c.valor)}</td><td>${this.formatarData(c.data||c.created_at)}</td><td><span class="badge badge-${this.getBadgeClass(c.status)}">${this.formatarStatus(c.status)}</span></td></tr>`);
                     break;
             }
             return { headers, rows, resumo };
@@ -542,12 +542,12 @@
             const agora = new Date();
             const dataEmissao = agora.toLocaleDateString('pt-BR');
             const horaEmissao = agora.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
-            const períodoTexto = dataInicio && dataFim ? 'Período: ' + new Date(dataInicio+'T12:00:00').toLocaleDateString('pt-BR') + ' a ' + new Date(dataFim+'T12:00:00').toLocaleDateString('pt-BR') : '';
+            const perï¿½odoTexto = dataInicio && dataFim ? 'Perï¿½odo: ' + new Date(dataInicio+'T12:00:00').toLocaleDateString('pt-BR') + ' a ' + new Date(dataFim+'T12:00:00').toLocaleDateString('pt-BR') : '';
             win.document.write(`<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>${config.título} - Zyntra ERP</title>
+<title>${config.tï¿½tulo} - Zyntra ERP</title>
 <style>
 @page { margin: 12mm 15mm; size: A4 landscape; }
 @media print { body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } .print-bar { display: none !important; } }
@@ -595,7 +595,7 @@ tbody tr:hover { background: #f1f5f9; }
 .confidential { font-size: 8px; color: #cbd5e1; text-align: center; margin-top: 10px; letter-spacing: 1px; text-transform: uppercase; }
 </style>
 </head>
-<body>
+<body class="dark-mode">
 <div class="print-bar">
     <button class="btn-print" onclick="window.print()">??? Imprimir / Salvar PDF</button>
     <button class="btn-close" onclick="window.close()">? Fechar</button>
@@ -603,32 +603,32 @@ tbody tr:hover { background: #f1f5f9; }
 <div class="rpt-header">
     <div class="brand">
         <div class="brand-name">ZYNTRA</div>
-        <div class="brand-sub">Zyntra ERP — Módulo de Compras</div>
+        <div class="brand-sub">Zyntra ERP ï¿½ Mï¿½dulo de Compras</div>
     </div>
     <div class="rpt-meta">
-        <div class="doc-tag">Relatório</div>
+        <div class="doc-tag">Relatï¿½rio</div>
         <div class="meta-line">Emitido em: ${dataEmissao} s ${horaEmissao}</div>
-        ${períodoTexto ? '<div class="meta-line">' + períodoTexto + '</div>' : ''}
+        ${perï¿½odoTexto ? '<div class="meta-line">' + perï¿½odoTexto + '</div>' : ''}
     </div>
 </div>
 <div class="rpt-title">
-    <h1>${config.título}</h1>
-    <div class="subtitle">${config.descrição}</div>
+    <h1>${config.tï¿½tulo}</h1>
+    <div class="subtitle">${config.descriï¿½ï¿½o}</div>
 </div>
 ${this.gerarResumoPDF(resumo)}
 <div class="data-section">
-    <h2>Dados do Relatório</h2>
+    <h2>Dados do Relatï¿½rio</h2>
     <table>
         <thead><tr>${headers.map(h => '<th>' + h + '</th>').join('')}</tr></thead>
-        <tbody>${rows.length ? rows.join('') : '<tr><td colspan="' + headers.length + '" style="text-align:center; padding:24px; color:#94a3b8; font-style:italic;">Nenhum dado encontrado para o período selecionado</td></tr>'}</tbody>
+        <tbody>${rows.length ? rows.join('') : '<tr><td colspan="' + headers.length + '" style="text-align:center; padding:24px; color:#94a3b8; font-style:italic;">Nenhum dado encontrado para o perï¿½odo selecionado</td></tr>'}</tbody>
     </table>
     <div style="text-align:right; margin-top:8px; font-size:10px; color:#94a3b8;">${rows.length} registro(s) encontrado(s)</div>
 </div>
 <div class="rpt-footer">
-    <span>Zyntra — Sistema Integrado de Gestão Empresarial</span>
+    <span>Zyntra ï¿½ Sistema Integrado de Gestï¿½o Empresarial</span>
     <span>Documento gerado automaticamente pelo Zyntra ERP</span>
 </div>
-<div class="confidential">Documento Confidencial é Uso Interno</div>
+<div class="confidential">Documento Confidencial ï¿½ Uso Interno</div>
     <scr` + `ipt src="/js/user-dropdown.js?v=20260319" defer></scr` + `ipt>
 </body>
 </html>`);
@@ -664,9 +664,9 @@ ${this.gerarResumoPDF(resumo)}
     };
 
     // Alias sem acento para onclick handlers
-    window.RelatoriosCompras = RelatóriosCompras;
+    window.RelatoriosCompras = Relatï¿½riosCompras;
 
-    document.addEventListener('DOMContentLoaded', () => RelatóriosCompras.init());
+    document.addEventListener('DOMContentLoaded', () => Relatï¿½riosCompras.init());
     </script>
 
     <!-- Module Scripts -->
