@@ -427,7 +427,7 @@
                 <div style="display:flex;gap:4px;">
                     <button class="action-btn view" onclick="event.stopPropagation();abrirModalEditarNFe(${n.id}, '${n.origem || 'nfe'}')" title="Detalhes"><i class="fas fa-eye"></i></button>
                     ${n.origem !== 'pedido' ? `<button class="action-btn success" onclick="event.stopPropagation();enviarSEFAZ(${n.id})" title="Enviar SEFAZ"><i class="fas fa-paper-plane"></i></button>` : ''}
-                    <button class="action-btn" onclick="event.stopPropagation();baixarDANFE(${n.id})" title="DANFE"><i class="fas fa-file-pdf"></i></button>
+                    ${n.origem !== 'pedido' ? `<button class="action-btn" onclick="event.stopPropagation();baixarDANFE(${n.id})" title="DANFE"><i class="fas fa-file-pdf"></i></button>` : ''}
                     ${n.origem !== 'pedido' ? `<button class="action-btn delete" onclick="event.stopPropagation();cancelarNFe(${n.id})" title="Cancelar"><i class="fas fa-times"></i></button>` : ''}
                 </div>
             </td>

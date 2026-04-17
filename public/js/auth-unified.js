@@ -11,6 +11,19 @@
 //      sem signal abortado, proactive refresh usa config centralizada.
 
 // =============================================================================
+// 🎨 ANTI-FOUC: Restaurar dark-mode imediatamente para evitar flash branco
+// Deve rodar ANTES de qualquer outro código (síncrono)
+// =============================================================================
+;(function antiFlashRestore() {
+    try {
+        if (localStorage.getItem('darkMode') === '1') {
+            document.documentElement.classList.add('dark-mode');
+            if (document.body) document.body.classList.add('dark-mode');
+        }
+    } catch (e) { /* localStorage indisponível */ }
+})();
+
+// =============================================================================
 // 🔒 STORAGE ISOLATOR - Deve rodar ANTES de qualquer outro código
 // Intercepta localStorage.getItem para chaves de autenticação
 // Retorna valores do sessionStorage (isolado por aba) quando disponíveis

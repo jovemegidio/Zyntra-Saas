@@ -4,6 +4,51 @@ Todas as alterações notáveis do projeto serão documentadas neste arquivo.
 
 ---
 
+## [2.6.0] — 2026-04-17
+
+### Adicionado
+- **NF-e — Dados Reais de Pedidos Faturados**: Página de NF-e agora integra pedidos faturados via UNION ALL (`pedidos` status='faturado'), exibindo junto com NF-es formais com campo `origem` para distinguir registros
+- **NF-e — Endpoint `/pedidos-aprovados`**: Nova rota para popular dropdown no modal "Nova NF-e"
+- **NF-e — Busca Textual + Filtros Auto-Reload**: Busca com debounce (400ms) por cliente/número/destinatário; filtros de status e data recarregam ao alterar
+- **NF-e — Modal Read-Only para Pedidos Faturados**: Detalhes de pedido faturado abrem em modo somente leitura
+- **Login Unificado Multi-Empresa**: Roteamento por domínio de email (`@aluforce.ind.br`, `@labor-eletric`, `@labor-energy`)
+- **Financeiro — Contas a Receber Completo**: Barra de pesquisa/filtros em todas as abas, importação Excel, aba OPERAÇÕES (345 registros), FAT.ANÁLISE, Disponível do Dia, filtro `mes_referencia`
+- **PCP — PDF Client-Side + Etiquetas Code128**: Geração de PDF no browser, etiqueta profissional com Code128 real
+- **Logística — Módulo Independente**: Extraído como módulo separado do Faturamento
+- **Zyntra Igrejas**: Dashboard completo com fundos rotativos e apresentação para pastores
+- **Email DANFE Automático**: Envio para logística@ e aluforce@ + cliente, botão "Enviar à SEFAZ"
+- **Service Worker v4.2.1**: `global-header-sidebar.css` adicionado ao precache obrigatório
+
+### Corrigido
+- **NF-e — Collation Mismatch (HTTP 500)**: UNION de `nfes` (utf8mb4_0900_ai_ci) + `pedidos` (utf8mb4_general_ci) — adicionado `COLLATE utf8mb4_general_ci` explícito
+- **NF-e — "NFe não encontrada"**: Botão DANFE oculto para registros de pedidos faturados (sem entrada na tabela `nfes`)
+- **Header/Sidebar Branco no Refresh (FOUC)**: `--header-bg` alterado de `#ffffff` para `#1e293b` — header sempre escuro, compatível com logos brancos. `auth-unified.js` restaura dark-mode imediatamente do localStorage
+- **Labor Eletric — Branding**: Logo azul + substituição em 130+ arquivos HTML/JS
+- **Compras — Encoding Mojibake**: Correção de caracteres corrompidos nas 3 empresas VPS
+- **Compras — httpOnly Cookies**: Removido Bearer de todos os JS, migrado para `credentials: 'include'`
+- **Financeiro — Configurações Overhaul**: Modais Formas Pagamento PUT/DELETE, Impostos CFOP, Certificado Digital delete
+- **Financeiro — Rate Limiter**: 30 → 200 req/min (resolve 429)
+- **Auth — Inatividade 4h**: Timeout de 30min → 4h (backend + frontend)
+- **Auth — Rate Limit Login**: 100/15min + prevenção enumeração de usuários
+- **Vendas — Lock Pedidos**: Faturados/aprovados não editáveis exceto por ti@aluforce
+- **Vendas — Dados Cliente**: Corrigida exibição errada (bug Luiz Alberto)
+- **Dashboard — Cards Corporativos**: Redesign flat Omie + glassmorphism fila única
+- **Erros Servidor 3 Empresas**: Correção sistemática aluforce/labor-eletric/labor-energy
+
+### Segurança
+- **Sessão Redis**: Registro de sessão ativa no login
+- **JWT JTI + 2FA Rotation**: ID único por token + rotação 2FA
+- **XSS Prevention**: Escape HTML em page-routes
+- **CORS Hardening**: Restrição de origens
+
+### Implantação
+- 176 commits em abril de 2026
+- Deploy contínuo nas 3 empresas VPS
+- PM2 reiniciado sem downtime
+- Base Enterprise sincronizada (Sistema, Labor Eletric, Labor Energy, Demo, Igrejas)
+
+---
+
 ## [2.5.1] — 2026-07-14
 
 ### Corrigido — Configurações do Sistema

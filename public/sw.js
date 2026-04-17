@@ -5,7 +5,7 @@
  * Atualizado: 06/04/2026
  */
 
-const CACHE_VERSION = 'v4.2.0';
+const CACHE_VERSION = 'v4.2.1';
 const STATIC_CACHE = `aluforce-static-${CACHE_VERSION}`;
 const DATA_CACHE = `aluforce-data-${CACHE_VERSION}`;
 
@@ -18,6 +18,7 @@ const PRECACHE_ASSETS = [
     '/css/login.css',
     '/css/responsive.css',
     '/css/flat-design.css',
+    '/css/global-header-sidebar.css',
     '/js/auth-unified.js',
     '/js/offline-sync-manager.js',
     '/js/pwa-manager.js',
