@@ -2063,7 +2063,7 @@
                     <button class="modal-tab" onclick="switchDetalhesTab(this, 'tab-vis-info')" style="padding:10px 20px;border:none;background:transparent;font-size:13px;font-weight:600;color:#6b7280;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all 0.2s;">
                         <i class="fas fa-info-circle"></i> InformaÃ§Ãµes
                     </button>
-                    ${pedido.observaÃ§Ã£o ? `<button class="modal-tab" onclick="switchDetalhesTab(this, 'tab-vis-obs')" style="padding:10px 20px;border:none;background:transparent;font-size:13px;font-weight:600;color:#6b7280;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all 0.2s;">
+                    ${pedido.observacao || pedido.observacoes ? `<button class="modal-tab" onclick="switchDetalhesTab(this, 'tab-vis-obs')" style="padding:10px 20px;border:none;background:transparent;font-size:13px;font-weight:600;color:#6b7280;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all 0.2s;">
                         <i class="fas fa-comment"></i> ObservaÃ§Ãµes
                     </button>` : ''}
                 </div>
@@ -2117,11 +2117,11 @@
                     </div>
                 </div>
 
-                ${pedido.observaÃ§Ã£o ? `
-                <!-- Tab: ObservaÃ§Ãµes -->
+                ${pedido.observacao || pedido.observacoes ? `
+                <!-- Tab: Observacoes -->
                 <div id="tab-vis-obs" class="tab-content-vis" style="display:none;">
                     <div style="background:#f9fafb;border-radius:8px;padding:20px;">
-                        <p style="color:#374151;font-size:14px;line-height:1.6;white-space:pre-wrap;">${pedido.observacao}</p>
+                        <p style="color:#374151;font-size:14px;line-height:1.6;white-space:pre-wrap;">${pedido.observacao || pedido.observacoes || ''}</p>
                     </div>
                 </div>` : ''}
             `;

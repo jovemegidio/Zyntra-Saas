@@ -9312,7 +9312,7 @@
 
         async function cpCarregarDados() {
             try {
-                const resp = await fetch('/api/pcp/arvore-produto');
+                const resp = await fetch('/api/pcp/arvore-produto', { credentials: 'include' });
                 if (!resp.ok) throw new Error('Erro ' + resp.status);
                 const data = await resp.json();
                 if (!data.success) throw new Error(data.message || 'Erro ao carregar');
