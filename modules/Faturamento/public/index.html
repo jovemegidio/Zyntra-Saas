@@ -174,7 +174,7 @@
 
     <!-- Modal Nova NF-e -->
     <div class="modal-overlay" id="modalNovaNovenfe">
-        <div class="modal">
+        <div class="modal" style="max-width:600px;">
             <div class="modal-header">
                 <h3><i class="fas fa-plus-circle"></i> Gerar NF-e a partir de Pedido</h3>
                 <button class="modal-close" onclick="fecharModal('modalNovaNovenfe')"><i
@@ -182,8 +182,14 @@
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <label>ID do Pedido de Venda</label>
-                    <input type="number" class="form-control" id="pedidoId" placeholder="Informe o ID do pedido">
+                    <label>Selecione o Pedido Aprovado</label>
+                    <select class="form-control" id="pedidoIdSelect" onchange="document.getElementById('pedidoId').value=this.value">
+                        <option value="">Carregando pedidos...</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-top:8px;">
+                    <label style="font-size:12px;color:#6b7280;">Ou informe o ID manualmente</label>
+                    <input type="number" class="form-control" id="pedidoId" placeholder="ID do pedido">
                 </div>
                 <div class="form-row">
                     <div class="form-group">
@@ -206,7 +212,7 @@
     <div class="modal-overlay" id="modalEditarNFe" onclick="if(event.target===this) fecharModalEditar()">
         <div class="modal" style="max-width:720px;max-height:90vh;overflow-y:auto;">
             <div class="modal-header">
-                <h3><i class="fas fa-edit"></i> Editar NF-e</h3>
+                <h3 id="modalEditarTitulo"><i class="fas fa-edit"></i> Editar NF-e</h3>
                 <button class="modal-close" onclick="fecharModalEditar()"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body">
@@ -305,6 +311,28 @@
 
         function abrirModalNovaNovenfe() {
             document.getElementById('modalNovaNovenfe').classList.add('active');
+            carregarPedidosAprovados();
+        }
+
+        async function carregarPedidosAprovados() {
+            const select = document.getElementById('pedidoIdSelect');
+            try {
+                const r = await fetch('/api/faturamento/pedidos-aprovados', { credentials: 'include' });
+                if (r.ok) {
+                    const resp = await r.json();
+                    const pedidos = resp.data || [];
+                    if (pedidos.length === 0) {
+                        select.innerHTML = '<option value="">Nenhum pedido aprovado disponível</option>';
+                    } else {
+                        select.innerHTML = '<option value="">-- Selecione um pedido --</option>' +
+                            pedidos.map(p => `<option value="${p.id}">#${p.id} — ${p.cliente_nome || p.cliente} — ${formatarMoeda(p.valor)}</option>`).join('');
+                    }
+                } else {
+                    select.innerHTML = '<option value="">Erro ao carregar pedidos</option>';
+                }
+            } catch (e) {
+                select.innerHTML = '<option value="">Erro de conexão</option>';
+            }
         }
 
         function fecharModal(id) {
@@ -360,7 +388,8 @@
                 const status = document.getElementById('filtroStatus').value;
                 const inicio = document.getElementById('filtroDataInicio').value;
                 const fim = document.getElementById('filtroDataFim').value;
-                const r = await fetch(`/api/faturamento/nfes?status=${encodeURIComponent(status)}&data_inicio=${encodeURIComponent(inicio)}&data_fim=${encodeURIComponent(fim)}`, { credentials: 'include' });
+                const busca = document.getElementById('filtroTexto').value.trim();
+                const r = await fetch(`/api/faturamento/nfes?status=${encodeURIComponent(status)}&data_inicio=${encodeURIComponent(inicio)}&data_fim=${encodeURIComponent(fim)}&busca=${encodeURIComponent(busca)}`, { credentials: 'include' });
                 if (r.ok) {
                     const resp = await r.json();
                     const nfes = Array.isArray(resp) ? resp : (resp.data || resp.nfes || []);
@@ -383,9 +412,12 @@
                 tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><i class="fas fa-file-invoice"></i><h3>Nenhuma NF-e encontrada</h3><p>Emita sua primeira nota fiscal</p></div></td></tr>';
                 return;
             }
-            tbody.innerHTML = nfes.map(n => `
-        <tr ondblclick="abrirModalEditarNFe(${n.id})" style="cursor:pointer;" title="Duplo clique para editar">
-            <td><span class="code">${n.número || n.numero || '-'}</span></td>
+            _nfesCache = nfes;
+            tbody.innerHTML = nfes.map(n => {
+                const origemTag = n.origem === 'pedido' ? `<span style="font-size:10px;color:#6b7280;display:block;">Pedido #${n.pedido_id}</span>` : '';
+                return `
+        <tr ondblclick="abrirModalEditarNFe(${n.id}, '${n.origem || 'nfe'}')" style="cursor:pointer;" title="Duplo clique para editar">
+            <td><span class="code">${n.número || n.numero || '-'}</span>${origemTag}</td>
             <td>${n.serie || '1'}</td>
             <td>${n.destinatario || n.cliente_nome || n.cliente || '-'}</td>
             <td><strong>${formatarMoeda(n.valor)}</strong></td>
@@ -393,14 +425,15 @@
             <td><span class="badge ${(n.status || 'pendente').toLowerCase()}">${n.status || 'Pendente'}</span></td>
             <td>
                 <div style="display:flex;gap:4px;">
-                    <button class="action-btn view" onclick="event.stopPropagation();abrirModalEditarNFe(${n.id})" title="Editar"><i class="fas fa-edit"></i></button>
-                    <button class="action-btn success" onclick="event.stopPropagation();enviarSEFAZ(${n.id})" title="Enviar SEFAZ"><i class="fas fa-paper-plane"></i></button>
+                    <button class="action-btn view" onclick="event.stopPropagation();abrirModalEditarNFe(${n.id}, '${n.origem || 'nfe'}')" title="Detalhes"><i class="fas fa-eye"></i></button>
+                    ${n.origem !== 'pedido' ? `<button class="action-btn success" onclick="event.stopPropagation();enviarSEFAZ(${n.id})" title="Enviar SEFAZ"><i class="fas fa-paper-plane"></i></button>` : ''}
                     <button class="action-btn" onclick="event.stopPropagation();baixarDANFE(${n.id})" title="DANFE"><i class="fas fa-file-pdf"></i></button>
-                    <button class="action-btn delete" onclick="event.stopPropagation();cancelarNFe(${n.id})" title="Cancelar"><i class="fas fa-times"></i></button>
+                    ${n.origem !== 'pedido' ? `<button class="action-btn delete" onclick="event.stopPropagation();cancelarNFe(${n.id})" title="Cancelar"><i class="fas fa-times"></i></button>` : ''}
                 </div>
             </td>
         </tr>
-    `).join('');
+    `;
+            }).join('');
         }
 
         async function gerarNFe() {
@@ -481,14 +514,17 @@
             }
         }
 
-        function verDetalhes(id) { abrirModalEditarNFe(id); }
+        function verDetalhes(id, origem) { abrirModalEditarNFe(id, origem); }
 
         // ======= MODAL EDITAR NF-e (Double-click) =======
         let _nfesCache = [];
+        let _editOrigem = 'nfe';
 
-        async function abrirModalEditarNFe(id) {
+        async function abrirModalEditarNFe(id, origem) {
+            origem = origem || 'nfe';
+            _editOrigem = origem;
             try {
-                const r = await fetch('/api/faturamento/nfes/' + id, { credentials: 'include' });
+                const r = await fetch('/api/faturamento/nfes/' + id + '?origem=' + origem, { credentials: 'include' });
                 if (!r.ok) throw new Error('Erro ' + r.status);
                 const resp = await r.json();
                 const nfe = resp.data || resp;
@@ -503,8 +539,30 @@
                 document.getElementById('edit-nfe-data-emissao').value = nfe.data_emissao ? String(nfe.data_emissao).slice(0,10) : '';
                 document.getElementById('edit-nfe-natureza').value = nfe.natureza_operacao || '';
                 document.getElementById('edit-nfe-chave').value = nfe.chave_acesso || '';
-                document.getElementById('edit-nfe-protocolo').value = nfe.protocolo || '';
+                document.getElementById('edit-nfe-protocolo').value = nfe.protocolo || nfe.protocolo_autorizacao || '';
                 document.getElementById('edit-nfe-observacoes').value = nfe.observacoes || '';
+
+                // Controle read-only para NF-e originadas de pedidos
+                const isReadOnly = (origem === 'pedido');
+                const editFields = ['edit-nfe-numero', 'edit-nfe-serie', 'edit-nfe-cliente-nome', 'edit-nfe-valor', 'edit-nfe-status', 'edit-nfe-data-emissao', 'edit-nfe-natureza', 'edit-nfe-chave', 'edit-nfe-protocolo', 'edit-nfe-observacoes'];
+                editFields.forEach(fid => {
+                    const el = document.getElementById(fid);
+                    if (el) { el.readOnly = isReadOnly; el.disabled = isReadOnly; }
+                });
+
+                // Botões de ação do modal
+                const btnSalvar = document.querySelector('[onclick="salvarEdicaoNFe()"]');
+                const btnExcluir = document.querySelector('[onclick="excluirNFe()"]');
+                if (btnSalvar) btnSalvar.style.display = isReadOnly ? 'none' : '';
+                if (btnExcluir) btnExcluir.style.display = isReadOnly ? 'none' : '';
+
+                // Título do modal
+                const tituloEl = document.getElementById('modalEditarTitulo');
+                if (tituloEl) {
+                    tituloEl.innerHTML = isReadOnly
+                        ? '<i class="fas fa-eye"></i> Detalhes da NF-e (Pedido Faturado)'
+                        : '<i class="fas fa-edit"></i> Editar NF-e';
+                }
 
                 // Itens
                 const itensBody = document.getElementById('edit-nfe-itens-body');
@@ -664,6 +722,22 @@
             carregarUsuarioLogado();
             carregarEstatisticas();
             carregarNFes();
+
+            // Debounce no campo de busca textual
+            let _buscaTimer;
+            const filtroTexto = document.getElementById('filtroTexto');
+            if (filtroTexto) {
+                filtroTexto.addEventListener('input', () => {
+                    clearTimeout(_buscaTimer);
+                    _buscaTimer = setTimeout(() => carregarNFes(), 400);
+                });
+            }
+
+            // Filtros de status e data recarregam ao mudar
+            ['filtroStatus', 'filtroDataInicio', 'filtroDataFim'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('change', () => carregarNFes());
+            });
         });
     </script>
     <script src="../../_shared/connection-monitor.js?v=20251223"></script>

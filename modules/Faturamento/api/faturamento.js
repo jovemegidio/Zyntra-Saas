@@ -115,6 +115,35 @@ module.exports = (pool, authenticateToken) => {
     }
 
     // ============================================================
+    // LISTAR PEDIDOS APROVADOS (para selector no modal "Nova NF-e")
+    // ============================================================
+
+    router.get('/pedidos-aprovados', authenticateToken, async (req, res) => {
+        try {
+            const [pedidos] = await pool.query(`
+                SELECT
+                    p.id,
+                    p.cliente_nome,
+                    COALESCE(c.nome, p.cliente_nome) as cliente,
+                    p.valor,
+                    p.created_at as data_pedido,
+                    p.status
+                FROM pedidos p
+                LEFT JOIN clientes c ON p.cliente_id = c.id
+                WHERE p.status = 'pedido-aprovado'
+                  AND p.id NOT IN (SELECT COALESCE(pedido_id, 0) FROM nfes WHERE pedido_id IS NOT NULL)
+                ORDER BY p.created_at DESC
+                LIMIT 50
+            `);
+
+            res.json({ success: true, data: pedidos });
+        } catch (error) {
+            console.error('[FATURAMENTO] Erro ao listar pedidos aprovados:', error);
+            res.status(500).json({ success: false, message: error.message });
+        }
+    });
+
+    // ============================================================
     // GERAR NF-e A PARTIR DE PEDIDO (COMPLETO)
     // ============================================================
 
@@ -184,7 +213,7 @@ module.exports = (pool, authenticateToken) => {
                     c.email_nfe as cliente_email_nfe
                 FROM pedidos p
                 INNER JOIN clientes c ON p.cliente_id = c.id
-                WHERE p.id = ? AND p.status = 'aprovado'
+                WHERE p.id = ? AND p.status IN ('aprovado', 'pedido-aprovado')
             `, [pedido_id]);
 
             if (pedidos.length === 0) {
@@ -645,48 +674,83 @@ module.exports = (pool, authenticateToken) => {
 
     router.get('/nfes', authenticateToken, async (req, res) => {
         try {
-            const { status, data_inicio, data_fim, cliente_id } = req.query;
+            const { status, data_inicio, data_fim, cliente_id, busca } = req.query;
 
+            // UNION: NF-es formais (tabela nfes) + Pedidos faturados sem NF-e formal
             let query = `
-                SELECT
-                    n.id,
-                    n.numero,
-                    n.serie,
-                    n.cliente_id,
-                    COALESCE(n.destinatario_nome, c.nome) as cliente_nome,
-                    COALESCE(n.destinatario_nome, c.nome) as destinatario,
-                    COALESCE(n.valor_total, 0) as valor,
-                    n.status,
-                    n.data_emissao,
-                    n.natureza_operacao as observacoes
-                FROM nfes n
-                LEFT JOIN clientes c ON n.cliente_id = c.id
+                SELECT * FROM (
+                    SELECT
+                        n.id,
+                        'nfe' as origem,
+                        n.numero,
+                        COALESCE(n.serie, 1) as serie,
+                        n.cliente_id,
+                        COALESCE(n.destinatario_nome, c.nome) as cliente_nome,
+                        COALESCE(n.destinatario_nome, c.nome) as destinatario,
+                        COALESCE(n.valor_total, 0) as valor,
+                        n.status,
+                        n.data_emissao,
+                        n.natureza_operacao as observacoes,
+                        n.chave_acesso,
+                        n.protocolo_autorizacao as protocolo,
+                        n.pedido_id
+                    FROM nfes n
+                    LEFT JOIN clientes c ON n.cliente_id = c.id
+
+                    UNION ALL
+
+                    SELECT
+                        p.id,
+                        'pedido' as origem,
+                        COALESCE(p.numero_nf, LPAD(p.id, 9, '0')) as numero,
+                        1 as serie,
+                        p.cliente_id,
+                        COALESCE(p.cliente_nome, c.nome) as cliente_nome,
+                        COALESCE(p.cliente_nome, c.nome) as destinatario,
+                        COALESCE(p.valor, 0) as valor,
+                        'autorizada' as status,
+                        COALESCE(p.data_faturamento, p.created_at) as data_emissao,
+                        'VENDA DE MERCADORIA' as observacoes,
+                        p.nfe_chave as chave_acesso,
+                        p.nfe_protocolo as protocolo,
+                        p.id as pedido_id
+                    FROM pedidos p
+                    LEFT JOIN clientes c ON p.cliente_id = c.id
+                    WHERE p.status = 'faturado'
+                      AND p.id NOT IN (SELECT COALESCE(pedido_id, 0) FROM nfes WHERE pedido_id IS NOT NULL)
+                ) AS unificado
                 WHERE 1=1
             `;
 
             const params = [];
 
             if (status) {
-                query += ' AND n.status = ?';
+                query += ' AND status = ?';
                 params.push(status);
             }
 
             if (data_inicio) {
-                query += ' AND DATE(n.data_emissao) >= ?';
+                query += ' AND DATE(data_emissao) >= ?';
                 params.push(data_inicio);
             }
 
             if (data_fim) {
-                query += ' AND DATE(n.data_emissao) <= ?';
+                query += ' AND DATE(data_emissao) <= ?';
                 params.push(data_fim);
             }
 
             if (cliente_id) {
-                query += ' AND n.cliente_id = ?';
+                query += ' AND cliente_id = ?';
                 params.push(cliente_id);
             }
 
-            query += ' ORDER BY n.data_emissao DESC LIMIT 100';
+            if (busca) {
+                query += ' AND (cliente_nome LIKE ? OR numero LIKE ? OR destinatario LIKE ?)';
+                const term = `%${busca}%`;
+                params.push(term, term, term);
+            }
+
+            query += ' ORDER BY data_emissao DESC LIMIT 100';
 
             const [nfes] = await pool.query(query, params);
 
@@ -711,10 +775,72 @@ module.exports = (pool, authenticateToken) => {
     router.get('/nfes/:id', authenticateToken, async (req, res) => {
         try {
             const { id } = req.params;
+            const origem = req.query.origem || 'nfe';
 
+            // Se origem=pedido, buscar dados do pedido faturado
+            if (origem === 'pedido') {
+                const [pedidos] = await pool.query(`
+                    SELECT
+                        p.id,
+                        'pedido' as origem,
+                        COALESCE(p.numero_nf, LPAD(p.id, 9, '0')) as numero,
+                        1 as serie,
+                        p.cliente_id,
+                        COALESCE(p.cliente_nome, c.nome) as cliente_nome,
+                        COALESCE(p.cliente_nome, c.nome) as destinatario,
+                        COALESCE(c.cnpj, c.cpf, '') as destinatario_cnpj_cpf,
+                        COALESCE(p.valor, 0) as valor_total,
+                        COALESCE(p.valor, 0) as valor,
+                        'autorizada' as status,
+                        COALESCE(p.data_faturamento, p.created_at) as data_emissao,
+                        'VENDA DE MERCADORIA' as natureza_operacao,
+                        p.nfe_chave as chave_acesso,
+                        p.nfe_protocolo as protocolo,
+                        p.observacao as observacoes,
+                        c.email as cliente_email,
+                        p.id as pedido_id
+                    FROM pedidos p
+                    LEFT JOIN clientes c ON p.cliente_id = c.id
+                    WHERE p.id = ? AND p.status = 'faturado'
+                `, [id]);
+
+                if (pedidos.length === 0) {
+                    return res.status(404).json({
+                        success: false,
+                        message: 'Pedido faturado não encontrado'
+                    });
+                }
+
+                // Buscar itens do pedido
+                const [itens] = await pool.query(`
+                    SELECT
+                        pi.id,
+                        pi.descricao as descricao,
+                        COALESCE(pr.descricao, pi.descricao) as produto_nome,
+                        pi.quantidade,
+                        pi.preco_unitario as valor_unitario,
+                        pi.subtotal as valor_total,
+                        pi.codigo,
+                        pi.unidade
+                    FROM pedido_itens pi
+                    LEFT JOIN produtos pr ON pi.produto_id = pr.id
+                    WHERE pi.pedido_id = ?
+                `, [id]);
+
+                return res.json({
+                    success: true,
+                    data: {
+                        ...pedidos[0],
+                        itens
+                    }
+                });
+            }
+
+            // Busca padrão na tabela nfes
             const [nfes] = await pool.query(`
                 SELECT
                     n.*,
+                    'nfe' as origem,
                     n.destinatario_nome as cliente_nome,
                     c.email as cliente_email
                 FROM nfes n
@@ -1057,15 +1183,38 @@ module.exports = (pool, authenticateToken) => {
 
     router.get('/estatisticas', authenticateToken, async (req, res) => {
         try {
+            // Estatísticas combinadas: nfes formais + pedidos faturados sem NF-e formal
             const [stats] = await pool.query(`
                 SELECT
-                    COUNT(*) as total_nfes,
-                    SUM(CASE WHEN status = 'autorizada' THEN 1 ELSE 0 END) as autorizadas,
-                    SUM(CASE WHEN status = 'pendente' OR status = 'digitacao' OR status = 'emitida' THEN 1 ELSE 0 END) as pendentes,
-                    SUM(CASE WHEN status = 'cancelada' THEN 1 ELSE 0 END) as canceladas,
-                    SUM(CASE WHEN status = 'autorizada' THEN COALESCE(valor_total, 0) ELSE 0 END) as valor_total_faturado,
-                    SUM(CASE WHEN status = 'autorizada' AND MONTH(data_emissao) = MONTH(NOW()) THEN COALESCE(valor_total, 0) ELSE 0 END) as valor_mes_atual
-                FROM nfes
+                    SUM(total_nfes) as total_nfes,
+                    SUM(autorizadas) as autorizadas,
+                    SUM(pendentes) as pendentes,
+                    SUM(canceladas) as canceladas,
+                    SUM(valor_total_faturado) as valor_total_faturado,
+                    SUM(valor_mes_atual) as valor_mes_atual
+                FROM (
+                    SELECT
+                        COUNT(*) as total_nfes,
+                        SUM(CASE WHEN status = 'autorizada' THEN 1 ELSE 0 END) as autorizadas,
+                        SUM(CASE WHEN status = 'pendente' OR status = 'digitacao' OR status = 'emitida' THEN 1 ELSE 0 END) as pendentes,
+                        SUM(CASE WHEN status = 'cancelada' THEN 1 ELSE 0 END) as canceladas,
+                        SUM(CASE WHEN status = 'autorizada' THEN COALESCE(valor_total, 0) ELSE 0 END) as valor_total_faturado,
+                        SUM(CASE WHEN status = 'autorizada' AND MONTH(data_emissao) = MONTH(NOW()) AND YEAR(data_emissao) = YEAR(NOW()) THEN COALESCE(valor_total, 0) ELSE 0 END) as valor_mes_atual
+                    FROM nfes
+
+                    UNION ALL
+
+                    SELECT
+                        COUNT(*) as total_nfes,
+                        COUNT(*) as autorizadas,
+                        0 as pendentes,
+                        0 as canceladas,
+                        SUM(COALESCE(p.valor, 0)) as valor_total_faturado,
+                        SUM(CASE WHEN MONTH(COALESCE(p.data_faturamento, p.created_at)) = MONTH(NOW()) AND YEAR(COALESCE(p.data_faturamento, p.created_at)) = YEAR(NOW()) THEN COALESCE(p.valor, 0) ELSE 0 END) as valor_mes_atual
+                    FROM pedidos p
+                    WHERE p.status = 'faturado'
+                      AND p.id NOT IN (SELECT COALESCE(pedido_id, 0) FROM nfes WHERE pedido_id IS NOT NULL)
+                ) combined
             `);
 
             res.json({
