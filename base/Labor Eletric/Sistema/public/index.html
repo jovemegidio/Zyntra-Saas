@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 
 
 <html lang="pt-BR">
@@ -153,7 +153,7 @@
             }
         }
 
-        /* Header - forçando estilo branco (sobrescreve backgrounds.css) */
+        /* Header - Efeito Vidro (Glassmorphism) */
         .main-header,
         #dashboard-area .main-header,
         #dashboard-area.bg-contrast-light .main-header,
@@ -163,13 +163,25 @@
             left: 0;
             right: 0;
             height: 64px;
-            background: rgba(255, 255, 255, 0.95) !important;
-            -webkit-backdrop-filter: blur(20px) !important;
-            backdrop-filter: blur(20px) !important;
-            -webkit-backdrop-filter: blur(20px) !important;
-            border-bottom: 1px solid var(--slate-200) !important;
+            background: rgba(255, 255, 255, 0.45) !important;
+            -webkit-backdrop-filter: blur(24px) saturate(1.8) !important;
+            backdrop-filter: blur(24px) saturate(1.8) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3) !important;
             z-index: 100;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.08) !important;
+        }
+
+        /* Logos brancas em fundo escuro */
+        #dashboard-area.bg-contrast-light .header-logo .logo-azul,
+        #dashboard-area.bg-contrast-light .header-logo .logo-zyntra-azul {
+            display: none !important;
+        }
+        #dashboard-area.bg-contrast-light .header-logo .logo-branca,
+        #dashboard-area.bg-contrast-light .header-logo .logo-zyntra-branca {
+            display: block !important;
+        }
+        #dashboard-area.bg-contrast-light .header-logo .logo-separator {
+            color: rgba(255,255,255,0.3) !important;
         }
 
         .header-content {
@@ -488,18 +500,18 @@
             }
         }
 
-        /* Modules Grid - responsive wrap layout (v2026-04-02) */
+        /* Modules Grid - glassmorphism colorido (v2026-04-08d) */
         .modules-grid {
             display: flex !important;
-            flex-wrap: wrap !important;
+            flex-wrap: nowrap !important;
             justify-content: center !important;
             align-items: stretch !important;
-            gap: 18px;
-            margin-bottom: 32px;
+            gap: 14px;
+            margin-bottom: 40px;
             animation: fadeInUp 0.5s ease 0.2s both;
-            max-width: 960px;
+            max-width: 1060px;
             width: 100%;
-            padding: 0 24px;
+            padding: 0 20px;
             margin-left: auto;
             margin-right: auto;
             box-sizing: border-box;
@@ -542,33 +554,28 @@
         }
 
         .module-card {
-            background: rgba(255, 255, 255, 0.94);
-            -webkit-backdrop-filter: blur(24px) saturate(1.4);
-            backdrop-filter: blur(24px) saturate(1.4);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            border-top: 3px solid var(--card-accent, #94a3b8);
-            border-radius: 16px;
-            padding: 24px 18px 20px;
+            background: var(--card-bg, rgba(59,130,246,0.85));
+            -webkit-backdrop-filter: blur(16px) saturate(1.4);
+            backdrop-filter: blur(16px) saturate(1.4);
+            border: 1px solid rgba(255,255,255,0.18);
+            border-radius: 18px;
+            padding: 22px 8px 16px;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
             text-decoration: none;
             display: flex !important;
             flex-direction: column !important;
             align-items: center !important;
-            justify-content: flex-start !important;
+            justify-content: center !important;
             position: relative;
             overflow: hidden;
-            box-shadow:
-                0 1px 3px rgba(0, 0, 0, 0.04),
-                0 4px 14px rgba(0, 0, 0, 0.05),
-                inset 0 1px 0 rgba(255, 255, 255, 0.6);
-            flex: 0 1 calc(25% - 14px) !important;
-            min-width: 140px !important;
-            max-width: 220px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.15);
+            flex: 1 1 0 !important;
+            min-width: 0 !important;
             box-sizing: border-box !important;
-            color: inherit;
+            color: #fff;
             text-align: center;
-            gap: 12px;
+            gap: 8px;
         }
 
         /* Impedir que elementos injetados por JS quebrem o layout */
@@ -577,58 +584,43 @@
             display: none !important;
         }
 
-        /* Gradient accent bar - hidden, using top border instead */
         .module-card::before {
-            display: none;
-        }
-
-        .module-card:hover::before {
-            display: none;
-        }
-
-        /* Subtle ambient glow on hover */
-        .module-card::after {
             content: '';
             position: absolute;
             inset: 0;
-            border-radius: 16px;
-            background: radial-gradient(ellipse at 50% 0%, var(--glow-color, rgba(59, 130, 246, 0.08)), transparent 70%);
-            opacity: 0;
-            transition: opacity 0.3s ease;
+            border-radius: 18px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 60%);
             pointer-events: none;
         }
 
-        .module-card:hover::after {
-            opacity: 1;
+        .module-card::after {
+            display: none;
         }
 
         .module-card:hover {
-            transform: translateY(-5px);
-            background: rgba(255, 255, 255, 0.98);
-            border-color: rgba(255, 255, 255, 0.8);
-            box-shadow:
-                0 12px 32px rgba(0, 0, 0, 0.10),
-                0 4px 12px rgba(0, 0, 0, 0.05),
-                0 0 24px var(--glow-shadow, rgba(59, 130, 246, 0.10)),
-                inset 0 1px 0 rgba(255, 255, 255, 0.7);
+            transform: translateY(-6px) scale(1.03);
+            box-shadow: 0 16px 48px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.3);
         }
 
         .module-icon {
-            width: 52px;
-            height: 52px;
-            min-width: 52px;
-            min-height: 52px;
+            width: 48px;
+            height: 48px;
+            min-width: 48px;
+            min-height: 48px;
             border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 22px;
+            font-size: 20px;
             margin-bottom: 0;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s ease;
             position: relative;
             z-index: 1;
             flex-shrink: 0;
-            box-shadow: 0 3px 8px var(--icon-shadow, rgba(0, 0, 0, 0.08));
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
         .module-icon i {
@@ -641,44 +633,54 @@
 
         .module-card:hover .module-icon {
             transform: scale(1.1);
-            box-shadow: 0 6px 18px var(--icon-shadow, rgba(0, 0, 0, 0.18));
+            background: rgba(255,255,255,0.3);
         }
 
         .module-info {
-            flex: 1 1 0;
+            flex: 0 1 auto;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 4px;
+            gap: 2px;
             position: relative;
             z-index: 1;
             min-width: 0;
-            overflow: visible;
+            max-width: 100%;
+            overflow: hidden;
         }
 
         .module-title {
-            font-family: 'Manrope', sans-serif;
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--slate-900);
-            margin-bottom: 2px;
-            line-height: 1.3;
-            letter-spacing: -0.01em;
-            white-space: normal;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
+            font-family: 'Inter', sans-serif;
+            font-size: 11.5px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 0;
+            line-height: 1.25;
+            letter-spacing: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
             max-width: 100%;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.15);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            white-space: normal;
+            word-break: break-word;
         }
 
         .module-desc {
-            font-size: 12px;
-            color: var(--slate-500);
-            line-height: 1.4;
-            white-space: normal;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
+            display: none;
+            color: rgba(255,255,255,0.65);
+            line-height: 1.25;
+            overflow: hidden;
+            text-overflow: ellipsis;
             max-width: 100%;
             font-weight: 400;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            white-space: normal;
+            word-break: break-word;
         }
 
         /* Arrow indicator - hidden in compact 6-col layout */
@@ -731,131 +733,40 @@
             }
         }
 
-        /* Module Colors - Premium Gradients */
+        /* Module Colors - glassmorphism colorido */
         .module-card.compras {
-            --glow-color: rgba(234, 88, 12, 0.08);
-            --glow-shadow: rgba(234, 88, 12, 0.15);
-            --card-gradient: linear-gradient(135deg, #f97316, #fb923c);
-            --icon-shadow: rgba(234, 88, 12, 0.25);
-            --arrow-bg: rgba(234, 88, 12, 0.08);
-            --card-accent: #f97316;
-        }
-
-        .module-card.compras .module-icon {
-            background: linear-gradient(135deg, #fff7ed, #ffedd5);
-            color: #ea580c;
-        }
-
-        .module-card.compras .module-arrow {
-            color: #f97316;
+            --card-bg: linear-gradient(135deg, #5b7cf7 0%, #4a6cf7 100%);
+            background: linear-gradient(135deg, #5b7cf7 0%, #4a6cf7 100%);
         }
 
         .module-card.vendas {
-            --glow-color: rgba(59, 130, 246, 0.08);
-            --glow-shadow: rgba(59, 130, 246, 0.15);
-            --card-gradient: linear-gradient(135deg, #3b82f6, #60a5fa);
-            --icon-shadow: rgba(59, 130, 246, 0.25);
-            --arrow-bg: rgba(59, 130, 246, 0.08);
-            --card-accent: #3b82f6;
-        }
-
-        .module-card.vendas .module-icon {
-            background: linear-gradient(135deg, #eff6ff, #dbeafe);
-            color: #2563eb;
-        }
-
-        .module-card.vendas .module-arrow {
-            color: #3b82f6;
+            --card-bg: linear-gradient(135deg, #1a3ab5 0%, #2545c9 100%);
+            background: linear-gradient(135deg, #1a3ab5 0%, #2545c9 100%);
         }
 
         .module-card.nfe {
-            --glow-color: rgba(37, 99, 235, 0.08);
-            --glow-shadow: rgba(37, 99, 235, 0.15);
-            --card-gradient: linear-gradient(135deg, #2563eb, #3b82f6);
-            --icon-shadow: rgba(37, 99, 235, 0.25);
-            --arrow-bg: rgba(37, 99, 235, 0.08);
-            --card-accent: #2563eb;
-        }
-
-        .module-card.nfe .module-icon {
-            background: linear-gradient(135deg, #eef2ff, #e0e7ff);
-            color: #1d4ed8;
-        }
-
-        .module-card.nfe .module-arrow {
-            color: #2563eb;
+            --card-bg: linear-gradient(135deg, #18b87e 0%, #21cc8e 100%);
+            background: linear-gradient(135deg, #18b87e 0%, #21cc8e 100%);
         }
 
         .module-card.logistica {
-            --glow-color: rgba(14, 165, 233, 0.08);
-            --glow-shadow: rgba(14, 165, 233, 0.15);
-            --card-gradient: linear-gradient(135deg, #0ea5e9, #38bdf8);
-            --icon-shadow: rgba(14, 165, 233, 0.25);
-            --arrow-bg: rgba(14, 165, 233, 0.08);
-            --card-accent: #0ea5e9;
-        }
-
-        .module-card.logistica .module-icon {
-            background: linear-gradient(135deg, #e0f2fe, #bae6fd);
-            color: #0284c7;
-        }
-
-        .module-card.logistica .module-arrow {
-            color: #0ea5e9;
+            --card-bg: linear-gradient(135deg, #18b87e 0%, #21cc8e 100%);
+            background: linear-gradient(135deg, #18b87e 0%, #21cc8e 100%);
         }
 
         .module-card.pcp {
-            --glow-color: rgba(71, 85, 105, 0.08);
-            --glow-shadow: rgba(71, 85, 105, 0.15);
-            --card-gradient: linear-gradient(135deg, #475569, #64748b);
-            --icon-shadow: rgba(71, 85, 105, 0.25);
-            --arrow-bg: rgba(71, 85, 105, 0.08);
-            --card-accent: #475569;
-        }
-
-        .module-card.pcp .module-icon {
-            background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
-            color: #334155;
-        }
-
-        .module-card.pcp .module-arrow {
-            color: #475569;
+            --card-bg: linear-gradient(135deg, #ef4444 0%, #f25f5f 100%);
+            background: linear-gradient(135deg, #ef4444 0%, #f25f5f 100%);
         }
 
         .module-card.financeiro {
-            --glow-color: rgba(16, 185, 129, 0.08);
-            --glow-shadow: rgba(16, 185, 129, 0.15);
-            --card-gradient: linear-gradient(135deg, #10b981, #34d399);
-            --icon-shadow: rgba(16, 185, 129, 0.25);
-            --arrow-bg: rgba(16, 185, 129, 0.08);
-            --card-accent: #10b981;
-        }
-
-        .module-card.financeiro .module-icon {
-            background: linear-gradient(135deg, #ecfdf5, #d1fae5);
-            color: #059669;
-        }
-
-        .module-card.financeiro .module-arrow {
-            color: #10b981;
+            --card-bg: linear-gradient(135deg, #7ccf00 0%, #8ed616 100%);
+            background: linear-gradient(135deg, #7ccf00 0%, #8ed616 100%);
         }
 
         .module-card.rh {
-            --glow-color: rgba(236, 72, 153, 0.08);
-            --glow-shadow: rgba(236, 72, 153, 0.15);
-            --card-gradient: linear-gradient(135deg, #ec4899, #f472b6);
-            --icon-shadow: rgba(236, 72, 153, 0.25);
-            --arrow-bg: rgba(236, 72, 153, 0.08);
-            --card-accent: #ec4899;
-        }
-
-        .module-card.rh .module-icon {
-            background: linear-gradient(135deg, #fdf2f8, #fce7f3);
-            color: #db2777;
-        }
-
-        .module-card.rh .module-arrow {
-            color: #ec4899;
+            --card-bg: linear-gradient(135deg, #9b59b6 0%, #a76bc8 100%);
+            background: linear-gradient(135deg, #9b59b6 0%, #a76bc8 100%);
         }
 
 
@@ -1152,7 +1063,22 @@
             color: var(--blue-400);
         }
 
-        /* Responsive */
+        /* Responsive - tablets */
+        @media (max-width: 1024px) and (min-width: 769px) {
+            .modules-grid {
+                flex-wrap: wrap !important;
+                gap: 14px;
+                padding: 0 20px;
+            }
+
+            .module-card {
+                flex: 0 0 calc(25% - 11px) !important;
+                max-width: none;
+                aspect-ratio: auto;
+            }
+        }
+
+        /* Responsive - mobile */
         @media (max-width: 768px) {
             .header-content {
                 padding: 0 16px;
@@ -1172,27 +1098,29 @@
 
             .modules-grid {
                 flex-wrap: wrap !important;
-                gap: 10px;
+                gap: 12px;
+                padding: 0 16px;
             }
 
             .module-card {
-                flex: 0 0 calc(33.33% - 7px) !important;
-                height: 110px !important;
-                min-height: 110px !important;
-                max-height: 110px !important;
+                flex: 0 0 calc(33.33% - 8px) !important;
+                max-width: none;
+                aspect-ratio: auto;
                 border-radius: 14px;
+                padding: 18px 10px 16px;
             }
 
             .module-icon {
-                width: 34px;
-                height: 34px;
-                font-size: 15px;
-                border-radius: 9px;
-                margin-bottom: 6px;
+                width: 40px;
+                height: 40px;
+                min-width: 40px;
+                min-height: 40px;
+                font-size: 16px;
+                border-radius: 11px;
             }
 
             .module-title {
-                font-size: 12px;
+                font-size: 11px;
             }
 
             .module-desc {
@@ -1202,7 +1130,32 @@
 
         @media (max-width: 480px) {
             .modules-grid {
-                grid-template-columns: 1fr;
+                flex-wrap: wrap !important;
+                gap: 10px;
+                padding: 0 12px;
+            }
+
+            .module-card {
+                flex: 0 0 calc(50% - 5px) !important;
+                max-width: none;
+                padding: 18px 10px 16px;
+            }
+
+            .module-icon {
+                width: 38px;
+                height: 38px;
+                min-width: 38px;
+                min-height: 38px;
+                font-size: 15px;
+                border-radius: 10px;
+            }
+
+            .module-title {
+                font-size: 11px;
+            }
+
+            .module-desc {
+                font-size: 8.5px;
             }
         }
 
@@ -1593,12 +1546,18 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        body.dark-mode .header-logo img.logo-azul {
-            display: none;
+        body.dark-mode .header-logo .logo-azul,
+        body.dark-mode .header-logo .logo-zyntra-azul {
+            display: none !important;
         }
 
-        body.dark-mode .header-logo img.logo-branca {
-            display: block;
+        body.dark-mode .header-logo .logo-branca,
+        body.dark-mode .header-logo .logo-zyntra-branca {
+            display: block !important;
+        }
+
+        body.dark-mode .header-logo .logo-separator {
+            color: rgba(255,255,255,0.3) !important;
         }
 
         body.dark-mode .header-icon-btn {
@@ -1875,11 +1834,12 @@
 
     <header class="main-header">
         <div class="header-content">
-            <div class="header-logo">
-                <img src="/images/Logo Monocromatico - Azul - Aluforce.png" alt="ALUFORCE" class="logo-azul"
-                    id="logo-azul">
-                <img src="/images/Logo Monocromatico - Branco - Aluforce copy.webp" alt="ALUFORCE" class="logo-branca"
-                    id="logo-branca" style="display:none;">
+            <div class="header-logo" style="display:flex;align-items:center;gap:12px;">
+                <img src="/images/zyntra-sem-fundo.png" alt="Zyntra" class="logo-zyntra-azul" style="height:28px;object-fit:contain;">
+                <img src="/images/zyntra-branco.png" alt="Zyntra" class="logo-zyntra-branca" id="logo-zyntra-branca" style="height:28px;object-fit:contain;display:none;">
+                <span class="logo-separator" style="color:rgba(0,0,0,0.15);font-weight:200;font-size:20px;user-select:none;">×</span>
+                <img src="/images/labor-eletric-logo-preto.png" alt="LABOR ELETRIC" class="logo-azul" id="logo-azul" style="height:26px;object-fit:contain;">
+                <img src="/images/labor-eletric-logo-branco.png" alt="LABOR ELETRIC" class="logo-branca" id="logo-branca" style="height:26px;object-fit:contain;display:none;">
             </div>
 
             <div class="header-right">
@@ -1917,7 +1877,7 @@
                             <div class="dropdown-info">
                                 <span class="dropdown-user-name" id="dropdown-user-name">Usuário</span>
                                 <span class="dropdown-user-email"
-                                    id="dropdown-user-email">usuario@aluforce.ind.br</span>
+                                    id="dropdown-user-email">usuario@laboreletric.com.br</span>
                             </div>
                         </div>
                         <hr class="dropdown-divider">
@@ -1970,7 +1930,6 @@
                 <div class="module-icon"><i class="fas fa-cart-shopping"></i></div>
                 <div class="module-info">
                     <div class="module-title">Compras</div>
-                    <div class="module-desc">Gestão de pedidos e fornecedores</div>
                 </div>
             </a>
 
@@ -1979,25 +1938,22 @@
                 <div class="module-icon"><i class="fas fa-chart-line"></i></div>
                 <div class="module-info">
                     <div class="module-title">Vendas</div>
-                    <div class="module-desc">Pedidos de venda e faturamento</div>
                 </div>
             </a>
 
-            <a href="/modules/NFe/index.html" class="module-card nfe" data-area="nfe">
+            <a href="/modules/Faturamento/public/dashboard.html" class="module-card nfe" data-area="nfe">
                 <div class="module-arrow"><i class="fas fa-arrow-right"></i></div>
                 <div class="module-icon"><i class="fas fa-file-invoice"></i></div>
                 <div class="module-info">
                     <div class="module-title">Faturamento</div>
-                    <div class="module-desc">Emissão de notas fiscais</div>
                 </div>
             </a>
 
-            <a href="/Logistica/index.html" class="module-card logistica" data-area="logistica">
+            <a href="/modules/Logistica/public/index.html" class="module-card logistica" data-area="logistica">
                 <div class="module-arrow"><i class="fas fa-arrow-right"></i></div>
                 <div class="module-icon"><i class="fas fa-truck"></i></div>
                 <div class="module-info">
                     <div class="module-title">Logística</div>
-                    <div class="module-desc">Expedição e rastreio de entregas</div>
                 </div>
             </a>
 
@@ -2006,7 +1962,6 @@
                 <div class="module-icon"><i class="fas fa-gears"></i></div>
                 <div class="module-info">
                     <div class="module-title">PCP</div>
-                    <div class="module-desc">Planejamento e controle de produção</div>
                 </div>
             </a>
 
@@ -2015,7 +1970,6 @@
                 <div class="module-icon"><i class="fas fa-wallet"></i></div>
                 <div class="module-info">
                     <div class="module-title">Financeiro</div>
-                    <div class="module-desc">Contas a pagar e receber</div>
                 </div>
             </a>
 
@@ -2024,7 +1978,6 @@
                 <div class="module-icon"><i class="fas fa-people-group"></i></div>
                 <div class="module-info">
                     <div class="module-title">Recursos Humanos</div>
-                    <div class="module-desc">Gestão de colaboradores</div>
                 </div>
             </a>
         </section>
@@ -2047,7 +2000,7 @@
             container.id = 'config-modals-container';
             container.innerHTML = html1 + html2;
             document.body.appendChild(container);
-            console.log('✅ Modais de configuração carregados (base + extended)');
+            console.log('? Modais de configuração carregados (base + extended)');
         }).catch(err => console.warn('Modais não carregados:', err));
     </script>
 
@@ -2098,7 +2051,7 @@
                 const fullName = user.nome || user.nome_completo || user.email || 'Usuário';
                 const firstName = fullName.split(' ')[0] || 'Usuário';
                 const displayName = user.apelido || firstName;
-                const userEmail = user.email || 'usuario@aluforce.ind.br';
+                const userEmail = user.email || 'usuario@laboreletric.com.br';
                 const userAvatarUrl = user.avatar || user.foto;
 
                 // Nome + Sobrenome para dropdown (nome completo só em RH)
@@ -2140,11 +2093,11 @@
                 );
 
                 // Emails que são admin no banco mas NÃO devem ver configurações
-                const noConfigEmails = ['adm@aluforce.ind.br'];
+                const noConfigEmails = ['adm@laboreletric.com.br'];
                 const isNoConfig = userEmail && noConfigEmails.includes(userEmail);
 
                 // Emails não-admin que devem ter acesso ao modal Configurações
-                const configAllowedEmails = ['thiago.scarcella@aluforce.ind.br', 'guilherme.bastos@aluforce.ind.br'];
+                const configAllowedEmails = ['ti@laboreletric.com.br'];
                 const isConfigAllowed = userEmail && configAllowedEmails.includes(userEmail);
 
                 // Mostrar opções de admin (exceto para consultoria e emails restritos)
@@ -2163,7 +2116,7 @@
                 // Aplicar permissões de módulos
                 applyModulePermissions(user);
 
-                console.log('✓ UI atualizada para:', displayName);
+                console.log('? UI atualizada para:', displayName);
             } catch (err) {
                 console.error('Erro ao atualizar UI:', err);
             }
@@ -2172,38 +2125,7 @@
         // Permissões por email
         const emailPermissions = {
             // Administração / TI - Acesso total
-            'ti@aluforce.ind.br': ['compras', 'vendas', 'nfe', 'pcp', 'financeiro', 'rh', 'logistica'],
-            'douglas@aluforce.ind.br': ['compras', 'vendas', 'nfe', 'pcp', 'financeiro', 'rh', 'logistica'],
-            'andreia@aluforce.ind.br': ['compras', 'vendas', 'nfe', 'pcp', 'financeiro', 'rh', 'logistica'],
-            'gerenciavendas@aluforce.ind.br': ['compras', 'vendas', 'nfe', 'pcp', 'financeiro', 'rh', 'logistica'],
-            'antonio@aluforce.ind.br': ['compras', 'vendas', 'nfe', 'pcp', 'financeiro', 'rh', 'logistica'],
-            'egidio@aluforce.ind.br': ['compras', 'vendas', 'nfe', 'pcp', 'financeiro', 'rh', 'logistica'],
-            'rh@aluforce.ind.br': ['compras', 'vendas', 'nfe', 'pcp', 'financeiro', 'rh', 'logistica'],
-            'fernando@aluforce.ind.br': ['compras', 'vendas', 'nfe', 'pcp', 'financeiro', 'rh', 'logistica'],
-            'fernando.kofugi@aluforce.ind.br': ['compras', 'vendas', 'nfe', 'pcp', 'financeiro', 'rh', 'logistica'],
-            // Financeiro - Apenas Financeiro + RH (funcionário)
-            'financeiro2@aluforce.ind.br': ['financeiro', 'rh'],
-            'financeiro3@aluforce.ind.br': ['financeiro', 'rh'],
-            // Compras - Guilherme Bastos
-            'compras@aluforce.ind.br': ['vendas', 'compras', 'pcp', 'financeiro', 'rh'],
-            // ADM (Junior) - RH + Financeiro
-            'adm@aluforce.ind.br': ['rh', 'financeiro'],
-            // Douglas (email atualizado)
-            'aluforce@aluforce.ind.br': ['compras', 'vendas', 'nfe', 'pcp', 'financeiro', 'rh', 'logistica'],
-            // Jamesson - Apenas PCP (somente visualização + relatórios)
-            'jamesson@aluforce.ind.br': ['pcp', 'rh'],
-            // Teste
-            'teste@aluforce.ind.br': ['vendas', 'rh', 'pcp', 'financeiro', 'nfe', 'compras', 'logistica'],
-            // Contas QA (Gerentes - Full Admin por Módulo)
-            'qafinanceiro@aluforce.ind.br': ['financeiro', 'vendas', 'compras', 'nfe', 'rh'],
-            'qavendas@aluforce.ind.br': ['vendas', 'rh'],
-            'qapcp@aluforce.ind.br': ['pcp', 'rh'],
-            'qarh@aluforce.ind.br': ['rh'],
-            'qacompras@aluforce.ind.br': ['vendas', 'compras', 'pcp', 'financeiro'],
-            'qanfe@aluforce.ind.br': ['nfe', 'faturamento', 'logistica', 'rh'],
-            'qapainel@aluforce.ind.br': ['compras', 'vendas', 'nfe', 'pcp', 'financeiro', 'rh', 'faturamento', 'logistica'],
-            // Logística
-            'logistica@aluforce.ind.br': ['nfe', 'logistica', 'vendas', 'pcp', 'rh'],
+            'ti@laboreletric.com.br': ['compras', 'vendas', 'nfe', 'pcp', 'financeiro', 'rh', 'logistica'],
             // Consultoria Lumière - acesso a módulos operacionais (sem admin/config)
             'jamerson.ribeiro@lumiereassessoria.com.br': ['compras', 'vendas', 'nfe', 'pcp', 'financeiro', 'rh', 'logistica'],
             'diego.lucena@lumiereassessoria.com.br': ['compras', 'vendas', 'nfe', 'pcp', 'financeiro', 'rh', 'logistica'],
@@ -2311,7 +2233,7 @@
                 }
                 localStorage.setItem('userData', JSON.stringify(merged));
                 updateUserUI(merged);
-                console.log('[Dashboard] ✅ Permissões atualizadas via authSuccess, áreas:', merged.areas || []);
+                console.log('[Dashboard] ? Permissões atualizadas via authSuccess, áreas:', merged.areas || []);
             }
         });
 
@@ -2427,7 +2349,7 @@
         window._originalPageTitle = document.title;
 
         window.abrirModalConfig = function () {
-            console.log('🔧 Abrindo modal de configurações...');
+            console.log('?? Abrindo modal de configurações...');
             // Salvar título original antes de alterar
             if (!window._originalPageTitle) {
                 window._originalPageTitle = document.title;
@@ -2445,7 +2367,7 @@
                 document.title = 'Zyntra: Configurações do Sistema';
                 // Filtrar tabs/cards baseado em permissões do usuário
                 filtrarTabsConfiguracoes();
-                console.log('✅ Modal de configurações ativado com título dinâmico');
+                console.log('? Modal de configurações ativado com título dinâmico');
             } else {
                 // Fallback: abre a página de configurações em modal
                 window.location.href = '/config-modals.html';
@@ -2455,9 +2377,9 @@
         // Filtra tabs e cards do modal de configurações baseado nas áreas permitidas do usuário
         function filtrarTabsConfiguracoes() {
             const areas = window._userAllowedAreas || ['rh'];
-            console.log('🔒 Filtrando configurações para áreas:', areas);
+            console.log('?? Filtrando configurações para áreas:', areas);
 
-            // Mapa: nome da tab → áreas necessárias (basta ter qualquer uma)
+            // Mapa: nome da tab ? áreas necessárias (basta ter qualquer uma)
             const tabPermissions = {
                 'principais': [],               // sempre visível (configurações gerais)
                 'recursos-humanos': ['rh'],
@@ -2516,22 +2438,22 @@
                 const onclick = card.getAttribute('onclick') || '';
                 let shouldHide = false;
 
-                // Custos e Precificação → requer PCP
+                // Custos e Precificação ? requer PCP
                 if (onclick.includes('custos-precificacao') && !areas.includes('pcp')) shouldHide = true;
-                // Importação da NF-e → requer NFe
+                // Importação da NF-e ? requer NFe
                 if (onclick.includes('importacao-nfe') && !areas.includes('nfe')) shouldHide = true;
-                // Certificado Digital → requer NFe
+                // Certificado Digital ? requer NFe
                 if (onclick.includes('certificado-digital') && !areas.includes('nfe')) shouldHide = true;
 
                 card.style.display = shouldHide ? 'none' : '';
             });
 
-            console.log('✅ Tabs filtradas com sucesso');
+            console.log('? Tabs filtradas com sucesso');
         }
 
         // Função abrirCentralNotificacoes
         window.abrirCentralNotificacoes = function () {
-            console.log('🔔 Abrindo central de notificações...');
+            console.log('?? Abrindo central de notificações...');
             if (typeof NotificationManager !== 'undefined' && NotificationManager.toggle) {
                 NotificationManager.toggle();
             } else {
@@ -2551,7 +2473,7 @@
     <script src="/js/popup-confirmacao.js"></script>
     <script src="/js/modal-fix-global.js?v=20260219"></script>
     <script src="/js/background-manager.js?v=20260214"></script>
-    <script src="/js/config-modals.js?v=20260326"></script>
+    <script src="/js/config-modals.js?v=20260408"></script>
     <script src="/js/custos-precificacao.js?v=20260328"></script>
     <script src="/js/espelho-nf.js?v=20260327b"></script>
 
@@ -2574,7 +2496,7 @@
                             onchange="handleFotoUpload(this)">
                     </div>
                     <div class="perfil-nome-usuario" id="perfil-nome">Usuário</div>
-                    <div class="perfil-email-usuario" id="perfil-email">usuario@aluforce.ind.br</div>
+                    <div class="perfil-email-usuario" id="perfil-email">usuario@laboreletric.com.br</div>
                 </div>
 
                 <div class="perfil-input-group">
@@ -2681,7 +2603,7 @@
                 const userProfile = JSON.parse(localStorage.getItem(`userProfile_${userId}`) || '{}');
 
                 const nome = userData.nome || userData.name || 'Usuário';
-                const email = userData.email || 'usuario@aluforce.ind.br';
+                const email = userData.email || 'usuario@laboreletric.com.br';
                 const cargo = userData.cargo || userData.role || '-';
                 const departamento = userData.departamento || userData.setor || '-';
                 const isAdmin = userData.is_admin === 1 || userData.role === 'admin';
@@ -2773,7 +2695,7 @@
                         if (uploadResp.ok) {
                             const result = await uploadResp.json();
                             novaFotoUrl = result.avatarUrl;
-                            console.log('[Perfil] ✅ Foto salva no servidor:', novaFotoUrl);
+                            console.log('[Perfil] ? Foto salva no servidor:', novaFotoUrl);
                         } else {
                             console.error('[Perfil] Erro upload foto:', uploadResp.status);
                         }
@@ -2873,7 +2795,7 @@
                     }
                 });
 
-                console.log('✓ UI atualizada com perfil:', apelido);
+                console.log('? UI atualizada com perfil:', apelido);
             } catch (e) {
                 console.error('Erro ao atualizar UI:', e);
             }
@@ -2933,10 +2855,10 @@
                 if (typeof BackgroundManager !== 'undefined') {
                     if (prefs.fundos) {
                         BackgroundManager.startAutoChange();
-                        console.log('✅ Fundos animados: ATIVADO');
+                        console.log('? Fundos animados: ATIVADO');
                     } else {
                         BackgroundManager.stopAutoChange();
-                        console.log('⏸️ Fundos animados: PAUSADO');
+                        console.log('?? Fundos animados: PAUSADO');
                     }
                 }
 
@@ -2944,8 +2866,8 @@
                 if (typeof NotificationManager !== 'undefined') {
                     NotificationManager.setEnabled(prefs.notificacoes);
                     NotificationManager.setSoundEnabled(prefs.som);
-                    console.log('🔔 Notificações:', prefs.notificacoes ? 'ATIVADAS' : 'DESATIVADAS');
-                    console.log('🔊 Som:', prefs.som ? 'ATIVADO' : 'DESATIVADO');
+                    console.log('?? Notificações:', prefs.notificacoes ? 'ATIVADAS' : 'DESATIVADAS');
+                    console.log('?? Som:', prefs.som ? 'ATIVADO' : 'DESATIVADO');
                 }
 
                 // Salvar no objeto global de preferências
@@ -3012,15 +2934,24 @@
         window.aplicarDarkMode = function (ativar) {
             const logoAzul = document.getElementById('logo-azul');
             const logoBranca = document.getElementById('logo-branca');
+            const logoZyntraAzul = document.querySelector('.logo-zyntra-azul');
+            const logoZyntraBranca = document.getElementById('logo-zyntra-branca');
+            const logoSep = document.querySelector('.logo-separator');
 
             if (ativar) {
                 document.body.classList.add('dark-mode');
                 if (logoAzul) logoAzul.style.display = 'none';
                 if (logoBranca) logoBranca.style.display = 'block';
+                if (logoZyntraAzul) logoZyntraAzul.style.display = 'none';
+                if (logoZyntraBranca) logoZyntraBranca.style.display = 'block';
+                if (logoSep) logoSep.style.color = 'rgba(255,255,255,0.3)';
             } else {
                 document.body.classList.remove('dark-mode');
                 if (logoAzul) logoAzul.style.display = 'block';
                 if (logoBranca) logoBranca.style.display = 'none';
+                if (logoZyntraAzul) logoZyntraAzul.style.display = 'block';
+                if (logoZyntraBranca) logoZyntraBranca.style.display = 'none';
+                if (logoSep) logoSep.style.color = 'rgba(0,0,0,0.15)';
             }
         };
 
@@ -3041,7 +2972,7 @@
                 if (prefs.fundos === false && typeof BackgroundManager !== 'undefined') {
                     setTimeout(() => {
                         BackgroundManager.stopAutoChange();
-                        console.log('⏸️ Fundos animados desativados por preferência');
+                        console.log('?? Fundos animados desativados por preferência');
                     }, 1000);
                 }
 
@@ -3090,7 +3021,7 @@
                         const modal = container.querySelector('#modal-configuracoes');
                         if (modal) {
                             document.body.appendChild(modal);
-                            console.log('✅ Modal de configurações carregado');
+                            console.log('? Modal de configurações carregado');
 
                             // Configurar eventos do modal
                             setupModalConfig();
@@ -3156,7 +3087,7 @@
                 } else {
                     document.title = 'Zyntra: Painel de Controle';
                 }
-                console.log('✅ Modal de configurações fechado, título restaurado');
+                console.log('? Modal de configurações fechado, título restaurado');
             }
         }
     </script>
@@ -3167,7 +3098,7 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
 
-    <!-- 🔄 Real-time: Atualização instantânea de permissões -->
+    <!-- ?? Real-time: Atualização instantânea de permissões -->
     <script>
         (function () {
             let _rtSocket = null;
@@ -3191,7 +3122,7 @@
 
                     _rtSocket.on('permissions-updated', function (data) {
                         if (data.userId !== myId) return;
-                        console.log('[REALTIME] 📡 Permissões atualizadas em tempo real:', data);
+                        console.log('[REALTIME] ?? Permissões atualizadas em tempo real:', data);
 
                         // Atualizar áreas no localStorage
                         const current = JSON.parse(localStorage.getItem('userData') || '{}');
@@ -3226,7 +3157,7 @@
                         window.location.href = '/login.html';
                     });
 
-                    console.log('[REALTIME] ✅ Listener de permissões ativo para userId=' + myId);
+                    console.log('[REALTIME] ? Listener de permissões ativo para userId=' + myId);
                 } catch (e) { console.warn('[REALTIME] Erro ao inicializar:', e); }
             }
             if (document.readyState === 'loading') {
