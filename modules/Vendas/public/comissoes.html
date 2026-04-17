@@ -814,10 +814,6 @@
                     // Esconder filtro de vendedor (não faz sentido se só vê o próprio)
                     const filtroVendedor = document.getElementById('filtroVendedor');
                     if (filtroVendedor) filtroVendedor.closest('.filter-group').style.display = 'none';
-                    // Mudar título para "Minha Comissão"
-                    const headerBrand = document.querySelector('.header-brand span');
-                    if (headerBrand) headerBrand.textContent = 'Minha Comissão';
-                    document.title = 'Zyntra: Minha Comissão';
                     // Esconder aba de histórico geral (se desejado, manter pois já filtra no backend)
                 } else if (!podeEditarComissao) {
                     // Admin que não pode editar: esconder botão de configuração apenas

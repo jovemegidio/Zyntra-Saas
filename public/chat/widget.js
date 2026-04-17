@@ -685,7 +685,9 @@
   // ==================== FILE UPLOAD ====================
   function initFileUpload() {
     ['afw-file-input', 'afw-photo-input'].forEach(inputId => {
-      $(inputId).addEventListener('change', async (e) => {
+      const el = $(inputId);
+      if (!el) return;
+      el.addEventListener('change', async (e) => {
         const file = e.target.files[0];
         if (!file) return;
         await uploadAndSendFile(file);
