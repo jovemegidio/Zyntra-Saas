@@ -1,8 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <!-- Favicon -->
-    <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 
     <meta charset="UTF-8">
@@ -12,11 +14,10 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Zyntra: Gest�o de Estoque MP</title>
+    <title>Aluforce: Gestão de Estoque MP</title>
 
-    <!-- Sistema de Autentica��o Unificado -->
+    <!-- Sistema de Autenticação Unificado -->
     <script src="/js/auth-unified.js?v=20260301" defer></script>
-    <script src="/js/inactivity-manager.js?v=20260324" defer></script>
 
     <!-- Fontes -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -27,22 +28,22 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
 
-    <!-- CSS Padr�o Global -->
+    <!-- CSS Padrão Global -->
     <link rel="stylesheet" href="/modules/Compras/css/compras-layout.css?v=20260301">
     <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260301">
     <link rel="stylesheet" href="/css/skeleton-loader.css?v=20260301">
     <link rel="stylesheet" href="/css/popup-confirmacao.css?v=20260301">
     <style>
         .fa-duotone { font-family: "Font Awesome 6 Free" !important; font-weight: 900 !important; }
-        /* Diferen�a card */
+        /* Diferença card */
         .diferenca-card { padding: 12px; border-radius: 10px; text-align: center; margin-top: 8px; }
         .diferenca-card.positivo { background: #f0fdf4; border: 1px solid #22c55e; }
         .diferenca-card.negativo { background: #fef2f2; border: 1px solid #ef4444; }
         .diferenca-card.neutro { background: #f8fafc; border: 1px solid #e2e8f0; }
         .diferenca-card .valor { font-size: 1.5rem; font-weight: 700; }
         .diferenca-card .texto { font-size: 0.75rem; margin-top: 4px; }
-        /* Hist�rico timeline */
-        .hist�rico-timeline { max-height: 400px; overflow-y: auto; }
+        /* Historico timeline */
+        .historico-timeline { max-height: 400px; overflow-y: auto; }
         /* Toast */
         .toast-container { position: fixed; top: 60px; right: 16px; z-index: 10000; display: flex; flex-direction: column; gap: 8px; }
 
@@ -64,18 +65,14 @@
         /* Tipo Badges */
         .tipo-badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: 500; }
         .tipo-pvc { background: #fef3c7; color: #d97706; }
-        .tipo-veia-multiplex { background: #dbeafe; color: #2563eb; }
-        .tipo-veia-potencia { background: #e0e7ff; color: #4f46e5; }
-        .tipo-cabo-fio { background: #fce7f3; color: #db2777; }
-        .tipo-corda-de-aluminio { background: #d1fae5; color: #059669; }
-        .tipo-bobina-embalagem { background: #e0e7ff; color: #4f46e5; }
+        .tipo-veia { background: #dbeafe; color: #2563eb; }
+        .tipo-cabo { background: #fce7f3; color: #db2777; }
+        .tipo-corda { background: #d1fae5; color: #059669; }
+        .tipo-bobina { background: #e0e7ff; color: #4f46e5; }
         .tipo-pigmento { background: #fae8ff; color: #a855f7; }
         .tipo-polietileno { background: #ccfbf1; color: #0d9488; }
         .tipo-cordinha { background: #d1fae5; color: #059669; }
         .tipo-filamento { background: #fee2e2; color: #dc2626; }
-        .tipo-xlpe { background: #fef3c7; color: #b45309; }
-        .tipo-servico { background: #f0fdf4; color: #16a34a; }
-        .tipo-outros { background: #f1f5f9; color: #64748b; }
         .tipo-default { background: #f1f5f9; color: #64748b; }
 
         /* ===== Action Buttons ===== */
@@ -93,8 +90,8 @@
         .btn-saida:hover { background: #dc2626; color: #fff; }
         .btn-editar { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
         .btn-editar:hover { background: #2563eb; color: #fff; }
-        .btn-hist�rico { background: #f5f3ff; color: #7c3aed; border: 1px solid #ddd6fe; }
-        .btn-hist�rico:hover { background: #7c3aed; color: #fff; }
+        .btn-historico { background: #f5f3ff; color: #7c3aed; border: 1px solid #ddd6fe; }
+        .btn-historico:hover { background: #7c3aed; color: #fff; }
         .btn-excluir { background: #fef2f2; color: #ef4444; border: 1px solid #fecaca; }
         .btn-excluir:hover { background: #ef4444; color: #fff; }
 
@@ -125,6 +122,8 @@
         tr.row-selected:hover { background: #dbeafe !important; }
 
         /* Stats grid 5 cols */
+        .stats-grid { grid-template-columns: repeat(5, 1fr) !important; }
+        @media (max-width: 768px) { .stats-grid { grid-template-columns: repeat(2, 1fr) !important; } }
 
         @keyframes slideDown {
             from { opacity: 0; transform: translateY(-10px); }
@@ -168,15 +167,14 @@
         .mat-desc { max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; color: #1e293b; }
     </style>
     <script>
-        function toggleNotificações() { const p = document.getElementById('notification-panel'); if (p) p.classList.toggle('active'); }
+        function toggleNotificacoes() { const p = document.getElementById('notification-panel'); if (p) p.classList.toggle('active'); }
         function marcarTodasLidas() {}
-        function limparNotificações() {}
+        function limparNotificacoes() {}
     </script>
     <script src="/js/anti-copy-protection.js" defer></script>
     <link rel="stylesheet" href="/chat/widget.css?v=20260301">
-    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260326">
 </head>
-<body class="dark-mode">
+<body>
     <div class="app-container">
         <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
 
@@ -186,15 +184,14 @@
             <nav class="sidebar-nav">
                 <button class="sidebar-btn" title="Dashboard" onclick="window.location.href='index.html'"><i class="fas fa-chart-line"></i></button>
                 <button class="sidebar-btn" title="Pedidos" onclick="window.location.href='pedidos.html'"><i class="fas fa-shopping-cart"></i></button>
-                <button class="sidebar-btn" title="Cota��es" onclick="window.location.href='cotacoes.html'"><i class="fas fa-file-invoice-dollar"></i></button>
+                <button class="sidebar-btn" title="Cotações" onclick="window.location.href='cotacoes.html'"><i class="fas fa-file-invoice-dollar"></i></button>
                 <button class="sidebar-btn" title="Fornecedores" onclick="window.location.href='fornecedores.html'"><i class="fas fa-users"></i></button>
-                <button class="sidebar-btn" title="Requisi��es" onclick="window.location.href='requisicoes.html'"><i class="fas fa-clipboard-list"></i></button>
+                <button class="sidebar-btn" title="Requisições" onclick="window.location.href='requisicoes.html'"><i class="fas fa-clipboard-list"></i></button>
                 <button class="sidebar-btn" title="Recebimento" onclick="window.location.href='recebimento.html'"><i class="fas fa-truck-loading"></i></button>
             </nav>
             <div class="sidebar-bottom">
                 <button class="sidebar-btn active" title="Estoque MP" onclick="window.location.href='gestao-estoque.html'"><i class="fas fa-boxes"></i></button>
-                <button class="sidebar-btn" title="QR Code Estoque" onclick="toggleQrCodePanel()"><i class="fas fa-qrcode"></i></button>
-                <button class="sidebar-btn" title="Relat�rios" onclick="window.location.href='relatorios.html'"><i class="fas fa-chart-bar"></i></button>
+                <button class="sidebar-btn" title="Relatórios" onclick="window.location.href='relatorios.html'"><i class="fas fa-chart-bar"></i></button>
             </div>
         </aside>
 
@@ -207,15 +204,27 @@
                         <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
-                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">�</span>
+                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">—</span>
                         <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Estoque MP</span>
                     </div>
                 </div>
                 <div class="header-right">
                     <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
-                    
+                    <div class="notification-container">
+                        <button class="header-btn notification-btn" title="Notificações" onclick="toggleNotificacoes()">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-badge hidden" id="notification-count">0</span>
+                        </button>
+                        <div class="notification-panel" id="notification-panel">
+                            <div class="notification-header"><h3><i class="fas fa-bell"></i> Notificações</h3><div class="notification-actions"><button onclick="marcarTodasLidas()" title="Marcar todas como lidas"><i class="fas fa-check-double"></i></button><button onclick="limparNotificacoes()" title="Limpar todas"><i class="fas fa-trash-alt"></i></button></div></div>
+                            <div class="notification-tabs"><button class="notif-tab active" onclick="filtrarNotificacoes('todas', this)">Todas</button><button class="notif-tab" onclick="filtrarNotificacoes('nao-lidas', this)">Não lidas</button><button class="notif-tab" onclick="filtrarNotificacoes('importantes', this)">Importantes</button></div>
+                            <div class="notification-list" id="notification-list"></div>
+                            <div class="notification-footer"><a href="#" onclick="verTodasNotificacoes(); return false;">Ver histórico completo</a></div>
+                        </div>
+                    </div>
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usu�rio</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
+                        <div class="user-avatar" id="user-avatar"><img src="" alt="" id="user-photo" style="display:none;"><span id="user-initial">U</span></div>
                     </div>
                 </div>
             </header>
@@ -225,132 +234,40 @@
                 <div class="page-header">
                     <div class="page-header-top">
                         <div class="page-actions">
-                            <button class="btn btn-secondary" onclick="abrirEntradaRapida()"><i class="fas fa-arrow-down"></i> Entrada R�pida</button>
+                            <button class="btn btn-secondary" onclick="abrirEntradaRapida()"><i class="fas fa-arrow-down"></i> Entrada Rápida</button>
                             <button class="btn btn-secondary" onclick="abrirSaidaRapida()"><i class="fas fa-arrow-up"></i> Dar Baixa</button>
-                            <button class="btn btn-secondary" onclick="verHistóricoGeral()"><i class="fas fa-history"></i> Hist�rico</button>
-                            <button class="btn btn-secondary" onclick="toggleQrCodePanel()" id="btn-qrcode-toggle" style="background:#6366f1;color:#fff;border-color:#6366f1;"><i class="fas fa-qrcode"></i> QR Code</button>
+                            <button class="btn btn-secondary" onclick="verHistoricoGeral()"><i class="fas fa-history"></i> Histórico</button>
                             <button class="btn btn-primary" onclick="abrirModalNovoMaterial()"><i class="fas fa-plus"></i> Novo Material</button>
                         </div>
                     </div>
                 </div>
 
-                <!-- ===== QR CODE INLINE PANEL ===== -->
-                <div id="qr-code-inline-panel" style="display:none;margin-bottom:20px;animation:slideDown 0.3s ease;">
-                    <div class="card" style="border:2px solid #6366f1;border-radius:16px;overflow:hidden;">
-                        <div style="background:linear-gradient(135deg,#6366f1,#818cf8);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;">
-                            <div style="display:flex;align-items:center;gap:12px;">
-                                <i class="fas fa-qrcode" style="font-size:1.3rem;color:#fff;"></i>
-                                <div>
-                                    <h3 style="margin:0;color:#fff;font-size:1rem;font-weight:700;">QR Code - Estoque</h3>
-                                    <p style="margin:0;color:rgba(255,255,255,0.7);font-size:0.75rem;">Escaneie, gere etiquetas ou registre movimenta��es por c�digo</p>
-                                </div>
-                            </div>
-                            <div style="display:flex;gap:8px;align-items:center;">
-                                <div class="qr-inline-tabs" style="display:flex;gap:4px;background:rgba(255,255,255,0.15);border-radius:8px;padding:3px;">
-                                    <button class="qr-itab active" onclick="switchQrTab('scan')" data-qrtab="scan" style="padding:6px 14px;border:none;border-radius:6px;font-size:0.75rem;font-weight:600;cursor:pointer;color:#fff;background:rgba(255,255,255,0.25);transition:all 0.2s;"><i class="fas fa-camera"></i> Escanear</button>
-                                    <button class="qr-itab" onclick="switchQrTab('manual')" data-qrtab="manual" style="padding:6px 14px;border:none;border-radius:6px;font-size:0.75rem;font-weight:600;cursor:pointer;color:rgba(255,255,255,0.7);background:transparent;transition:all 0.2s;"><i class="fas fa-keyboard"></i> Manual</button>
-                                    <button class="qr-itab" onclick="switchQrTab('generate')" data-qrtab="generate" style="padding:6px 14px;border:none;border-radius:6px;font-size:0.75rem;font-weight:600;cursor:pointer;color:rgba(255,255,255,0.7);background:transparent;transition:all 0.2s;"><i class="fas fa-print"></i> Gerar QR</button>
-                                </div>
-                                <button onclick="toggleQrCodePanel()" style="background:rgba(255,255,255,0.2);border:none;width:32px;height:32px;border-radius:8px;color:#fff;cursor:pointer;font-size:14px;" title="Fechar"><i class="fas fa-times"></i></button>
-                            </div>
-                        </div>
-                        <div style="padding:20px;">
-                            <!-- Tab: Escanear -->
-                            <div id="qr-tab-scan" class="qr-tab-content">
-                                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-                                    <div>
-                                        <div id="qr-inline-scanner-viewport" style="position:relative;width:100%;aspect-ratio:4/3;background:#0d1117;border-radius:12px;overflow:hidden;display:flex;align-items:center;justify-content:center;">
-                                            <video id="qr-inline-video" playsinline autoplay muted style="width:100%;height:100%;object-fit:cover;display:none;"></video>
-                                            <div id="qr-inline-scan-overlay" style="position:absolute;inset:0;display:none;align-items:center;justify-content:center;pointer-events:none;">
-                                                <div style="width:180px;height:180px;border:3px solid #6366f1;border-radius:14px;box-shadow:0 0 0 9999px rgba(0,0,0,0.4);position:relative;">
-                                                    <div style="position:absolute;top:0;left:10%;right:10%;height:2px;background:linear-gradient(90deg,transparent,#6366f1,transparent);animation:scanMove 2s ease-in-out infinite;"></div>
-                                                </div>
-                                            </div>
-                                            <div id="qr-inline-placeholder" style="text-align:center;color:#8b949e;">
-                                                <i class="fas fa-camera" style="font-size:2.5rem;opacity:0.3;margin-bottom:8px;display:block;"></i>
-                                                <p style="font-size:0.85rem;">Clique para iniciar a c�mera</p>
-                                            </div>
-                                        </div>
-                                        <div style="display:flex;gap:8px;margin-top:10px;">
-                                            <button id="qr-inline-btn-start" onclick="qrInlineStartCamera()" class="btn btn-secondary" style="flex:1;font-size:0.8rem;"><i class="fas fa-camera"></i> Iniciar C�mera</button>
-                                            <button id="qr-inline-btn-stop" onclick="qrInlineStopCamera()" class="btn btn-secondary" style="flex:1;font-size:0.8rem;display:none;background:#ef4444;color:#fff;border-color:#ef4444;"><i class="fas fa-stop"></i> Parar</button>
-                                        </div>
-                                    </div>
-                                    <div id="qr-inline-result-panel">
-                                        <div style="text-align:center;padding:40px 20px;color:#94a3b8;">
-                                            <i class="fas fa-qrcode" style="font-size:2.5rem;opacity:0.2;margin-bottom:8px;display:block;"></i>
-                                            <p style="font-size:0.85rem;">Escaneie um QR Code ou use a aba "Manual" para buscar por c�digo</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Tab: Manual -->
-                            <div id="qr-tab-manual" class="qr-tab-content" style="display:none;">
-                                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-                                    <div>
-                                        <label style="font-size:0.8rem;font-weight:600;color:#475569;margin-bottom:6px;display:block;">C�digo do Material</label>
-                                        <div style="display:flex;gap:8px;">
-                                            <input type="text" id="qr-inline-manual-code" placeholder="Digite o c�digo ou descri��o..." style="flex:1;padding:10px 14px;border:1px solid #e2e8f0;border-radius:8px;font-size:0.9rem;" autocomplete="off" oninput="qrInlineManualAutocomplete(this.value)">
-                                            <button onclick="qrInlineSearchManual()" class="btn btn-primary" style="padding:10px 18px;"><i class="fas fa-search"></i></button>
-                                        </div>
-                                        <div id="qr-inline-manual-suggestions" style="max-height:280px;overflow-y:auto;margin-top:10px;"></div>
-                                    </div>
-                                    <div id="qr-inline-manual-result">
-                                        <div style="text-align:center;padding:40px 20px;color:#94a3b8;">
-                                            <i class="fas fa-search" style="font-size:2.5rem;opacity:0.2;margin-bottom:8px;display:block;"></i>
-                                            <p style="font-size:0.85rem;">Busque um material para ver detalhes e registrar movimenta��o</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Tab: Gerar QR -->
-                            <div id="qr-tab-generate" class="qr-tab-content" style="display:none;">
-                                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-                                    <div>
-                                        <label style="font-size:0.8rem;font-weight:600;color:#475569;margin-bottom:6px;display:block;">Buscar Material para Gerar Etiqueta</label>
-                                        <input type="text" id="qr-inline-gen-search" placeholder="Digite c�digo ou descri��o..." style="width:100%;padding:10px 14px;border:1px solid #e2e8f0;border-radius:8px;font-size:0.9rem;" oninput="qrInlineSearchGenerate(this.value)" autocomplete="off">
-                                        <div id="qr-inline-gen-results" style="max-height:280px;overflow-y:auto;margin-top:10px;"></div>
-                                    </div>
-                                    <div id="qr-inline-gen-preview" style="text-align:center;padding:20px;">
-                                        <div style="color:#94a3b8;">
-                                            <i class="fas fa-qrcode" style="font-size:2.5rem;opacity:0.2;margin-bottom:8px;display:block;"></i>
-                                            <p style="font-size:0.85rem;">Selecione um material para gerar o QR Code</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Stats -->
-                <div class="metrics-grid">
-                    <div class="metric-card purple">
-                        <div class="metric-header"><div class="metric-icon purple"><i class="fas fa-cubes"></i></div></div>
-                        <div class="metric-value" id="stat-total">0</div>
-                        <div class="metric-label">Total Materiais</div>
+                <div class="stats-grid">
+                    <div class="stat-card purple">
+                        <div class="stat-header"><div class="stat-icon purple"><i class="fas fa-cubes"></i></div></div>
+                        <div class="stat-value" id="stat-total">0</div>
+                        <div class="stat-label">Total Materiais</div>
                     </div>
-                    <div class="metric-card green">
-                        <div class="metric-header"><div class="metric-icon green"><i class="fas fa-check-circle"></i></div></div>
-                        <div class="metric-value" id="stat-ativos">0</div>
-                        <div class="metric-label">Ativos</div>
+                    <div class="stat-card green">
+                        <div class="stat-header"><div class="stat-icon green"><i class="fas fa-check-circle"></i></div></div>
+                        <div class="stat-value" id="stat-ativos">0</div>
+                        <div class="stat-label">Ativos</div>
                     </div>
-                    <div class="metric-card red">
-                        <div class="metric-header"><div class="metric-icon red"><i class="fas fa-ban"></i></div></div>
-                        <div class="metric-value" id="stat-inativos">0</div>
-                        <div class="metric-label">Inativos</div>
+                    <div class="stat-card red">
+                        <div class="stat-header"><div class="stat-icon red"><i class="fas fa-ban"></i></div></div>
+                        <div class="stat-value" id="stat-inativos">0</div>
+                        <div class="stat-label">Inativos</div>
                     </div>
-                    <div class="metric-card blue">
-                        <div class="metric-header"><div class="metric-icon blue"><i class="fas fa-link"></i></div></div>
-                        <div class="metric-value" id="stat-vinculados">0</div>
-                        <div class="metric-label">Vinculados</div>
+                    <div class="stat-card blue">
+                        <div class="stat-header"><div class="stat-icon blue"><i class="fas fa-link"></i></div></div>
+                        <div class="stat-value" id="stat-vinculados">0</div>
+                        <div class="stat-label">Vinculados</div>
                     </div>
-                    <div class="metric-card orange">
-                        <div class="metric-header"><div class="metric-icon orange"><i class="fas fa-check-square"></i></div></div>
-                        <div class="metric-value" id="stat-selecionados">0</div>
-                        <div class="metric-label">Selecionados</div>
+                    <div class="stat-card amber">
+                        <div class="stat-header"><div class="stat-icon amber"><i class="fas fa-check-square"></i></div></div>
+                        <div class="stat-value" id="stat-selecionados">0</div>
+                        <div class="stat-label">Selecionados</div>
                     </div>
                 </div>
 
@@ -358,7 +275,7 @@
                 <div class="filters-bar">
                     <div class="search-box" style="flex:1;min-width:200px;">
                         <i class="fas fa-search"></i>
-                        <input type="text" id="busca-input" placeholder="Buscar por c�digo ou descri��o..." oninput="filtrarEstoque()">
+                        <input type="text" id="busca-input" placeholder="Buscar por código ou descrição..." oninput="filtrarEstoque()">
                     </div>
                     <select id="filtro-tipo" class="form-select" onchange="filtrarEstoque()" style="padding:8px 12px;border:1px solid var(--gray-300);border-radius:var(--radius-md);font-size:0.8rem;min-width:150px;">
                         <option value="">Todos os Tipos</option>
@@ -369,9 +286,9 @@
                         <option value="0">Inativos</option>
                     </select>
                     <select id="filtro-vinculado" class="form-select" onchange="filtrarEstoque()" style="padding:8px 12px;border:1px solid var(--gray-300);border-radius:var(--radius-md);font-size:0.8rem;min-width:130px;">
-                        <option value="">Vincula��o</option>
+                        <option value="">Vinculação</option>
                         <option value="1">Vinculados</option>
-                        <option value="0">N�o vinculados</option>
+                        <option value="0">Não vinculados</option>
                     </select>
                 </div>
 
@@ -393,15 +310,15 @@
                             <table class="data-table">
                                 <thead>
                                     <tr>
-                                        <th><input type="checkbox" id="select-all" onchange="toggleSelectAll(this)" title="Selecionar todos da p�gina"></th>
-                                        <th>C�digo</th>
+                                        <th><input type="checkbox" id="select-all" onchange="toggleSelectAll(this)" title="Selecionar todos da página"></th>
+                                        <th>Código</th>
                                         <th>Material</th>
                                         <th>Tipo</th>
                                         <th>Unidade</th>
                                         <th>Custo Unit.</th>
                                         <th>Status</th>
                                         <th>Vinculado</th>
-                                        <th style="width:170px">A��es</th>
+                                        <th style="width:170px">Ações</th>
                                     </tr>
                                 </thead>
                                 <tbody id="materiais-tbody">
@@ -413,9 +330,9 @@
                             <span class="pag-info" id="pag-info">Mostrando 0 de 0</span>
                             <div class="pag-btns" id="pag-btns"></div>
                             <select id="por-pagina" onchange="filtrarEstoque()">
-                                <option value="50">50/p�gina</option>
-                                <option value="100">100/p�gina</option>
-                                <option value="200">200/p�gina</option>
+                                <option value="50">50/página</option>
+                                <option value="100">100/página</option>
+                                <option value="200">200/página</option>
                                 <option value="999">Todos</option>
                             </select>
                         </div>
@@ -436,27 +353,23 @@
             </div>
             <div class="modal-body">
                 <div class="form-grid cols-2">
-                    <div class="form-group"><label>C�digo *</label><input type="text" id="novo-material-codigo" required></div>
+                    <div class="form-group"><label>Código *</label><input type="text" id="novo-material-codigo" required></div>
                     <div class="form-group">
                         <label>Tipo</label>
                         <select id="novo-material-tipo">
                             <option value="">Sem tipo</option>
-                            <option value="Veia Multiplex">Veia Multiplex</option>
-                            <option value="Veia Pot�ncia">Veia Pot�ncia</option>
-                            <option value="Cabo/Fio">Cabo / Fio</option>
-                            <option value="Bobina/Embalagem">Bobina / Embalagem</option>
-                            <option value="Corda de Alum�nio">Corda de Alum�nio</option>
-                            <option value="Cordinha">Cordinha</option>
-                            <option value="Filamento">Filamento</option>
-                            <option value="Polietileno">Polietileno</option>
-                            <option value="PVC">PVC</option>
-                            <option value="XLPE">XLPE</option>
-                            <option value="Pigmento">Pigmento</option>
-                            <option value="Servi�o">Servi�o</option>
-                            <option value="Outros">Outros</option>
+                            <option value="pvc">PVC</option>
+                            <option value="veia">Veia</option>
+                            <option value="cabo">Cabo</option>
+                            <option value="corda">Corda</option>
+                            <option value="bobina">Bobina</option>
+                            <option value="pigmento">Pigmento</option>
+                            <option value="polietileno">Polietileno</option>
+                            <option value="cordinha">Cordinha</option>
+                            <option value="filamento">Filamento</option>
                         </select>
                     </div>
-                    <div class="form-group" style="grid-column:span 2;"><label>Descri��o *</label><input type="text" id="novo-material-descricao" required placeholder="Ex: VEIA MULTIPLEX 25MM PRETA"></div>
+                    <div class="form-group" style="grid-column:span 2;"><label>Descrição *</label><input type="text" id="novo-material-descricao" required placeholder="Ex: VEIA MULTIPLEX 25MM PRETA"></div>
                     <div class="form-group"><label>NCM</label><input type="text" id="novo-material-ncm" placeholder="Ex: 3917.39.00" maxlength="12"></div>
                     <div class="form-group">
                         <label>Unidade</label>
@@ -466,9 +379,9 @@
                             <option value="MT">MT</option><option value="RL">RL</option>
                         </select>
                     </div>
-                    <div class="form-group"><label>Custo Unit�rio (R$)</label><input type="number" id="novo-material-custo" step="0.01" min="0"></div>
+                    <div class="form-group"><label>Custo Unitário (R$)</label><input type="number" id="novo-material-custo" step="0.01" min="0"></div>
                     <div class="form-group"><label>Qtd. Estoque Inicial</label><input type="number" id="novo-material-qtd-estoque" step="0.01" min="0" value="0"></div>
-                    <div class="form-group"><label>Estoque M�nimo</label><input type="number" id="novo-material-minimo" min="0" value="0"></div>
+                    <div class="form-group"><label>Estoque Mínimo</label><input type="number" id="novo-material-minimo" min="0" value="0"></div>
                     <div class="form-group">
                         <label>Status</label>
                         <select id="novo-material-ativo"><option value="1">Ativo</option><option value="0">Inativo</option></select>
@@ -497,8 +410,8 @@
                     <div class="form-group"><label>Quantidade *</label><input type="number" id="entrada-qtd" min="1" required></div>
                     <div class="form-group"><label>Custo Unit. (R$)</label><input type="number" id="entrada-custo" step="0.01" min="0"></div>
                 </div>
-                <div class="form-group"><label>N� Documento/NF</label><input type="text" id="entrada-documento"></div>
-                <div class="form-group"><label>Observa��es</label><textarea id="entrada-obs" rows="2"></textarea></div>
+                <div class="form-group"><label>Nº Documento/NF</label><input type="text" id="entrada-documento"></div>
+                <div class="form-group"><label>Observações</label><textarea id="entrada-obs" rows="2"></textarea></div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="fecharModal('modal-entrada')">Cancelar</button>
@@ -507,11 +420,11 @@
         </div>
     </div>
 
-    <!-- Modal: Sa�da / Dar Baixa -->
+    <!-- Modal: Saída / Dar Baixa -->
     <div class="modal-overlay" id="modal-saida">
         <div class="modal" style="max-width:500px;">
             <div class="modal-header">
-                <h3><i class="fas fa-arrow-up" style="color:#dc2626;"></i> Dar Baixa / Sa�da de Estoque</h3>
+                <h3><i class="fas fa-arrow-up" style="color:#dc2626;"></i> Dar Baixa / Saída de Estoque</h3>
                 <button class="modal-close" onclick="fecharModal('modal-saida')">&times;</button>
             </div>
             <div class="modal-body">
@@ -521,36 +434,36 @@
                     <input type="text" id="saida-nome" readonly style="background:#f1f5f9;font-weight:600;">
                     <small id="saida-variacao-info" style="color:#6366f1;font-size:11px;margin-top:4px;display:block;"></small>
                 </div>
-                <div class="form-group"><label>Dispon�vel</label><input type="text" id="saida-disponivel" readonly style="background:#f1f5f9;"></div>
+                <div class="form-group"><label>Disponível</label><input type="text" id="saida-disponivel" readonly style="background:#f1f5f9;"></div>
                 <div class="form-grid cols-2">
                     <div class="form-group"><label>Quantidade *</label><input type="number" id="saida-qtd" min="1" required oninput="validarSaida()"></div>
-                    <div class="form-group"><label>Destino *</label><input type="text" id="saida-destino" placeholder="Produ��o, PCP, Manuten��o..."></div>
+                    <div class="form-group"><label>Destino *</label><input type="text" id="saida-destino" placeholder="Produção, PCP, Manutenção..."></div>
                 </div>
-                <div class="form-group"><label>N� Documento</label><input type="text" id="saida-documento"></div>
-                <div class="form-group"><label>Observa��es</label><textarea id="saida-obs" rows="2"></textarea></div>
+                <div class="form-group"><label>Nº Documento</label><input type="text" id="saida-documento"></div>
+                <div class="form-group"><label>Observações</label><textarea id="saida-obs" rows="2"></textarea></div>
                 <div id="saida-aviso" style="display:none;padding:10px 14px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;font-size:13px;color:#dc2626;margin-top:8px;">
-                    <i class="fas fa-exclamation-triangle"></i> Quantidade superior ao dispon�vel!
+                    <i class="fas fa-exclamation-triangle"></i> Quantidade superior ao disponível!
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="fecharModal('modal-saida')">Cancelar</button>
-                <button class="btn btn-primary" id="btn-confirmar-saida" onclick="confirmarSaida()" style="background:#dc2626;border-color:#dc2626;"><i class="fas fa-check"></i> Confirmar Sa�da</button>
+                <button class="btn btn-primary" id="btn-confirmar-saida" onclick="confirmarSaida()" style="background:#dc2626;border-color:#dc2626;"><i class="fas fa-check"></i> Confirmar Saída</button>
             </div>
         </div>
     </div>
 
-    <!-- Modal: Hist�rico -->
+    <!-- Modal: Histórico -->
     <div class="modal-overlay" id="modal-historico">
         <div class="modal" style="max-width:600px;">
             <div class="modal-header">
-                <h3><i class="fas fa-history"></i> Hist�rico de Movimenta��es</h3>
-                <button class="modal-close" onclick="fecharModal('modal-histórico')">&times;</button>
+                <h3><i class="fas fa-history"></i> Histórico de Movimentações</h3>
+                <button class="modal-close" onclick="fecharModal('modal-historico')">&times;</button>
             </div>
-            <div class="modal-body histórico-timeline" id="historico-content">
+            <div class="modal-body historico-timeline" id="historico-content">
                 <p style="text-align:center;color:#94a3b8;"><i class="fas fa-spinner fa-spin"></i> Carregando...</p>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="fecharModal('modal-histórico')">Fechar</button>
+                <button class="btn btn-secondary" onclick="fecharModal('modal-historico')">Fechar</button>
             </div>
         </div>
     </div>
@@ -559,7 +472,7 @@
     <div class="modal-overlay" id="modal-ajuste">
         <div class="modal" style="max-width:500px;">
             <div class="modal-header">
-                <h3><i class="fas fa-balance-scale"></i> Ajuste de Invent�rio</h3>
+                <h3><i class="fas fa-balance-scale"></i> Ajuste de Inventário</h3>
                 <button class="modal-close" onclick="fecharModal('modal-ajuste')">&times;</button>
             </div>
             <div class="modal-body">
@@ -571,20 +484,20 @@
                 </div>
                 <div class="diferenca-card neutro" id="ajuste-diferenca-card" style="display:none;">
                     <div class="valor" id="ajuste-diferenca-valor">0</div>
-                    <div class="texto" id="ajuste-diferenca-texto">Sem diferen�a</div>
+                    <div class="texto" id="ajuste-diferenca-texto">Sem diferença</div>
                 </div>
                 <div class="form-group" style="margin-top:12px;">
                     <label>Motivo *</label>
                     <select id="ajuste-motivo" required>
                         <option value="">Selecione</option>
-                        <option value="inventario">Invent�rio F�sico</option>
+                        <option value="inventario">Inventário Físico</option>
                         <option value="avaria">Avaria/Perda</option>
-                        <option value="correcao">Corre��o de Sistema</option>
+                        <option value="correcao">Correção de Sistema</option>
                         <option value="outro">Outro</option>
                     </select>
                 </div>
-                <div class="form-group"><label>N� Documento</label><input type="text" id="ajuste-documento"></div>
-                <div class="form-group"><label>Observa��es</label><textarea id="ajuste-obs" rows="2"></textarea></div>
+                <div class="form-group"><label>Nº Documento</label><input type="text" id="ajuste-documento"></div>
+                <div class="form-group"><label>Observações</label><textarea id="ajuste-obs" rows="2"></textarea></div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="fecharModal('modal-ajuste')">Cancelar</button>
@@ -609,8 +522,8 @@
                         <i class="fas fa-cube" style="color:#2563eb;font-size:16px;"></i>
                     </div>
                     <div style="flex:1;min-width:0;">
-                        <div id="editar-info-c�digo" style="font-size:11px;color:#64748b;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;"></div>
-                        <div id="editar-info-descri��o" style="font-size:14px;font-weight:600;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+                        <div id="editar-info-codigo" style="font-size:11px;color:#64748b;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;"></div>
+                        <div id="editar-info-descricao" style="font-size:14px;font-weight:600;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
                     </div>
                     <div id="editar-info-status" style="flex-shrink:0;"></div>
                 </div>
@@ -622,38 +535,34 @@
                         <div id="editar-estoque-atual" style="font-size:1.2rem;font-weight:700;color:#15803d;margin-top:2px;">0</div>
                     </div>
                     <div style="padding:10px 14px;background:#fefce8;border:1px solid #fde68a;border-radius:8px;text-align:center;">
-                        <div style="font-size:10px;color:#ca8a04;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Estoque M�n.</div>
+                        <div style="font-size:10px;color:#ca8a04;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Estoque Mín.</div>
                         <div id="editar-estoque-min-info" style="font-size:1.2rem;font-weight:700;color:#a16207;margin-top:2px;">0</div>
                     </div>
                     <div style="padding:10px 14px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;text-align:center;">
                         <div style="font-size:10px;color:#2563eb;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Vinculado</div>
-                        <div id="editar-vinculado" style="font-size:1.2rem;font-weight:700;color:#1d4ed8;margin-top:2px;">�</div>
+                        <div id="editar-vinculado" style="font-size:1.2rem;font-weight:700;color:#1d4ed8;margin-top:2px;">—</div>
                     </div>
                 </div>
 
                 <div class="form-grid cols-2">
-                    <div class="form-group"><label>C�digo *</label><input type="text" id="editar-codigo" required></div>
+                    <div class="form-group"><label>Código *</label><input type="text" id="editar-codigo" required></div>
                     <div class="form-group"><label>NCM</label><input type="text" id="editar-ncm" placeholder="Ex: 3917.39.00" maxlength="12"></div>
                 </div>
-                <div class="form-group"><label>Descri��o *</label><input type="text" id="editar-descricao" required></div>
+                <div class="form-group"><label>Descrição *</label><input type="text" id="editar-descricao" required></div>
                 <div class="form-grid cols-2">
                     <div class="form-group">
                         <label>Tipo</label>
                         <select id="editar-tipo">
                             <option value="">Sem tipo</option>
-                            <option value="Veia Multiplex">Veia Multiplex</option>
-                            <option value="Veia Pot�ncia">Veia Pot�ncia</option>
-                            <option value="Cabo/Fio">Cabo / Fio</option>
-                            <option value="Bobina/Embalagem">Bobina / Embalagem</option>
-                            <option value="Corda de Alum�nio">Corda de Alum�nio</option>
-                            <option value="Cordinha">Cordinha</option>
-                            <option value="Filamento">Filamento</option>
-                            <option value="Polietileno">Polietileno</option>
-                            <option value="PVC">PVC</option>
-                            <option value="XLPE">XLPE</option>
-                            <option value="Pigmento">Pigmento</option>
-                            <option value="Servi�o">Servi�o</option>
-                            <option value="Outros">Outros</option>
+                            <option value="pvc">PVC</option>
+                            <option value="veia">Veia</option>
+                            <option value="cabo">Cabo</option>
+                            <option value="corda">Corda</option>
+                            <option value="bobina">Bobina</option>
+                            <option value="pigmento">Pigmento</option>
+                            <option value="polietileno">Polietileno</option>
+                            <option value="cordinha">Cordinha</option>
+                            <option value="filamento">Filamento</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -666,8 +575,8 @@
                     </div>
                 </div>
                 <div class="form-grid cols-2">
-                    <div class="form-group"><label>Custo Unit�rio (R$)</label><input type="number" id="editar-custo" step="0.0001" min="0"></div>
-                    <div class="form-group"><label>Estoque M�nimo</label><input type="number" id="editar-estoque-min" step="0.01" min="0"></div>
+                    <div class="form-group"><label>Custo Unitário (R$)</label><input type="number" id="editar-custo" step="0.0001" min="0"></div>
+                    <div class="form-group"><label>Estoque Mínimo</label><input type="number" id="editar-estoque-min" step="0.01" min="0"></div>
                 </div>
                 <div class="form-group">
                     <label>Status</label>
@@ -676,20 +585,20 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="fecharModal('modal-editar')">Cancelar</button>
-                <button class="btn btn-primary" onclick="salvarEdicao()"><i class="fas fa-save"></i> Salvar Altera��es</button>
+                <button class="btn btn-primary" onclick="salvarEdicao()"><i class="fas fa-save"></i> Salvar Alterações</button>
             </div>
         </div>
     </div>
 
-    <!-- Modal: Seletor de Material (para entrada/sa�da r�pida) -->
+    <!-- Modal: Seletor de Material (para entrada/saída rápida) -->
     <div class="modal-overlay" id="modal-seletor">
         <div class="modal" style="max-width:700px;max-height:80vh;display:flex;flex-direction:column;">
             <div class="modal-header">
-                <h3><i class="fas fa-search"></i> <span id="seletor-t�tulo">Selecionar Material</span></h3>
+                <h3><i class="fas fa-search"></i> <span id="seletor-titulo">Selecionar Material</span></h3>
                 <button class="modal-close" onclick="fecharModal('modal-seletor')">&times;</button>
             </div>
             <div style="padding:12px 20px;border-bottom:1px solid #e2e8f0;">
-                <input type="text" id="seletor-busca" placeholder="Buscar material por nome ou c�digo..." oninput="filtrarSeletor()" style="width:100%;padding:10px 14px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px;">
+                <input type="text" id="seletor-busca" placeholder="Buscar material por nome ou código..." oninput="filtrarSeletor()" style="width:100%;padding:10px 14px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px;">
             </div>
             <div class="modal-body" style="flex:1;overflow:auto;padding:0;" id="seletor-lista">
                 <p style="text-align:center;color:#94a3b8;padding:40px;">Carregando materiais...</p>
@@ -707,7 +616,7 @@
     </script>
 
     <!-- Module Scripts -->
-    <script src="/modules/Compras/js/compras-utils.js?v=20260416"></script>
+    <script src="/modules/Compras/js/compras-utils.js?v=20260301"></script>
     <script src="/js/popup-confirmacao.js?v=20260301"></script>
     <script src="/modules/Compras/compras-user-loader.js?v=20260301"></script>
     <script src="/modules/Compras/gestao-estoque.js?v=20260610"></script>
@@ -721,309 +630,6 @@
 
     <!-- Enterprise Shared -->
     <script src="/js/sidebar-click-animation.js?v=20260301"></script>
-    <script src="/_shared/accessibility-widget.js?v=20260301"></script>
-
-    <!-- Chat Corporativo (Teams) -->
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
-    <script src="/js/user-dropdown.js?v=20260319" defer></script>
-
-    <!-- QR Code Library + Inline QR Logic -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js" defer></script>
-    <script>
-    // ==================== QR CODE INLINE ====================
-    let qrInlineCameraStream = null;
-    let qrInlineScanInterval = null;
-    let qrInlineSelectedMaterial = null;
-
-    function toggleQrCodePanel() {
-        const panel = document.getElementById('qr-code-inline-panel');
-        if (!panel) return;
-        if (panel.style.display === 'none') {
-            panel.style.display = 'block';
-            document.getElementById('btn-qrcode-toggle').style.background = '#4f46e5';
-        } else {
-            panel.style.display = 'none';
-            document.getElementById('btn-qrcode-toggle').style.background = '#6366f1';
-            qrInlineStopCamera();
-        }
-    }
-
-    function switchQrTab(tab) {
-        document.querySelectorAll('.qr-tab-content').forEach(el => el.style.display = 'none');
-        document.querySelectorAll('.qr-itab').forEach(el => {
-            el.style.background = 'transparent';
-            el.style.color = 'rgba(255,255,255,0.7)';
-        });
-        const target = document.getElementById('qr-tab-' + tab);
-        if (target) target.style.display = 'block';
-        const activeTab = document.querySelector(`.qr-itab[data-qrtab="${tab}"]`);
-        if (activeTab) {
-            activeTab.style.background = 'rgba(255,255,255,0.25)';
-            activeTab.style.color = '#fff';
-        }
-        if (tab !== 'scan') qrInlineStopCamera();
-    }
-
-    function getQrAuthHeaders() {
-        return { 'Content-Type': 'application/json' };
-    }
-
-    // ---- Camera / QR Scanner ----
-    async function qrInlineStartCamera() {
-        try {
-            const constraints = { video: { facingMode: { ideal: 'environment' }, width: { ideal: 640 }, height: { ideal: 480 } } };
-            qrInlineCameraStream = await navigator.mediaDevices.getUserMedia(constraints);
-            const video = document.getElementById('qr-inline-video');
-            video.srcObject = qrInlineCameraStream;
-            video.style.display = 'block';
-            document.getElementById('qr-inline-placeholder').style.display = 'none';
-            document.getElementById('qr-inline-scan-overlay').style.display = 'flex';
-            document.getElementById('qr-inline-btn-start').style.display = 'none';
-            document.getElementById('qr-inline-btn-stop').style.display = 'block';
-            qrInlineStartScanning();
-        } catch (err) {
-            showToast('Erro ao acessar c�mera: ' + err.message, 'error');
-        }
-    }
-
-    function qrInlineStopCamera() {
-        if (qrInlineCameraStream) {
-            qrInlineCameraStream.getTracks().forEach(t => t.stop());
-            qrInlineCameraStream = null;
-        }
-        if (qrInlineScanInterval) {
-            clearInterval(qrInlineScanInterval);
-            qrInlineScanInterval = null;
-        }
-        const video = document.getElementById('qr-inline-video');
-        if (video) { video.srcObject = null; video.style.display = 'none'; }
-        const ph = document.getElementById('qr-inline-placeholder');
-        if (ph) ph.style.display = 'block';
-        const ov = document.getElementById('qr-inline-scan-overlay');
-        if (ov) ov.style.display = 'none';
-        const btnStart = document.getElementById('qr-inline-btn-start');
-        const btnStop = document.getElementById('qr-inline-btn-stop');
-        if (btnStart) btnStart.style.display = 'block';
-        if (btnStop) btnStop.style.display = 'none';
-    }
-
-    function qrInlineStartScanning() {
-        const video = document.getElementById('qr-inline-video');
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        let lastScanned = '';
-        qrInlineScanInterval = setInterval(() => {
-            if (!video || video.readyState < 2) return;
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            ctx.drawImage(video, 0, 0);
-            try {
-                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                // Use jsQR if available, otherwise try BarcodeDetector
-                if (typeof jsQR === 'function') {
-                    const code = jsQR(imageData.data, imageData.width, imageData.height);
-                    if (code && code.data && code.data !== lastScanned) {
-                        lastScanned = code.data;
-                        qrInlineHandleScan(code.data);
-                    }
-                } else if ('BarcodeDetector' in window) {
-                    const detector = new BarcodeDetector({ formats: ['qr_code'] });
-                    detector.detect(canvas).then(barcodes => {
-                        if (barcodes.length > 0 && barcodes[0].rawValue !== lastScanned) {
-                            lastScanned = barcodes[0].rawValue;
-                            qrInlineHandleScan(barcodes[0].rawValue);
-                        }
-                    }).catch(() => {});
-                }
-            } catch (e) {}
-        }, 500);
-    }
-
-    async function qrInlineHandleScan(code) {
-        showToast('QR Code detectado: ' + code, 'success');
-        qrInlineStopCamera();
-        await qrInlineLoadMaterial(code, 'qr-inline-result-panel');
-    }
-
-    // ---- Manual Search ----
-    let _qrManualDebounce = null;
-    async function qrInlineManualAutocomplete(query) {
-        const container = document.getElementById('qr-inline-manual-suggestions');
-        if (!container) return;
-        if (!query || query.length < 2) { container.innerHTML = ''; return; }
-        clearTimeout(_qrManualDebounce);
-        _qrManualDebounce = setTimeout(async () => {
-            try {
-                const response = await fetch('/api/compras/estoque?busca=' + encodeURIComponent(query), { headers: getQrAuthHeaders() });
-                const data = await response.json();
-                const items = data.materiais || data.estoque || [];
-                if (items.length === 0) { container.innerHTML = '<p style="color:#94a3b8;font-size:0.8rem;padding:8px;">Nenhum resultado</p>'; return; }
-                container.innerHTML = items.slice(0, 8).map(m => {
-                    const nome = escapeHtml(m.descricao || m.nome || '�');
-                    const cod = escapeHtml(m.codigo || m.codigo_material || '�');
-                    const est = m.quantidade_estoque || m.estoque_atual || 0;
-                    return '<div onclick="qrInlineSelectSuggestion(\'' + cod.replace(/'/g, "\\'") + '\')" style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#f8fafc;border-radius:8px;margin-bottom:4px;cursor:pointer;border:1px solid #e2e8f0;transition:border-color 0.15s;" onmouseover="this.style.borderColor=\'#6366f1\'" onmouseout="this.style.borderColor=\'#e2e8f0\'">' +
-                        '<div><div style="font-weight:600;font-size:0.82rem;">' + nome + '</div><div style="font-size:0.7rem;color:#64748b;font-family:monospace;">' + cod + '</div></div>' +
-                        '<span style="font-size:0.75rem;font-weight:600;color:#6366f1;">' + est + ' un</span></div>';
-                }).join('');
-            } catch (e) { container.innerHTML = ''; }
-        }, 300);
-    }
-
-    function qrInlineSelectSuggestion(código) {
-        document.getElementById('qr-inline-manual-code').value = código;
-        document.getElementById('qr-inline-manual-suggestions').innerHTML = '';
-        qrInlineSearchManual();
-    }
-
-    async function qrInlineSearchManual() {
-        const code = document.getElementById('qr-inline-manual-code').value.trim();
-        if (!code) return;
-        // Hide suggestions
-        const sug = document.getElementById('qr-inline-manual-suggestions');
-        if (sug) sug.innerHTML = '';
-        await qrInlineLoadMaterial(code, 'qr-inline-manual-result');
-    }
-
-    async function qrInlineLoadMaterial(code, targetId) {
-        const panel = document.getElementById(targetId);
-        if (!panel) return;
-        panel.innerHTML = '<div style="text-align:center;padding:20px;"><i class="fas fa-spinner fa-spin" style="font-size:1.5rem;color:#6366f1;"></i></div>';
-        try {
-            // Try busca endpoint that searches across ALL materials
-            const response = await fetch('/api/compras/estoque?busca=' + encodeURIComponent(code), { headers: getQrAuthHeaders() });
-            if (!response.ok) throw new Error('Erro ao buscar');
-            const data = await response.json();
-            const items = data.materiais || data.estoque || (Array.isArray(data) ? data : []);
-            const match = items.find(m => m.codigo === code || m.c�digo === code) || items[0];
-            if (!match) {
-                panel.innerHTML = '<div style="text-align:center;padding:20px;color:#ef4444;"><i class="fas fa-exclamation-triangle" style="font-size:1.5rem;margin-bottom:8px;display:block;"></i><p>Material n�o encontrado</p></div>';
-                return;
-            }
-            qrInlineSelectedMaterial = match;
-            const estoque = match.quantidade_estoque || match.estoque || 0;
-            const minimo = match.estoque_minimo || match.minimo || 0;
-            const status = estoque <= 0 ? 'critico' : estoque <= minimo ? 'baixo' : 'adequado';
-            const statusLabel = estoque <= 0 ? 'Cr�tico' : estoque <= minimo ? 'Baixo' : 'Adequado';
-            const statusColor = estoque <= 0 ? '#ef4444' : estoque <= minimo ? '#f59e0b' : '#22c55e';
-            const nome = match.descricao || match.descri��o || match.nome || '�';
-            const código = match.codigo || match.c�digo || '�';
-            panel.innerHTML = 
-                '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:16px;">' +
-                    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">' +
-                        '<div><div style="font-weight:700;font-size:1rem;">' + escapeHtml(nome) + '</div>' +
-                        '<span style="font-size:0.75rem;color:#64748b;font-family:monospace;background:#e2e8f0;padding:2px 8px;border-radius:4px;">' + escapeHtml(código) + '</span></div>' +
-                        '<span style="padding:4px 12px;border-radius:12px;font-size:0.7rem;font-weight:600;background:' + statusColor + '20;color:' + statusColor + ';">' + statusLabel + '</span>' +
-                    '</div>' +
-                    '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;">' +
-                        '<div style="text-align:center;padding:10px;background:#fff;border-radius:8px;border:1px solid #e2e8f0;"><div style="font-size:1.3rem;font-weight:800;color:#1e293b;">' + estoque + '</div><div style="font-size:0.7rem;color:#64748b;">Atual</div></div>' +
-                        '<div style="text-align:center;padding:10px;background:#fff;border-radius:8px;border:1px solid #e2e8f0;"><div style="font-size:1.3rem;font-weight:800;color:#1e293b;">' + minimo + '</div><div style="font-size:0.7rem;color:#64748b;">M�nimo</div></div>' +
-                        '<div style="text-align:center;padding:10px;background:#fff;border-radius:8px;border:1px solid #e2e8f0;"><div style="font-size:1.3rem;font-weight:800;color:#1e293b;">' + (match.unidade || 'UN') + '</div><div style="font-size:0.7rem;color:#64748b;">Unidade</div></div>' +
-                    '</div>' +
-                    '<div style="display:flex;gap:8px;">' +
-                        '<button onclick="qrInlineMovement(\'entrada\')" class="btn btn-secondary" style="flex:1;background:#22c55e;color:#fff;border-color:#22c55e;font-size:0.8rem;"><i class="fas fa-arrow-down"></i> Entrada</button>' +
-                        '<button onclick="qrInlineMovement(\'saida\')" class="btn btn-secondary" style="flex:1;background:#ef4444;color:#fff;border-color:#ef4444;font-size:0.8rem;"><i class="fas fa-arrow-up"></i> Sa�da / Baixa</button>' +
-                    '</div>' +
-                '</div>';
-        } catch (err) {
-            panel.innerHTML = '<div style="text-align:center;padding:20px;color:#ef4444;"><i class="fas fa-exclamation-circle" style="font-size:1.5rem;margin-bottom:8px;display:block;"></i><p>Erro ao buscar material</p></div>';
-        }
-    }
-
-    function qrInlineMovement(tipo) {
-        if (!qrInlineSelectedMaterial) return;
-        const mat = qrInlineSelectedMaterial;
-        const id = mat.id || mat.material_id;
-        if (tipo === 'entrada') {
-            if (typeof abrirEntrada === 'function') {
-                abrirEntrada(id, mat.descricao || mat.descri��o || '', mat.quantidade_estoque || mat.estoque || 0);
-            } else {
-                const el = document.getElementById('entrada-id'); if (el) el.value = id;
-                const n = document.getElementById('entrada-nome'); if (n) n.value = mat.descricao || mat.descri��o || '';
-                const ea = document.getElementById('entrada-estoque-atual'); if (ea) ea.value = mat.quantidade_estoque || mat.estoque || 0;
-                abrirModal('modal-entrada');
-            }
-        } else {
-            if (typeof abrirSaida === 'function') {
-                abrirSaida(id, mat.descricao || mat.descri��o || '', mat.quantidade_estoque || mat.estoque || 0);
-            } else {
-                const el = document.getElementById('saida-id'); if (el) el.value = id;
-                const n = document.getElementById('saida-nome'); if (n) n.value = mat.descricao || mat.descri��o || '';
-                const d = document.getElementById('saida-disponivel'); if (d) d.value = mat.quantidade_estoque || mat.estoque || 0;
-                abrirModal('modal-saida');
-            }
-        }
-    }
-
-    // ---- Generate QR ----
-    async function qrInlineSearchGenerate(query) {
-        const container = document.getElementById('qr-inline-gen-results');
-        if (!container) return;
-        if (!query || query.length < 2) { container.innerHTML = ''; return; }
-        try {
-            const response = await fetch('/api/compras/estoque?busca=' + encodeURIComponent(query), { headers: getQrAuthHeaders() });
-            const data = await response.json();
-            const items = data.materiais || data.estoque || (Array.isArray(data) ? data : []);
-            if (items.length === 0) { container.innerHTML = '<p style="color:#94a3b8;font-size:0.8rem;padding:10px;">Nenhum material encontrado</p>'; return; }
-            container.innerHTML = items.slice(0, 10).map(m => {
-                const nome = escapeHtml(m.descricao || m.descri��o || m.nome || '�');
-                const cod = escapeHtml(m.codigo || m.c�digo || '�');
-                return '<div onclick="qrInlineGenerateFor(\'' + (m.codigo || m.c�digo || '') + '\', \'' + nome.replace(/'/g, "\\'") + '\')" style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:#f8fafc;border-radius:8px;margin-bottom:6px;cursor:pointer;border:1px solid #e2e8f0;transition:all 0.15s;" onmouseover="this.style.borderColor=\'#6366f1\'" onmouseout="this.style.borderColor=\'#e2e8f0\'">' +
-                    '<div><div style="font-weight:600;font-size:0.85rem;">' + nome + '</div><div style="font-size:0.7rem;color:#64748b;font-family:monospace;">' + cod + '</div></div>' +
-                    '<i class="fas fa-qrcode" style="color:#6366f1;"></i></div>';
-            }).join('');
-        } catch (e) { container.innerHTML = '<p style="color:#ef4444;font-size:0.8rem;">Erro ao buscar</p>'; }
-    }
-
-    function qrInlineGenerateFor(código, nome) {
-        const preview = document.getElementById('qr-inline-gen-preview');
-        if (!preview) return;
-        preview.innerHTML = '<div style="background:#fff;border-radius:12px;padding:24px;border:1px solid #e2e8f0;"><canvas id="qr-inline-canvas"></canvas>' +
-            '<div style="margin-top:10px;"><div style="font-weight:700;font-size:0.95rem;">' + nome + '</div><div style="font-size:0.75rem;color:#64748b;font-family:monospace;">' + escapeHtml(código) + '</div></div>' +
-            '<div style="display:flex;gap:8px;margin-top:14px;">' +
-            '<button onclick="qrInlineDownloadQR()" class="btn btn-secondary" style="flex:1;font-size:0.8rem;"><i class="fas fa-download"></i> Baixar PNG</button>' +
-            '<button onclick="qrInlinePrintQR()" class="btn btn-primary" style="flex:1;font-size:0.8rem;"><i class="fas fa-print"></i> Imprimir</button></div></div>';
-        if (typeof QRCode !== 'undefined') {
-            QRCode.toCanvas(document.getElementById('qr-inline-canvas'), código, { width: 180, margin: 2 });
-        }
-    }
-
-    function qrInlineDownloadQR() {
-        const canvas = document.getElementById('qr-inline-canvas');
-        if (!canvas) return;
-        const link = document.createElement('a');
-        link.download = 'qrcode-estoque.png';
-        link.href = canvas.toDataURL();
-        link.click();
-    }
-
-    function qrInlinePrintQR() {
-        const canvas = document.getElementById('qr-inline-canvas');
-        if (!canvas) return;
-        const win = window.open('', '', 'width=400,height=500');
-        win.document.write('<html><body style="text-align:center;padding:20px;"><img src="' + canvas.toDataURL() + '" style="max-width:200px;"><br><p>' + (qrInlineSelectedMaterial?.descricao || '') + '</p></body></html>');
-        win.document.close();
-        win.print();
-    }
-
-    // Helpers
-    function escapeHtml(text) {
-        if (!text) return '';
-        const div = document.createElement('div');
-        div.appendChild(document.createTextNode(text));
-        return div.innerHTML;
-    }
-
-    // Enter key for manual search
-    document.addEventListener('DOMContentLoaded', function() {
-        const manualInput = document.getElementById('qr-inline-manual-code');
-        if (manualInput) {
-            manualInput.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') qrInlineSearchManual();
-            });
-        }
-    });
-    </script>
+    <script src="/_shared/accessibility-widget.js?v=20260418"></script>
 </body>
 </html>

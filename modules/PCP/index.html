@@ -28,14 +28,14 @@
     <!-- CSP Fix - Converter onclick inline para addEventListener -->
     <script src="/js/csp-fix.js" defer></script>
 
-    <link rel="stylesheet" href="../_shared/modern-saas.css?v=3.0">
+    <link rel="stylesheet" href="../_shared/modern-saas.css?v=20260418">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
         integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
     <!-- CSS PCP Padrão - Mesmo layout das outras páginas -->
     <link rel="stylesheet" href="/css/z-index-scale.css">
-    <link rel="stylesheet" href="css/pcp-layout.css">
-    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260216">
-    <link rel="stylesheet" href="css/pcp-components.css">
+    <link rel="stylesheet" href="css/pcp-layout.css?v=20260418">
+    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260418">
+    <link rel="stylesheet" href="css/pcp-components.css?v=20260418">
     <!-- Performance: Skeleton Loaders -->
     <link rel="stylesheet" href="/css/skeleton-loader.css">
 
@@ -605,7 +605,7 @@
             gap: var(--space-3);
         }
 
-        /* BUTTONS — gerenciados por pcp-components.css */
+        /* BUTTONS — gerenciados por pcp-components.css?v=20260418 */
 
         /* ============================================
            CARDS
@@ -4722,7 +4722,7 @@
     <link rel="stylesheet" href="/chat/widget.css?v=20260218"> -->
 
     <!-- PCP Header & Sidebar  Design Institucional Refinado (DEVE SER O ÚLTIMO) -->
-    <link rel="stylesheet" href="css/pcp-header-sidebar.css?v=20260215">
+    <link rel="stylesheet" href="css/pcp-header-sidebar.css?v=20260418">
     <!-- Chat Corporativo (Teams) -->
     <link rel="stylesheet" href="/chat-teams/chat-widget.css?v=20260615">
     <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260324">
@@ -9071,7 +9071,9 @@
         });
 
         // Carregar preferência salva
-        if (localStorage.getItem('darkMode') === 'true') {
+        if (localStorage.getItem('darkMode') === 'false') {
+            document.body.classList.remove('dark-mode');
+        } else if (localStorage.getItem('darkMode') === 'true') {
             document.body.classList.add('dark-mode');
             const icon = darkModeBtn?.querySelector('i');
             if (icon) {
@@ -24791,9 +24793,9 @@
 
     <!-- Sidebar Click Animation -->
     <script src="/js/sidebar-click-animation.js?v=20260224"></script>
-    <script src="/_shared/accessibility-widget.js?v=20260225"></script>
+    <script src="/_shared/accessibility-widget.js?v=20260418"></script>
     <!-- Chat Corporativo (Teams) -->
-    <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
+    <script src="/chat-teams/chat-widget.js?v=20260418" defer></script>
 </body>
 
 </html>

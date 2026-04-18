@@ -1,22 +1,23 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <!-- Favicon -->
-    <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
-    
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#1e1e1e">
     <meta name="format-detection" content="telephone=no">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Zyntra: Pedidos de Compra</title>
+    <title>Aluforce: Pedidos de Compra</title>
 
-    <!-- Sistema de Autentica��o Unificado -->
-    <script src="/js/auth-unified.js?v=20260326" defer></script>
-    <script src="/js/inactivity-manager.js?v=20260324" defer></script>
+    <!-- Sistema de Autenticação Unificado -->
+    <script src="/js/auth-unified.js?v=20260301" defer></script>
 
     <!-- Fontes -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,9 +26,9 @@
     <script src="/js/csp-fix.js" defer></script>
 
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
 
-    <!-- CSS Padr�o Global -->
+    <!-- CSS Padrão Global -->
     <link rel="stylesheet" href="/modules/Compras/css/compras-layout.css?v=20260301">
     <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260301">
     <link rel="stylesheet" href="/css/skeleton-loader.css?v=20260301">
@@ -39,7 +40,7 @@
         .fas, .far, .fab, .fa { font-family: 'Font Awesome 6 Free', 'Font Awesome 6 Brands', FontAwesome !important; font-style: normal; display: inline-block !important; visibility: visible !important; }
         .fas { font-weight: 900; } .far { font-weight: 400; }
 
-        /* Status badges espec�ficos de pedidos */
+        /* Status badges específicos de pedidos */
         .badge.aprovado { background: #dcfce7; color: #166534; }
         .badge.aprovado::before { background: #22c55e; }
         .badge.recebido { background: #dbeafe; color: #1e40af; }
@@ -61,118 +62,17 @@
         .items-table input:focus, .items-table select:focus { outline: none; border-color: var(--primary-400); }
         .btn-remove-item { width: 28px; height: 28px; border: none; background: #fef2f2; color: #ef4444; border-radius: var(--radius-sm); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; }
         .btn-remove-item:hover { background: #fee2e2; }
-    
-        /* === Metric Card Standard (prospeccao.html) === */
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-        .metric-card {
-            background: white;
-            border-radius: 16px;
-            padding: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-            border: 1px solid #e2e8f0;
-            transition: all 0.2s;
-            position: relative;
-            overflow: hidden;
-        }
-        .metric-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-        }
-        .metric-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 4px;
-        }
-        .metric-card.blue::before { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
-        .metric-card.orange::before { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
-        .metric-card.purple::before { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
-        .metric-card.green::before { background: linear-gradient(90deg, #22c55e, #4ade80); }
-        .metric-card.red::before { background: linear-gradient(90deg, #ef4444, #f87171); }
-        .metric-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 12px;
-        }
-        .metric-icon {
-            width: 44px; height: 44px;
-            border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 20px;
-        }
-        .metric-icon.blue { background: #eff6ff; color: #3b82f6; }
-        .metric-icon.orange { background: #fff7ed; color: #f59e0b; }
-        .metric-icon.purple { background: #faf5ff; color: #8b5cf6; }
-        .metric-icon.green { background: #f0fdf4; color: #22c55e; }
-        .metric-icon.red { background: #fef2f2; color: #ef4444; }
-        .metric-trend {
-            font-size: 11px;
-            padding: 4px 8px;
-            border-radius: 20px;
-            font-weight: 600;
-        }
-        .metric-trend.up { background: #dcfce7; color: #16a34a; }
-        .metric-trend.down { background: #fee2e2; color: #dc2626; }
-        .metric-value {
-            font-size: 32px;
-            font-weight: 800;
-            color: #1e293b;
-            line-height: 1;
-            margin-bottom: 4px;
-        }
-        .metric-label {
-            font-size: 13px;
-            color: #64748b;
-            font-weight: 500;
-        }
-        /* Pattern B/C compat: metric-content/metric-info wrappers */
-        .metric-content, .metric-info {
-            display: flex;
-            flex-direction: column;
-        }
-        .metric-content .metric-value,
-        .metric-info .value,
-        .metric-info h3 {
-            font-size: 32px;
-            font-weight: 800;
-            color: #1e293b;
-            line-height: 1;
-            margin: 0 0 4px;
-            order: 1;
-        }
-        .metric-content .metric-label,
-        .metric-info h3:first-child {
-            font-size: 13px;
-            color: #64748b;
-            font-weight: 500;
-            margin: 0;
-        }
-        .metric-content .metric-trend {
-            order: 3;
-            margin-top: 4px;
-        }
-        @media (max-width: 1400px) { .metrics-grid { grid-template-columns: repeat(3, 1fr); } }
-        @media (max-width: 1024px) { .metrics-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 768px) { .metrics-grid { grid-template-columns: 1fr; } }
-        /* === End Metric Card Standard === */
-
     </style>
 
     <script>
-        function toggleNotificações() { const p = document.getElementById('notification-panel'); if (p) p.classList.toggle('active'); }
+        function toggleNotificacoes() { const p = document.getElementById('notification-panel'); if (p) p.classList.toggle('active'); }
         function marcarTodasLidas() {}
-        function limparNotificações() {}
+        function limparNotificacoes() {}
     </script>
     <!-- Chat Widget BOB AI -->
     <link rel="stylesheet" href="/chat/widget.css?v=20260301">
 </head>
-<body class="dark-mode">
+<body>
     <div class="app-container">
         <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
 
@@ -182,14 +82,14 @@
             <nav class="sidebar-nav">
                 <button class="sidebar-btn" title="Dashboard" onclick="window.location.href='index.html'"><i class="fas fa-chart-line"></i></button>
                 <button class="sidebar-btn active" title="Pedidos" onclick="window.location.href='pedidos.html'"><i class="fas fa-shopping-cart"></i></button>
-                <button class="sidebar-btn" title="Cota��es" onclick="window.location.href='cotacoes.html'"><i class="fas fa-file-invoice-dollar"></i></button>
+                <button class="sidebar-btn" title="Cotações" onclick="window.location.href='cotacoes.html'"><i class="fas fa-file-invoice-dollar"></i></button>
                 <button class="sidebar-btn" title="Fornecedores" onclick="window.location.href='fornecedores.html'"><i class="fas fa-users"></i></button>
-                <button class="sidebar-btn" title="Requisi��es" onclick="window.location.href='requisicoes.html'"><i class="fas fa-clipboard-list"></i></button>
+                <button class="sidebar-btn" title="Requisições" onclick="window.location.href='requisicoes.html'"><i class="fas fa-clipboard-list"></i></button>
                 <button class="sidebar-btn" title="Recebimento" onclick="window.location.href='recebimento.html'"><i class="fas fa-truck-loading"></i></button>
             </nav>
             <div class="sidebar-bottom">
                 <button class="sidebar-btn" title="Estoque MP" onclick="window.location.href='gestao-estoque.html'"><i class="fas fa-boxes"></i></button>
-                <button class="sidebar-btn" title="Relat�rios" onclick="window.location.href='relatorios.html'"><i class="fas fa-chart-bar"></i></button>
+                <button class="sidebar-btn" title="Relatórios" onclick="window.location.href='relatorios.html'"><i class="fas fa-chart-bar"></i></button>
             </div>
         </aside>
 
@@ -202,15 +102,27 @@
                         <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
-                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;"></span>
+                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">—</span>
                         <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Pedidos</span>
                     </div>
                 </div>
                 <div class="header-right">
                     <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
-                    
+                    <div class="notification-container">
+                        <button class="header-btn notification-btn" title="Notificações" onclick="toggleNotificacoes()">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-badge hidden" id="notification-count">0</span>
+                        </button>
+                        <div class="notification-panel" id="notification-panel">
+                            <div class="notification-header"><h3><i class="fas fa-bell"></i> Notificações</h3><div class="notification-actions"><button onclick="marcarTodasLidas()" title="Marcar todas como lidas"><i class="fas fa-check-double"></i></button><button onclick="limparNotificacoes()" title="Limpar todas"><i class="fas fa-trash-alt"></i></button></div></div>
+                            <div class="notification-tabs"><button class="notif-tab active" onclick="filtrarNotificacoes('todas', this)">Todas</button><button class="notif-tab" onclick="filtrarNotificacoes('nao-lidas', this)">Não lidas</button><button class="notif-tab" onclick="filtrarNotificacoes('importantes', this)">Importantes</button></div>
+                            <div class="notification-list" id="notification-list"></div>
+                            <div class="notification-footer"><a href="#" onclick="verTodasNotificacoes(); return false;">Ver histórico completo</a></div>
+                        </div>
+                    </div>
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usu�rio</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
+                        <div class="user-avatar" id="user-avatar"><img src="" alt="" id="user-photo" style="display:none;"><span id="user-initial">U</span></div>
                     </div>
                 </div>
             </header>
@@ -227,32 +139,32 @@
                 </div>
 
                 <!-- Stats -->
-                <div class="metrics-grid">
-                    <div class="metric-card purple">
-                        <div class="metric-header"><div class="metric-icon purple"><i class="fas fa-shopping-cart"></i></div></div>
-                        <div class="metric-value" id="totalPedidos">0</div>
-                        <div class="metric-label">Total Pedidos</div>
+                <div class="stats-grid">
+                    <div class="stat-card purple">
+                        <div class="stat-header"><div class="stat-icon purple"><i class="fas fa-shopping-cart"></i></div></div>
+                        <div class="stat-value" id="totalPedidos">0</div>
+                        <div class="stat-label">Total Pedidos</div>
                     </div>
-                    <div class="metric-card orange">
-                        <div class="metric-header"><div class="metric-icon orange"><i class="fas fa-clock"></i></div></div>
-                        <div class="metric-value" id="pedidosPendentes">0</div>
-                        <div class="metric-label">Pendentes</div>
+                    <div class="stat-card amber">
+                        <div class="stat-header"><div class="stat-icon amber"><i class="fas fa-clock"></i></div></div>
+                        <div class="stat-value" id="pedidosPendentes">0</div>
+                        <div class="stat-label">Pendentes</div>
                     </div>
-                    <div class="metric-card green">
-                        <div class="metric-header"><div class="metric-icon green"><i class="fas fa-check-circle"></i></div></div>
-                        <div class="metric-value" id="pedidosAprovados">0</div>
-                        <div class="metric-label">Aprovados</div>
+                    <div class="stat-card green">
+                        <div class="stat-header"><div class="stat-icon green"><i class="fas fa-check-circle"></i></div></div>
+                        <div class="stat-value" id="pedidosAprovados">0</div>
+                        <div class="stat-label">Aprovados</div>
                     </div>
-                    <div class="metric-card blue">
-                        <div class="metric-header"><div class="metric-icon blue"><i class="fas fa-truck"></i></div></div>
-                        <div class="metric-value" id="pedidosRecebidos">0</div>
-                        <div class="metric-label">Recebidos</div>
+                    <div class="stat-card blue">
+                        <div class="stat-header"><div class="stat-icon blue"><i class="fas fa-truck"></i></div></div>
+                        <div class="stat-value" id="pedidosRecebidos">0</div>
+                        <div class="stat-label">Recebidos</div>
                     </div>
                 </div>
 
                 <!-- Filters -->
                 <div class="filters-bar">
-                    <div class="search-box"><i class="fas fa-search"></i><input type="text" id="searchInput" placeholder="Buscar por n�mero, fornecedor..." onkeyup="filtrarPedidos()"></div>
+                    <div class="search-box"><i class="fas fa-search"></i><input type="text" id="searchInput" placeholder="Buscar por número, fornecedor..." onkeyup="filtrarPedidos()"></div>
                     <button class="filter-btn active" onclick="setFiltro('todos', this)"><i class="fas fa-list"></i> Todos</button>
                     <button class="filter-btn" onclick="setFiltro('pendente', this)"><i class="fas fa-clock"></i> Pendentes</button>
                     <button class="filter-btn" onclick="setFiltro('aprovado', this)"><i class="fas fa-check"></i> Aprovados</button>
@@ -272,13 +184,13 @@
                             <thead>
                                 <tr>
                                     <th style="width:40px;"><input type="checkbox" id="selectAllPedidos" onchange="toggleSelectAll(this)"></th>
-                                    <th>N� Pedido</th>
+                                    <th>Nº Pedido</th>
                                     <th>Fornecedor</th>
                                     <th>Data</th>
                                     <th>Valor Total</th>
                                     <th>Prazo Entrega</th>
                                     <th>Status</th>
-                                    <th style="min-width:140px;">A��es</th>
+                                    <th>Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="pedidosTableBody"></tbody>
@@ -307,7 +219,7 @@
                     <input type="hidden" id="pedidoId">
                     <div class="form-row" style="grid-template-columns:1fr 1fr 1fr;">
                         <div class="form-group">
-                            <label>N�mero do Pedido</label>
+                            <label>Número do Pedido</label>
                             <input type="text" id="numeroPedido" class="form-control" readonly style="background:var(--gray-50);">
                         </div>
                         <div class="form-group">
@@ -315,18 +227,16 @@
                             <input type="date" id="dataPedido" class="form-control">
                         </div>
                         <div class="form-group">
-                            <label>Previs�o de Entrega</label>
+                            <label>Previsão de Entrega</label>
                             <input type="date" id="dataEntregaPrevista" class="form-control">
                         </div>
                     </div>
                     <div class="form-row">
                         <div class="form-group">
                             <label>Fornecedor <span class="required">*</span></label>
-                            <div style="position:relative;">
-                                <input type="text" id="fornecedorBusca" class="form-control" placeholder="Digite para buscar fornecedor..." autocomplete="off" oninput="filtrarFornecedoresAutocomplete(this.value)">
-                                <input type="hidden" id="fornecedorId" required>
-                                <div id="fornecedorDropdown" class="autocomplete-dropdown" style="display:none; position:absolute; top:100%; left:0; right:0; z-index:999; max-height:200px; overflow-y:auto; background:#fff; border:1px solid #e2e8f0; border-radius:8px; box-shadow:0 8px 24px rgba(0,0,0,0.12);"></div>
-                            </div>
+                            <select id="fornecedorId" class="form-control" required>
+                                <option value="">Selecione o fornecedor...</option>
+                            </select>
                         </div>
                         <div class="form-group">
                             <label>Status</label>
@@ -351,7 +261,7 @@
                                     <th>Produto/Material</th>
                                     <th style="width:80px;text-align:center;">Qtd</th>
                                     <th style="width:80px;text-align:center;">Un.</th>
-                                    <th style="width:110px;text-align:center;">Pre�o Unit.</th>
+                                    <th style="width:110px;text-align:center;">Preço Unit.</th>
                                     <th style="width:110px;text-align:right;">Subtotal</th>
                                     <th style="width:40px;"></th>
                                 </tr>
@@ -362,10 +272,10 @@
 
                     <div class="form-row" style="grid-template-columns:1fr 1fr 1fr;">
                         <div class="form-group">
-                            <label>Condi��es de Pagamento</label>
+                            <label>Condições de Pagamento</label>
                             <select id="condicoesPagamento" class="form-control">
                                 <option value="">Selecione...</option>
-                                <option value="avista">� Vista</option>
+                                <option value="avista">À Vista</option>
                                 <option value="30dias">30 dias</option>
                                 <option value="30-60">30/60 dias</option>
                                 <option value="30-60-90">30/60/90 dias</option>
@@ -389,7 +299,7 @@
                     </div>
 
                     <div class="form-group mt-4">
-                        <label>Observa��es</label>
+                        <label>Observações</label>
                         <textarea id="observacoes" class="form-control" rows="3"></textarea>
                     </div>
                 </form>
@@ -426,7 +336,7 @@
     </script>
 
     <!-- Module Scripts -->
-    <script src="/modules/Compras/js/compras-utils.js?v=20260416"></script>
+    <script src="/modules/Compras/js/compras-utils.js?v=20260301"></script>
     <script src="/modules/Compras/notifications.js?v=20260301"></script>
     <script src="/modules/Compras/pedidos.js?v=20260301"></script>
     <script src="/modules/Compras/compras-user-loader.js?v=20260301"></script>
@@ -442,11 +352,6 @@
 
     <!-- Enterprise Shared -->
     <script src="/js/sidebar-click-animation.js?v=20260301"></script>
-    <script src="/_shared/accessibility-widget.js?v=20260301"></script>
-
-    <!-- Chat Corporativo (Teams) -->
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
-    <script src="/js/user-dropdown.js?v=20260319" defer></script>
+    <script src="/_shared/accessibility-widget.js?v=20260418"></script>
 </body>
 </html>
