@@ -1276,6 +1276,9 @@ function safeSendModuleHtml(req, res, next, moduleDir) {
             }
         }
         res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
         res.send(html);
     } else {
         next();
