@@ -39,6 +39,10 @@ module.exports = function createPCPRoutes(deps) {
         if (req.path.startsWith('/api/transportadoras')) {
             return next(); // Transportadoras são usadas por Vendas, Logística e PCP
         }
+        // Árvore de produto (GET somente-leitura) é usada pelo módulo Vendas para parâmetros fiscais (DIFAL/ICMS-ST)
+        if (req.path === '/arvore-produto' && req.method === 'GET') {
+            return next();
+        }
         // Helper: tenta autorizar por uma área sem enviar resposta de erro
         const tryAuth = (area) => new Promise((resolve) => {
             const fakeRes = {
@@ -1721,7 +1725,7 @@ module.exports = function createPCPRoutes(deps) {
             }
         };
 
-        res.set('Content-Type', 'text/plain');
+        res.set('Content-Type', 'text/plain; charset=utf-8');
         res.send(`# Zyntra v2.0 Metrics
     aluforce_uptime_seconds ${metrics.process.uptime}
     aluforce_memory_used_bytes ${metrics.process.memory.heapUsed}
@@ -2118,6 +2122,124 @@ module.exports = function createPCPRoutes(deps) {
                 message: 'Erro ao buscar movimentações',
                 error: 'Erro interno no servidor. Tente novamente.'
             });
+        }
+    });
+
+    // POST /estoque/movimentacao - Registrar entrada, saída ou ajuste de estoque
+    // Suporta produto_id (produtos) e material_id (materiais)
+    // SECURITY: Requer autenticação. Isolamento por banco de dados (pool tenant-specific)
+    router.post('/estoque/movimentacao', authenticateToken, async (req, res) => {
+        const { material_id, produto_id, tipo, quantidade, observacoes, observacao, local, documento } = req.body;
+        const itemId = material_id || produto_id;
+        if (!itemId) return res.status(400).json({ success: false, message: 'Informe produto_id ou material_id' });
+        if (!quantidade || isNaN(parseFloat(quantidade))) return res.status(400).json({ success: false, message: 'Quantidade inválida' });
+
+        const tabela = material_id ? 'materiais' : 'produtos';
+        const coluna = material_id ? 'quantidade_estoque' : 'estoque_atual';
+        const obs = observacoes || observacao || '';
+        const tipoNorm = (tipo || 'ENTRADA').toUpperCase();
+        if (!['ENTRADA', 'SAIDA', 'AJUSTE'].includes(tipoNorm)) {
+            return res.status(400).json({ success: false, message: 'Tipo inválido. Use ENTRADA, SAIDA ou AJUSTE' });
+        }
+
+        try {
+            const colunaSelect = tabela === 'produtos'
+                ? 'COALESCE(estoque_atual, 0) as quantidade, nome, codigo'
+                : 'quantidade_estoque as quantidade, descricao as nome, codigo_material as codigo';
+            const [[item]] = await pool.query(`SELECT ${colunaSelect} FROM ${tabela} WHERE id = ?`, [itemId]);
+            if (!item) return res.status(404).json({ success: false, message: `${tabela === 'materiais' ? 'Material' : 'Produto'} não encontrado` });
+
+            const quantidadeAnterior = parseFloat(item.quantidade) || 0;
+            let novaQuantidade;
+            const qtd = parseFloat(quantidade);
+            switch (tipoNorm) {
+                case 'ENTRADA':  novaQuantidade = quantidadeAnterior + qtd; break;
+                case 'SAIDA':    novaQuantidade = quantidadeAnterior - qtd; break;
+                case 'AJUSTE':   novaQuantidade = qtd; break;
+            }
+            if (novaQuantidade < 0) return res.status(400).json({ success: false, message: 'Quantidade insuficiente em estoque' });
+
+            const conn = await pool.getConnection();
+            try {
+                await conn.beginTransaction();
+                await conn.query(`UPDATE ${tabela} SET ${coluna} = ? WHERE id = ?`, [novaQuantidade, itemId]);
+                await conn.query(`
+                    INSERT INTO movimentacoes_estoque
+                    (material_id, produto_id, tipo, quantidade, quantidade_anterior, quantidade_atual, observacoes, local, documento, usuario_id, created_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+                `, [material_id || null, produto_id || null, tipoNorm, qtd, quantidadeAnterior, novaQuantidade, obs, local || 'PRINCIPAL', documento || null, req.user?.id || null]);
+                await conn.commit();
+            } catch (txErr) {
+                try { await conn.rollback(); } catch(e) {}
+                throw txErr;
+            } finally {
+                conn.release();
+            }
+
+            res.json({
+                success: true,
+                message: 'Movimentação registrada com sucesso',
+                quantidade_anterior: quantidadeAnterior,
+                quantidade_atual: novaQuantidade,
+                nome_item: item.nome
+            });
+        } catch (err) {
+            console.error('[PCP] Erro ao registrar movimentação de estoque:', err.message);
+            res.status(500).json({ success: false, message: 'Erro ao registrar movimentação' });
+        }
+    });
+
+    // POST /materiais/movimentacao - Registrar movimentação de material
+    router.post('/materiais/movimentacao', authenticateToken, async (req, res) => {
+        const { material_id, produto_id, tipo, quantidade, observacoes, observacao, local, documento } = req.body;
+        const matId = material_id || produto_id;
+        if (!matId) return res.status(400).json({ success: false, message: 'Informe material_id' });
+        if (!quantidade || isNaN(parseFloat(quantidade))) return res.status(400).json({ success: false, message: 'Quantidade inválida' });
+
+        const obs = observacoes || observacao || '';
+        const tipoNorm = (tipo || 'ENTRADA').toUpperCase();
+        if (!['ENTRADA', 'SAIDA', 'AJUSTE'].includes(tipoNorm)) {
+            return res.status(400).json({ success: false, message: 'Tipo inválido' });
+        }
+
+        try {
+            const [[item]] = await pool.query(
+                'SELECT quantidade_estoque as quantidade, descricao as nome FROM materiais WHERE id = ?',
+                [matId]
+            );
+            if (!item) return res.status(404).json({ success: false, message: 'Material não encontrado' });
+
+            const quantidadeAnterior = parseFloat(item.quantidade) || 0;
+            let novaQuantidade;
+            const qtd = parseFloat(quantidade);
+            switch (tipoNorm) {
+                case 'ENTRADA':  novaQuantidade = quantidadeAnterior + qtd; break;
+                case 'SAIDA':    novaQuantidade = quantidadeAnterior - qtd; break;
+                case 'AJUSTE':   novaQuantidade = qtd; break;
+            }
+            if (novaQuantidade < 0) return res.status(400).json({ success: false, message: 'Quantidade insuficiente em estoque' });
+
+            const conn = await pool.getConnection();
+            try {
+                await conn.beginTransaction();
+                await conn.query('UPDATE materiais SET quantidade_estoque = ? WHERE id = ?', [novaQuantidade, matId]);
+                await conn.query(`
+                    INSERT INTO movimentacoes_estoque
+                    (material_id, tipo, quantidade, quantidade_anterior, quantidade_atual, observacoes, local, documento, usuario_id, created_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+                `, [matId, tipoNorm, qtd, quantidadeAnterior, novaQuantidade, obs, local || 'PRINCIPAL', documento || null, req.user?.id || null]);
+                await conn.commit();
+            } catch (txErr) {
+                try { await conn.rollback(); } catch(e) {}
+                throw txErr;
+            } finally {
+                conn.release();
+            }
+
+            res.json({ success: true, message: 'Movimentação registrada com sucesso', quantidade_anterior: quantidadeAnterior, quantidade_atual: novaQuantidade, nome_item: item.nome });
+        } catch (err) {
+            console.error('[PCP] Erro ao registrar movimentação de material:', err.message);
+            res.status(500).json({ success: false, message: 'Erro ao registrar movimentação' });
         }
     });
 
@@ -3642,6 +3764,7 @@ module.exports = function createPCPRoutes(deps) {
     // Pipeline: dados → XML (xmlbuilder2) → XSLT transforma em XSL-FO → Apache FOP gera PDF
     const { gerarOrdemXML } = require('../services/ordem-xml-generator');
     const { gerarPdfComFop, verificarFop } = require('../services/fop-pdf-service');
+    const { buscarConfiguracoesEmpresa, formatarDadosParaPDF } = require('../modules/_shared/services/empresa-config.service');
 
     // GET /api/ordem-pdf/status - Verifica se FOP está disponível
     router.get('/api/ordem-pdf/status', authenticateToken, (req, res) => {
@@ -3713,6 +3836,24 @@ module.exports = function createPCPRoutes(deps) {
                 } catch (dbErr) {
                     console.warn('⚠️ Erro ao buscar dados da transportadora para PDF:', dbErr.message);
                 }
+            }
+
+            // 0. Buscar dados da empresa do banco
+            try {
+                const empresaConfig = await buscarConfiguracoesEmpresa(pool);
+                const dadosEmpPDF = formatarDadosParaPDF(empresaConfig);
+                dadosOrdem.empresa = {
+                    nome: dadosEmpPDF.nome,
+                    razao_social: dadosEmpPDF.nome,
+                    endereco: dadosEmpPDF.endereco,
+                    bairro: dadosEmpPDF.bairro || '',
+                    cep: dadosEmpPDF.cep,
+                    cidade: dadosEmpPDF.cidade,
+                    estado: dadosEmpPDF.estado,
+                    enderecoCompleto: `${dadosEmpPDF.endereco}, ${dadosEmpPDF.numero || ''} - ${dadosEmpPDF.bairro || ''}`.replace(/ - $/, '')
+                };
+            } catch (empErr) {
+                console.warn('⚠️ Erro ao buscar config empresa para OP PDF:', empErr.message);
             }
 
             // 1. Gerar XML estruturado
@@ -9368,6 +9509,340 @@ tr:nth-child(even){background:#f8fafc}
         console.log('[PCP/QUALIDADE] Checklist excluído:', req.params.id);
         res.json({ success: true });
     }));
+
+
+    // ==================== ROTAS DE RELATÓRIOS PCP ====================
+
+    // ==================== ROTAS DE RELATÓRIOS PCP ====================
+
+    // 1. Cabos mais vendidos (ranking por quantidade e valor)
+    router.get('/relatórios/cabos-mais-vendidos', async (req, res) => {
+        try {
+            const { data_inicio, data_fim, limit } = req.query;
+            const maxResults = parseInt(limit) || 20;
+            let whereClause = '';
+            let params = [];
+
+            if (data_inicio && data_fim) {
+                whereClause = 'WHERE p.created_at BETWEEN ? AND ?';
+                params = [data_inicio, data_fim];
+            }
+
+            const [porQuantidade] = await pool.query(`
+                SELECT
+                    pi.codigo,
+                    pi.descricao,
+                    SUM(pi.quantidade) as total_quantidade,
+                    pi.unidade,
+                    SUM(pi.subtotal) as total_valor,
+                    COUNT(DISTINCT pi.pedido_id) as total_pedidos,
+                    AVG(pi.preco_unitario) as preco_medio
+                FROM pedido_itens pi
+                LEFT JOIN pedidos p ON pi.pedido_id = p.id
+                ${whereClause}
+                GROUP BY pi.codigo, pi.descricao, pi.unidade
+                ORDER BY total_quantidade DESC
+                LIMIT ?
+            `, [...params, maxResults]);
+
+            const [porValor] = await pool.query(`
+                SELECT
+                    pi.codigo,
+                    pi.descricao,
+                    SUM(pi.quantidade) as total_quantidade,
+                    pi.unidade,
+                    SUM(pi.subtotal) as total_valor,
+                    COUNT(DISTINCT pi.pedido_id) as total_pedidos,
+                    AVG(pi.preco_unitario) as preco_medio
+                FROM pedido_itens pi
+                LEFT JOIN pedidos p ON pi.pedido_id = p.id
+                ${whereClause}
+                GROUP BY pi.codigo, pi.descricao, pi.unidade
+                ORDER BY total_valor DESC
+                LIMIT ?
+            `, [...params, maxResults]);
+
+            const [resumo] = await pool.query(`
+                SELECT
+                    COUNT(DISTINCT pi.codigo) as total_produtos_vendidos,
+                    SUM(pi.quantidade) as quantidade_total,
+                    SUM(pi.subtotal) as valor_total,
+                    COUNT(DISTINCT pi.pedido_id) as total_pedidos
+                FROM pedido_itens pi
+                LEFT JOIN pedidos p ON pi.pedido_id = p.id
+                ${whereClause}
+            `, params);
+
+            let whereOP = '';
+            let paramsOP = [];
+            if (data_inicio && data_fim) {
+                whereOP = 'WHERE data_inicio BETWEEN ? AND ?';
+                paramsOP = [data_inicio, data_fim];
+            }
+
+            const [ordensProducao] = await pool.query(`
+                SELECT
+                    produto_nome,
+                    codigo,
+                    SUM(quantidade) as total_quantidade,
+                    SUM(metragem) as total_metragem,
+                    COUNT(*) as total_ordens,
+                    unidade
+                FROM ordens_producao
+                ${whereOP}
+                GROUP BY produto_nome, codigo, unidade
+                ORDER BY total_quantidade DESC
+                LIMIT ?
+            `, [...paramsOP, maxResults]);
+
+            res.json({
+                success: true,
+                ranking_por_quantidade: porQuantidade,
+                ranking_por_valor: porValor,
+                ordens_producao: ordensProducao,
+                resumo: resumo[0] || {},
+                periodo: { data_inicio, data_fim }
+            });
+        } catch (err) {
+            console.error('[PCP_RELATORIOS] Erro cabos mais vendidos:', err.message);
+            res.status(500).json({ success: false, message: 'Erro ao gerar relatório de cabos mais vendidos.' });
+        }
+    });
+
+    // 2. Ranking de vendas (por vendedor, cliente, produto)
+    router.get('/relatórios/ranking-vendas', async (req, res) => {
+        try {
+            const { data_inicio, data_fim, agrupar } = req.query;
+            let whereClause = '';
+            let params = [];
+
+            if (data_inicio && data_fim) {
+                whereClause = 'WHERE p.created_at BETWEEN ? AND ?';
+                params = [data_inicio, data_fim];
+            }
+
+            const [porVendedor] = await pool.query(`
+                SELECT
+                    COALESCE(p.vendedor_nome, 'Não informado') as vendedor,
+                    COUNT(*) as total_pedidos,
+                    SUM(p.valor) as valor_total,
+                    AVG(p.valor) as ticket_medio,
+                    COUNT(CASE WHEN p.status = 'faturado' THEN 1 END) as pedidos_faturados,
+                    COUNT(CASE WHEN p.status = 'aprovado' THEN 1 END) as pedidos_aprovados
+                FROM pedidos p
+                ${whereClause}
+                GROUP BY p.vendedor_nome
+                ORDER BY valor_total DESC
+                LIMIT 20
+            `, params);
+
+            const [porCliente] = await pool.query(`
+                SELECT
+                    COALESCE(p.cliente_nome, 'Não informado') as cliente,
+                    COUNT(*) as total_pedidos,
+                    SUM(p.valor) as valor_total,
+                    AVG(p.valor) as ticket_medio,
+                    MAX(p.created_at) as ultimo_pedido
+                FROM pedidos p
+                ${whereClause}
+                GROUP BY p.cliente_nome
+                ORDER BY valor_total DESC
+                LIMIT 20
+            `, params);
+
+            const [totais] = await pool.query(`
+                SELECT
+                    COUNT(*) as total_pedidos,
+                    SUM(p.valor) as valor_total,
+                    AVG(p.valor) as ticket_medio,
+                    COUNT(DISTINCT p.vendedor_nome) as total_vendedores,
+                    COUNT(DISTINCT p.cliente_nome) as total_clientes
+                FROM pedidos p
+                ${whereClause}
+            `, params);
+
+            const [evolucaoMensal] = await pool.query(`
+                SELECT
+                    DATE_FORMAT(p.created_at, '%Y-%m') as mes,
+                    COUNT(*) as total_pedidos,
+                    SUM(p.valor) as valor_total
+                FROM pedidos p
+                ${whereClause.length > 0 ? whereClause : 'WHERE p.created_at IS NOT NULL'}
+                GROUP BY DATE_FORMAT(p.created_at, '%Y-%m')
+                ORDER BY mes DESC
+                LIMIT 12
+            `, params);
+
+            res.json({
+                success: true,
+                por_vendedor: porVendedor,
+                por_cliente: porCliente,
+                evolucao_mensal: evolucaoMensal.reverse(),
+                totais: totais[0] || {},
+                periodo: { data_inicio, data_fim }
+            });
+        } catch (err) {
+            console.error('[PCP_RELATORIOS] Erro ranking vendas:', err.message);
+            res.status(500).json({ success: false, message: 'Erro ao gerar ranking de vendas.' });
+        }
+    });
+
+    // 3. Metros produzidos por dia
+    router.get('/relatórios/metros-produzidos', async (req, res) => {
+        try {
+            const { data_inicio, data_fim } = req.query;
+
+            const fim = data_fim || new Date().toISOString().slice(0, 10);
+            const inicio = data_inicio || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+
+            const [apontamentosDiarios] = await pool.query(`
+                SELECT
+                    DATE(ap.data_apontamento) as data,
+                    SUM(ap.quantidade_produzida) as quantidade_produzida,
+                    SUM(ap.tempo_producao) as tempo_total_min,
+                    COUNT(*) as total_apontamentos,
+                    GROUP_CONCAT(DISTINCT ap.maquina SEPARATOR ', ') as maquinas,
+                    GROUP_CONCAT(DISTINCT ap.operador SEPARATOR ', ') as operadores
+                FROM apontamentos_producao ap
+                WHERE ap.data_apontamento BETWEEN ? AND ?
+                GROUP BY DATE(ap.data_apontamento)
+                ORDER BY data ASC
+            `, [inicio, fim]);
+
+            const [ordensConcluidasDia] = await pool.query(`
+                SELECT
+                    DATE(COALESCE(data_conclusao, data_inicio)) as data,
+                    SUM(metragem) as total_metragem,
+                    SUM(quantidade) as total_quantidade,
+                    COUNT(*) as total_ordens,
+                    GROUP_CONCAT(DISTINCT produto_nome SEPARATOR ', ') as produtos
+                FROM ordens_producao
+                WHERE (data_conclusao BETWEEN ? AND ? OR data_inicio BETWEEN ? AND ?)
+                GROUP BY DATE(COALESCE(data_conclusao, data_inicio))
+                ORDER BY data ASC
+            `, [inicio, fim, inicio, fim]);
+
+            const [resumoApontamentos] = await pool.query(`
+                SELECT
+                    SUM(quantidade_produzida) as total_produzido,
+                    AVG(quantidade_produzida) as media_diaria,
+                    MAX(quantidade_produzida) as max_dia,
+                    MIN(quantidade_produzida) as min_dia,
+                    SUM(tempo_producao) as tempo_total,
+                    COUNT(DISTINCT DATE(data_apontamento)) as dias_com_producao
+                FROM apontamentos_producao
+                WHERE data_apontamento BETWEEN ? AND ?
+            `, [inicio, fim]);
+
+            const [resumoOrdens] = await pool.query(`
+                SELECT
+                    SUM(metragem) as total_metragem,
+                    SUM(quantidade) as total_quantidade,
+                    COUNT(*) as total_ordens,
+                    COUNT(CASE WHEN status = 'concluida' THEN 1 END) as ordens_concluidas,
+                    COUNT(CASE WHEN status = 'em_producao' THEN 1 END) as ordens_em_producao
+                FROM ordens_producao
+                WHERE data_inicio BETWEEN ? AND ? OR data_conclusao BETWEEN ? AND ?
+            `, [inicio, fim, inicio, fim]);
+
+            res.json({
+                success: true,
+                apontamentos_diarios: apontamentosDiarios,
+                ordens_por_dia: ordensConcluidasDia,
+                resumo_apontamentos: resumoApontamentos[0] || {},
+                resumo_ordens: resumoOrdens[0] || {},
+                periodo: { data_inicio: inicio, data_fim: fim }
+            });
+        } catch (err) {
+            console.error('[PCP_RELATORIOS] Erro metros produzidos:', err.message);
+            res.status(500).json({ success: false, message: 'Erro ao gerar relatório de metros produzidos.' });
+        }
+    });
+
+    // 4. Faturamento mensal
+    router.get('/relatórios/faturamento-mensal', async (req, res) => {
+        try {
+            const { ano } = req.query;
+            const anoFiltro = parseInt(ano) || new Date().getFullYear();
+
+            const [faturamentoPF] = await pool.query(`
+                SELECT
+                    DATE_FORMAT(data_faturamento, '%Y-%m') as mes,
+                    MONTH(data_faturamento) as mes_num,
+                    COUNT(*) as total_pedidos,
+                    SUM(total) as valor_total,
+                    AVG(total) as ticket_medio
+                FROM pedidos_faturados
+                WHERE YEAR(data_faturamento) = ?
+                GROUP BY DATE_FORMAT(data_faturamento, '%Y-%m'), MONTH(data_faturamento)
+                ORDER BY mes_num ASC
+            `, [anoFiltro]);
+
+            const [faturamentoPedidos] = await pool.query(`
+                SELECT
+                    DATE_FORMAT(p.created_at, '%Y-%m') as mes,
+                    MONTH(p.created_at) as mes_num,
+                    COUNT(*) as total_pedidos,
+                    SUM(p.valor) as valor_total,
+                    AVG(p.valor) as ticket_medio
+                FROM pedidos p
+                WHERE p.status IN ('faturado', 'entregue', 'convertido')
+                AND YEAR(p.created_at) = ?
+                GROUP BY DATE_FORMAT(p.created_at, '%Y-%m'), MONTH(p.created_at)
+                ORDER BY mes_num ASC
+            `, [anoFiltro]);
+
+            const [faturamentoAnoAnterior] = await pool.query(`
+                SELECT
+                    SUM(total) as valor_total,
+                    COUNT(*) as total_pedidos
+                FROM pedidos_faturados
+                WHERE YEAR(data_faturamento) = ?
+            `, [anoFiltro - 1]);
+
+            const [faturamentoAnoAtual] = await pool.query(`
+                SELECT
+                    SUM(total) as valor_total,
+                    COUNT(*) as total_pedidos
+                FROM pedidos_faturados
+                WHERE YEAR(data_faturamento) = ?
+            `, [anoFiltro]);
+
+            const [topClientes] = await pool.query(`
+                SELECT
+                    cliente,
+                    COUNT(*) as total_pedidos,
+                    SUM(total) as valor_total
+                FROM pedidos_faturados
+                WHERE YEAR(data_faturamento) = ?
+                GROUP BY cliente
+                ORDER BY valor_total DESC
+                LIMIT 10
+            `, [anoFiltro]);
+
+            const totalAtual = faturamentoAnoAtual[0]?.valor_total || 0;
+            const totalAnterior = faturamentoAnoAnterior[0]?.valor_total || 0;
+            const variacao = totalAnterior > 0 ? ((totalAtual - totalAnterior) / totalAnterior * 100).toFixed(2) : 0;
+
+            res.json({
+                success: true,
+                faturamento_mensal: faturamentoPF,
+                faturamento_pedidos: faturamentoPedidos,
+                top_clientes: topClientes,
+                resumo: {
+                    ano: anoFiltro,
+                    valor_total_ano: totalAtual,
+                    total_pedidos_ano: faturamentoAnoAtual[0]?.total_pedidos || 0,
+                    valor_ano_anterior: totalAnterior,
+                    variacao_percentual: `${variacao}%`
+                }
+            });
+        } catch (err) {
+            console.error('[PCP_RELATORIOS] Erro faturamento mensal:', err.message);
+            res.status(500).json({ success: false, message: 'Erro ao gerar relatório de faturamento mensal.' });
+        }
+    });
+
 
     return router;
 };

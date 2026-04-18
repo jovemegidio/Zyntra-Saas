@@ -30,6 +30,7 @@
     <!-- CSS Padrão Global -->
     <link rel="stylesheet" href="/modules/Compras/css/compras-layout.css?v=20260301">
     <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260301">
+    <link rel="stylesheet" href="css/fin-header-sidebar.css?v=20260418">
     <link rel="stylesheet" href="/css/skeleton-loader.css?v=20260301">
     <link rel="stylesheet" href="/css/popup-confirmacao.css?v=20260301">
 
@@ -39,8 +40,8 @@
 
         .badge.aberta { background: #dbeafe; color: #1e40af; }
         .badge.aberta::before { background: #3b82f6; }
-        .badge.analise { background: #fef3c7; color: #92400e; }
-        .badge.analise::before { background: #f59e0b; }
+        .badge.análise { background: #fef3c7; color: #92400e; }
+        .badge.análise::before { background: #f59e0b; }
         .badge.finalizada { background: #dcfce7; color: #166534; }
         .badge.finalizada::before { background: #22c55e; }
         .badge.cancelada { background: #f3f4f6; color: #4b5563; }
@@ -101,9 +102,9 @@
     </style>
 
     <script>
-        function toggleNotificacoes() { const p = document.getElementById('notification-panel'); if (p) p.classList.toggle('active'); }
+        function toggleNotificações() { const p = document.getElementById('notification-panel'); if (p) p.classList.toggle('active'); }
         function marcarTodasLidas() {}
-        function limparNotificacoes() {}
+        function limparNotificações() {}
     </script>
     <script src="/js/anti-copy-protection.js" defer></script>
     <!-- Chat Widget BOB AI -->
@@ -122,11 +123,11 @@
                 <button class="sidebar-btn" title="Pedidos" onclick="window.location.href='pedidos.html'"><i class="fas fa-shopping-cart"></i></button>
                 <button class="sidebar-btn active" title="Cotações" onclick="window.location.href='cotacoes.html'"><i class="fas fa-file-invoice-dollar"></i></button>
                 <button class="sidebar-btn" title="Fornecedores" onclick="window.location.href='fornecedores.html'"><i class="fas fa-users"></i></button>
-                <button class="sidebar-btn" title="Requisições" onclick="window.location.href='requisicoes.html'"><i class="fas fa-clipboard-list"></i></button>
+                <button class="sidebar-btn" title="Requisições" onclick="window.location.href='requisições.html'"><i class="fas fa-clipboard-list"></i></button>
                 <button class="sidebar-btn" title="Recebimento" onclick="window.location.href='recebimento.html'"><i class="fas fa-truck-loading"></i></button>
             </nav>
             <div class="sidebar-bottom">
-                <button class="sidebar-btn" title="Estoque MP" onclick="window.location.href='gestao-estoque.html'"><i class="fas fa-boxes"></i></button>
+                <button class="sidebar-btn" title="Estoque MP" onclick="window.location.href='Gestão-estoque.html'"><i class="fas fa-boxes"></i></button>
                 <button class="sidebar-btn" title="QR Code Estoque" onclick="window.location.href='qrcode-estoque.html'"><i class="fas fa-qrcode"></i></button>
                 <button class="sidebar-btn" title="Relatórios" onclick="window.location.href='relatorios.html'"><i class="fas fa-chart-bar"></i></button>
             </div>
@@ -157,8 +158,8 @@
                 <div class="page-header">
                     <div class="page-header-top">
                         <div class="page-actions">
-                            <button class="btn btn-secondary" onclick="cotacoesManager.exportar()"><i class="fas fa-download"></i> Exportar</button>
-                            <button class="btn btn-primary" onclick="abrirModalNovaCotacao()"><i class="fas fa-plus"></i> Nova Cotação</button>
+                            <button class="btn btn-secondary" onclick="cotaçõesManager.exportar()"><i class="fas fa-download"></i> Exportar</button>
+                            <button class="btn btn-primary" onclick="abrirModalNovaCotação()"><i class="fas fa-plus"></i> Nova Cotação</button>
                         </div>
                     </div>
                 </div>
@@ -189,12 +190,12 @@
 
                 <!-- Filters -->
                 <div class="filters-bar">
-                    <div class="search-box"><i class="fas fa-search"></i><input type="text" id="searchCotacao" placeholder="Buscar por código, fornecedor, material..." oninput="cotacoesManager.filtrar()"></div>
-                    <button class="filter-btn active" onclick="cotacoesManager.filtrarPorStatus('todos')"><i class="fas fa-list"></i> Todas</button>
-                    <button class="filter-btn" onclick="cotacoesManager.filtrarPorStatus('Rascunho')"><i class="fas fa-edit"></i> Rascunho</button>
-                    <button class="filter-btn" onclick="cotacoesManager.filtrarPorStatus('Enviada')"><i class="fas fa-paper-plane"></i> Enviadas</button>
-                    <button class="filter-btn" onclick="cotacoesManager.filtrarPorStatus('Em Análise')"><i class="fas fa-search-dollar"></i> Em Análise</button>
-                    <button class="filter-btn" onclick="cotacoesManager.filtrarPorStatus('Aprovada')"><i class="fas fa-check-circle"></i> Aprovadas</button>
+                    <div class="search-box"><i class="fas fa-search"></i><input type="text" id="searchCotacao" placeholder="Buscar por código, fornecedor, material..." oninput="cotaçõesManager.filtrar()"></div>
+                    <button class="filter-btn active" onclick="cotaçõesManager.filtrarPorStatus('todos')"><i class="fas fa-list"></i> Todas</button>
+                    <button class="filter-btn" onclick="cotaçõesManager.filtrarPorStatus('Rascunho')"><i class="fas fa-edit"></i> Rascunho</button>
+                    <button class="filter-btn" onclick="cotaçõesManager.filtrarPorStatus('Enviada')"><i class="fas fa-paper-plane"></i> Enviadas</button>
+                    <button class="filter-btn" onclick="cotaçõesManager.filtrarPorStatus('Em Análise')"><i class="fas fa-search-dollar"></i> Em Análise</button>
+                    <button class="filter-btn" onclick="cotaçõesManager.filtrarPorStatus('Aprovada')"><i class="fas fa-check-circle"></i> Aprovadas</button>
                 </div>
 
                 <!-- Table -->
@@ -232,7 +233,7 @@
         <div class="modal" style="max-width:800px;">
             <div class="modal-header">
                 <h3><i class="fas fa-plus-circle"></i> <span id="modalCotacaoTitulo">Nova Cotação de Compra</span></h3>
-                <button class="modal-close" onclick="fecharModalCotacao()"><i class="fas fa-times"></i></button>
+                <button class="modal-close" onclick="fecharModalCotação()"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body">
                 <form id="formCotacao">
@@ -290,8 +291,8 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="fecharModalCotacao()">Cancelar</button>
-                <button class="btn btn-primary" onclick="salvarCotacao()"><i class="fas fa-save"></i> Salvar Cotação</button>
+                <button class="btn btn-secondary" onclick="fecharModalCotação()">Cancelar</button>
+                <button class="btn btn-primary" onclick="salvarCotação()"><i class="fas fa-save"></i> Salvar Cotação</button>
             </div>
         </div>
     </div>
@@ -327,7 +328,7 @@
             }
         }
 
-        async function carregarMateriaisCotacao() {
+        async function carregarMateriaisCotação() {
             const select = document.getElementById('cotMaterial');
             if (!select) return;
             try {
@@ -337,47 +338,47 @@
                     const data = await r.json();
                     const materiais = data.produtos || data || [];
                     select.innerHTML = '<option value="">Selecione o material...</option>' +
-                        materiais.map(m => `<option value="${m.id}">${m.nome || m.descrição || m.name}</option>`).join('');
+                        materiais.map(m => `<option value="${m.id}">${m.nome || m.descricao || m.name}</option>`).join('');
                 }
             } catch (e) {
                 console.error('Erro ao carregar materiais:', e);
             }
         }
 
-        async function abrirModalNovaCotacao() {
-            document.getElementById('modalNovaCotacao').classList.add('active');
-            document.getElementById('modalCotacaoTitulo').textContent = 'Nova Cotação de Compra';
-            document.getElementById('formCotacao').reset();
-            document.getElementById('cotacaoId').value = '';
-            document.getElementById('cotacaoNumero').value = '';
+        async function abrirModalNovaCotação() {
+            document.getElementById('modalNovaCotação').classList.add('active');
+            document.getElementById('modalCotaçãoTítulo').textContent = 'Nova Cotação de Compra';
+            document.getElementById('formCotação').reset();
+            document.getElementById('cotaçãoId').value = '';
+            document.getElementById('cotaçãoNúmero').value = '';
             // Carregar materiais e fornecedores dinamicamente
-            carregarMateriaisCotacao();
+            carregarMateriaisCotação();
             carregarFornecedores();
             // Buscar próximo número
             try {
                 const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-                const r = await fetch('/api/compras/cotacoes/proximo-numero', { headers: { 'Authorization': `Bearer ${token}` } });
-                if (r.ok) { const d = await r.json(); document.getElementById('cotacaoNumero').value = d.número || d.proximo_número || ''; }
-            } catch (e) { document.getElementById('cotacaoNumero').value = 'COT-' + String(Date.now()).slice(-4); }
+                const r = await fetch('/api/compras/cotacoes/próximo-numero', { headers: { 'Authorization': `Bearer ${token}` } });
+                if (r.ok) { const d = await r.json(); document.getElementById('cotaçãoNúmero').value = d.numero || d.proximo_numero || ''; }
+            } catch (e) { document.getElementById('cotaçãoNúmero').value = 'COT-' + String(Date.now()).slice(-4); }
         }
 
-        function fecharModalCotacao() {
-            document.getElementById('modalNovaCotacao').classList.remove('active');
+        function fecharModalCotação() {
+            document.getElementById('modalNovaCotação').classList.remove('active');
         }
 
-        let _salvandoCotacao = false;
-        async function salvarCotacao() {
-            if (_salvandoCotacao) return;
-            _salvandoCotacao = true;
+        let _salvandoCotação = false;
+        async function salvarCotação() {
+            if (_salvandoCotação) return;
+            _salvandoCotação = true;
             const btn = event && event.target ? event.target : null;
             if (btn) btn.disabled = true;
-            const descrição = document.getElementById('cotDescricao').value;
+            const descrição = document.getElementById('cotDescrição').value;
             const validade = document.getElementById('cotValidade').value;
             const material = document.getElementById('cotMaterial').value;
             const quantidade = document.getElementById('cotQuantidade').value;
             if (!descrição || !validade || !material || !quantidade) {
                 showToast('Por favor, preencha todos os campos obrigatórios.', 'warning');
-                _salvandoCotacao = false; if (btn) btn.disabled = false;
+                _salvandoCotação = false; if (btn) btn.disabled = false;
                 return;
             }
 
@@ -385,21 +386,21 @@
             const fornecedores_ids = Array.from(fornecedoresChecked).map(cb => parseInt(cb.value));
 
             const body = {
-                número: document.getElementById('cotacaoNumero').value,
+                número: document.getElementById('cotaçãoNúmero').value,
                 descrição: descrição,
                 data_abertura: new Date().toISOString().split('T')[0],
                 data_validade: validade,
                 quantidade: parseFloat(quantidade),
                 unidade: document.getElementById('cotUnidade').value,
-                observacoes: document.getElementById('cotObservacoes').value,
+                observações: document.getElementById('cotObservações').value,
                 fornecedores_ids: fornecedores_ids
             };
 
             try {
                 const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-                const cotacaoId = document.getElementById('cotacaoId').value;
-                const url = cotacaoId ? `/api/compras/cotacoes/${cotacaoId}` : '/api/compras/cotacoes';
-                const method = cotacaoId ? 'PUT' : 'POST';
+                const cotaçãoId = document.getElementById('cotaçãoId').value;
+                const url = cotaçãoId ? `/api/compras/cotações/${cotaçãoId}` : '/api/compras/cotações';
+                const method = cotaçãoId ? 'PUT' : 'POST';
 
                 const r = await fetch(url, {
                     method: method,
@@ -413,7 +414,7 @@
                 }
 
                 showToast(cotaçãoId ? 'Cotação atualizada com sucesso!' : 'Cotação salva com sucesso!', 'success');
-                fecharModalCotacao();
+                fecharModalCotação();
 
                 // Recarregar dados na tabela
                 if (typeof cotaçõesManager !== 'undefined') {
@@ -424,12 +425,12 @@
             } catch (e) {
                 showToast('Erro: ' + e.message, 'error');
             } finally {
-                _salvandoCotacao = false; if (btn) btn.disabled = false;
+                _salvandoCotação = false; if (btn) btn.disabled = false;
             }
         }
 
-        document.getElementById('modalNovaCotacao').addEventListener('click', function(e) {
-            if (e.target === this) fecharModalCotacao();
+        document.getElementById('modalNovaCotação').addEventListener('click', function(e) {
+            if (e.target === this) fecharModalCotação();
         });
     </script>
 
@@ -438,13 +439,13 @@
         <div class="modal" style="max-width:700px;">
             <div class="modal-header">
                 <h3><i class="fas fa-eye"></i> Detalhes da Cotação</h3>
-                <button class="modal-close" onclick="document.getElementById('modalVisualizarCotacao').classList.remove('active')">&times;</button>
+                <button class="modal-close" onclick="document.getElementById('modalVisualizarCotação').classList.remove('active')">&times;</button>
             </div>
             <div class="modal-body" id="viewCotacaoBody" style="max-height:60vh; overflow-y:auto;">
                 <p style="text-align:center; color:var(--gray-400);"><i class="fas fa-spinner fa-spin"></i> Carregando...</p>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="document.getElementById('modalVisualizarCotacao').classList.remove('active')">Fechar</button>
+                <button class="btn btn-secondary" onclick="document.getElementById('modalVisualizarCotação').classList.remove('active')">Fechar</button>
             </div>
         </div>
     </div>

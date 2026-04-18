@@ -2,10 +2,10 @@
  * ALUFORCE Service Worker v4.2.0
  * Cache inteligente + Offline-first + Background Sync
  * SISTEMA COMPLETO OFFLINE
- * Atualizado: 06/04/2026
+ * Atualizado: 19/04/2026
  */
 
-const CACHE_VERSION = 'v4.2.1';
+const CACHE_VERSION = 'v4.2.3';
 const STATIC_CACHE = `aluforce-static-${CACHE_VERSION}`;
 const DATA_CACHE = `aluforce-data-${CACHE_VERSION}`;
 

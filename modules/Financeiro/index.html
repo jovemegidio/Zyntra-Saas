@@ -1398,7 +1398,7 @@
         }
 
         /* ========================================
-           PAGINAÇÃO
+           PAGINAÇÁO
            ======================================== */
         .fin-pagination {
             display: flex;
@@ -1468,7 +1468,7 @@
         <!-- Overlay para fechar sidebar em mobile -->
         <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
 
-        <!-- SIDEBAR - PADRÃO FINANCEIRO -->
+        <!-- SIDEBAR - PADRÁO FINANCEIRO -->
         <aside class="sidebar" id="mobile-sidebar">
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel">
                 <i class="fas fa-home"></i>
@@ -1512,7 +1512,7 @@
                 <a href="impostos.html" class="sidebar-btn" title="Impostos">
                     <i class="fas fa-percent"></i>
                 </a>
-                <button class="sidebar-btn" title="Configurações" id="btn-config" onclick="toggleConfiguracoes()">
+                <button class="sidebar-btn" title="Configurações" id="btn-config" onclick="toggleConfigurações()">
                     <i class="fas fa-cog"></i>
                 </button>
             </div>
@@ -1520,7 +1520,7 @@
 
         <!-- Main Area -->
         <main class="main-area">
-            <!-- HEADER - PADRÃO FINANCEIRO -->
+            <!-- HEADER - PADRÁO FINANCEIRO -->
             <header class="header">
                 <div class="header-left">
                     <!-- Botão Menu Mobile -->
@@ -1706,7 +1706,7 @@
             overlay.classList.toggle('active');
         }
 
-        function toggleNotificacoes(event) {
+        function toggleNotificações(event) {
             if (event) event.stopPropagation();
             const panel = document.getElementById('notification-panel');
             if (panel) panel.classList.toggle('active');
@@ -1714,8 +1714,8 @@
 
         // Notificações removidas — funções stub para compatibilidade
         function marcarTodasLidas() {}
-        function limparNotificacoes() {}
-        function toggleConfiguracoes() {}
+        function limparNotificações() {}
+        function toggleConfigurações() {}
 
         // ======== Carregar usuário ========
         async function carregarUsuario() {
@@ -1764,9 +1764,9 @@
             return data.toISOString().split('T')[0];
         }
 
-        function obterPeriodoMensal(referencia = new Date()) {
-            const inicio = new Date(referencia.getFullYear(), referencia.getMonth(), 1);
-            const fim = new Date(referencia.getFullYear(), referencia.getMonth() + 1, 0);
+        function obterPeríodoMensal(referência = new Date()) {
+            const inicio = new Date(referência.getFullYear(), referência.getMonth(), 1);
+            const fim = new Date(referência.getFullYear(), referência.getMonth() + 1, 0);
             return {
                 inicio: formatarDataISO(inicio),
                 fim: formatarDataISO(fim)
@@ -1779,7 +1779,7 @@
             return [];
         }
 
-        function converterNumero(valor) {
+        function converterNúmero(valor) {
             const número = Number.parseFloat(valor);
             return Number.isFinite(número) ? número : 0;
         }
@@ -1814,10 +1814,10 @@
         function calcularTotal(contas) {
             return contas
                 .filter(c => ['pendente', 'parcial', 'a_vencer', 'vencida'].includes(normalizarStatus(c.status)))
-                .reduce((soma, conta) => soma + converterNumero(conta.valor_total || conta.valor), 0);
+                .reduce((soma, conta) => soma + converterNúmero(conta.valor_total || conta.valor), 0);
         }
 
-        function calcularVariacaoPercentual(atual, anterior) {
+        function calcularVariaçãoPercentual(atual, anterior) {
             if (anterior === 0) {
                 return atual === 0 ? 0 : 100;
             }
@@ -1841,8 +1841,8 @@
 
             const referenciaAtual = new Date();
             const referenciaAnterior = new Date(referenciaAtual.getFullYear(), referenciaAtual.getMonth() - 1, 1);
-            const periodoAtual = obterPeriodoMensal(referenciaAtual);
-            const periodoAnterior = obterPeriodoMensal(referenciaAnterior);
+            const períodoAtual = obterPeríodoMensal(referenciaAtual);
+            const períodoAnterior = obterPeríodoMensal(referenciaAnterior);
 
             dashboardCache.loadPromise = (async () => {
                 const [
@@ -1855,12 +1855,12 @@
                     lancamentosPayload,
                     resumoKpisPayload
                 ] = await Promise.all([
-                    fetchJsonSeguro(`/api/financeiro/contas-receber?dataInicio=${periodoAtual.inicio}&dataFim=${periodoAtual.fim}`, { data: [] }),
-                    fetchJsonSeguro(`/api/financeiro/contas-pagar?dataInicio=${periodoAtual.inicio}&dataFim=${periodoAtual.fim}`, { data: [] }),
-                    fetchJsonSeguro(`/api/financeiro/contas-receber?dataInicio=${periodoAnterior.inicio}&dataFim=${periodoAnterior.fim}`, { data: [] }),
-                    fetchJsonSeguro(`/api/financeiro/contas-pagar?dataInicio=${periodoAnterior.inicio}&dataFim=${periodoAnterior.fim}`, { data: [] }),
-                    fetchJsonSeguro('/api/financeiro/fluxo-caixa-resumo?periodo=mes', { saldoInicial: 0, fluxoDiario: [] }),
-                    fetchJsonSeguro('/api/financeiro/proximos-vencimentos?limite=30', { data: [] }),
+                    fetchJsonSeguro(`/api/financeiro/contas-receber?dataInicio=${períodoAtual.inicio}&dataFim=${períodoAtual.fim}`, { data: [] }),
+                    fetchJsonSeguro(`/api/financeiro/contas-pagar?dataInicio=${períodoAtual.inicio}&dataFim=${períodoAtual.fim}`, { data: [] }),
+                    fetchJsonSeguro(`/api/financeiro/contas-receber?dataInicio=${períodoAnterior.inicio}&dataFim=${períodoAnterior.fim}`, { data: [] }),
+                    fetchJsonSeguro(`/api/financeiro/contas-pagar?dataInicio=${períodoAnterior.inicio}&dataFim=${períodoAnterior.fim}`, { data: [] }),
+                    fetchJsonSeguro('/api/financeiro/fluxo-caixa-resumo?período=mes', { saldoInicial: 0, fluxoDiario: [] }),
+                    fetchJsonSeguro('/api/financeiro/próximos-vencimentos?limite=30', { data: [] }),
                     fetchJsonSeguro('/api/financeiro/ultimos-lancamentos?limite=50', { data: [] }),
                     fetchJsonSeguro('/api/financeiro/resumo-kpis', { data: { vencidos: 0 } })
                 ]);
@@ -1870,7 +1870,7 @@
                 const contasReceberAnterior = normalizarArray(receberAnteriorPayload);
                 const contasPagarAnterior = normalizarArray(pagarAnteriorPayload);
 
-                const saldoContas = converterNumero(fluxoPayload?.saldoInicial);
+                const saldoContas = converterNúmero(fluxoPayload?.saldoInicial);
                 const totalReceber = calcularTotal(contasReceberAtual);
                 const totalPagar = calcularTotal(contasPagarAtual);
                 const saldoProjetado = saldoContas + totalReceber - totalPagar;
@@ -1908,7 +1908,7 @@
             return dashboardCache.loadPromise;
         }
 
-        function atualizarBadgeNotificacao(total, kpis = {}) {
+        function atualizarBadgeNotificação(total, kpis = {}) {
             const badge = document.getElementById('notification-count');
             if (!badge) return;
 
@@ -1967,7 +1967,7 @@
             }
         }
 
-        function aplicarVariacao(elId, atual, anterior, inverterCores = false) {
+        function aplicarVariação(elId, atual, anterior, inverterCores = false) {
             const el = document.getElementById(elId);
             if (!el) return;
 
@@ -1977,12 +1977,12 @@
                 return;
             }
 
-            const variacao = calcularVariacaoPercentual(atual, anterior);
-            const subiu = variacao >= 0;
+            const variação = calcularVariaçãoPercentual(atual, anterior);
+            const subiu = variação >= 0;
             const classPositiva = inverterCores ? !subiu : subiu;
 
             el.className = `metric-trend ${classPositiva ? 'up' : 'down'}`;
-            el.innerHTML = `<i class="fas fa-arrow-${subiu ? 'up' : 'down'}"></i> ${Math.abs(variacao).toFixed(1)}%`;
+            el.innerHTML = `<i class="fas fa-arrow-${subiu ? 'up' : 'down'}"></i> ${Math.abs(variação).toFixed(1)}%`;
         }
 
         // ======== KPIs ========
@@ -2006,9 +2006,9 @@
                     saldoContasEl.className = `metric-value${dados.cards.saldoContas < 0 ? ' negative' : ''}`;
                 }
 
-                aplicarVariacao('changeReceber', dados.cards.totalReceber, dados.comparativos.totalReceberAnterior);
-                aplicarVariacao('changePagar', dados.cards.totalPagar, dados.comparativos.totalPagarAnterior, true);
-                aplicarVariacao('changeSaldo', dados.cards.saldoProjetado, dados.comparativos.saldoProjetadoAnterior);
+                aplicarVariação('changeReceber', dados.cards.totalReceber, dados.comparativos.totalReceberAnterior);
+                aplicarVariação('changePagar', dados.cards.totalPagar, dados.comparativos.totalPagarAnterior, true);
+                aplicarVariação('changeSaldo', dados.cards.saldoProjetado, dados.comparativos.saldoProjetadoAnterior);
 
                 const changeContas = document.getElementById('changeContas');
                 if (changeContas) {
@@ -2016,7 +2016,7 @@
                     changeContas.innerHTML = '<i class="fas fa-check-circle"></i> Saldo atual';
                 }
 
-                atualizarBadgeNotificacao(dados.alertas, dados.kpisDetalhado);
+                atualizarBadgeNotificação(dados.alertas, dados.kpisDetalhado);
             } catch (error) {
                 console.error('Erro ao carregar cards do dashboard:', error);
             }
@@ -2060,8 +2060,8 @@
                     const item = fluxoPorData.get(chave) || {};
 
                     labels.push(data.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }));
-                    entradas.push(converterNumero(item.entradas));
-                    saidas.push(converterNumero(item.saidas));
+                    entradas.push(converterNúmero(item.entradas));
+                    saidas.push(converterNúmero(item.saidas));
                 }
 
                 fluxoCaixaChartInstance = new Chart(ctx, {
@@ -2147,12 +2147,12 @@
         }
 
         // ======== Estado de Paginação ========
-        const paginacaoEstado = {
+        const paginaçãoEstado = {
             vencimentos: { pagina: 1, porPagina: 5, dados: [] },
             lancamentos: { pagina: 1, porPagina: 20, dados: [] }
         };
 
-        function renderizarControlePaginacao(containerId, estado, nomeFuncao) {
+        function renderizarControlePaginação(containerId, estado, nomeFuncao) {
             const el = document.getElementById(containerId);
             if (!el) return;
             const { pagina, porPagina, dados } = estado;
@@ -2175,12 +2175,12 @@
         }
 
         function irParaPaginaVencimentos(p) {
-            paginacaoEstado.vencimentos.pagina = p;
+            paginaçãoEstado.vencimentos.pagina = p;
             renderizarPaginaVencimentos();
         }
 
         function irParaPaginaLancamentos(p) {
-            paginacaoEstado.lancamentos.pagina = p;
+            paginaçãoEstado.lancamentos.pagina = p;
             renderizarPaginaLancamentos();
         }
 
@@ -2188,7 +2188,7 @@
         function renderizarPaginaVencimentos() {
             const lista = document.getElementById('lista-vencimentos');
             if (!lista) return;
-            const { pagina, porPagina, dados } = paginacaoEstado.vencimentos;
+            const { pagina, porPagina, dados } = paginaçãoEstado.vencimentos;
             const paginados = dados.slice((pagina - 1) * porPagina, pagina * porPagina);
             if (paginados.length === 0) {
                 lista.innerHTML = '<div class="empty-state"><i class="fas fa-check-circle"></i><p>Nenhum vencimento próximo</p></div>';
@@ -2208,7 +2208,7 @@
                     </div>
                 `).join('');
             }
-            renderizarControlePaginacao('paginacao-vencimentos', paginacaoEstado.vencimentos, 'irParaPaginaVencimentos');
+            renderizarControlePaginação('paginação-vencimentos', paginaçãoEstado.vencimentos, 'irParaPaginaVencimentos');
         }
 
         async function carregarVencimentos() {
@@ -2216,9 +2216,9 @@
             if (!lista) return;
             try {
                 const dados = await carregarDadosDashboard();
-                paginacaoEstado.vencimentos.dados = [...dados.proximosVencimentos]
+                paginaçãoEstado.vencimentos.dados = [...dados.proximosVencimentos]
                     .sort((a, b) => new Date(a.data_vencimento) - new Date(b.data_vencimento));
-                paginacaoEstado.vencimentos.pagina = 1;
+                paginaçãoEstado.vencimentos.pagina = 1;
                 renderizarPaginaVencimentos();
             } catch (error) {
                 console.error('Erro ao carregar próximos vencimentos:', error);
@@ -2230,7 +2230,7 @@
         function renderizarPaginaLancamentos() {
             const tbody = document.getElementById('tabela-lancamentos');
             if (!tbody) return;
-            const { pagina, porPagina, dados } = paginacaoEstado.lancamentos;
+            const { pagina, porPagina, dados } = paginaçãoEstado.lancamentos;
             const paginados = dados.slice((pagina - 1) * porPagina, pagina * porPagina);
             if (paginados.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="5" class="td-loading"><i class="fas fa-inbox icon-empty"></i>Nenhum lançamento</td></tr>';
@@ -2248,7 +2248,7 @@
                     `;
                 }).join('');
             }
-            renderizarControlePaginacao('paginacao-lancamentos', paginacaoEstado.lancamentos, 'irParaPaginaLancamentos');
+            renderizarControlePaginação('paginação-lancamentos', paginaçãoEstado.lancamentos, 'irParaPaginaLancamentos');
         }
 
         async function carregarLancamentos() {
@@ -2256,8 +2256,8 @@
             if (!tbody) return;
             try {
                 const dados = await carregarDadosDashboard();
-                paginacaoEstado.lancamentos.dados = [...dados.ultimosLancamentos];
-                paginacaoEstado.lancamentos.pagina = 1;
+                paginaçãoEstado.lancamentos.dados = [...dados.ultimosLancamentos];
+                paginaçãoEstado.lancamentos.pagina = 1;
                 renderizarPaginaLancamentos();
             } catch (error) {
                 console.error('Erro ao carregar Últimos lançamentos:', error);
@@ -2297,7 +2297,7 @@
         }
 
         function formatarMoeda(valor) {
-            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(converterNumero(valor));
+            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(converterNúmero(valor));
         }
 
         // SECURITY: Escape HTML para prevenir XSS em innerHTML
@@ -2309,7 +2309,7 @@
         }
 
         function novoLancamento(tipo) {
-            location.href = tipo === 'pagar' ? '/contas-pagar?acao=nova' : '/contas-receber?acao=nova';
+            location.href = tipo === 'pagar' ? '/contas-pagar?ação=nova' : '/contas-receber?ação=nova';
         }
 
         // ======== Dashboard update ========
@@ -2590,7 +2590,7 @@
                     <div><label class="campo-label">CEP</label><input type="text" id="cepInput"
                             class="campo-input campo-input--sm"></div>
                     <div><label class="campo-label">Número do endereço</label><input type="text"
-                            id="númeroEnderecoInput" class="campo-input campo-input--sm"></div>
+                            id="numeroEnderecoInput" class="campo-input campo-input--sm"></div>
                     <button class="btn-selecionar btn--flush-h40" onclick="pesquisarCEP()"><i class="fas fa-bolt"></i>
                         Pesquisar</button>
                 </div>
@@ -2638,14 +2638,14 @@
                     </div>
 
                     <div class="cadastro-tabs">
-                        <button class="cadastro-tab active" data-tab="endereco">Endereço</button>
+                        <button class="cadastro-tab active" data-tab="endereço">Endereço</button>
                         <button class="cadastro-tab" data-tab="telefones">Telefones e E-mail</button>
-                        <button class="cadastro-tab" data-tab="bancarios">Dados Bancários</button>
+                        <button class="cadastro-tab" data-tab="bancários">Dados Bancários</button>
                         <button class="cadastro-tab" data-tab="inscricoes">Inscrições, CNAE e Outros</button>
                         <button class="cadastro-tab" data-tab="integração"><i class="fas fa-cog"></i> Integração
                             Automática</button>
                         <button class="cadastro-tab" data-tab="caracteristicas">Características</button>
-                        <button class="cadastro-tab" data-tab="recomendacoes">Recomendações</button>
+                        <button class="cadastro-tab" data-tab="recomendações">Recomendações</button>
                         <button class="cadastro-tab" data-tab="faturamento">Faturamento e Crédito</button>
                         <button class="cadastro-tab" data-tab="mapa">Mapa</button>
                     </div>
@@ -2657,7 +2657,7 @@
                                 <div class="form-group form-group--span2"><label>Endereço <span
                                             class="campo-label-link">@ Pesquisar Endereço</span></label><input
                                         type="text" id="enderecoInput" class="campo-input"></div>
-                                <div class="form-group"><label>Número</label><input type="text" id="númeroInput"
+                                <div class="form-group"><label>Número</label><input type="text" id="numeroInput"
                                         class="campo-input"></div>
                             </div>
                             <div class="form-row">
@@ -2802,7 +2802,7 @@
                             </div>
                         </div>
                         <!-- Integração -->
-                        <div class="cadastro-tab-panel" id="tab-integração">
+                        <div class="cadastro-tab-panel" id="tab-integracao">
                             <div class="tab-placeholder"><i class="fas fa-cog icon-placeholder"></i>
                                 <h3 class="heading-placeholder">Integração Automática</h3>
                                 <p>Configure integrações com sistemas externos aqui.</p>
@@ -2930,7 +2930,7 @@
             document.getElementById('dddInput').value = data.ddd_telefone_1 ? data.ddd_telefone_1.substring(0, 2) : '';
             document.getElementById('telefoneInput').value = data.ddd_telefone_1 ? data.ddd_telefone_1.substring(2) : '';
             document.getElementById('enderecoInput').value = data.logradouro || '';
-            document.getElementById('númeroInput').value = data.número || '';
+            document.getElementById('númeroInput').value = data.numero || '';
             document.getElementById('bairroInput').value = data.bairro || '';
             document.getElementById('complementoInput').value = data.complemento || '';
             document.getElementById('cidadeInput').value = data.municipio || '';
@@ -2974,21 +2974,21 @@
                 let resultados = [];
                 try {
                     const response = await fetch(`/api/financeiro/clientes-fornecedores/buscar?termo=${encodeURIComponent(termo)}`, { credentials: 'include' });
-                    if (response.ok) { const data = await response.json(); const raw = data.data || data || []; const arr = Array.isArray(raw) ? raw : []; resultados = arr.map(item => ({ localidade: item.razao_social || item.nome_fantasia || item.nome || 'Sem nome', endereco: `${item.endereco || ''}, ${item.número || ''} - ${item.bairro || ''}, ${item.cidade || ''} - ${item.estado || ''}, ${item.cep || ''}, Brasil`.replace(/^, | - , |, , /g, ''), dados: item })); }
+                    if (response.ok) { const data = await response.json(); const raw = data.data || data || []; const arr = Array.isArray(raw) ? raw : []; resultados = arr.map(item => ({ localidade: item.razao_social || item.nome_fantasia || item.nome || 'Sem nome', endereço: `${item.endereço || ''}, ${item.numero || ''} - ${item.bairro || ''}, ${item.cidade || ''} - ${item.estado || ''}, ${item.cep || ''}, Brasil`.replace(/^, | - , |, , /g, ''), dados: item })); }
                 } catch (e) { console.log('Busca interna não disponível'); }
                 if (resultados.length === 0) {
                     const cnpjLimpo = termo.replace(/\D/g, '');
                     if (cnpjLimpo.length === 14) {
-                        try { const r = await fetch(`/api/proxy/cnpj/${cnpjLimpo}`, { credentials: 'include' }); if (r.ok) { const d = await r.json(); resultados.push({ localidade: d.razao_social || d.nome_fantasia, endereco: `${d.logradouro || ''}, ${d.número || ''} - ${d.bairro || ''}, ${d.municipio || ''} - ${d.uf || ''}, ${d.cep || ''}, Brasil`, dados: { razao_social: d.razao_social, nome_fantasia: d.nome_fantasia, cnpj_cpf: d.cnpj, endereco: d.logradouro, número: d.número, bairro: d.bairro, cidade: d.municipio, estado: d.uf, cep: d.cep, telefone: d.ddd_telefone_1 } }); } } catch (e) { }
+                        try { const r = await fetch(`/api/proxy/cnpj/${cnpjLimpo}`, { credentials: 'include' }); if (r.ok) { const d = await r.json(); resultados.push({ localidade: d.razao_social || d.nome_fantasia, endereço: `${d.logradouro || ''}, ${d.numero || ''} - ${d.bairro || ''}, ${d.municipio || ''} - ${d.uf || ''}, ${d.cep || ''}, Brasil`, dados: { razao_social: d.razao_social, nome_fantasia: d.nome_fantasia, cnpj_cpf: d.cnpj, endereço: d.logradouro, número: d.numero, bairro: d.bairro, cidade: d.municipio, estado: d.uf, cep: d.cep, telefone: d.ddd_telefone_1 } }); } } catch (e) { }
                     }
                 }
                 if (resultados.length === 0) {
                     const cepLimpo = termo.replace(/\D/g, '');
                     if (cepLimpo.length === 8) {
-                        try { const r = await fetch(`/api/proxy/cep/${cepLimpo}`, { credentials: 'include' }); if (r.ok) { const d = await r.json(); if (!d.erro) { resultados.push({ localidade: `Endereço em ${d.localidade}`, endereco: `${d.logradouro || ''} - ${d.bairro || ''}, ${d.localidade || ''} - ${d.uf || ''}, ${d.cep || ''}, Brasil`, dados: { endereco: d.logradouro, bairro: d.bairro, cidade: d.localidade, estado: d.uf, cep: d.cep } }); } } } catch (e) { }
+                        try { const r = await fetch(`/api/proxy/cep/${cepLimpo}`, { credentials: 'include' }); if (r.ok) { const d = await r.json(); if (!d.erro) { resultados.push({ localidade: `Endereço em ${d.localidade}`, endereço: `${d.logradouro || ''} - ${d.bairro || ''}, ${d.localidade || ''} - ${d.uf || ''}, ${d.cep || ''}, Brasil`, dados: { endereço: d.logradouro, bairro: d.bairro, cidade: d.localidade, estado: d.uf, cep: d.cep } }); } } } catch (e) { }
                     }
                 }
-                if (resultados.length === 0) { resultados = [{ localidade: termo, endereco: 'Endereço não encontrado - Preencha manualmente', dados: { razao_social: termo } }]; }
+                if (resultados.length === 0) { resultados = [{ localidade: termo, endereço: 'Endereço não encontrado - Preencha manualmente', dados: { razao_social: termo } }]; }
                 resultadosPesquisa = resultados;
                 document.getElementById('googleSearchLoading').style.display = 'none';
                 document.getElementById('btnPesquisarGoogle').disabled = false;
@@ -2999,7 +2999,7 @@
 
         function mostrarResultadosComDados(resultados) {
             const tbody = document.getElementById('resultadosTableBody');
-            tbody.innerHTML = resultados.map((r, i) => `<tr onclick="selecionarLinha(this)" data-index="${i}" class="cursor-pointer"><td class="fw-500">${escapeHtml(r.localidade)}</td><td>${escapeHtml(r.endereco)}</td></tr>`).join('');
+            tbody.innerHTML = resultados.map((r, i) => `<tr onclick="selecionarLinha(this)" data-index="${i}" class="cursor-pointer"><td class="fw-500">${escapeHtml(r.localidade)}</td><td>${escapeHtml(r.endereço)}</td></tr>`).join('');
             document.getElementById('resultadosCount').textContent = `1-${resultados.length} de ${resultados.length} registros`;
             document.getElementById('modalResultados').classList.add('active');
         }
@@ -3007,7 +3007,7 @@
         function mostrarResultados(resultados) {
             fecharModalClienteFornecedor();
             const tbody = document.getElementById('resultadosTableBody');
-            tbody.innerHTML = resultados.map((r, i) => `<tr onclick="selecionarLinha(this)" data-index="${i}"><td>${escapeHtml(r.localidade)}</td><td>${escapeHtml(r.endereco)}</td></tr>`).join('');
+            tbody.innerHTML = resultados.map((r, i) => `<tr onclick="selecionarLinha(this)" data-index="${i}"><td>${escapeHtml(r.localidade)}</td><td>${escapeHtml(r.endereço)}</td></tr>`).join('');
             document.getElementById('resultadosCount').textContent = `1-${resultados.length} de ${resultados.length} registros`;
             document.getElementById('modalResultados').classList.add('active');
         }
@@ -3025,8 +3025,8 @@
                 document.getElementById('razaoSocialInput').value = d.razao_social || d.nome || '';
                 document.getElementById('nomeFantasiaInput').value = d.nome_fantasia || '';
                 document.getElementById('cnpjInput').value = d.cnpj_cpf || d.cnpj || '';
-                document.getElementById('enderecoInput').value = d.endereco || d.logradouro || '';
-                document.getElementById('númeroInput').value = d.número || '';
+                document.getElementById('enderecoInput').value = d.endereço || d.logradouro || '';
+                document.getElementById('númeroInput').value = d.numero || '';
                 document.getElementById('bairroInput').value = d.bairro || '';
                 document.getElementById('complementoInput').value = d.complemento || '';
                 document.getElementById('cidadeInput').value = d.cidade || d.municipio || '';
@@ -3039,7 +3039,7 @@
 
         async function salvarClienteFornecedor() {
             if (window._guardSalvarCliFor) return;
-            const dados = { razao_social: document.getElementById('razaoSocialInput').value, nome_fantasia: document.getElementById('nomeFantasiaInput').value, cnpj_cpf: document.getElementById('cnpjInput').value, ddd: document.getElementById('dddInput').value, telefone: document.getElementById('telefoneInput').value, contato: document.getElementById('contatoInput').value, endereco: document.getElementById('enderecoInput').value, número: document.getElementById('númeroInput').value, bairro: document.getElementById('bairroInput').value, complemento: document.getElementById('complementoInput').value, cidade: document.getElementById('cidadeInput').value, estado: document.getElementById('estadoSelect').value, cep: document.getElementById('cepCadastroInput').value };
+            const dados = { razao_social: document.getElementById('razaoSocialInput').value, nome_fantasia: document.getElementById('nomeFantasiaInput').value, cnpj_cpf: document.getElementById('cnpjInput').value, ddd: document.getElementById('dddInput').value, telefone: document.getElementById('telefoneInput').value, contato: document.getElementById('contatoInput').value, endereço: document.getElementById('enderecoInput').value, número: document.getElementById('númeroInput').value, bairro: document.getElementById('bairroInput').value, complemento: document.getElementById('complementoInput').value, cidade: document.getElementById('cidadeInput').value, estado: document.getElementById('estadoSelect').value, cep: document.getElementById('cepCadastroInput').value };
             if (!dados.razao_social) { showToast('Informe a Razão Social / Nome', 'warning'); return; }
             window._guardSalvarCliFor = true;
             try {

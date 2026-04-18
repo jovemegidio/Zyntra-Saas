@@ -7,7 +7,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Zyntra: ConciliaÃ§Ã£o BancÃ¡ria</title>
+    <title>Zyntra: Conciliação Bancária</title>
     <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
     
     <script src="/js/auth-unified.js?v=20260326" defer></script>
@@ -65,7 +65,7 @@
 
 
 
-        /* ======================================== SISTEMA DE NOTIFICAÃ‡Ã•ES ======================================== */
+        /* ======================================== SISTEMA DE NOTIFICAÇÕES ======================================== */
 
 
 
@@ -196,8 +196,8 @@
         .filters-bar .btn:hover { filter: brightness(1.1); }
 
         /* CONCILIAO GRID */
-        .conciliaÃ§Ã£o-grid { display: grid; grid-template-columns: 1fr 80px 1fr; gap: 24px; margin-bottom: 24px; }
-        .conciliaÃ§Ã£o-panel { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .conciliação-grid { display: grid; grid-template-columns: 1fr 80px 1fr; gap: 24px; margin-bottom: 24px; }
+        .conciliação-panel { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         .panel-header { padding: 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
         .panel-header h3 { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
         .panel-header h3 i { color: var(--primary-orange); }
@@ -226,7 +226,7 @@
         .item-check.checked { background: var(--primary-orange); border-color: var(--primary-orange); color: white; }
         .item-info { flex: 1; }
         .item-info .data { font-size: 11px; color: var(--text-secondary); margin-bottom: 4px; }
-        .item-info .descriÃ§Ã£o { font-size: 13px; font-weight: 500; }
+        .item-info .descricao { font-size: 13px; font-weight: 500; }
         .item-valor { font-size: 14px; font-weight: 600; text-align: right; }
         .item-valor.entrada { color: var(--success); }
         .item-valor.saida { color: var(--danger); }
@@ -260,36 +260,36 @@
         .modal-
         .modal-footer { padding: 20px 24px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 12px; }
 
-        /* MODAL - Classes padrÃ£o (PadrÃ£o SaaS Empresarial) */
-        .modal-overlay-padrao { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15,23,42,0.7); display: none; align-items: center; justify-content: center; z-index: 99999; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
-        .modal-overlay-padrao.active { display: flex !important; }
-        .modal-padrao { display: flex !important; flex-direction: column !important; background: white !important; border-radius: 20px !important; width: 100% !important; max-width: 600px !important; max-height: 90vh !important; overflow: hidden !important; box-shadow: 0 25px 80px rgba(0,0,0,0.25), 0 10px 30px rgba(0,0,0,0.15) !important; animation: modalFadeIn 0.25s ease-out !important; position: relative !important; margin: 16px !important; }
+        /* MODAL - Classes padrão (Padrão SaaS Empresarial) */
+        .modal-overlay-padrão { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15,23,42,0.7); display: none; align-items: center; justify-content: center; z-index: 99999; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+        .modal-overlay-padrão.active { display: flex !important; }
+        .modal-padrão { display: flex !important; flex-direction: column !important; background: white !important; border-radius: 20px !important; width: 100% !important; max-width: 600px !important; max-height: 90vh !important; overflow: hidden !important; box-shadow: 0 25px 80px rgba(0,0,0,0.25), 0 10px 30px rgba(0,0,0,0.15) !important; animation: modalFadeIn 0.25s ease-out !important; position: relative !important; margin: 16px !important; }
         @keyframes modalFadeIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
-        .modal-header-padrao { padding: 24px 32px !important; background: linear-gradient(135deg, #225cfa 0%, #1a47c4 100%) !important; color: white !important; display: flex !important; justify-content: space-between !important; align-items: center !important; flex-shrink: 0 !important; border-radius: 20px 20px 0 0 !important; }
-        .modal-padrao--sm { max-width: 480px !important; }
-        .modal-header-content-padrao { display: flex; align-items: center; gap: 14px; }
-        .modal-header-icon-padrao { width: 44px; height: 44px; background: rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-        .modal-header-text-padrao h2 { font-size: 20px; font-weight: 700; color: white; margin: 0; }
-        .modal-header-text-padrao p { font-size: 13px; color: rgba(255,255,255,0.8); margin: 4px 0 0 0; }
-        .modal-close-padrao { width: 40px !important; height: 40px !important; border: none !important; background: rgba(255,255,255,0.2) !important; border-radius: 10px !important; cursor: pointer !important; color: white !important; font-size: 18px !important; transition: all 0.2s !important; display: flex !important; align-items: center !important; justify-content: center !important; }
-        .modal-close-padrao:hover { background: rgba(255,255,255,0.3) !important; transform: rotate(90deg) !important; }
-        .modal-body-padrao { padding: 28px 32px !important; overflow-y: auto !important; max-height: calc(90vh - 200px) !important; background: #f9fafb !important; flex: 1 !important; }
-        .modal-footer-padrao { padding: 20px 32px !important; border-top: 1px solid #e5e7eb !important; display: flex !important; justify-content: flex-end !important; gap: 12px !important; background: #ffffff !important; flex-shrink: 0 !important; }
-        .form-section-padrao { background: #ffffff; border-radius: 16px; padding: 24px; border: 1px solid #e5e7eb; margin-bottom: 16px; }
-        .form-section-padrao:last-child { margin-bottom: 0; }
-        .form-grid-padrao { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 16px; }
-        .form-grid-padrao:last-child { margin-bottom: 0; }
-        .form-group-padrao { margin-bottom: 16px; }
-        .form-group-padrao:last-child { margin-bottom: 0; }
-        .form-group-padrao label { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 8px; }
-        .form-group-padrao label i { color: #225cfa; font-size: 14px; }
-        .form-group-padrao label .required { color: #ef4444; margin-left: 2px; }
-        .form-group-padrao input, .form-group-padrao select, .form-group-padrao textarea { width: 100%; padding: 14px 16px; border: 2px solid #e5e7eb; border-radius: 12px; font-size: 15px; transition: all 0.2s; background: #ffffff; }
-        .form-group-padrao input:focus, .form-group-padrao select:focus, .form-group-padrao textarea:focus { outline: none; border-color: #225cfa; box-shadow: 0 0 0 4px rgba(34, 92, 250, 0.1); }
-        .btn-padrao-ghost { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; border: 1px solid #e5e7eb; background: #ffffff; color: #6b7280; }
-        .btn-padrao-ghost:hover { background: #f3f4f6; color: #374151; }
-        .btn-padrao-primary { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; border: none; background: linear-gradient(135deg, #225cfa 0%, #1a47c4 100%); color: white; box-shadow: 0 4px 12px rgba(34, 92, 250, 0.35); }
-        .btn-padrao-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(34, 92, 250, 0.4); }
+        .modal-header-padrão { padding: 24px 32px !important; background: linear-gradient(135deg, #225cfa 0%, #1a47c4 100%) !important; color: white !important; display: flex !important; justify-content: space-between !important; align-items: center !important; flex-shrink: 0 !important; border-radius: 20px 20px 0 0 !important; }
+        .modal-padrão--sm { max-width: 480px !important; }
+        .modal-header-content-padrão { display: flex; align-items: center; gap: 14px; }
+        .modal-header-icon-padrão { width: 44px; height: 44px; background: rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .modal-header-text-padrão h2 { font-size: 20px; font-weight: 700; color: white; margin: 0; }
+        .modal-header-text-padrão p { font-size: 13px; color: rgba(255,255,255,0.8); margin: 4px 0 0 0; }
+        .modal-close-padrão { width: 40px !important; height: 40px !important; border: none !important; background: rgba(255,255,255,0.2) !important; border-radius: 10px !important; cursor: pointer !important; color: white !important; font-size: 18px !important; transition: all 0.2s !important; display: flex !important; align-items: center !important; justify-content: center !important; }
+        .modal-close-padrão:hover { background: rgba(255,255,255,0.3) !important; transform: rotate(90deg) !important; }
+        .modal-body-padrão { padding: 28px 32px !important; overflow-y: auto !important; max-height: calc(90vh - 200px) !important; background: #f9fafb !important; flex: 1 !important; }
+        .modal-footer-padrão { padding: 20px 32px !important; border-top: 1px solid #e5e7eb !important; display: flex !important; justify-content: flex-end !important; gap: 12px !important; background: #ffffff !important; flex-shrink: 0 !important; }
+        .form-section-padrão { background: #ffffff; border-radius: 16px; padding: 24px; border: 1px solid #e5e7eb; margin-bottom: 16px; }
+        .form-section-padrão:last-child { margin-bottom: 0; }
+        .form-grid-padrão { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 16px; }
+        .form-grid-padrão:last-child { margin-bottom: 0; }
+        .form-group-padrão { margin-bottom: 16px; }
+        .form-group-padrão:last-child { margin-bottom: 0; }
+        .form-group-padrão label { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 8px; }
+        .form-group-padrão label i { color: #225cfa; font-size: 14px; }
+        .form-group-padrão label .required { color: #ef4444; margin-left: 2px; }
+        .form-group-padrão input, .form-group-padrão select, .form-group-padrão textarea { width: 100%; padding: 14px 16px; border: 2px solid #e5e7eb; border-radius: 12px; font-size: 15px; transition: all 0.2s; background: #ffffff; }
+        .form-group-padrão input:focus, .form-group-padrão select:focus, .form-group-padrão textarea:focus { outline: none; border-color: #225cfa; box-shadow: 0 0 0 4px rgba(34, 92, 250, 0.1); }
+        .btn-padrão-ghost { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; border: 1px solid #e5e7eb; background: #ffffff; color: #6b7280; }
+        .btn-padrão-ghost:hover { background: #f3f4f6; color: #374151; }
+        .btn-padrão-primary { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; border: none; background: linear-gradient(135deg, #225cfa 0%, #1a47c4 100%); color: white; box-shadow: 0 4px 12px rgba(34, 92, 250, 0.35); }
+        .btn-padrão-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(34, 92, 250, 0.4); }
 
         /* UPLOAD AREA */
         .upload-area { border: 2px dashed var(--border-color); border-radius: 16px; padding: 40px; text-align: center; cursor: pointer; transition: all 0.3s; }
@@ -303,7 +303,7 @@
         .upload-area.drag-over { border-color: #225cfa; background: rgba(34,92,250,0.05); }
 
         /* RESPONSIVE */
-        @media (max-width: 1400px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } .conciliaÃ§Ã£o-grid { grid-template-columns: 1fr; } .match-column { flex-direction: row; padding: 20px; } }
+        @media (max-width: 1400px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } .conciliação-grid { grid-template-columns: 1fr; } .match-column { flex-direction: row; padding: 20px; } }
         @media (max-width: 1100px) { .filters-bar { flex-wrap: wrap; } .filter-group { flex: 1; min-width: 250px; } .filters-bar .btn { width: 100%; justify-content: center; border-radius: 0 0 14px 14px; } }
         @media (max-width: 768px) { .kpi-grid { grid-template-columns: 1fr; } .filter-group { flex-direction: column; align-items: flex-start; min-width: 100%; } }
 
@@ -378,7 +378,7 @@
     <link rel="stylesheet" href="/css/modal-fix-global.css?v=20260114-fix4">
     <link rel="stylesheet" href="css/modais-padrao.css?v=20260114-fix3">
     <link rel="stylesheet" href="css/modais-saas-unified.css?v=20260121">
-    <link rel="stylesheet" href="css/conciliacao-mobile.css?v=20260201">
+    <link rel="stylesheet" href="css/conciliação-mobile.css?v=20260201">
     <link rel="stylesheet" href="/css/tooltips-professional.css?v=20260209">
     <script src="/js/tooltips-professional.js?v=20260209"></script>
     <link rel="stylesheet" href="css/fin-header-sidebar.css?v=20260215">
@@ -394,7 +394,7 @@
         <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
 
 
-        <!-- SIDEBAR - PADRÃƒO PCP (HTML estÃ¡tico, RBAC via JS) -->
+        <!-- SIDEBAR - PADRÁƒO PCP (HTML estático, RBAC via JS) -->
         <aside class="sidebar" id="mobile-sidebar">
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel">
                 <i class="fas fa-home"></i>
@@ -419,13 +419,13 @@
                 <a href="plano-contas.html" class="sidebar-btn" title="Plano de Contas">
                     <i class="fas fa-list-alt"></i>
                 </a>
-                <a href="orcamentos.html" class="sidebar-btn" title="OrÃ§amentos">
+                <a href="orcamentos.html" class="sidebar-btn" title="Orçamentos">
                     <i class="fas fa-calculator"></i>
                 </a>
-                <a href="conciliacao.html" class="sidebar-btn active" title="ConciliaÃ§Ã£o">
+                <a href="conciliacao.html" class="sidebar-btn active" title="Conciliação">
                     <i class="fas fa-balance-scale"></i>
                 </a>
-                <a href="relatorios.html" class="sidebar-btn" title="RelatÃ³rios">
+                <a href="relatorios.html" class="sidebar-btn" title="Relatórios">
                     <i class="fas fa-chart-bar"></i>
                 </a>
             </nav>
@@ -438,7 +438,7 @@
                 <a href="impostos.html" class="sidebar-btn" title="Impostos">
                     <i class="fas fa-percent"></i>
                 </a>
-                <button class="sidebar-btn" title="ConfiguraÃ§Ãµes" id="btn-config" onclick="toggleConfiguracoes()">
+                <button class="sidebar-btn" title="Configurações" id="btn-config" onclick="toggleConfigurações()">
                     <i class="fas fa-cog"></i>
                 </button>
             </div>
@@ -446,10 +446,10 @@
 
         <!-- Main Area -->
         <main class="main-area">
-            <!-- HEADER - PADRÃƒO PCP (HTML estÃ¡tico) -->
+            <!-- HEADER - PADRÁƒO PCP (HTML estático) -->
             <header class="header">
                 <div class="header-left">
-                    <!-- Botao Menu Mobile -->
+                    <!-- Botão Menu Mobile -->
                     <button class="mobile-menu-btn" onclick="toggleMobileSidebar()" title="Menu">
                         <i class="fas fa-bars"></i>
                     </button>
@@ -458,7 +458,7 @@
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;"></span>
-                        <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">ConciliaÃ§Ã£o</span>
+                        <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Conciliação</span>
                     </div>
                 </div>
                 <div class="header-right">
@@ -467,19 +467,19 @@
                     </button>
                     
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">UsuÃ¡rio</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
                     </div>
                 </div>
             </header>
 
-            <!-- Main Content - PadrÃ£o PCP -->
+            <!-- Main Content - Padrão PCP -->
             <div class="main-content">
 
             <div class="page-content">
                 <!-- Action Buttons -->
                 <div style="display:flex; justify-content:flex-end; gap:10px; margin-bottom:16px;">
                     <button class="btn btn-secondary" onclick="abrirModalImportar()"><i class="fas fa-file-import"></i> Importar OFX</button>
-                    <button class="btn btn-primary" onclick="conciliarAutomatico()"><i class="fas fa-magic"></i> Conciliar AutomÃ¡tico</button>
+                    <button class="btn btn-primary" onclick="conciliarAutomatico()"><i class="fas fa-magic"></i> Conciliar Automático</button>
                 </div>
 
                 <!-- KPIs -->
@@ -489,7 +489,7 @@
                             <div class="kpi-icon"><i class="fas fa-check-double"></i></div>
                         </div>
                         <div class="kpi-content">
-                            <h3>LanÃ§amentos Conciliados</h3>
+                            <h3>Lançamentos Conciliados</h3>
                             <div class="kpi-value" id="totalConciliados">0</div>
                         </div>
                     </div>
@@ -529,7 +529,7 @@
                         <select id="filtroBanco" name="filtroBanco" onchange="aplicarFiltros()">
                             <option value="">Todos os bancos</option>
                             <option value="1" selected>Banco do Brasil - Principal</option>
-                            <option value="2">ItaÃº - Fornecedores</option>
+                            <option value="2">Itaú - Fornecedores</option>
                             <option value="3">Bradesco - Recebimentos</option>
                         </select>
                     </div>
@@ -543,21 +543,21 @@
                     </div>
                     <div class="filter-group">
                         <label><i class="fas fa-calendar-alt"></i> De</label>
-                        <input type="date" id="dataInicio" title="Data inÃ­cio">
+                        <input type="date" id="dataInicio" title="Data início">
                     </div>
                     <div class="filter-group">
-                        <label><i class="fas fa-calendar-day"></i> AtÃ©</label>
+                        <label><i class="fas fa-calendar-day"></i> Até</label>
                         <input type="date" id="dataFim" title="Data fim">
                     </div>
                     <button class="btn btn-primary" onclick="aplicarFiltros()"><i class="fas fa-filter"></i> Filtrar</button>
                 </div>
 
-                <!-- ConciliaÃ§Ã£o Grid -->
-                <div class="conciliaÃ§Ã£o-grid">
+                <!-- Conciliação Grid -->
+                <div class="conciliação-grid">
                     <!-- Sistema -->
-                    <div class="conciliaÃ§Ã£o-panel">
+                    <div class="conciliação-panel">
                         <div class="panel-header">
-                            <h3><i class="fas fa-desktop"></i> LanÃ§amentos do Sistema</h3>
+                            <h3><i class="fas fa-desktop"></i> Lançamentos do Sistema</h3>
                             <div class="saldo positivo" id="saldoSistema">R$ 0,00</div>
                         </div>
                         <div class="panel-body">
@@ -571,10 +571,10 @@
                         <button class="match-btn link" onclick="conciliarSelecionados()" title="Conciliar Selecionados">
                             <i class="fas fa-link"></i>
                         </button>
-                        <button class="match-btn unlink" onclick="desconciliarSelecionados()" title="Desfazer ConciliaÃ§Ã£o">
+                        <button class="match-btn unlink" onclick="desconciliarSelecionados()" title="Desfazer Conciliação">
                             <i class="fas fa-unlink"></i>
                         </button>
-                        <button class="match-btn auto" onclick="conciliarAutomatico()" title="Conciliar AutomÃ¡tico">
+                        <button class="match-btn auto" onclick="conciliarAutomatico()" title="Conciliar Automático">
                             <i class="fas fa-magic"></i>
                         </button>
                         <div class="match-info">
@@ -583,9 +583,9 @@
                     </div>
 
                     <!-- Extrato -->
-                    <div class="conciliaÃ§Ã£o-panel">
+                    <div class="conciliação-panel">
                         <div class="panel-header">
-                            <h3><i class="fas fa-file-invoice"></i> Extrato BancÃ¡rio</h3>
+                            <h3><i class="fas fa-file-invoice"></i> Extrato Bancário</h3>
                             <div class="saldo positivo" id="saldoExtrato">R$ 0,00</div>
                         </div>
                         <div class="panel-body">
@@ -595,23 +595,23 @@
                     </div>
                 </div>
 
-                <!-- HistÃ³rico de ConciliaÃ§Ãµes -->
+                <!-- Histórico de Conciliações -->
                 <div class="card">
                     <div class="card-header">
-                        <h3><i class="fas fa-history"></i> HistÃ³rico de ConciliaÃ§Ãµes</h3>
+                        <h3><i class="fas fa-history"></i> Histórico de Conciliações</h3>
                     </div>
                     <table class="data-table">
                         <thead>
                             <tr>
-                                <th>Data ConciliaÃ§Ã£o</th>
-                                <th>LanÃ§amento Sistema</th>
-                                <th>LanÃ§amento Extrato</th>
+                                <th>Data Conciliação</th>
+                                <th>Lançamento Sistema</th>
+                                <th>Lançamento Extrato</th>
                                 <th>Valor</th>
                                 <th>Status</th>
-                                <th>AÃ§Ãµes</th>
+                                <th>Ações</th>
                             </tr>
                         </thead>
-                        <tbody id="histÃ³ricoConciliacoes"></tbody>
+                        <tbody id="historicoConciliacoes"></tbody>
                     </table>
                 </div>
             </div>
@@ -621,21 +621,21 @@
     </div>
 
     <!-- Modal Importar OFX -->
-    <div class="modal-overlay-padrao" id="modalImportar">
-        <div class="modal-padrao modal-padrao--sm">
-            <div class="modal-header-padrao">
-                <div class="modal-header-content-padrao">
-                    <div class="modal-header-icon-padrao">
+    <div class="modal-overlay-padrão" id="modalImportar">
+        <div class="modal-padrão modal-padrão--sm">
+            <div class="modal-header-padrão">
+                <div class="modal-header-content-padrão">
+                    <div class="modal-header-icon-padrão">
                         <i class="fas fa-file-import"></i>
                     </div>
-                    <div class="modal-header-text-padrao">
+                    <div class="modal-header-text-padrão">
                         <h2>Importar Extrato</h2>
-                        <p>Importe seu extrato bancÃ¡rio</p>
+                        <p>Importe seu extrato bancário</p>
                     </div>
                 </div>
-                <button class="modal-close-padrao" onclick="fecharModal('modalImportar')"><i class="fas fa-times"></i></button>
+                <button class="modal-close-padrão" onclick="fecharModal('modalImportar')"><i class="fas fa-times"></i></button>
             </div>
-            <div class="modal-body-padrao">
+            <div class="modal-body-padrão">
                 <div class="upload-area" onclick="document.getElementById('arquivoOFX').click()">
                     <i class="fas fa-cloud-upload-alt"></i>
                     <h4>Arraste o arquivo ou clique para selecionar</h4>
@@ -646,9 +646,9 @@
                     <p><i class="fas fa-file"></i> <span id="nomeArquivo"></span></p>
                 </div>
             </div>
-            <div class="modal-footer-padrao">
-                <button class="btn-padrao-ghost" onclick="fecharModal('modalImportar')">Cancelar</button>
-                <button class="btn-padrao-primary" onclick="importarExtrato()"><i class="fas fa-upload"></i> Importar</button>
+            <div class="modal-footer-padrão">
+                <button class="btn-padrão-ghost" onclick="fecharModal('modalImportar')">Cancelar</button>
+                <button class="btn-padrão-primary" onclick="importarExtrato()"><i class="fas fa-upload"></i> Importar</button>
             </div>
         </div>
     </div>
@@ -693,7 +693,7 @@
         // === State ===
         let lancamentosSistema = []; // contas_pagar + contas_receber pendentes
         let lancamentosExtrato = []; // extratos_importados
-        let histÃ³rico = []; // conciliacoes_bancarias
+        let histórico = []; // conciliacoes_bancarias
         let sistemasSelecionados = [];
         let extratosSelecionados = [];
         let contaBancariaAtual = '';
@@ -720,7 +720,7 @@
                 const r = await fetch('/api/me', { credentials: 'include' });
                 if (r.ok) {
                     const u = await r.json();
-                    const nome = u.apelido || (u.nome ? u.nome.split(' ')[0] : 'UsuÃ¡rio');
+                    const nome = u.apelido || (u.nome ? u.nome.split(' ')[0] : 'Usuário');
                     const h = new Date().getHours();
                     const el = document.getElementById('greeting-text');
                     if (el) el.textContent = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
@@ -740,7 +740,7 @@
 
         async function carregarBancos() {
             try {
-                const r = await fetch(`${API}/contas-bancarias`, { credentials: 'include', headers: hdrs() });
+                const r = await fetch(`${API}/contas-bancárias`, { credentials: 'include', headers: hdrs() });
                 const data = await r.json();
                 const sel = document.getElementById('filtroBanco');
                 const bancos = data.data || data || [];
@@ -757,11 +757,11 @@
             await Promise.all([carregarSistema(), carregarExtrato(), carregarHistorico()]);
             atualizarKPIs();
             renderizarListas();
-            renderizarHistorico();
+            renderizarHistórico();
         }
 
         async function carregarSistema() {
-            // Carrega contas a pagar e receber recentes (representam lanÃ§amentos do sistema)
+            // Carrega contas a pagar e receber recentes (representam lançamentos do sistema)
             try {
                 const ini = document.getElementById('dataInicio').value;
                 const fim = document.getElementById('dataFim').value;
@@ -773,12 +773,12 @@
                 const receber = await rReceber.json();
                 const itensPagar = (pagar.data || []).map(c => ({
                     id: 'p_' + c.id, dbId: c.id, tabela: 'contas_pagar',
-                    data: c.data_vencimento || c.data_emissao, descriÃ§Ã£o: c.descricao || c.descriÃ§Ã£o || c.fornecedor_nome || c.fornecedor || ('Conta #' + c.id),
+                    data: c.data_vencimento || c.data_emissao, descrição: c.descricao || c.descricao || c.fornecedor_nome || c.fornecedor || ('Conta #' + c.id),
                     tipo: 'saida', valor: Number(c.valor), conciliado: false
                 }));
                 const itensReceber = (receber.data || []).map(c => ({
                     id: 'r_' + c.id, dbId: c.id, tabela: 'contas_receber',
-                    data: c.data_vencimento || c.data_emissao, descriÃ§Ã£o: c.descricao || c.descriÃ§Ã£o || c.cliente_nome || c.cliente || ('Conta #' + c.id),
+                    data: c.data_vencimento || c.data_emissao, descrição: c.descricao || c.descricao || c.cliente_nome || c.cliente || ('Conta #' + c.id),
                     tipo: 'entrada', valor: Number(c.valor), conciliado: false
                 }));
                 lancamentosSistema = [...itensPagar, ...itensReceber].sort((a, b) => new Date(String(b.data).slice(0,10) + 'T00:00:00') - new Date(String(a.data).slice(0,10) + 'T00:00:00'));
@@ -789,13 +789,13 @@
             try {
                 const contaId = document.getElementById('filtroBanco').value;
                 contaBancariaAtual = contaId;
-                let url = `${API}/conciliacao?tipo=extrato`;
+                let url = `${API}/conciliação?tipo=extrato`;
                 if (contaId) url += `&conta_id=${contaId}`;
                 const r = await fetch(url, { credentials: 'include', headers: hdrs() });
                 const data = await r.json();
                 lancamentosExtrato = (data.data || []).map(e => ({
                     id: 'e_' + e.id, dbId: e.id,
-                    data: e.data, descriÃ§Ã£o: e.descriÃ§Ã£o,
+                    data: e.data, descrição: e.descricao,
                     tipo: Number(e.valor) >= 0 ? 'entrada' : 'saida',
                     valor: Math.abs(Number(e.valor)),
                     conciliado: e.conciliado == 1
@@ -806,21 +806,21 @@
         async function carregarHistorico() {
             try {
                 const contaId = document.getElementById('filtroBanco').value;
-                let url = `${API}/conciliacao?tipo=conciliacoes`;
+                let url = `${API}/conciliação?tipo=conciliações`;
                 if (contaId) url += `&conta_id=${contaId}`;
                 const r = await fetch(url, { credentials: 'include', headers: hdrs() });
                 const data = await r.json();
-                histÃ³rico = (data.data || []).map(c => ({
+                histórico = (data.data || []).map(c => ({
                     id: c.id, data: c.created_at || c.data,
                     sistemaDesc: c.movimentacao_sistema_id ? `Mov #${c.movimentacao_sistema_id}` : '-',
                     extratoDesc: c.extrato_id ? `Extrato #${c.extrato_id}` : '-',
                     valor: Number(c.valor), status: 'conciliado'
                 }));
-            } catch (e) { console.error('Erro histÃ³rico:', e); histÃ³rico = []; }
+            } catch (e) { console.error('Erro histórico:', e); histórico = []; }
         }
 
         function atualizarKPIs() {
-            const conciliados = histÃ³rico.length;
+            const conciliados = histórico.length;
             const pendentesSis = lancamentosSistema.filter(l => !l.conciliado).length;
             const pendentesExt = lancamentosExtrato.filter(l => !l.conciliado).length;
             const divergencias = lancamentosExtrato.filter(e => !e.conciliado && !lancamentosSistema.some(s => Math.abs(s.valor - e.valor) < 0.01 && !s.conciliado)).length;
@@ -847,8 +847,8 @@
         function renderizarPainelSistema() {
             const listaSistema = document.getElementById('listaSistema');
             if (lancamentosSistema.length === 0) {
-                listaSistema.innerHTML = '<li style="padding:40px;text-align:center;color:var(--text-secondary)"><i class="fas fa-inbox" style="font-size:32px;margin-bottom:12px;display:block;color:#cbd5e1"></i>Nenhum lanÃ§amento no perÃ­odo</li>';
-                document.getElementById('paginacaoSistema').innerHTML = '';
+                listaSistema.innerHTML = '<li style="padding:40px;text-align:center;color:var(--text-secondary)"><i class="fas fa-inbox" style="font-size:32px;margin-bottom:12px;display:block;color:#cbd5e1"></i>Nenhum lançamento no período</li>';
+                document.getElementById('paginaçãoSistema').innerHTML = '';
                 return;
             }
             const total = lancamentosSistema.length;
@@ -864,19 +864,19 @@
                     <div class="item-check ${sistemasSelecionados.includes(item.id) ? 'checked' : ''}">
                         ${sistemasSelecionados.includes(item.id) ? '<i class="fas fa-check" style="font-size:12px;"></i>' : ''}
                     </div>
-                    <div class="item-info"><div class="data">${formatarData(item.data)}</div><div class="descriÃ§Ã£o">${item.descriÃ§Ã£o}</div></div>
+                    <div class="item-info"><div class="data">${formatarData(item.data)}</div><div class="descrição">${item.descricao}</div></div>
                     <div class="item-valor ${item.tipo}">${item.tipo === 'entrada' ? '+' : '-'}${formatarMoeda(item.valor)}</div>
                 </li>
             `).join('');
 
-            renderizarPaginacao('paginacaoSistema', paginaSistema, totalPags, total, inicio, fim, 'sistema');
+            renderizarPaginação('paginaçãoSistema', paginaSistema, totalPags, total, inicio, fim, 'sistema');
         }
 
         function renderizarPainelExtrato() {
             const listaExtrato = document.getElementById('listaExtrato');
             if (lancamentosExtrato.length === 0) {
-                listaExtrato.innerHTML = '<li style="padding:40px;text-align:center;color:var(--text-secondary)"><i class="fas fa-file-import" style="font-size:32px;margin-bottom:12px;display:block;color:#cbd5e1"></i>Importe um extrato OFX para comeÃ§ar</li>';
-                document.getElementById('paginacaoExtrato').innerHTML = '';
+                listaExtrato.innerHTML = '<li style="padding:40px;text-align:center;color:var(--text-secondary)"><i class="fas fa-file-import" style="font-size:32px;margin-bottom:12px;display:block;color:#cbd5e1"></i>Importe um extrato OFX para começar</li>';
+                document.getElementById('paginaçãoExtrato').innerHTML = '';
                 return;
             }
             const total = lancamentosExtrato.length;
@@ -892,19 +892,19 @@
                     <div class="item-check ${extratosSelecionados.includes(item.id) ? 'checked' : ''}">
                         ${extratosSelecionados.includes(item.id) ? '<i class="fas fa-check" style="font-size:12px;"></i>' : ''}
                     </div>
-                    <div class="item-info"><div class="data">${formatarData(item.data)}</div><div class="descriÃ§Ã£o">${item.descriÃ§Ã£o}</div></div>
+                    <div class="item-info"><div class="data">${formatarData(item.data)}</div><div class="descrição">${item.descricao}</div></div>
                     <div class="item-valor ${item.tipo}">${item.tipo === 'entrada' ? '+' : '-'}${formatarMoeda(item.valor)}</div>
                 </li>
             `).join('');
 
-            renderizarPaginacao('paginacaoExtrato', paginaExtrato, totalPags, total, inicio, fim, 'extrato');
+            renderizarPaginação('paginaçãoExtrato', paginaExtrato, totalPags, total, inicio, fim, 'extrato');
         }
 
-        function renderizarPaginacao(containerId, paginaAtual, totalPags, total, inicio, fim, tipo) {
+        function renderizarPaginação(containerId, paginaAtual, totalPags, total, inicio, fim, tipo) {
             const container = document.getElementById(containerId);
             if (totalPags <= 1) {
-                container.innerHTML = `<div class="pagination-info">${total} lanÃ§amento${total !== 1 ? 's' : ''}</div>
-                    <div class="pagination-per-page"><span>Por pÃ¡gina:</span>
+                container.innerHTML = `<div class="pagination-info">${total} lançamento${total !== 1 ? 's' : ''}</div>
+                    <div class="pagination-per-page"><span>Por página:</span>
                     <select onchange="alterarItensPorPagina(this.value)">
                         <option value="20" ${itensPorPagina===20?'selected':''}>20</option>
                         <option value="30" ${itensPorPagina===30?'selected':''}>30</option>
@@ -931,7 +931,7 @@
                     <button class="pagination-btn" onclick="irParaPagina('${tipo}',${paginaAtual+1})" ${paginaAtual===totalPags?'disabled':''}><i class="fas fa-angle-right"></i></button>
                     <button class="pagination-btn" onclick="irParaPagina('${tipo}',${totalPags})" ${paginaAtual===totalPags?'disabled':''}><i class="fas fa-angle-double-right"></i></button>
                 </div>
-                <div class="pagination-per-page"><span>Por pÃ¡gina:</span>
+                <div class="pagination-per-page"><span>Por página:</span>
                 <select onchange="alterarItensPorPagina(this.value)">
                     <option value="20" ${itensPorPagina===20?'selected':''}>20</option>
                     <option value="30" ${itensPorPagina===30?'selected':''}>30</option>
@@ -959,13 +959,13 @@
             renderizarListas();
         }
 
-        function renderizarHistorico() {
-            const tbody = document.getElementById('histÃ³ricoConciliacoes');
-            if (histÃ³rico.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-secondary)">Nenhuma conciliaÃ§Ã£o realizada</td></tr>';
+        function renderizarHistórico() {
+            const tbody = document.getElementById('históricoConciliações');
+            if (histórico.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-secondary)">Nenhuma conciliação realizada</td></tr>';
                 return;
             }
-            tbody.innerHTML = histÃ³rico.map(item => `
+            tbody.innerHTML = histórico.map(item => `
                 <tr>
                     <td>${formatarData(item.data)}</td>
                     <td>${item.sistemaDesc}</td>
@@ -1008,19 +1008,19 @@
                     valor: sisItem.valor,
                     tipo_match: 'manual'
                 };
-                const r = await fetch(`${API}/conciliacao`, { credentials: 'include', method: 'POST', headers: hdrs(), body: JSON.stringify(payload) });
+                const r = await fetch(`${API}/conciliação`, { credentials: 'include', method: 'POST', headers: hdrs(), body: JSON.stringify(payload) });
                 const data = await r.json();
                 if (data.success) {
-                    mostrarToastFinanceiro('ConciliaÃ§Ã£o manual realizada!', 'success');
+                    mostrarToastFinanceiro('Conciliação manual realizada!', 'success');
                     sistemasSelecionados = [];
                     extratosSelecionados = [];
                     await carregarTudo();
                 } else { mostrarToastFinanceiro(data.message || 'Erro', 'error'); }
-            } catch (e) { mostrarToastFinanceiro('Erro de conexÃ£o', 'error'); }
+            } catch (e) { mostrarToastFinanceiro('Erro de conexão', 'error'); }
         }
 
         function desconciliarSelecionados() {
-            mostrarToastFinanceiro('Clique no Ãcone de desfazer no histÃ³rico abaixo', 'info');
+            mostrarToastFinanceiro('Clique no Ácone de desfazer no histórico abaixo', 'info');
         }
 
         async function conciliarAutomatico() {
@@ -1028,11 +1028,11 @@
                 const contaId = document.getElementById('filtroBanco').value;
                 const payload = {};
                 if (contaId) payload.conta_id = contaId;
-                const r = await fetch(`${API}/conciliacao/automatica`, { credentials: 'include', method: 'POST', headers: hdrs(), body: JSON.stringify(payload) });
+                const r = await fetch(`${API}/conciliação/automatica`, { credentials: 'include', method: 'POST', headers: hdrs(), body: JSON.stringify(payload) });
                 const data = await r.json();
                 if (data.success) {
                     const total = data.conciliados || 0;
-                    mostrarToastFinanceiro(`ConciliaÃ§Ã£o automÃ¡tica: ${total} item(ns) conciliado(s)!`, total > 0 ? 'success' : 'info');
+                    mostrarToastFinanceiro(`Conciliação automática: ${total} item(ns) conciliado(s)!`, total > 0 ? 'success' : 'info');
                     await carregarTudo();
                 } else { mostrarToastFinanceiro(data.message || 'Erro', 'error'); }
             } catch (e) { mostrarToastFinanceiro('Erro ao conciliar', 'error'); }
@@ -1040,13 +1040,13 @@
 
         async function desconciliar(id) {
             const confirmado = typeof showConfirmModal === 'function'
-                ? await showConfirmModal({ type:'warning', title:'Desfazer ConciliaÃ§Ã£o', message:'Deseja realmente desfazer esta conciliaÃ§Ã£o?', confirmText:'Desfazer', cancelText:'Cancelar' })
-                : confirm('Deseja desfazer esta conciliaÃ§Ã£o?');
+                ? await showConfirmModal({ type:'warning', title:'Desfazer Conciliação', message:'Deseja realmente desfazer esta conciliação?', confirmText:'Desfazer', cancelText:'Cancelar' })
+                : confirm('Deseja desfazer esta conciliação?');
             if (!confirmado) return;
             try {
-                const r = await fetch(`${API}/conciliacao/${id}`, { credentials: 'include', method: 'DELETE', headers: hdrs() });
+                const r = await fetch(`${API}/conciliação/${id}`, { credentials: 'include', method: 'DELETE', headers: hdrs() });
                 const data = await r.json();
-                if (data.success) { mostrarToastFinanceiro('ConciliaÃ§Ã£o desfeita', 'success'); await carregarTudo(); }
+                if (data.success) { mostrarToastFinanceiro('Conciliação desfeita', 'success'); await carregarTudo(); }
                 else { mostrarToastFinanceiro(data.message || 'Erro', 'error'); }
             } catch (e) { mostrarToastFinanceiro('Erro', 'error'); }
         }
@@ -1071,16 +1071,16 @@
                 // Ler arquivo e enviar como texto (OFX/CSV)
                 const texto = await arquivo.text();
                 const payload = { conta_id: contaId || null, conteudo: texto, nome_arquivo: arquivo.name };
-                const r = await fetch(`${API}/conciliacao/importar-ofx`, { credentials: 'include', method: 'POST',
+                const r = await fetch(`${API}/conciliação/importar-ofx`, { credentials: 'include', method: 'POST',
                     headers: hdrs(),
                     body: JSON.stringify(payload)
                 });
                 const data = await r.json();
                 if (data.success) {
-                    mostrarToastFinanceiro(`Extrato importado! ${data.importados || 0} lanÃ§amento(s) novos, ${data.duplicados || 0} duplicado(s)`, 'success');
+                    mostrarToastFinanceiro(`Extrato importado! ${data.importados || 0} lançamento(s) novos, ${data.duplicados || 0} duplicado(s)`, 'success');
                     fecharModal('modalImportar');
                     await carregarTudo();
-                } else { mostrarToastFinanceiro(data.message || 'Erro na importaÃ§Ã£o', 'error'); }
+                } else { mostrarToastFinanceiro(data.message || 'Erro na importação', 'error'); }
             } catch (e) { mostrarToastFinanceiro('Erro ao importar extrato', 'error'); }
         }
     </script>
@@ -1088,14 +1088,14 @@
     <script src="financeiro.js"></script>
     <script src="public/js/financeiro-user-loader.js?v=20251227"></script>
 
-    <!-- Sistema de NotificaÃ§Ãµes Global -->
+    <!-- Sistema de Notificações Global -->
     <script src="/js/notifications-manager.js?v=20251227"></script>
     <script src="/js/notification-button.js?v=20251227"></script>
 
     <!-- Sistema de Chat e Suporte -->
     <script src="/js/chat-suporte-widgets.js?v=20260103"></script>
 
-    <!-- Sistema de Monitoramento de ConexÃ£o -->
+    <!-- Sistema de Monitoramento de Conexão -->
     <script src="../_shared/connection-monitor.js?v=20251227"></script>
     <script src="/js/popup-confirmacao.js"></script>
     <script src="/js/confirm-modal.js?v=20260110"></script>

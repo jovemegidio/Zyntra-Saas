@@ -133,7 +133,7 @@
                 <a href="bancos.html" class="sidebar-btn" title="Bancos"><i class="fas fa-university"></i></a>
                 <a href="boletos.html" class="sidebar-btn" title="Boletos"><i class="fas fa-barcode"></i></a>
                 <a href="nfse.html" class="sidebar-btn active" title="NFS-e"><i class="fas fa-file-invoice"></i></a>
-                <a href="recorrencias.html" class="sidebar-btn" title="Recorrências"><i class="fas fa-redo"></i></a>
+                <a href="recorrências.html" class="sidebar-btn" title="Recorrências"><i class="fas fa-redo"></i></a>
                 <a href="conciliacao.html" class="sidebar-btn" title="Conciliação"><i class="fas fa-balance-scale"></i></a>
                 <a href="relatorios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
             </nav>
@@ -273,7 +273,7 @@
                         <div class="form-group"><label><i class="fas fa-percent"></i> Alíquota ISS (%)</label><input type="number" id="nf-aliquota" step="0.01" value="5" placeholder="5.00"></div>
                         <div class="form-group"><label><i class="fas fa-exchange-alt"></i> ISS Retido?</label><select id="nf-iss-retido"><option value="0">Não</option><option value="1">Sim</option></select></div>
                         <div class="form-group"><label><i class="fas fa-calendar"></i> Competência</label><input type="date" id="nf-competencia"></div>
-                        <div class="form-group full"><label><i class="fas fa-align-left"></i> Descrição do Serviço <span class="req">*</span></label><textarea id="nf-descrição" rows="3" placeholder="Descreva o serviço prestado..."></textarea></div>
+                        <div class="form-group full"><label><i class="fas fa-align-left"></i> Descrição do Serviço <span class="req">*</span></label><textarea id="nf-descricao" rows="3" placeholder="Descreva o serviço prestado..."></textarea></div>
                         <div class="form-group full"><label><i class="fas fa-sticky-note"></i> Observações</label><textarea id="nf-obs" rows="2" placeholder="Observações adicionais..."></textarea></div>
                     </div>
                 </div>
@@ -318,9 +318,9 @@
             perPage: 30,
             getData: () => notas,
             searchFields: [
-                n => n.número_nfse,
+                n => n.numero_nfse,
                 n => n.tomador_nome,
-                n => n.descrição_servico,
+                n => n.descricao_servico,
                 n => n.status
             ],
             renderRows: (pageData, allFiltered) => {
@@ -331,9 +331,9 @@
                 }
                 tb.innerHTML = pageData.map(n => `
                     <tr>
-                        <td><strong>${esc(n.número_nfse || '-')}</strong></td>
+                        <td><strong>${esc(n.numero_nfse || '-')}</strong></td>
                         <td>${esc(n.tomador_nome)}</td>
-                        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(n.descrição_servico)}</td>
+                        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(n.descricao_servico)}</td>
                         <td>${fmtData(n.data_emissao)}</td>
                         <td class="valor">${fmtMoeda(n.valor_servico)}</td>
                         <td class="valor">${fmtMoeda(n.valor_iss)}</td>
@@ -399,14 +399,14 @@
             document.getElementById('detalhe-body').innerHTML = `
                 <div class="nfse-detail">
                     <div class="detail-header">
-                        <h3>NFS-e Nº ${esc(n.número_nfse)}</h3>
-                        <p>Protocolo: ${esc(n.protocolo || '-')} é Verificação: ${esc(n.codigo_verificacao || '-')}</p>
+                        <h3>NFS-e Nº ${esc(n.numero_nfse)}</h3>
+                        <p>Protocolo: ${esc(n.protocolo || '-')} é Verificação: ${esc(n.codigo_verificação || '-')}</p>
                     </div>
                     <div class="detail-body">
                         <div class="info-row"><span class="label">Tomador</span><span class="value">${esc(n.tomador_nome)}</span></div>
                         <div class="info-row"><span class="label">CPF/CNPJ</span><span class="value">${esc(n.tomador_cpf_cnpj || '-')}</span></div>
                         <div class="info-row"><span class="label">E-mail</span><span class="value">${esc(n.tomador_email || '-')}</span></div>
-                        <div class="info-row"><span class="label">Serviço</span><span class="value">${esc(n.descrição_servico)}</span></div>
+                        <div class="info-row"><span class="label">Serviço</span><span class="value">${esc(n.descricao_servico)}</span></div>
                         <div class="info-row"><span class="label">Competência</span><span class="value">${fmtData(n.data_competencia)}</span></div>
                         <div class="info-row"><span class="label">Data Emissão</span><span class="value">${fmtData(n.data_emissao)}</span></div>
                         <div class="info-row"><span class="label">Valor do Serviço</span><span class="value" style="font-size:16px">${fmtMoeda(n.valor_servico)}</span></div>
@@ -441,15 +441,15 @@
                 tomador_cidade: document.getElementById('nf-tomador-cidade').value,
                 tomador_uf: document.getElementById('nf-tomador-uf').value,
                 codigo_servico: document.getElementById('nf-cod-servico').value,
-                descrição_servico: document.getElementById('nf-descrição').value,
+                descricao_servico: document.getElementById('nf-descrição').value,
                 valor_servico: parseFloat(document.getElementById('nf-valor').value),
                 valor_deducoes: parseFloat(document.getElementById('nf-deducoes').value) || 0,
                 aliquota_iss: parseFloat(document.getElementById('nf-aliquota').value) || 5,
                 iss_retido: document.getElementById('nf-iss-retido').value === '1',
                 data_competencia: document.getElementById('nf-competencia').value,
-                observacoes: document.getElementById('nf-obs').value
+                observações: document.getElementById('nf-obs').value
             };
-            if (!payload.tomador_nome || !payload.descrição_servico || !payload.valor_servico) {
+            if (!payload.tomador_nome || !payload.descricao_servico || !payload.valor_servico) {
                 mostrarToast('Preencha tomador, descrição e valor', 'warning'); return;
             }
             window._guardEmitirNfse = true;
@@ -457,7 +457,7 @@
                 const r = await fetch(`${API}/emitir-nfse`, { method: 'POST', headers: hdrs(), body: JSON.stringify(payload) });
                 const data = await r.json();
                 if (data.success) {
-                    mostrarToast(`NFS-e #${data.nfse.número} emitida com sucesso!`, 'success');
+                    mostrarToast(`NFS-e #${data.nfse.numero} emitida com sucesso!`, 'success');
                     fecharModal('modal-emitir');
                     carregarNfse();
                     document.querySelectorAll('#modal-emitir input, #modal-emitir textarea').forEach(el => { if (el.type !== 'number' || !el.value) el.value = ''; });
@@ -481,7 +481,7 @@
             if (notas.length === 0) { mostrarToast('Nenhuma NFS-e para exportar', 'warning'); return; }
             let csv = 'Número,Tomador,CPF/CNPJ,Serviço,Valor,ISS,Líquido,Status,Emissão\n';
             notas.forEach(n => {
-                csv += `"${n.número_nfse}","${n.tomador_nome}","${n.tomador_cpf_cnpj||''}","${n.descrição_servico}","${n.valor_servico}","${n.valor_iss}","${n.valor_liquido}","${n.status}","${fmtData(n.data_emissao)}"\n`;
+                csv += `"${n.numero_nfse}","${n.tomador_nome}","${n.tomador_cpf_cnpj||''}","${n.descricao_servico}","${n.valor_servico}","${n.valor_iss}","${n.valor_liquido}","${n.status}","${fmtData(n.data_emissao)}"\n`;
             });
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const a = document.createElement('a');

@@ -733,6 +733,8 @@
   function initAttachMenu() {
     const btn = $('afw-btn-attach');
     const menu = $('afw-attach-menu');
+    if (!btn || !menu) return;
+
 
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -851,15 +853,14 @@
       grid.appendChild(s);
     });
 
-    const btnEmoji = $('afw-btn-emoji');
-    if (btnEmoji) btnEmoji.addEventListener('click', (e) => {
+    $('afw-btn-emoji').addEventListener('click', (e) => {
       e.stopPropagation();
       $('afw-emoji-picker').classList.toggle('hidden');
     });
 
     document.addEventListener('click', (e) => {
       const picker = $('afw-emoji-picker');
-      if (picker && !picker.contains(e.target) && e.target !== $('afw-btn-emoji')) {
+      if (!picker.contains(e.target) && e.target !== $('afw-btn-emoji')) {
         picker.classList.add('hidden');
       }
     });
@@ -869,20 +870,26 @@
   let modalZoom = 1;
 
   function initModal() {
-    $('afw-modal-bg').addEventListener('click', closeModal);
-    $('afw-modal-close').addEventListener('click', closeModal);
+    const modalBg = $('afw-modal-bg');
+    const modalClose = $('afw-modal-close');
+    const modalZoomIn = $('afw-modal-zoom-in');
+    const modalZoomOut = $('afw-modal-zoom-out');
+    const modalContent = $('afw-modal-content');
+    if (!modalBg) return; // Modal elements not present on this page
+    modalBg.addEventListener('click', closeModal);
+    if (modalClose) modalClose.addEventListener('click', closeModal);
 
-    $('afw-modal-zoom-in').addEventListener('click', () => {
+    if (modalZoomIn) modalZoomIn.addEventListener('click', () => {
       modalZoom = Math.min(modalZoom + 0.25, 3);
       applyModalZoom();
     });
 
-    $('afw-modal-zoom-out').addEventListener('click', () => {
+    if (modalZoomOut) modalZoomOut.addEventListener('click', () => {
       modalZoom = Math.max(modalZoom - 0.25, 0.25);
       applyModalZoom();
     });
 
-    $('afw-modal-content').addEventListener('wheel', (e) => {
+    if (modalContent) modalContent.addEventListener('wheel', (e) => {
       e.preventDefault();
       modalZoom = Math.max(0.25, Math.min(3, modalZoom + (e.deltaY > 0 ? -0.1 : 0.1)));
       applyModalZoom();

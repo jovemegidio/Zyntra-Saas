@@ -68,7 +68,7 @@
 
 
 
-        /* ======================================== SISTEMA DE NOTIFICAÃ‡Ã•ES ======================================== */
+        /* ======================================== SISTEMA DE NOTIFICAÇÕES ======================================== */
 
 
 
@@ -203,7 +203,7 @@
     <div class="app-container">
         <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
 
-        <!-- SIDEBAR - PADRÃƒO PCP (HTML estÃ¡tico, RBAC via JS) -->
+        <!-- SIDEBAR - PADRÁƒO PCP (HTML estático, RBAC via JS) -->
         <aside class="sidebar" id="mobile-sidebar">
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel">
                 <i class="fas fa-home"></i>
@@ -228,13 +228,13 @@
                 <a href="plano-contas.html" class="sidebar-btn" title="Plano de Contas">
                     <i class="fas fa-list-alt"></i>
                 </a>
-                <a href="orcamentos.html" class="sidebar-btn" title="OrÃ§amentos">
+                <a href="orcamentos.html" class="sidebar-btn" title="Orçamentos">
                     <i class="fas fa-calculator"></i>
                 </a>
-                <a href="conciliacao.html" class="sidebar-btn" title="ConciliaÃ§Ã£o">
+                <a href="conciliacao.html" class="sidebar-btn" title="Conciliação">
                     <i class="fas fa-balance-scale"></i>
                 </a>
-                <a href="relatorios.html" class="sidebar-btn" title="RelatÃ³rios">
+                <a href="relatorios.html" class="sidebar-btn" title="Relatórios">
                     <i class="fas fa-chart-bar"></i>
                 </a>
             </nav>
@@ -247,7 +247,7 @@
                 <a href="impostos.html" class="sidebar-btn active" title="Impostos">
                     <i class="fas fa-percent"></i>
                 </a>
-                <button class="sidebar-btn" title="ConfiguraÃ§Ãµes" id="btn-config" onclick="toggleConfiguracoes()">
+                <button class="sidebar-btn" title="Configurações" id="btn-config" onclick="toggleConfigurações()">
                     <i class="fas fa-cog"></i>
                 </button>
             </div>
@@ -255,10 +255,10 @@
 
         <!-- Main Area -->
         <main class="main-area">
-            <!-- HEADER - PADRÃƒO PCP (HTML estÃ¡tico) -->
+            <!-- HEADER - PADRÁƒO PCP (HTML estático) -->
             <header class="header">
                 <div class="header-left">
-                    <!-- Botao Menu Mobile -->
+                    <!-- Botão Menu Mobile -->
                     <button class="mobile-menu-btn" onclick="toggleMobileSidebar()" title="Menu">
                         <i class="fas fa-bars"></i>
                     </button>
@@ -276,12 +276,12 @@
                     </button>
                     
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">UsuÃ¡rio</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
                     </div>
                 </div>
             </header>
 
-            <!-- Main Content - PadrÃ£o PCP -->
+            <!-- Main Content - Padrão PCP -->
             <div class="main-content">
 
             <div class="page-content">
@@ -323,7 +323,7 @@
                             <div class="kpi-icon orange"><i class="fas fa-calculator"></i></div>
                         </div>
                         <div class="kpi-content">
-                            <h3>AlÃ­quota MÃ©dia</h3>
+                            <h3>Alíquota Média</h3>
                             <div class="kpi-value" id="kpi-aliquota">0%</div>
                         </div>
                     </div>
@@ -332,7 +332,7 @@
                             <div class="kpi-icon blue"><i class="fas fa-clock"></i></div>
                         </div>
                         <div class="kpi-content">
-                            <h3>Vencendo Este MÃªs</h3>
+                            <h3>Vencendo Este Mês</h3>
                             <div class="kpi-value" id="kpi-vencendo">0</div>
                         </div>
                     </div>
@@ -347,7 +347,7 @@
                         <div class="fp-search-bar">
                             <div class="fp-search-wrap">
                                 <i class="fas fa-search"></i>
-                                <input type="text" id="fp-search-impostos" placeholder="Pesquisar por cÃ³digo, nome, tipo..." oninput="window._finPg['fp-pg-impostos'].search(this.value)">
+                                <input type="text" id="fp-search-impostos" placeholder="Pesquisar por código, nome, tipo..." oninput="window._finPg['fp-pg-impostos'].search(this.value)">
                             </div>
                             <span class="fp-count" id="fp-info-impostos"></span>
                         </div>
@@ -356,13 +356,13 @@
                         <table>
                             <thead>
                                 <tr>
-                                    <th>CÃ³digo</th>
+                                    <th>Código</th>
                                     <th>Nome</th>
                                     <th>Tipo</th>
-                                    <th>AlÃ­quota</th>
-                                    <th>Base de CÃ¡lculo</th>
+                                    <th>Alíquota</th>
+                                    <th>Base de Cálculo</th>
                                     <th>Status</th>
-                                    <th>AÃ§Ãµes</th>
+                                    <th>Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="tabela-impostos">
@@ -382,7 +382,7 @@
         </main>
     </div>
 
-    <!-- Modal Novo/Editar - PadrÃ£o SaaS Empresarial -->
+    <!-- Modal Novo/Editar - Padrão SaaS Empresarial -->
     <div class="modal-overlay-saas" id="modalImposto" onclick="if(event.target === this) fecharModal()">
         <div class="modal-saas modal-sm">
             <div class="modal-header-saas header-purple">
@@ -391,7 +391,7 @@
                         <i class="fas fa-percent" id="modal-icon"></i>
                     </div>
                     <div class="modal-header-text-saas">
-                        <h2 id="modal-tÃ­tulo">Novo Imposto</h2>
+                        <h2 id="modal-titulo">Novo Imposto</h2>
                         <p id="modal-subtitulo">Configure um novo imposto ou tributo</p>
                     </div>
                     <button class="modal-close-saas" onclick="fecharModal()"><i class="fas fa-times"></i></button>
@@ -401,17 +401,17 @@
                 <form id="formImposto">
                     <input type="hidden" id="imposto-id">
 
-                    <!-- SeÃ§Ã£o: IdentificaÃ§Ã£o -->
+                    <!-- Seção: Identificação -->
                     <div class="form-section-saas">
                         <div class="form-section-title-saas">
                             <i class="fas fa-tag icon-purple"></i>
-                            <span>IdentificaÃ§Ã£o</span>
-                            <span class="section-badge-saas">ObrigatÃ³rio</span>
+                            <span>Identificação</span>
+                            <span class="section-badge-saas">Obrigatório</span>
                         </div>
                         <div class="form-grid-saas">
                             <div class="form-group-saas">
-                                <label><i class="fas fa-hashtag"></i> CÃ³digo <span class="required">*</span></label>
-                                <input type="text" id="imposto-cÃ³digo" placeholder="Ex: ICMS, ISS, PIS" required>
+                                <label><i class="fas fa-hashtag"></i> Código <span class="required">*</span></label>
+                                <input type="text" id="imposto-codigo" placeholder="Ex: ICMS, ISS, PIS" required>
                             </div>
                             <div class="form-group-saas">
                                 <label><i class="fas fa-layer-group"></i> Tipo <span class="required">*</span></label>
@@ -428,15 +428,15 @@
                         </div>
                     </div>
 
-                    <!-- SeÃ§Ã£o: ConfiguraÃ§Ã£o -->
+                    <!-- Seção: Configuração -->
                     <div class="form-section-saas">
                         <div class="form-section-title-saas">
                             <i class="fas fa-cog icon-orange"></i>
-                            <span>ConfiguraÃ§Ã£o de CÃ¡lculo</span>
+                            <span>Configuração de Cálculo</span>
                         </div>
                         <div class="form-grid-saas">
                             <div class="form-group-saas">
-                                <label><i class="fas fa-percentage"></i> AlÃ­quota (%)</label>
+                                <label><i class="fas fa-percentage"></i> Alíquota (%)</label>
                                 <input type="number" id="imposto-aliquota" placeholder="0.00" step="0.01" min="0" max="100">
                                 <div class="field-hint-saas">
                                     <i class="fas fa-info-circle"></i>
@@ -444,18 +444,18 @@
                                 </div>
                             </div>
                             <div class="form-group-saas">
-                                <label><i class="fas fa-calculator"></i> Base de CÃ¡lculo</label>
+                                <label><i class="fas fa-calculator"></i> Base de Cálculo</label>
                                 <select id="imposto-base">
                                     <option value="faturamento">Faturamento Bruto</option>
                                     <option value="lucro">Lucro</option>
                                     <option value="folha">Folha de Pagamento</option>
-                                    <option value="servicos">ServiÃ§os Prestados</option>
+                                    <option value="servicos">Serviços Prestados</option>
                                     <option value="mercadorias">Valor das Mercadorias</option>
                                 </select>
                             </div>
                             <div class="form-group-saas full">
-                                <label><i class="fas fa-align-left"></i> DescriÃ§Ã£o</label>
-                                <textarea id="imposto-descriÃ§Ã£o" rows="3" placeholder="DescriÃ§Ã£o detalhada do imposto e suas regras de aplicaÃ§Ã£o..."></textarea>
+                                <label><i class="fas fa-align-left"></i> Descrição</label>
+                                <textarea id="imposto-descricao" rows="3" placeholder="Descrição detalhada do imposto e suas regras de aplicação..."></textarea>
                             </div>
                             <div class="form-group-saas">
                                 <label><i class="fas fa-toggle-on"></i> Status</label>
@@ -472,7 +472,7 @@
                 <div class="modal-footer-left-saas">
                     <div class="footer-info">
                         <i class="fas fa-info-circle"></i>
-                        <span>Campos com <span style="color:#dc2626">*</span> sÃ£o obrigatÃ³rios</span>
+                        <span>Campos com <span style="color:#dc2626">*</span> são obrigatórios</span>
                     </div>
                 </div>
                 <div class="modal-footer-right-saas">
@@ -495,7 +495,7 @@
         let tabAtual = 'todos';
         let editandoId = null;
 
-        // PaginaÃ§Ã£o
+        // Paginação
         const pgImpostos = new FinPagination({
             containerId: 'fp-pg-impostos',
             searchId: 'fp-search-impostos',
@@ -507,7 +507,7 @@
                 return impostos.filter(i => i.tipo === tipoMap[tabAtual]);
             },
             searchFields: [
-                i => i.codigo || i.cÃ³digo,
+                i => i.codigo || i.codigo,
                 i => i.nome,
                 i => i.tipo,
                 i => i.base || i.base_calculo
@@ -520,7 +520,7 @@
                 }
                 tbody.innerHTML = pageData.map(i => `
                     <tr>
-                        <td><strong>${i.codigo || i.cÃ³digo || '-'}</strong></td>
+                        <td><strong>${i.codigo || i.codigo || '-'}</strong></td>
                         <td>${i.nome}</td>
                         <td><span class="badge badge-purple">${(i.tipo || '').charAt(0).toUpperCase() + (i.tipo || '').slice(1)}</span></td>
                         <td><strong>${i.aliquota}%</strong></td>
@@ -539,22 +539,22 @@
 
         // Dados mockados (substituir por API real)
         const impostosIniciais = [
-            { id: 1, codigo: 'ICMS', nome: 'Imposto sobre CirculaÃ§Ã£o de Mercadorias', tipo: 'estadual', aliquota: 18, base: 'mercadorias', ativo: true },
-            { id: 2, codigo: 'ISS', nome: 'Imposto Sobre ServiÃ§os', tipo: 'municipal', aliquota: 5, base: 'servicos', ativo: true },
-            { id: 3, codigo: 'PIS', nome: 'Programa de IntegraÃ§Ã£o Social', tipo: 'federal', aliquota: 1.65, base: 'faturamento', ativo: true },
-            { id: 4, codigo: 'COFINS', nome: 'ContribuiÃ£o para Financiamento da Seguridade Social', tipo: 'federal', aliquota: 7.6, base: 'faturamento', ativo: true },
-            { id: 5, codigo: 'IRPJ', nome: 'Imposto de Renda Pessoa JurÃ­dica', tipo: 'federal', aliquota: 15, base: 'lucro', ativo: true },
-            { id: 6, codigo: 'CSLL', nome: 'ContribuiÃ£o Social sobre o Lucro LÃ­quido', tipo: 'federal', aliquota: 9, base: 'lucro', ativo: true },
-            { id: 7, codigo: 'INSS', nome: 'Instituto Nacional do Seguro Social', tipo: 'federal', aliquota: 20, base: 'folha', ativo: true },
+            { id: 1, código: 'ICMS', nome: 'Imposto sobre Circulação de Mercadorias', tipo: 'estadual', aliquota: 18, base: 'mercadorias', ativo: true },
+            { id: 2, código: 'ISS', nome: 'Imposto Sobre Serviços', tipo: 'municipal', aliquota: 5, base: 'servicos', ativo: true },
+            { id: 3, código: 'PIS', nome: 'Programa de Integração Social', tipo: 'federal', aliquota: 1.65, base: 'faturamento', ativo: true },
+            { id: 4, código: 'COFINS', nome: 'Contribuião para Financiamento da Seguridade Social', tipo: 'federal', aliquota: 7.6, base: 'faturamento', ativo: true },
+            { id: 5, código: 'IRPJ', nome: 'Imposto de Renda Pessoa Jurídica', tipo: 'federal', aliquota: 15, base: 'lucro', ativo: true },
+            { id: 6, código: 'CSLL', nome: 'Contribuião Social sobre o Lucro Líquido', tipo: 'federal', aliquota: 9, base: 'lucro', ativo: true },
+            { id: 7, código: 'INSS', nome: 'Instituto Nacional do Seguro Social', tipo: 'federal', aliquota: 20, base: 'folha', ativo: true },
         ];
 
-        // Carregar usuÃ¡rio
+        // Carregar usuário
         async function carregarUsuario() {
             try {
                 const response = await fetch('/api/me', { credentials: 'include' });
                 if (response.ok) {
                     const user = await response.json();
-                    const primeiroNome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'UsuÃ¡rio');
+                    const primeiroNome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usuário');
 
                     const hour = new Date().getHours();
                     let greeting = 'Bom dia';
@@ -582,7 +582,7 @@
                         fotoEl.onerror = () => { fotoEl.style.display = 'none'; if (inicialEl) { inicialEl.textContent = primeiroNome.charAt(0).toUpperCase(); inicialEl.style.display = 'flex'; } };
                     }
                 }
-            } catch (e) { console.error('Erro ao carregar usuÃ¡rio:', e); }
+            } catch (e) { console.error('Erro ao carregar usuário:', e); }
         }
 
         // Carregar impostos
@@ -623,7 +623,7 @@
                 'faturamento': 'Faturamento Bruto',
                 'lucro': 'Lucro',
                 'folha': 'Folha de Pagamento',
-                'servicos': 'ServiÃ§os',
+                'servicos': 'Serviços',
                 'mercadorias': 'Mercadorias'
             };
             return map[base] || base;
@@ -653,7 +653,7 @@
 
         function abrirModal() {
             editandoId = null;
-            document.getElementById('modal-tÃ­tulo').textContent = 'Novo Imposto';
+            document.getElementById('modal-título').textContent = 'Novo Imposto';
             document.getElementById('formImposto').reset();
             document.getElementById('imposto-id').value = '';
             document.getElementById('modalImposto').classList.add('active');
@@ -668,32 +668,32 @@
             if (!imposto) return;
 
             editandoId = id;
-            document.getElementById('modal-tÃ­tulo').textContent = 'Editar Imposto';
+            document.getElementById('modal-título').textContent = 'Editar Imposto';
             document.getElementById('imposto-id').value = imposto.id;
-            document.getElementById('imposto-cÃ³digo').value = imposto.codigo || '';
+            document.getElementById('imposto-código').value = imposto.codigo || '';
             document.getElementById('imposto-nome').value = imposto.nome || '';
             document.getElementById('imposto-tipo').value = imposto.tipo || 'federal';
             document.getElementById('imposto-aliquota').value = imposto.aliquota || 0;
             document.getElementById('imposto-base').value = imposto.base || 'faturamento';
-            document.getElementById('imposto-descriÃ§Ã£o').value = imposto.descriÃ§Ã£o || '';
+            document.getElementById('imposto-descrição').value = imposto.descricao || '';
             document.getElementById('imposto-ativo').value = imposto.ativo ? '1' : '0';
             document.getElementById('modalImposto').classList.add('active');
         }
 
         async function salvarImposto() {
             const dados = {
-                codigo: document.getElementById('imposto-cÃ³digo').value,
+                código: document.getElementById('imposto-código').value,
                 tipo: document.getElementById('imposto-tipo').value,
                 nome: document.getElementById('imposto-nome').value,
                 aliquota: parseFloat(document.getElementById('imposto-aliquota').value) || 0,
                 base: document.getElementById('imposto-base').value,
-                descriÃ§Ã£o: document.getElementById('imposto-descriÃ§Ã£o').value,
-                observacoes: document.getElementById('imposto-descriÃ§Ã£o').value,
+                descrição: document.getElementById('imposto-descrição').value,
+                observações: document.getElementById('imposto-descrição').value,
                 ativo: document.getElementById('imposto-ativo').value === '1'
             };
 
             if (!dados.tipo) {
-                mostrarToastFinanceiro('Tipo do imposto Ã© obrigatÃ³rio', 'warning');
+                mostrarToastFinanceiro('Tipo do imposto é obrigatório', 'warning');
                 return;
             }
 
@@ -761,10 +761,10 @@
                         <button onclick="this.closest('.imposto-detail-modal').remove()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#94a3b8;">&times;</button>
                     </div>
                     <div style="display:grid;gap:12px;">
-                        <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#f8fafc;border-radius:8px;"><span style="color:#64748b;font-size:13px;">Nome</span><strong style="color:#1e293b;font-size:13px;">${imposto.nome || imposto.descriÃ§Ã£o}</strong></div>
-                        <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#f8fafc;border-radius:8px;"><span style="color:#64748b;font-size:13px;">CÃ³digo</span><strong style="color:#1e293b;font-size:13px;">${imposto.cÃ³digo || imposto.tipo}</strong></div>
+                        <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#f8fafc;border-radius:8px;"><span style="color:#64748b;font-size:13px;">Nome</span><strong style="color:#1e293b;font-size:13px;">${imposto.nome || imposto.descricao}</strong></div>
+                        <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#f8fafc;border-radius:8px;"><span style="color:#64748b;font-size:13px;">Código</span><strong style="color:#1e293b;font-size:13px;">${imposto.codigo || imposto.tipo}</strong></div>
                         <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#f8fafc;border-radius:8px;"><span style="color:#64748b;font-size:13px;">Tipo</span><strong style="color:#1e293b;font-size:13px;">${imposto.tipo}</strong></div>
-                        <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#f8fafc;border-radius:8px;"><span style="color:#64748b;font-size:13px;">AlÃ­quota</span><strong style="color:#8b5cf6;font-size:13px;">${imposto.aliquota}%</strong></div>
+                        <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#f8fafc;border-radius:8px;"><span style="color:#64748b;font-size:13px;">Alíquota</span><strong style="color:#8b5cf6;font-size:13px;">${imposto.aliquota}%</strong></div>
                         <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#f8fafc;border-radius:8px;"><span style="color:#64748b;font-size:13px;">Base</span><strong style="color:#1e293b;font-size:13px;">${formatarBase(imposto.base)}</strong></div>
                         <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#f8fafc;border-radius:8px;"><span style="color:#64748b;font-size:13px;">Status</span><span style="padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;${imposto.ativo ? 'background:#dcfce7;color:#16a34a' : 'background:#fee2e2;color:#dc2626'};">${imposto.ativo ? 'Ativo' : 'Inativo'}</span></div>
                     </div>
@@ -775,13 +775,13 @@
 
         function exportarImpostos() {
             if (impostos.length === 0) {
-                mostrarToastFinanceiro('NÃ£o hÃ¡ dados para exportar', 'warning');
+                mostrarToastFinanceiro('Não há dados para exportar', 'warning');
                 return;
             }
 
-            let csv = 'CÃ³digo,Nome,Tipo,AlÃ­quota,Base,Status\n';
+            let csv = 'Código,Nome,Tipo,Alíquota,Base,Status\n';
             impostos.forEach(i => {
-                csv += `"${i.cÃ³digo}","${i.nome}","${i.tipo}","${i.aliquota}","${formatarBase(i.base)}","${i.ativo ? 'Ativo' : 'Inativo'}"\n`;
+                csv += `"${i.codigo}","${i.nome}","${i.tipo}","${i.aliquota}","${formatarBase(i.base)}","${i.ativo ? 'Ativo' : 'Inativo'}"\n`;
             });
 
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -791,7 +791,7 @@
             link.click();
         }
 
-        // InicializaÃ§Ã£o
+        // Inicialização
         document.addEventListener('DOMContentLoaded', function() {
             carregarUsuario();
             carregarImpostos();

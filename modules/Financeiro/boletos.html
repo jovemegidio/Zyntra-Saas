@@ -149,7 +149,7 @@
                 <a href="bancos.html" class="sidebar-btn" title="Bancos"><i class="fas fa-university"></i></a>
                 <a href="boletos.html" class="sidebar-btn active" title="Boletos"><i class="fas fa-barcode"></i></a>
                 <a href="nfse.html" class="sidebar-btn" title="NFS-e"><i class="fas fa-file-invoice"></i></a>
-                <a href="recorrencias.html" class="sidebar-btn" title="Recorrências"><i class="fas fa-redo"></i></a>
+                <a href="recorrências.html" class="sidebar-btn" title="Recorrências"><i class="fas fa-redo"></i></a>
                 <a href="conciliacao.html" class="sidebar-btn" title="Conciliação"><i class="fas fa-balance-scale"></i></a>
                 <a href="relatorios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
             </nav>
@@ -324,7 +324,7 @@
             perPage: 30,
             getData: () => boletos,
             searchFields: [
-                b => b.número_documento,
+                b => b.numero_documento,
                 b => b.sacado_nome,
                 b => b.status,
                 b => b.data_vencimento
@@ -337,7 +337,7 @@
                 }
                 tbody.innerHTML = pageData.map(b => `
                     <tr>
-                        <td><strong>${esc(b.número_documento || '-')}</strong></td>
+                        <td><strong>${esc(b.numero_documento || '-')}</strong></td>
                         <td>${esc(b.sacado_nome)}</td>
                         <td>${formatarData(b.data_emissao)}</td>
                         <td>${formatarData(b.data_vencimento)}</td>
@@ -410,8 +410,8 @@
             document.getElementById('detalhe-body').innerHTML = `
                 <div class="boleto-detail">
                     <div class="linha-digitavel">${esc(b.linha_digitavel || 'N/A')}</div>
-                    <div class="info-row"><span class="label">Nº Documento</span><span class="value">${esc(b.número_documento)}</span></div>
-                    <div class="info-row"><span class="label">Nosso Número</span><span class="value">${esc(b.nosso_número)}</span></div>
+                    <div class="info-row"><span class="label">Nº Documento</span><span class="value">${esc(b.numero_documento)}</span></div>
+                    <div class="info-row"><span class="label">Nosso Número</span><span class="value">${esc(b.nosso_numero)}</span></div>
                     <div class="info-row"><span class="label">Sacado</span><span class="value">${esc(b.sacado_nome)}</span></div>
                     <div class="info-row"><span class="label">CPF/CNPJ</span><span class="value">${esc(b.sacado_cpf_cnpj || '-')}</span></div>
                     <div class="info-row"><span class="label">Valor</span><span class="value" style="color:var(--success)">${formatarMoeda(b.valor)}</span></div>
@@ -439,7 +439,7 @@
                 data_vencimento: document.getElementById('bol-vencimento').value,
                 conta_bancaria_id: document.getElementById('bol-conta').value || null,
                 conta_receber_id: document.getElementById('bol-conta-receber').value || null,
-                observacoes: document.getElementById('bol-obs').value
+                observações: document.getElementById('bol-obs').value
             };
 
             if (!payload.sacado_nome || !payload.valor || !payload.data_vencimento) {
@@ -494,7 +494,7 @@
             if (boletos.length === 0) { mostrarToast('Nenhum boleto para exportar', 'warning'); return; }
             let csv = 'Nº Documento,Sacado,CPF/CNPJ,Valor,Emissão,Vencimento,Status\n';
             boletos.forEach(b => {
-                csv += `"${b.número_documento}","${b.sacado_nome}","${b.sacado_cpf_cnpj || ''}","${b.valor}","${formatarData(b.data_emissao)}","${formatarData(b.data_vencimento)}","${b.status}"\n`;
+                csv += `"${b.numero_documento}","${b.sacado_nome}","${b.sacado_cpf_cnpj || ''}","${b.valor}","${formatarData(b.data_emissao)}","${formatarData(b.data_vencimento)}","${b.status}"\n`;
             });
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
@@ -505,7 +505,7 @@
 
         async function carregarContasBancarias() {
             try {
-                const r = await fetch(`${API}/contas-bancarias`, { headers: headers() });
+                const r = await fetch(`${API}/contas-bancárias`, { headers: headers() });
                 const data = await r.json();
                 const contas = Array.isArray(data) ? data : (data.data || []);
                 const sel = document.getElementById('bol-conta');
@@ -527,7 +527,7 @@
                 contas.forEach(c => {
                     const opt = document.createElement('option');
                     opt.value = c.id;
-                    opt.textContent = `#${c.id} - ${c.cliente_nome || c.descrição} - ${formatarMoeda(c.valor)}`;
+                    opt.textContent = `#${c.id} - ${c.cliente_nome || c.descricao} - ${formatarMoeda(c.valor)}`;
                     sel.appendChild(opt);
                 });
             } catch (e) { console.error('Erro contas receber:', e); }
