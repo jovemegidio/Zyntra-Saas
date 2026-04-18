@@ -767,7 +767,7 @@
             </div>
             <div class="modal-footer">
                 <button class="btn-secondary" onclick="fecharModal()">Cancelar</button>
-                <button class="btn-primary" onclick="salvarConfiguracoes()">
+                <button class="btn-primary" onclick="salvarConfigurações()">
                     <i class="fas fa-save"></i> Salvar
                 </button>
             </div>
@@ -1009,7 +1009,7 @@
             
             // Definir período atual
             const agora = new Date();
-            document.getElementById('filtroPeriodo').value = agora.toISOString().substring(0, 7);
+            document.getElementById('filtroPeríodo').value = agora.toISOString().substring(0, 7);
             
             carregarVendedores();
             carregarDados();
@@ -1038,10 +1038,10 @@
 
         // Carregar dados principais
         async function carregarDados() {
-            const período = document.getElementById('filtroPeriodo').value;
+            const período = document.getElementById('filtroPeríodo').value;
             let vendedor = document.getElementById('filtroVendedor').value;
             
-            // Se NÃO é admin, forçar filtro para o próprio ID do usuário
+            // Se NÁO é admin, forçar filtro para o próprio ID do usuário
             if (!isAdminComissao && usuarioLogadoId) {
                 vendedor = usuarioLogadoId;
             }
@@ -1050,7 +1050,7 @@
             const [ano, mes] = período.split('-');
             const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
                           'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-            document.getElementById('periodoLabel').textContent = `${meses[parseInt(mes) - 1]} ${ano}`;
+            document.getElementById('períodoLabel').textContent = `${meses[parseInt(mes) - 1]} ${ano}`;
             
             await Promise.all([
                 carregarResumo(período, vendedor),
@@ -1060,9 +1060,9 @@
         }
 
         // Carregar resumo por vendedor
-        async function carregarResumo(periodo, vendedor) {
+        async function carregarResumo(período, vendedor) {
             try {
-                let url = `/api/vendas/comissoes/resumo?periodo=${periodo}`;
+                let url = `/api/vendas/comissoes/resumo?período=${período}`;
                 if (vendedor) url += `&vendedor_id=${vendedor}`;
                 
                 const response = await fetch(url, { credentials: 'include' });
@@ -1128,7 +1128,7 @@
         // Carregar detalhes por venda
         async function carregarDetalhes(período, vendedor) {
             try {
-                let url = `/api/vendas/comissoes?periodo=${período}`;
+                let url = `/api/vendas/comissoes?período=${período}`;
                 if (vendedor) url += `&vendedor_id=${vendedor}`;
                 
                 const response = await fetch(url, { credentials: 'include' });
@@ -1175,18 +1175,18 @@
                 const response = await fetch('/api/vendas/comissoes/historico', { credentials: 'include' });
                 if (!response.ok) throw new Error('Erro ao carregar histórico');
                 
-                const historico = await response.json();
+                const histórico = await response.json();
                 const tbody = document.getElementById('tabelaHistorico');
                 
-                if (historico.length === 0) {
+                if (histórico.length === 0) {
                     tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:40px;color:#94a3b8;">
                         Nenhum histórico encontrado
                     </td></tr>`;
                     return;
                 }
                 
-                tbody.innerHTML = historico.map(h => {
-                    const periodo_val = h.período || h.periodo || '';
+                tbody.innerHTML = histórico.map(h => {
+                    const periodo_val = h.periodo || h.periodo || '';
                     const [ano, mes] = periodo_val.split('-');
                     const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
                     
@@ -1211,8 +1211,10 @@
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
             
-            event.target.classList.add('active');
-            document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+            const caller = event && event.target ? event.target.closest('.tab-btn') : null;
+            if (caller) caller.classList.add('active');
+            const tabEl = document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1));
+            if (tabEl) tabEl.classList.add('active');
         }
 
         // Modal configurar
@@ -1253,7 +1255,7 @@
             document.getElementById('modalConfigurar').classList.remove('active');
         }
 
-        async function salvarConfiguracoes() {
+        async function salvarConfigurações() {
             const inputs = document.querySelectorAll('[id^="comissao_"]');
             let sucesso = 0;
             
@@ -1353,8 +1355,8 @@
         }
 
         function exportarComissoes() {
-            const período = document.getElementById('filtroPeriodo').value;
-            window.open(`/api/vendas/comissoes/exportar?periodo=${período}&formato=csv`, '_blank');
+            const período = document.getElementById('filtroPeríodo').value;
+            window.open(`/api/vendas/comissoes/exportar?periodo=${periodo}&formato=csv`, '_blank');
         }
     </script>
 
@@ -1368,7 +1370,7 @@
     <script src="/js/auth-unified.js?v=20260301"></script>
     <script src="/js/mobile-auto-enhance.js?v=20260202" defer></script>
     <!-- Chat Widget BOB AI - DESATIVADO -->
-    <!-- <script src="/chat/widget.js?v=20260218" defer></script> -->
+    <!-- <script src="/chat/widget.js?v=20260418" defer></script> -->
     <script src="/js/user-dropdown.js?v=20260223" defer></script>
 
     <!-- Sidebar Click Animation -->

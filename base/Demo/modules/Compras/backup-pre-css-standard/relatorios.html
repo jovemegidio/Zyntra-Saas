@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <!-- Favicon -->
@@ -79,7 +79,7 @@
     <!-- Chat Widget BOB AI -->
     <link rel="stylesheet" href="/chat/widget.css?v=20260301">
 </head>
-<body>
+<body class="dark-mode">
     <div class="app-container">
         <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
 
@@ -459,7 +459,7 @@
 
         exportarExcel(tipo) {
             const config = this.getConfigRelatorio(tipo);
-            let html = '<html><head><meta charset="UTF-8"></head><body>';
+            let html = '<html><head><meta charset="UTF-8"></head><body class="dark-mode">';
             html += '<h2>' + config.titulo + '</h2>';
             html += '<p>Gerado em: ' + new Date().toLocaleString('pt-BR') + '</p>';
 
@@ -484,7 +484,7 @@
             win.document.write(`
                 <html><head><title>${config.titulo}</title>
                 <style>body { font-family: Arial, sans-serif; padding: 40px; } h1 { color: #1e1e1e; } p { color: #666; } table { margin-top: 20px; } th { background: #f0f0f0; }</style>
-                </head><body>
+                </head><body class="dark-mode">
                 <h1>${config.titulo}</h1>
                 <p>Gerado em: ${new Date().toLocaleString('pt-BR')}</p>
                 <p>ALUFORCE — Módulo de Compras</p>

@@ -2,11 +2,6 @@
    FORNECEDORES - MÓDULO COMPRAS
    ======================================== */
 
-function _escHtml(s) {
-    if (s == null) return '';
-    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-}
-
 class FornecedoresCompras {
     constructor() {
         this.fornecedores = [];
@@ -19,11 +14,8 @@ class FornecedoresCompras {
 
     async loadFornecedores() {
         try {
-            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
             const response = await fetch('/api/compras/fornecedores', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
+                credentials: 'include'
             });
 
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -83,13 +75,13 @@ class FornecedoresCompras {
                          onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 16px rgba(0,0,0,0.06)'">
                         <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 16px;">
                             <div style="flex: 1;">
-                                <h3 style="margin: 0 0 8px 0; font-size: 17px; font-weight: 700; color: #1e293b;">${_escHtml(f.nome)}</h3>
+                                <h3 style="margin: 0 0 8px 0; font-size: 17px; font-weight: 700; color: #1e293b;">${f.nome}</h3>
                                 <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                                     <span style="padding: 4px 10px; background: ${f.status === 'ativo' ? '#d1fae5' : '#fee2e2'}; color: ${f.status === 'ativo' ? '#065f46' : '#991b1b'}; border-radius: 6px; font-size: 11px; font-weight: 600; text-transform: uppercase;">
                                         ${f.status === 'ativo' ? 'Ativo' : 'Inativo'}
                                     </span>
                                     <span style="padding: 4px 10px; background: #f1f5f9; color: #475569; border-radius: 6px; font-size: 11px; font-weight: 600;">
-                                        ${_escHtml(f.categoria)}
+                                        ${f.categoria}
                                     </span>
                                 </div>
                             </div>
@@ -101,19 +93,19 @@ class FornecedoresCompras {
                         <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px;">
                             <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: #64748b;">
                                 <i class="fas fa-id-card" style="color: #94a3b8; width: 16px;"></i>
-                                <span>${_escHtml(f.cnpj)}</span>
+                                <span>${f.cnpj}</span>
                             </div>
                             <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: #64748b;">
                                 <i class="fas fa-phone" style="color: #94a3b8; width: 16px;"></i>
-                                <span>${_escHtml(f.telefone)}</span>
+                                <span>${f.telefone}</span>
                             </div>
                             <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: #64748b;">
                                 <i class="fas fa-envelope" style="color: #94a3b8; width: 16px;"></i>
-                                <span>${_escHtml(f.email)}</span>
+                                <span>${f.email}</span>
                             </div>
                             <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: #64748b;">
                                 <i class="fas fa-map-marker-alt" style="color: #94a3b8; width: 16px;"></i>
-                                <span>${_escHtml(f.cidade)} - ${_escHtml(f.estado)}</span>
+                                <span>${f.cidade} - ${f.estado}</span>
                             </div>
                         </div>
 
@@ -222,10 +214,10 @@ class FornecedoresCompras {
         this.fornecedores.forEach(f => {
             const statusClass = f.status === 'ativo' ? 'status-success' : 'status-secondary';
             html += `<tr>
-                <td><strong>${_escHtml(f.nome)}</strong></td>
-                <td>${_escHtml(f.cnpj)}</td>
-                <td>${_escHtml(f.telefone)}</td>
-                <td>${_escHtml(f.email)}</td>
+                <td><strong>${f.nome}</strong></td>
+                <td>${f.cnpj}</td>
+                <td>${f.telefone}</td>
+                <td>${f.email}</td>
                 <td><span class="status-badge ${statusClass}">${f.status}</span></td>
                 <td>
                     <button class="btn-icon" onclick="fornecedoresCompras.editar(${f.id})" title="Editar">

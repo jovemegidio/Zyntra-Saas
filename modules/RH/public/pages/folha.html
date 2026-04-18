@@ -221,7 +221,7 @@
         @keyframes spin { to { transform: rotate(360deg); } }
 
         /* Histórico */
-        .histórico-list { margin-top: 20px; }
+        .historico-list { margin-top: 20px; }
         .hist-item {
             display: flex; align-items: center; justify-content: space-between;
             padding: 12px 16px; background: #fff; border: 1px solid #e2e8f0;
@@ -263,16 +263,16 @@
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel de Controle"><i class="fas fa-home"></i></a>
             <nav class="sidebar-nav">
                 <a href="../areaadm.html" class="sidebar-btn" title="Dashboard RH"><i class="fas fa-chart-pie"></i></a>
-                <a href="funcionarios.html" class="sidebar-btn" title="Funcionários"><i class="fas fa-users"></i></a>
+                <a href="funcionários.html" class="sidebar-btn" title="Funcionários"><i class="fas fa-users"></i></a>
                 <a href="../gestao-holerites.html" class="sidebar-btn" title="Gestão de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="folha.html" class="sidebar-btn active" title="Folha de Pagamento"><i class="fas fa-money-check-alt"></i></a>
                 <a href="gestao-ponto.html" class="sidebar-btn" title="Gestão do Ponto"><i class="fas fa-clock"></i></a>
                 <a href="importar-ponto.html" class="sidebar-btn" title="Importar Ponto (Control iD)"><i class="fas fa-upload"></i></a>
-                <a href="gestao-solicitacoes.html" class="sidebar-btn" title="Gestão de Solicitações"><i class="fas fa-tasks"></i></a>
+                <a href="gestao-solicitações.html" class="sidebar-btn" title="Gestão de Solicitações"><i class="fas fa-tasks"></i></a>
                 <a href="calendario-rh.html" class="sidebar-btn" title="Calendário RH"><i class="fas fa-calendar-alt"></i></a>
             </nav>
             <div class="sidebar-bottom">
-                <a href="../funcionario.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-user"></i></a>
+                <a href="../funcionário.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-user"></i></a>
             </div>
         </aside>
 
@@ -311,7 +311,7 @@
                     <button class="btn btn-outline btn-sm" onclick="abrirModalImportar()" title="Importar funcionários do sistema">
                         <i class="fas fa-user-plus"></i> Importar Funcionários
                     </button>
-                    <button class="btn btn-outline btn-sm" onclick="abrirHistorico()" title="Ver folhas anteriores">
+                    <button class="btn btn-outline btn-sm" onclick="abrirHistórico()" title="Ver folhas anteriores">
                         <i class="fas fa-history"></i> Histórico
                     </button>
                 </div>
@@ -468,14 +468,14 @@
             </div>
             <div class="modal-body">
                 <p style="font-size:0.85rem;color:#64748b;margin-bottom:12px;">Selecione os funcionários para adicionar  folha atual. J cadastrados sero mantidos.</p>
-                <input type="text" class="func-filter" id="func-filter" placeholder="Buscar por nome ou empresa..." oninput="filtrarFuncionarios()">
+                <input type="text" class="func-filter" id="func-filter" placeholder="Buscar por nome ou empresa..." oninput="filtrarFuncionários()">
                 <div class="func-list" id="func-list">
                     <div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Carregando...</p></div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline" onclick="fecharModal('modalImportar')">Cancelar</button>
-                <button class="btn btn-primary" onclick="confirmarImportacao()">
+                <button class="btn btn-primary" onclick="confirmarImportação()">
                     <i class="fas fa-check"></i> Importar Selecionados
                 </button>
             </div>
@@ -484,13 +484,13 @@
 
     <!-- Modal: Histórico -->
     <div class="modal" id="modalHistorico">
-        <div class="modal-overlay" onclick="fecharModal('modalHistorico')"></div>
+        <div class="modal-overlay" onclick="fecharModal('modalHistórico')"></div>
         <div class="modal-content">
             <div class="modal-header">
                 <h2><i class="fas fa-history"></i> Histórico de Folhas</h2>
-                <button class="modal-close" onclick="fecharModal('modalHistorico')"><i class="fas fa-times"></i></button>
+                <button class="modal-close" onclick="fecharModal('modalHistórico')"><i class="fas fa-times"></i></button>
             </div>
-            <div class="modal-body" id="histórico-body">
+            <div class="modal-body" id="historico-body">
                 <div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Carregando...</p></div>
             </div>
         </div>
@@ -715,7 +715,7 @@
         dadosFolha[tipo].itens.push({
             empresa: (dados && dados.empresa) || '',
             colaborador_nome: (dados && dados.colaborador_nome) || '',
-            funcionário_id: (dados && dados.funcionário_id) || null,
+            funcionario_id: (dados && dados.funcionario_id) || null,
             valor_base: (dados && dados.valor_base) || 0,
             salario_por_fora: (dados && dados.salario_por_fora) || 0,
             he_50: (dados && dados.he_50) || 0,
@@ -756,7 +756,7 @@
                 dadosFolha[tipo].itens = (f.itens || []).map(i => ({
                     empresa: i.empresa || '',
                     colaborador_nome: i.colaborador_nome || '',
-                    funcionário_id: i.funcionário_id,
+                    funcionario_id: i.funcionario_id,
                     valor_base: parseNum(i.valor_base),
                     salario_por_fora: parseNum(i.salario_por_fora),
                     he_50: parseNum(i.he_50),
@@ -770,8 +770,8 @@
         }
 
         const mesNome = MESES[parseInt(mes)];
-        document.getElementById('titulo-SALARIO').textContent = `${mesNome.toUpperCase()} - SALÁRIO, POR FORA E HORA EXTRAS`;
-        document.getElementById('titulo-ADIANTAMENTO').textContent = `${mesNome.toUpperCase()} - ADIANTAMENTO`;
+        document.getElementById('título-SALARIO').textContent = `${mesNome.toUpperCase()} - SALÁRIO, POR FORA E HORA EXTRAS`;
+        document.getElementById('título-ADIANTAMENTO').textContent = `${mesNome.toUpperCase()} - ADIANTAMENTO`;
         document.getElementById('kpi-sub-sal').textContent = `${mesNome} ${ano}`;
         document.getElementById('kpi-sub-adto').textContent = `${mesNome} ${ano}`;
         document.getElementById('kpi-sub-colab').textContent = `${mesNome} ${ano}`;
@@ -973,7 +973,7 @@
 
     function filtrarFuncionários() { renderFuncionáriosList(); }
 
-    function confirmarImportacao() {
+    function confirmarImportação() {
         const checkboxes = document.querySelectorAll('#func-list input[type="checkbox"]:checked:not([disabled])');
         if (checkboxes.length === 0) {
             showToast('Selecione pelo menos um funcionário.', 'warning');
@@ -983,7 +983,7 @@
             adicionarLinha(tabAtiva, {
                 empresa: cb.dataset.empresa,
                 colaborador_nome: cb.dataset.nome,
-                funcionário_id: parseInt(cb.value),
+                funcionario_id: parseInt(cb.value),
                 valor_base: parseFloat(cb.dataset.salário) || 0
             });
         });
@@ -994,8 +994,8 @@
     // ============================================================
     // HISTÓRICO
     // ============================================================
-    async function abrirHistorico() {
-        document.getElementById('modalHistorico').classList.add('show');
+    async function abrirHistórico() {
+        document.getElementById('modalHistórico').classList.add('show');
         const body = document.getElementById('histórico-body');
         body.innerHTML = '<div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Carregando...</p></div>';
 
@@ -1009,13 +1009,13 @@
                 return;
             }
 
-            let html = '<div class="historico-list">';
+            let html = '<div class="histórico-list">';
             folhas.forEach(f => {
                 const mesNome = MESES[f.mes] || f.mes;
                 const tipoLabel = f.tipo === 'SALARIO' ? 'Salário' : 'Adiantamento';
                 const statusClass = f.status === 'fechada' ? 'badge-fechada' : 'badge-rascunho';
                 const statusLabel = f.status === 'fechada' ? 'Fechada' : 'Rascunho';
-                html += `<div class="hist-item" style="cursor:pointer;" onclick="carregarDoHistorico(${f.mes},${f.ano})">
+                html += `<div class="hist-item" style="cursor:pointer;" onclick="carregarDoHistórico(${f.mes},${f.ano})">
                     <div>
                         <div class="hist-label">${mesNome} ${f.ano} - ${tipoLabel}</div>
                         <div style="font-size:0.78rem;color:#94a3b8;">${f.qtd_itens || 0} colaboradores</div>
@@ -1033,10 +1033,10 @@
         }
     }
 
-    function carregarDoHistorico(mes, ano) {
+    function carregarDoHistórico(mes, ano) {
         document.getElementById('sel-mes').value = mes;
         document.getElementById('sel-ano').value = ano;
-        fecharModal('modalHistorico');
+        fecharModal('modalHistórico');
         carregarCompetencia();
     }
 

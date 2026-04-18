@@ -489,6 +489,8 @@
     const btn = $('afw-btn-attach');
     const menu = $('afw-attach-menu');
 
+    if (!btn || !menu) return;
+
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       menu.classList.toggle('hidden');

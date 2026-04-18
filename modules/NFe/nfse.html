@@ -99,9 +99,9 @@
             <nav class="sidebar-nav">
                 <a href="index.html" class="sidebar-btn" title="Dashboard"><i class="fas fa-chart-pie"></i></a>
                 <a href="consultar.html" class="sidebar-btn" title="Consultar NFe"><i class="fas fa-search"></i></a>
-                <a href="relatorios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
+                <a href="relatórios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
                 <a href="eventos.html" class="sidebar-btn" title="Eventos"><i class="fas fa-history"></i></a>
-                <a href="inutilizacao.html" class="sidebar-btn" title="Inutilização"><i class="fas fa-ban"></i></a>
+                <a href="inutilização.html" class="sidebar-btn" title="Inutilização"><i class="fas fa-ban"></i></a>
                 <a href="regua.html" class="sidebar-btn" title="Régua Cobrança"><i class="fas fa-bell"></i></a>
                 <a href="pix.html" class="sidebar-btn" title="PIX"><i class="fas fa-qrcode"></i></a>
                 <a href="logistica.html" class="sidebar-btn" title="Logística & Expedição"><i class="fas fa-truck"></i></a>
@@ -188,8 +188,8 @@
                                         <input type="text" id="enderecoTomador" name="enderecoTomador" class="form-control" placeholder="Rua, Avenida...">
                                     </div>
                                     <div class="form-group">
-                                        <label for="numeroTomador">Número</label>
-                                        <input type="text" id="numeroTomador" name="numeroTomador" class="form-control" placeholder="Nº">
+                                        <label for="númeroTomador">Número</label>
+                                        <input type="text" id="numeroTomador" name="númeroTomador" class="form-control" placeholder="Nº">
                                     </div>
                                     <div class="form-group">
                                         <label for="complementoTomador">Complemento</label>
@@ -258,16 +258,16 @@
                             <div class="card-body">
                                 <div class="form-row">
                                     <div class="form-group">
-                                        <label for="codigoServico">Código do Serviço</label>
-                                        <input type="text" id="codigoServico" name="codigoServico" class="form-control" placeholder="Ex: 01.01" required>
+                                        <label for="códigoServico">Código do Serviço</label>
+                                        <input type="text" id="codigoServico" name="códigoServico" class="form-control" placeholder="Ex: 01.01" required>
                                     </div>
                                     <div class="form-group" style="grid-column: span 2;">
-                                        <label for="descricaoServico">Descrição do Serviço</label>
-                                        <textarea id="descricaoServico" name="descricaoServico" class="form-control" rows="3" placeholder="Descreva detalhadamente o serviço prestado..." required></textarea>
+                                        <label for="descriçãoServico">Descrição do Serviço</label>
+                                        <textarea id="descricaoServico" name="descriçãoServico" class="form-control" rows="3" placeholder="Descreva detalhadamente o serviço prestado..." required></textarea>
                                     </div>
                                     <div class="form-group">
-                                        <label for="codigoCNAE">Código CNAE</label>
-                                        <input type="text" id="codigoCNAE" name="codigoCNAE" class="form-control" placeholder="0000-0/00">
+                                        <label for="códigoCNAE">Código CNAE</label>
+                                        <input type="text" id="codigoCNAE" name="códigoCNAE" class="form-control" placeholder="0000-0/00">
                                     </div>
                                 </div>
                                 <div class="form-row">
@@ -290,8 +290,8 @@
                                 </div>
                                 <div class="form-row">
                                     <div class="form-group">
-                                        <label for="codigoMunicipio">Código Município (IBGE)</label>
-                                        <input type="text" id="codigoMunicipio" name="codigoMunicipio" class="form-control" placeholder="Ex: 3550308">
+                                        <label for="códigoMunicipio">Código Município (IBGE)</label>
+                                        <input type="text" id="codigoMunicipio" name="códigoMunicipio" class="form-control" placeholder="Ex: 3550308">
                                     </div>
                                 </div>
                             </div>
@@ -416,7 +416,7 @@
             overlay.classList.toggle('active');
         }
 
-        function toggleNotificacoes() {
+        function toggleNotificações() {
             const panel = document.getElementById('notification-panel');
             if (panel) panel.classList.toggle('active');
         }
@@ -577,7 +577,7 @@
                     razaoSocial: document.getElementById('razaoSocialTomador').value,
                     email: document.getElementById('emailTomador').value,
                     endereco: document.getElementById('enderecoTomador').value,
-                    numero: document.getElementById('numeroTomador').value,
+                    número: document.getElementById('númeroTomador').value,
                     complemento: document.getElementById('complementoTomador').value,
                     bairro: document.getElementById('bairroTomador').value,
                     municipio: document.getElementById('municipioTomador').value,
@@ -586,14 +586,14 @@
                     telefone: document.getElementById('telefoneTomador').value
                 },
                 servico: {
-                    codigoServico: document.getElementById('codigoServico').value,
-                    descricao: document.getElementById('descricaoServico').value,
-                    codigoCNAE: document.getElementById('codigoCNAE').value,
+                    códigoServico: document.getElementById('códigoServico').value,
+                    descrição: document.getElementById('descriçãoServico').value,
+                    códigoCNAE: document.getElementById('códigoCNAE').value,
                     aliquotaISS: parseFloat(document.getElementById('aliquotaISS').value) || 0,
                     valorServico: parseFloat(document.getElementById('valorServico').value) || 0,
                     valorDeducao: parseFloat(document.getElementById('valorDeducao').value) || 0,
                     itemListaServico: document.getElementById('itemListaServico').value,
-                    codigoMunicipio: document.getElementById('codigoMunicipio').value
+                    códigoMunicipio: document.getElementById('códigoMunicipio').value
                 },
                 impostos: {
                     issRetido: document.getElementById('issRetido').value,
@@ -679,7 +679,7 @@
         }
 
         // ===== MODAL CONFIGURAÇÕES (PLACEHOLDER) =====
-        function abrirModalConfiguracoes() {
+        function abrirModalConfigurações() {
             showAlert('Configurações NFSe — em breve disponível.', 'info');
         }
 

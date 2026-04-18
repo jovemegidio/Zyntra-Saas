@@ -6,6 +6,7 @@
  */
 const express = require('express');
 const mysql = require('mysql2/promise');
+const { buscarConfiguracoesEmpresa, formatarDadosParaPDF, resolverCaminhoLogo } = require('../modules/_shared/services/empresa-config.service');
 
 module.exports = function createVendasExtendedRoutes(deps) {
     const { pool, authenticateToken, authorizeArea, authorizeAdmin, writeAuditLog, cacheMiddleware, CACHE_CONFIG, VENDAS_DB_CONFIG } = deps;
@@ -16,9 +17,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
     const path = require('path');
     const multer = require('multer');
     const fs = require('fs');
-    const SAFE_MIMES = new Set(['image/jpeg','image/png','image/gif','image/webp','application/pdf','text/csv','text/plain','application/vnd.ms-excel','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','application/xml','text/xml']);
-    const safeFileFilter = (req, file, cb) => SAFE_MIMES.has(file.mimetype) ? cb(null, true) : cb(new multer.MulterError('LIMIT_UNEXPECTED_FILE', file.fieldname));
-    const upload = multer({ dest: path.join(__dirname, '..', 'uploads'), limits: { fileSize: 10 * 1024 * 1024 }, fileFilter: safeFileFilter });
+    const upload = multer({ dest: path.join(__dirname, '..', 'uploads'), limits: { fileSize: 10 * 1024 * 1024 } });
     const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
     const validate = (req, res, next) => {
         const errors = validationResult(req);
@@ -80,14 +79,12 @@ module.exports = function createVendasExtendedRoutes(deps) {
             const [topVendedores] = await pool.query(`
                 SELECT
                     u.id, u.nome, u.email,
-                    COUNT(CASE WHEN p.status NOT IN ('cancelado', 'excluido') THEN p.id END) as total_vendas,
+                    COUNT(p.id) as total_vendas,
                     SUM(CASE WHEN p.status IN ('faturado', 'recibo') THEN p.valor ELSE 0 END) as valor_faturado,
-                    SUM(CASE WHEN p.status NOT IN ('cancelado', 'excluido') THEN p.valor ELSE 0 END) as valor_total
+                    SUM(p.valor) as valor_total
                 FROM usuarios u
                 LEFT JOIN pedidos p ON u.id = p.vendedor_id AND p.created_at >= CURDATE() - INTERVAL ? DAY
-                WHERE u.role IN ('comercial', 'vendedor')
-                   OR JSON_CONTAINS(COALESCE(u.areas, '[]'), '"vendas"')
-                   OR u.id IN (SELECT DISTINCT vendedor_id FROM pedidos WHERE vendedor_id IS NOT NULL)
+                WHERE u.role = 'comercial'
                 GROUP BY u.id, u.nome, u.email
                 ORDER BY valor_faturado DESC
                 LIMIT 10
@@ -251,27 +248,22 @@ module.exports = function createVendasExtendedRoutes(deps) {
     // GET: top vendedores by faturamento
     router.get('/dashboard/top-vendedores', authenticateToken, cacheMiddleware('vendas_top_vend', CACHE_CONFIG.dashboardVendas), async (req, res) => {
         try {
-            const limit = Math.max(parseInt(req.query.limit || '10'), 1);
-            const periodDays = Math.max(parseInt(req.query.period || req.query.days || '365'), 1);
+            const limit = Math.max(parseInt(req.query.limit || '5'), 1);
+            const periodDays = Math.max(parseInt(req.query.period || req.query.days || '30'), 1);
 
-            // Buscar vendedores que REALMENTE têm pedidos, unificando com lista de vendedores cadastrados
             const [rows] = await pool.query(
                 `SELECT
                     u.id,
                     u.nome,
                     COALESCE(f.foto_perfil_url, u.foto, u.avatar) AS foto,
-                    COUNT(CASE WHEN p.status NOT IN ('cancelado', 'excluido') THEN p.id END) as vendas,
-                    COALESCE(SUM(CASE WHEN p.status NOT IN ('cancelado', 'excluido', 'orcamento') THEN p.valor ELSE 0 END), 0) AS valor
+                    COUNT(p.id) as vendas,
+                    COALESCE(SUM(CASE WHEN p.status IN ('faturado', 'recibo') THEN p.valor ELSE 0 END), 0) AS valor
                  FROM usuarios u
                  LEFT JOIN funcionarios f ON f.email = u.email
-                 LEFT JOIN pedidos p ON p.vendedor_id = u.id
-                    AND p.created_at >= CURDATE() - INTERVAL ? DAY
-                    AND p.status NOT IN ('cancelado', 'excluido')
-                 WHERE u.role IN ('comercial', 'vendedor', 'admin')
-                    OR JSON_CONTAINS(COALESCE(u.areas, '[]'), '"vendas"')
-                    OR u.id IN (SELECT DISTINCT vendedor_id FROM pedidos WHERE vendedor_id IS NOT NULL)
+                 LEFT JOIN pedidos p ON p.vendedor_id = u.id AND p.created_at >= CURDATE() - INTERVAL ? DAY
+                 WHERE JSON_CONTAINS(COALESCE(u.areas, '[]'), '"vendas"') OR u.role = 'vendedor'
                  GROUP BY u.id, u.nome, f.foto_perfil_url, u.foto, u.avatar
-                 ORDER BY valor DESC, vendas DESC
+                 ORDER BY valor DESC
                  LIMIT ?`,
                  [periodDays, limit]
             );
@@ -325,7 +317,41 @@ module.exports = function createVendasExtendedRoutes(deps) {
         }
     });
 
-    // AUDIT-FIX R3: GET /pedidos REMOVIDO (dead code — existe em vendas-routes.js)
+    // === PEDIDOS ===
+    router.get('/pedidos', authorizeArea('vendas'), async (req, res) => {
+        try {
+            const { status, limite = 100 } = req.query;
+            let query = `
+                SELECT p.*,
+                       p.valor as valor_total,
+                       p.created_at as data_pedido,
+                       COALESCE(c.nome_fantasia, c.razao_social, c.nome, p.cliente_nome, p.cliente, 'Cliente não informado') as cliente_nome,
+                       c.email as cliente_email,
+                       c.telefone as cliente_telefone,
+                       e.nome_fantasia as empresa_nome,
+                       u.nome as vendedor_nome
+                FROM pedidos p
+                LEFT JOIN clientes c ON p.cliente_id = c.id
+                LEFT JOIN empresas e ON p.empresa_id = e.id
+                LEFT JOIN usuarios u ON p.vendedor_id = u.id
+            `;
+
+            const params = [];
+            if (status) {
+                query += ' WHERE p.status = ?';
+                params.push(status);
+            }
+
+            query += ' ORDER BY p.id DESC LIMIT ?';
+            params.push(parseInt(limite));
+
+            const [pedidos] = await pool.query(query, params);
+            res.json(pedidos);
+        } catch (error) {
+            console.error('Erro ao listar pedidos:', error);
+            res.status(500).json({ error: 'Erro ao listar pedidos' });
+        }
+    });
 
     // ========================================
     // PDF GENERATION - ORÇAMENTO PROFISSIONAL INSTITUCIONAL
@@ -404,13 +430,25 @@ module.exports = function createVendasExtendedRoutes(deps) {
                 } catch(e) {}
             }
 
-            const emp = {
-                razao: 'I. M. DOS REIS - ALUFORCE INDUSTRIA E COMERCIO DE CONDUTORES',
-                cnpj: '08.192.479/0001-60', ie: '103.385.861-110',
-                end: 'Rua Ernestina, 270 - Vila Sao Joao',
-                cidUf: 'Ferraz de Vasconcelos/SP', cep: '08527-400',
-                tel: '(11) 94723-8729', email: 'contato@aluforce.com.br'
-            };
+            const emp = {};
+            try {
+                const empresaConfig = await buscarConfiguracoesEmpresa(pool);
+                const dadosPDF = formatarDadosParaPDF(empresaConfig);
+                emp.razao = dadosPDF.nome;
+                emp.cnpj = dadosPDF.cnpj;
+                emp.ie = dadosPDF.inscricaoEstadual;
+                emp.end = `${dadosPDF.endereco}, ${dadosPDF.numero} - ${dadosPDF.bairro}`;
+                emp.cidUf = `${dadosPDF.cidade}/${dadosPDF.estado}`;
+                emp.cep = dadosPDF.cep;
+                emp.tel = dadosPDF.telefone;
+                emp.email = dadosPDF.email || '';
+            } catch (cfgErr) {
+                console.error('[PDF] Erro ao buscar config empresa, usando fallback:', cfgErr.message);
+                emp.razao = 'Empresa não configurada';
+                emp.cnpj = '--'; emp.ie = '--';
+                emp.end = '--'; emp.cidUf = '--'; emp.cep = '--';
+                emp.tel = '--'; emp.email = '';
+            }
 
             let geradoPor = 'Sistema';
             if (req.user?.id) {
@@ -490,7 +528,9 @@ module.exports = function createVendasExtendedRoutes(deps) {
             // ================================================================
             //  CABECALHO - Logo | Empresa | Documento
             // ================================================================
-            const logoPath = path.join(__dirname, '..', 'public', 'images', 'Logo Monocromatico - Azul - Aluforce.png');
+            const empresaConfigForLogo = await buscarConfiguracoesEmpresa(pool);
+            const logoPath = resolverCaminhoLogo(empresaConfigForLogo, path.join(__dirname, '..', 'public'))
+                          || path.join(__dirname, '..', 'public', 'images', 'Logo Monocromatico - Azul - Aluforce.png');
             if (fs.existsSync(logoPath)) {
                 try { doc.image(logoPath, ML, y, { width: 70 }); } catch(e) {}
             }
@@ -517,7 +557,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
             doc.rect(dbX, y + 1, dbW, 2).fillColor(C.gold).fill();
 
             doc.fontSize(9.5).fillColor(C.white).font('Helvetica-Bold')
-               .text('ORCAMENTO', dbX, y + 8, { width: dbW, align: 'center' });
+               .text(statusNome.toUpperCase(), dbX, y + 8, { width: dbW, align: 'center' });
             doc.fontSize(18).fillColor(C.gold).font('Helvetica-Bold')
                .text(`N. ${pedido.id}`, dbX, y + 21, { width: dbW, align: 'center' });
 
@@ -858,13 +898,123 @@ module.exports = function createVendasExtendedRoutes(deps) {
         }
     });
 
-    // AUDIT-FIX R3: GET /pedidos/:id REMOVIDO (dead code — existe em vendas-routes.js)
-    // A versão canônica já inclui auto-repair e ownership check
+    router.get('/pedidos/:id', authenticateToken, authorizeArea('vendas'), async (req, res) => {
+        try {
+            const { id } = req.params;
+            const [pedidos] = await vendasPool.query(`
+                SELECT p.*,
+                       p.valor as valor_total,
+                       p.descricao as observacoes,
+                       p.created_at as data_criacao,
+                       p.transportadora_id,
+                       p.transportadora_nome,
+                       COALESCE(c.nome, c.razao_social, c.nome_fantasia, e.nome_fantasia, e.razao_social) as cliente_nome_resolved,
+                       c.razao_social as cliente_razao_social,
+                       c.nome_fantasia as cliente_nome_fantasia,
+                       COALESCE(c.cnpj, c.cnpj_cpf, e.cnpj) as cliente_cnpj,
+                       COALESCE(c.inscricao_estadual, e.inscricao_estadual) as cliente_ie,
+                       COALESCE(c.email, e.email) as cliente_email,
+                       COALESCE(c.telefone, e.telefone) as cliente_telefone,
+                       COALESCE(c.contato, e.contato) as cliente_contato,
+                       COALESCE(c.endereco, e.endereco) as cliente_endereco,
+                       COALESCE(c.bairro, e.bairro) as cliente_bairro,
+                       COALESCE(c.cidade, e.cidade) as cliente_cidade,
+                       COALESCE(c.estado, e.estado) as cliente_estado,
+                       COALESCE(c.cep, e.cep) as cliente_cep,
+                       e.nome_fantasia as empresa_nome, e.cnpj as empresa_cnpj,
+                       u.nome as vendedor_nome,
+                       t.razao_social as transp_razao_social,
+                       t.cnpj_cpf as transp_cnpj,
+                       t.telefone as transp_telefone,
+                       t.email as transp_email,
+                       t.cidade as transp_cidade,
+                       t.estado as transp_estado,
+                       t.bairro as transp_bairro
+                FROM pedidos p
+                LEFT JOIN clientes c ON p.cliente_id = c.id
+                LEFT JOIN empresas e ON p.empresa_id = e.id
+                LEFT JOIN usuarios u ON p.vendedor_id = u.id
+                LEFT JOIN transportadoras t ON p.transportadora_id = t.id
+                WHERE p.id = ?
+            `, [id]);
 
-    // AUDIT-FIX R3: POST /pedidos REMOVIDO (dead code — existe em vendas-routes.js)
-    // A rota canônica POST /pedidos/novo abaixo continua ativa
-    if (false) { // dead code block start — POST /pedidos
-    router.post('/pedidos__disabled', authenticateToken, authorizeArea('vendas'), async (req, res) => {
+            if (pedidos.length === 0) {
+                return res.status(404).json({ error: 'Pedido não encontrado' });
+            }
+
+            // Formatar o pedido para compatibilidade com o frontend
+            const pedido = pedidos[0];
+
+            // Garantir que cliente_nome use o valor armazenado (p.cliente_nome) com fallback para JOIN
+            if (!pedido.cliente_nome && pedido.cliente_nome_resolved) {
+                pedido.cliente_nome = pedido.cliente_nome_resolved;
+            }
+            // Alias: frontend também usa pedido.cliente
+            if (!pedido.cliente) {
+                pedido.cliente = pedido.cliente_nome || pedido.cliente_nome_resolved || '';
+            }
+
+            // Buscar itens da tabela pedido_itens
+            let itensDB = [];
+            try {
+                const [rows] = await vendasPool.query('SELECT * FROM pedido_itens WHERE pedido_id = ? ORDER BY id ASC', [id]);
+                itensDB = rows;
+            } catch (e) { console.log('[GET pedido] Erro ao buscar itens:', e.message); }
+
+            // Auto-repair: se pedido_itens vazio mas produtos_preview tem dados, inserir automaticamente
+            // AUDIT-FIX HIGH-007: Wrapped auto-repair in transaction to prevent partial inserts
+            const previewItens = safeParseJSON(pedido.produtos_preview, []);
+            if (itensDB.length === 0 && previewItens.length > 0) {
+                console.log(`[VENDAS] Auto-repair: inserindo ${previewItens.length} itens do preview para pedido #${id}`);
+                const repairConn = await vendasPool.getConnection();
+                try {
+                    await repairConn.beginTransaction();
+                    for (const item of previewItens) {
+                        const qty = parseFloat(item.quantidade) || 1;
+                        const preco = parseFloat(item.preco_unitario || item.valor_unitario || item.preco) || 0;
+                        const desc = parseFloat(item.desconto) || 0;
+                        const subtotal = (qty * preco) - desc;
+                        await repairConn.query(
+                            `INSERT INTO pedido_itens (pedido_id, codigo, descricao, quantidade, quantidade_parcial, unidade, local_estoque, preco_unitario, desconto, subtotal)
+                             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                            [id, item.codigo || '', item.descricao || item.nome || '', qty, parseFloat(item.quantidade_parcial) || 0,
+                             item.unidade || 'UN', item.local_estoque || 'PADRAO - Local de Estoque Padrão', preco, desc, subtotal]
+                        );
+                    }
+                    await repairConn.commit();
+                    // Recarregar itens após auto-repair
+                    const [rows2] = await vendasPool.query('SELECT * FROM pedido_itens WHERE pedido_id = ? ORDER BY id ASC', [id]);
+                    itensDB = rows2;
+                } catch (e) {
+                    await repairConn.rollback();
+                    console.log('[VENDAS] Erro no auto-repair (rollback):', e.message);
+                } finally {
+                    repairConn.release();
+                }
+            }
+
+            const pedidoFormatado = {
+                ...pedido,
+                numero: `Pedido Nº ${pedido.id}`,
+                cliente: pedido.cliente_nome || '',
+                vendedor: pedido.vendedor_nome || '',
+                valor: parseFloat(pedido.valor) || 0,
+                data: pedido.created_at ? new Date(pedido.created_at).toISOString().slice(0, 10) : '',
+                frete: parseFloat(pedido.frete) || 0,
+                origem: 'Sistema',
+                tipo: pedido.prioridade || 'normal',
+                produtos: itensDB.length > 0 ? itensDB : previewItens,
+                itens: itensDB
+            };
+
+            res.json(pedidoFormatado);
+        } catch (error) {
+            console.error('Erro ao buscar pedido:', error);
+            res.status(500).json({ error: 'Erro ao buscar pedido' });
+        }
+    });
+
+    router.post('/pedidos', authenticateToken, authorizeArea('vendas'), async (req, res) => {
         const connection = await vendasPool.getConnection();
         try {
             await connection.beginTransaction();
@@ -874,14 +1024,6 @@ module.exports = function createVendasExtendedRoutes(deps) {
                 prazo_entrega, endereco_entrega, municipio_entrega, metodo_envio
             } = req.body;
             const vendedor_id = req.user.id;
-
-            // AUDIT-FIX: Validar valor, frete, quantidade — rejeitar negativos
-            const valorNum = parseFloat(valor) || 0;
-            const freteNum = parseFloat(frete) || 0;
-            if (valorNum < 0 || freteNum < 0) {
-                await connection.rollback();
-                return res.status(400).json({ error: 'Valor e frete não podem ser negativos' });
-            }
 
             // empresa_id padrão = 1 (ALUFORCE) se não fornecido
             const empresaIdFinal = empresa_id || 1;
@@ -898,8 +1040,8 @@ module.exports = function createVendasExtendedRoutes(deps) {
                 if (vRows.length > 0) vendedorNome = vRows[0].nome;
             } catch (e) { /* nomes opcionais */ }
 
-            // Gerar numero_pedido sequencial (AUDIT-FIX: FOR UPDATE previne race condition)
-            const [[npRow]] = await connection.query('SELECT COALESCE(MAX(numero_pedido), 0) + 1 AS next_num FROM pedidos FOR UPDATE');
+            // Gerar numero_pedido sequencial
+            const [[npRow]] = await connection.query('SELECT COALESCE(MAX(numero_pedido), 0) + 1 AS next_num FROM pedidos');
             const numeroPedido = npRow.next_num || 1;
 
             const [result] = await connection.query(`
@@ -924,18 +1066,12 @@ module.exports = function createVendasExtendedRoutes(deps) {
                     const qty = parseFloat(item.quantidade) || 1;
                     const preco = parseFloat(item.preco_unitario || item.valor_unitario || item.preco) || 0;
                     const desc = parseFloat(item.desconto) || 0;
-                    // AUDIT-FIX: Validar valores e limitar desconto ao subtotal
-                    if (qty <= 0 || preco < 0) {
-                        await connection.rollback();
-                        return res.status(400).json({ error: `Item inválido: quantidade deve ser > 0 e preço >= 0` });
-                    }
-                    const descCapped = Math.min(Math.max(desc, 0), qty * preco);
-                    const subtotal = (qty * preco) - descCapped;
+                    const subtotal = (qty * preco) - desc;
                     await connection.query(
                         `INSERT INTO pedido_itens (pedido_id, codigo, descricao, quantidade, quantidade_parcial, unidade, local_estoque, preco_unitario, desconto, subtotal)
                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                         [pedidoId, item.codigo || '', item.descricao || item.nome || '', qty, parseFloat(item.quantidade_parcial) || 0,
-                         item.unidade || 'UN', item.local_estoque || 'PADRAO - Local de Estoque Padrão', preco, descCapped, subtotal]
+                         item.unidade || 'UN', item.local_estoque || 'PADRAO - Local de Estoque Padrão', preco, desc, subtotal]
                     );
                 }
             }
@@ -950,7 +1086,6 @@ module.exports = function createVendasExtendedRoutes(deps) {
             connection.release();
         }
     });
-    } // dead code block end — POST /pedidos
 
     // Alias para /api/vendas/pedidos/novo -> cria novo pedido com itens (TODOS OS CAMPOS)
     router.post('/pedidos/novo', authenticateToken, authorizeArea('vendas'), async (req, res) => {
@@ -980,7 +1115,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
             } = req.body;
             const vendedor_id = req.user.id;
 
-            // Usar itens se disponivel, senao produtos
+            // Usar itens se disponível, senão produtos
             const produtosData = itens || produtos || [];
 
             // empresa_id padrão = 1 (ALUFORCE) se não fornecido
@@ -1047,13 +1182,63 @@ module.exports = function createVendasExtendedRoutes(deps) {
         } catch (error) {
             await connection.rollback();
             console.error('Erro ao criar pedido /novo:', error);
-            res.status(500).json({ error: 'Erro ao criar pedido' });
+            res.status(500).json({ error: 'Erro ao criar pedido', details: error.message });
         } finally {
             connection.release();
         }
     });
 
-    // AUDIT-FIX R3: PUT /pedidos/:id REMOVIDO (dead code — existe em vendas-routes.js com mesmas validações)
+    router.put('/pedidos/:id', authenticateToken, authorizeArea('vendas'), async (req, res) => {
+        try {
+            const { id } = req.params;
+
+            // Lock: pedidos em status bloqueado só podem ser editados por ti@aluforce.ind.br
+            const STATUS_BLOQUEADO = ['faturado', 'faturar', 'aprovado', 'pedido-aprovado', 'orcamento', 'orçamento', 'analise', 'analise-credito', 'recibo', 'entregue'];
+            const [[pedidoLock]] = await vendasPool.query('SELECT status FROM pedidos WHERE id = ?', [parseInt(id)]);
+            if (pedidoLock && STATUS_BLOQUEADO.includes((pedidoLock.status || '').toLowerCase())) {
+                const userEmail = (req.user && req.user.email || '').toLowerCase();
+                if (userEmail !== 'ti@aluforce.ind.br') {
+                    return res.status(403).json({ error: `Pedido com status "${pedidoLock.status}" não pode ser editado. Somente TI pode editar pedidos neste status.` });
+                }
+            }
+
+            const {
+                cliente_id, empresa_id, produtos, valor, descricao, status,
+                frete, prioridade, prazo_entrega, endereco_entrega,
+                municipio_entrega, metodo_envio, observacao
+            } = req.body;
+
+            // Construir query dinâmica apenas com campos fornecidos
+            const updates = [];
+            const params = [];
+
+            if (cliente_id !== undefined) { updates.push('cliente_id = ?'); params.push(cliente_id); }
+            if (empresa_id !== undefined) { updates.push('empresa_id = ?'); params.push(empresa_id); }
+            if (valor !== undefined) { updates.push('valor = ?'); params.push(valor); }
+            if (descricao !== undefined) { updates.push('descricao = ?'); params.push(descricao); }
+            if (observacao !== undefined) { updates.push('observacao = ?'); params.push(observacao); }
+            if (status !== undefined) { updates.push('status = ?'); params.push(status); }
+            if (frete !== undefined) { updates.push('frete = ?'); params.push(frete); }
+            if (prioridade !== undefined) { updates.push('prioridade = ?'); params.push(prioridade); }
+            if (prazo_entrega !== undefined) { updates.push('prazo_entrega = ?'); params.push(prazo_entrega); }
+            if (endereco_entrega !== undefined) { updates.push('endereco_entrega = ?'); params.push(endereco_entrega); }
+            if (municipio_entrega !== undefined) { updates.push('municipio_entrega = ?'); params.push(municipio_entrega); }
+            if (metodo_envio !== undefined) { updates.push('metodo_envio = ?'); params.push(metodo_envio); }
+            if (produtos !== undefined) { updates.push('produtos_preview = ?'); params.push(JSON.stringify(produtos)); }
+
+            if (updates.length === 0) {
+                return res.status(400).json({ error: 'Nenhum campo para atualizar' });
+            }
+
+            params.push(id);
+            await vendasPool.query(`UPDATE pedidos SET ${updates.join(', ')} WHERE id = ?`, params);
+
+            res.json({ success: true, message: 'Pedido atualizado com sucesso' });
+        } catch (error) {
+            console.error('Erro ao atualizar pedido:', error);
+            res.status(500).json({ error: 'Erro ao atualizar pedido' });
+        }
+    });
 
     // ROTA DUPLICADA REMOVIDA - /api/vendas/pedidos/:id/status já existe no apiVendasRouter
 
@@ -1063,8 +1248,116 @@ module.exports = function createVendasExtendedRoutes(deps) {
     // transaction, cascading deletes, and linked order/financial validation.
     // router.delete('/pedidos/:id', ...) — REMOVED
 
-    // AUDIT-FIX R3: 6 rotas duplicadas de clientes/empresas REMOVIDAS (dead code — existem em vendas-routes.js)
-    // Removidas: GET /clientes, GET /clientes/:id, POST /clientes, GET /empresas, GET /empresas/:id, POST /empresas
+    // === CLIENTES ===
+    router.get('/clientes', authorizeArea('vendas'), async (req, res) => {
+        try {
+            const { search } = req.query;
+            let query = 'SELECT id, nome, razao_social, nome_fantasia, cnpj, cnpj_cpf, email, telefone, cidade, estado, vendedor_responsavel, ativo FROM clientes';
+            const params = [];
+
+            if (search) {
+                query += ' WHERE nome LIKE ? OR email LIKE ? OR telefone LIKE ?';
+                const searchTerm = `%${search}%`;
+                params.push(searchTerm, searchTerm, searchTerm);
+            }
+
+            query += ' ORDER BY nome LIMIT 100';
+
+            const [clientes] = await vendasPool.query(query, params);
+            res.json(clientes);
+        } catch (error) {
+            console.error('Erro ao listar clientes:', error);
+            res.status(500).json({ error: 'Erro ao listar clientes' });
+        }
+    });
+
+    router.get('/clientes/:id', authorizeArea('vendas'), async (req, res) => {
+        try {
+            const { id } = req.params;
+            const [clientes] = await vendasPool.query('SELECT * FROM clientes WHERE id = ?', [id]);
+
+            if (clientes.length === 0) {
+                return res.status(404).json({ error: 'Cliente não encontrado' });
+            }
+
+            res.json(clientes[0]);
+        } catch (error) {
+            console.error('Erro ao buscar cliente:', error);
+            res.status(500).json({ error: 'Erro ao buscar cliente' });
+        }
+    });
+
+    router.post('/clientes', authorizeArea('vendas'), async (req, res) => {
+        try {
+            const { nome, email, telefone, cpf, endereco } = req.body;
+
+            const [result] = await vendasPool.query(`
+                INSERT INTO clientes (nome, email, telefone, cpf, endereco, data_criacao)
+                VALUES (?, ?, ?, ?, ?, NOW())
+            `, [nome, email, telefone, cpf, endereco]);
+
+            res.json({ success: true, id: result.insertId, message: 'Cliente criado com sucesso' });
+        } catch (error) {
+            console.error('Erro ao criar cliente:', error);
+            res.status(500).json({ error: 'Erro ao criar cliente' });
+        }
+    });
+
+    // === EMPRESAS ===
+    router.get('/empresas', authorizeArea('vendas'), async (req, res) => {
+        try {
+            const { search } = req.query;
+            let query = 'SELECT * FROM empresas';
+            const params = [];
+
+            if (search) {
+                query += ' WHERE nome_fantasia LIKE ? OR razao_social LIKE ? OR cnpj LIKE ?';
+                const searchTerm = `%${search}%`;
+                params.push(searchTerm, searchTerm, searchTerm);
+            }
+
+            query += ' ORDER BY nome_fantasia LIMIT 100';
+
+            const [empresas] = await vendasPool.query(query, params);
+            res.json(empresas);
+        } catch (error) {
+            console.error('Erro ao listar empresas:', error);
+            res.status(500).json({ error: 'Erro ao listar empresas' });
+        }
+    });
+
+    router.get('/empresas/:id', authorizeArea('vendas'), async (req, res) => {
+        try {
+            const { id } = req.params;
+            const [empresas] = await vendasPool.query('SELECT * FROM empresas WHERE id = ?', [id]);
+
+            if (empresas.length === 0) {
+                return res.status(404).json({ error: 'Empresa não encontrada' });
+            }
+
+            res.json(empresas[0]);
+        } catch (error) {
+            console.error('Erro ao buscar empresa:', error);
+            res.status(500).json({ error: 'Erro ao buscar empresa' });
+        }
+    });
+
+    router.post('/empresas', authorizeArea('vendas'), async (req, res) => {
+        try {
+            const { nome_fantasia, razao_social, cnpj, email, telefone, endereco } = req.body;
+            const vendedor_id = req.user?.id || null;
+
+            const [result] = await vendasPool.query(`
+                INSERT INTO empresas (nome_fantasia, razao_social, cnpj, email, telefone, endereco, data_criacao, vendedor_id, ultima_movimentacao, status_cliente)
+                VALUES (?, ?, ?, ?, ?, ?, NOW(), ?, NOW(), 'ativo')
+            `, [nome_fantasia, razao_social, cnpj, email, telefone, endereco, vendedor_id]);
+
+            res.json({ success: true, id: result.insertId, message: 'Empresa criada com sucesso' });
+        } catch (error) {
+            console.error('Erro ao criar empresa:', error);
+            res.status(500).json({ error: 'Erro ao criar empresa' });
+        }
+    });
 
     // === API para reativar cliente inativo (permite outro vendedor "conquistar") ===
     router.post('/empresas/:id/reativar', authorizeArea('vendas'), async (req, res) => {
@@ -1114,9 +1407,8 @@ module.exports = function createVendasExtendedRoutes(deps) {
             } catch(e) { /* usa criado_em como fallback */ }
 
             const [notificacoes] = await pool.query(`
-                SELECT id, titulo, mensagem, tipo, lida, usuario_id, ${orderColumn}
-                FROM notificacoes
-                WHERE usuario_id = ?
+                SELECT * FROM notificacoes
+                WHERE usuario_id = ? OR usuario_id IS NULL
                 ORDER BY ${orderColumn} DESC
                 LIMIT 20
             `, [userId]);
@@ -1187,7 +1479,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
     // ========================================
     // PROXY CEP (evita CORS no client)
     // ========================================
-    router.get('/proxy/cep/:cep', authenticateToken, async (req, res) => {
+    router.get('/proxy/cep/:cep', async (req, res) => {
         try {
             const { cep } = req.params;
             const cleanCep = cep.replace(/\D/g, '');
@@ -1499,7 +1791,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
             res.send(pdfBuffer);
         } catch (err) {
             console.error('Erro ao gerar PDF vendas-periodo:', err);
-            res.status(500).json({ error: 'Erro ao gerar PDF' });
+            res.status(500).json({ error: 'Erro ao gerar PDF', detalhe: err.message });
         }
     });
 
@@ -1603,7 +1895,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
             res.send(pdfBuffer);
         } catch (err) {
             console.error('Erro ao gerar PDF comissoes:', err);
-            res.status(500).json({ error: 'Erro ao gerar PDF' });
+            res.status(500).json({ error: 'Erro ao gerar PDF', detalhe: err.message });
         }
     });
 
@@ -1656,7 +1948,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
             res.send(pdfBuffer);
         } catch (err) {
             console.error('Erro ao gerar PDF clientes:', err);
-            res.status(500).json({ error: 'Erro ao gerar PDF' });
+            res.status(500).json({ error: 'Erro ao gerar PDF', detalhe: err.message });
         }
     });
 
@@ -1706,7 +1998,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
             res.send(pdfBuffer);
         } catch (err) {
             console.error('Erro ao gerar PDF produtos:', err);
-            res.status(500).json({ error: 'Erro ao gerar PDF' });
+            res.status(500).json({ error: 'Erro ao gerar PDF', detalhe: err.message });
         }
     });
 
@@ -1806,7 +2098,27 @@ module.exports = function createVendasExtendedRoutes(deps) {
         } catch (error) { next(error); }
     });
 
-    // AUDIT-FIX R3: REMOVIDO — GET /empresas/buscar duplicado (existe em vendas-routes.js)
+    // ========================================
+    // EMPRESAS BUSCAR (autocomplete para prospecção)
+    // ========================================
+    router.get('/empresas/buscar', authorizeArea('vendas'), async (req, res, next) => {
+        try {
+            const search = req.query.search || req.query.q || req.query.termo || '';
+            let query = `SELECT id, nome_fantasia, razao_social, cnpj, telefone, email
+                         FROM empresas WHERE 1=1`;
+            const params = [];
+
+            if (search) {
+                query += ` AND (nome_fantasia LIKE ? OR razao_social LIKE ? OR cnpj LIKE ?)`;
+                params.push(`%${search}%`, `%${search}%`, `%${search}%`);
+            }
+
+            query += ' ORDER BY nome_fantasia LIMIT 30';
+
+            const [rows] = await vendasPool.query(query, params);
+            res.json(rows);
+        } catch (error) { next(error); }
+    });
 
     // ========================================
     // LIGAÇÕES - CDR Scraper via Puppeteer
@@ -1819,7 +2131,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
             const status = cdrScraper.getStatus();
             res.json(status);
         } catch (error) {
-            res.json({ configurado: false, erro: 'Serviço indisponível' });
+            res.json({ configurado: false, erro: error.message });
         }
     });
 
@@ -1871,7 +2183,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
             res.json({
                 total: 0, chamadas: [],
                 periodo: { inicio: req.query.data_inicio || hoje, fim: req.query.data_fim || hoje },
-                erro: 'Serviço temporariamente indisponível'
+                erro: error.message
             });
         }
     });
@@ -1917,7 +2229,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
                     inicio: req.query.data_inicio || hoje,
                     fim: req.query.data_fim || hoje
                 },
-                erro: 'Serviço temporariamente indisponível'
+                erro: error.message
             });
         }
     });

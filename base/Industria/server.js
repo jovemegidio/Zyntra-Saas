@@ -186,7 +186,7 @@ if (process.env.CLOUDFLARE_ENABLED === 'true') {
     app.set('trust proxy', 1);
 }
 
-const PORT = parseInt(process.env.PORT) || 3000;
+const PORT = parseInt(process.env.SERVER_PORT || process.env.PORT) || 3000;
 const HOST = process.env.HOST || '0.0.0.0';
 
 // reference to the running http.Server (set when app.listen is called)

@@ -176,8 +176,8 @@
                         </thead>
                         <tbody>
                             ${produtos.map(p => {
-                                const codigo = p.codigo || '';
-                                const descrição = p.nome || p.descrição || '';
+                                const código = p.codigo || '';
+                                const descrição = p.nome || p.descricao || '';
                                 const sku = p.sku || '';
                                 const gtin = p.gtin || '';
                                 const unidade = p.unidade_medida || p.unidade || '';
@@ -185,32 +185,32 @@
                                 const custo = Number(p.custo_unitario || 0).toFixed(2);
                                 
                                 // Processar variações
-                                let variacoes = [];
+                                let variações = [];
                                 try {
-                                    if (Array.isArray(p.variacao)) {
-                                        variacoes = p.variacao;
-                                    } else if (typeof p.variacao === 'string' && p.variacao.trim().startsWith('[')) {
-                                        variacoes = JSON.parse(p.variacao);
-                                    } else if (typeof p.variacao === 'string') {
-                                        variacoes = p.variacao.split(/[,;]+/).map(s => s.trim()).filter(Boolean);
+                                    if (Array.isArray(p.variação)) {
+                                        variações = p.variação;
+                                    } else if (typeof p.variação === 'string' && p.variação.trim().startsWith('[')) {
+                                        variações = JSON.parse(p.variação);
+                                    } else if (typeof p.variação === 'string') {
+                                        variações = p.variação.split(/[,;]+/).map(s => s.trim()).filter(Boolean);
                                     }
                                 } catch (e) {
-                                    variacoes = [];
+                                    variações = [];
                                 }
                                 
-                                const variacaoHtml = variacoes.length ? 
-                                    variacoes.map(v => `<span class="var-badge">${v}</span>`).join('') : 
+                                const variaçãoHtml = variações.length ? 
+                                    variações.map(v => `<span class="var-badge">${v}</span>`).join('') : 
                                     '';
                                 
                                 return `
                                     <tr data-id="${p.id}">
-                                        <td><strong>${codigo}</strong></td>
+                                        <td><strong>${código}</strong></td>
                                         <td>${descrição}</td>
                                         <td><span class="sku-badge">${sku || '-'}</span></td>
                                         <td><span class="gtin-text">${gtin || '-'}</span></td>
                                         <td>${unidade}</td>
                                         <td class="text-center"><span class="estoque-number">${estoque}</span></td>
-                                        <td>${variacaoHtml}</td>
+                                        <td>${variaçãoHtml}</td>
                                         <td>R$ ${custo}</td>
                                         <td class="text-center">
                                             <button class="btn-editar-prod" data-id="${p.id}" onclick="editarProduto(${p.id})">

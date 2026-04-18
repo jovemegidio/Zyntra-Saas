@@ -363,6 +363,48 @@ module.exports = function createLogisticaRoutes(deps) {
         }
     });
 
+    // ===================== EXPEDIÇÃO =====================
+
+    // Criar nova expedição (manual)
+    router.post('/expedicao', async (req, res, next) => {
+        try {
+            const { nfe, pedido_id, pedido: pedidoBody, cliente, transportadora_id, status, previsao, prioridade, observacoes } = req.body;
+            const pedido = pedido_id || pedidoBody;
+
+            // Se for baseado em um pedido existente, atualizar
+            if (pedido) {
+                // Tenant isolation — verificar empresa_id
+                const [pedCheck] = await pool.query('SELECT id FROM pedidos WHERE id = ? AND empresa_id = ?', [pedido, req.user.empresa_id]);
+                if (!pedCheck.length) {
+                    return res.status(404).json({ error: 'Pedido não encontrado.' });
+                }
+                // Validar FK — transportadora deve existir
+                if (transportadora_id) {
+                    const [transp] = await pool.query('SELECT id FROM transportadoras WHERE id = ? AND (status IS NULL OR status != "inativa")', [transportadora_id]);
+                    if (!transp.length) {
+                        return res.status(400).json({ error: 'Transportadora não encontrada ou inativa.' });
+                    }
+                }
+                await pool.query(`
+                    UPDATE pedidos SET
+                        status_logistica = ?,
+                        transportadora_id = ?,
+                        data_prevista = ?,
+                        prioridade = ?,
+                        observacao = CONCAT(COALESCE(observacao, ''), ?)
+                    WHERE id = ? AND empresa_id = ?
+                `, [status || 'pendente', transportadora_id, previsao, prioridade, observacoes ? `\n[EXP] ${observacoes}` : '', pedido, req.user.empresa_id]);
+
+                return res.json({ success: true, message: 'Expedição criada com sucesso', pedido_id: pedido });
+            }
+
+            res.status(400).json({ success: false, message: 'Pedido ou NF-e é obrigatório' });
+        } catch (error) {
+            console.error('[LOGISTICA/EXPEDICAO] Erro:', error);
+            next(error);
+        }
+    });
+
     // ===================== COTAÇÃO DE FRETE =====================
 
     // Cotar frete com base nas tabelas de preço das transportadoras

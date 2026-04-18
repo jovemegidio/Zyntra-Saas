@@ -517,17 +517,17 @@
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel de Controle"><i class="fas fa-home"></i></a>
             <nav class="sidebar-nav">
                 <a href="areaadm.html" class="sidebar-btn active" title="Dashboard RH"><i class="fas fa-chart-pie"></i></a>
-                <a href="pages/funcionarios.html" class="sidebar-btn" title="Funcionários"><i class="fas fa-users"></i></a>
+                <a href="pages/funcionários.html" class="sidebar-btn" title="Funcionários"><i class="fas fa-users"></i></a>
                 <a href="gestao-holerites.html" class="sidebar-btn" title="Gestão de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="pages/folha.html" class="sidebar-btn" title="Folha de Pagamento"><i class="fas fa-money-check-alt"></i></a>
                 <a href="pages/gestao-ponto.html" class="sidebar-btn" title="Gestão do Ponto"><i class="fas fa-clock"></i></a>
                 <a href="pages/importar-ponto.html" class="sidebar-btn" title="Importar Ponto (Control iD)"><i class="fas fa-upload"></i></a>
-                <a href="pages/gestao-solicitacoes.html" class="sidebar-btn" title="Gestão de Solicitações"><i class="fas fa-tasks"></i></a>
+                <a href="pages/gestao-solicitações.html" class="sidebar-btn" title="Gestão de Solicitações"><i class="fas fa-tasks"></i></a>
                 <a href="pages/requisicoes-compra.html" class="sidebar-btn" title="Requisições de Compra"><i class="fas fa-shopping-cart"></i></a>
                 <a href="pages/calendario-rh.html" class="sidebar-btn" title="Calendário RH"><i class="fas fa-calendar-alt"></i></a>
             </nav>
             <div class="sidebar-bottom">
-                <a href="funcionario.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-user"></i></a>
+                <a href="funcionário.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-user"></i></a>
             </div>
         </aside>
 
@@ -644,12 +644,12 @@
                             </div>
                             <div class="card-body">
                                 <div class="quick-actions">
-                                    <a href="pages/funcionarios.html?action=new" class="quick-action-btn">
+                                    <a href="pages/funcionários.html?action=new" class="quick-action-btn">
                                         <i class="fas fa-user-plus"></i>
                                         <span>Novo Funcionário</span>
                                     </a>
                                         <i class="fas fa-calendar-check"></i>
-                                        <span>Gestão Férias</span>
+                                        <span>Gestão de Férias</span>
                                     </a>
                                     <a href="pages/importar-ponto.html" class="quick-action-btn">
                                         <i class="fas fa-upload"></i>
@@ -708,13 +708,13 @@
         }
 
         // Helper: Resolve foto do funcionário
-        function resolverFoto(marcacao) {
+        function resolverFoto(marcação) {
             // 1. Foto vinda da API (avatar do funcionário)
-            if (marcacao.foto_url && marcacao.foto_url !== '/avatars/default.webp') {
-                return marcacao.foto_url;
+            if (marcação.foto_url && marcação.foto_url !== '/avatars/default.webp') {
+                return marcação.foto_url;
             }
             // 2. Tentar pelo nome no mapa de avatares
-            const nome = marcacao.funcionário_nome || '';
+            const nome = marcação.funcionario_nome || '';
             const primeiroNome = nome.split(' ')[0].toLowerCase()
                 .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
             if (avatarNameMap[primeiroNome]) return avatarNameMap[primeiroNome];
@@ -869,13 +869,13 @@
                 // Buscar total de funcionários com autenticação
                 const token = getAuthToken();
                 const headers = { 'Content-Type': 'application/json' };
-                const respfuncionarios = await fetch('/api/rh/funcionarios', {
+                const respfuncionários = await fetch('/api/rh/funcionarios', {
                     credentials: 'include',
                     headers
                 });
 
-                if (respfuncionarios.ok) {
-                    const data = await respfuncionarios.json();
+                if (respfuncionários.ok) {
+                    const data = await respfuncionários.json();
                     // A API retorna { funcionários: [], stats, departamentos, cargos }
                     const funcionários = Array.isArray(data) ? data : (data.funcionarios || []);
                     const stats = data.stats || {};
@@ -887,12 +887,12 @@
                     const férias = stats.férias || funcionários.filter(f => f.status === 'Férias').length;
                     const admissoes = stats.admissoes_mes || 0;
 
-                    document.getElementById('stat-funcionarios').textContent = ativos;
+                    document.getElementById('stat-funcionários').textContent = ativos;
                     document.getElementById('stat-ferias').textContent = férias;
                     document.getElementById('stat-admissoes').textContent = admissoes;
                 } else {
                     // Se a API falhar, mostrar erro amigável
-                    console.error('Erro na API:', respfuncionarios.status);
+                    console.error('Erro na API:', respfuncionários.status);
                     mostrarErroEstatisticas('Erro ao carregar dados. Faça login novamente.');
                 }
             } catch (error) {
@@ -902,7 +902,7 @@
         }
 
         function mostrarErroEstatisticas(mensagem) {
-            document.getElementById('stat-funcionarios').textContent = '-';
+            document.getElementById('stat-funcionários').textContent = '-';
             document.getElementById('stat-ferias').textContent = '-';
             document.getElementById('stat-admissoes').textContent = '-';
         }
@@ -910,8 +910,8 @@
         // ========================================
         // CARREGAR MARCAÇÕES EM TEMPO REAL
         // ========================================
-        async function carregarMarcacoesTempoReal() {
-            const tbody = document.getElementById('tbody-marcacoes');
+        async function carregarMarcaçõesTempoReal() {
+            const tbody = document.getElementById('tbody-marcações');
             if (!tbody) return;
 
             try {
@@ -925,19 +925,19 @@
 
                 if (!resp.ok) throw new Error('HTTP ' + resp.status);
                 const data = await resp.json();
-                const marcacoes = data.marcacoes || [];
+                const marcações = data.marcações || [];
 
                 // Atualizar contadores
-                document.getElementById('marcacoes-count').textContent = marcacoes.length;
-                const uniqueFuncs = new Set(marcacoes.filter(m => m.funcionário_id).map(m => m.funcionário_id));
-                document.getElementById('marcacoes-presentes').textContent = uniqueFuncs.size;
+                document.getElementById('marcações-count').textContent = marcações.length;
+                const uniqueFuncs = new Set(marcações.filter(m => m.funcionario_id).map(m => m.funcionario_id));
+                document.getElementById('marcações-presentes').textContent = uniqueFuncs.size;
 
                 const agora = new Date();
                 const horas = agora.getHours();
-                document.getElementById('marcacoes-data-label').textContent = 
+                document.getElementById('marcações-data-label').textContent = 
                     `Hoje, ${String(agora.getDate()).padStart(2,'0')}/${String(agora.getMonth()+1).padStart(2,'0')}`;
 
-                if (marcacoes.length === 0) {
+                if (marcações.length === 0) {
                     tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:40px;color:#94a3b8;">
                         <i class="fas fa-clock" style="font-size:32px;margin-bottom:12px;display:block;opacity:0.5;"></i>
                         Nenhuma marcação registrada hoje
@@ -946,17 +946,17 @@
                 }
 
                 // Ordenar por hora DESC (mais recente primeiro)
-                marcacoes.sort((a, b) => {
+                marcações.sort((a, b) => {
                     if (a.hora > b.hora) return -1;
                     if (a.hora < b.hora) return 1;
                     return 0;
                 });
 
-                tbody.innerHTML = marcacoes.slice(0, 20).map(m => {
-                    let nome = m.funcionário_nome || 'Não identificado';
+                tbody.innerHTML = marcações.slice(0, 20).map(m => {
+                    let nome = m.funcionario_nome || 'Não identificado';
                     // Tentar extrair nome da observação se não tem nome
-                    if (nome === 'Não identificado' && m.observacao) {
-                        const match = m.observacao.match(/^RHi?D:\s*(.+)/i);
+                    if (nome === 'Não identificado' && m.observação) {
+                        const match = m.observação.match(/^RHi?D:\s*(.+)/i);
                         if (match) nome = match[1].trim();
                     }
                     // Normalizar formatação do nome (ALL CAPS → Title Case)
@@ -964,7 +964,7 @@
                     const dept = toTitleCase(m.departamento || m.cargo || '');
                     const initial = nome.charAt(0).toUpperCase();
                     const hora = m.hora ? m.hora.substring(0, 5) : '--:--';
-                    const tipoLabel = m.tipo === 'marcacao' ? 'Marcação' : m.tipo === 'entrada' ? 'Entrada' : m.tipo === 'saida' ? 'Saída' : (m.tipo || 'Marcação');
+                    const tipoLabel = m.tipo === 'marcação' ? 'Marcação' : m.tipo === 'entrada' ? 'Entrada' : m.tipo === 'saida' ? 'Saída' : (m.tipo || 'Marcação');
                     const origemLabel = m.origem === 'rhid_cloud' ? 'RHID Cloud' : m.origem === 'control_id' ? 'Control iD' : m.origem === 'manual' ? 'Manual' : (m.origem || '-');
                     const origemClass = m.origem === 'rhid_cloud' ? 'color:#6366f1' : m.origem === 'manual' ? 'color:#f59e0b' : 'color:#10b981';
 
@@ -993,7 +993,7 @@
                 }).join('');
 
                 // Atualizar status de sync
-                document.getElementById('marcacoes-sync-status').innerHTML = 
+                document.getElementById('marcações-sync-status').innerHTML = 
                     `<i class="fas fa-circle" style="font-size:8px;margin-right:4px;color:#10b981;"></i> Atualizado às ${String(agora.getHours()).padStart(2,'0')}:${String(agora.getMinutes()).padStart(2,'0')}`;
 
             } catch (error) {
@@ -1041,7 +1041,7 @@
 
                     activityList.innerHTML = atividades.slice(0, 5).map(a => {
                         const tempo = calcularTempoRelativo(a.created_at);
-                        const titulo = escapeHtml(a.titulo);
+                        const título = escapeHtml(a.titulo);
                         const icone = a.icone || 'fa-bell';
                         const cor = a.cor || '#6b7280';
 
@@ -1051,7 +1051,7 @@
                                     <i class="fas ${icone}"></i>
                                 </div>
                                 <div class="activity-content">
-                                    <div class="activity-title">${titulo}</div>
+                                    <div class="activity-title">${título}</div>
                                     <div class="activity-time">${tempo}</div>
                                 </div>
                             </li>
@@ -1080,7 +1080,7 @@
                     const dataAdm = cells[3]?.textContent?.trim() || '';
                     if (nome && nome !== 'Nenhum' && dataAdm !== '-') {
                         atividades.push({
-                            titulo: `Admissão: ${nome} (${cargo})`,
+                            título: `Admissão: ${nome} (${cargo})`,
                             icone: 'fa-user-plus',
                             cor: '#10b981',
                             tempo: dataAdm
@@ -1149,19 +1149,19 @@
             carregarUsuarioLogado();
             carregarEstatisticas();
             carregarAtividadesRecentes();
-            carregarMarcacoesTempoReal();
+            carregarMarcaçõesTempoReal();
 
             // Auto-refresh marcações a cada 60 segundos
-            window._marcacoesIntervalRH = setInterval(() => {
-                carregarMarcacoesTempoReal();
+            window._marcaçõesIntervalRH = setInterval(() => {
+                carregarMarcaçõesTempoReal();
             }, 60000);
             // Cleanup: pausar quando tab oculta
             document.addEventListener('visibilitychange', function() {
                 if (document.hidden) {
-                    clearInterval(window._marcacoesIntervalRH);
+                    clearInterval(window._marcaçõesIntervalRH);
                 } else {
-                    carregarMarcacoesTempoReal();
-                    window._marcacoesIntervalRH = setInterval(() => { carregarMarcacoesTempoReal(); }, 60000);
+                    carregarMarcaçõesTempoReal();
+                    window._marcaçõesIntervalRH = setInterval(() => { carregarMarcaçõesTempoReal(); }, 60000);
                 }
             });
         });

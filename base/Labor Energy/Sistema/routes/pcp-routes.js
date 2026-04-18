@@ -1721,7 +1721,7 @@ module.exports = function createPCPRoutes(deps) {
             }
         };
 
-        res.set('Content-Type', 'text/plain');
+        res.set('Content-Type', 'text/plain; charset=utf-8');
         res.send(`# Zyntra v2.0 Metrics
     aluforce_uptime_seconds ${metrics.process.uptime}
     aluforce_memory_used_bytes ${metrics.process.memory.heapUsed}
@@ -3642,6 +3642,7 @@ module.exports = function createPCPRoutes(deps) {
     // Pipeline: dados → XML (xmlbuilder2) → XSLT transforma em XSL-FO → Apache FOP gera PDF
     const { gerarOrdemXML } = require('../services/ordem-xml-generator');
     const { gerarPdfComFop, verificarFop } = require('../services/fop-pdf-service');
+    const { buscarConfiguracoesEmpresa, formatarDadosParaPDF } = require('../modules/_shared/services/empresa-config.service');
 
     // GET /api/ordem-pdf/status - Verifica se FOP está disponível
     router.get('/api/ordem-pdf/status', authenticateToken, (req, res) => {
@@ -3713,6 +3714,24 @@ module.exports = function createPCPRoutes(deps) {
                 } catch (dbErr) {
                     console.warn('⚠️ Erro ao buscar dados da transportadora para PDF:', dbErr.message);
                 }
+            }
+
+            // 0. Buscar dados da empresa do banco
+            try {
+                const empresaConfig = await buscarConfiguracoesEmpresa(pool);
+                const dadosEmpPDF = formatarDadosParaPDF(empresaConfig);
+                dadosOrdem.empresa = {
+                    nome: dadosEmpPDF.nome,
+                    razao_social: dadosEmpPDF.nome,
+                    endereco: dadosEmpPDF.endereco,
+                    bairro: dadosEmpPDF.bairro || '',
+                    cep: dadosEmpPDF.cep,
+                    cidade: dadosEmpPDF.cidade,
+                    estado: dadosEmpPDF.estado,
+                    enderecoCompleto: `${dadosEmpPDF.endereco}, ${dadosEmpPDF.numero || ''} - ${dadosEmpPDF.bairro || ''}`.replace(/ - $/, '')
+                };
+            } catch (empErr) {
+                console.warn('⚠️ Erro ao buscar config empresa para OP PDF:', empErr.message);
             }
 
             // 1. Gerar XML estruturado

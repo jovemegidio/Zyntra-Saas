@@ -1040,6 +1040,13 @@ module.exports = (pool, authenticateToken) => {
     router.get('/nfes/:id/xml', authenticateToken, async (req, res) => {
         try {
             const { id } = req.params;
+            const origem = req.query.origem || 'nfe';
+
+            // Pedidos faturados não possuem XML formal
+            if (origem === 'pedido') {
+                return res.status(404).json({ success: false, message: 'XML não disponível — este registro é um pedido faturado sem NF-e formal emitida.' });
+            }
+
             const [[nfe]] = await pool.query('SELECT numero, xml_nfe FROM nfes WHERE id = ?', [id]);
             if (!nfe) return res.status(404).json({ success: false, message: 'NF-e não encontrada' });
             if (!nfe.xml_nfe) return res.status(404).json({ success: false, message: 'XML não disponível para esta NF-e' });

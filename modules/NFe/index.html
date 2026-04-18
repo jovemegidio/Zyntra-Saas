@@ -949,7 +949,7 @@
                 <a href="eventos.html" class="sidebar-btn" title="Eventos">
                     <i class="fas fa-history"></i>
                 </a>
-                <a href="inutilizacao.html" class="sidebar-btn" title="Inutilização">
+                <a href="inutilização.html" class="sidebar-btn" title="Inutilização">
                     <i class="fas fa-ban"></i>
                 </a>
                 <a href="regua.html" class="sidebar-btn" title="Régua Cobrança">
@@ -964,10 +964,10 @@
             </nav>
 
             <div class="sidebar-bottom">
-                <a href="relatorios.html" class="sidebar-btn" title="Relatórios">
+                <a href="relatórios.html" class="sidebar-btn" title="Relatórios">
                     <i class="fas fa-chart-bar"></i>
                 </a>
-                <button class="sidebar-btn" title="Configurações" id="btn-config" onclick="abrirModalConfiguracoes()">
+                <button class="sidebar-btn" title="Configurações" id="btn-config" onclick="abrirModalConfigurações()">
                     <i class="fas fa-cog"></i>
                 </button>
             </div>
@@ -1072,7 +1072,7 @@
                                         </div>
                                         <div class="chevron"><i class="fas fa-chevron-right"></i></div>
                                     </a>
-                                    <a href="relatorios.html" class="quick-action-btn">
+                                    <a href="relatórios.html" class="quick-action-btn">
                                         <div class="quick-action-icon green"><i class="fas fa-chart-bar"></i></div>
                                         <div class="quick-action-content">
                                             <span class="quick-action-title">Relatórios</span>
@@ -1137,7 +1137,7 @@
         <div class="modal modal-lg">
             <div class="modal-header">
                 <h2><i class="fas fa-cog"></i> Configurações NFe</h2>
-                <button class="modal-close" onclick="fecharModalConfiguracoes()"><i class="fas fa-times"></i></button>
+                <button class="modal-close" onclick="fecharModalConfigurações()"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body">
                 <div class="tabs-bar">
@@ -1197,9 +1197,9 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn-config btn-cancel" onclick="fecharModalConfiguracoes()"><i class="fas fa-times"></i>
+                <button class="btn-config btn-cancel" onclick="fecharModalConfigurações()"><i class="fas fa-times"></i>
                     Cancelar</button>
-                <button class="btn-config btn-save" onclick="salvarConfiguracoes()"><i class="fas fa-save"></i> Salvar
+                <button class="btn-config btn-save" onclick="salvarConfigurações()"><i class="fas fa-save"></i> Salvar
                     Configurações</button>
             </div>
         </div>
@@ -1214,12 +1214,12 @@
             overlay.classList.toggle('active');
         }
 
-        function toggleNotificacoes() {
+        function toggleNotificações() {
             const panel = document.getElementById('notification-panel');
             panel.classList.toggle('active');
         }
         function marcarTodasLidas() { }
-        function limparNotificacoes() { }
+        function limparNotificações() { }
 
         // ===== MAPEAMENTO DE AVATARES =====
         const avatarNameMap = {
@@ -1317,14 +1317,14 @@
         // ===== MODAL DE CONFIGURAÇÕES =====
         const _nfeOriginalTitle = document.title;
 
-        function abrirModalConfiguracoes() {
-            document.getElementById('modal-configuracoes-nfe').classList.add('active');
+        function abrirModalConfigurações() {
+            document.getElementById('modal-configurações-nfe').classList.add('active');
             document.title = 'Zyntra: Configurações NFe';
             carregarConfiguracoes();
         }
 
-        function fecharModalConfiguracoes() {
-            document.getElementById('modal-configuracoes-nfe').classList.remove('active');
+        function fecharModalConfigurações() {
+            document.getElementById('modal-configurações-nfe').classList.remove('active');
             document.title = _nfeOriginalTitle;
         }
 
@@ -1352,7 +1352,7 @@
             } catch (error) { console.log('Erro ao carregar configurações:', error); }
         }
 
-        async function salvarConfiguracoes() {
+        async function salvarConfigurações() {
             const btn = document.querySelector('.btn-save');
             btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
             try {
@@ -1362,14 +1362,14 @@
                 };
                 const response = await fetch('/api/nfe/configuracoes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(config) });
                 const result = await response.json();
-                if (response.ok && result.success) { showToast('Configurações salvas com sucesso!', 'success'); fecharModalConfiguracoes(); }
+                if (response.ok && result.success) { showToast('Configurações salvas com sucesso!', 'success'); fecharModalConfigurações(); }
                 else { showToast(result.message || 'Erro ao salvar configurações', 'error'); }
             } catch (error) { showToast('Erro ao salvar configurações', 'error'); }
             finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-save"></i> Salvar Configurações'; }
         }
 
-        document.getElementById('modal-configuracoes-nfe')?.addEventListener('click', (e) => {
-            if (e.target.id === 'modal-configuracoes-nfe') fecharModalConfiguracoes();
+        document.getElementById('modal-configurações-nfe')?.addEventListener('click', (e) => {
+            if (e.target.id === 'modal-configurações-nfe') fecharModalConfigurações();
         });
 
 
@@ -1399,19 +1399,19 @@
                     const trendAutorizadas = document.querySelector('.metric-card.green .metric-trend');
 
                     if (trendEmitidas) {
-                        if (data.variacaoEmitidas !== undefined) {
-                            const sinal = data.variacaoEmitidas >= 0 ? '+' : '';
-                            const icone = data.variacaoEmitidas >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
-                            trendEmitidas.className = 'metric-trend ' + (data.variacaoEmitidas >= 0 ? 'up' : 'down');
-                            trendEmitidas.innerHTML = '<i class="fas ' + icone + '"></i> ' + sinal + data.variacaoEmitidas + '% vs mês anterior';
+                        if (data.variaçãoEmitidas !== undefined) {
+                            const sinal = data.variaçãoEmitidas >= 0 ? '+' : '';
+                            const icone = data.variaçãoEmitidas >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
+                            trendEmitidas.className = 'metric-trend ' + (data.variaçãoEmitidas >= 0 ? 'up' : 'down');
+                            trendEmitidas.innerHTML = '<i class="fas ' + icone + '"></i> ' + sinal + data.variaçãoEmitidas + '% vs mês anterior';
                         } else {
                             trendEmitidas.className = 'metric-trend up';
                             trendEmitidas.innerHTML = '<i class="fas fa-calendar-alt"></i> Mês atual';
                         }
                     }
                     if (trendAutorizadas) {
-                        if (data.taxaAprovacao !== undefined) {
-                            trendAutorizadas.innerHTML = '<i class="fas fa-check"></i> ' + data.taxaAprovacao + '% de aprovação';
+                        if (data.taxaAprovação !== undefined) {
+                            trendAutorizadas.innerHTML = '<i class="fas fa-check"></i> ' + data.taxaAprovação + '% de aprovação';
                         } else {
                             const taxa = qtdEmitidas > 0 ? Math.round((qtdAutorizadas / qtdEmitidas) * 100) : 0;
                             trendAutorizadas.className = 'metric-trend up';
@@ -1419,11 +1419,11 @@
                         }
                     }
                     if (trendValor) {
-                        if (data.variacaoValor !== undefined) {
-                            const sinal = data.variacaoValor >= 0 ? '+' : '';
-                            const icone = data.variacaoValor >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
-                            trendValor.className = 'metric-trend ' + (data.variacaoValor >= 0 ? 'up' : 'down');
-                            trendValor.innerHTML = '<i class="fas ' + icone + '"></i> ' + sinal + data.variacaoValor + '% vs mês anterior';
+                        if (data.variaçãoValor !== undefined) {
+                            const sinal = data.variaçãoValor >= 0 ? '+' : '';
+                            const icone = data.variaçãoValor >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
+                            trendValor.className = 'metric-trend ' + (data.variaçãoValor >= 0 ? 'up' : 'down');
+                            trendValor.innerHTML = '<i class="fas ' + icone + '"></i> ' + sinal + data.variaçãoValor + '% vs mês anterior';
                         } else {
                             trendValor.className = 'metric-trend up';
                             trendValor.innerHTML = '<i class="fas fa-calendar-alt"></i> Mês atual';
@@ -1475,8 +1475,8 @@
                     const container = document.getElementById('activity-list');
                     if (data.atividades && data.atividades.length > 0) {
                         container.innerHTML = data.atividades.map(ativ => {
-                            const iconClass = ativ.tipo === 'autorizacao' ? 'success' : ativ.tipo === 'emissão' ? 'info' : ativ.tipo === 'rejeicao' ? 'warning' : ativ.tipo === 'cancelamento' ? 'error' : ativ.tipo === 'entrega' ? 'success' : 'info';
-                            const icon = ativ.tipo === 'autorizacao' ? 'fa-check' : ativ.tipo === 'emissão' ? 'fa-file-invoice' : ativ.tipo === 'rejeicao' ? 'fa-exclamation' : ativ.tipo === 'cancelamento' ? 'fa-times' : ativ.tipo === 'entrega' ? 'fa-truck' : 'fa-info';
+                            const iconClass = ativ.tipo === 'autorização' ? 'success' : ativ.tipo === 'emissão' ? 'info' : ativ.tipo === 'rejeicao' ? 'warning' : ativ.tipo === 'cancelamento' ? 'error' : ativ.tipo === 'entrega' ? 'success' : 'info';
+                            const icon = ativ.tipo === 'autorização' ? 'fa-check' : ativ.tipo === 'emissão' ? 'fa-file-invoice' : ativ.tipo === 'rejeicao' ? 'fa-exclamation' : ativ.tipo === 'cancelamento' ? 'fa-times' : ativ.tipo === 'entrega' ? 'fa-truck' : 'fa-info';
                             const dataAtiv = new Date(ativ.data);
                             const diffMs = Date.now() - dataAtiv;
                             const diffMin = Math.floor(diffMs / 60000);
@@ -1500,7 +1500,7 @@
             // Abrir modal de configurações se redirecionado com ?openConfig=true
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('openConfig') === 'true') {
-                abrirModalConfiguracoes();
+                abrirModalConfigurações();
                 // Limpar o parâmetro da URL sem recarregar
                 window.history.replaceState({}, '', window.location.pathname);
             }

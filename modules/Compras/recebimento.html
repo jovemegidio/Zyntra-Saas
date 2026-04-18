@@ -94,9 +94,9 @@
         .tab-content.active { display: block; }
     </style>
     <script>
-        function toggleNotificacoes() { const p = document.getElementById('notification-panel'); if (p) p.classList.toggle('active'); }
+        function toggleNotificações() { const p = document.getElementById('notification-panel'); if (p) p.classList.toggle('active'); }
         function marcarTodasLidas() {}
-        function limparNotificacoes() {}
+        function limparNotificações() {}
     </script>
     <script src="/js/anti-copy-protection.js" defer></script>
     <!-- Chat Widget BOB AI -->
@@ -653,7 +653,7 @@
                 const d = await r.json();
                 pedidosData = d.pedidos || d || [];
                 renderizarPedidos();
-                atualizarPaginacao(d.total || pedidosData.length);
+                atualizarPaginação(d.total || pedidosData.length);
                 return;
             }
         } catch (e) { /* fallback */ }
@@ -666,7 +666,7 @@
                 if (currentFilter === 'todos') pedidosData = all;
                 else pedidosData = all.filter(p => p.status === currentFilter || (currentFilter === 'pendente' && (p.status === 'aprovado' || p.status === 'pendente')));
                 renderizarPedidos();
-                atualizarPaginacao(pedidosData.length);
+                atualizarPaginação(pedidosData.length);
             }
         } catch (e) { console.log('Erro pedidos:', e); pedidosData = []; renderizarPedidos(); }
     }
@@ -742,7 +742,7 @@
                 '<div><label style="font-size:0.65rem; color:var(--gray-500); text-transform:uppercase;">Status</label><p><span class="badge badge-' + traduzirStatus(p.status).class + '">' + traduzirStatus(p.status).label + '</span></p></div>' +
                 '</div></div>' +
                 (itensHtml ? '<div class="view-section"><h4>Itens</h4>' + itensHtml + '</div>' : '') +
-                (p.observacoes ? '<div class="view-section"><h4>Observa��es</h4><p style="font-size:0.85rem; color:var(--gray-700);">' + p.observacoes + '</p></div>' : '');
+                (p.observações ? '<div class="view-section"><h4>Observa��es</h4><p style="font-size:0.85rem; color:var(--gray-700);">' + p.observações + '</p></div>' : '');
             document.getElementById('modalDetalhes').classList.add('active');
         } catch (e) { alert('Erro ao carregar detalhes'); }
     }
@@ -756,14 +756,14 @@
             const d = await r.json();
             const p = d.pedido || d;
             document.getElementById('pedidoId').value = p.id;
-            document.getElementById('infoPedidoNumero').textContent = p.n�mero || p.id;
+            document.getElementById('infoPedidoNúmero').textContent = p.n�mero || p.id;
             document.getElementById('infoPedidoFornecedor').textContent = p.fornecedor || p.fornecedor_nome || '-';
             document.getElementById('infoPedidoValor').textContent = formatarMoeda(p.valor_total);
             document.getElementById('dataRecebimento').value = new Date().toISOString().split('T')[0];
-            document.getElementById('numeroNfe').value = '';
+            document.getElementById('númeroNfe').value = '';
             document.getElementById('chaveAcessoNfe').value = '';
             document.getElementById('resultadoBuscaSefaz').innerHTML = '';
-            document.getElementById('observacoesRecebimento').value = '';
+            document.getElementById('observaçõesRecebimento').value = '';
             dadosNfeSefaz = null;
             anexosNfe = [];
             document.getElementById('listaAnexosNfe').innerHTML = '';
@@ -796,13 +796,13 @@
         if (!pedidoId) return;
         const body = {
             data_recebimento: document.getElementById('dataRecebimento').value,
-            n�mero_nfe: document.getElementById('numeroNfe').value,
+            n�mero_nfe: document.getElementById('númeroNfe').value,
             tipo: document.getElementById('tipoRecebimento').value,
             chave_acesso: document.getElementById('chaveAcessoNfe').value || document.getElementById('chaveNfeSalvar').value,
             responsavel: document.getElementById('responsavelRecebimento').value,
             local_armazenamento: document.getElementById('localArmazenamento').value,
             atualizar_estoque: document.getElementById('atualizarEstoque').value === 'sim',
-            observacoes: document.getElementById('observacoesRecebimento').value,
+            observações: document.getElementById('observaçõesRecebimento').value,
             dados_sefaz: dadosNfeSefaz
         };
         if (!body.n�mero_nfe || !body.responsavel) { alert('Preencha NF-e e Respons�vel'); return; }
@@ -873,7 +873,7 @@
 
     function preencherDadosNfe() {
         if (!dadosNfeSefaz) return;
-        document.getElementById('numeroNfe').value = dadosNfeSefaz.n�mero || dadosNfeSefaz.nNF || '';
+        document.getElementById('númeroNfe').value = dadosNfeSefaz.n�mero || dadosNfeSefaz.nNF || '';
     }
 
     /* ========== Files ========== */
@@ -896,7 +896,7 @@
     function removerAnexo(i) { anexosNfe.splice(i, 1); renderizarAnexos(); }
 
     /* ========== Pagination ========== */
-    function atualizarPaginacao(total) {
+    function atualizarPaginação(total) {
         const totalPages = Math.ceil(total / pageSize);
         const info = document.getElementById('paginationInfo');
         const start = (currentPage - 1) * pageSize + 1;
@@ -934,7 +934,7 @@
         return map[s] || { label: s || '-', class: 'pending' };
     }
     function debounce(func, wait) { let t; return function(...args) { clearTimeout(t); t = setTimeout(() => func.apply(this, args), wait); }; }
-    function exportarRelatorio() { alert('Funcionalidade em desenvolvimento'); }
+    function exportarRelatório() { alert('Funcionalidade em desenvolvimento'); }
     </script>
 
     <!-- Module Scripts -->
@@ -947,7 +947,7 @@
     <script src="/_shared/confirm-dialog.js?v=20260301"></script>
 
     <!-- Chat Widget BOB AI -->
-    <script src="/chat/widget.js?v=20260416" defer></script>
+    <script src="/chat/widget.js?v=20260418" defer></script>
 
     <!-- Enterprise Shared -->
     <script src="/js/sidebar-click-animation.js?v=20260301"></script>

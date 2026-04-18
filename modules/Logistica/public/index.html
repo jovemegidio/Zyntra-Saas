@@ -85,7 +85,7 @@
                         <div class="metric-value" id="count-aguardando">0</div>
                         <div class="metric-label">Aguardando</div>
                     </div>
-                    <div class="metric-card blue" onclick="filtrarPorCard('em_separacao')"
+                    <div class="metric-card blue" onclick="filtrarPorCard('em_separação')"
                         style="cursor:pointer;" title="Filtrar por Em Separação">
                         <div class="metric-header">
                             <div class="metric-icon blue"><i class="fas fa-box-open"></i></div>
@@ -129,7 +129,7 @@
                         Pedidos</button>
                     <button class="tab-btn" onclick="mostrarTab('transportadoras',this)"><i
                             class="fas fa-truck-moving"></i> Transportadoras</button>
-                    <button class="tab-btn" onclick="mostrarTab('cotacao',this)"><i
+                    <button class="tab-btn" onclick="mostrarTab('cotação',this)"><i
                             class="fas fa-calculator"></i> Cotação Frete</button>
                     <button class="tab-btn" onclick="mostrarTab('rastreamento',this)"><i
                             class="fas fa-map-marker-alt"></i> Rastreamento</button>
@@ -150,7 +150,7 @@
                         <select class="filter-btn" id="filtro-status" onchange="aplicarFiltros()">
                             <option value="">Todos os Status</option>
                             <option value="pendente">Aguardando</option>
-                            <option value="em_separacao">Em Separação</option>
+                            <option value="em_separação">Em Separação</option>
                             <option value="em_expedicao">Expedição</option>
                             <option value="em_transporte">Em Transporte</option>
                             <option value="entregue">Entregue</option>
@@ -308,7 +308,7 @@
                             <div class="filters-bar" style="padding:12px 16px;">
                                 <select class="filter-btn" id="cte-filtro-status" onchange="carregarCTes()">
                                     <option value="">Todos</option>
-                                    <option value="digitacao">Digitação</option>
+                                    <option value="digitação">Digitação</option>
                                     <option value="autorizado">Autorizado</option>
                                     <option value="cancelado">Cancelado</option>
                                 </select>
@@ -348,7 +348,7 @@
                             <div class="filters-bar" style="padding:12px 16px;">
                                 <select class="filter-btn" id="mdfe-filtro-status" onchange="carregarMDFes()">
                                     <option value="">Todos</option>
-                                    <option value="digitacao">Digitação</option>
+                                    <option value="digitação">Digitação</option>
                                     <option value="autorizado">Autorizado</option>
                                     <option value="encerrado">Encerrado</option>
                                     <option value="cancelado">Cancelado</option>
@@ -406,7 +406,7 @@
                             </select></div>
                         <div class="form-group"><label>Status</label><select class="form-control" id="exp-status">
                                 <option value="pendente">Aguardando</option>
-                                <option value="em_separacao">Em Separação</option>
+                                <option value="em_separação">Em Separação</option>
                                 <option value="em_expedicao">Expedição</option>
                                 <option value="em_transporte">Em Transporte</option>
                             </select></div>
@@ -464,7 +464,7 @@
                 </div>
                 <hr style="margin:16px 0;border-color:var(--border-color);">
                 <h4 style="font-size:13px;font-weight:600;color:var(--primary);margin-bottom:12px;"><i class="fas fa-satellite-dish"></i> Integração API Rastreamento</h4>
-                <div class="form-group"><label>URL API Rastreamento</label><input type="url" class="form-control" id="transp-api-url" placeholder="https://api.transportadora.com/rastreio/{codigo}"></div>
+                <div class="form-group"><label>URL API Rastreamento</label><input type="url" class="form-control" id="transp-api-url" placeholder="https://api.transportadora.com/rastreio/{código}"></div>
                 <div class="form-row">
                     <div class="form-group"><label>Token API</label><input type="text" class="form-control" id="transp-api-token" placeholder="Bearer token ou chave"></div>
                     <div class="form-group"><label>Código Integração</label><input type="text" class="form-control" id="transp-cod-integracao" placeholder="Código na API"></div>
@@ -501,7 +501,7 @@
                             <div class="custom-select-option" data-value="pendente" onclick="selectStatus(this)">
                                 <i class="fas fa-clock" style="color:#f59e0b;"></i> Aguardando Separação
                             </div>
-                            <div class="custom-select-option" data-value="em_separacao" onclick="selectStatus(this)">
+                            <div class="custom-select-option" data-value="em_separação" onclick="selectStatus(this)">
                                 <i class="fas fa-boxes" style="color:#3b82f6;"></i> Em Separação
                             </div>
                             <div class="custom-select-option" data-value="em_expedicao" onclick="selectStatus(this)">
@@ -808,8 +808,8 @@
         }
 
         function getStatusBadge(status) {
-            const m = { pendente: 'pending', aguardando_separacao: 'pending', aguardando: 'pending', separacao: 'processing', em_separacao: 'processing', expedicao: 'in-progress', em_expedicao: 'in-progress', transporte: 'em-transito', em_transporte: 'em-transito', entregue: 'entregue' };
-            const l = { pendente: 'Aguardando', aguardando_separacao: 'Aguardando', aguardando: 'Aguardando', separacao: 'Separação', em_separacao: 'Separação', expedicao: 'Expedição', em_expedicao: 'Expedição', transporte: 'Transporte', em_transporte: 'Transporte', entregue: 'Entregue' };
+            const m = { pendente: 'pending', aguardando_separação: 'pending', aguardando: 'pending', separação: 'processing', em_separação: 'processing', expedicao: 'in-progress', em_expedicao: 'in-progress', transporte: 'em-transito', em_transporte: 'em-transito', entregue: 'entregue' };
+            const l = { pendente: 'Aguardando', aguardando_separação: 'Aguardando', aguardando: 'Aguardando', separação: 'Separação', em_separação: 'Separação', expedicao: 'Expedição', em_expedicao: 'Expedição', transporte: 'Transporte', em_transporte: 'Transporte', entregue: 'Entregue' };
             return `<span class="badge ${m[status] || 'info'}">${l[status] || status}</span>`;
         }
 
@@ -824,8 +824,8 @@
                 const r = await fetch('/api/logistica/dashboard', { credentials: 'include' });
                 if (r.ok) {
                     const d = await r.json();
-                    document.getElementById('count-aguardando').textContent = d.aguardando_separacao || d.aguardando || 0;
-                    document.getElementById('count-separacao').textContent = d.em_separacao || d.separacao || 0;
+                    document.getElementById('count-aguardando').textContent = d.aguardando_separação || d.aguardando || 0;
+                    document.getElementById('count-separação').textContent = d.em_separação || d.separação || 0;
                     document.getElementById('count-expedicao').textContent = d.em_expedicao || d.expedicao || 0;
                     document.getElementById('count-transporte').textContent = d.em_transporte || d.transporte || 0;
                     document.getElementById('count-entregues').textContent = d.entregues || 0;
@@ -911,7 +911,7 @@
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
-                    body: JSON.stringify({ status_logistica: novoStatus, observacao: obs })
+                    body: JSON.stringify({ status_logistica: novoStatus, observação: obs })
                 });
                 if (r.ok) {
                     closeModal('modal-status');
@@ -928,7 +928,7 @@
         function verDetalhes(id) {
             const p = pedidos.find(x => x.id === id);
             if (!p) { alert('Pedido não encontrado'); return; }
-            const statusLabel = { pendente: 'Aguardando', em_separacao: 'Em Separação', em_expedicao: 'Em Expedição', em_transporte: 'Em Transporte', entregue: 'Entregue' };
+            const statusLabel = { pendente: 'Aguardando', em_separação: 'Em Separação', em_expedicao: 'Em Expedição', em_transporte: 'Em Transporte', entregue: 'Entregue' };
             document.getElementById('modal-detalhes-body').innerHTML = `
         <div style="display:flex;flex-direction:column;gap:20px;">
             <!-- Seção: Identificação -->
@@ -1039,7 +1039,7 @@
                 <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
                     <i class="fas fa-sticky-note" style="color:#06b6d4;"></i> Observações
                 </div>
-                <p style="font-size:13px;color:#334155;white-space:pre-wrap;line-height:1.6;margin:0;">${esc(p.observacao || 'Nenhuma observação')}</p>
+                <p style="font-size:13px;color:#334155;white-space:pre-wrap;line-height:1.6;margin:0;">${esc(p.observação || 'Nenhuma observação')}</p>
             </div>
         </div>
     `;
@@ -1054,7 +1054,7 @@
             const previsao = p.previsao && p.previsao !== '-' ? new Date(p.previsao).toLocaleDateString('pt-BR') : '-';
             const priorLabel = { urgente: 'URGENTE', alta: 'ALTA', media: 'NORMAL', baixa: 'BAIXA', normal: 'NORMAL' }[(p.prioridade || 'normal').toLowerCase()] || 'NORMAL';
             const nfeFormatado = String(p.nfe_numero || p.nfe || '000000000').padStart(9, '0');
-            const codigoRastreio = 'ALU-' + String(p.pedido_id || p.id).padStart(6, '0');
+            const códigoRastreio = 'ALU-' + String(p.pedido_id || p.id).padStart(6, '0');
             const volumes = p.volumes || 1;
 
             // Code128B barcode generator (real encoding)
@@ -1067,7 +1067,7 @@
                 return codes.map(c => C128[c]).join('');
             };
 
-            const bits = code128B(codigoRastreio);
+            const bits = code128B(códigoRastreio);
             const barcodeWidth = bits.length;
             let barcodeSvg = `<svg viewBox="0 0 ${barcodeWidth} 60" preserveAspectRatio="none" style="width:100%;max-width:260px;height:50px;">`;
             for (let i = 0; i < bits.length; i++) {
@@ -1076,7 +1076,7 @@
             barcodeSvg += '</svg>';
 
             const win = window.open('', '_blank', 'width=450,height=700');
-            win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Etiqueta ${codigoRastreio}</title>
+            win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Etiqueta ${códigoRastreio}</title>
 <style>
 @page { size: 100mm 150mm; margin: 0; }
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -1179,7 +1179,7 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
 
     <div class="etq-barcode">
         ${barcodeSvg}
-        <div class="etq-barcode-code">${codigoRastreio}</div>
+        <div class="etq-barcode-code">${códigoRastreio}</div>
     </div>
 
     <div class="etq-footer">
@@ -1195,7 +1195,7 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
         // ========== Exportar Excel ==========
         function exportarExcel() {
             if (!pedidos.length) { alert('Nenhum pedido para exportar'); return; }
-            const statusLabel = { pendente: 'Aguardando', em_separacao: 'Em Separação', em_expedicao: 'Em Expedição', em_transporte: 'Em Transporte', entregue: 'Entregue' };
+            const statusLabel = { pendente: 'Aguardando', em_separação: 'Em Separação', em_expedicao: 'Em Expedição', em_transporte: 'Em Transporte', entregue: 'Entregue' };
             const headers = ['Pedido', 'NF-e', 'Cliente', 'Cidade/UF', 'Transportadora', 'Previsão', 'Status', 'Prioridade', 'Valor'];
             const rows = pedidos.map(p => [
                 p.pedido_id || p.id,
@@ -1231,7 +1231,7 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
                         status: document.getElementById('exp-status').value,
                         previsao: document.getElementById('exp-previsao').value,
                         prioridade: document.getElementById('exp-prioridade').value,
-                        observacoes: document.getElementById('exp-observacoes').value
+                        observações: document.getElementById('exp-observações').value
                     })
                 });
                 if (r.ok) {
@@ -1466,7 +1466,7 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
         async function cotarFrete() {
             const uf = document.getElementById('cot-uf-destino').value;
             if (!uf) { alert('Selecione a UF de destino'); return; }
-            const div = document.getElementById('cotacao-resultado');
+            const div = document.getElementById('cotação-resultado');
             div.innerHTML = '<p style="color:var(--text-secondary);"><i class="fas fa-spinner fa-spin"></i> Calculando cotações...</p>';
             try {
                 const r = await fetch('/api/logistica/cotacao-frete', {
@@ -1482,13 +1482,13 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
                     })
                 });
                 const data = await r.json();
-                if (!data.cotacoes || !data.cotacoes.length) {
+                if (!data.cotações || !data.cotações.length) {
                     div.innerHTML = '<div class="empty-state" style="padding:24px;"><i class="fas fa-search-dollar"></i><p>' + esc(data.mensagem || 'Nenhuma cotação encontrada para os parâmetros informados') + '</p></div>';
                     return;
                 }
                 div.innerHTML = `<h4 style="margin-bottom:12px;font-size:14px;"><i class="fas fa-check-circle" style="color:var(--success);"></i> ${data.total_opcoes} cotação(ões) encontrada(s)</h4>
                     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;">
-                    ${data.cotacoes.map((c, i) => `
+                    ${data.cotações.map((c, i) => `
                         <div class="card" style="border:${i === 0 ? '2px solid var(--success)' : '1px solid var(--border-color)'};padding:16px;">
                             ${i === 0 ? '<span class="badge success" style="margin-bottom:8px;">Melhor preço</span>' : ''}
                             <h4 style="font-size:14px;margin-bottom:8px;">${esc(c.transportadora)}</h4>
@@ -1580,13 +1580,13 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
 
         async function salvarEventoRastreamento() {
             const pedidoId = document.getElementById('rastr-add-pedido-id').value;
-            const descricao = document.getElementById('rastr-desc').value.trim();
-            if (!descricao) { alert('Descrição é obrigatória'); return; }
+            const descrição = document.getElementById('rastr-desc').value.trim();
+            if (!descrição) { alert('Descrição é obrigatória'); return; }
             try {
                 const r = await fetch(`/api/logistica/pedidos/${encodeURIComponent(pedidoId)}/rastreamento`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
                     body: JSON.stringify({
-                        descricao, cidade: document.getElementById('rastr-cidade').value || null,
+                        descrição, cidade: document.getElementById('rastr-cidade').value || null,
                         uf: document.getElementById('rastr-uf').value || null,
                         latitude: document.getElementById('rastr-lat').value || null,
                         longitude: document.getElementById('rastr-lng').value || null,
@@ -1611,8 +1611,8 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
         }
 
         function getCteStatusBadge(status) {
-            const m = { digitacao: 'pending', autorizado: 'success', cancelado: 'danger', inutilizado: 'info', denegado: 'warning' };
-            const l = { digitacao: 'Digitação', autorizado: 'Autorizado', cancelado: 'Cancelado', inutilizado: 'Inutilizado', denegado: 'Denegado' };
+            const m = { digitação: 'pending', autorizado: 'success', cancelado: 'danger', inutilizado: 'info', denegado: 'warning' };
+            const l = { digitação: 'Digitação', autorizado: 'Autorizado', cancelado: 'Cancelado', inutilizado: 'Inutilizado', denegado: 'Denegado' };
             return `<span class="badge ${m[status] || 'info'}">${l[status] || status}</span>`;
         }
 
@@ -1631,8 +1631,8 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
                     <td>${getCteStatusBadge(c.status)}</td>
                     <td>
                         <div style="display:flex;gap:4px;">
-                            ${c.status === 'digitacao' ? `<button class="action-btn edit" onclick="editarCTe(${c.id})" title="Editar"><i class="fas fa-pen"></i></button>` : ''}
-                            ${c.status === 'digitacao' ? `<button class="action-btn" style="color:var(--danger);" onclick="excluirCTe(${c.id})" title="Excluir"><i class="fas fa-trash"></i></button>` : ''}
+                            ${c.status === 'digitação' ? `<button class="action-btn edit" onclick="editarCTe(${c.id})" title="Editar"><i class="fas fa-pen"></i></button>` : ''}
+                            ${c.status === 'digitação' ? `<button class="action-btn" style="color:var(--danger);" onclick="excluirCTe(${c.id})" title="Excluir"><i class="fas fa-trash"></i></button>` : ''}
                         </div>
                     </td>
                 </tr>
@@ -1719,8 +1719,8 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
         }
 
         function getMdfeStatusBadge(status) {
-            const m = { digitacao: 'pending', autorizado: 'success', encerrado: 'info', cancelado: 'danger' };
-            const l = { digitacao: 'Digitação', autorizado: 'Autorizado', encerrado: 'Encerrado', cancelado: 'Cancelado' };
+            const m = { digitação: 'pending', autorizado: 'success', encerrado: 'info', cancelado: 'danger' };
+            const l = { digitação: 'Digitação', autorizado: 'Autorizado', encerrado: 'Encerrado', cancelado: 'Cancelado' };
             return `<span class="badge ${m[status] || 'info'}">${l[status] || status}</span>`;
         }
 
@@ -1740,8 +1740,8 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
                     <td>
                         <div style="display:flex;gap:4px;">
                             ${m.status === 'autorizado' ? `<button class="action-btn success" onclick="encerrarMDFe(${m.id})" title="Encerrar"><i class="fas fa-check-double"></i></button>` : ''}
-                            ${['digitacao','autorizado'].includes(m.status) ? `<button class="action-btn" style="color:var(--danger);" onclick="cancelarMDFe(${m.id})" title="Cancelar"><i class="fas fa-ban"></i></button>` : ''}
-                            ${m.status === 'digitacao' ? `<button class="action-btn" style="color:var(--danger);" onclick="excluirMDFe(${m.id})" title="Excluir"><i class="fas fa-trash"></i></button>` : ''}
+                            ${['digitação','autorizado'].includes(m.status) ? `<button class="action-btn" style="color:var(--danger);" onclick="cancelarMDFe(${m.id})" title="Cancelar"><i class="fas fa-ban"></i></button>` : ''}
+                            ${m.status === 'digitação' ? `<button class="action-btn" style="color:var(--danger);" onclick="excluirMDFe(${m.id})" title="Excluir"><i class="fas fa-trash"></i></button>` : ''}
                         </div>
                     </td>
                 </tr>
@@ -1804,7 +1804,7 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
                         condutor_nome: document.getElementById('mdfe-condutor-nome').value,
                         condutor_cpf: document.getElementById('mdfe-condutor-cpf').value,
                         veiculo_placa: document.getElementById('mdfe-placa').value,
-                        veiculo_uf: document.getElementById('mdfe-veiculo-uf').value,
+                        veiculo_uf: document.getElementById('mdfe-veículo-uf').value,
                         veiculo_rntrc: document.getElementById('mdfe-rntrc').value,
                         peso_bruto: document.getElementById('mdfe-peso').value || 0,
                         valor_carga: document.getElementById('mdfe-valor-carga').value || 0,
@@ -1873,7 +1873,7 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
     <!-- ALUFORCE: Confirm Dialog Profissional v2.0 -->
     <script src="/_shared/confirm-dialog.js?v=20260217"></script>
     <!-- Chat Widget BOB AI - DESATIVADO 23/02/2026 -->
-    <!-- <script src="/chat/widget.js?v=20260218" defer></script> -->
+    <!-- <script src="/chat/widget.js?v=20260418" defer></script> -->
     <script src="/_shared/accessibility-widget.js?v=20260226"></script>
 
     <!-- Chat Corporativo (Teams) -->

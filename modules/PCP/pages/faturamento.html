@@ -695,7 +695,7 @@
                 <a href="faturamento.html" class="sidebar-btn active" title="Faturamento"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="../apontamentos.html" class="sidebar-btn" title="Apontamentos"><i class="fas fa-stopwatch"></i></a>
                 <a href="qualidade.html" class="sidebar-btn" title="Qualidade"><i class="fas fa-award"></i></a>
-                <a href="relatorios.html" class="sidebar-btn" title="Central de Relatórios"><i class="fas fa-chart-pie"></i></a>
+                <a href="relatórios.html" class="sidebar-btn" title="Central de Relatórios"><i class="fas fa-chart-pie"></i></a>
             </nav>
             <div class="sidebar-bottom">
                 <button class="sidebar-btn" title="Configurações" id="btn-config"><i class="fas fa-cog"></i></button>
@@ -885,7 +885,7 @@
                             </label>
                             <div class="input-with-icon-fat">
                                 <i class="fas fa-hashtag"></i>
-                                <input type="text" class="form-input-fat" id="fat-pedido-número"
+                                <input type="text" class="form-input-fat" id="fat-pedido-numero"
                                        placeholder="Ex: 12345" oninput="buscarPedido(this.value)">
                             </div>
                         </div>
@@ -902,7 +902,7 @@
                             <div class="info-card-fat" id="info-pedido-card" style="display: none;">
                                 <div class="info-card-fat-row">
                                     <span class="info-card-fat-label">Pedido</span>
-                                    <span class="info-card-fat-value" id="info-pedido-número">-</span>
+                                    <span class="info-card-fat-value" id="info-pedido-numero">-</span>
                                 </div>
                                 <div class="info-card-fat-row">
                                     <span class="info-card-fat-label">Cliente</span>
@@ -1206,7 +1206,7 @@
             document.getElementById('fat-pedido-número').value = '';
             document.getElementById('fat-cliente').value = '';
             document.getElementById('fat-valor').value = '';
-            document.getElementById('fat-observacoes').value = '';
+            document.getElementById('fat-observações').value = '';
             document.getElementById('fat-responsavel').value = '';
             document.getElementById('fat-status').value = 'programado';
             document.getElementById('fat-tipo').value = 'normal';
@@ -1246,8 +1246,8 @@
             }
         });
 
-        async function buscarPedido(numero) {
-            if (!numero || numero.length < 1) {
+        async function buscarPedido(número) {
+            if (!número || número.length < 1) {
                 document.getElementById('fat-cliente').value = '';
                 document.getElementById('info-pedido-card').style.display = 'none';
                 pedidoSelecionado = null;
@@ -1256,7 +1256,7 @@
 
             try {
                 const API_BASE = getAPIBase();
-                const response = await fetch(`${API_BASE}/api/vendas/pedidos/${numero}`);
+                const response = await fetch(`${API_BASE}/api/vendas/pedidos/${número}`);
 
                 if (response.ok) {
                     const pedido = await response.json();
@@ -1268,7 +1268,7 @@
 
                     // Mostrar info card
                     document.getElementById('info-pedido-card').style.display = 'block';
-                    document.getElementById('info-pedido-número').textContent = `#${pedido.id || pedido.número || número}`;
+                    document.getElementById('info-pedido-número').textContent = `#${pedido.id || pedido.numero || número}`;
                     document.getElementById('info-pedido-cliente').textContent = pedido.cliente || pedido.empresa || '-';
                     document.getElementById('info-pedido-data').textContent = formatarData(pedido.data_criacao || pedido.data_pedido || new Date());
                     document.getElementById('info-pedido-valor').textContent = formatarMoeda(pedido.valor_total || pedido.total || 0);
@@ -1298,7 +1298,7 @@
         }
 
         async function salvarNovoFaturamento() {
-            const pedidoNumero = document.getElementById('fat-pedido-número').value.trim();
+            const pedidoNúmero = document.getElementById('fat-pedido-número').value.trim();
             const cliente = document.getElementById('fat-cliente').value.trim();
             const dataProgramada = document.getElementById('fat-data-programada').value;
             const valorStr = document.getElementById('fat-valor').value.replace(/\./g, '').replace(',', '.');
@@ -1306,10 +1306,10 @@
             const status = document.getElementById('fat-status').value;
             const tipo = document.getElementById('fat-tipo').value;
             const responsavel = document.getElementById('fat-responsavel').value.trim();
-            const observacoes = document.getElementById('fat-observacoes').value.trim();
+            const observações = document.getElementById('fat-observações').value.trim();
 
             // Validações
-            if (!pedidoNumero) {
+            if (!pedidoNúmero) {
                 showToast('Informe o número do pedido', 'error');
                 document.getElementById('fat-pedido-número').focus();
                 return;
@@ -1328,14 +1328,14 @@
             }
 
             const dadosFaturamento = {
-                pedido_id: parseInt(pedidoNumero),
-                cliente: cliente || `Pedido #${pedidoNumero}`,
+                pedido_id: parseInt(pedidoNúmero),
+                cliente: cliente || `Pedido #${pedidoNúmero}`,
                 data_programada: dataProgramada,
                 valor: valor,
                 status: status,
                 tipo: tipo,
                 responsavel: responsavel,
-                observacoes: observacoes
+                observações: observações
             };
 
             try {
@@ -1384,7 +1384,7 @@
         });
 
         document.addEventListener('DOMContentLoaded', function() {
-            atualizarSaudacao();
+            atualizarSaudação();
             carregarFaturamentos();
             renderizarCalendario();
         });

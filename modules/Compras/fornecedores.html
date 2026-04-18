@@ -52,9 +52,9 @@
         .view-item p { font-size: 0.85rem; color: var(--gray-800); margin-top: 2px; }
     </style>
     <script>
-        function toggleNotificacoes() { const p = document.getElementById('notification-panel'); if (p) p.classList.toggle('active'); }
+        function toggleNotificações() { const p = document.getElementById('notification-panel'); if (p) p.classList.toggle('active'); }
         function marcarTodasLidas() {}
-        function limparNotificacoes() {}
+        function limparNotificações() {}
     </script>
     <script src="/js/anti-copy-protection.js" defer></script>
     <!-- Chat Widget BOB AI -->
@@ -422,8 +422,8 @@
             avalia��o: parseInt(document.getElementById('avalia��o').value) || 0,
             logo: document.getElementById('logoPath').value,
             produtos_fornecidos: document.getElementById('produtosFornecidos').value,
-            certificacoes: document.getElementById('certificacoes').value,
-            observacoes: document.getElementById('observacoes').value
+            certificações: document.getElementById('certificações').value,
+            observações: document.getElementById('observações').value
         };
         if (!dados.razao_social || !dados.cnpj) { alert('Preencha os campos obrigat�rios'); _salvandoFornecedor = false; return; }
         try {
@@ -474,8 +474,8 @@
             document.getElementById('avalia��o').value = f.avalia��o || '0';
             document.getElementById('logoPath').value = f.logo || '';
             document.getElementById('produtosFornecidos').value = f.produtos_fornecidos || '';
-            document.getElementById('certificacoes').value = f.certificacoes || '';
-            document.getElementById('observacoes').value = f.observacoes || '';
+            document.getElementById('certificações').value = f.certificações || '';
+            document.getElementById('observações').value = f.observações || '';
             document.getElementById('modalFornecedorTitle').innerHTML = '<i class="fas fa-edit"></i> Editar Fornecedor';
             trocarAbaFornecedor('dados', document.querySelector('.modal-tabs button'));
             document.getElementById('modalFornecedor').classList.add('active');
@@ -520,11 +520,11 @@
                     '<div class="view-item"><label>PIX</label><p>' + (f.chave_pix || '-') + '</p></div>' +
                     '<div class="view-item"><label>Avalia��o</label><p>' + stars + '</p></div>' +
                 '</div></div>' +
-                (f.produtos_fornecidos || f.certificacoes || f.observacoes ?
+                (f.produtos_fornecidos || f.certificações || f.observações ?
                     '<div class="view-section"><h4><i class="fas fa-file-alt"></i> Informa��es Adicionais</h4>' +
                     (f.produtos_fornecidos ? '<div class="view-item" style="margin-bottom:var(--space-2);"><label>Produtos</label><p>' + f.produtos_fornecidos + '</p></div>' : '') +
-                    (f.certificacoes ? '<div class="view-item" style="margin-bottom:var(--space-2);"><label>Certifica��es</label><p>' + f.certificacoes + '</p></div>' : '') +
-                    (f.observacoes ? '<div class="view-item"><label>Observa��es</label><p>' + f.observacoes + '</p></div>' : '') +
+                    (f.certificações ? '<div class="view-item" style="margin-bottom:var(--space-2);"><label>Certifica��es</label><p>' + f.certificações + '</p></div>' : '') +
+                    (f.observações ? '<div class="view-item"><label>Observa��es</label><p>' + f.observações + '</p></div>' : '') +
                     '</div>' : '');
             document.getElementById('modalVisualizarFornecedor').classList.add('active');
         } catch (e) { alert('Erro ao carregar detalhes'); }
@@ -586,7 +586,7 @@
     <script src="/_shared/confirm-dialog.js?v=20260301"></script>
 
     <!-- Chat Widget BOB AI -->
-    <script src="/chat/widget.js?v=20260416" defer></script>
+    <script src="/chat/widget.js?v=20260418" defer></script>
 
     <!-- Enterprise Shared -->
     <script src="/js/sidebar-click-animation.js?v=20260301"></script>

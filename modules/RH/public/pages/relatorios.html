@@ -162,7 +162,7 @@
                 </div>
             </div>
 
-            <div class="report-card" onclick="openReport('historico-salarial')">
+            <div class="report-card" onclick="openReport('histórico-salarial')">
                 <div class="card-icon purple"><i class="fas fa-chart-line"></i></div>
                 <h3>Histórico Salarial</h3>
                 <p>Consulta de reajustes salariais por funcionário, com datas, percentuais e motivos.</p>
@@ -172,7 +172,7 @@
                 </div>
             </div>
 
-            <div class="report-card" onclick="openReport('historico-cargos')">
+            <div class="report-card" onclick="openReport('histórico-cargos')">
                 <div class="card-icon teal"><i class="fas fa-sitemap"></i></div>
                 <h3>Histórico de Cargos</h3>
                 <p>Movimentações de cargo e promoções de cada funcionário ao longo do tempo.</p>
@@ -228,13 +228,13 @@
             output.innerHTML = '';
 
             // Reports that need employee selection
-            if (type === 'historico-salarial' || type === 'historico-cargos') {
+            if (type === 'histórico-salarial' || type === 'histórico-cargos') {
                 filterBar.style.display = 'flex';
                 document.getElementById('filter-extra').innerHTML =
                     '<label style="margin-left:12px;">Funcionário:</label>' +
                     '<select id="filter-funcionario" style="padding:8px 14px;border-radius:8px;border:1px solid #cbd5e1;font-size:0.85rem;font-family:Inter,sans-serif;background:#f8fafc;min-width:200px;">' +
                     '<option value="">Carregando...</option></select>';
-                loadFuncionarios();
+                loadFuncionários();
             } else if (type === 'ferias-vencimentos') {
                 filterBar.style.display = 'flex';
                 document.getElementById('filter-extra').innerHTML =
@@ -250,7 +250,7 @@
             filterBar.scrollIntoView({ behavior: 'smooth', block: 'center' });
         };
 
-        function loadFuncionarios() {
+        function loadFuncionários() {
             var token = getCookieValue('authToken') || localStorage.getItem('token');
             fetch('/api/rh/funcionarios', {
                 headers: { 'Authorization': 'Bearer ' + token }
@@ -258,7 +258,7 @@
             .then(function(r) { return r.json(); })
             .then(function(data) {
                 var list = Array.isArray(data) ? data : (data.funcionarios || []);
-                var sel = document.getElementById('filter-funcionario');
+                var sel = document.getElementById('filter-funcionário');
                 if (!sel) return;
                 sel.innerHTML = '<option value="">Selecione...</option>';
                 list.forEach(function(f) {
@@ -269,7 +269,7 @@
                 });
             })
             .catch(function() {
-                var sel = document.getElementById('filter-funcionario');
+                var sel = document.getElementById('filter-funcionário');
                 if (sel) sel.innerHTML = '<option value="">Erro ao carregar</option>';
             });
         }
@@ -287,38 +287,38 @@
 
             switch (activeReport) {
                 case 'ponto-mensal':
-                    url = '/api/rh/ponto/relatorio-mensal?mes=' + mes + '&ano=' + ano;
+                    url = '/api/rh/ponto/relatório-mensal?mes=' + mes + '&ano=' + ano;
                     title = 'Relatório Mensal de Ponto';
                     break;
                 case 'ferias-vencimentos':
                     var tipo = document.getElementById('filter-tipo');
-                    url = '/api/rh/ferias/relatorio-vencimentos' + (tipo ? '?tipo=' + tipo.value : '');
+                    url = '/api/rh/ferias/relatório-vencimentos' + (tipo ? '?tipo=' + tipo.value : '');
                     title = 'Vencimento de Férias';
                     break;
                 case 'folha-centro-custo':
-                    url = '/api/rh/folha/relatorio/centro-custo?mes=' + mes + '&ano=' + ano;
+                    url = '/api/rh/folha/relatório/centro-custo?mes=' + mes + '&ano=' + ano;
                     title = 'Folha por Centro de Custo';
                     break;
                 case 'beneficios-custos':
-                    url = '/api/rh/beneficios/relatorio/custos?mes=' + mes + '&ano=' + ano;
+                    url = '/api/rh/beneficios/relatório/custos?mes=' + mes + '&ano=' + ano;
                     title = 'Custos de Benefícios';
                     break;
-                case 'historico-salarial':
-                    var funcId = document.getElementById('filter-funcionario');
+                case 'histórico-salarial':
+                    var funcId = document.getElementById('filter-funcionário');
                     if (!funcId || !funcId.value) {
                         output.innerHTML = '<div style="text-align:center;padding:30px;color:#ef4444;"><i class="fas fa-exclamation-triangle"></i> Selecione um funcionário.</div>';
                         return;
                     }
-                    url = '/api/rh/historico-salarial/' + funcId.value;
+                    url = '/api/rh/histórico-salarial/' + funcId.value;
                     title = 'Histórico Salarial';
                     break;
-                case 'historico-cargos':
-                    var funcId2 = document.getElementById('filter-funcionario');
+                case 'histórico-cargos':
+                    var funcId2 = document.getElementById('filter-funcionário');
                     if (!funcId2 || !funcId2.value) {
                         output.innerHTML = '<div style="text-align:center;padding:30px;color:#ef4444;"><i class="fas fa-exclamation-triangle"></i> Selecione um funcionário.</div>';
                         return;
                     }
-                    url = '/api/rh/historico-cargos/' + funcId2.value;
+                    url = '/api/rh/histórico-cargos/' + funcId2.value;
                     title = 'Histórico de Cargos';
                     break;
             }

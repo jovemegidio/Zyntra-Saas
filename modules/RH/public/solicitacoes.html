@@ -272,7 +272,7 @@
             <!-- sidebar-nav oculta por padrão; visível apenas para admins RH via JS -->
             <nav class="sidebar-nav" id="rh-admin-nav" style="display:none;">
                 <a href="areaadm.html" class="sidebar-btn" title="Dashboard RH"><i class="fas fa-chart-pie"></i></a>
-                <a href="pages/funcionarios.html" class="sidebar-btn" title="FUNCIONÁRIOS"><i class="fas fa-users"></i></a>
+                <a href="pages/funcionários.html" class="sidebar-btn" title="FUNCIONÁRIOS"><i class="fas fa-users"></i></a>
                 <a href="gestao-holerites.html" class="sidebar-btn" title="Gestão de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="pages/folha.html" class="sidebar-btn" title="Folha de Pagamento"><i class="fas fa-money-check-alt"></i></a>
                 <a href="pages/gestao-ponto.html" class="sidebar-btn" title="Gestão do Ponto"><i class="fas fa-clock"></i></a>
@@ -281,7 +281,7 @@
                 <a href="pages/calendario-rh.html" class="sidebar-btn" title="Calendário RH"><i class="fas fa-calendar-alt"></i></a>
             </nav>
             <div class="sidebar-bottom">
-                <a href="funcionario.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-user"></i></a>
+                <a href="funcionário.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-user"></i></a>
             </div>
         </aside>
 
@@ -316,11 +316,11 @@
                         <i class="fas fa-envelope"></i>
                         Solicitações
                     </h1>
-                    <p class="page-subtitle">Faça Solicitações e acompanhe o status</p>
+                    <p class="page-subtitle">Faça solicitações e acompanhe o status</p>
                 </div>
 
                 <div class="controls-bar">
-                    <a href="funcionario.html" class="btn btn-outline">
+                    <a href="funcionário.html" class="btn btn-outline">
                         <i class="fas fa-arrow-left"></i>
                         Voltar
                     </a>
@@ -369,16 +369,16 @@
                             </h3>
                         </div>
                         <div class="card-body">
-                            <form id="solicitação-form">
+                            <form id="solicitacao-form">
                                 <div class="form-group">
                                     <label class="form-label">Tipo de Solicitação</label>
-                                    <select class="form-select" id="tipo-solicitação" required>
+                                    <select class="form-select" id="tipo-solicitacao" required>
                                         <option value="">Selecione o tipo</option>
                                         <option value="férias">Férias</option>
                                         <option value="folga">Folga / Abono</option>
-                                        <option value="holerite">2 Via de Holerite</option>
-                                        <option value="declaracao">Declaração</option>
-                                        <option value="alteracao-dados">Alteração de Dados Cadastrais</option>
+                                        <option value="holerite">2ª Via de Holerite</option>
+                                        <option value="declaração">Declaração</option>
+                                        <option value="alteração-dados">Alteração de Dados Cadastrais</option>
                                         <option value="adiantamento">Adiantamento Salarial</option>
                                         <option value="cs_saude">CS Saúde</option>
                                         <option value="outros">Outros</option>
@@ -387,12 +387,12 @@
 
                                 <div class="form-group">
                                     <label class="form-label">Assunto</label>
-                                    <input type="text" class="form-input" id="assunto" placeholder="Resumo da Solicitação" required>
+                                    <input type="text" class="form-input" id="assunto" placeholder="Resumo da solicitação" required>
                                 </div>
 
                                 <div class="form-group">
                                     <label class="form-label">Descrição</label>
-                                    <textarea class="form-textarea" id="descrição" placeholder="Descreva sua Solicitação em detalhes..." required></textarea>
+                                    <textarea class="form-textarea" id="descricao" placeholder="Descreva sua solicitação em detalhes..." required></textarea>
                                 </div>
 
                                 <div class="form-group">
@@ -576,7 +576,7 @@
             }
         }
 
-        async function carregarSolicitacoes() {
+        async function carregarSolicitações() {
             try {
                 const response = await fetch('/api/rh/solicitacoes', { credentials: 'include' });
                 if (!response.ok) throw new Error('Erro ao carregar Solicitações');
@@ -592,14 +592,14 @@
                 document.getElementById('stat-rejected').textContent = stats.recusadas || 0;
 
                 // Renderizar lista de Solicitações
-                renderizarSolicitacoes(solicitações);
+                renderizarSolicitações(solicitações);
 
             } catch (error) {
                 console.error('Erro ao carregar Solicitações:', error);
             }
         }
 
-        function renderizarSolicitacoes(solicitações) {
+        function renderizarSolicitações(solicitações) {
             const requestsList = document.getElementById('requests-list');
 
             if (!solicitações || solicitações.length === 0) {
@@ -617,8 +617,8 @@
                 const statusClass = getStatusClass(sol.status);
                 const statusIcon = getStatusIcon(sol.status);
                 const statusLabel = getStatusLabel(sol.status);
-                const titulo = sol.assunto || sol.tipo || 'Solicitação';
-                const descrição = sol.descrição ? sol.descrição.substring(0, 100) + (sol.descrição.length > 100 ? '...' : '') : (sol.categoria || '');
+                const título = sol.assunto || sol.tipo || 'Solicitação';
+                const descrição = sol.descricao ? sol.descricao.substring(0, 100) + (sol.descricao.length > 100 ? '...' : '') : (sol.categoria || '');
 
                 return `
                     <div class="request-item">
@@ -626,7 +626,7 @@
                             <i class="fas ${statusIcon}"></i>
                         </div>
                         <div class="request-content">
-                            <div class="request-title">${titulo}</div>
+                            <div class="request-title">${título}</div>
                             <div class="request-date">Enviado em ${formatarData(sol.created_at)}</div>
                             <div class="request-description">${descrição}</div>
                         </div>
@@ -637,7 +637,7 @@
         }
 
         function limparFormulario() {
-            document.getElementById('solicitação-form').reset();
+            document.getElementById('solicitacao-form').reset();
         }
 
         function showToast(message, type = 'success') {
@@ -670,10 +670,10 @@
             }, 4000);
         }
 
-        document.getElementById('solicitação-form').addEventListener('submit', async (e) => {
+        document.getElementById('solicitacao-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const tipo = document.getElementById('tipo-solicitação').value;
+            const tipo = document.getElementById('tipo-solicitacao').value;
             const assunto = document.getElementById('assunto').value;
             const descrição = document.getElementById('descrição').value;
             const prioridade = document.getElementById('prioridade').value;
@@ -701,7 +701,7 @@
                 limparFormulario();
 
                 // Recarregar lista de Solicitações
-                await carregarSolicitacoes();
+                await carregarSolicitações();
 
             } catch (error) {
                 console.error('Erro ao enviar Solicitação:', error);
@@ -711,7 +711,7 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             carregarUsuarioLogado();
-            carregarSolicitacoes();
+            carregarSolicitações();
         });
     </script>
     <!-- Sistema de Monitoramento de Conexão -->

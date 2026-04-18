@@ -3,11 +3,6 @@
    KPIs, Gráficos e Informações Principais
    ======================================== */
 
-// FIX-XSS: HTML escape utility
-function _escHtml(s) {
-    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-}
-
 class ComprasDashboard {
     constructor() {
         this.dados = {};
@@ -21,11 +16,8 @@ class ComprasDashboard {
 
     async loadData() {
         try {
-            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
             const response = await fetch('/api/compras/dashboard', {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
+                credentials: 'include'
             });
 
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -159,7 +151,7 @@ class ComprasDashboard {
                 <div class="pedido-item">
                     <div class="pedido-info">
                         <strong>#${pedido.id}</strong>
-                        <span>${_escHtml(pedido.fornecedor)}</span>
+                        <span>${pedido.fornecedor}</span>
                     </div>
                     <div class="pedido-valor">${this.formatCurrency(pedido.valor)}</div>
                     <span class="status-badge ${statusClass}">${statusText}</span>

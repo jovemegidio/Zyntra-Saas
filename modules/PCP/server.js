@@ -3700,7 +3700,7 @@ app.get('/api/pcp/produtos/export-pdf', authRequired, async (req, res) => {
         const catalogoPath = path.join(__dirname, 'catalogo_produtos_gtin_2025_10_06.html');
 
         if (fs.existsSync(catalogoPath)) {
-            res.setHeader('Content-Type', 'text/html');
+            res.setHeader('Content-Type', 'text/html; charset=utf-8');
             res.setHeader('Content-Disposition', 'inline; filename="catalogo_produtos.html"');
             res.sendFile(catalogoPath);
         } else {

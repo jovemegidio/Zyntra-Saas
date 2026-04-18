@@ -2265,7 +2265,7 @@ module.exports = function registerConfiguracoesRoutes(router, deps) {
             const statusMap = {
                 'ativo': 'em_andamento',
                 'pausado': 'pausado',
-                'concluido': 'concluido',
+                'concluído': 'concluído',
                 'cancelado': 'cancelado'
             };
             const dbStatus = statusMap[status] || 'em_andamento';
@@ -2333,7 +2333,7 @@ module.exports = function registerConfiguracoesRoutes(router, deps) {
             const statusMap = {
                 'ativo': 'em_andamento',
                 'pausado': 'pausado',
-                'concluido': 'concluido',
+                'concluído': 'concluído',
                 'cancelado': 'cancelado'
             };
             const dbStatus = statusMap[status] || 'em_andamento';

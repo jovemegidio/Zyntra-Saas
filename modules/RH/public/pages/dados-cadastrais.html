@@ -549,13 +549,13 @@
         <aside class="sidebar" id="mobile-sidebar">
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel de Controle"><i class="fas fa-home"></i></a>
             <nav class="sidebar-nav">
-                <a href="../funcionario.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-home"></i></a>
+                <a href="../funcionário.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-home"></i></a>
                 <a href="meus-holerites.html" class="sidebar-btn" title="Meus Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="dados-cadastrais.html" class="sidebar-btn active" title="Dados Cadastrais"><i class="fas fa-id-card"></i></a>
                 <a href="beneficios.html" class="sidebar-btn" title="Meus Benefícios"><i class="fas fa-gift"></i></a>
                 <a href="espelho-ponto.html" class="sidebar-btn" title="Espelho de Ponto"><i class="fas fa-list-check"></i></a>
                 <a href="enviar-atestado.html" class="sidebar-btn" title="Enviar Atestado"><i class="fas fa-file-medical"></i></a>
-                <a href="../solicitacoes.html" class="sidebar-btn" title="Minhas Solicitações"><i class="fas fa-clipboard-list"></i></a>
+                <a href="../solicitações.html" class="sidebar-btn" title="Minhas Solicitações"><i class="fas fa-clipboard-list"></i></a>
                 <a href="manual-colaborador.html" class="sidebar-btn" title="Manual do Colaborador"><i class="fas fa-book"></i></a>
             </nav>
             <div class="sidebar-bottom">
@@ -599,7 +599,7 @@
                         <p class="page-subtitle">Visualize suas informações pessoais e profissionais</p>
                     </div>
                     <div class="page-header-right">
-                        <button type="button" class="btn btn-warning" onclick="abrirModalSolicitacao()">
+                        <button type="button" class="btn btn-warning" onclick="abrirModalSolicitação()">
                             <i class="fas fa-edit"></i>
                             Solicitar Alterações
                         </button>
@@ -614,14 +614,14 @@
                 <div class="data-section">
                     <div class="photo-section">
                         <div class="photo-container" id="foto-container">
-                            <img id="funcionário-foto" src="" alt="Foto do Funcionário" style="display: none;">
-                            <div id="funcionário-iniciais" class="avatar-iniciais">
+                            <img id="funcionario-foto" src="" alt="Foto do Funcionário" style="display: none;">
+                            <div id="funcionario-iniciais" class="avatar-iniciais">
                                 <span>?</span>
                             </div>
                         </div>
-                        <div class="employee-name" id="funcionário-nome-completo">Carregando...</div>
-                        <div class="employee-role" id="funcionário-cargo-dept">Cargo - Departamento</div>
-                        <span class="employee-status status-ativo" id="funcionário-status">ATIVO</span>
+                        <div class="employee-name" id="funcionario-nome-completo">Carregando...</div>
+                        <div class="employee-role" id="funcionario-cargo-dept">Cargo - Departamento</div>
+                        <span class="employee-status status-ativo" id="funcionario-status">ATIVO</span>
                     </div>
                 </div>
 
@@ -723,7 +723,7 @@
                             </div>
                             <div class="data-item">
                                 <span class="data-label">CTPS Número</span>
-                                <div class="data-value" id="dado-ctps-número">-</div>
+                                <div class="data-value" id="dado-ctps-numero">-</div>
                             </div>
                             <div class="data-item">
                                 <span class="data-label">CTPS Série</span>
@@ -731,7 +731,7 @@
                             </div>
                             <div class="data-item">
                                 <span class="data-label">Título de Eleitor</span>
-                                <div class="data-value" id="dado-título-eleitor">-</div>
+                                <div class="data-value" id="dado-titulo-eleitor">-</div>
                             </div>
                             <div class="data-item">
                                 <span class="data-label">CNH</span>
@@ -759,7 +759,7 @@
                             </div>
                             <div class="data-item">
                                 <span class="data-label">Número</span>
-                                <div class="data-value" id="dado-número">-</div>
+                                <div class="data-value" id="dado-numero">-</div>
                             </div>
                             <div class="data-item">
                                 <span class="data-label">Complemento</span>
@@ -979,7 +979,7 @@
                 <form id="formSolicitacao" class="request-form-shell">
                     <div class="request-grid">
                     <div class="form-group">
-                        <label for="tipoAlteracao">Tipo de Alteração <span style="color: #ef4444;">*</span></label>
+                        <label for="tipoAlteração">Tipo de Alteração <span style="color: #ef4444;">*</span></label>
                         <span class="field-note">Escolha a categoria que mais se aproxima do ajuste solicitado.</span>
                         <select id="tipoAlteracao" class="form-input" required>
                             <option value="">Selecione o tipo...</option>
@@ -999,15 +999,15 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="descriçãoAlteracao">Descrição da Alteração <span style="color: #ef4444;">*</span></label>
+                        <label for="descriçãoAlteração">Descrição da Alteração <span style="color: #ef4444;">*</span></label>
                         <span class="field-note">Informe o dado atual, o dado correto e, se possível, o motivo da alteração.</span>
-                        <textarea id="descriçãoAlteracao" class="form-input form-textarea" rows="5" placeholder="Ex.: alterar endereço para Rua X, número Y, bairro Z. Motivo: mudança de residência." required></textarea>
+                        <textarea id="descricaoAlteracao" class="form-input form-textarea" rows="5" placeholder="Ex.: alterar endereço para Rua X, número Y, bairro Z. Motivo: mudança de residência." required></textarea>
                     </div>
                     <div class="form-group">
-                        <label for="anexoAlteracao">Anexo Comprobatório</label>
+                        <label for="anexoAlteração">Anexo Comprobatório</label>
                         <span class="field-note">Opcional, mas recomendado para documentos, endereço, dados Bancários e dependentes.</span>
                         <div class="file-upload-wrapper">
-                            <div id="fileUploadArea" class="file-upload-area" onclick="document.getElementById('anexoAlteracao').click()">
+                            <div id="fileUploadArea" class="file-upload-area" onclick="document.getElementById('anexoAlteração').click()">
                                 <div class="file-upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
                                 <div class="file-upload-text">
                                     <div class="main-text">Clique para selecionar um arquivo</div>
@@ -1022,7 +1022,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline" onclick="fecharModal()">Cancelar</button>
-                <button type="button" class="btn btn-primary" onclick="enviarSolicitacao()">
+                <button type="button" class="btn btn-primary" onclick="enviarSolicitação()">
                     <i class="fas fa-paper-plane"></i>
                     Enviar Solicitação
                 </button>
@@ -1164,12 +1164,12 @@
                         </div>
                     </div>
                     ${p.banco_recebedor ? `<div style="font-size:12px; color:#64748b; margin-top:8px;"><i class="fas fa-university"></i> ${p.banco_recebedor}${p.agencia_recebedor ? ' | Ag: ' + p.agencia_recebedor : ''}${p.conta_recebedor ? ' | Conta: ' + p.conta_recebedor : ''}</div>` : ''}
-                    ${p.observacoes ? `<div style="font-size:12px; color:#64748b; margin-top:4px;"><i class="fas fa-sticky-note"></i> ${p.observacoes}</div>` : ''}
+                    ${p.observações ? `<div style="font-size:12px; color:#64748b; margin-top:4px;"><i class="fas fa-sticky-note"></i> ${p.observações}</div>` : ''}
                 </div>
             `).join('');
         }
 
-        async function carregarPensaoMeusDados(funcionarioId) {
+        async function carregarPensaoMeusDados(funcionárioId) {
             try {
                 const response = await fetch(`/api/rh/funcionarios/${funcionarioId}/pensao`, { credentials: 'include' });
                 if (!response.ok) throw new Error('Erro ao carregar Pensão');
@@ -1205,7 +1205,7 @@
             `).join('');
         }
 
-        async function carregarSalarioFamiliaMeusDados(funcionarioId) {
+        async function carregarSalarioFamiliaMeusDados(funcionárioId) {
             try {
                 const response = await fetch(`/api/rh/funcionarios/${funcionarioId}/salario-familia`, { credentials: 'include' });
                 if (!response.ok) throw new Error('Erro ao carregar salário-Família');
@@ -1213,8 +1213,8 @@
                 const recebe = data.recebe === 1 || data.recebe === true;
                 const displayEl = document.getElementById('sf-recebe-display-meus-dados');
                 const depsSection = document.getElementById('sf-dependentes-section-meus-dados');
-                const obsView = document.getElementById('sf-observacoes-view-meus-dados');
-                const obsDisplay = document.getElementById('sf-observacoes-display-meus-dados');
+                const obsView = document.getElementById('sf-observações-view-meus-dados');
+                const obsDisplay = document.getElementById('sf-observações-display-meus-dados');
 
                 if (displayEl) {
                     displayEl.textContent = recebe ? 'Sim' : 'No';
@@ -1222,8 +1222,8 @@
                     displayEl.style.color = recebe ? '#166534' : '#991b1b';
                 }
                 if (depsSection) depsSection.style.display = recebe ? 'block' : 'none';
-                if (obsView) obsView.style.display = data.observacoes ? 'block' : 'none';
-                if (obsDisplay) obsDisplay.textContent = data.observacoes || '-';
+                if (obsView) obsView.style.display = data.observações ? 'block' : 'none';
+                if (obsDisplay) obsDisplay.textContent = data.observações || '-';
 
                 renderizarDependentesMeusDados(data.dependentes || []);
             } catch (error) {
@@ -1307,7 +1307,7 @@
                         let funcionárioDetalhado = funcionárioData;
                         if (funcionárioData.id) {
                             try {
-                                const detalheResponse = await fetch(`/api/rh/funcionarios/${funcionárioData.id}`, {
+                                const detalheResponse = await fetch(`/api/rh/funcionarios/${funcionarioData.id}`, {
                                     credentials: 'include'
                                 });
                                 if (detalheResponse.ok) {
@@ -1324,9 +1324,9 @@
                         carregarSalarioFamiliaMeusDados(funcionárioDetalhado.id);
 
                         // Atualizar também a foto do header com dados do funcionário
-                        const fotoFuncionario = funcionárioDetalhado.foto_perfil_url || funcionárioDetalhado.foto_thumb_url || funcionárioDetalhado.foto;
-                        if (fotoFuncionario && userPhotoEl) {
-                            userPhotoEl.src = fotoFuncionario;
+                        const fotoFuncionário = funcionárioDetalhado.foto_perfil_url || funcionárioDetalhado.foto_thumb_url || funcionárioDetalhado.foto;
+                        if (fotoFuncionário && userPhotoEl) {
+                            userPhotoEl.src = fotoFuncionário;
                             userPhotoEl.classList.add('visible');
                             userPhotoEl.style.display = 'block';
                             userPhotoEl.onerror = function() {
@@ -1439,9 +1439,9 @@
             }
 
             setValor('dado-pis', f.pis_pasep);
-            setValor('dado-ctps-número', f.ctps_número);
+            setValor('dado-ctps-número', f.ctps_numero);
             setValor('dado-ctps-serie', f.ctps_serie);
-            setValor('dado-título-eleitor', f.título_eleitor);
+            setValor('dado-título-eleitor', f.titulo_eleitor);
             setValor('dado-cnh', f.cnh);
             setValor('dado-reservista', f.certificado_reservista);
 
@@ -1543,7 +1543,7 @@
 
         function removeFile(e) {
             e.stopPropagation();
-            const input = document.getElementById('anexoAlteracao');
+            const input = document.getElementById('anexoAlteração');
             input.value = '';
             const area = document.getElementById('fileUploadArea');
             area.classList.remove('has-file');
@@ -1556,20 +1556,20 @@
             `;
         }
 
-        function abrirModalSolicitacao() {
-            document.getElementById('modalSolicitacao').classList.add('show');
+        function abrirModalSolicitação() {
+            document.getElementById('modalSolicitação').classList.add('show');
         }
 
         function fecharModal() {
-            document.getElementById('modalSolicitacao').classList.remove('show');
-            document.getElementById('formSolicitacao').reset();
+            document.getElementById('modalSolicitação').classList.remove('show');
+            document.getElementById('formSolicitação').reset();
             removeFile(new Event('click'));
         }
 
-        async function enviarSolicitacao() {
-            const tipo = document.getElementById('tipoAlteracao').value;
-            const descrição = document.getElementById('descriçãoAlteracao').value;
-            const anexo = document.getElementById('anexoAlteracao').files[0];
+        async function enviarSolicitação() {
+            const tipo = document.getElementById('tipoAlteração').value;
+            const descrição = document.getElementById('descriçãoAlteração').value;
+            const anexo = document.getElementById('anexoAlteração').files[0];
 
             if (!tipo || !descrição) {
                 showToast('Preencha todos os campos obrigatórios', 'error');
@@ -1581,7 +1581,7 @@
                 formData.append('tipo', 'Alteração de Dados Cadastrais');
                 formData.append('categoria', tipo);
                 formData.append('descrição', descrição);
-                formData.append('funcionário_id', funcionárioData?.id || null);
+                formData.append('funcionario_id', funcionárioData?.id || null);
                 if (anexo) {
                     formData.append('anexo', anexo);
                 }

@@ -44,7 +44,7 @@ function requireInternalStatus(req, res, next) {
     }
 
     return res.status(403).json({
-        error: 'Acesso nao autorizado'
+        error: 'Acesso não autorizado'
     });
 }
 

@@ -87,7 +87,7 @@ function authenticateToken(req, res, next) {
             }
         }
 
-        // TC-AUTH-03-001: Inactivity timeout — 4h sem atividade encerra a sessão
+        // TC-AUTH-03-001: Inactivity timeout — 15 min sem atividade encerra a sessão
         if (_cacheService && user.id) {
             const sessionKey = `session_activity:${user.id}:${user.deviceId || 'default'}`;
             // SECURITY FIX: Requests com X-Activity-Check NÃO resetam o timer de inatividade.
@@ -95,7 +95,19 @@ function authenticateToken(req, res, next) {
             const isPassiveCheck = req.headers['x-activity-check'] === 'passive';
             try {
                 const lastActivity = await _cacheService.cacheGet(sessionKey);
-                if (lastActivity && (Date.now() - lastActivity > SESSION_INACTIVITY_MS)) {
+
+                // Se a chave não existe no Redis (TTL expirou ou nunca foi criada),
+                // significa que o usuário ficou inativo além do TTL → sessão expirada.
+                // Apenas permitir passagem se for a primeira requisição pós-login
+                // (o login SEMPRE cria a chave, então null = inatividade).
+                if (lastActivity === null || lastActivity === undefined) {
+                    return res.status(401).json({
+                        message: 'Sessão encerrada por inatividade.',
+                        code: 'AUTH_INACTIVE'
+                    });
+                }
+
+                if (Date.now() - lastActivity > SESSION_INACTIVITY_MS) {
                     // Sessão expirou por inatividade — limpar a chave
                     await _cacheService.cacheDelete(sessionKey).catch(() => {});
                     return res.status(401).json({
@@ -108,9 +120,9 @@ function authenticateToken(req, res, next) {
                     await _cacheService.cacheSet(sessionKey, Date.now(), SESSION_INACTIVITY_MS + 60000);
                 }
             } catch (cacheErr) {
-                // CHAOS-FIX BD-002: fail-closed — se cache indisponível, continuar mas logar
+                // CHAOS-FIX BD-002: se cache indisponível, permitir passagem (fail-open)
+                // Inatividade é segunda camada; JWT já foi validado acima
                 console.warn('[AUTH] Cache indisponível para verificar inatividade:', cacheErr.message);
-                // Inatividade é menos crítica que blacklist — permitir passagem com warning
             }
         }
 

@@ -1015,19 +1015,19 @@
         }
 
         /* Previsão Faturamento */
-        .previsao-faturamento {
+        .previsão-faturamento {
             display: flex;
             align-items: center;
             gap: 8px;
             margin-left: auto;
         }
 
-        .previsao-label {
+        .previsão-label {
             font-size: 11px;
             color: #888;
         }
 
-        .previsao-badge {
+        .previsão-badge {
             width: 18px;
             height: 18px;
             background: #fef3c7;
@@ -1038,14 +1038,14 @@
             color: #d97706;
         }
 
-        .previsao-input {
+        .previsão-input {
             padding: 6px 10px;
             border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 12px;
         }
 
-        .btn-consulta-credito {
+        .btn-consulta-crédito {
             padding: 8px 14px;
             background: white;
             border: 1px solid #ddd;
@@ -1058,7 +1058,7 @@
             color: #555;
         }
 
-        .btn-consulta-credito:hover {
+        .btn-consulta-crédito:hover {
             background: #f5f5f5;
             border-color: #ccc;
         }
@@ -1489,7 +1489,7 @@
             color: #374151;
         }
         .parcelas-table tr:hover { background: #f9fafb; }
-        .parcelas-table .situacao-previsao {
+        .parcelas-table .situacao-previsão {
             background: #fef3c7;
             color: #92400e;
             padding: 4px 8px;
@@ -1708,7 +1708,7 @@
                         <thead>
                             <tr>
                                 <th style="width:40px;cursor:default;" onclick="event.stopPropagation()"><input type="checkbox" class="row-checkbox" id="checkAll" onchange="toggleSelectAll(this)"></th>
-                                <th onclick="sortColumn('numero')">Nº Pedido <i class="fas fa-sort sort-icon"></i></th>
+                                <th onclick="sortColumn('número')">Nº Pedido <i class="fas fa-sort sort-icon"></i></th>
                                 <th onclick="sortColumn('cliente_nome')">Cliente <i class="fas fa-sort sort-icon"></i></th>
                                 <th onclick="sortColumn('data_pedido')">Data <i class="fas fa-sort sort-icon"></i></th>
                                 <th onclick="sortColumn('status')">Status <i class="fas fa-sort sort-icon"></i></th>
@@ -1782,7 +1782,7 @@
                 // Mapear campos para compatibilidade
                 todosPedidos = (Array.isArray(data) ? data : []).map(p => ({
                     ...p,
-                    numero: p.numero || p.id,
+                    número: p.numero || p.id,
                     cliente_nome: p.cliente_nome || p.cliente || 'Cliente não informado',
                     valor_total: parseFloat(p.valor_total || p.valor) || 0,
                     data_pedido: p.data_pedido || p.created_at,
@@ -1874,7 +1874,7 @@
                 return matchBusca && matchStatus && matchVendedor && matchData;
             });
             // Apply sort
-            aplicarOrdenacao();
+            aplicarOrdenação();
             renderizarTabela();
         }
 
@@ -1934,11 +1934,11 @@
                     </td>
                 </tr>
             `}).join('');
-            atualizarPaginacao(inicio, fim);
+            atualizarPaginação(inicio, fim);
             atualizarBulkBar();
         }
 
-        function atualizarPaginacao(inicio, fim) {
+        function atualizarPaginação(inicio, fim) {
             const container = document.getElementById('paginationContainer');
             container.style.display = 'flex';
             document.getElementById('paginationInfo').textContent = `Exibindo ${inicio + 1}-${fim} de ${pedidosFiltrados.length} pedidos`;
@@ -1981,7 +1981,7 @@
                 <div id="modal-visualizar" class="modal-overlay">
                     <div class="modal-content-omie" style="max-width: 1100px;">
                         <div class="modal-header-omie">
-                            <h2 id="modal-título-visualizar"><i class="fas fa-file-alt" style="color: var(--primary-orange); margin-right: 8px;"></i> Detalhes do Pedido <span id="modal-pedido-número" style="color: var(--primary-orange);"></span></h2>
+                            <h2 id="modal-titulo-visualizar"><i class="fas fa-file-alt" style="color: var(--primary-orange); margin-right: 8px;"></i> Detalhes do Pedido <span id="modal-pedido-numero" style="color: var(--primary-orange);"></span></h2>
                             <button class="close-btn" onclick="fecharModalVisualizar()">Fechar <i class="fas fa-times"></i></button>
                         </div>
                         <div class="modal-container-omie">
@@ -2063,7 +2063,7 @@
                     <button class="modal-tab" onclick="switchDetalhesTab(this, 'tab-vis-info')" style="padding:10px 20px;border:none;background:transparent;font-size:13px;font-weight:600;color:#6b7280;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all 0.2s;">
                         <i class="fas fa-info-circle"></i> Informações
                     </button>
-                    ${pedido.observacao || pedido.observacoes ? `<button class="modal-tab" onclick="switchDetalhesTab(this, 'tab-vis-obs')" style="padding:10px 20px;border:none;background:transparent;font-size:13px;font-weight:600;color:#6b7280;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all 0.2s;">
+                    ${pedido.observação || pedido.observações ? `<button class="modal-tab" onclick="switchDetalhesTab(this, 'tab-vis-obs')" style="padding:10px 20px;border:none;background:transparent;font-size:13px;font-weight:600;color:#6b7280;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all 0.2s;">
                         <i class="fas fa-comment"></i> Observações
                     </button>` : ''}
                 </div>
@@ -2117,11 +2117,11 @@
                     </div>
                 </div>
 
-                ${pedido.observacao || pedido.observacoes ? `
-                <!-- Tab: Observacoes -->
+                ${pedido.observação || pedido.observações ? `
+                <!-- Tab: Observações -->
                 <div id="tab-vis-obs" class="tab-content-vis" style="display:none;">
                     <div style="background:#f9fafb;border-radius:8px;padding:20px;">
-                        <p style="color:#374151;font-size:14px;line-height:1.6;white-space:pre-wrap;">${pedido.observacao || pedido.observacoes || ''}</p>
+                        <p style="color:#374151;font-size:14px;line-height:1.6;white-space:pre-wrap;">${pedido.observação || pedido.observações || ''}</p>
                     </div>
                 </div>` : ''}
             `;
@@ -2143,7 +2143,7 @@
                 <button class="sidebar-action-btn" onclick="duplicarPedidoFromView(${id})"><i class="fas fa-copy"></i> Duplicar</button>
                 <div style="height:1px;background:#e5e7eb;margin:8px 0;"></div>
                 <button class="sidebar-action-btn" onclick="window.open('/api/vendas/pedidos/${id}/pdf', '_blank')"><i class="fas fa-file-pdf"></i> Gerar Orçamento</button>
-                <button class="sidebar-action-btn" onclick="verHistoricoPedido(${id})"><i class="fas fa-history"></i> Histórico</button>
+                <button class="sidebar-action-btn" onclick="verHistóricoPedido(${id})"><i class="fas fa-history"></i> Histórico</button>
                 <div style="height:1px;background:#e5e7eb;margin:8px 0;"></div>
                 <button class="sidebar-action-btn" onclick="fecharModalVisualizar()" style="color:#6b7280;"><i class="fas fa-times"></i> Fechar</button>
             `;
@@ -2173,12 +2173,12 @@
         }
 
         // Ver histórico do pedido
-        async function verHistoricoPedido(id) {
+        async function verHistóricoPedido(id) {
             try {
                 const response = await fetch(`/api/vendas/pedidos/${id}/historico`, { headers: getAuthHeaders() });
                 if (response.ok) {
-                    const historico = await response.json();
-                    if (historico.length > 0) {
+                    const histórico = await response.json();
+                    if (histórico.length > 0) {
                         showToast('Histórico do pedido carregado', 'info');
                     } else {
                         showToast('Nenhum histórico registrado para este pedido', 'info');
@@ -2198,7 +2198,7 @@
             }
 
             // ========================================
-            // VERIFICAÇÃO DE SEGURANÇA: Checar permissão antes de abrir edição
+            // VERIFICAÇÁO DE SEGURANÇA: Checar permissão antes de abrir edição
             // ========================================
             const perms = window.ALUFORCE_PERMISSIONS || {};
             const podeEditarOwner = perms.podeEditarPedido ? perms.podeEditarPedido(pedido.vendedor_id) : true;
@@ -2241,7 +2241,7 @@
                     <div class="modal-content-omie">
                         <!-- Header -->
                         <div class="modal-header-omie">
-                            <h2 id="modal-título-pedido">Orçamento Nº</h2>
+                            <h2 id="modal-titulo-pedido">Orçamento Nº</h2>
                             <button class="close-btn" onclick="fecharModalEditar()">
                                 Fechar <i class="fas fa-times"></i>
                             </button>
@@ -2260,10 +2260,10 @@
                                         </div>
                                         <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 12px; flex-wrap: wrap;">
                                             <input type="text" class="cliente-nome-input" id="edit-cliente" placeholder="Nome do cliente" readonly style="background: #f9f9f9; flex: 1;">
-                                            <div class="previsao-faturamento">
-                                                <span class="previsao-label">Previsão de Faturamento</span>
-                                                <div class="previsao-badge"><i class="fas fa-exclamation" style="font-size: 8px;"></i></div>
-                                                <input type="date" class="previsao-input" id="edit-previsao-faturamento">
+                                            <div class="previsão-faturamento">
+                                                <span class="previsão-label">Previsão de Faturamento</span>
+                                                <div class="previsão-badge"><i class="fas fa-exclamation" style="font-size: 8px;"></i></div>
+                                                <input type="date" class="previsão-input" id="edit-previsão-faturamento">
                                             </div>
                                         </div>
                                     </div>
@@ -2313,7 +2313,7 @@
                                         <label>Status</label>
                                         <select id="edit-status">
                                             <option value="orcamento">Orçamento</option>
-                                            <option value="analise-credito">Análise de Crédito</option>
+                                            <option value="análise-crédito">Análise de Crédito</option>
                                             <option value="aprovado">Aprovado</option>
                                             <option value="faturado">Faturado</option>
                                             <option value="entregue">Entregue</option>
@@ -2328,7 +2328,7 @@
                                     <button class="modal-tab" data-tab="frete" onclick="switchModalTabPedidos('frete')">Frete e Outras Despesas</button>
                                     <button class="modal-tab" data-tab="informações" onclick="switchModalTabPedidos('informações')">Informações Adicionais</button>
                                     <button class="modal-tab" data-tab="parcelas" onclick="switchModalTabPedidos('parcelas')">Parcelas</button>
-                                    <button class="modal-tab" data-tab="observacoes" onclick="switchModalTabPedidos('observacoes')">Observações</button>
+                                    <button class="modal-tab" data-tab="observações" onclick="switchModalTabPedidos('observações')">Observações</button>
                                 </div>
 
                                 <!-- Tab Content: Itens da Venda -->
@@ -2425,7 +2425,7 @@
                                     <div class="form-row-omie" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr; gap: 10px;">
                                         <div class="form-group-omie">
                                             <label>Peso Líq. (Kg)</label>
-                                            <input type="number" id="edit-peso-liquido" step="0.001" min="0" placeholder="0,000">
+                                            <input type="number" id="edit-peso-líquido" step="0.001" min="0" placeholder="0,000">
                                         </div>
                                         <div class="form-group-omie">
                                             <label>Peso Bruto (Kg)</label>
@@ -2455,7 +2455,7 @@
                                     <div class="form-row-omie" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px;">
                                         <div class="form-group-omie">
                                             <label>Nº Lacre</label>
-                                            <input type="text" id="edit-número-lacre" placeholder="Lacre">
+                                            <input type="text" id="edit-numero-lacre" placeholder="Lacre">
                                         </div>
                                         <div class="form-group-omie">
                                             <label>Outras Despesas</label>
@@ -2463,11 +2463,11 @@
                                         </div>
                                         <div class="form-group-omie">
                                             <label>Prev. Entrega</label>
-                                            <input type="date" id="edit-previsao-entrega">
+                                            <input type="date" id="edit-previsão-entrega">
                                         </div>
                                         <div class="form-group-omie">
                                             <label>Cód. Rastreio</label>
-                                            <input type="text" id="edit-código-rastreio" placeholder="Rastreamento">
+                                            <input type="text" id="edit-codigo-rastreio" placeholder="Rastreamento">
                                         </div>
                                     </div>
 
@@ -2481,7 +2481,7 @@
                                 </div>
 
                                 <!-- Tab Content: Informações Adicionais -->
-                                <div class="tab-content" id="tab-informações">
+                                <div class="tab-content" id="tab-informacoes">
                                     <div class="form-row-omie">
                                         <div class="form-group-omie">
                                             <label>Nota Fiscal</label>
@@ -2529,7 +2529,7 @@
                                             </thead>
                                             <tbody id="parcelas-tbody">
                                                 <tr>
-                                                    <td><span class="situação-previsao">Previsão</span></td>
+                                                    <td><span class="situacao-previsão">Previsão</span></td>
                                                     <td>001/001</td>
                                                     <td id="parcela-vencimento-1">-</td>
                                                     <td id="parcela-valor-1">R$ 0,00</td>
@@ -2573,7 +2573,7 @@
 
                                 <div class="sidebar-divider"></div>
 
-                                <button class="sidebar-action-btn" onclick="verHistoricoPedido()">
+                                <button class="sidebar-action-btn" onclick="verHistóricoPedido()">
                                     <i class="fas fa-history"></i> Histórico
                                 </button>
 
@@ -2689,7 +2689,7 @@
             document.getElementById('edit-status').value = pedido.status || 'orcamento';
             document.getElementById('edit-valor-total').value = formatarValor(pedido.valor_total).replace('R$ ', '');
             document.getElementById('edit-total-mercadorias').value = formatarValor(pedido.valor_total).replace('R$ ', '');
-            document.getElementById('edit-observacoes').value = pedido.observacao || '';
+            document.getElementById('edit-observações').value = pedido.observação || '';
             document.getElementById('edit-pedido-id').value = pedido.id;
 
             // Carregar itens do pedido
@@ -2857,10 +2857,10 @@
             }
 
             // Atualizar botões de paginação
-            atualizarBotoesPaginacao(totalPaginas);
+            atualizarBotoesPaginação(totalPaginas);
         }
 
-        function atualizarBotoesPaginacao(totalPaginas) {
+        function atualizarBotoesPaginação(totalPaginas) {
             const container = document.querySelector('.parcelas-pagination-btns');
             if (!container) return;
 
@@ -2929,7 +2929,7 @@
                     body: JSON.stringify({
                         nome: novoParcelamento,
                         dias: novoParcelamento,
-                        descricao: `Condição cadastrada pelo vendedor`
+                        descrição: `Condição cadastrada pelo vendedor`
                     })
                 });
 
@@ -3003,7 +3003,7 @@
 
                 return `
                     <tr ondblclick="editarParcela(${i})">
-                        <td><span class="situação-previsao">Previsão</span></td>
+                        <td><span class="situacao-previsão">Previsão</span></td>
                         <td>${String(i + 1).padStart(3, '0')}/${String(dias.length).padStart(3, '0')}</td>
                         <td>${vencimentoStr}</td>
                         <td>R$ ${vl.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
@@ -3076,18 +3076,18 @@
                 // ===== FRETE E TRANSPORTE =====
                 transportadora: document.getElementById('edit-transportadora')?.value || '',
                 tipo_frete: document.getElementById('edit-tipo-frete')?.value || '',
-                placa_veiculo: document.getElementById('edit-placa-veiculo')?.value || '',
-                veiculo_uf: document.getElementById('edit-veiculo-uf')?.value || '',
+                placa_veiculo: document.getElementById('edit-placa-veículo')?.value || '',
+                veiculo_uf: document.getElementById('edit-veículo-uf')?.value || '',
                 rntrc: document.getElementById('edit-rntrc')?.value || '',
 
                 // Volumes
                 qtd_volumes: parseInt(document.getElementById('edit-qtd-volumes')?.value) || 0,
                 especie_volumes: document.getElementById('edit-especie-volumes')?.value || '',
                 marca_volumes: document.getElementById('edit-marca-volumes')?.value || '',
-                numeracao_volumes: document.getElementById('edit-numeracao-volumes')?.value || '',
+                numeracao_volumes: document.getElementById('edit-numeração-volumes')?.value || '',
 
                 // Pesos e valores
-                peso_liquido: parseFloat(document.getElementById('edit-peso-liquido')?.value) || 0,
+                peso_liquido: parseFloat(document.getElementById('edit-peso-líquido')?.value) || 0,
                 peso_bruto: parseFloat(document.getElementById('edit-peso-bruto')?.value) || 0,
                 frete: parseFloat(document.getElementById('edit-valor-frete')?.value) || 0,
                 valor_seguro: parseFloat(document.getElementById('edit-valor-seguro')?.value) || 0,
@@ -3096,9 +3096,9 @@
                 // Outros dados de frete
                 numero_lacre: document.getElementById('edit-número-lacre')?.value || '',
                 outras_despesas: parseFloat(document.getElementById('edit-outras-despesas')?.value) || 0,
-                prazo_entrega: document.getElementById('edit-previsao-entrega')?.value || '',
+                prazo_entrega: document.getElementById('edit-previsão-entrega')?.value || '',
                 codigo_rastreio: document.getElementById('edit-código-rastreio')?.value || '',
-                veiculo_proprio: document.getElementById('edit-veiculo-proprio')?.checked ? 1 : 0,
+                veiculo_proprio: document.getElementById('edit-veículo-proprio')?.checked ? 1 : 0,
 
                 // ===== INFORMAÇÕES ADICIONAIS =====
                 nf: document.getElementById('edit-nf')?.value || '',
@@ -3106,8 +3106,8 @@
                 info_complementar: document.getElementById('edit-info-complementar')?.value || '',
 
                 // ===== OBSERVAÇÕES =====
-                observacao: document.getElementById('edit-observacoes')?.value || '',
-                observacao_cliente: document.getElementById('edit-observacoes-cliente')?.value || ''
+                observação: document.getElementById('edit-observações')?.value || '',
+                observacao_cliente: document.getElementById('edit-observações-cliente')?.value || ''
             };
 
             // Remover campos vazios/undefined para não sobrescrever dados existentes
@@ -3177,7 +3177,7 @@
                 valor_total: pedidoAtualModal.valor_total,
                 valor_produtos: pedidoAtualModal.valor_produtos,
                 desconto: pedidoAtualModal.desconto || 0,
-                observacoes: `[DUPLICADO do pedido #${pedidoAtualModal.numero || pedidoAtualModal.id}] ${pedidoAtualModal.observacoes || ''}`,
+                observações: `[DUPLICADO do pedido #${pedidoAtualModal.numero || pedidoAtualModal.id}] ${pedidoAtualModal.observações || ''}`,
                 itens: pedidoAtualModal.itens || []
             };
 
@@ -3241,7 +3241,7 @@
                 body: JSON.stringify({
                     data_faturamento: new Date().toISOString().split('T')[0],
                     gerar_financeiro: true,
-                    observacoes: `Faturado em ${new Date().toLocaleString('pt-BR')}`
+                    observações: `Faturado em ${new Date().toLocaleString('pt-BR')}`
                 })
             })
             .then(async res => {
@@ -3274,7 +3274,7 @@
             });
         }
 
-        function verHistoricoPedido() {
+        function verHistóricoPedido() {
             if (!pedidoAtualModal) {
                 showToast('Nenhum pedido selecionado', 'warning');
                 return;
@@ -3285,11 +3285,11 @@
                 headers: getAuthHeaders()
             })
             .then(res => res.json())
-            .then(historico => {
+            .then(histórico => {
                 let itensHtml = '';
 
-                if (Array.isArray(historico) && historico.length > 0) {
-                    itensHtml = historico.map(h => {
+                if (Array.isArray(histórico) && histórico.length > 0) {
+                    itensHtml = histórico.map(h => {
                         const data = new Date(h.created_at).toLocaleString('pt-BR');
                         return `
                             <div style="padding:12px 16px;border-bottom:1px solid #f1f5f9;display:flex;flex-direction:column;gap:4px;">
@@ -3337,7 +3337,7 @@
                 }
 
                 // Remover modal anterior se existir
-                const existente = document.getElementById('modal-historico-pedido');
+                const existente = document.getElementById('modal-histórico-pedido');
                 if (existente) existente.remove();
 
                 const modalHtml = `
@@ -3345,7 +3345,7 @@
                         <div style="background:#fff;border-radius:12px;width:90%;max-width:520px;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
                             <div style="padding:16px 20px;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;">
                                 <h3 style="margin:0;font-size:15px;font-weight:600;color:#1e293b;"><i class="fas fa-history" style="margin-right:8px;color:#6366f1;"></i>Histórico — Pedido #${pedidoAtualModal.numero || pedidoAtualModal.id}</h3>
-                                <button onclick="document.getElementById('modal-historico-pedido').remove()" style="background:none;border:none;cursor:pointer;font-size:18px;color:#94a3b8;padding:4px 8px;border-radius:6px;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'">&times;</button>
+                                <button onclick="document.getElementById('modal-histórico-pedido').remove()" style="background:none;border:none;cursor:pointer;font-size:18px;color:#94a3b8;padding:4px 8px;border-radius:6px;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'">&times;</button>
                             </div>
                             <div style="overflow-y:auto;flex:1;">
                                 ${itensHtml}
@@ -3448,7 +3448,7 @@
             function fd(d) { return d ? new Date(d).toLocaleDateString('pt-BR') : '-'; }
             function esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-            const statusLabel = { orcamento:'Orçamento', aprovado:'Aprovado', faturado:'Faturado', entregue:'Entregue', pendente:'Pendente', cancelado:'Cancelado', 'pedido-aprovado':'Pedido Aprovado', 'em-producao':'Em Produção', 'em-analise':'Em Análise', 'analise-credito':'Análise de Crédito', 'negociacao':'Negociação', recibo:'Recibo' };
+            const statusLabel = { orcamento:'Orçamento', aprovado:'Aprovado', faturado:'Faturado', entregue:'Entregue', pendente:'Pendente', cancelado:'Cancelado', 'pedido-aprovado':'Pedido Aprovado', 'em-producao':'Em Produção', 'em-análise':'Em Análise', 'análise-crédito':'Análise de Crédito', 'negociação':'Negociação', recibo:'Recibo' };
             const statusText = statusLabel[(pedido.status || '').toLowerCase()] || pedido.status || '-';
 
             // Itens do pedido
@@ -3476,7 +3476,7 @@
             const freteVal = parseFloat(pedido.frete) || 0;
             const totalGeral = subtotalCalc > 0 ? (subtotalCalc - descontoCalc + freteVal) : (parseFloat(pedido.valor_total || pedido.valor) || 0);
             const freteMap = { '0': 'CIF (Remetente)', '1': 'FOB (Destinatário)', 'CIF': 'CIF (Remetente)', 'FOB': 'FOB (Destinatário)' };
-            const obsTexto = pedido.observacoes || pedido.observacao || pedido.descricao || '';
+            const obsTexto = pedido.observações || pedido.observação || pedido.descricao || '';
             const nomeCliente = pedido.cliente_razao_social || pedido.cliente_nome_fantasia || pedido.cliente_nome || pedido.cliente || 'Não informado';
 
             const printWindow = window.open('', '_blank');
@@ -3663,7 +3663,7 @@
             // Update header visual
             document.querySelectorAll('.pedidos-table th').forEach(th => th.classList.remove('sorted'));
             const headers = document.querySelectorAll('.pedidos-table th');
-            const colMap = {1:'numero',2:'cliente_nome',3:'data_pedido',4:'status',5:'valor_total',6:'vendedor_nome'};
+            const colMap = {1:'número',2:'cliente_nome',3:'data_pedido',4:'status',5:'valor_total',6:'vendedor_nome'};
             headers.forEach((th, idx) => {
                 if (colMap[idx] === column) {
                     th.classList.add('sorted');
@@ -3671,11 +3671,11 @@
                     if (icon) icon.className = `fas fa-sort-${sortState.direction === 'asc' ? 'up' : 'down'} sort-icon`;
                 }
             });
-            aplicarOrdenacao();
+            aplicarOrdenação();
             renderizarTabela();
         }
 
-        function aplicarOrdenacao() {
+        function aplicarOrdenação() {
             const { column, direction } = sortState;
             pedidosFiltrados.sort((a, b) => {
                 let va = a[column], vb = b[column];
@@ -3683,7 +3683,7 @@
                     va = parseFloat(va) || 0; vb = parseFloat(vb) || 0;
                 } else if (column === 'data_pedido') {
                     va = va ? new Date(va).getTime() : 0; vb = vb ? new Date(vb).getTime() : 0;
-                } else if (column === 'numero') {
+                } else if (column === 'número') {
                     va = parseInt(va) || 0; vb = parseInt(vb) || 0;
                 } else {
                     va = String(va || '').toLowerCase(); vb = String(vb || '').toLowerCase();
@@ -3866,7 +3866,7 @@
 
         // Carregar dados do usuário logado via API
         let _pedidosUserEmail = '';
-        const _STATUS_BLOQUEADO_EDICAO = ['faturado', 'faturar', 'aprovado', 'pedido-aprovado', 'orcamento', 'orçamento', 'analise', 'analise-credito', 'recibo', 'entregue'];
+        const _STATUS_BLOQUEADO_EDICAO = ['faturado', 'faturar', 'aprovado', 'pedido-aprovado', 'orcamento', 'orçamento', 'análise', 'análise-crédito', 'recibo', 'entregue'];
         const _EMAIL_EDICAO_LIBERADO = 'ti@aluforce.ind.br';
         function pedidoBloqueadoPorStatus(pedido) {
             if (!pedido) return false;
@@ -3937,7 +3937,7 @@
         }
 
         // Notificações — Padrão ALUFORCE
-        function toggleNotificacoes() {
+        function toggleNotificações() {
             const panel = document.getElementById('notification-panel');
             if (panel) panel.classList.toggle('open');
         }
@@ -3945,7 +3945,7 @@
             const badge = document.getElementById('notification-count');
             if (badge) { badge.textContent = '0'; badge.style.display = 'none'; }
         }
-        function limparNotificacoes() {
+        function limparNotificações() {
             const list = document.getElementById('notification-list');
             if (list) list.innerHTML = '<div class="notification-empty"><i class="fas fa-check-circle"></i><p>Nenhuma notificação</p></div>';
             marcarTodasLidas();
@@ -4191,7 +4191,7 @@
                                 <i class="fas fa-info-circle" style="color: #3b82f6; margin-top: 2px;"></i>
                                 <div style="font-size: 12px; color: #1e40af;">
                                     <strong>Fluxo 50% F9:</strong><br>
-                                    1. <strong>Faturamento (50%)</strong> - Emite NF de Simples Faturamento (CFOP 5922/6922). NÃO baixa estoque.<br>
+                                    1. <strong>Faturamento (50%)</strong> - Emite NF de Simples Faturamento (CFOP 5922/6922). NÁO baixa estoque.<br>
                                     2. <strong>Remessa (50%)</strong> - Emite NF de Remessa (CFOP 5117/6117). BAIXA estoque.
                                 </div>
                             </div>
@@ -4257,7 +4257,7 @@
             const cfop = document.getElementById('cfop-faturamento')?.value || '5922';
             const gerarFinanceiro = document.getElementById('gerar-financeiro')?.checked ?? true;
             const gerarNFe = document.getElementById('gerar-nfe')?.checked ?? false;
-            const observacoes = document.getElementById('obs-faturamento')?.value || '';
+            const observações = document.getElementById('obs-faturamento')?.value || '';
 
             // Validar se — faturamento normal
             if (tipoFaturamento === 'normal') {
@@ -4281,7 +4281,7 @@
                 message: `Confirma faturamento de <strong>${percentual}%</strong>?<br><br>` +
                     `<strong>Valor:</strong> R$ ${valorFaturar.toLocaleString('pt-BR', {minimumFractionDigits: 2})}<br>` +
                     `<strong>CFOP:</strong> ${cfop}<br><br>` +
-                    `<small style="color:#64748b;">Este faturamento NÃO baixa estoque. O estoque será baixado na remessa.</small>`,
+                    `<small style="color:#64748b;">Este faturamento NÁO baixa estoque. O estoque será baixado na remessa.</small>`,
                 confirmText: 'Faturar',
                 cancelText: 'Cancelar'
             });
@@ -4297,7 +4297,7 @@
                         cfop,
                         gerarFinanceiro,
                         gerarNFe,
-                        observacoes
+                        observações
                     })
                 });
 
@@ -4328,7 +4328,7 @@
             const cfop = document.getElementById('cfop-faturamento')?.value || '5117';
             const gerarFinanceiro = document.getElementById('gerar-financeiro')?.checked ?? true;
             const gerarNFe = document.getElementById('gerar-nfe')?.checked ?? false;
-            const observacoes = document.getElementById('obs-faturamento')?.value || '';
+            const observações = document.getElementById('obs-faturamento')?.value || '';
 
             // Confirmar ação
             const confirmado = await showConfirmModal({
@@ -4336,7 +4336,7 @@
                 title: 'Remessa / Entrega',
                 message: `Confirma emissão da <strong>Remessa de Entrega</strong>?<br><br>` +
                     `<strong>CFOP:</strong> ${cfop}<br><br>` +
-                    `<span style="color:#dc2626;"><i class="fas fa-exclamation-triangle"></i> <strong>ATENÇÃO:</strong> Esta ação irá BAIXAR o estoque!</span>`,
+                    `<span style="color:#dc2626;"><i class="fas fa-exclamation-triangle"></i> <strong>ATENÇÁO:</strong> Esta ação irá BAIXAR o estoque!</span>`,
                 confirmText: 'Emitir Remessa',
                 cancelText: 'Cancelar'
             });
@@ -4351,7 +4351,7 @@
                         gerarFinanceiro,
                         gerarNFe,
                         baixarEstoque: true,
-                        observacoes
+                        observações
                     })
                 });
 
@@ -4437,7 +4437,7 @@
     <script src="/js/auth-unified.js?v=20260301"></script>
     <script src="/js/mobile-auto-enhance.js?v=20260202" defer></script>
     <!-- Chat Widget BOB AI - DESATIVADO -->
-    <!-- <script src="/chat/widget.js?v=20260218" defer></script> -->
+    <!-- <script src="/chat/widget.js?v=20260418" defer></script> -->
     <script src="/js/user-dropdown.js?v=20260223" defer></script>
 
     <!-- Sidebar Click Animation -->

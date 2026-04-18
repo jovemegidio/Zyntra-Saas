@@ -169,16 +169,16 @@
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel de Controle"><i class="fas fa-home"></i></a>
             <nav class="sidebar-nav">
                 <a href="../areaadm.html" class="sidebar-btn active" title="Dashboard RH"><i class="fas fa-chart-pie"></i></a>
-                <a href="funcionarios.html" class="sidebar-btn" title="Funcionários"><i class="fas fa-users"></i></a>
+                <a href="funcionários.html" class="sidebar-btn" title="Funcionários"><i class="fas fa-users"></i></a>
                 <a href="../gestao-holerites.html" class="sidebar-btn" title="Gestão de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="folha.html" class="sidebar-btn" title="Folha de Pagamento"><i class="fas fa-money-check-alt"></i></a>
                 <a href="gestao-ponto.html" class="sidebar-btn" title="Gestão do Ponto"><i class="fas fa-clock"></i></a>
                 <a href="importar-ponto.html" class="sidebar-btn" title="Importar Ponto (Control iD)"><i class="fas fa-upload"></i></a>
-                <a href="gestao-solicitacoes.html" class="sidebar-btn" title="Gestão de Solicitações"><i class="fas fa-tasks"></i></a>
+                <a href="gestao-solicitações.html" class="sidebar-btn" title="Gestão de Solicitações"><i class="fas fa-tasks"></i></a>
                 <a href="calendario-rh.html" class="sidebar-btn" title="Calendário RH"><i class="fas fa-calendar-alt"></i></a>
             </nav>
             <div class="sidebar-bottom">
-                <a href="../funcionario.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-user"></i></a>
+                <a href="../funcionário.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-user"></i></a>
             </div>
         </aside>
         <main class="main-area">
@@ -212,7 +212,7 @@
                         <div class="metric-icon blue"><i class="fas fa-user-friends"></i></div>
                         <span class="metric-trend">&mdash;</span>
                     </div>
-                    <div class="metric-value widget-value" id="total-funcionários">--</div>
+                    <div class="metric-value widget-value" id="total-funcionarios">--</div>
                     <div class="metric-label">Total Funcionários</div>
                 </div>
                 <div class="metric-card green">
@@ -269,7 +269,7 @@
                 </div>
                 <div class="card-body">
                     <div class="quick-actions">
-                        <button class="quick-action-btn" id="btnNovoFuncionario" onclick="openNovoFuncionarioModal()">
+                        <button class="quick-action-btn" id="btnNovoFuncionario" onclick="openNovoFuncionárioModal()">
                             <i class="fas fa-user-plus"></i>
                             <span>Novo Funcionário</span>
                         </button>
@@ -302,11 +302,11 @@
 
     <!-- Modal Novo Funcionário -->
     <div id="novoFuncionarioModal" class="modal">
-        <div class="modal-overlay" onclick="closeNovoFuncionarioModal()"></div>
+        <div class="modal-overlay" onclick="closeNovoFuncionárioModal()"></div>
         <div class="modal-content">
             <div class="modal-header">
                 <h2><i class="fas fa-user-plus"></i> Novo Funcionário</h2>
-                <button class="modal-close" onclick="closeNovoFuncionarioModal()"><i class="fas fa-times"></i></button>
+                <button class="modal-close" onclick="closeNovoFuncionárioModal()"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body">
                 <form id="novoFuncionarioForm">
@@ -372,7 +372,7 @@
                             </div>
                             <div class="form-group required">
                                 <label for="número">Número</label>
-                                <input type="text" id="número" name="número" required>
+                                <input type="text" id="numero" name="número" required>
                             </div>
                             <div class="form-group">
                                 <label for="complemento">Complemento</label>
@@ -460,8 +460,8 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label for="observacoes">Observações</label>
-                                <textarea id="observacoes" name="observacoes" placeholder="Informações adicionais..."></textarea>
+                                <label for="observações">Observações</label>
+                                <textarea id="observacoes" name="observações" placeholder="Informações adicionais..."></textarea>
                             </div>
                         </div>
 
@@ -493,10 +493,10 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="closeNovoFuncionarioModal()">
+                <button type="button" class="btn btn-secondary" onclick="closeNovoFuncionárioModal()">
                     <i class="fas fa-times"></i> Cancelar
                 </button>
-                <button type="button" class="btn btn-primary" onclick="salvarFuncionario()">
+                <button type="button" class="btn btn-primary" onclick="salvarFuncionário()">
                     <i class="fas fa-save"></i> Salvar Funcionário
                 </button>
             </div>
@@ -543,9 +543,9 @@
                                     <option value="administrativo">Administrativo</option>
                                 </select>
                             </div>
-                            <div class="form-group" id="funcionário_group" style="display: none;">
-                                <label for="filtro_funcionário">Funcionário</label>
-                                <select id="filtro_funcionário" name="filtro_funcionário">
+                            <div class="form-group" id="funcionario_group" style="display: none;">
+                                <label for="filtro_funcionario">Funcionário</label>
+                                <select id="filtro_funcionario" name="filtro_funcionario">
                                     <option value="">Carregando funcionários...</option>
                                 </select>
                             </div>
@@ -600,8 +600,8 @@
                                 <input type="number" id="outros_descontos" name="outros_descontos" step="0.01" value="0">
                             </div>
                             <div class="form-group">
-                                <label for="descrição_outros_descontos">Descrição dos Outros Descontos</label>
-                                <input type="text" id="descrição_outros_descontos" name="descrição_outros_descontos" placeholder="Ex: Empréstimo consignado, etc.">
+                                <label for="descricao_outros_descontos">Descrição dos Outros Descontos</label>
+                                <input type="text" id="descricao_outros_descontos" name="descricao_outros_descontos" placeholder="Ex: Empréstimo consignado, etc.">
                             </div>
                         </div>
 
@@ -689,38 +689,38 @@ Equipe de Recursos Humanos
         }
 
         // ========== CARREGAR DADOS REAIS DO DASHBOARD ==========
-        let _dashFuncionarios = [];
+        let _dashFuncionários = [];
 
         async function carregarDadosDashboard() {
             try {
                 const resp = await fetch('/api/rh/funcionarios?limit=500', { credentials: 'include' });
                 if (!resp.ok) throw new Error('HTTP ' + resp.status);
                 const data = await resp.json();
-                const funcionarios = data.funcionarios || [];
+                const funcionários = data.funcionarios || [];
                 const stats = data.stats || {};
-                _dashFuncionarios = funcionarios;
+                _dashFuncionários = funcionários;
 
                 // KPI
-                const total = stats.total || funcionarios.length;
-                const ativos = stats.ativos || funcionarios.filter(f => (f.status || '').toLowerCase() === 'ativo').length;
+                const total = stats.total || funcionários.length;
+                const ativos = stats.ativos || funcionários.filter(f => (f.status || '').toLowerCase() === 'ativo').length;
                 const aniv = stats.aniversariantes || 0;
                 document.getElementById('total-funcionários').textContent = ativos;
                 document.getElementById('count-folha').textContent = ativos;
                 document.getElementById('count-aniversariantes').textContent = aniv;
 
                 // Colaboradores com mais tempo de casa
-                renderTopColaboradores(funcionarios);
+                renderTopColaboradores(funcionários);
                 // Aniversariantes do mês
-                renderAniversariantes(funcionarios);
+                renderAniversariantes(funcionários);
             } catch (err) {
                 console.error('Erro ao carregar dados do dashboard:', err);
             }
         }
 
-        function renderTopColaboradores(funcionarios) {
+        function renderTopColaboradores(funcionários) {
             const container = document.getElementById('top-colaboradores');
             if (!container) return;
-            const ativos = funcionarios.filter(f => (f.status || '').toLowerCase() === 'ativo' && f.data_admissao);
+            const ativos = funcionários.filter(f => (f.status || '').toLowerCase() === 'ativo' && f.data_admissao);
             const agora = new Date();
             ativos.sort((a, b) => new Date(a.data_admissao) - new Date(b.data_admissao));
             const top3 = ativos.slice(0, 3);
@@ -755,12 +755,12 @@ Equipe de Recursos Humanos
             }).join('');
         }
 
-        function renderAniversariantes(funcionarios) {
+        function renderAniversariantes(funcionários) {
             const container = document.getElementById('aniversariantes-list');
             if (!container) return;
             const mesAtual = new Date().getMonth() + 1;
             const meses = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-            const aniversariantes = funcionarios.filter(f => {
+            const aniversariantes = funcionários.filter(f => {
                 if (!f.data_nascimento) return false;
                 const mes = new Date(f.data_nascimento).getMonth() + 1;
                 return mes === mesAtual;
@@ -820,8 +820,8 @@ Equipe de Recursos Humanos
                 }
             } catch (e) { console.log('Atividades API indisponível:', e); }
             // Fallback: gerar a partir dos funcionários carregados
-            if (_dashFuncionarios.length > 0) {
-                const recentes = _dashFuncionarios.filter(f => f.data_admissao).sort((a, b) => new Date(b.data_admissao) - new Date(a.data_admissao)).slice(0, 3);
+            if (_dashFuncionários.length > 0) {
+                const recentes = _dashFuncionários.filter(f => f.data_admissao).sort((a, b) => new Date(b.data_admissao) - new Date(a.data_admissao)).slice(0, 3);
                 container.innerHTML = recentes.map(f => `<div class="activity-item">
                     <div class="activity-icon success"><i class="fas fa-user-plus"></i></div>
                     <div class="activity-content">
@@ -853,7 +853,7 @@ Equipe de Recursos Humanos
         // Funções dos Modals - Definir como globais
         window.openNovoFuncionárioModal = function() {
             console.log('Abrindo modal de novo funcionário...');
-            const modal = document.getElementById('novoFuncionarioModal');
+            const modal = document.getElementById('novoFuncionárioModal');
             if (modal) {
                 modal.classList.add('show');
                 document.body.style.overflow = 'hidden';
@@ -863,13 +863,13 @@ Equipe de Recursos Humanos
             }
         };
 
-        window.closeNovoFuncionarioModal = function() {
+        window.closeNovoFuncionárioModal = function() {
             console.log('Fechando modal de novo funcionário...');
-            const modal = document.getElementById('novoFuncionarioModal');
+            const modal = document.getElementById('novoFuncionárioModal');
             if (modal) {
                 modal.classList.remove('show');
                 document.body.style.overflow = 'auto';
-                const form = document.getElementById('novoFuncionarioForm');
+                const form = document.getElementById('novoFuncionárioForm');
                 if (form) form.reset();
             }
         };
@@ -902,7 +902,7 @@ Equipe de Recursos Humanos
         // Fechar modals com tecla Escape
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
-                closeNovoFuncionarioModal();
+                closeNovoFuncionárioModal();
                 closeGerarHoleritesModal();
             }
         });
@@ -916,7 +916,7 @@ Equipe de Recursos Humanos
         }
 
         // Carregar lista de funcionários
-        async function carregarFuncionarios() {
+        async function carregarFuncionários() {
             try {
                 const response = await fetch('/api/rh/funcionarios?limit=500', {
                     headers: rhUiCommon.getAuthHeaders(),
@@ -926,8 +926,8 @@ Equipe de Recursos Humanos
                     const payload = await response.json();
                     const funcionários = Array.isArray(payload)
                         ? payload
-                        : (payload.funcionários || payload.data || []);
-                    const select = document.getElementById('filtro_funcionário');
+                        : (payload.funcionarios || payload.data || []);
+                    const select = document.getElementById('filtro_funcionario');
                     select.innerHTML = '<option value="">Selecione o funcionário...</option>';
                     
                     funcionários.forEach(func => {
@@ -939,25 +939,25 @@ Equipe de Recursos Humanos
                 }
             } catch (error) {
                 console.log('Erro ao carregar funcionários:', error);
-                document.getElementById('filtro_funcionário').innerHTML = '<option value="">Erro ao carregar funcionários</option>';
+                document.getElementById('filtro_funcionario').innerHTML = '<option value="">Erro ao carregar funcionários</option>';
             }
         }
 
         // Controlar visibilidade dos campos baseado no tipo de geração
         function controlarCamposFiltro() {
-            const tipoGeracao = document.getElementById('tipo_geracao').value;
+            const tipoGeração = document.getElementById('tipo_geracao').value;
             const depGroup = document.getElementById('departamento_group');
-            const funcGroup = document.getElementById('funcionário_group');
+            const funcGroup = document.getElementById('funcionario_group');
             
-            depGroup.style.display = tipoGeracao === 'departamento' ? 'block' : 'none';
-            funcGroup.style.display = tipoGeracao === 'funcionário' ? 'block' : 'none';
+            depGroup.style.display = tipoGeração === 'departamento' ? 'block' : 'none';
+            funcGroup.style.display = tipoGeração === 'funcionário' ? 'block' : 'none';
             
             // Limpar campos no utilizados
-            if (tipoGeracao !== 'departamento') {
+            if (tipoGeração !== 'departamento') {
                 document.getElementById('filtro_departamento').value = '';
             }
-            if (tipoGeracao !== 'funcionário') {
-                document.getElementById('filtro_funcionário').value = '';
+            if (tipoGeração !== 'funcionário') {
+                document.getElementById('filtro_funcionario').value = '';
             }
 
             calcularPreview();
@@ -1080,8 +1080,8 @@ Equipe de Recursos Humanos
         }
 
         // Salvar funcionário no banco de dados
-        async function salvarFuncionario() {
-            const form = document.getElementById('novoFuncionarioForm');
+        async function salvarFuncionário() {
+            const form = document.getElementById('novoFuncionárioForm');
             const formData = new FormData(form);
             
             // Validar campos obrigatórios
@@ -1157,10 +1157,10 @@ Equipe de Recursos Humanos
             console.log('Inicializando dashboard...');
             
             // Verificar se os modais existem
-            const modalFuncionario = document.getElementById('novoFuncionarioModal');
+            const modalFuncionário = document.getElementById('novoFuncionárioModal');
             const modalHolerites = document.getElementById('gerarHoleritesModal');
             
-            if (!modalFuncionario) {
+            if (!modalFuncionário) {
                 console.error('Modal de funcionário não encontrado!');
             } else {
                 console.log('Modal de funcionário encontrado ✓');
@@ -1173,20 +1173,20 @@ Equipe de Recursos Humanos
             }
             
             // Garantir que os modais estejam ocultos inicialmente
-            if (modalFuncionario) modalFuncionario.classList.remove('show');
+            if (modalFuncionário) modalFuncionário.classList.remove('show');
             if (modalHolerites) modalHolerites.classList.remove('show');
 
             // Verificar se os botes existem e adicionar event listeners alternativos
-            const btnFuncionario = document.getElementById('btnNovoFuncionario');
+            const btnFuncionário = document.getElementById('btnNovoFuncionário');
             const btnHolerites = document.getElementById('btnGerarHolerites');
 
-            if (btnFuncionario) {
+            if (btnFuncionário) {
                 console.log('Botão Novo Funcionário encontrado ✓');
                 // Adicionar event listener alternativo
-                btnFuncionario.addEventListener('click', function(e) {
+                btnFuncionário.addEventListener('click', function(e) {
                     e.preventDefault();
                     console.log('Clique detectado no boto Novo Funcionário');
-                    window.openNovoFuncionarioModal();
+                    window.openNovoFuncionárioModal();
                 });
             } else {
                 console.warn('Botão Novo Funcionário não encontrado!');
@@ -1238,9 +1238,9 @@ Equipe de Recursos Humanos
             }
 
             // Event listeners para o modal de holerites
-            const tipoGeracaoSelect = document.getElementById('tipo_geracao');
-            if (tipoGeracaoSelect) {
-                tipoGeracaoSelect.addEventListener('change', controlarCamposFiltro);
+            const tipoGeraçãoSelect = document.getElementById('tipo_geracao');
+            if (tipoGeraçãoSelect) {
+                tipoGeraçãoSelect.addEventListener('change', controlarCamposFiltro);
             }
 
             const formatoSaidaSelect = document.getElementById('formato_saida');
@@ -1260,7 +1260,7 @@ Equipe de Recursos Humanos
             // Fechar modals com ESC
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape') {
-                    closeNovoFuncionarioModal();
+                    closeNovoFuncionárioModal();
                     closeGerarHoleritesModal();
                 }
             });
@@ -1273,21 +1273,21 @@ Equipe de Recursos Humanos
             
             // Validar campos obrigatórios
             const competencia = document.getElementById('competencia').value;
-            const tipoGeracao = document.getElementById('tipo_geracao').value;
+            const tipoGeração = document.getElementById('tipo_geracao').value;
             const formatoSaida = document.getElementById('formato_saida').value;
             
-            if (!competencia || !tipoGeracao || !formatoSaida) {
+            if (!competencia || !tipoGeração || !formatoSaida) {
                 showToast('Por favor, preencha todos os campos obrigatórios.', 'warning');
                 return;
             }
 
             // Validar filtros ESPECÍFICOS
-            if (tipoGeracao === 'departamento' && !document.getElementById('filtro_departamento').value) {
+            if (tipoGeração === 'departamento' && !document.getElementById('filtro_departamento').value) {
                 showToast('Por favor, selecione um departamento.', 'warning');
                 return;
             }
             
-            if (tipoGeracao === 'funcionário' && !document.getElementById('filtro_funcionário').value) {
+            if (tipoGeração === 'funcionário' && !document.getElementById('filtro_funcionario').value) {
                 showToast('Por favor, selecione um funcionário.', 'warning');
                 return;
             }

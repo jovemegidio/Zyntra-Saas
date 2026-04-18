@@ -924,10 +924,10 @@
                             </div>
                         </div>
                         <div class="tab-pane-conta" id="tab-cr-departamentos">
-                            <div class="empty-state-conta"><span>=\(</span><p>Ainda nao foi informada nenhuma distribuicao por departamentos para esta conta.</p><a href="#" class="link-acao" onclick="event.preventDefault()">Clique aqui para fazer a distribuicao agora.</a></div>
+                            <div class="empty-state-conta"><span>=\(</span><p>Ainda não foi informada nenhuma distribuição por departamentos para esta conta.</p><a href="#" class="link-acao" onclick="event.preventDefault()">Clique aqui para fazer a distribuição agora.</a></div>
                         </div>
                         <div class="tab-pane-conta" id="tab-cr-repeticao">
-                            <div class="empty-state-conta"><span>=\(</span><p>Ainda nao foi informada nenhuma repeticao para esta conta.</p><a href="#" class="link-acao" onclick="event.preventDefault()">Clique aqui para incluir repeticoes agora.</a></div>
+                            <div class="empty-state-conta"><span>=\(</span><p>Ainda não foi informada nenhuma repetição para esta conta.</p><a href="#" class="link-acao" onclick="event.preventDefault()">Clique aqui para incluir repetições agora.</a></div>
                         </div>
                         <div class="tab-pane-conta" id="tab-cr-recebimentos">
                             <div class="recebimentos-layout">
@@ -950,7 +950,7 @@
                             </div>
                         </div>
                         <div class="tab-pane-conta" id="tab-cr-integracao">
-                            <div class="empty-state-conta"><span>&#128533;</span><p>Ainda nao temos suporte para integracao bancaria CNAB para esta conta.</p></div>
+                            <div class="empty-state-conta"><span>&#128533;</span><p>Ainda não temos suporte para integração bancária CNAB para esta conta.</p></div>
                         </div>
                         <div class="tab-pane-conta" id="tab-cr-diversos">
                             <div class="form-row-conta">
@@ -1474,7 +1474,7 @@
 
         async function enviarCobrancas() {
             var pendentes = contas.filter(function(c){ return c.status === 'pendente' || c.status === 'vencido'; });
-            if (pendentes.length === 0) { showToast('Nao ha contas pendentes para cobranca', 'warning'); return; }
+            if (pendentes.length === 0) { showToast('Não há contas pendentes para cobrança', 'warning'); return; }
             if (!confirm('Enviar cobranca para '+pendentes.length+' conta(s)?')) return;
             try {
                 var ids = pendentes.map(function(c){return c.id;});
@@ -1516,7 +1516,7 @@
         function editarContaFromView() { }
         function receberContaFromView() { }
         function exportarExcel() {
-            if(contas.length===0){showToast('Nao ha dados para exportar','warning');return;}
+            if(contas.length===0){showToast('Não há dados para exportar','warning');return;}
             var csvSafe=function(s){if(typeof s!=='string')return String(s==null?'':s);var v=s.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g,'');if(/^[=+\-@\t\r]/.test(v))v="'"+v;return v;};
             var headers=['Empresa','NFe','Parcela','Cliente','CNPJ','Emissao','Vencimento','Categoria','Conta Corrente','Documento','Boleto','Vendedor','Projeto','Valor','PIS','COFINS','CSLL','IR','ISS','INSS','Valor Liquido','Recebido','A Receber','Situacao','Portador','Status','Dias','Observacoes'];
             var linhas=contas.map(function(c){return [

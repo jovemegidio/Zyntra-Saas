@@ -64,15 +64,15 @@
             <nav class="sidebar-nav">
                 <a href="index.html" class="sidebar-btn" title="Dashboard"><i class="fas fa-chart-pie"></i></a>
                 <a href="consultar.html" class="sidebar-btn active" title="Consultar NFe"><i class="fas fa-search"></i></a>
-                <a href="relatorios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
+                <a href="relatórios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
                 <a href="eventos.html" class="sidebar-btn" title="Eventos"><i class="fas fa-history"></i></a>
-                <a href="inutilizacao.html" class="sidebar-btn" title="Inutilização"><i class="fas fa-ban"></i></a>
+                <a href="inutilização.html" class="sidebar-btn" title="Inutilização"><i class="fas fa-ban"></i></a>
                 <a href="regua.html" class="sidebar-btn" title="Régua Cobrança"><i class="fas fa-bell"></i></a>
                 <a href="pix.html" class="sidebar-btn" title="PIX"><i class="fas fa-qrcode"></i></a>
                 <a href="logistica.html" class="sidebar-btn" title="Logística & Expedição"><i class="fas fa-truck"></i></a>
             </nav>
             <div class="sidebar-bottom">
-                <button class="sidebar-btn" title="Configurações" onclick="abrirModalConfiguracoes()"><i class="fas fa-cog"></i></button>
+                <button class="sidebar-btn" title="Configurações" onclick="abrirModalConfigurações()"><i class="fas fa-cog"></i></button>
             </div>
         </aside>
         <main class="main-area">
@@ -246,7 +246,7 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Email do Destinatério *</label>
+                    <label>Email do Destinatário *</label>
                     <input type="email" class="form-control" id="emailDestinatario" placeholder="exemplo@email.com">
                 </div>
                 <div class="form-group">
@@ -281,7 +281,7 @@
             sidebar.classList.toggle('open');
             overlay.classList.toggle('active');
         }
-        function toggleNotificacoes() {}
+        function toggleNotificações() {}
 
         // == Avatar map ==
         const avatarNameMap = {
@@ -348,7 +348,7 @@
 
         // == Filter and display ==
         function filtrarEExibir() {
-            const numero = document.getElementById('filtroNumero').value.trim().toLowerCase();
+            const número = document.getElementById('filtroNúmero').value.trim().toLowerCase();
             const serie = document.getElementById('filtroSerie').value.trim();
             const chave = document.getElementById('filtroChave').value.trim();
             const cliente = document.getElementById('filtroCliente').value.trim().toLowerCase();
@@ -357,7 +357,7 @@
             const status = document.getElementById('filtroStatus').value;
 
             let filtradas = nfesCarregadas.filter(nfe => {
-                if (numero && !(nfe.numero||'').toLowerCase().includes(numero)) return false;
+                if (número && !(nfe.numero||'').toLowerCase().includes(número)) return false;
                 if (serie && (nfe.serie||'') !== serie) return false;
                 if (chave && !(nfe.chave||'').includes(chave)) return false;
                 if (cliente && !(nfe.cliente||nfe.destinatario||'').toLowerCase().includes(cliente)) return false;
@@ -386,7 +386,7 @@
                 const chaveEsc = escapeHtml(nfe.chave||'');
                 const nfeIdentificador = chaveEsc || String(nfe.id || '');
                 return `<tr>
-                    <td><strong>${escapeHtml(nfe.número||'-')}</strong></td>
+                    <td><strong>${escapeHtml(nfe.numero||'-')}</strong></td>
                     <td>${escapeHtml(nfe.serie||'1')}</td>
                     <td>${escapeHtml(nfe.cliente||nfe.destinatario||'-')}</td>
                     <td>${escapeHtml(dt)}</td>
@@ -566,7 +566,7 @@
         }
 
         function limparFiltros() {
-            document.getElementById('filtroNumero').value = '';
+            document.getElementById('filtroNúmero').value = '';
             document.getElementById('filtroSerie').value = '';
             document.getElementById('filtroChave').value = '';
             document.getElementById('filtroCliente').value = '';
@@ -582,7 +582,7 @@
             if (nfesCarregadas.length === 0) { showAlert('Nenhum dado para exportar', 'warning'); return; }
             let csv = 'Número;Série;Cliente;Data;Valor;Status\n';
             nfesCarregadas.forEach(nfe => {
-                csv += `${nfe.número||''};${nfe.serie||''};${nfe.cliente||''};${nfe.dataEmissao||''};${nfe.valor||0};${nfe.status||''}\n`;
+                csv += `${nfe.numero||''};${nfe.serie||''};${nfe.cliente||''};${nfe.dataEmissao||''};${nfe.valor||0};${nfe.status||''}\n`;
             });
             const blob = new Blob(['\uFEFF' + csv], { type:'text/csv;charset=utf-8' });
             const a = document.createElement('a');
@@ -592,7 +592,7 @@
         }
 
         // == Modal placeholder ==
-        function abrirModalConfiguracoes() {
+        function abrirModalConfigurações() {
             showAlert('Configurações é Em desenvolvimento', 'info');
         }
 
@@ -613,7 +613,7 @@
     <script src="/js/mobile-auto-enhance.js?v=20260325" defer></script>
 
     <!-- Chat Widget BOB AI -->
-    <script src="/chat/widget.js?v=20260325" defer></script>
+    <script src="/chat/widget.js?v=20260418" defer></script>
 
     <!-- Enterprise Shared -->
     <script src="/js/sidebar-click-animation.js?v=20260325"></script>

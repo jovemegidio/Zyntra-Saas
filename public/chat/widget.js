@@ -251,9 +251,12 @@
 
   // ==================== TOOLTIP ====================
   function initTooltip() {
-    $('afw-tooltip-close').addEventListener('click', (e) => {
+    const closeBtn = $('afw-tooltip-close');
+    if (!closeBtn) return;
+    closeBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      $('afw-tooltip').classList.add('hidden');
+      const tip = $('afw-tooltip');
+      if (tip) tip.classList.add('hidden');
     });
   }
 
@@ -742,9 +745,12 @@
       $('afw-emoji-picker').classList.add('hidden');
     });
 
-    $('afw-attach-file').addEventListener('click', () => { menu.classList.add('hidden'); $('afw-file-input').click(); });
-    $('afw-attach-photo').addEventListener('click', () => { menu.classList.add('hidden'); $('afw-photo-input').click(); });
-    $('afw-attach-screenshot').addEventListener('click', () => { menu.classList.add('hidden'); captureScreenshot(); });
+    const af = $('afw-attach-file');
+    if (af) af.addEventListener('click', () => { menu.classList.add('hidden'); const fi = $('afw-file-input'); if (fi) fi.click(); });
+    const ap = $('afw-attach-photo');
+    if (ap) ap.addEventListener('click', () => { menu.classList.add('hidden'); const pi = $('afw-photo-input'); if (pi) pi.click(); });
+    const as2 = $('afw-attach-screenshot');
+    if (as2) as2.addEventListener('click', () => { menu.classList.add('hidden'); captureScreenshot(); });
 
     document.addEventListener('click', (e) => {
       if (!menu.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
@@ -853,9 +859,11 @@
       grid.appendChild(s);
     });
 
-    $('afw-btn-emoji').addEventListener('click', (e) => {
+    const emojiBtn = $('afw-btn-emoji');
+    if (emojiBtn) emojiBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      $('afw-emoji-picker').classList.toggle('hidden');
+      const picker = $('afw-emoji-picker');
+      if (picker) picker.classList.toggle('hidden');
     });
 
     document.addEventListener('click', (e) => {

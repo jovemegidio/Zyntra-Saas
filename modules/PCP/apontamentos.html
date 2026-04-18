@@ -122,7 +122,7 @@
         }
         .op-item:hover { background: #f8fafc; }
         .op-item.selected { background: #dbeafe; }
-        .op-codigo { font-weight: 600; color: var(--primary-color); }
+        .op-código { font-weight: 600; color: var(--primary-color); }
         .op-produto { font-size: 14px; }
         .op-progresso { display: flex; align-items: center; gap: 8px; }
         .progress-bar {
@@ -145,7 +145,7 @@
             font-weight: 600;
         }
         .status-badge.ativa { background: #dbeafe; color: #3b82f6; }
-        .status-badge.em_produção { background: #fef3c7; color: #d97706; }
+        .status-badge.em_producao { background: #fef3c7; color: #d97706; }
         .status-badge.concluida { background: #dcfce7; color: #16a34a; }
         .status-badge.pendente { background: #f1f5f9; color: #64748b; }
 
@@ -354,7 +354,7 @@
                 <a href="ordens-producao.html" class="sidebar-btn" title="Ordens de Produção">
                     <i class="fas fa-clipboard-list"></i>
                 </a>
-                <a href="pages/gestao-producao.html" class="sidebar-btn" title="Gestão de Produção">
+                <a href="pages/Gestão-producao.html" class="sidebar-btn" title="Gestão de Produção">
                     <i class="fas fa-industry"></i>
                 </a>
                 <a href="pages/faturamento.html" class="sidebar-btn" title="Faturamento">
@@ -366,7 +366,7 @@
                 <a href="pages/qualidade.html" class="sidebar-btn" title="Qualidade">
                     <i class="fas fa-award"></i>
                 </a>
-                <a href="pages/relatorios.html" class="sidebar-btn" title="Relatórios">
+                <a href="pages/relatórios.html" class="sidebar-btn" title="Relatórios">
                     <i class="fas fa-chart-pie"></i>
                 </a>
             </nav>
@@ -614,27 +614,27 @@
                 </div>
 
                 <!-- Botões de Aão -->
-                <div class="acoes-timer" id="acoesTimer" style="display: none;">
-                    <button class="btn-acao pausar" id="btnPausar" onclick="pausarAtividade()">
+                <div class="ações-timer" id="acoesTimer" style="display: none;">
+                    <button class="btn-ação pausar" id="btnPausar" onclick="pausarAtividade()">
                         <i class="fas fa-pause"></i>
                         <span>PAUSAR</span>
                     </button>
-                    <button class="btn-acao finalizar" onclick="finalizarAtividade()">
+                    <button class="btn-ação finalizar" onclick="finalizarAtividade()">
                         <i class="fas fa-stop"></i>
                         <span>FINALIZAR</span>
                     </button>
                 </div>
 
                 <!-- Histórico do Dia -->
-                <div class="historico-section">
-                    <div class="historico-header">
+                <div class="histórico-section">
+                    <div class="histórico-header">
                         <h3><i class="fas fa-history"></i> Histórico de Hoje</h3>
-                        <div class="historico-resumo">
+                        <div class="histórico-resumo">
                             <span id="totalTempo">00:00:00</span>
                             <span class="resumo-label">Total trabalhado</span>
                         </div>
                     </div>
-                    <div class="historico-lista" id="históricoLista">
+                    <div class="histórico-lista" id="historicoLista">
                         <div class="empty-state-mini">
                             <i class="fas fa-clock"></i>
                             <p>Nenhum registro hoje</p>
@@ -781,7 +781,7 @@
             gap: 16px;
             margin-bottom: 24px;
         }
-        .btn-acao {
+        .btn-ação {
             display: flex;
             align-items: center;
             gap: 12px;
@@ -795,30 +795,30 @@
             text-transform: uppercase;
             letter-spacing: 1px;
         }
-        .btn-acao.pausar {
+        .btn-ação.pausar {
             background: linear-gradient(135deg, #f59e0b, #d97706);
             color: white;
             box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
         }
-        .btn-acao.pausar:hover {
+        .btn-ação.pausar:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5);
         }
-        .btn-acao.continuar {
+        .btn-ação.continuar {
             background: linear-gradient(135deg, #22c55e, #16a34a);
             color: white;
             box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4);
         }
-        .btn-acao.finalizar {
+        .btn-ação.finalizar {
             background: linear-gradient(135deg, #ef4444, #dc2626);
             color: white;
             box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
         }
-        .btn-acao.finalizar:hover {
+        .btn-ação.finalizar:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5);
         }
-        .btn-acao i {
+        .btn-ação i {
             font-size: 20px;
         }
 
@@ -899,7 +899,7 @@
             color: var(--text-secondary);
             margin-top: 2px;
         }
-        .historico-duracao {
+        .historico-duração {
             font-size: 18px;
             font-weight: 700;
             color: var(--text-primary);
@@ -935,7 +935,7 @@
             .timer-display-grande {
                 font-size: 48px;
             }
-            .btn-acao {
+            .btn-ação {
                 padding: 14px 24px;
                 font-size: 14px;
             }
@@ -1041,7 +1041,7 @@
             atualizarDataHoje();
             carregarHistoricoLocal();
             verificarAtividadeEmAndamento();
-            atualizarSaudacao();
+            atualizarSaudação();
         });
 
         function atualizarDataHoje() {
@@ -1054,7 +1054,7 @@
         }
 
         // Função para obter saudação baseada na hora
-        function getSaudacao() {
+        function getSaudação() {
             const hora = new Date().getHours();
             if (hora >= 5 && hora < 12) return 'Bom dia';
             if (hora >= 12 && hora < 18) return 'Boa tarde';
@@ -1127,9 +1127,9 @@
                     const primeiroNome = user.apelido || nome.split(' ')[0];
 
                     // Atualizar saudação e nome separadamente
-                    const saudacaoEl = document.getElementById('saudacao');
+                    const saudaçãoEl = document.getElementById('saudação');
                     const userNameEl = document.getElementById('userName');
-                    if (saudacaoEl) saudacaoEl.textContent = getSaudacao() + ',';
+                    if (saudaçãoEl) saudaçãoEl.textContent = getSaudação() + ',';
                     if (userNameEl) userNameEl.textContent = primeiroNome;
 
                     const avatarEl = document.getElementById('userAvatar');
@@ -1241,14 +1241,14 @@
         }
 
         // Saudação dinâmica
-        function atualizarSaudacao() {
+        function atualizarSaudação() {
             const hora = new Date().getHours();
-            let saudacao = 'Bom dia';
-            if (hora >= 12 && hora < 18) saudacao = 'Boa tarde';
-            else if (hora >= 18 || hora < 6) saudacao = 'Boa noite';
+            let saudação = 'Bom dia';
+            if (hora >= 12 && hora < 18) saudação = 'Boa tarde';
+            else if (hora >= 18 || hora < 6) saudação = 'Boa noite';
 
-            const el = document.getElementById('saudacao');
-            if (el) el.textContent = saudacao + ',';
+            const el = document.getElementById('saudação');
+            if (el) el.textContent = saudação + ',';
         }
 
         function iniciarAtividade(tipo, nome, cor) {
@@ -1280,14 +1280,14 @@
             });
 
             // Mostrar botões de ação
-            document.getElementById('acoesTimer').style.display = 'flex';
+            document.getElementById('açõesTimer').style.display = 'flex';
 
             // Mostrar seção de contexto (pedido + observações)
             document.getElementById('contextoApontamento').style.display = 'block';
 
             mostrarToast(`${nome} iniciado!`, 'success');
 
-            // === NOTIFICAÇÃO PUSH: Avisar todos os usuários PCP ===
+            // === NOTIFICAÇÁO PUSH: Avisar todos os usuários PCP ===
             notificarInicioPCP(tipo, nome);
         }
 
@@ -1299,11 +1299,11 @@
 
         // Enviar notificação push de início de atividade para o servidor
         async function notificarInicioPCP(tipo, nome) {
-            notificarAcaoPCP('iniciou', tipo, nome);
+            notificarAçãoPCP('iniciou', tipo, nome);
         }
 
         // Enviar notificação push genrica (início, pausa, retomada, finalização)
-        async function notificarAcaoPCP(ação, tipo, nome, duracao) {
+        async function notificarAçãoPCP(ação, tipo, nome, duração) {
             const headers = { 'Content-Type': 'application/json' };
             const operador = getOperadorNome();
             const body = {
@@ -1311,7 +1311,7 @@
                 nome_atividade: nome,
                 operador: operador,
                 ação: ação,
-                duracao: duracao || null
+                duração: duração || null
             };
 
             // Se offline, enfileirar
@@ -1375,11 +1375,11 @@
             // Atualizar botão pausar/continuar
             const btnPausar = document.getElementById('btnPausar');
             if (timerPausado) {
-                btnPausar.className = 'btn-acao continuar';
+                btnPausar.className = 'btn-ação continuar';
                 btnPausar.innerHTML = '<i class="fas fa-play"></i><span>CONTINUAR</span>';
                 btnPausar.onclick = continuarAtividade;
             } else {
-                btnPausar.className = 'btn-acao pausar';
+                btnPausar.className = 'btn-ação pausar';
                 btnPausar.innerHTML = '<i class="fas fa-pause"></i><span>PAUSAR</span>';
                 btnPausar.onclick = pausarAtividade;
             }
@@ -1415,7 +1415,7 @@
             mostrarToast('Atividade pausada', 'info');
             // Notificação push: atividade pausada
             if (atividadeAtual) {
-                notificarAcaoPCP('pausou', atividadeAtual.tipo, atividadeAtual.nome);
+                notificarAçãoPCP('pausou', atividadeAtual.tipo, atividadeAtual.nome);
             }
         }
 
@@ -1426,7 +1426,7 @@
             mostrarToast('Atividade retomada', 'success');
             // Notificação push: atividade retomada
             if (atividadeAtual) {
-                notificarAcaoPCP('retomou', atividadeAtual.tipo, atividadeAtual.nome);
+                notificarAçãoPCP('retomou', atividadeAtual.tipo, atividadeAtual.nome);
             }
         }
 
@@ -1439,9 +1439,9 @@
             }
             salvandoApontamento = true;
 
-            const pedidoNumero = document.getElementById('inputPedidoNumero')?.value?.trim() || '';
-            const produtoDescricao = document.getElementById('inputProdutoDescricao')?.value?.trim() || '';
-            const observacoes = document.getElementById('inputObservacoes')?.value?.trim() || '';
+            const pedidoNúmero = document.getElementById('inputPedidoNúmero')?.value?.trim() || '';
+            const produtoDescrição = document.getElementById('inputProdutoDescrição')?.value?.trim() || '';
+            const observações = document.getElementById('inputObservações')?.value?.trim() || '';
             const maquina = document.getElementById('inputMaquina')?.value?.trim() || '';
             const turno = document.getElementById('inputTurno')?.value || '';
             const qtdProduzida = parseFloat(document.getElementById('inputQtdProduzida')?.value) || 0;
@@ -1454,11 +1454,11 @@
                 cor: atividadeAtual.cor,
                 horaInicio: horaInicio.toISOString(),
                 horaFim: new Date().toISOString(),
-                duracao: timerSeconds,
+                duração: timerSeconds,
                 data: new Date().toISOString().split('T')[0],
-                pedido_numero: pedidoNumero,
-                produto_descricao: produtoDescricao,
-                observacoes: observacoes,
+                pedido_numero: pedidoNúmero,
+                produto_descricao: produtoDescrição,
+                observações: observações,
                 maquina: maquina,
                 turno: turno,
                 quantidade_produzida: qtdProduzida,
@@ -1467,8 +1467,8 @@
 
             // Adicionar ao histórico
             históricoHoje.unshift(registro);
-            salvarHistoricoLocal();
-            renderizarHistorico();
+            salvarHistóricoLocal();
+            renderizarHistórico();
 
             // Salvar no servidor
             salvarRegistroServidor(registro);
@@ -1476,9 +1476,9 @@
             // Resetar timer
             resetarTimer();
 
-            mostrarToast(`${registro.nome} finalizado! Duração: ${formatarDuracao(registro.duracao)}`, 'success');
+            mostrarToast(`${registro.nome} finalizado! Duração: ${formatarDuração(registro.duração)}`, 'success');
             // Notificação push: atividade finalizada com duração
-            notificarAcaoPCP('finalizou', registro.tipo, registro.nome, formatarDuracao(registro.duracao));
+            notificarAçãoPCP('finalizou', registro.tipo, registro.nome, formatarDuração(registro.duração));
         }
 
         function finalizarAtividadeAutomatica() {
@@ -1488,9 +1488,9 @@
             salvandoApontamento = true;
 
             // Capturar campos de contexto antes de perder a referência
-            const pedidoNumero = document.getElementById('inputPedidoNumero')?.value?.trim() || '';
-            const produtoDescricao = document.getElementById('inputProdutoDescricao')?.value?.trim() || '';
-            const observacoes = document.getElementById('inputObservacoes')?.value?.trim() || '';
+            const pedidoNúmero = document.getElementById('inputPedidoNúmero')?.value?.trim() || '';
+            const produtoDescrição = document.getElementById('inputProdutoDescrição')?.value?.trim() || '';
+            const observações = document.getElementById('inputObservações')?.value?.trim() || '';
             const maquina = document.getElementById('inputMaquina')?.value?.trim() || '';
             const turno = document.getElementById('inputTurno')?.value || '';
             const qtdProduzida = parseFloat(document.getElementById('inputQtdProduzida')?.value) || 0;
@@ -1503,11 +1503,11 @@
                 cor: atividadeAtual.cor,
                 horaInicio: horaInicio.toISOString(),
                 horaFim: new Date().toISOString(),
-                duracao: timerSeconds,
+                duração: timerSeconds,
                 data: new Date().toISOString().split('T')[0],
-                pedido_numero: pedidoNumero,
-                produto_descricao: produtoDescricao,
-                observacoes: observacoes,
+                pedido_numero: pedidoNúmero,
+                produto_descricao: produtoDescrição,
+                observações: observações,
                 maquina: maquina,
                 turno: turno,
                 quantidade_produzida: qtdProduzida,
@@ -1515,8 +1515,8 @@
             };
 
             históricoHoje.unshift(registro);
-            salvarHistoricoLocal();
-            renderizarHistorico();
+            salvarHistóricoLocal();
+            renderizarHistórico();
             salvarRegistroServidor(registro);
             salvandoApontamento = false;
         }
@@ -1538,12 +1538,12 @@
             atualizarUITimer();
 
             // Esconder botões e remover destaque
-            document.getElementById('acoesTimer').style.display = 'none';
+            document.getElementById('açõesTimer').style.display = 'none';
             document.getElementById('contextoApontamento').style.display = 'none';
             // Limpar campos de contexto
-            if (document.getElementById('inputPedidoNumero')) document.getElementById('inputPedidoNumero').value = '';
-            if (document.getElementById('inputProdutoDescricao')) document.getElementById('inputProdutoDescricao').value = '';
-            if (document.getElementById('inputObservacoes')) document.getElementById('inputObservacoes').value = '';
+            if (document.getElementById('inputPedidoNúmero')) document.getElementById('inputPedidoNúmero').value = '';
+            if (document.getElementById('inputProdutoDescrição')) document.getElementById('inputProdutoDescrição').value = '';
+            if (document.getElementById('inputObservações')) document.getElementById('inputObservações').value = '';
             if (document.getElementById('inputMaquina')) document.getElementById('inputMaquina').value = '';
             if (document.getElementById('inputTurno')) document.getElementById('inputTurno').value = '';
             if (document.getElementById('inputQtdProduzida')) document.getElementById('inputQtdProduzida').value = '';
@@ -1553,7 +1553,7 @@
                 card.classList.remove('ativo');
             });
 
-            renderizarHistorico();
+            renderizarHistórico();
         }
 
         function salvarAtividadeEmAndamento() {
@@ -1565,9 +1565,9 @@
                 timerSeconds,
                 timerPausado,
                 savedAt: new Date().toISOString(),
-                pedido_numero: document.getElementById('inputPedidoNumero')?.value?.trim() || '',
-                produto_descricao: document.getElementById('inputProdutoDescricao')?.value?.trim() || '',
-                observacoes: document.getElementById('inputObservacoes')?.value?.trim() || '',
+                pedido_numero: document.getElementById('inputPedidoNúmero')?.value?.trim() || '',
+                produto_descricao: document.getElementById('inputProdutoDescrição')?.value?.trim() || '',
+                observações: document.getElementById('inputObservações')?.value?.trim() || '',
                 maquina: document.getElementById('inputMaquina')?.value?.trim() || '',
                 turno: document.getElementById('inputTurno')?.value || '',
                 quantidade_produzida: parseFloat(document.getElementById('inputQtdProduzida')?.value) || 0,
@@ -1611,13 +1611,13 @@
                     }
                 });
 
-                document.getElementById('acoesTimer').style.display = 'flex';
+                document.getElementById('açõesTimer').style.display = 'flex';
                 document.getElementById('contextoApontamento').style.display = 'block';
 
                 // Restaurar campos de contexto se salvos
-                if (atividade.pedido_numero) document.getElementById('inputPedidoNumero').value = atividade.pedido_numero;
-                if (atividade.produto_descricao) document.getElementById('inputProdutoDescricao').value = atividade.produto_descricao;
-                if (atividade.observacoes) document.getElementById('inputObservacoes').value = atividade.observacoes;
+                if (atividade.pedido_numero) document.getElementById('inputPedidoNúmero').value = atividade.pedido_numero;
+                if (atividade.produto_descricao) document.getElementById('inputProdutoDescrição').value = atividade.produto_descricao;
+                if (atividade.observações) document.getElementById('inputObservações').value = atividade.observações;
                 if (atividade.maquina) document.getElementById('inputMaquina').value = atividade.maquina;
                 if (atividade.turno) document.getElementById('inputTurno').value = atividade.turno;
                 if (atividade.quantidade_produzida) document.getElementById('inputQtdProduzida').value = atividade.quantidade_produzida;
@@ -1627,17 +1627,17 @@
             }
         }
 
-        function salvarHistoricoLocal() {
-            localStorage.setItem('histórico_apontamentos_' + new Date().toISOString().split('T')[0], JSON.stringify(históricoHoje));
+        function salvarHistóricoLocal() {
+            localStorage.setItem('historico_apontamentos_' + new Date().toISOString().split('T')[0], JSON.stringify(históricoHoje));
         }
 
         function carregarHistoricoLocal() {
             const hoje = new Date().toISOString().split('T')[0];
-            const dados = localStorage.getItem('histórico_apontamentos_' + hoje);
+            const dados = localStorage.getItem('historico_apontamentos_' + hoje);
             if (dados) {
                 históricoHoje = JSON.parse(dados);
             }
-            renderizarHistorico();
+            renderizarHistórico();
 
             // Também carregar do servidor para ter dados completos
             carregarHistoricoServidor(hoje);
@@ -1665,18 +1665,18 @@
                                     cor: (coresAtividades[sa.tipo] || coresAtividades.outros).color,
                                     horaInicio: sa.data + 'T' + (sa.hora_inicio || '00:00') + ':00',
                                     horaFim: sa.data + 'T' + (sa.hora_fim || '00:00') + ':00',
-                                    duracao: sa.duracao || 0,
+                                    duração: sa.duração || 0,
                                     data: sa.data,
                                     pedido_numero: sa.pedido_numero || '',
                                     produto_descricao: sa.produto_descricao || '',
-                                    observacoes: sa.observacoes || ''
+                                    observações: sa.observações || ''
                                 });
                             }
                         });
                         // Ordenar por hora de início (mais recente primeiro)
                         históricoHoje.sort((a, b) => new Date(b.horaInicio) - new Date(a.horaInicio));
-                        salvarHistoricoLocal();
-                        renderizarHistorico();
+                        salvarHistóricoLocal();
+                        renderizarHistórico();
                     }
                 }
             } catch (e) {
@@ -1691,10 +1691,10 @@
                 nome_atividade: registro.nome,
                 hora_inicio: registro.horaInicio,
                 hora_fim: registro.horaFim,
-                duracao_segundos: registro.duracao,
+                duracao_segundos: registro.duração,
                 pedido_numero: registro.pedido_numero || '',
                 produto_descricao: registro.produto_descricao || '',
-                observacoes: registro.observacoes || '',
+                observações: registro.observações || '',
                 ordem_producao_id: registro.ordem_producao_id || null,
                 maquina: registro.maquina || '',
                 turno: registro.turno || '',
@@ -1754,7 +1754,7 @@
             return div.innerHTML;
         }
 
-        function renderizarHistorico() {
+        function renderizarHistórico() {
             const container = document.getElementById('históricoLista');
 
             if (!históricoHoje.length) {
@@ -1769,8 +1769,8 @@
             }
 
             // Calcular tempo total
-            const totalSegundos = históricoHoje.reduce((acc, r) => acc + r.duracao, 0);
-            document.getElementById('totalTempo').textContent = formatarDuracao(totalSegundos);
+            const totalSegundos = históricoHoje.reduce((acc, r) => acc + r.duração, 0);
+            document.getElementById('totalTempo').textContent = formatarDuração(totalSegundos);
 
             container.innerHTML = históricoHoje.map(registro => {
                 const cores = coresAtividades[registro.tipo] || coresAtividades.outros;
@@ -1778,26 +1778,26 @@
                 const fim = new Date(registro.horaFim);
 
                 return `
-                    <div class="historico-item">
-                        <div class="historico-icon" style="background: ${cores.bg}; color: ${cores.color};">
+                    <div class="histórico-item">
+                        <div class="histórico-icon" style="background: ${cores.bg}; color: ${cores.color};">
                             <i class="fas ${cores.icon}"></i>
                         </div>
-                        <div class="historico-info">
-                            <div class="historico-atividade">${escapeHtml(registro.nome)}</div>
-                            <div class="historico-horarios">
+                        <div class="histórico-info">
+                            <div class="histórico-atividade">${escapeHtml(registro.nome)}</div>
+                            <div class="histórico-horarios">
                                 ${inicio.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'})} -
                                 ${fim.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'})}
                                 ${registro.pedido_numero ? ` — <span style="color:#4338ca;font-weight:600;">Pedido #${escapeHtml(String(registro.pedido_numero))}</span>` : ''}
                             </div>
-                            ${registro.observacoes ? `<div style="font-size:11px;color:#94a3b8;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:250px;" title="${escapeHtml(registro.observacoes)}">${escapeHtml(registro.observacoes)}</div>` : ''}
+                            ${registro.observações ? `<div style="font-size:11px;color:#94a3b8;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:250px;" title="${escapeHtml(registro.observações)}">${escapeHtml(registro.observações)}</div>` : ''}
                         </div>
-                        <div class="historico-duracao">${formatarDuracao(registro.duracao)}</div>
+                        <div class="histórico-duração">${formatarDuração(registro.duração)}</div>
                     </div>
                 `;
             }).join('');
         }
 
-        function formatarDuracao(segundos) {
+        function formatarDuração(segundos) {
             const h = Math.floor(segundos / 3600);
             const m = Math.floor((segundos % 3600) / 60);
             const s = segundos % 60;

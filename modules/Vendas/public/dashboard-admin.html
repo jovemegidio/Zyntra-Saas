@@ -641,16 +641,16 @@
         }
 
         /* ==================== RELATÓRIO DE LIGAÇÕES ==================== */
-        .ligacoes-stats {
+        .ligações-stats {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 16px;
             margin-bottom: 24px;
         }
         @media (max-width: 768px) {
-            .ligacoes-stats { grid-template-columns: repeat(2, 1fr); }
+            .ligações-stats { grid-template-columns: repeat(2, 1fr); }
         }
-        .ligacoes-filtros {
+        .ligações-filtros {
             display: flex;
             gap: 8px;
             flex-wrap: wrap;
@@ -661,8 +661,8 @@
             padding: 10px 14px;
             margin-bottom: 16px;
         }
-        .ligacoes-filtros select,
-        .ligacoes-filtros input[type="date"] {
+        .ligações-filtros select,
+        .ligações-filtros input[type="date"] {
             padding: 7px 10px;
             border: 1px solid #d1d5db;
             border-radius: 6px;
@@ -672,13 +672,13 @@
             background: white;
             transition: border-color 0.2s;
         }
-        .ligacoes-filtros select:focus,
-        .ligacoes-filtros input[type="date"]:focus {
+        .ligações-filtros select:focus,
+        .ligações-filtros input[type="date"]:focus {
             outline: none;
             border-color: var(--primary-orange);
             box-shadow: 0 0 0 2px rgba(255,107,0,0.12);
         }
-        .ligacoes-filtros .btn-filtrar {
+        .ligações-filtros .btn-filtrar {
             padding: 7px 18px;
             background: var(--primary-orange);
             color: white;
@@ -692,24 +692,24 @@
             align-items: center;
             gap: 6px;
         }
-        .ligacoes-filtros .btn-filtrar:hover { opacity: 0.88; transform: translateY(-1px); }
-        .ligacoes-table-wrapper {
+        .ligações-filtros .btn-filtrar:hover { opacity: 0.88; transform: translateY(-1px); }
+        .ligações-table-wrapper {
             border: 1px solid #e5e7eb;
             border-radius: 10px;
             overflow: hidden;
         }
-        .ligacoes-table {
+        .ligações-table {
             width: 100%;
             border-collapse: collapse;
         }
-        .ligacoes-table th,
-        .ligacoes-table td {
+        .ligações-table th,
+        .ligações-table td {
             padding: 10px 14px;
             text-align: left;
             border-bottom: 1px solid #f1f5f9;
             font-size: 13px;
         }
-        .ligacoes-table th {
+        .ligações-table th {
             font-size: 11px;
             font-weight: 700;
             color: #64748b;
@@ -718,9 +718,9 @@
             letter-spacing: 0.3px;
             border-bottom: 2px solid #e2e8f0;
         }
-        .ligacoes-table tr:last-child td { border-bottom: none; }
-        .ligacoes-table tbody tr { transition: background 0.15s; }
-        .ligacoes-table tbody tr:hover { background: #f0f7ff; }
+        .ligações-table tr:last-child td { border-bottom: none; }
+        .ligações-table tbody tr { transition: background 0.15s; }
+        .ligações-table tbody tr:hover { background: #f0f7ff; }
         .badge-tipo {
             display: inline-flex;
             align-items: center;
@@ -733,7 +733,7 @@
         .badge-tipo.saida { background: #dbeafe; color: #1d4ed8; }
         .badge-tipo.entrada { background: #dcfce7; color: #166534; }
         .badge-tipo.perdida { background: #fee2e2; color: #991b1b; }
-        .badge-duracao {
+        .badge-duração {
             font-variant-numeric: tabular-nums;
             color: #374151;
         }
@@ -785,14 +785,14 @@
             text-align: right;
             font-weight: 700;
         }
-        .ligacoes-api-msg {
+        .ligações-api-msg {
             text-align: center;
             padding: 40px 20px;
             color: #94a3b8;
         }
-        .ligacoes-api-msg i { font-size: 40px; margin-bottom: 12px; }
-        .ligacoes-api-msg p { margin-top: 8px; font-size: 14px; }
-        .ligacoes-api-msg .btn-config {
+        .ligações-api-msg i { font-size: 40px; margin-bottom: 12px; }
+        .ligações-api-msg p { margin-top: 8px; font-size: 14px; }
+        .ligações-api-msg .btn-config {
             display: inline-flex;
             align-items: center;
             gap: 6px;
@@ -805,7 +805,7 @@
             font-size: 13px;
             cursor: default;
         }
-        .ligacoes-online-badge {
+        .ligações-online-badge {
             display: inline-flex;
             align-items: center;
             gap: 6px;
@@ -816,7 +816,7 @@
             font-size: 12px;
             font-weight: 600;
         }
-        .ligacoes-online-badge .pulse {
+        .ligações-online-badge .pulse {
             width: 8px;
             height: 8px;
             background: #22c55e;
@@ -828,7 +828,7 @@
             50% { opacity: 0.5; transform: scale(1.3); }
         }
         /* Paginação da tabela de ligações */
-        .ligacoes-pagination {
+        .ligações-pagination {
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -838,15 +838,15 @@
             font-size: 13px;
             color: #64748b;
         }
-        .ligacoes-pagination .pag-info {
+        .ligações-pagination .pag-info {
             font-weight: 500;
         }
-        .ligacoes-pagination .pag-buttons {
+        .ligações-pagination .pag-buttons {
             display: flex;
             gap: 4px;
             align-items: center;
         }
-        .ligacoes-pagination .pag-buttons button {
+        .ligações-pagination .pag-buttons button {
             padding: 5px 10px;
             border: 1px solid #d1d5db;
             border-radius: 6px;
@@ -858,21 +858,21 @@
             transition: all 0.15s;
             min-width: 32px;
         }
-        .ligacoes-pagination .pag-buttons button:hover:not(:disabled) {
+        .ligações-pagination .pag-buttons button:hover:not(:disabled) {
             background: var(--primary-orange);
             color: white;
             border-color: var(--primary-orange);
         }
-        .ligacoes-pagination .pag-buttons button:disabled {
+        .ligações-pagination .pag-buttons button:disabled {
             opacity: 0.4;
             cursor: default;
         }
-        .ligacoes-pagination .pag-buttons button.active {
+        .ligações-pagination .pag-buttons button.active {
             background: var(--primary-orange);
             color: white;
             border-color: var(--primary-orange);
         }
-        .ligacoes-pagination .pag-buttons .pag-ellipsis {
+        .ligações-pagination .pag-buttons .pag-ellipsis {
             padding: 0 4px;
             color: #94a3b8;
         }
@@ -1117,7 +1117,7 @@
                         <p>Acompanhe a performance da equipe e gerencie metas</p>
                     </div>
                     <div class="page-header-actions">
-                        <button class="btn-secondary" onclick="exportarRelatorio()">
+                        <button class="btn-secondary" onclick="exportarRelatório()">
                             <i class="fas fa-file-export"></i> Exportar
                         </button>
                         <button class="btn-primary" onclick="abrirModalMeta()">
@@ -1307,18 +1307,18 @@
                         <div class="section-header">
                             <h3><i class="fas fa-phone-alt"></i> Relatório de Ligações (Ramais)</h3>
                             <div style="display: flex; align-items: center; gap: 10px;">
-                                <span class="ligacoes-online-badge" id="ligacoesOnlineBadge" style="display:none;">
+                                <span class="ligações-online-badge" id="ligacoesOnlineBadge" style="display:none;">
                                     <span class="pulse"></span>
                                     <span id="ligacoesOnlineCount">0</span> em andamento
                                 </span>
-                                <button class="btn-secondary" onclick="carregarLigacoes()" title="Atualizar">
+                                <button class="btn-secondary" onclick="carregarLigações()" title="Atualizar">
                                     <i class="fas fa-sync-alt"></i>
                                 </button>
                             </div>
                         </div>
                         <div class="section-content" id="ligacoesContent">
                             <!-- Carregado via JS -->
-                            <div class="ligacoes-api-msg" id="ligacoesLoading">
+                            <div class="ligações-api-msg" id="ligacoesLoading">
                                 <i class="fas fa-spinner fa-spin"></i>
                                 <p>Verificando conexão com PABX...</p>
                             </div>
@@ -1574,7 +1574,7 @@
             }
 
             // Usar o mês selecionado como período
-            const periodoStr = mesMeta; // Já está no formato YYYY-MM
+            const períodoStr = mesMeta; // Já está no formato YYYY-MM
 
             try {
                 let response;
@@ -1587,7 +1587,7 @@
                         credentials: 'include',
                         body: JSON.stringify({
                             vendedor_id: parseInt(vendedor),
-                            periodo: periodoStr,
+                            período: períodoStr,
                             tipo: 'mensal',
                             valor_meta: valor
                         })
@@ -1599,7 +1599,7 @@
                         headers: { 'Content-Type': 'application/json' },
                         credentials: 'include',
                         body: JSON.stringify({
-                            periodo: periodoStr,
+                            período: períodoStr,
                             valor_meta_padrao: valor
                         })
                     });
@@ -1627,12 +1627,12 @@
             vendedorGroup.style.display = this.value === 'vendedor' ? 'block' : 'none';
         });
 
-        async function exportarRelatorio() {
+        async function exportarRelatório() {
             try {
                 const agora = new Date();
                 const inicioMes = new Date(agora.getFullYear(), agora.getMonth(), 1).toISOString().split('T')[0];
                 const fimMes = new Date(agora.getFullYear(), agora.getMonth() + 1, 0).toISOString().split('T')[0];
-                const periodoAtual = agora.toISOString().substring(0, 7);
+                const períodoAtual = agora.toISOString().substring(0, 7);
 
                 const [pedidosRes, rankingRes] = await Promise.all([
                     fetch(`/api/vendas/pedidos?data_inicio=${inicioMes}&data_fim=${fimMes}`, { credentials: 'include' }),
@@ -1681,7 +1681,7 @@
                 const url = URL.createObjectURL(blob);
                 const link = document.createElement('a');
                 link.href = url;
-                link.download = `relatório-vendas-${periodoAtual}.csv`;
+                link.download = `relatório-vendas-${períodoAtual}.csv`;
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
@@ -1728,7 +1728,7 @@
             try {
                 // Buscar dados de vendas do mês atual
                 const agora = new Date();
-                const periodoAtual = agora.toISOString().substring(0, 7); // YYYY-MM
+                const períodoAtual = agora.toISOString().substring(0, 7); // YYYY-MM
                 const inicioMes = new Date(agora.getFullYear(), agora.getMonth(), 1).toISOString().split('T')[0];
                 const fimMes = new Date(agora.getFullYear(), agora.getMonth() + 1, 0).toISOString().split('T')[0];
 
@@ -1874,7 +1874,7 @@
         }
 
         // Atualização automática a cada 30 segundos
-        function iniciarAtualizacaoAutomatica() {
+        function iniciarAtualizaçãoAutomatica() {
             // Carregar dados iniciais
             carregarMetas();
             carregarUltimasVendas();
@@ -1920,18 +1920,18 @@
                 const totalVendasAtual = pedidosAtual.reduce((sum, p) => sum + (parseFloat(p.valor) || parseFloat(p.valor_total) || 0), 0);
                 const totalVendasAnterior = pedidosAnterior.reduce((sum, p) => sum + (parseFloat(p.valor) || parseFloat(p.valor_total) || 0), 0);
                 
-                const variacaoVendas = totalVendasAnterior > 0 
+                const variaçãoVendas = totalVendasAnterior > 0 
                     ? ((totalVendasAtual - totalVendasAnterior) / totalVendasAnterior * 100).toFixed(0)
                     : 100;
 
                 document.getElementById('totalVendasMes').textContent = formatarMoeda(totalVendasAtual);
                 
                 const trendVendas = document.getElementById('trendVendasMes');
-                const isUpVendas = parseFloat(variacaoVendas) >= 0;
+                const isUpVendas = parseFloat(variaçãoVendas) >= 0;
                 trendVendas.className = `metric-trend ${isUpVendas ? 'up' : 'down'}`;
                 trendVendas.innerHTML = `
                     <i class="fas fa-arrow-${isUpVendas ? 'up' : 'down'}"></i>
-                    <span>${Math.abs(variacaoVendas)}% vs mês anterior</span>
+                    <span>${Math.abs(variaçãoVendas)}% vs mês anterior</span>
                 `;
 
                 // 2. META DA EQUIPE
@@ -1961,18 +1961,18 @@
                 const totalPedidosAtual = pedidosAtual.length;
                 const totalPedidosAnterior = pedidosAnterior.length;
                 
-                const variacaoPedidos = totalPedidosAnterior > 0 
+                const variaçãoPedidos = totalPedidosAnterior > 0 
                     ? ((totalPedidosAtual - totalPedidosAnterior) / totalPedidosAnterior * 100).toFixed(0)
                     : 100;
 
                 document.getElementById('pedidosMes').textContent = totalPedidosAtual;
                 
                 const trendPedidos = document.getElementById('trendPedidosMes');
-                const isUpPedidos = parseFloat(variacaoPedidos) >= 0;
+                const isUpPedidos = parseFloat(variaçãoPedidos) >= 0;
                 trendPedidos.className = `metric-trend ${isUpPedidos ? 'up' : 'down'}`;
                 trendPedidos.innerHTML = `
                     <i class="fas fa-arrow-${isUpPedidos ? 'up' : 'down'}"></i>
-                    <span>${Math.abs(variacaoPedidos)}% vs mês anterior</span>
+                    <span>${Math.abs(variaçãoPedidos)}% vs mês anterior</span>
                 `;
 
                 // 5. VENDEDORES ABAIXO DA META
@@ -2015,7 +2015,7 @@
             
             // Atualizar título com mês/ano atual
             const agora = new Date();
-            const periodoAtual = agora.toISOString().substring(0, 7);
+            const períodoAtual = agora.toISOString().substring(0, 7);
             const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
                           'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
             if (mesAnoEl) {
@@ -2114,7 +2114,7 @@
         // RELATÓRIO DE LIGAÇÕES (RAMAIS)
         // ====================================
 
-        function formatarDuracao(segundos) {
+        function formatarDuração(segundos) {
             const s = parseInt(segundos) || 0;
             if (s < 60) return `${s}s`;
             const min = Math.floor(s / 60);
@@ -2125,15 +2125,15 @@
             return `${hrs}h ${remMin > 0 ? remMin + 'm' : ''}`.trim();
         }
 
-        function formatarDuracaoTabela(segundos) {
+        function formatarDuraçãoTabela(segundos) {
             const s = parseInt(segundos) || 0;
             const min = Math.floor(s / 60);
             const sec = s % 60;
             return `${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
         }
 
-        async function carregarLigacoes() {
-            const container = document.getElementById('ligacoesContent');
+        async function carregarLigações() {
+            const container = document.getElementById('ligaçõesContent');
             
             try {
                 // Verificar status da API
@@ -2142,7 +2142,7 @@
                 
                 if (!status.configurado) {
                     container.innerHTML = `
-                        <div class="ligacoes-api-msg">
+                        <div class="ligações-api-msg">
                             <i class="fas fa-plug" style="color: #cbd5e1;"></i>
                             <p><strong>PABX não configurado</strong></p>
                             <p style="font-size: 13px; margin-top: 4px;">As credenciais de acesso ao painel CDR não estão configuradas no servidor.</p>
@@ -2157,7 +2157,7 @@
                 
                 // Mostrar layout com filtros
                 container.innerHTML = `
-                    <div class="ligacoes-filtros" id="ligacoesFiltros">
+                    <div class="ligações-filtros" id="ligacoesFiltros">
                         <input type="date" id="ligDataInicio" value="${semanaAtras}" title="Data início">
                         <input type="date" id="ligDataFim" value="${hoje}" title="Data fim">
                         <select id="ligTipo" title="Tipo de chamada">
@@ -2168,41 +2168,41 @@
                         <select id="ligRamal" title="Ramal">
                             <option value="">Todos os ramais</option>
                         </select>
-                        <button class="btn-filtrar" onclick="filtrarLigacoes()">
+                        <button class="btn-filtrar" onclick="filtrarLigações()">
                             <i class="fas fa-search"></i> Filtrar
                         </button>
                     </div>
                     
-                    <div class="ligacoes-stats" id="ligacoesStats">
-                        <div class="ligacao-metric-card card-total">
+                    <div class="ligações-stats" id="ligacoesStats">
+                        <div class="ligação-metric-card card-total">
                             <div class="metric-icon-wrapper"><i class="fas fa-phone"></i></div>
                             <div class="metric-content">
                                 <div class="stat-number" id="ligTotal">-</div>
                                 <div class="metric-label">Total de Ligações</div>
                             </div>
                         </div>
-                        <div class="ligacao-metric-card card-realizadas">
+                        <div class="ligação-metric-card card-realizadas">
                             <div class="metric-icon-wrapper"><i class="fas fa-phone-alt"></i></div>
                             <div class="metric-content">
                                 <div class="stat-number" id="ligRealizadas">-</div>
                                 <div class="metric-label">Realizadas</div>
                             </div>
                         </div>
-                        <div class="ligacao-metric-card card-atendidas">
+                        <div class="ligação-metric-card card-atendidas">
                             <div class="metric-icon-wrapper"><i class="fas fa-check-circle"></i></div>
                             <div class="metric-content">
                                 <div class="stat-number" id="ligAtendidas">-</div>
                                 <div class="metric-label">Atendidas</div>
                             </div>
                         </div>
-                        <div class="ligacao-metric-card card-duracao">
+                        <div class="ligação-metric-card card-duração">
                             <div class="metric-icon-wrapper"><i class="fas fa-clock"></i></div>
                             <div class="metric-content">
                                 <div class="stat-number" id="ligDuracao">-</div>
                                 <div class="metric-label">Duração Total</div>
                             </div>
                         </div>
-                        <div class="ligacao-metric-card card-meta">
+                        <div class="ligação-metric-card card-meta">
                             <div class="metric-icon-wrapper"><i class="fas fa-bullseye"></i></div>
                             <div class="metric-content">
                                 <div class="stat-number" id="ligMetaPercent">-</div>
@@ -2214,8 +2214,8 @@
                     
                     <div id="ligacoesRamaisChart" style="margin-bottom: 20px;"></div>
                     
-                    <div class="ligacoes-table-wrapper">
-                        <table class="ligacoes-table">
+                    <div class="ligações-table-wrapper">
+                        <table class="ligações-table">
                             <thead>
                                 <tr>
                                     <th>Data/Hora</th>
@@ -2234,7 +2234,7 @@
                                 </tr>
                             </tbody>
                         </table>
-                        <div class="ligacoes-pagination" id="ligacoesPagination" style="display:none;"></div>
+                        <div class="ligações-pagination" id="ligacoesPagination" style="display:none;"></div>
                     </div>
                 `;
                 
@@ -2242,7 +2242,7 @@
                 carregarRamaisSelect();
                 
                 // Carregar dados iniciais
-                filtrarLigacoes();
+                filtrarLigações();
                 
                 // Verificar chamadas online
                 verificarChamadasOnline();
@@ -2250,7 +2250,7 @@
             } catch (error) {
                 console.error('Erro ao carregar ligações:', error);
                 container.innerHTML = `
-                    <div class="ligacoes-api-msg">
+                    <div class="ligações-api-msg">
                         <i class="fas fa-exclamation-triangle" style="color: #f59e0b;"></i>
                         <p><strong>Erro ao conectar com PABX</strong></p>
                         <p style="font-size: 13px;">${error.message}</p>
@@ -2298,13 +2298,13 @@
             }
         }
 
-        async function filtrarLigacoes() {
+        async function filtrarLigações() {
             const dataInicio = document.getElementById('ligDataInicio')?.value || '';
             const dataFim = document.getElementById('ligDataFim')?.value || '';
             const tipo = document.getElementById('ligTipo')?.value || '';
             const ramal = document.getElementById('ligRamal')?.value || '';
             
-            const tbody = document.getElementById('ligacoesTableBody');
+            const tbody = document.getElementById('ligaçõesTableBody');
             if (tbody) {
                 tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:#94a3b8;"><i class="fas fa-spinner fa-spin"></i> Carregando...</td></tr>';
             }
@@ -2329,12 +2329,12 @@
                 const elTotal = document.getElementById('ligTotal');
                 const elRealizadas = document.getElementById('ligRealizadas');
                 const elAtendidas = document.getElementById('ligAtendidas');
-                const elDuracao = document.getElementById('ligDuracao');
+                const elDuração = document.getElementById('ligDuração');
                 
                 if (elTotal) elTotal.textContent = resumo.total || 0;
                 if (elRealizadas) elRealizadas.textContent = resumo.realizadas || 0;
                 if (elAtendidas) elAtendidas.textContent = resumo.atendidas || 0;
-                if (elDuracao) elDuracao.textContent = formatarDuracao(resumo.duracao_total || 0);
+                if (elDuração) elDuração.textContent = formatarDuração(resumo.duracao_total || 0);
                 
                 // Meta do Mês (ligações)
                 const metaLig = resumo.meta_mensal || 0;
@@ -2382,7 +2382,7 @@
         }
 
         function renderizarGraficoRamais(porRamal) {
-            const container = document.getElementById('ligacoesRamaisChart');
+            const container = document.getElementById('ligaçõesRamaisChart');
             if (!container) return;
             
             const ramais = Object.entries(porRamal);
@@ -2423,19 +2423,19 @@
         }
 
         // Variáveis globais para paginação
-        let ligacoesPaginaAtual = 1;
+        let ligaçõesPaginaAtual = 1;
         const LIGACOES_POR_PAGINA = 10;
         let todasChamadas = [];
 
         function renderizarTabelaChamadas(chamadas) {
             todasChamadas = chamadas || [];
-            ligacoesPaginaAtual = 1;
+            ligaçõesPaginaAtual = 1;
             renderizarPagina();
         }
 
         function renderizarPagina() {
-            const tbody = document.getElementById('ligacoesTableBody');
-            const pagDiv = document.getElementById('ligacoesPagination');
+            const tbody = document.getElementById('ligaçõesTableBody');
+            const pagDiv = document.getElementById('ligaçõesPagination');
             if (!tbody) return;
             
             if (todasChamadas.length === 0) {
@@ -2452,8 +2452,8 @@
             }
             
             const totalPaginas = Math.ceil(todasChamadas.length / LIGACOES_POR_PAGINA);
-            if (ligacoesPaginaAtual > totalPaginas) ligacoesPaginaAtual = totalPaginas;
-            const inicio = (ligacoesPaginaAtual - 1) * LIGACOES_POR_PAGINA;
+            if (ligaçõesPaginaAtual > totalPaginas) ligaçõesPaginaAtual = totalPaginas;
+            const inicio = (ligaçõesPaginaAtual - 1) * LIGACOES_POR_PAGINA;
             const fim = Math.min(inicio + LIGACOES_POR_PAGINA, todasChamadas.length);
             const paginaChamadas = todasChamadas.slice(inicio, fim);
             
@@ -2464,12 +2464,12 @@
                 const mostrarNome = nomeOp !== ramalId;
                 const destino = c.destino || '-';
                 const cidade = c.cidade || '-';
-                const duracao = c.tempo || formatarDuracaoTabela(c.duracao || 0);
+                const duração = c.tempo || formatarDuraçãoTabela(c.duração || 0);
                 const valor = typeof c.valor === 'number' ? c.valor.toFixed(5).replace('.', ',') : (c.valor || '0,00');
                 
                 const valorFloat = typeof c.valor === 'number' ? c.valor : parseFloat((c.valor || '0').replace(',', '.'));
                 const valorClass = valorFloat > 0 ? 'color: #16a34a; font-weight: 600;' : 'color: #cbd5e1;';
-                const duracaoStyle = c.duracao > 0 ? 'color: #3b82f6; font-weight: 600;' : 'color: #ef4444; font-weight: 600;';
+                const duraçãoStyle = c.duração > 0 ? 'color: #3b82f6; font-weight: 600;' : 'color: #ef4444; font-weight: 600;';
                 
                 return `
                     <tr>
@@ -2480,7 +2480,7 @@
                         </td>
                         <td style="font-weight:500;">${destino}</td>
                         <td style="font-size:12px; color:#64748b; max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${cidade}</td>
-                        <td style="${duracaoStyle} white-space:nowrap;">${duracao}</td>
+                        <td style="${duraçãoStyle} white-space:nowrap;">${duração}</td>
                         <td style="${valorClass} white-space:nowrap;">${valor}</td>
                     </tr>
                 `;
@@ -2494,22 +2494,22 @@
                 } else {
                     pagDiv.style.display = 'flex';
                     let botoesHTML = '';
-                    botoesHTML += `<button onclick="irParaPagina(1)" ${ligacoesPaginaAtual === 1 ? 'disabled' : ''} title="Primeira"><i class="fas fa-angle-double-left"></i></button>`;
-                    botoesHTML += `<button onclick="irParaPagina(${ligacoesPaginaAtual - 1})" ${ligacoesPaginaAtual === 1 ? 'disabled' : ''} title="Anterior"><i class="fas fa-angle-left"></i></button>`;
+                    botoesHTML += `<button onclick="irParaPagina(1)" ${ligaçõesPaginaAtual === 1 ? 'disabled' : ''} title="Primeira"><i class="fas fa-angle-double-left"></i></button>`;
+                    botoesHTML += `<button onclick="irParaPagina(${ligaçõesPaginaAtual - 1})" ${ligaçõesPaginaAtual === 1 ? 'disabled' : ''} title="Anterior"><i class="fas fa-angle-left"></i></button>`;
                     
                     const maxBotoes = 5;
-                    let inicioBtn = Math.max(1, ligacoesPaginaAtual - Math.floor(maxBotoes / 2));
+                    let inicioBtn = Math.max(1, ligaçõesPaginaAtual - Math.floor(maxBotoes / 2));
                     let fimBtn = Math.min(totalPaginas, inicioBtn + maxBotoes - 1);
                     if (fimBtn - inicioBtn < maxBotoes - 1) inicioBtn = Math.max(1, fimBtn - maxBotoes + 1);
                     
                     if (inicioBtn > 1) botoesHTML += '<span class="pag-ellipsis">...</span>';
                     for (let i = inicioBtn; i <= fimBtn; i++) {
-                        botoesHTML += `<button onclick="irParaPagina(${i})" class="${i === ligacoesPaginaAtual ? 'active' : ''}">${i}</button>`;
+                        botoesHTML += `<button onclick="irParaPagina(${i})" class="${i === ligaçõesPaginaAtual ? 'active' : ''}">${i}</button>`;
                     }
                     if (fimBtn < totalPaginas) botoesHTML += '<span class="pag-ellipsis">...</span>';
                     
-                    botoesHTML += `<button onclick="irParaPagina(${ligacoesPaginaAtual + 1})" ${ligacoesPaginaAtual === totalPaginas ? 'disabled' : ''} title="Próxima"><i class="fas fa-angle-right"></i></button>`;
-                    botoesHTML += `<button onclick="irParaPagina(${totalPaginas})" ${ligacoesPaginaAtual === totalPaginas ? 'disabled' : ''} title="Última"><i class="fas fa-angle-double-right"></i></button>`;
+                    botoesHTML += `<button onclick="irParaPagina(${ligaçõesPaginaAtual + 1})" ${ligaçõesPaginaAtual === totalPaginas ? 'disabled' : ''} title="Próxima"><i class="fas fa-angle-right"></i></button>`;
+                    botoesHTML += `<button onclick="irParaPagina(${totalPaginas})" ${ligaçõesPaginaAtual === totalPaginas ? 'disabled' : ''} title="Última"><i class="fas fa-angle-double-right"></i></button>`;
                     
                     pagDiv.innerHTML = `
                         <span class="pag-info">Exibindo ${inicio + 1} a ${fim} de ${todasChamadas.length} registros</span>
@@ -2522,10 +2522,10 @@
         function irParaPagina(pagina) {
             const totalPaginas = Math.ceil(todasChamadas.length / LIGACOES_POR_PAGINA);
             if (pagina < 1 || pagina > totalPaginas) return;
-            ligacoesPaginaAtual = pagina;
+            ligaçõesPaginaAtual = pagina;
             renderizarPagina();
             // Scroll para o topo da tabela
-            const tableEl = document.querySelector('.ligacoes-table-wrapper');
+            const tableEl = document.querySelector('.ligações-table-wrapper');
             if (tableEl) tableEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
@@ -2534,8 +2534,8 @@
                 const res = await fetch('/api/vendas/ligacoes/online', { credentials: 'include' });
                 if (res.ok) {
                     const data = await res.json();
-                    const badge = document.getElementById('ligacoesOnlineBadge');
-                    const count = document.getElementById('ligacoesOnlineCount');
+                    const badge = document.getElementById('ligaçõesOnlineBadge');
+                    const count = document.getElementById('ligaçõesOnlineCount');
                     if (badge && data.total > 0) {
                         badge.style.display = 'inline-flex';
                         if (count) count.textContent = data.total;
@@ -2553,9 +2553,9 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             carregarUsuario();
-            iniciarAtualizacaoAutomatica();
+            iniciarAtualizaçãoAutomatica();
             // Carregar relatório de ligações
-            setTimeout(carregarLigacoes, 1500);
+            setTimeout(carregarLigações, 1500);
         });
         
         // Toggle Sidebar Mobile
@@ -2577,7 +2577,7 @@
     <script src="/js/auth-unified.js?v=20260301"></script>
     <script src="/js/mobile-auto-enhance.js?v=20260202" defer></script>
     <!-- Chat Widget BOB AI - DESATIVADO -->
-    <!-- <script src="/chat/widget.js?v=20260218" defer></script> -->
+    <!-- <script src="/chat/widget.js?v=20260418" defer></script> -->
     <script src="/js/user-dropdown.js?v=20260223" defer></script>
 
     <!-- Sidebar Click Animation -->

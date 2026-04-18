@@ -686,7 +686,7 @@
             font-size: 11px; font-weight: 600; text-transform: capitalize;
         }
         .status-badge.orcamento { background: #fef3c7; color: #92400e; }
-        .status-badge.analise, .status-badge.analise-credito { background: #e0e7ff; color: #3730a3; }
+        .status-badge.análise, .status-badge.análise-crédito { background: #e0e7ff; color: #3730a3; }
         .status-badge.aprovado, .status-badge.pedido-aprovado { background: #dcfce7; color: #166534; }
         .status-badge.faturar, .status-badge.faturado { background: #dbeafe; color: #1e40af; }
         .status-badge.entregue { background: #d1fae5; color: #065f46; }
@@ -923,12 +923,12 @@
                     <!-- Tabs -->
                     <div class="modal-omie-tabs">
                         <button class="modal-omie-tab" onclick="trocarAbaCliente('resumo')">Resumo</button>
-                        <button class="modal-omie-tab active" onclick="trocarAbaCliente('endereco')">Endereço</button>
+                        <button class="modal-omie-tab active" onclick="trocarAbaCliente('endereço')">Endereço</button>
                         <button class="modal-omie-tab" onclick="trocarAbaCliente('telefones')">Telefones e E-mail</button>
-                        <button class="modal-omie-tab" onclick="trocarAbaCliente('bancarios')">Dados Bancários</button>
+                        <button class="modal-omie-tab" onclick="trocarAbaCliente('bancários')">Dados Bancários</button>
                         <button class="modal-omie-tab" onclick="trocarAbaCliente('inscricoes')">Inscrições, CNAE e Outros</button>
                         <button class="modal-omie-tab" onclick="trocarAbaCliente('caracteristicas')">Características</button>
-                        <button class="modal-omie-tab" onclick="trocarAbaCliente('recomendacoes')">Recomendações</button>
+                        <button class="modal-omie-tab" onclick="trocarAbaCliente('recomendações')">Recomendações</button>
                         <button class="modal-omie-tab" onclick="trocarAbaCliente('faturamento')">Faturamento e Crédito</button>
                         <button class="modal-omie-tab" onclick="trocarAbaCliente('mapa')">Mapa</button>
                     </div>
@@ -948,7 +948,7 @@
                         </div>
                         
                         <!-- Aba Endereço -->
-                        <div class="modal-omie-tab-pane active" id="tab-endereco">
+                        <div class="modal-omie-tab-pane active" id="tab-endereço">
                             <div class="omie-form-grid cols-2">
                                 <div class="omie-form-group span-2">
                                     <label>Endereço <span class="omie-link" onclick="buscarEndereco()" style="margin-left: 8px;"><i class="fas fa-search"></i> Pesquisar Endereço</span></label>
@@ -1084,7 +1084,7 @@
                         </div>
 
                         <!-- Aba Dados Bancários -->
-                        <div class="modal-omie-tab-pane" id="tab-bancarios">
+                        <div class="modal-omie-tab-pane" id="tab-bancários">
                             <p style="margin-bottom: 16px; color: #374151;"><strong>Preencha aqui os dados bancários</strong> deste cliente, fornecedor ou funcionário</p>
                             <p style="margin-bottom: 24px; color: #6b7280; font-size: 13px;">Eles poderão ser utilizados para realizar a integração dos pagamentos automaticamente com o seu banco</p>
                             
@@ -1284,7 +1284,7 @@
                     
                     <div class="modal-omie-action-divider"></div>
                     
-                    <button class="modal-omie-action" onclick="abrirHistoricoFinanceiro()">
+                    <button class="modal-omie-action" onclick="abrirHistóricoFinanceiro()">
                         <i class="fas fa-wallet"></i> Histórico Financeiro
                     </button>
                     <button class="modal-omie-action" onclick="abrirEmailsEnviados()">
@@ -1297,7 +1297,7 @@
                     
                     <div class="modal-omie-action-divider"></div>
                     
-                    <button class="modal-omie-action" onclick="abrirHistoricoAlteracoes()">
+                    <button class="modal-omie-action" onclick="abrirHistóricoAlterações()">
                         <i class="fas fa-clipboard-list"></i> Histórico de Alterações
                     </button>
                     <button class="modal-omie-action" onclick="abrirTarefasCliente()">
@@ -1320,7 +1320,7 @@
             <div class="sidebar-panel-header">
                 <div class="panel-icon green"><i class="fas fa-wallet"></i></div>
                 <div><h3>Histórico Financeiro</h3><p id="panelFinanceiroSubtitle">Resumo financeiro do cliente</p></div>
-                <button class="panel-close" onclick="fecharPanel('panelHistoricoFinanceiro')"><i class="fas fa-times"></i></button>
+                <button class="panel-close" onclick="fecharPanel('panelHistóricoFinanceiro')"><i class="fas fa-times"></i></button>
             </div>
             <div class="sidebar-panel-body" id="panelFinanceiroBody">
                 <div class="resumo-loading"><div class="loading-spinner"></div><div class="resumo-loading-text">Carregando...</div></div>
@@ -1371,7 +1371,7 @@
             <div class="sidebar-panel-header">
                 <div class="panel-icon blue"><i class="fas fa-clipboard-list"></i></div>
                 <div><h3>Histórico de Alterações</h3><p>Registro de modificações no cadastro</p></div>
-                <button class="panel-close" onclick="fecharPanel('panelHistoricoAlteracoes')"><i class="fas fa-times"></i></button>
+                <button class="panel-close" onclick="fecharPanel('panelHistóricoAlterações')"><i class="fas fa-times"></i></button>
             </div>
             <div class="sidebar-panel-body" id="panelHistoricoBody">
                 <div class="resumo-loading"><div class="loading-spinner"></div><div class="resumo-loading-text">Carregando...</div></div>
@@ -1453,9 +1453,9 @@
 
         function formatarTelefone(telefone) {
             if (!telefone) return '-';
-            const numeros = telefone.replace(/\D/g, '');
-            if (numeros.length === 11) return numeros.replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3');
-            if (numeros.length === 10) return numeros.replace(/^(\d{2})(\d{4})(\d{4})$/, '($1) $2-$3');
+            const números = telefone.replace(/\D/g, '');
+            if (números.length === 11) return números.replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3');
+            if (números.length === 10) return números.replace(/^(\d{2})(\d{4})(\d{4})$/, '($1) $2-$3');
             return telefone;
         }
 
@@ -1500,10 +1500,10 @@
                     </td>
                 </tr>
             `).join('');
-            atualizarPaginacao(inicio, fim);
+            atualizarPaginação(inicio, fim);
         }
 
-        function atualizarPaginacao(inicio, fim) {
+        function atualizarPaginação(inicio, fim) {
             const container = document.getElementById('paginationContainer');
             if (!container) return;
             container.style.display = 'flex';
@@ -1548,13 +1548,13 @@
         }
 
         function atualizarMapa() {
-            const endereco = document.getElementById('clienteEndereco').value;
-            const numero = document.getElementById('clienteNumero').value;
+            const endereço = document.getElementById('clienteEndereco').value;
+            const número = document.getElementById('clienteNúmero').value;
             const cidade = document.getElementById('clienteCidade').value;
             const uf = document.getElementById('clienteUF').value;
             
-            if (endereco && cidade) {
-                const enderecoCompleto = encodeURIComponent(`${endereco}, ${numero} - ${cidade}, ${uf}`);
+            if (endereço && cidade) {
+                const enderecoCompleto = encodeURIComponent(`${endereço}, ${número} - ${cidade}, ${uf}`);
                 const iframe = document.getElementById('mapaFrame');
                 iframe.src = `https://www.google.com/maps?q=${enderecoCompleto}&output=embed`;
             }
@@ -1571,13 +1571,13 @@
             // Reset resumo
             resumoCarregado = false;
             // Limpar todos os campos
-            ['clienteId','clienteNome','clienteFantasia','clienteCnpj','clienteDDD','clienteTelefone','clienteContato','clienteEndereco','clienteNumero','clienteComplemento','clienteBairro','clienteCidade','clienteUF','clienteCep','clienteEmail','clienteWebsite','clienteIE','clienteIM','clienteLimiteCredito'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+            ['clienteId','clienteNome','clienteFantasia','clienteCnpj','clienteDDD','clienteTelefone','clienteContato','clienteEndereco','clienteNúmero','clienteComplemento','clienteBairro','clienteCidade','clienteUF','clienteCep','clienteEmail','clienteWebsite','clienteIE','clienteIM','clienteLimiteCredito'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
             
             // Reset avatar
             atualizarAvatarModal('Novo Cliente');
             
             // Voltar para primeira aba
-            trocarAbaCliente('endereco');
+            trocarAbaCliente('endereço');
             
             // Mostrar modal
             document.getElementById('modalCliente').classList.add('active');
@@ -1623,8 +1623,8 @@
             document.getElementById('clienteContato').value = cliente.contato || '';
             
             // Aba Endereço
-            document.getElementById('clienteEndereco').value = cliente.endereco || cliente.logradouro || '';
-            document.getElementById('clienteNumero').value = cliente.numero || '';
+            document.getElementById('clienteEndereco').value = cliente.endereço || cliente.logradouro || '';
+            document.getElementById('clienteNúmero').value = cliente.numero || '';
             document.getElementById('clienteComplemento').value = cliente.complemento || '';
             document.getElementById('clienteBairro').value = cliente.bairro || '';
             document.getElementById('clienteCidade').value = cliente.cidade || '';
@@ -1674,7 +1674,7 @@
             if (document.getElementById('clienteVendedorPadrao')) document.getElementById('clienteVendedorPadrao').value = cliente.vendedor_padrao || '';
             if (document.getElementById('clienteEmailNFe')) document.getElementById('clienteEmailNFe').value = cliente.email_nfe || '';
             if (document.getElementById('clienteTransportadora')) document.getElementById('clienteTransportadora').value = cliente.transportadora || '';
-            if (document.getElementById('clienteCodigoReceita')) document.getElementById('clienteCodigoReceita').value = cliente.codigo_receita || '';
+            if (document.getElementById('clienteCódigoReceita')) document.getElementById('clienteCódigoReceita').value = cliente.codigo_receita || '';
             
             // Faturamento
             if (document.getElementById('clienteBloquearFaturamento')) document.getElementById('clienteBloquearFaturamento').checked = !!cliente.bloquear_faturamento;
@@ -1689,7 +1689,7 @@
             carregarStatusMonitoramento(cliente.id);
             
             // Voltar para primeira aba
-            trocarAbaCliente('endereco');
+            trocarAbaCliente('endereço');
             
             // Mostrar modal
             document.getElementById('modalCliente').classList.add('active');
@@ -1782,8 +1782,8 @@
                 celular: celularCompleto,
                 email: document.getElementById('clienteEmail').value.trim(),
                 website: document.getElementById('clienteWebsite').value.trim(),
-                endereco: document.getElementById('clienteEndereco').value.trim(),
-                numero: document.getElementById('clienteNumero').value.trim(),
+                endereço: document.getElementById('clienteEndereco').value.trim(),
+                número: document.getElementById('clienteNúmero').value.trim(),
                 complemento: document.getElementById('clienteComplemento').value.trim(),
                 bairro: document.getElementById('clienteBairro').value.trim(),
                 cidade: document.getElementById('clienteCidade').value.trim(),
@@ -1816,7 +1816,7 @@
                 vendedor_padrao: (document.getElementById('clienteVendedorPadrao') || {}).value || '',
                 email_nfe: (document.getElementById('clienteEmailNFe') || {}).value || '',
                 transportadora: (document.getElementById('clienteTransportadora') || {}).value || '',
-                codigo_receita: (document.getElementById('clienteCodigoReceita') || {}).value || '',
+                codigo_receita: (document.getElementById('clienteCódigoReceita') || {}).value || '',
                 // Faturamento
                 bloquear_faturamento: (document.getElementById('clienteBloquearFaturamento') || {}).checked ? 1 : 0,
                 // Tags
@@ -1942,13 +1942,13 @@
             if (/^(\d)\1+$/.test(cnpj)) return false; // Rejeita CNPJs com todos os dígitos iguais
             
             let tamanho = cnpj.length - 2;
-            let numeros = cnpj.substring(0, tamanho);
+            let números = cnpj.substring(0, tamanho);
             let digitos = cnpj.substring(tamanho);
             let soma = 0;
             let pos = tamanho - 7;
             
             for (let i = tamanho; i >= 1; i--) {
-                soma += numeros.charAt(tamanho - i) * pos--;
+                soma += números.charAt(tamanho - i) * pos--;
                 if (pos < 2) pos = 9;
             }
             
@@ -1956,12 +1956,12 @@
             if (resultado != digitos.charAt(0)) return false;
             
             tamanho = tamanho + 1;
-            numeros = cnpj.substring(0, tamanho);
+            números = cnpj.substring(0, tamanho);
             soma = 0;
             pos = tamanho - 7;
             
             for (let i = tamanho; i >= 1; i--) {
-                soma += numeros.charAt(tamanho - i) * pos--;
+                soma += números.charAt(tamanho - i) * pos--;
                 if (pos < 2) pos = 9;
             }
             
@@ -2037,7 +2037,7 @@
                 const cep = (data.cep || '').toString().replace(/[.\-]/g, '');
                 document.getElementById('clienteCep').value = cep;
                 document.getElementById('clienteEndereco').value = data.logradouro || '';
-                document.getElementById('clienteNumero').value = data.numero || '';
+                document.getElementById('clienteNúmero').value = data.numero || '';
                 document.getElementById('clienteComplemento').value = data.complemento || '';
                 document.getElementById('clienteBairro').value = data.bairro || '';
                 document.getElementById('clienteCidade').value = data.municipio || '';
@@ -2117,7 +2117,7 @@
         
         function getStatusLabel(status) {
             const labels = {
-                'orcamento': 'Orçamento', 'analise': 'Análise', 'analise-credito': 'Análise Crédito',
+                'orcamento': 'Orçamento', 'análise': 'Análise', 'análise-crédito': 'Análise Crédito',
                 'aprovado': 'Aprovado', 'pedido-aprovado': 'Ped. Aprovado', 'faturar': 'Faturar',
                 'faturado': 'Faturado', 'entregue': 'Entregue', 'cancelado': 'Cancelado'
             };
@@ -2215,7 +2215,7 @@
                         </div>
                         <div class="resumo-card">
                             <div class="card-icon green"><i class="fas fa-file-invoice"></i></div>
-                            <div class="card-valor">${f.total_títulos}</div>
+                            <div class="card-valor">${f.total_titulos}</div>
                             <div class="card-label">Total de Títulos</div>
                         </div>
                     </div>
@@ -2315,11 +2315,11 @@
         }
 
         // === HISTÓRICO FINANCEIRO ===
-        async function abrirHistoricoFinanceiro() {
+        async function abrirHistóricoFinanceiro() {
             const id = document.getElementById('clienteId').value;
             if (!id) { mostrarToast('Salve o cliente antes de ver o histórico', 'error'); return; }
             
-            const panel = document.getElementById('panelHistoricoFinanceiro');
+            const panel = document.getElementById('panelHistóricoFinanceiro');
             const body = document.getElementById('panelFinanceiroBody');
             const nome = document.getElementById('clienteNome').value || 'Cliente';
             document.getElementById('panelFinanceiroSubtitle').textContent = nome;
@@ -2353,7 +2353,7 @@
                         </div>
                         <div class="resumo-card">
                             <div class="card-icon blue"><i class="fas fa-file-invoice-dollar"></i></div>
-                            <div class="card-valor">${f.total_títulos || 0}</div>
+                            <div class="card-valor">${f.total_titulos || 0}</div>
                             <div class="card-label">Total Títulos</div>
                         </div>
                     </div>
@@ -2441,12 +2441,12 @@
         }
 
         // === HISTÓRICO DE ALTERAÇÕES ===
-        async function abrirHistoricoAlteracoes() {
+        async function abrirHistóricoAlterações() {
             const id = document.getElementById('clienteId').value;
             if (!id) { mostrarToast('Salve o cliente primeiro', 'error'); return; }
             
-            const panel = document.getElementById('panelHistoricoAlteracoes');
-            const body = document.getElementById('panelHistoricoBody');
+            const panel = document.getElementById('panelHistóricoAlterações');
+            const body = document.getElementById('panelHistóricoBody');
             panel.classList.add('active');
             body.innerHTML = `<div class="resumo-loading"><div class="loading-spinner"></div><div class="resumo-loading-text">Carregando histórico...</div></div>`;
             
@@ -2454,16 +2454,16 @@
                 const response = await fetch(`/api/vendas/clientes/${id}/historico`, { credentials: 'include' });
                 if (!response.ok) throw new Error('Erro ao buscar histórico');
                 const data = await response.json();
-                const historico = data.historico || [];
+                const histórico = data.historico || [];
                 
-                if (historico.length === 0) {
+                if (histórico.length === 0) {
                     body.innerHTML = `<div class="sidebar-panel-empty"><i class="fas fa-clipboard-list"></i><h4>Nenhuma alteração registrada</h4><p>As alterações no cadastro deste cliente serão listadas aqui.</p></div>`;
                     return;
                 }
                 
-                body.innerHTML = `<div class="historico-timeline">${historico.map(h => `
-                    <div class="historico-item ${h.tipo || ''}">
-                        <div class="hist-data">${h.data_alteracao ? new Date(h.data_alteracao).toLocaleString('pt-BR') : '-'}</div>
+                body.innerHTML = `<div class="histórico-timeline">${histórico.map(h => `
+                    <div class="histórico-item ${h.tipo || ''}">
+                        <div class="hist-data">${h.data_alteração ? new Date(h.data_alteração).toLocaleString('pt-BR') : '-'}</div>
                         <div class="hist-desc">${h.descricao || 'Alteração registrada'}</div>
                         <div class="hist-user"><i class="fas fa-user" style="margin-right:4px"></i>${h.usuario || 'Sistema'}</div>
                     </div>
@@ -2680,7 +2680,7 @@
     <script src="/js/auth-unified.js?v=20260301"></script>
     <script src="/js/mobile-auto-enhance.js?v=20260202" defer></script>
     <!-- Chat Widget BOB AI - DESATIVADO -->
-    <!-- <script src="/chat/widget.js?v=20260218" defer></script> -->
+    <!-- <script src="/chat/widget.js?v=20260418" defer></script> -->
     <script src="/js/user-dropdown.js?v=20260223" defer></script>
 
     <!-- Sidebar Click Animation -->

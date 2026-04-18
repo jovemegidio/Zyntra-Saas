@@ -23,7 +23,7 @@ async function main() {
       console.log(JSON.stringify(f, null, 2));
     }
   } else {
-    console.log('Tatiane NAO encontrada em funcionarios');
+    console.log('Tatiane NÃO encontrada em funcionários');
   }
 
   // 3. Hellen - permissoes_modulos

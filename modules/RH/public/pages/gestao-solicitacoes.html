@@ -480,16 +480,16 @@
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel de Controle"><i class="fas fa-home"></i></a>
             <nav class="sidebar-nav">
                 <a href="../areaadm.html" class="sidebar-btn" title="Dashboard RH"><i class="fas fa-chart-pie"></i></a>
-                <a href="funcionarios.html" class="sidebar-btn" title="Funcionários"><i class="fas fa-users"></i></a>
+                <a href="funcionários.html" class="sidebar-btn" title="Funcionários"><i class="fas fa-users"></i></a>
                 <a href="../gestao-holerites.html" class="sidebar-btn" title="Gestão de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="folha.html" class="sidebar-btn" title="Folha de Pagamento"><i class="fas fa-money-check-alt"></i></a>
                 <a href="gestao-ponto.html" class="sidebar-btn" title="Gestão do Ponto"><i class="fas fa-clock"></i></a>
                 <a href="importar-ponto.html" class="sidebar-btn" title="Importar Ponto (Control iD)"><i class="fas fa-upload"></i></a>
-                <a href="gestao-solicitacoes.html" class="sidebar-btn active" title="Gestão de Solicitações"><i class="fas fa-tasks"></i></a>
+                <a href="gestao-solicitações.html" class="sidebar-btn active" title="Gestão de Solicitações"><i class="fas fa-tasks"></i></a>
                 <a href="calendario-rh.html" class="sidebar-btn" title="Calendário RH"><i class="fas fa-calendar-alt"></i></a>
             </nav>
             <div class="sidebar-bottom">
-                <a href="../funcionario.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-user"></i></a>
+                <a href="../funcionário.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-user"></i></a>
             </div>
         </aside>
 
@@ -527,7 +527,7 @@
                         </h1>
                         <p class="page-subtitle">Gerencie as Solicitações dos colaboradores</p>
                     </div>
-                    <button class="btn btn-primary" onclick="carregarSolicitacoes()">
+                    <button class="btn btn-primary" onclick="carregarSolicitações()">
                         <i class="fas fa-sync-alt"></i> Atualizar
                     </button>
                 </div>
@@ -597,7 +597,7 @@
                             <option value="urgente">Urgente</option>
                         </select>
                     </div>
-                    <button class="btn btn-primary" onclick="carregarSolicitacoes()">
+                    <button class="btn btn-primary" onclick="carregarSolicitações()">
                         <i class="fas fa-search"></i> Filtrar
                     </button>
                 </div>
@@ -669,7 +669,7 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline" onclick="fecharModalAprovar()">Cancelar</button>
-                <button class="btn btn-success" onclick="confirmarAprovacao()">
+                <button class="btn btn-success" onclick="confirmarAprovação()">
                     <i class="fas fa-check"></i> Confirmar Aprovao
                 </button>
             </div>
@@ -765,13 +765,13 @@
         }
 
         // Carregar Solicitações
-        async function carregarSolicitacoes() {
+        async function carregarSolicitações() {
             try {
                 const status = document.getElementById('filterStatus').value;
                 const tipo = document.getElementById('filterTipo').value;
                 const prioridade = document.getElementById('filterPrioridade').value;
 
-                let url = '/api/rh/solicitacoes/todas?';
+                let url = '/api/rh/solicitações/todas?';
                 if (status) url += `status=${encodeURIComponent(status)}&`;
                 if (tipo) url += `tipo=${encodeURIComponent(tipo)}&`;
                 if (prioridade) url += `prioridade=${encodeURIComponent(prioridade)}&`;
@@ -807,7 +807,7 @@
 
         // Renderizar tabela
         function renderizarTabela() {
-            const tbody = document.getElementById('tabelaSolicitacoes');
+            const tbody = document.getElementById('tabelaSolicitações');
             const empty = document.getElementById('emptyState');
 
             if (solicitações.length === 0) {
@@ -821,8 +821,8 @@
                 <tr>
                     <td><strong>#${s.id}</strong></td>
                     <td>
-                        <div style="font-weight: 500;">${escapeHtml(s.funcionário_nome || '-')}</div>
-                        <small style="color: #64748b;">${escapeHtml(s.funcionário_email || '')}</small>
+                        <div style="font-weight: 500;">${escapeHtml(s.funcionario_nome || '-')}</div>
+                        <small style="color: #64748b;">${escapeHtml(s.funcionario_email || '')}</small>
                     </td>
                     <td>${escapeHtml(s.tipo || '-')}</td>
                     <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(s.assunto || '-')}</td>
@@ -870,14 +870,14 @@
                         <div class="detail-icon"><i class="fas fa-user"></i></div>
                         <div class="detail-content">
                             <div class="detail-label">Colaborador</div>
-                            <div class="detail-value">${escapeHtml(solicitaçãoAtual.funcionário_nome || '-')}</div>
+                            <div class="detail-value">${escapeHtml(solicitaçãoAtual.funcionario_nome || '-')}</div>
                         </div>
                     </div>
                     <div class="detail-item">
                         <div class="detail-icon"><i class="fas fa-envelope"></i></div>
                         <div class="detail-content">
                             <div class="detail-label">Email</div>
-                            <div class="detail-value">${escapeHtml(solicitaçãoAtual.funcionário_email || '-')}</div>
+                            <div class="detail-value">${escapeHtml(solicitaçãoAtual.funcionario_email || '-')}</div>
                         </div>
                     </div>
                     <div class="detail-item">
@@ -925,7 +925,7 @@
                 </div>
                 <div class="detail-description">
                     <div class="detail-description-label"><i class="fas fa-align-left"></i> Descrição</div>
-                    <div class="detail-description-text">${escapeHtml(solicitaçãoAtual.descrição || 'Sem descrição')}</div>
+                    <div class="detail-description-text">${escapeHtml(solicitaçãoAtual.descricao || 'Sem descrição')}</div>
                 </div>
                 ${solicitaçãoAtual.resposta ? `
                 <div class="detail-description" style="background: #dcfce7; margin-top: 12px;">
@@ -978,13 +978,13 @@
         }
 
         // Confirmar aprovao
-        async function confirmarAprovacao() {
+        async function confirmarAprovação() {
             if (!solicitaçãoAtual) return;
 
             const resposta = document.getElementById('respostaAprovar').value;
 
             try {
-                const response = await fetch(`/api/rh/solicitacoes/${solicitaçãoAtual.id}/status`, { credentials: 'include', method: 'PUT',
+                const response = await fetch(`/api/rh/solicitacoes/${solicitacaoAtual.id}/status`, { credentials: 'include', method: 'PUT',
                     headers: getAuthHeaders(),
                     credentials: 'include',
                     body: JSON.stringify({ status: 'Aprovado', resposta })
@@ -995,7 +995,7 @@
                 showToast('success', 'Solicitação aprovada com sucesso!');
                 fecharModalAprovar();
                 fecharModal();
-                carregarSolicitacoes();
+                carregarSolicitações();
             } catch (error) {
                 showToast('error', 'Erro ao aprovar Solicitação');
             }
@@ -1023,7 +1023,7 @@
                 showToast('success', 'Solicitação rejeitada');
                 fecharModalRejeitar();
                 fecharModal();
-                carregarSolicitacoes();
+                carregarSolicitações();
             } catch (error) {
                 showToast('error', 'Erro ao rejeitar Solicitação');
             }
@@ -1064,10 +1064,10 @@
         // Inicializar
         document.addEventListener('DOMContentLoaded', () => {
             carregarUsuario();
-            carregarSolicitacoes();
+            carregarSolicitações();
 
             // Auto-refresh a cada 30s (sem socket.io para evitar erros de polling)
-            setInterval(() => carregarSolicitacoes(), 30000);
+            setInterval(() => carregarSolicitações(), 30000);
         });
     </script>
     <script src="/js/auth-unified.js?v=20260214" defer></script>

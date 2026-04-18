@@ -279,13 +279,13 @@
 
         function abrirModalImposto() {
             editandoId = null;
-            document.getElementById('modal-imp-titulo').textContent = 'Nova Guia de Imposto';
+            document.getElementById('modal-imp-título').textContent = 'Nova Guia de Imposto';
             document.getElementById('imp-id').value = '';
             document.getElementById('imp-tipo').value = '';
             document.getElementById('imp-aliquota').value = '';
-            document.getElementById('imp-descricao').value = '';
+            document.getElementById('imp-descrição').value = '';
             document.getElementById('imp-base').value = '';
-            document.getElementById('imp-observacoes').value = '';
+            document.getElementById('imp-observações').value = '';
             document.getElementById('modal-imposto').classList.add('active');
         }
 
@@ -293,13 +293,13 @@
             const i = impostos.find(x => x.id === id);
             if (!i) return;
             editandoId = id;
-            document.getElementById('modal-imp-titulo').textContent = 'Editar Imposto';
+            document.getElementById('modal-imp-título').textContent = 'Editar Imposto';
             document.getElementById('imp-id').value = id;
             document.getElementById('imp-tipo').value = i.tipo || '';
             document.getElementById('imp-aliquota').value = i.aliquota || '';
-            document.getElementById('imp-descricao').value = i.descricao || '';
+            document.getElementById('imp-descrição').value = i.descricao || '';
             document.getElementById('imp-base').value = i.base || '';
-            document.getElementById('imp-observacoes').value = i.observacoes || '';
+            document.getElementById('imp-observações').value = i.observações || '';
             document.getElementById('modal-imposto').classList.add('active');
         }
 
@@ -307,16 +307,16 @@
 
         async function salvarImposto() {
             const tipo = document.getElementById('imp-tipo').value;
-            const descricao = document.getElementById('imp-descricao').value.trim();
+            const descrição = document.getElementById('imp-descrição').value.trim();
             const aliquota = parseFloat(document.getElementById('imp-aliquota').value) || 0;
             const base = parseFloat(document.getElementById('imp-base').value) || 0;
-            const observacoes = document.getElementById('imp-observacoes').value.trim();
-            if (!tipo || !descricao) { if (typeof showToast === 'function') showToast('Preencha tipo e descrição.', 'warning'); return; }
+            const observações = document.getElementById('imp-observações').value.trim();
+            if (!tipo || !descrição) { if (typeof showToast === 'function') showToast('Preencha tipo e descrição.', 'warning'); return; }
             try {
                 const url = editandoId ? `${API_BASE}/api/financeiro/impostos/${editandoId}` : `${API_BASE}/api/financeiro/impostos`;
                 const resp = await fetch(url, {
                     method: editandoId ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
-                    body: JSON.stringify({ tipo, aliquota, descricao, base, observacoes, ativo: true })
+                    body: JSON.stringify({ tipo, aliquota, descrição, base, observações, ativo: true })
                 });
                 if (resp.ok) {
                     if (typeof showToast === 'function') showToast(editandoId ? 'Imposto atualizado!' : 'Imposto criado!', 'success');

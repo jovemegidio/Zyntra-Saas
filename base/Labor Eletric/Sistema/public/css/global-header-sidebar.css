@@ -1,3 +1,26 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+/* ============================================================
+   FONTE GLOBAL — Inter em todo o sistema (exceto ícones)
+   ============================================================ */
+html, body, input, select, textarea, button, table, th, td, label, div, p, a, li, ul, ol, h1, h2, h3, h4, h5, h6, blockquote {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+}
+/* Preservar fontes de ícones (Font Awesome) */
+.fas, .far, .fal, .fad, .fa-solid, .fa-regular, .fa-light, .fa-duotone,
+[class^="fa-"]:not(.fa-brands):not(.fab), [class*=" fa-"]:not(.fa-brands):not(.fab),
+.material-icons, .material-icons-outlined, .material-icons-round, .material-symbols-outlined {
+    font-family: 'Font Awesome 6 Free' !important;
+    font-weight: 900 !important;
+}
+.fab, .fa-brands {
+    font-family: 'Font Awesome 6 Brands' !important;
+}
+/* Preservar fontes monospace para código */
+pre code, code, .monospace, .code, kbd, samp {
+    font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', 'Monaco', 'Consolas', 'Courier New', monospace !important;
+}
+
 /* ============================================================
    GLOBAL HEADER & SIDEBAR — Design Institucional ALUFORCE
    Padrão unificado para todos os módulos
@@ -9,8 +32,44 @@
    1. DESIGN TOKENS
    ============================================================ */
 :root {
-    /* Sidebar */
+    /* Sidebar — Dark (institucional, mesma tonalidade do header) */
     --sidebar-w: 48px;
+    --sidebar-bg: #1e293b;
+    --sidebar-hover: rgba(255,255,255,0.08);
+    --sidebar-active-bg: rgba(255,255,255,0.12);
+    --sidebar-active-text: #ffffff;
+    --sidebar-icon-color: #94a3b8;
+    --sidebar-icon-hover: #ffffff;
+
+    /* Header — sempre escuro (todas as páginas usam logos brancos) */
+    --header-h: 42px;
+    --header-bg: #1e293b;
+    --header-text: #94a3b8;
+    --header-text-bold: #f1f5f9;
+    --header-border: rgba(255,255,255,0.08);
+
+    /* Accent — Light Blue (for dark sidebar) */
+    --accent: #60a5fa;
+    --accent-hover: #93c5fd;
+    --accent-soft: rgba(96,165,250,0.15);
+
+    /* Tooltip — Professional (mantém escuro para legibilidade) */
+    --tooltip-bg: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    --tooltip-bg-solid: #1e293b;
+    --tooltip-text: #ffffff;
+    --tooltip-shadow: 0 10px 25px -5px rgba(0,0,0,0.25), 0 8px 10px -6px rgba(0,0,0,0.1);
+    --tooltip-border: 1px solid rgba(255,255,255,0.1);
+
+    /* Override legacy variables */
+    --sidebar-width: 48px !important;
+    --header-height: 42px !important;
+    --primary-dark: #ffffff !important;
+}
+
+/* ============================================================
+   DARK MODE — body.dark-mode
+   ============================================================ */
+body.dark-mode {
     --sidebar-bg: #1e1e1e;
     --sidebar-hover: rgba(255,255,255,0.08);
     --sidebar-active-bg: #3b3b3b;
@@ -18,28 +77,15 @@
     --sidebar-icon-color: #8b8b8b;
     --sidebar-icon-hover: #d4d4d4;
 
-    /* Header */
-    --header-h: 42px;
     --header-bg: #1e1e1e;
     --header-text: #a1a1a1;
     --header-text-bold: #f1f5f9;
     --header-border: rgba(255,255,255,0.08);
 
-    /* Accent (neutral white) */
     --accent: #ffffff;
     --accent-hover: #d4d4d4;
     --accent-soft: rgba(255,255,255,0.10);
 
-    /* Tooltip — Professional */
-    --tooltip-bg: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-    --tooltip-bg-solid: #1e293b;
-    --tooltip-text: #ffffff;
-    --tooltip-shadow: 0 10px 25px -5px rgba(0,0,0,0.25), 0 8px 10px -6px rgba(0,0,0,0.1);
-    --tooltip-border: 1px solid rgba(255,255,255,0.1);
-
-    /* Override legacy variables — !important garante precedência sobre inline <style> */
-    --sidebar-width: 48px !important;
-    --header-height: 42px !important;
     --primary-dark: #1e1e1e !important;
 }
 
@@ -966,4 +1012,41 @@ body > main:not(.main-area) {
 /* modal-receber-header: já é gradiente, só padroniza raio */
 .modal-receber-header {
     border-radius: 16px 16px 0 0;
+}
+
+/* ============================================================
+   LIGHT MODE specific overrides (default state, no class needed)
+   ============================================================ */
+.sidebar {
+    box-shadow: 2px 0 8px rgba(0,0,0,0.06);
+}
+
+.sidebar-logo {
+    background: #1e3a8a !important;
+}
+
+.header {
+    box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+}
+
+/* DARK MODE specific overrides */
+body.dark-mode .sidebar {
+    box-shadow: none;
+}
+
+body.dark-mode .sidebar-logo {
+    background: #3b3b3b !important;
+}
+
+body.dark-mode .header {
+    box-shadow: none;
+}
+
+body.dark-mode .user-avatar {
+    background: #3b3b3b !important;
+}
+
+body.dark-mode .user-role-badge {
+    background: rgba(255,255,255,0.1) !important;
+    color: #d4d4d4 !important;
 }

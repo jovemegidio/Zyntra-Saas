@@ -54,7 +54,7 @@ if exist "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysqldump.exe" (
 )
 
 if "%MYSQLDUMP%"=="" (
-    echo [ERRO] mysqldump nao encontrado!
+    echo [ERRO] mysqldump não encontrado!
     echo.
     echo Possiveis solucoes:
     echo   1. Instale o MySQL Client

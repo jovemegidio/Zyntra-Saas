@@ -95,8 +95,8 @@
         .badge-saida { background: #fee2e2; color: #991b1b; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
         tr.saldo-negativo td { background: #fef2f2; }
         tr.saldo-negativo td:last-child { color: #ef4444 !important; font-weight: 800; }
-        .alert-recorrencia { background: #fffbeb; border: 1px solid #fbbf24; border-radius: 8px; padding: 10px 16px; font-size: 12px; color: #92400e; margin-bottom: 16px; display: none; align-items: center; gap: 8px; }
-        .alert-recorrencia i { color: #f59e0b; }
+        .alert-recorrência { background: #fffbeb; border: 1px solid #fbbf24; border-radius: 8px; padding: 10px 16px; font-size: 12px; color: #92400e; margin-bottom: 16px; display: none; align-items: center; gap: 8px; }
+        .alert-recorrência i { color: #f59e0b; }
         .alert-erro { background: #fef2f2; border: 1px solid #fca5a5; border-radius: 8px; padding: 10px 16px; font-size: 12px; color: #991b1b; margin-bottom: 16px; display: none; align-items: center; gap: 8px; }
         .alert-erro i { color: #ef4444; }
         .loading-overlay { position: relative; }
@@ -173,21 +173,21 @@
                 </div>
 
                 <!-- Alertas -->
-                <div class="alert-recorrencia" id="alert-recorrencia"><i class="fas fa-exclamation-triangle"></i> <span>Atenção: lançamentos recorrentes podem não ter sido processados para este período. A projeção pode estar incompleta.</span></div>
+                <div class="alert-recorrência" id="alert-recorrência"><i class="fas fa-exclamation-triangle"></i> <span>Atenção: lançamentos recorrentes podem não ter sido processados para este período. A projeção pode estar incompleta.</span></div>
                 <div class="alert-erro" id="alert-erro"><i class="fas fa-times-circle"></i> <span id="alert-erro-msg">Erro ao carregar dados.</span></div>
 
                 <!-- Seletor de Período -->
                 <div class="period-selector">
-                    <button class="period-btn" data-periodo="semana" onclick="selecionarPeriodo('semana', this)">Semana</button>
-                    <button class="period-btn active" data-periodo="mes" onclick="selecionarPeriodo('mes', this)">Este Mês</button>
-                    <button class="period-btn" data-periodo="trimestre" onclick="selecionarPeriodo('trimestre', this)">Trimestre</button>
-                    <button class="period-btn" data-periodo="semestre" onclick="selecionarPeriodo('semestre', this)">Semestre</button>
-                    <button class="period-btn" data-periodo="ano" onclick="selecionarPeriodo('ano', this)">Ano</button>
+                    <button class="period-btn" data-período="semana" onclick="selecionarPeríodo('semana', this)">Semana</button>
+                    <button class="period-btn active" data-período="mes" onclick="selecionarPeríodo('mes', this)">Este Mês</button>
+                    <button class="period-btn" data-período="trimestre" onclick="selecionarPeríodo('trimestre', this)">Trimestre</button>
+                    <button class="period-btn" data-período="semestre" onclick="selecionarPeríodo('semestre', this)">Semestre</button>
+                    <button class="period-btn" data-período="ano" onclick="selecionarPeríodo('ano', this)">Ano</button>
                     <div class="period-custom">
                         <input type="date" id="data-inicio">
                         <span style="color:var(--gray-400);font-size:12px;">até</span>
                         <input type="date" id="data-fim">
-                        <button class="btn-buscar" onclick="buscarPeriodoCustom()"><i class="fas fa-search"></i> Buscar</button>
+                        <button class="btn-buscar" onclick="buscarPeríodoCustom()"><i class="fas fa-search"></i> Buscar</button>
                     </div>
                 </div>
 
@@ -223,7 +223,7 @@
 
     <script>
         function toggleMobileSidebar() { document.getElementById('mobile-sidebar')?.classList.toggle('mobile-open'); document.getElementById('sidebar-overlay')?.classList.toggle('active'); }
-        function toggleNotificacoes() { if (typeof window.NotificationsManager !== 'undefined') window.NotificationsManager.togglePanel(); }
+        function toggleNotificações() { if (typeof window.NotificationsManager !== 'undefined') window.NotificationsManager.togglePanel(); }
 
         let fluxoData = [];
         let chartInstance = null;
@@ -261,12 +261,12 @@
             document.getElementById('data-fim').value = fim.toISOString().split('T')[0];
         }
 
-        function selecionarPeriodo(periodo, btn) {
+        function selecionarPeríodo(período, btn) {
             document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
             if (btn) btn.classList.add('active');
             const hoje = new Date();
             let inicio, fim;
-            switch (periodo) {
+            switch (período) {
                 case 'semana': inicio = new Date(hoje); inicio.setDate(hoje.getDate() - hoje.getDay()); fim = new Date(inicio); fim.setDate(inicio.getDate() + 6); break;
                 case 'mes': inicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1); fim = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0); break;
                 case 'trimestre': inicio = new Date(hoje.getFullYear(), hoje.getMonth() - 2, 1); fim = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0); break;
@@ -278,7 +278,7 @@
             carregarFluxo();
         }
 
-        function buscarPeriodoCustom() {
+        function buscarPeríodoCustom() {
             document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
             carregarFluxo();
         }
@@ -290,17 +290,17 @@
             const fim = document.getElementById('data-fim').value;
             if (!inicio || !fim) return;
             const alertErro = document.getElementById('alert-erro');
-            const alertRec = document.getElementById('alert-recorrencia');
+            const alertRec = document.getElementById('alert-recorrência');
             alertErro.style.display = 'none';
             alertRec.style.display = 'none';
-            document.getElementById('tabela-movimentacoes').innerHTML = '<tr><td colspan="6" style="text-align:center;padding:60px;color:var(--gray-400);"><i class="fas fa-spinner fa-spin" style="font-size:48px;margin-bottom:16px;display:block;"></i>Carregando...</td></tr>';
+            document.getElementById('tabela-movimentações').innerHTML = '<tr><td colspan="6" style="text-align:center;padding:60px;color:var(--gray-400);"><i class="fas fa-spinner fa-spin" style="font-size:48px;margin-bottom:16px;display:block;"></i>Carregando...</td></tr>';
             try {
                 const r = await fetch(`/api/financeiro/fluxo-caixa?inicio=${encodeURIComponent(inicio)}&fim=${encodeURIComponent(fim)}`, { credentials: 'include' });
                 if (r.status === 401) { window.location.href = '/login.html?expired=1'; return; }
                 if (r.status === 503) { alertErro.style.display = 'flex'; document.getElementById('alert-erro-msg').textContent = 'Serviço temporariamente indisponível. Tente novamente em instantes.'; fluxoData = []; renderizarTabela(); return; }
                 if (!r.ok) { alertErro.style.display = 'flex'; document.getElementById('alert-erro-msg').textContent = `Erro ao carregar dados (HTTP ${r.status}).`; fluxoData = []; renderizarTabela(); return; }
                 const payload = await r.json();
-                fluxoData = payload.data || payload.movimentacoes || payload;
+                fluxoData = payload.data || payload.movimentações || payload;
                 if (!Array.isArray(fluxoData)) fluxoData = [];
                 if (payload.recorrencias_pendentes) alertRec.style.display = 'flex';
                 atualizarResumo(); renderizarGrafico(); renderizarTabela();
@@ -312,7 +312,7 @@
             }
         }
 
-        // ===== SANITIZAÇÃO HTML (prevenção XSS) =====
+        // ===== SANITIZAÇÁO HTML (prevenção XSS) =====
         function escHtml(s) { const d = document.createElement('div'); d.textContent = String(s || ''); return d.innerHTML; }
 
         function atualizarResumo() {
@@ -330,7 +330,7 @@
             const saldoProjetado = saldoRealizado + entradasFut - saidasFut;
             document.getElementById('total-entradas').textContent = `R$ ${entradas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
             document.getElementById('total-saidas').textContent = `R$ ${saidas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
-            const saldoEl = document.getElementById('saldo-periodo');
+            const saldoEl = document.getElementById('saldo-período');
             saldoEl.textContent = `R$ ${saldoRealizado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
             saldoEl.style.color = saldoRealizado >= 0 ? '#3b82f6' : '#ef4444';
             const projEl = document.getElementById('saldo-projetado');
@@ -381,7 +381,7 @@
         }
 
         function renderizarTabela() {
-            const tbody = document.getElementById('tabela-movimentacoes');
+            const tbody = document.getElementById('tabela-movimentações');
             if (fluxoData.length === 0) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:60px;color:#9ca3af;"><i class="fas fa-inbox" style="font-size:48px;margin-bottom:16px;display:block;"></i>Nenhuma movimentação no período</td></tr>'; return; }
             let saldoAcum = 0;
             const sorted = [...fluxoData].sort((a, b) => new Date(a.data) - new Date(b.data));
@@ -392,7 +392,7 @@
                 const rowClass = saldoAcum < 0 ? ' class="saldo-negativo"' : '';
                 return `<tr${rowClass}>
                     <td>${m.data ? new Date(m.data).toLocaleDateString('pt-BR') : '-'}</td>
-                    <td><strong>${escHtml(m.descricao || m.descrição || '-')}</strong></td>
+                    <td><strong>${escHtml(m.descricao || m.descricao || '-')}</strong></td>
                     <td>${escHtml(m.categoria || m.categoria_nome || '-')}</td>
                     <td><span class="${isEntrada ? 'badge-entrada' : 'badge-saida'}">${isEntrada ? 'Entrada' : 'Saída'}</span></td>
                     <td style="color:${isEntrada ? '#059669' : '#ef4444'};font-weight:700;">${isEntrada ? '+' : '-'} R$ ${valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
@@ -417,7 +417,7 @@
                 saldoAcum += isE ? v : -v;
                 return [
                     m.data ? new Date(m.data).toLocaleDateString('pt-BR') : '-',
-                    `"${(m.descricao || m.descrição || '').replace(/"/g, '""')}"`,
+                    `"${(m.descricao || m.descricao || '').replace(/"/g, '""')}"`,
                     `"${(m.categoria || m.categoria_nome || '-').replace(/"/g, '""')}"`,
                     isE ? 'Entrada' : 'Saída',
                     (isE ? '' : '-') + v.toFixed(2).replace('.', ','),
@@ -442,7 +442,7 @@
             const esc = s => String(s||'-').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
             const entradas = fluxoData.filter(m => m.tipo === 'entrada' || m.tipo === 'receita').reduce((s, m) => s + (parseFloat(m.valor) || 0), 0);
             const saidas = fluxoData.filter(m => m.tipo === 'saida' || m.tipo === 'despesa').reduce((s, m) => s + (parseFloat(m.valor) || 0), 0);
-            w.document.write(`<html><head><title>Fluxo de Caixa — Zyntra ERP</title><style>body{font-family:Arial,sans-serif;padding:20px;color:#1f2937;}h2{margin-bottom:4px;}table{width:100%;border-collapse:collapse;margin-top:16px;}th,td{padding:8px 12px;border:1px solid #ddd;text-align:left;font-size:12px;}th{background:#f3f4f6;font-weight:700;}.entrada{color:#059669;font-weight:700;}.saida{color:#ef4444;font-weight:700;}.negativo{background:#fef2f2;}.resumo{margin-top:8px;font-size:13px;}.resumo span{margin-right:24px;}@media print{body{padding:0;}}</style></head><body><h2>Fluxo de Caixa — Zyntra ERP</h2><p style="color:#6b7280;margin-top:0;">Período: ${esc(inicio)} a ${esc(fim)} &bull; Gerado em: ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR')}</p><div class="resumo"><span style="color:#059669;">Entradas: R$ ${entradas.toLocaleString('pt-BR',{minimumFractionDigits:2})}</span><span style="color:#ef4444;">Saídas: R$ ${saidas.toLocaleString('pt-BR',{minimumFractionDigits:2})}</span><span style="color:${(entradas-saidas)>=0?'#059669':'#ef4444'};font-weight:700;">Saldo: R$ ${(entradas-saidas).toLocaleString('pt-BR',{minimumFractionDigits:2})}</span></div><table><thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Tipo</th><th>Valor</th><th>Saldo Acumulado</th></tr></thead><tbody>${sorted.map(m => { const v = parseFloat(m.valor)||0; const isE = m.tipo==='entrada'||m.tipo==='receita'; saldoAcum += isE?v:-v; return `<tr class="${saldoAcum<0?'negativo':''}"><td>${m.data?new Date(m.data).toLocaleDateString('pt-BR'):'-'}</td><td>${esc(m.descricao||m.descrição)}</td><td>${esc(m.categoria)}</td><td class="${isE?'entrada':'saida'}">${isE?'Entrada':'Saída'}</td><td class="${isE?'entrada':'saida'}">${isE?'+':'-'} R$ ${v.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td><td style="color:${saldoAcum>=0?'#059669':'#ef4444'};font-weight:700;">R$ ${saldoAcum.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td></tr>`; }).join('')}</tbody></table><p style="margin-top:24px;font-size:10px;color:#9ca3af;">Documento gerado automaticamente pelo Zyntra ERP. ${fluxoData.length} movimentações.</p></body></html>`);
+            w.document.write(`<html><head><title>Fluxo de Caixa — Zyntra ERP</title><style>body{font-family:Arial,sans-serif;padding:20px;color:#1f2937;}h2{margin-bottom:4px;}table{width:100%;border-collapse:collapse;margin-top:16px;}th,td{padding:8px 12px;border:1px solid #ddd;text-align:left;font-size:12px;}th{background:#f3f4f6;font-weight:700;}.entrada{color:#059669;font-weight:700;}.saida{color:#ef4444;font-weight:700;}.negativo{background:#fef2f2;}.resumo{margin-top:8px;font-size:13px;}.resumo span{margin-right:24px;}@media print{body{padding:0;}}</style></head><body><h2>Fluxo de Caixa — Zyntra ERP</h2><p style="color:#6b7280;margin-top:0;">Período: ${esc(inicio)} a ${esc(fim)} &bull; Gerado em: ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR')}</p><div class="resumo"><span style="color:#059669;">Entradas: R$ ${entradas.toLocaleString('pt-BR',{minimumFractionDigits:2})}</span><span style="color:#ef4444;">Saídas: R$ ${saidas.toLocaleString('pt-BR',{minimumFractionDigits:2})}</span><span style="color:${(entradas-saidas)>=0?'#059669':'#ef4444'};font-weight:700;">Saldo: R$ ${(entradas-saidas).toLocaleString('pt-BR',{minimumFractionDigits:2})}</span></div><table><thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Tipo</th><th>Valor</th><th>Saldo Acumulado</th></tr></thead><tbody>${sorted.map(m => { const v = parseFloat(m.valor)||0; const isE = m.tipo==='entrada'||m.tipo==='receita'; saldoAcum += isE?v:-v; return `<tr class="${saldoAcum<0?'negativo':''}"><td>${m.data?new Date(m.data).toLocaleDateString('pt-BR'):'-'}</td><td>${esc(m.descricao||m.descricao)}</td><td>${esc(m.categoria)}</td><td class="${isE?'entrada':'saida'}">${isE?'Entrada':'Saída'}</td><td class="${isE?'entrada':'saida'}">${isE?'+':'-'} R$ ${v.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td><td style="color:${saldoAcum>=0?'#059669':'#ef4444'};font-weight:700;">R$ ${saldoAcum.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td></tr>`; }).join('')}</tbody></table><p style="margin-top:24px;font-size:10px;color:#9ca3af;">Documento gerado automaticamente pelo Zyntra ERP. ${fluxoData.length} movimentações.</p></body></html>`);
             w.document.close(); w.print();
         }
 

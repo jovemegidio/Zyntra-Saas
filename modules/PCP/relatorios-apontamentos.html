@@ -179,7 +179,7 @@
             font-weight: 600;
             white-space: nowrap;
         }
-        .duracao-cell {
+        .duração-cell {
             font-family: 'Inter', monospace;
             font-weight: 600;
             font-size: 13px;
@@ -223,7 +223,7 @@
         .sidebar-stack { display: flex; flex-direction: column; gap: 20px; }
 
         /* Funcionário cards */
-        .funcionário-card {
+        .funcionario-card {
             display: flex;
             align-items: center;
             gap: 12px;
@@ -233,12 +233,12 @@
             margin-bottom: 10px;
             transition: all 0.2s;
         }
-        .funcionário-card:last-child { margin-bottom: 0; }
-        .funcionário-card:hover {
+        .funcionario-card:last-child { margin-bottom: 0; }
+        .funcionario-card:hover {
             border-color: var(--accent-indigo);
             box-shadow: 0 2px 8px rgba(99,102,241,0.1);
         }
-        .funcionário-avatar {
+        .funcionario-avatar {
             width: 42px; height: 42px;
             border-radius: 50%;
             background: linear-gradient(135deg, var(--accent-indigo), #8b5cf6);
@@ -246,11 +246,11 @@
             color: white; font-weight: 700; font-size: 15px;
             flex-shrink: 0;
         }
-        .funcionário-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
-        .funcionário-info { flex: 1; min-width: 0; }
-        .funcionário-nome { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .funcionário-cargo { font-size: 11px; color: var(--text-secondary); }
-        .funcionário-stats { display: flex; gap: 16px; text-align: center; flex-shrink: 0; }
+        .funcionario-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+        .funcionario-info { flex: 1; min-width: 0; }
+        .funcionario-nome { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .funcionario-cargo { font-size: 11px; color: var(--text-secondary); }
+        .funcionario-stats { display: flex; gap: 16px; text-align: center; flex-shrink: 0; }
 
         /* Eficiência Grid */
         .eficiencia-grid {
@@ -358,7 +358,7 @@
                 <a href="ordens-producao.html" class="sidebar-btn" title="Ordens de Produção">
                     <i class="fas fa-clipboard-list"></i>
                 </a>
-                <a href="pages/gestao-producao.html" class="sidebar-btn" title="Gestão de Produção">
+                <a href="pages/Gestão-producao.html" class="sidebar-btn" title="Gestão de Produção">
                     <i class="fas fa-industry"></i>
                 </a>
                 <a href="pages/faturamento.html" class="sidebar-btn" title="Faturamento">
@@ -367,10 +367,10 @@
                 <a href="apontamentos.html" class="sidebar-btn" title="Apontamentos">
                     <i class="fas fa-stopwatch"></i>
                 </a>
-                <a href="relatorios-apontamentos.html" class="sidebar-btn" title="Relatórios" onclick="event.preventDefault(); window.location.href='pages/relatorios.html'">
+                <a href="relatórios-apontamentos.html" class="sidebar-btn" title="Relatórios" onclick="event.preventDefault(); window.location.href='pages/relatorios.html'">
                     <i class="fas fa-chart-bar"></i>
                 </a>
-                <a href="pages/relatorios.html" class="sidebar-btn active" title="Central de Relatórios">
+                <a href="pages/relatórios.html" class="sidebar-btn active" title="Central de Relatórios">
                     <i class="fas fa-chart-pie"></i>
                 </a>
             </nav>
@@ -399,7 +399,7 @@
                     <button class="header-btn" onclick="location.reload()" title="Atualizar">
                         <i class="fas fa-sync-alt"></i>
                     </button>
-                    <button class="header-btn" onclick="exportarRelatorio()" title="Exportar">
+                    <button class="header-btn" onclick="exportarRelatório()" title="Exportar">
                         <i class="fas fa-download"></i>
                     </button>
                     <div class="user-greeting">
@@ -420,7 +420,7 @@
                         <button class="btn btn-success" onclick="atualizarDados()">
                             <i class="fas fa-sync-alt"></i> Atualizar
                         </button>
-                        <button class="btn btn-export" onclick="exportarRelatorio()">
+                        <button class="btn btn-export" onclick="exportarRelatório()">
                             <i class="fas fa-file-excel"></i> Exportar CSV
                         </button>
                     </div>
@@ -488,8 +488,8 @@
                             <option value="ST">Setup</option>
                             <option value="1">Início Produção</option>
                             <option value="1A">Produção Irregular</option>
-                            <option value="PR">Parada Refeião</option>
-                            <option value="PM">Parada Manutenão</option>
+                            <option value="PR">Parada Refeição</option>
+                            <option value="PM">Parada Manutenção</option>
                             <option value="FM">Falta Mat. Prima</option>
                             <option value="ME">Manut. Elétrica</option>
                             <option value="MM">Manut. Mecânica</option>
@@ -592,7 +592,7 @@
                                     </div>
                                     <div class="eficiencia-item">
                                         <div class="eficiencia-valor" id="efManutencao" style="color: #f59e0b;">0%</div>
-                                        <div class="eficiencia-label">Manutenão</div>
+                                        <div class="eficiencia-label">Manutenção</div>
                                     </div>
                                     <div class="eficiencia-item">
                                         <div class="eficiencia-valor" id="efMediaDia" style="color: #6366f1;">0h</div>
@@ -678,7 +678,7 @@
             return null;
         }
 
-        function getSaudacao() {
+        function getSaudação() {
             const hora = new Date().getHours();
             if (hora >= 5 && hora < 12) return 'Bom dia';
             if (hora >= 12 && hora < 18) return 'Boa tarde';
@@ -690,7 +690,7 @@
             carregarUsuario();
             setDatasIniciais();
             carregarDados();
-            atualizarSaudacao();
+            atualizarSaudação();
         });
 
         function setDatasIniciais() {
@@ -715,7 +715,7 @@
                     const email = (user.email || '').toLowerCase();
                     const permissoesPcp = user.permissoes_pcp || [];
                     const rolesPermitidas = ['admin', 'administrador', 'supervisor', 'gerente', 'diretoria', 'ti', 'pcp', 'consultoria', 'operador'];
-                    const deptPermitidos = ['ti', 'pcp', 'diretoria', 'administração', 'gerência', 'producao', 'produção', 'fabrica', 'fábrica'];
+                    const deptPermitidos = ['ti', 'pcp', 'diretoria', 'administração', 'gerência', 'produção', 'produção', 'fabrica', 'fábrica'];
 
                     const temRole = rolesPermitidas.some(r => role.includes(r));
                     const temDept = deptPermitidos.some(d => departamento.includes(d));
@@ -727,16 +727,16 @@
                             : (permissoesPcp && typeof permissoesPcp === 'object'
                                 ? Object.values(permissoesPcp).map(p => String(p).toLowerCase())
                                 : []));
-                    const temPermPcp = permsArray.includes('all') || permsArray.includes('dashboard') || permsArray.includes('relatorios') || permsArray.includes('apontamentos');
+                    const temPermPcp = permsArray.includes('all') || permsArray.includes('dashboard') || permsArray.includes('relatórios') || permsArray.includes('apontamentos');
 
                     if (!temRole && !temDept && !temEmail && !temPermPcp) {
                         window.location.href = 'apontamentos.html';
                         return;
                     }
 
-                    const saudacaoEl = document.getElementById('saudacao');
+                    const saudaçãoEl = document.getElementById('saudação');
                     const userNameEl = document.getElementById('userName');
-                    if (saudacaoEl) saudacaoEl.textContent = getSaudacao() + ',';
+                    if (saudaçãoEl) saudaçãoEl.textContent = getSaudação() + ',';
                     if (userNameEl) userNameEl.textContent = primeiroNome;
 
                     const avatarEl = document.getElementById('userAvatar');
@@ -767,12 +767,12 @@
         async function carregarDados() {
             const dataInicio = document.getElementById('dataInicio').value;
             const dataFim = document.getElementById('dataFim').value;
-            const funcionário = document.getElementById('filtroFuncionario').value;
+            const funcionário = document.getElementById('filtroFuncionário').value;
             const atividade = document.getElementById('filtroAtividade').value;
             const pedido = document.getElementById('filtroPedido').value;
 
             try {
-                let url = `/api/pcp/apontamentos/relatorio?dataInicio=${dataInicio}&dataFim=${dataFim}`;
+                let url = `/api/pcp/apontamentos/relatório?dataInicio=${dataInicio}&dataFim=${dataFim}`;
                 if (funcionário) url += `&usuario=${funcionário}`;
                 if (atividade) url += `&atividade=${atividade}`;
                 if (pedido) url += `&pedido=${pedido}`;
@@ -783,11 +783,11 @@
                 if (resp.ok) {
                     const data = await resp.json();
                     apontamentos = data.apontamentos || [];
-                    funcionários = data.funcionários || [];
+                    funcionários = data.funcionarios || [];
 
                     atualizarStats(data);
-                    popularSelectFuncionarios(funcionários);
-                    renderizarResumoFuncionarios();
+                    popularSelectFuncionários(funcionários);
+                    renderizarResumoFuncionários();
                     renderizarDistribuicaoAtividades();
                     renderizarTabela();
                     calcularEficiencia();
@@ -797,7 +797,7 @@
                     apontamentos = [];
                     funcionários = [];
                     atualizarStats({});
-                    renderizarResumoFuncionarios();
+                    renderizarResumoFuncionários();
                     renderizarDistribuicaoAtividades();
                     renderizarTabela();
                     mostrarToast('Erro ao carregar dados do servidor', 'error');
@@ -807,34 +807,34 @@
                 apontamentos = [];
                 funcionários = [];
                 atualizarStats({});
-                renderizarResumoFuncionarios();
+                renderizarResumoFuncionários();
                 renderizarDistribuicaoAtividades();
                 renderizarTabela();
             }
         }
 
         function calcularTotalHoras() {
-            return Math.round(apontamentos.reduce((acc, a) => acc + (a.duracao || 0), 0) / 3600 * 10) / 10;
+            return Math.round(apontamentos.reduce((acc, a) => acc + (a.duração || 0), 0) / 3600 * 10) / 10;
         }
 
-        function calcularHorasProducao() {
-            return Math.round(apontamentos.filter(a => TIPOS_PRODUTIVOS.includes(a.tipo)).reduce((acc, a) => acc + (a.duracao || 0), 0) / 3600 * 10) / 10;
+        function calcularHorasProdução() {
+            return Math.round(apontamentos.filter(a => TIPOS_PRODUTIVOS.includes(a.tipo)).reduce((acc, a) => acc + (a.duração || 0), 0) / 3600 * 10) / 10;
         }
 
         function atualizarStats(data) {
-            document.getElementById('totalFuncionarios').textContent = data.totalFuncionarios || funcionários.length;
+            document.getElementById('totalFuncionários').textContent = data.totalFuncionários || funcionários.length;
             document.getElementById('totalHoras').textContent = (data.totalHoras || calcularTotalHoras()) + 'h';
-            document.getElementById('horasProducao').textContent = (data.horasProducao || calcularHorasProducao()) + 'h';
+            document.getElementById('horasProdução').textContent = (data.horasProdução || calcularHorasProdução()) + 'h';
             document.getElementById('totalApontamentos').textContent = data.totalApontamentos || apontamentos.length;
 
-            const totalSeg = apontamentos.reduce((acc, a) => acc + (a.duracao || 0), 0);
-            const prodSeg = apontamentos.filter(a => TIPOS_PRODUTIVOS.includes(a.tipo)).reduce((acc, a) => acc + (a.duracao || 0), 0);
+            const totalSeg = apontamentos.reduce((acc, a) => acc + (a.duração || 0), 0);
+            const prodSeg = apontamentos.filter(a => TIPOS_PRODUTIVOS.includes(a.tipo)).reduce((acc, a) => acc + (a.duração || 0), 0);
             const ef = totalSeg > 0 ? Math.round(prodSeg / totalSeg * 100) : 0;
             document.getElementById('eficienciaGeral').textContent = ef + '%';
         }
 
         function calcularEficiencia() {
-            const totalSeg = apontamentos.reduce((acc, a) => acc + (a.duracao || 0), 0);
+            const totalSeg = apontamentos.reduce((acc, a) => acc + (a.duração || 0), 0);
             if (totalSeg === 0) {
                 document.getElementById('efProdutivo').textContent = '0%';
                 document.getElementById('efParada').textContent = '0%';
@@ -843,9 +843,9 @@
                 return;
             }
 
-            const prodSeg = apontamentos.filter(a => TIPOS_PRODUTIVOS.includes(a.tipo)).reduce((acc, a) => acc + (a.duracao || 0), 0);
-            const manutSeg = apontamentos.filter(a => TIPOS_MANUTENCAO.includes(a.tipo)).reduce((acc, a) => acc + (a.duracao || 0), 0);
-            const paradaSeg = apontamentos.filter(a => TIPOS_PARADA.includes(a.tipo)).reduce((acc, a) => acc + (a.duracao || 0), 0);
+            const prodSeg = apontamentos.filter(a => TIPOS_PRODUTIVOS.includes(a.tipo)).reduce((acc, a) => acc + (a.duração || 0), 0);
+            const manutSeg = apontamentos.filter(a => TIPOS_MANUTENCAO.includes(a.tipo)).reduce((acc, a) => acc + (a.duração || 0), 0);
+            const paradaSeg = apontamentos.filter(a => TIPOS_PARADA.includes(a.tipo)).reduce((acc, a) => acc + (a.duração || 0), 0);
 
             document.getElementById('efProdutivo').textContent = Math.round(prodSeg / totalSeg * 100) + '%';
             document.getElementById('efParada').textContent = Math.round(paradaSeg / totalSeg * 100) + '%';
@@ -856,8 +856,8 @@
             document.getElementById('efMediaDia').textContent = Math.round(totalSeg / 3600 / numDias * 10) / 10 + 'h';
         }
 
-        function popularSelectFuncionarios(lista) {
-            const select = document.getElementById('filtroFuncionario');
+        function popularSelectFuncionários(lista) {
+            const select = document.getElementById('filtroFuncionário');
             const valorAtual = select.value;
             select.innerHTML = '<option value="">Todos</option>';
             lista.forEach(f => {
@@ -869,8 +869,8 @@
             select.value = valorAtual;
         }
 
-        function renderizarResumoFuncionarios() {
-            const container = document.getElementById('resumoFuncionarios');
+        function renderizarResumoFuncionários() {
+            const container = document.getElementById('resumoFuncionários');
             const resumo = {};
             const fotoMap = {};
             funcionários.forEach(f => { if (f.foto) fotoMap[f.id] = f.foto; });
@@ -880,10 +880,10 @@
                 if (!resumo[key]) {
                     resumo[key] = { nome: a.usuário_nome, foto: a.usuário_foto || fotoMap[a.usuário_id] || '', totalSegundos: 0, produçãoSegundos: 0, apontamentos: 0 };
                 }
-                resumo[key].totalSegundos += a.duracao || 0;
+                resumo[key].totalSegundos += a.duração || 0;
                 resumo[key].apontamentos++;
                 if (TIPOS_PRODUTIVOS.includes(a.tipo)) {
-                    resumo[key].produçãoSegundos += a.duracao || 0;
+                    resumo[key].producaoSegundos += a.duração || 0;
                 }
             });
 
@@ -894,34 +894,34 @@
 
             let idx = 0;
             container.innerHTML = Object.values(resumo).map(f => {
-                const horasTotais = formatarDuracaoHoras(f.totalSegundos);
-                const horasProducao = formatarDuracaoHoras(f.produçãoSegundos);
+                const horasTotais = formatarDuraçãoHoras(f.totalSegundos);
+                const horasProdução = formatarDuraçãoHoras(f.producaoSegundos);
                 const primeiraLetra = f.nome ? f.nome[0].toUpperCase() : '?';
                 const primeiroNome = f.nome ? f.nome.split(' ')[0] : 'Desconhecido';
                 const avatarId = 'avatar-func-' + (idx++);
 
                 return `
-                    <div class="funcionario-card">
-                        <div class="funcionario-avatar" id="${avatarId}" data-foto="${f.foto || ''}" data-nome="${primeiroNome}">${primeiraLetra}</div>
-                        <div class="funcionario-info">
-                            <div class="funcionario-nome">${f.nome || 'Desconhecido'}</div>
-                            <div class="funcionario-cargo">${f.apontamentos} apontamentos</div>
+                    <div class="funcionário-card">
+                        <div class="funcionário-avatar" id="${avatarId}" data-foto="${f.foto || ''}" data-nome="${primeiroNome}">${primeiraLetra}</div>
+                        <div class="funcionário-info">
+                            <div class="funcionário-nome">${f.nome || 'Desconhecido'}</div>
+                            <div class="funcionário-cargo">${f.apontamentos} apontamentos</div>
                         </div>
-                        <div class="funcionario-stats">
+                        <div class="funcionário-stats">
                             <div>
-                                <div class="funcionario-metric-value">${horasTotais}</div>
-                                <div class="funcionario-metric-label">Total</div>
+                                <div class="funcionário-metric-value">${horasTotais}</div>
+                                <div class="funcionário-metric-label">Total</div>
                             </div>
                             <div>
-                                <div class="funcionario-metric-value" style="color:#16a34a;">${horasProducao}</div>
-                                <div class="funcionario-metric-label">Produção</div>
+                                <div class="funcionário-metric-value" style="color:#16a34a;">${horasProdução}</div>
+                                <div class="funcionário-metric-label">Produção</div>
                             </div>
                         </div>
                     </div>
                 `;
             }).join('');
 
-            document.querySelectorAll('.funcionário-avatar[data-foto]').forEach(avatarEl => {
+            document.querySelectorAll('.funcionario-avatar[data-foto]').forEach(avatarEl => {
                 const foto = avatarEl.dataset.foto;
                 const nome = avatarEl.dataset.nome;
                 const inicial = avatarEl.textContent.trim();
@@ -953,8 +953,8 @@
             apontamentos.forEach(a => {
                 const tipo = a.tipo || 'outros';
                 if (!resumo[tipo]) resumo[tipo] = 0;
-                resumo[tipo] += a.duracao || 0;
-                total += a.duracao || 0;
+                resumo[tipo] += a.duração || 0;
+                total += a.duração || 0;
             });
 
             const barContainer = document.getElementById('atividadesBar');
@@ -985,7 +985,7 @@
             resumoContainer.innerHTML = sorted.map(([tipo, segundos]) => {
                 const cor = coresAtividades[tipo]?.color || '#64748b';
                 const nome = coresAtividades[tipo]?.nome || tipo;
-                const horas = formatarDuracaoHoras(segundos);
+                const horas = formatarDuraçãoHoras(segundos);
                 const percent = (segundos / total * 100).toFixed(1);
                 return `<tr><td><span style="display:inline-block;width:10px;height:10px;background:${cor};border-radius:3px;margin-right:6px;vertical-align:middle;"></span>${nome}</td><td style="text-align:right;font-weight:600;color:${cor};white-space:nowrap;">${horas} <span style="font-weight:400;color:#94a3b8;font-size:11px;">(${percent}%)</span></td></tr>`;
             }).join('');
@@ -1013,11 +1013,11 @@
                     ? `<span class="op-badge"><i class="fas fa-clipboard-list"></i> ${a.op_codigo}</span>`
                     : '<span style="color:#cbd5e1;"></span>';
 
-                const pedidoHtml = a.pedido_número
-                    ? `<span class="pedido-badge"><i class="fas fa-file-alt"></i> #${a.pedido_número}</span>`
+                const pedidoHtml = a.pedido_numero
+                    ? `<span class="pedido-badge"><i class="fas fa-file-alt"></i> #${a.pedido_numero}</span>`
                     : '<span style="color:#cbd5e1;"></span>';
 
-                const obsText = a.observacoes || '';
+                const obsText = a.observações || '';
                 const obsHtml = obsText
                     ? `<span class="obs-cell" title="${obsText.replace(/"/g, '&quot;')}">${obsText}</span>`
                     : '<span style="color:#cbd5e1;"></span>';
@@ -1034,7 +1034,7 @@
                         <td>${formatarData(a.data)}</td>
                         <td>${a.hora_inicio || '-'}</td>
                         <td>${a.hora_fim || '-'}</td>
-                        <td class="duracao-cell">${formatarDuracao(a.duracao)}</td>
+                        <td class="duração-cell">${formatarDuração(a.duração)}</td>
                         <td>${opHtml}</td>
                         <td>${pedidoHtml}</td>
                         <td>${obsHtml}</td>
@@ -1043,7 +1043,7 @@
             }).join('');
         }
 
-        function formatarDuracao(segundos) {
+        function formatarDuração(segundos) {
             if (!segundos) return '00:00:00';
             const h = Math.floor(segundos / 3600);
             const m = Math.floor((segundos % 3600) / 60);
@@ -1051,7 +1051,7 @@
             return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
         }
 
-        function formatarDuracaoHoras(segundos) {
+        function formatarDuraçãoHoras(segundos) {
             if (!segundos) return '0h';
             return Math.round(segundos / 3600 * 10) / 10 + 'h';
         }
@@ -1064,11 +1064,11 @@
         function aplicarFiltros() { carregarDados(); }
         function atualizarDados() { carregarDados(); mostrarToast('Dados atualizados!', 'success'); }
 
-        function exportarRelatorio() {
+        function exportarRelatório() {
             let csv = 'Funcionário,Atividade,Data,Início,Fim,Duração,OP,Pedido,Observações\n';
             apontamentos.forEach(a => {
                 const cores = coresAtividades[a.tipo] || coresAtividades.outros;
-                csv += `"${a.usuário_nome || ''}","${cores.nome || a.tipo}","${a.data || ''}","${a.hora_inicio || ''}","${a.hora_fim || ''}","${formatarDuracao(a.duracao)}","${a.op_codigo || ''}","${a.pedido_número || ''}","${(a.observacoes || '').replace(/"/g, '""')}"\n`;
+                csv += `"${a.usuário_nome || ''}","${cores.nome || a.tipo}","${a.data || ''}","${a.hora_inicio || ''}","${a.hora_fim || ''}","${formatarDuração(a.duração)}","${a.op_codigo || ''}","${a.pedido_numero || ''}","${(a.observações || '').replace(/"/g, '""')}"\n`;
             });
 
             const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
@@ -1103,13 +1103,13 @@
             document.querySelector('.sidebar').classList.toggle('open');
         }
 
-        function atualizarSaudacao() {
+        function atualizarSaudação() {
             const hora = new Date().getHours();
-            let saudacao = 'Bom dia';
-            if (hora >= 12 && hora < 18) saudacao = 'Boa tarde';
-            else if (hora >= 18 || hora < 6) saudacao = 'Boa noite';
-            const el = document.getElementById('saudacao');
-            if (el) el.textContent = saudacao + ',';
+            let saudação = 'Bom dia';
+            if (hora >= 12 && hora < 18) saudação = 'Boa tarde';
+            else if (hora >= 18 || hora < 6) saudação = 'Boa noite';
+            const el = document.getElementById('saudação');
+            if (el) el.textContent = saudação + ',';
         }
     </script>
 

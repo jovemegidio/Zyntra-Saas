@@ -14,10 +14,7 @@ function getCookie(name) {
 
 // Headers com autenticação
 function getAuthHeaders() {
-    return {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${getAuthToken()}`
-    };
+    return { 'Content-Type': 'application/json' };
 }
 
 // ========== FORNECEDORES ==========

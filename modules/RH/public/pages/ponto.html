@@ -232,13 +232,13 @@
         <aside class="sidebar" id="mobile-sidebar">
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel de Controle"><i class="fas fa-home"></i></a>
             <nav class="sidebar-nav">
-                <a href="../funcionario.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-home"></i></a>
+                <a href="../funcionário.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-home"></i></a>
                 <a href="meus-holerites.html" class="sidebar-btn" title="Meus Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="dados-cadastrais.html" class="sidebar-btn" title="Dados Cadastrais"><i class="fas fa-id-card"></i></a>
                 <a href="beneficios.html" class="sidebar-btn" title="Meus Benefícios"><i class="fas fa-gift"></i></a>
                 <a href="espelho-ponto.html" class="sidebar-btn" title="Espelho de Ponto"><i class="fas fa-list-check"></i></a>
                 <a href="enviar-atestado.html" class="sidebar-btn" title="Enviar Atestado"><i class="fas fa-file-medical"></i></a>
-                <a href="../solicitacoes.html" class="sidebar-btn" title="Minhas Solicitações"><i class="fas fa-clipboard-list"></i></a>
+                <a href="../solicitações.html" class="sidebar-btn" title="Minhas Solicitações"><i class="fas fa-clipboard-list"></i></a>
                 <a href="manual-colaborador.html" class="sidebar-btn" title="Manual do Colaborador"><i class="fas fa-book"></i></a>
             </nav>
             <div class="sidebar-bottom">
@@ -277,7 +277,7 @@
                     </div>
                 </div>
 
-                <!-- Relgio e Batida -->
+                <!-- Relógio e Batida -->
                 <div class="relogio-container">
                     <div class="relogio" id="relogio">00:00:00</div>
                     <div class="data-atual" id="data-atual">Segunda-feira, 17 de Dezembro de 2025</div>
@@ -424,7 +424,7 @@
                 const response = await fetch('/api/me', { credentials: 'include', headers: getAuthHeaders() });
                 if (response.ok) {
                     const user = await response.json();
-                    currentUserId = user.id || user.funcionário_id;
+                    currentUserId = user.id || user.funcionario_id;
                     const userName = user.nome || user.apelido || 'Usuário';
                     let userAvatar = user.avatar && user.avatar !== '/avatars/default.webp' ? user.avatar : getAvatarFromEmail(user.email, userName);
                     const userNameEl = document.getElementById('user-name');
@@ -437,7 +437,7 @@
             } catch (error) { console.error('Erro ao carregar Usuário:', error); }
         }
 
-        // Relgio em tempo real
+        // Relógio em tempo real
         function atualizarRelogio() {
             const agora = new Date();
             const horas = String(agora.getHours()).padStart(2, '0');
@@ -484,11 +484,11 @@
                         headers: getAuthHeaders(),
                         credentials: 'include',
                         body: JSON.stringify({
-                            funcionário_id: currentUserId,
+                            funcionario_id: currentUserId,
                             data: dataHoje,
                             hora: hora + ':00',
                             tipo: tipos[batidaAtual - 1],
-                            observacao: `Batida de ponto via sistema - ${labels[batidaAtual - 1]}`
+                            observação: `Batida de ponto via sistema - ${labels[batidaAtual - 1]}`
                         })
                     });
 

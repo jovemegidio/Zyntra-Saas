@@ -946,7 +946,8 @@ router.post('/login', validate(schemas.login), async (req, res) => {
         try {
             const cacheService = require('../../services/cache');
             const sessionKey = `session_activity:${user.id}:${deviceId}`;
-            await cacheService.cacheSet(sessionKey, Date.now(), 4 * 60 * 60 * 1000 + 60000); // 4h + 1min margem (TC-AUTH-03-001)
+            const SESSION_INACTIVITY_MS = parseInt(process.env.SESSION_INACTIVITY_TIMEOUT_MS, 10) || 15 * 60 * 1000;
+            await cacheService.cacheSet(sessionKey, Date.now(), SESSION_INACTIVITY_MS + 60000); // 15min + 1min margem
             console.log(`[AUTH/LOGIN] 📡 Sessão registrada no Redis: ${sessionKey}`);
         } catch (redisErr) {
             console.warn('[AUTH/LOGIN] ⚠️ Redis session registration failed (non-blocking):', redisErr.message);
@@ -1104,6 +1105,17 @@ router.post('/auth/refresh', async (req, res) => {
         res.cookie('refreshToken', result.refreshToken, Object.assign({}, cookieOpts, {
             maxAge: 1000 * 60 * 60 * 24 * 7
         }));
+
+        // TC-AUTH-03-001: Renovar session_activity no Redis — refresh é atividade legítima
+        try {
+            const cacheService = require('../../services/cache');
+            const deviceId = decoded.deviceId || 'default';
+            const sessionKey = `session_activity:${result.user.id}:${deviceId}`;
+            const SESSION_INACTIVITY_MS = parseInt(process.env.SESSION_INACTIVITY_TIMEOUT_MS, 10) || 15 * 60 * 1000;
+            await cacheService.cacheSet(sessionKey, Date.now(), SESSION_INACTIVITY_MS + 60000);
+        } catch (redisErr) {
+            console.warn('[AUTH/REFRESH] ⚠️ Redis session renewal failed (non-blocking):', redisErr.message);
+        }
 
         console.log(`[AUTH/REFRESH] ✅ Tokens renovados para userId ${result.user.id}`);
 

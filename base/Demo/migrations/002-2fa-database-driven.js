@@ -46,7 +46,7 @@ async function runMigration() {
         connection = await mysql.createConnection(DB_CONFIG);
         console.log('Conectado ao banco de dados');
 
-        // 1. Adicionar coluna two_factor_enabled (se nao existir)
+        // 1. Adicionar coluna two_factor_enabled (se não existir)
         console.log('\n1. Verificando coluna two_factor_enabled...');
         const [cols] = await connection.query(
             "SHOW COLUMNS FROM usuarios LIKE 'two_factor_enabled'"
@@ -58,10 +58,10 @@ async function runMigration() {
             );
             console.log('   Coluna two_factor_enabled criada com sucesso');
         } else {
-            console.log('   Coluna two_factor_enabled ja existe');
+            console.log('   Coluna two_factor_enabled já existe');
         }
 
-        // 2. Garantir que two_factor_disabled tambem existe (compatibilidade)
+        // 2. Garantir que two_factor_disabled também existe (compatibilidade)
         console.log('\n2. Verificando coluna two_factor_disabled...');
         const [colsDisabled] = await connection.query(
             "SHOW COLUMNS FROM usuarios LIKE 'two_factor_disabled'"
@@ -73,7 +73,7 @@ async function runMigration() {
             );
             console.log('   Coluna two_factor_disabled criada');
         } else {
-            console.log('   Coluna two_factor_disabled ja existe');
+            console.log('   Coluna two_factor_disabled já existe');
         }
 
         // 3. Popular two_factor_enabled para os emails da whitelist
@@ -97,22 +97,22 @@ async function runMigration() {
                 );
                 if (exists.length === 0) {
                     naoEncontrados.push(email);
-                    console.log('   [NAO ENCONTRADO] ' + email);
+                    console.log('   [NÃO ENCONTRADO] ' + email);
                 } else {
-                    console.log('   [JA ATIVO] ' + email);
+                    console.log('   [JÁ ATIVO] ' + email);
                 }
             }
         }
 
         // 4. Resumo
         console.log('\n' + '='.repeat(60));
-        console.log('RESUMO DA MIGRACAO');
+        console.log('RESUMO DA MIGRAÇÃO');
         console.log('='.repeat(60));
         console.log('   Emails na whitelist:    ' + WHITELIST_EMAILS.length);
         console.log('   Ativados agora:         ' + ativados);
-        console.log('   Nao encontrados no DB:  ' + naoEncontrados.length);
+        console.log('   Não encontrados no DB:  ' + naoEncontrados.length);
         if (naoEncontrados.length > 0) {
-            console.log('   Emails nao encontrados:');
+            console.log('   Emails não encontrados:');
             naoEncontrados.forEach(e => console.log('     - ' + e));
         }
 

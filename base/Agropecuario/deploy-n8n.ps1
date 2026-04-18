@@ -77,7 +77,7 @@ if ($Status) {
     Write-Host ""
     
     # Verificar container
-    $cmd = "docker ps --filter name=n8n --format '{{.Status}}' $DEVNULL $OR echo 'Docker nao disponivel'"
+    $cmd = "docker ps --filter name=n8n --format '{{.Status}}' $DEVNULL $OR echo 'Docker não disponível'"
     $containerStatus = SSH-Executar $cmd
     Write-Host "  🐳 Container: " -NoNewline
     if ($containerStatus -match "Up") {

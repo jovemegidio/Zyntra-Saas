@@ -15,6 +15,7 @@ const FinanceiroIntegracaoService = require('../services/financeiro-integracao.s
 const VendasEstoqueIntegracaoService = require('../services/vendas-estoque-integracao.service');
 const PixGatewayService = require('../services/pix-gateway.service');
 const ReguaCobrancaService = require('../services/regua-cobranca.service');
+const { sendEmail, isConfigured: isEmailConfigured } = require('../../../utils/email');
 
 /**
  * MÓDULO DE FATURAMENTO NF-e COMPLETO
@@ -41,6 +42,106 @@ module.exports = (pool, authenticateToken) => {
         reguaService.configurarEmailTransporter();
         reguaService.iniciarServico();
     }).catch(err => console.error('[RÉGUA] Erro ao inicializar:', err));
+
+    // ============================================================
+    // HELPER: Enviar DANFE por email ao cliente
+    // ============================================================
+    // Emails fixos que SEMPRE recebem DANFE
+    const DANFE_DESTINATARIOS_FIXOS = ['logistica@aluforce.ind.br', 'aluforce@aluforce.ind.br'];
+
+    async function enviarDanfeEmail(nfeId, clienteEmail, clienteNome, numeroNfe, valorTotal) {
+        if (!isEmailConfigured()) {
+            console.log(`[FATURAMENTO-EMAIL] Email não enviado: SMTP não configurado`);
+            return { enviado: false, motivo: 'SMTP não configurado' };
+        }
+
+        // Montar lista de destinatários: fixos + cliente (se tiver)
+        const destinatarios = [...DANFE_DESTINATARIOS_FIXOS];
+        if (clienteEmail && !destinatarios.includes(clienteEmail.toLowerCase())) {
+            destinatarios.push(clienteEmail);
+        }
+
+        try {
+            // Gerar PDF do DANFE
+            const DANFEService = require('../../../src/nfe/services/DANFEService');
+            const danfeSvc = new DANFEService(pool);
+            const pdfBuffer = await danfeSvc.gerarDANFE(nfeId);
+
+            const html = `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <div style="background: #1e40af; color: white; padding: 20px; border-radius: 8px 8px 0 0; text-align: center;">
+                        <h2 style="margin: 0;">Zyntra ERP</h2>
+                        <p style="margin: 5px 0 0; opacity: 0.9;">Nota Fiscal Eletrônica</p>
+                    </div>
+                    <div style="background: #f8fafc; padding: 25px; border: 1px solid #e2e8f0; border-top: none;">
+                        <p>Prezado(a) <strong>${clienteNome || 'Cliente'}</strong>,</p>
+                        <p>Segue em anexo a DANFE (Documento Auxiliar da Nota Fiscal Eletrônica) referente à NF-e nº <strong>${numeroNfe}</strong>.</p>
+                        <div style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin: 15px 0;">
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <tr><td style="padding: 5px 0; color: #64748b;">NF-e:</td><td style="padding: 5px 0; font-weight: 600;">${numeroNfe}</td></tr>
+                                <tr><td style="padding: 5px 0; color: #64748b;">Valor Total:</td><td style="padding: 5px 0; font-weight: 600;">R$ ${(valorTotal || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td></tr>
+                            </table>
+                        </div>
+                        <p style="color: #64748b; font-size: 13px;">Este é um email automático enviado pelo sistema Zyntra ERP. Em caso de dúvidas, entre em contato com o setor fiscal.</p>
+                    </div>
+                    <div style="text-align: center; padding: 15px; color: #94a3b8; font-size: 12px;">
+                        <p>Zyntra ERP &copy; ${new Date().getFullYear()}</p>
+                    </div>
+                </div>
+            `;
+
+            const anexo = [{
+                filename: `DANFE-${numeroNfe}.pdf`,
+                content: pdfBuffer,
+                contentType: 'application/pdf'
+            }];
+
+            const result = await sendEmail(
+                destinatarios.join(', '),
+                `NF-e ${numeroNfe} - DANFE`,
+                html,
+                `DANFE da NF-e ${numeroNfe}. Valor: R$ ${(valorTotal || 0).toFixed(2)}`,
+                anexo
+            );
+
+            if (result.success) {
+                console.log(`[FATURAMENTO-EMAIL] ✅ DANFE enviada para ${destinatarios.join(', ')} (NF-e ${numeroNfe})`);
+            }
+            return { enviado: result.success, destinatarios, messageId: result.messageId, erro: result.error };
+        } catch (err) {
+            console.error(`[FATURAMENTO-EMAIL] ❌ Erro ao enviar DANFE por email:`, err.message);
+            return { enviado: false, motivo: err.message };
+        }
+    }
+
+    // ============================================================
+    // LISTAR PEDIDOS APROVADOS (para selector no modal "Nova NF-e")
+    // ============================================================
+
+    router.get('/pedidos-aprovados', authenticateToken, async (req, res) => {
+        try {
+            const [pedidos] = await pool.query(`
+                SELECT
+                    p.id,
+                    p.cliente_nome,
+                    COALESCE(c.nome, p.cliente_nome) as cliente,
+                    p.valor,
+                    p.created_at as data_pedido,
+                    p.status
+                FROM pedidos p
+                LEFT JOIN clientes c ON p.cliente_id = c.id
+                WHERE p.status = 'pedido-aprovado'
+                  AND p.id NOT IN (SELECT COALESCE(pedido_id, 0) FROM nfes WHERE pedido_id IS NOT NULL)
+                ORDER BY p.created_at DESC
+                LIMIT 50
+            `);
+
+            res.json({ success: true, data: pedidos });
+        } catch (error) {
+            console.error('[FATURAMENTO] Erro ao listar pedidos aprovados:', error);
+            res.status(500).json({ success: false, message: error.message });
+        }
+    });
 
     // ============================================================
     // GERAR NF-e A PARTIR DE PEDIDO (COMPLETO)
@@ -108,10 +209,11 @@ module.exports = (pool, authenticateToken) => {
                     c.cidade as cliente_cidade,
                     c.estado as cliente_estado,
                     c.cep as cliente_cep,
-                    c.email as cliente_email
+                    c.email as cliente_email,
+                    c.email_nfe as cliente_email_nfe
                 FROM pedidos p
                 INNER JOIN clientes c ON p.cliente_id = c.id
-                WHERE p.id = ? AND p.status = 'aprovado'
+                WHERE p.id = ? AND p.status IN ('aprovado', 'pedido-aprovado')
             `, [pedido_id]);
 
             if (pedidos.length === 0) {
@@ -503,6 +605,15 @@ module.exports = (pool, authenticateToken) => {
             // AUDITORIA ENTERPRISE: Log de geração de NF-e fiscal
             console.log(`[FATURAMENTO-AUDIT] ✅ NF-e ${proximoNumero} gerada por usuário ${usuario_id} para pedido ${pedido_id}. Valor: R$ ${valorTotal.toFixed(2)}`);
 
+            // Enviar DANFE por email AUTOMATICAMENTE (assíncrono, não bloqueia resposta)
+            let emailResult = null;
+            {
+                const emailDestinatario = pedido.cliente_email_nfe || pedido.cliente_email;
+                enviarDanfeEmail(nfe_id, emailDestinatario, pedido.cliente_nome, proximoNumero, valorTotal)
+                    .then(r => { emailResult = r; })
+                    .catch(err => console.error('[FATURAMENTO-EMAIL] Erro assíncrono:', err.message));
+            }
+
             res.json({
                 success: true,
                 message: integracoes.avisos.length === 0 ? 'NF-e gerada com sucesso' : 'NF-e gerada com avisos de integração',
@@ -563,48 +674,83 @@ module.exports = (pool, authenticateToken) => {
 
     router.get('/nfes', authenticateToken, async (req, res) => {
         try {
-            const { status, data_inicio, data_fim, cliente_id } = req.query;
+            const { status, data_inicio, data_fim, cliente_id, busca } = req.query;
 
+            // UNION: NF-es formais (tabela nfes) + Pedidos faturados sem NF-e formal
             let query = `
-                SELECT
-                    n.id,
-                    n.numero,
-                    n.serie,
-                    n.cliente_id,
-                    COALESCE(n.destinatario_nome, c.nome) as cliente_nome,
-                    COALESCE(n.destinatario_nome, c.nome) as destinatario,
-                    COALESCE(n.valor_total, 0) as valor,
-                    n.status,
-                    n.data_emissao,
-                    n.natureza_operacao as observacoes
-                FROM nfes n
-                LEFT JOIN clientes c ON n.cliente_id = c.id
+                SELECT * FROM (
+                    SELECT
+                        n.id,
+                        'nfe' COLLATE utf8mb4_general_ci as origem,
+                        n.numero COLLATE utf8mb4_general_ci as numero,
+                        COALESCE(n.serie, 1) as serie,
+                        n.cliente_id,
+                        COALESCE(n.destinatario_nome, c.nome) COLLATE utf8mb4_general_ci as cliente_nome,
+                        COALESCE(n.destinatario_nome, c.nome) COLLATE utf8mb4_general_ci as destinatario,
+                        COALESCE(n.valor_total, 0) as valor,
+                        n.status COLLATE utf8mb4_general_ci as status,
+                        n.data_emissao,
+                        n.natureza_operacao COLLATE utf8mb4_general_ci as observacoes,
+                        n.chave_acesso COLLATE utf8mb4_general_ci as chave_acesso,
+                        n.protocolo_autorizacao COLLATE utf8mb4_general_ci as protocolo,
+                        n.pedido_id
+                    FROM nfes n
+                    LEFT JOIN clientes c ON n.cliente_id = c.id
+
+                    UNION ALL
+
+                    SELECT
+                        p.id,
+                        'pedido' as origem,
+                        COALESCE(p.numero_nf, LPAD(p.id, 9, '0')) as numero,
+                        1 as serie,
+                        p.cliente_id,
+                        COALESCE(p.cliente_nome, c.nome) as cliente_nome,
+                        COALESCE(p.cliente_nome, c.nome) as destinatario,
+                        COALESCE(p.valor, 0) as valor,
+                        'autorizada' as status,
+                        COALESCE(p.data_faturamento, p.created_at) as data_emissao,
+                        'VENDA DE MERCADORIA' as observacoes,
+                        p.nfe_chave as chave_acesso,
+                        p.nfe_protocolo as protocolo,
+                        p.id as pedido_id
+                    FROM pedidos p
+                    LEFT JOIN clientes c ON p.cliente_id = c.id
+                    WHERE p.status = 'faturado'
+                      AND p.id NOT IN (SELECT COALESCE(pedido_id, 0) FROM nfes WHERE pedido_id IS NOT NULL)
+                ) AS unificado
                 WHERE 1=1
             `;
 
             const params = [];
 
             if (status) {
-                query += ' AND n.status = ?';
+                query += ' AND status = ?';
                 params.push(status);
             }
 
             if (data_inicio) {
-                query += ' AND DATE(n.data_emissao) >= ?';
+                query += ' AND DATE(data_emissao) >= ?';
                 params.push(data_inicio);
             }
 
             if (data_fim) {
-                query += ' AND DATE(n.data_emissao) <= ?';
+                query += ' AND DATE(data_emissao) <= ?';
                 params.push(data_fim);
             }
 
             if (cliente_id) {
-                query += ' AND n.cliente_id = ?';
+                query += ' AND cliente_id = ?';
                 params.push(cliente_id);
             }
 
-            query += ' ORDER BY n.data_emissao DESC LIMIT 100';
+            if (busca) {
+                query += ' AND (cliente_nome LIKE ? OR numero LIKE ? OR destinatario LIKE ?)';
+                const term = `%${busca}%`;
+                params.push(term, term, term);
+            }
+
+            query += ' ORDER BY data_emissao DESC LIMIT 100';
 
             const [nfes] = await pool.query(query, params);
 
@@ -629,10 +775,72 @@ module.exports = (pool, authenticateToken) => {
     router.get('/nfes/:id', authenticateToken, async (req, res) => {
         try {
             const { id } = req.params;
+            const origem = req.query.origem || 'nfe';
 
+            // Se origem=pedido, buscar dados do pedido faturado
+            if (origem === 'pedido') {
+                const [pedidos] = await pool.query(`
+                    SELECT
+                        p.id,
+                        'pedido' as origem,
+                        COALESCE(p.numero_nf, LPAD(p.id, 9, '0')) as numero,
+                        1 as serie,
+                        p.cliente_id,
+                        COALESCE(p.cliente_nome, c.nome) as cliente_nome,
+                        COALESCE(p.cliente_nome, c.nome) as destinatario,
+                        COALESCE(c.cnpj, c.cpf, '') as destinatario_cnpj_cpf,
+                        COALESCE(p.valor, 0) as valor_total,
+                        COALESCE(p.valor, 0) as valor,
+                        'autorizada' as status,
+                        COALESCE(p.data_faturamento, p.created_at) as data_emissao,
+                        'VENDA DE MERCADORIA' as natureza_operacao,
+                        p.nfe_chave as chave_acesso,
+                        p.nfe_protocolo as protocolo,
+                        p.observacao as observacoes,
+                        c.email as cliente_email,
+                        p.id as pedido_id
+                    FROM pedidos p
+                    LEFT JOIN clientes c ON p.cliente_id = c.id
+                    WHERE p.id = ? AND p.status = 'faturado'
+                `, [id]);
+
+                if (pedidos.length === 0) {
+                    return res.status(404).json({
+                        success: false,
+                        message: 'Pedido faturado não encontrado'
+                    });
+                }
+
+                // Buscar itens do pedido
+                const [itens] = await pool.query(`
+                    SELECT
+                        pi.id,
+                        pi.descricao as descricao,
+                        COALESCE(pr.descricao, pi.descricao) as produto_nome,
+                        pi.quantidade,
+                        pi.preco_unitario as valor_unitario,
+                        pi.subtotal as valor_total,
+                        pi.codigo,
+                        pi.unidade
+                    FROM pedido_itens pi
+                    LEFT JOIN produtos pr ON pi.produto_id = pr.id
+                    WHERE pi.pedido_id = ?
+                `, [id]);
+
+                return res.json({
+                    success: true,
+                    data: {
+                        ...pedidos[0],
+                        itens
+                    }
+                });
+            }
+
+            // Busca padrão na tabela nfes
             const [nfes] = await pool.query(`
                 SELECT
                     n.*,
+                    'nfe' as origem,
                     n.destinatario_nome as cliente_nome,
                     c.email as cliente_email
                 FROM nfes n
@@ -832,6 +1040,13 @@ module.exports = (pool, authenticateToken) => {
     router.get('/nfes/:id/xml', authenticateToken, async (req, res) => {
         try {
             const { id } = req.params;
+            const origem = req.query.origem || 'nfe';
+
+            // Pedidos faturados não possuem XML formal
+            if (origem === 'pedido') {
+                return res.status(404).json({ success: false, message: 'XML não disponível — este registro é um pedido faturado sem NF-e formal emitida.' });
+            }
+
             const [[nfe]] = await pool.query('SELECT numero, xml_nfe FROM nfes WHERE id = ?', [id]);
             if (!nfe) return res.status(404).json({ success: false, message: 'NF-e não encontrada' });
             if (!nfe.xml_nfe) return res.status(404).json({ success: false, message: 'XML não disponível para esta NF-e' });
@@ -975,15 +1190,38 @@ module.exports = (pool, authenticateToken) => {
 
     router.get('/estatisticas', authenticateToken, async (req, res) => {
         try {
+            // Estatísticas combinadas: nfes formais + pedidos faturados sem NF-e formal
             const [stats] = await pool.query(`
                 SELECT
-                    COUNT(*) as total_nfes,
-                    SUM(CASE WHEN status = 'autorizada' THEN 1 ELSE 0 END) as autorizadas,
-                    SUM(CASE WHEN status = 'pendente' OR status = 'digitacao' OR status = 'emitida' THEN 1 ELSE 0 END) as pendentes,
-                    SUM(CASE WHEN status = 'cancelada' THEN 1 ELSE 0 END) as canceladas,
-                    SUM(CASE WHEN status = 'autorizada' THEN COALESCE(valor_total, 0) ELSE 0 END) as valor_total_faturado,
-                    SUM(CASE WHEN status = 'autorizada' AND MONTH(data_emissao) = MONTH(NOW()) THEN COALESCE(valor_total, 0) ELSE 0 END) as valor_mes_atual
-                FROM nfes
+                    SUM(total_nfes) as total_nfes,
+                    SUM(autorizadas) as autorizadas,
+                    SUM(pendentes) as pendentes,
+                    SUM(canceladas) as canceladas,
+                    SUM(valor_total_faturado) as valor_total_faturado,
+                    SUM(valor_mes_atual) as valor_mes_atual
+                FROM (
+                    SELECT
+                        COUNT(*) as total_nfes,
+                        SUM(CASE WHEN status COLLATE utf8mb4_general_ci = 'autorizada' THEN 1 ELSE 0 END) as autorizadas,
+                        SUM(CASE WHEN status COLLATE utf8mb4_general_ci = 'pendente' OR status COLLATE utf8mb4_general_ci = 'digitacao' OR status COLLATE utf8mb4_general_ci = 'emitida' THEN 1 ELSE 0 END) as pendentes,
+                        SUM(CASE WHEN status COLLATE utf8mb4_general_ci = 'cancelada' THEN 1 ELSE 0 END) as canceladas,
+                        SUM(CASE WHEN status COLLATE utf8mb4_general_ci = 'autorizada' THEN COALESCE(valor_total, 0) ELSE 0 END) as valor_total_faturado,
+                        SUM(CASE WHEN status COLLATE utf8mb4_general_ci = 'autorizada' AND MONTH(data_emissao) = MONTH(NOW()) AND YEAR(data_emissao) = YEAR(NOW()) THEN COALESCE(valor_total, 0) ELSE 0 END) as valor_mes_atual
+                    FROM nfes
+
+                    UNION ALL
+
+                    SELECT
+                        COUNT(*) as total_nfes,
+                        COUNT(*) as autorizadas,
+                        0 as pendentes,
+                        0 as canceladas,
+                        SUM(COALESCE(p.valor, 0)) as valor_total_faturado,
+                        SUM(CASE WHEN MONTH(COALESCE(p.data_faturamento, p.created_at)) = MONTH(NOW()) AND YEAR(COALESCE(p.data_faturamento, p.created_at)) = YEAR(NOW()) THEN COALESCE(p.valor, 0) ELSE 0 END) as valor_mes_atual
+                    FROM pedidos p
+                    WHERE p.status = 'faturado'
+                      AND p.id NOT IN (SELECT COALESCE(pedido_id, 0) FROM nfes WHERE pedido_id IS NOT NULL)
+                ) combined
             `);
 
             res.json({
@@ -1094,6 +1332,22 @@ module.exports = (pool, authenticateToken) => {
                     console.warn(`[FATURAMENTO] ⚠ Estoque não baixado para NFe ${id}: ${estoqueErr.message}`);
                 }
 
+                // Enviar DANFE por email automaticamente após autorização SEFAZ
+                const emailDanfe = { enviado: false };
+                try {
+                    const [[nfeCliente]] = await pool.query(
+                        `SELECT c.email, c.email_nfe, c.nome as cliente_nome, n.valor_total, n.numero
+                         FROM nfes n LEFT JOIN clientes c ON n.cliente_id = c.id WHERE n.id = ?`, [id]
+                    );
+                    if (nfeCliente) {
+                        const emailDest = nfeCliente.email_nfe || nfeCliente.email;
+                        const r = await enviarDanfeEmail(parseInt(id), emailDest, nfeCliente.cliente_nome, nfe.numero_nfe || nfeCliente.numero, nfeCliente.valor_total);
+                        emailDanfe.enviado = r.enviado;
+                    }
+                } catch (emailErr) {
+                    console.warn(`[FATURAMENTO-EMAIL] ⚠ DANFE email falhou: ${emailErr.message}`);
+                }
+
                 res.json({
                     success: true,
                     message: integracoesSefaz.avisos.length === 0
@@ -1140,6 +1394,50 @@ module.exports = (pool, authenticateToken) => {
             res.status(500).json({ success: false, message: error.message });
         } finally {
             connection.release();
+        }
+    });
+
+    // ============================================================
+    // ENVIAR DANFE POR EMAIL (MANUAL)
+    // ============================================================
+
+    router.post('/nfes/:id/enviar-email', authenticateToken, async (req, res) => {
+        try {
+            const { id } = req.params;
+            const { email: emailOverride } = req.body;
+
+            const [[nfeData]] = await pool.query(
+                `SELECT n.numero, n.valor_total, n.cliente_id, n.destinatario_nome,
+                        c.email, c.email_nfe, c.nome as cliente_nome
+                 FROM nfes n LEFT JOIN clientes c ON n.cliente_id = c.id
+                 WHERE n.id = ?`, [id]
+            );
+
+            if (!nfeData) {
+                return res.status(404).json({ success: false, message: 'NF-e não encontrada' });
+            }
+
+            const emailDest = emailOverride || nfeData.email_nfe || nfeData.email;
+            if (!emailDest) {
+                return res.status(400).json({ success: false, message: 'Email do destinatário não informado. Informe o email no cadastro do cliente ou envie no campo "email".' });
+            }
+
+            const result = await enviarDanfeEmail(
+                parseInt(id),
+                emailDest,
+                nfeData.cliente_nome || nfeData.destinatario_nome,
+                nfeData.numero,
+                nfeData.valor_total
+            );
+
+            if (result.enviado) {
+                res.json({ success: true, message: `DANFE enviada para ${emailDest}` });
+            } else {
+                res.status(500).json({ success: false, message: result.motivo || 'Falha ao enviar email' });
+            }
+        } catch (error) {
+            console.error('[FATURAMENTO-EMAIL] Erro:', error);
+            res.status(500).json({ success: false, message: error.message });
         }
     });
 

@@ -1228,7 +1228,7 @@
                     <div class="kanban-column">
                         <div class="kanban-column-header">
                             <div class="kanban-column-title">
-                                <div class="indicator negociacao"></div>
+                                <div class="indicator negociação"></div>
                                 <h3>Negociação</h3>
                             </div>
                             <span class="kanban-count" id="count-negociacao">0</span>
@@ -1384,7 +1384,7 @@
                         <option value="novo">Novo Lead</option>
                         <option value="contato">Em Contato</option>
                         <option value="qualificado">Qualificado</option>
-                        <option value="negociacao">Em Negociação</option>
+                        <option value="negociação">Em Negociação</option>
                         <option value="convertido">Convertido</option>
                         <option value="perdido">Perdido</option>
                     </select>
@@ -1434,7 +1434,7 @@
                         <div>
                             <strong style="color: #1e40af; font-size: 14px;">Como funciona?</strong>
                             <p style="color: #1e40af; font-size: 13px; margin-top: 4px; opacity: 0.8;">
-                                Cole os CNPJs abaixo (um por linha) e o sistema irã consultar automaticamente a Receita Federal para obter os dados completos de cada empresa.
+                                Cole os CNPJs abaixo (um por linha) e o sistema irá consultar automaticamente a Receita Federal para obter os dados completos de cada empresa.
                             </p>
                         </div>
                     </div>
@@ -1496,7 +1496,7 @@ Aceita com ou sem formatação"></textarea>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="CRM.fecharModal('modal-importar')" id="btn-cancel-import">Cancelar</button>
-                <button class="btn btn-primary" onclick="CRM.iniciarImportacao()" id="btn-start-import">
+                <button class="btn btn-primary" onclick="CRM.iniciarImportação()" id="btn-start-import">
                     <i class="fas fa-cloud-download-alt"></i> Iniciar Importação
                 </button>
             </div>
@@ -1613,8 +1613,8 @@ Aceita com ou sem formatação"></textarea>
 
         carregarUsuario() {
             const hora = new Date().getHours();
-            let saudacao = hora < 12 ? 'Bom dia' : hora < 18 ? 'Boa tarde' : 'Boa noite';
-            document.getElementById('greeting-text').textContent = saudacao;
+            let saudação = hora < 12 ? 'Bom dia' : hora < 18 ? 'Boa tarde' : 'Boa noite';
+            document.getElementById('greeting-text').textContent = saudação;
             
             fetch('/api/me', { credentials: 'include' })
                 .then(res => res.ok ? res.json() : null)
@@ -1655,24 +1655,24 @@ Aceita com ou sem formatação"></textarea>
             const total = this.leads.length;
             const contato = this.leads.filter(l => l.status === 'contato').length;
             const qualificado = this.leads.filter(l => l.status === 'qualificado').length;
-            const negociacao = this.leads.filter(l => l.status === 'negociacao').length;
+            const negociação = this.leads.filter(l => l.status === 'negociação').length;
             const convertido = this.leads.filter(l => l.status === 'convertido').length;
 
             document.getElementById('metric-total').textContent = total;
             document.getElementById('metric-contato').textContent = contato;
             document.getElementById('metric-qualificado').textContent = qualificado;
-            document.getElementById('metric-negociacao').textContent = negociacao;
+            document.getElementById('metric-negociacao').textContent = negociação;
             document.getElementById('metric-convertido').textContent = convertido;
 
             document.getElementById('count-novo').textContent = this.leads.filter(l => l.status === 'novo' || !l.status).length;
             document.getElementById('count-contato').textContent = contato;
             document.getElementById('count-qualificado').textContent = qualificado;
-            document.getElementById('count-negociacao').textContent = negociacao;
+            document.getElementById('count-negociacao').textContent = negociação;
             document.getElementById('count-convertido').textContent = convertido;
         },
 
         renderizarKanban() {
-            const colunas = ['novo', 'contato', 'qualificado', 'negociacao', 'convertido'];
+            const colunas = ['novo', 'contato', 'qualificado', 'negociação', 'convertido'];
             
             colunas.forEach(status => {
                 const leads = this.leads.filter(l => (l.status || 'novo') === status);
@@ -1709,7 +1709,7 @@ Aceita com ou sem formatação"></textarea>
                         ${lead.cidade ? `<div class="lead-detail"><i class="fas fa-map-marker-alt"></i> ${lead.cidade}${lead.uf ? '/' + lead.uf : ''}</div>` : ''}
                     </div>
                     <div class="lead-tags">
-                        ${lead.situação === 'ATIVA' ? '<span class="lead-tag ativo">Ativa</span>' : ''}
+                        ${lead.situacao === 'ATIVA' ? '<span class="lead-tag ativo">Ativa</span>' : ''}
                         ${lead.optante_simples ? '<span class="lead-tag simples">Simples</span>' : ''}
                         ${score >= 70 ? '<span class="lead-tag score-high">Score ' + score + '%</span>' : ''}
                     </div>
@@ -1777,7 +1777,7 @@ Aceita com ou sem formatação"></textarea>
         },
 
         formatarStatus(status) {
-            const map = { novo: 'Novo', contato: 'Em Contato', qualificado: 'Qualificado', negociacao: 'Negociação', convertido: 'Convertido', perdido: 'Perdido' };
+            const map = { novo: 'Novo', contato: 'Em Contato', qualificado: 'Qualificado', negociação: 'Negociação', convertido: 'Convertido', perdido: 'Perdido' };
             return map[status] || 'Novo';
         },
 
@@ -1799,6 +1799,14 @@ Aceita com ou sem formatação"></textarea>
             });
 
             columns.forEach(col => {
+                // Guard: só adiciona listeners de drop uma vez por coluna.
+                // renderizarKanban() chama initDragAndDrop() repetidamente,
+                // mas as colunas são elementos DOM fixos — sem o guard cada
+                // novo render acumula um listener extra, causando múltiplos
+                // disparos de atualizarStatusLead() e spam de toasts.
+                if (col.dataset.dropInit) return;
+                col.dataset.dropInit = '1';
+
                 col.addEventListener('dragover', e => {
                     e.preventDefault();
                     col.style.background = '#e0f2fe';
@@ -1901,7 +1909,7 @@ Aceita com ou sem formatação"></textarea>
         },
 
         renderizarKanbanFiltrado(leads) {
-            const colunas = ['novo', 'contato', 'qualificado', 'negociacao', 'convertido'];
+            const colunas = ['novo', 'contato', 'qualificado', 'negociação', 'convertido'];
             colunas.forEach(status => {
                 const filtered = leads.filter(l => (l.status || 'novo') === status);
                 const container = document.getElementById(`col-${status}`);
@@ -2064,7 +2072,7 @@ Aceita com ou sem formatação"></textarea>
                     this.atualizarLoadingEtapa('cnae', 'skip');
                 }
 
-                // ========== 5. DDD/REGIÃO ==========
+                // ========== 5. DDD/REGIÁO ==========
                 this.atualizarLoadingEtapa('ddd', 'loading');
                 try {
                     const ddd = dadosEnriquecidos.receita_federal.ddd_telefone_1?.substring(0, 2);
@@ -2140,7 +2148,7 @@ Aceita com ou sem formatação"></textarea>
                 uf: data.uf,
                 bairro: data.bairro,
                 logradouro: data.logradouro,
-                numero: data.numero,
+                número: data.numero,
                 cep: data.cep,
                 ddd_telefone_1: data.telefone?.replace(/\D/g, ''),
                 email: data.email,
@@ -2151,7 +2159,7 @@ Aceita com ou sem formatação"></textarea>
                 capital_social: parseFloat(data.capital_social) || 0,
                 opcao_pelo_simples: data.simples?.optante === 'Sim',
                 data_inicio_atividade: data.abertura,
-                qsa: data.qsa?.map(s => ({ nome_socio: s.nome, qualificação_socio: s.qual })) || []
+                qsa: data.qsa?.map(s => ({ nome_socio: s.nome, qualificacao_socio: s.qual })) || []
             };
         },
 
@@ -2318,7 +2326,7 @@ Aceita com ou sem formatação"></textarea>
                 cidade: rf.municipio,
                 uf: rf.uf,
                 bairro: rf.bairro,
-                endereco: `${rf.logradouro || ''}, ${rf.número || 's/n'}`.trim(),
+                endereço: `${rf.logradouro || ''}, ${rf.numero || 's/n'}`.trim(),
                 cep: rf.cep,
                 telefone: rf.ddd_telefone_1 ? `(${rf.ddd_telefone_1.substring(0,2)}) ${rf.ddd_telefone_1.substring(2)}` : '',
                 email: rf.email || '',
@@ -2327,7 +2335,7 @@ Aceita com ou sem formatação"></textarea>
                 cnae_descricao: rf.cnae_fiscal_descricao,
                 cnae_grupo: cnae?.descricao || null,
                 segmento: this.inferirSegmento(rf.cnae_fiscal_descricao),
-                situacao: rf.descricao_situacao_cadastral,
+                situação: rf.descricao_situacao_cadastral,
                 capital_social: rf.capital_social,
                 optante_simples: rf.opcao_pelo_simples,
                 optante_mei: rf.opcao_pelo_mei || false,
@@ -2412,7 +2420,7 @@ Aceita com ou sem formatação"></textarea>
                 cidade: document.getElementById('lead-cidade').value,
                 uf: document.getElementById('lead-uf').value,
                 status: document.getElementById('lead-status').value,
-                observacoes: document.getElementById('lead-obs').value,
+                observações: document.getElementById('lead-obs').value,
                 created_at: id ? undefined : new Date().toISOString()
             };
 
@@ -2474,7 +2482,7 @@ Aceita com ou sem formatação"></textarea>
                             </p>
                             <p style="margin-bottom: 12px;">
                                 <strong>Situação:</strong> 
-                                <span style="padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; ${lead.situação === 'ATIVA' ? 'background: #dcfce7; color: #166534;' : 'background: #fee2e2; color: #991b1b;'}">${lead.situação || '-'}</span>
+                                <span style="padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; ${lead.situacao === 'ATIVA' ? 'background: #dcfce7; color: #166534;' : 'background: #fee2e2; color: #991b1b;'}">${lead.situacao || '-'}</span>
                             </p>
                             <p style="margin-bottom: 12px;"><strong>Data de Abertura:</strong> ${dataAbertura} ${idadeEmpresa ? `<span style="color: #64748b;">(${idadeEmpresa} anos)</span>` : ''}</p>
                             <p style="margin-bottom: 12px;"><strong>Capital Social:</strong> <span style="color: #3b82f6; font-weight: 600;">${capitalFormatado}</span></p>
@@ -2497,7 +2505,7 @@ Aceita com ou sem formatação"></textarea>
                         
                         <div class="form-section-title"><i class="fas fa-map-marker-alt"></i> Localização</div>
                         <div style="background: #f8fafc; border-radius: 12px; padding: 16px;">
-                            <p style="margin-bottom: 8px;"><i class="fas fa-road" style="color: #64748b; width: 20px;"></i> ${lead.endereco || '-'}</p>
+                            <p style="margin-bottom: 8px;"><i class="fas fa-road" style="color: #64748b; width: 20px;"></i> ${lead.endereço || '-'}</p>
                             <p style="margin-bottom: 8px;"><i class="fas fa-map" style="color: #64748b; width: 20px;"></i> ${lead.bairro || '-'}</p>
                             <p style="margin-bottom: 8px;"><i class="fas fa-city" style="color: #64748b; width: 20px;"></i> <strong>${lead.cidade || '-'}/${lead.uf || '-'}</strong></p>
                             <p><i class="fas fa-mail-bulk" style="color: #64748b; width: 20px;"></i> CEP: ${lead.cep || '-'}</p>
@@ -2553,7 +2561,7 @@ Aceita com ou sem formatação"></textarea>
                                 </div>
                                 <div>
                                     <p style="font-size: 13px; font-weight: 600; color: #1e293b;">${s.nome_socio || s.nome || '-'}</p>
-                                    <p style="font-size: 11px; color: #64748b;">${s.qualificação_socio || s.qualificação || 'Sãcio'}</p>
+                                    <p style="font-size: 11px; color: #64748b;">${s.qualificacao_socio || s.qualificação || 'Sãcio'}</p>
                                 </div>
                             </div>
                         `).join('')}
@@ -2582,7 +2590,7 @@ Aceita com ou sem formatação"></textarea>
             document.getElementById('lead-cidade').value = lead.cidade || '';
             document.getElementById('lead-uf').value = lead.uf || '';
             document.getElementById('lead-status').value = lead.status || 'novo';
-            document.getElementById('lead-obs').value = lead.observacoes || '';
+            document.getElementById('lead-obs').value = lead.observações || '';
             
             document.getElementById('modal-lead').classList.add('active');
         },
@@ -2626,8 +2634,8 @@ Aceita com ou sem formatação"></textarea>
 
         abrirWhatsApp(telefone) {
             if (!telefone) return;
-            const numero = telefone.replace(/\D/g, '');
-            window.open(`https://wa.me/55${número}`, '_blank');
+            const número = telefone.replace(/\D/g, '');
+            window.open(`https://wa.me/55${numero}`, '_blank');
         },
 
         abrirEmail(email) {
@@ -2657,7 +2665,7 @@ Aceita com ou sem formatação"></textarea>
 
             const dataHoje = new Date().toLocaleDateString('pt-BR');
             const horaAtual = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-            const statusLabel = (s) => ({ novo: 'Novo', contato: 'Em Contato', qualificado: 'Qualificado', negociacao: 'Negociação', convertido: 'Convertido', perdido: 'Perdido' }[s] || 'Novo');
+            const statusLabel = (s) => ({ novo: 'Novo', contato: 'Em Contato', qualificado: 'Qualificado', negociação: 'Negociação', convertido: 'Convertido', perdido: 'Perdido' }[s] || 'Novo');
             const escXml = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
             const formatMoeda = (v) => v ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v) : '-';
 
@@ -2665,7 +2673,7 @@ Aceita com ou sem formatação"></textarea>
             const totalNovo = dadosExportar.filter(l => (l.status || 'novo') === 'novo').length;
             const totalContato = dadosExportar.filter(l => l.status === 'contato').length;
             const totalQualificado = dadosExportar.filter(l => l.status === 'qualificado').length;
-            const totalNegociacao = dadosExportar.filter(l => l.status === 'negociacao').length;
+            const totalNegociação = dadosExportar.filter(l => l.status === 'negociação').length;
             const totalConvertido = dadosExportar.filter(l => l.status === 'convertido').length;
 
             // Gerar Excel XML (abre direto no Excel)
@@ -2688,7 +2696,7 @@ Aceita com ou sem formatação"></textarea>
   <Font ss:Bold="1" ss:Color="#1E3A8A" ss:Size="16" ss:FontName="Segoe UI"/>
   <Alignment ss:Horizontal="Left" ss:Vertical="Center"/>
  </Style>
- <Style ss:ID="subtitulo">
+ <Style ss:ID="subtítulo">
   <Font ss:Color="#64748B" ss:Size="10" ss:FontName="Segoe UI"/>
   <Alignment ss:Horizontal="Left" ss:Vertical="Center"/>
  </Style>
@@ -2736,7 +2744,7 @@ Aceita com ou sem formatação"></textarea>
  <Style ss:ID="statusNovo"><Font ss:Bold="1" ss:Size="9" ss:FontName="Segoe UI" ss:Color="#1E40AF"/><Interior ss:Color="#DBEAFE" ss:Pattern="Solid"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style>
  <Style ss:ID="statusContato"><Font ss:Bold="1" ss:Size="9" ss:FontName="Segoe UI" ss:Color="#92400E"/><Interior ss:Color="#FEF3C7" ss:Pattern="Solid"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style>
  <Style ss:ID="statusQualificado"><Font ss:Bold="1" ss:Size="9" ss:FontName="Segoe UI" ss:Color="#6B21A8"/><Interior ss:Color="#F3E8FF" ss:Pattern="Solid"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style>
- <Style ss:ID="statusNegociacao"><Font ss:Bold="1" ss:Size="9" ss:FontName="Segoe UI" ss:Color="#9A3412"/><Interior ss:Color="#FFEDD5" ss:Pattern="Solid"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style>
+ <Style ss:ID="statusNegociação"><Font ss:Bold="1" ss:Size="9" ss:FontName="Segoe UI" ss:Color="#9A3412"/><Interior ss:Color="#FFEDD5" ss:Pattern="Solid"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style>
  <Style ss:ID="statusConvertido"><Font ss:Bold="1" ss:Size="9" ss:FontName="Segoe UI" ss:Color="#166534"/><Interior ss:Color="#DCFCE7" ss:Pattern="Solid"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style>
  <Style ss:ID="statusPerdido"><Font ss:Bold="1" ss:Size="9" ss:FontName="Segoe UI" ss:Color="#991B1B"/><Interior ss:Color="#FEE2E2" ss:Pattern="Solid"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style>
  <Style ss:ID="rodape">
@@ -2768,7 +2776,7 @@ Aceita com ou sem formatação"></textarea>
    <Cell ss:StyleID="título" ss:MergeAcross="7"><Data ss:Type="String">ZYNTRA  |  Relatãrio de Leads - Prospecção B2B</Data></Cell>
   </Row>
   <Row ss:Height="20">
-   <Cell ss:StyleID="subtitulo" ss:MergeAcross="7"><Data ss:Type="String">Gerado em ${dataHoje} às ${horaAtual} ? ${dadosExportar.length} lead(s) exportado(s)</Data></Cell>
+   <Cell ss:StyleID="subtítulo" ss:MergeAcross="7"><Data ss:Type="String">Gerado em ${dataHoje} às ${horaAtual} ? ${dadosExportar.length} lead(s) exportado(s)</Data></Cell>
   </Row>
   <Row ss:Height="8"></Row>
 `;
@@ -2781,7 +2789,7 @@ Aceita com ou sem formatação"></textarea>
    <Cell ss:StyleID="resumoLabel"><Data ss:Type="String">Qualificados</Data></Cell>
    <Cell ss:StyleID="resumoValor"><Data ss:Type="Number">${totalQualificado}</Data></Cell>
    <Cell ss:StyleID="resumoLabel"><Data ss:Type="String">Negociação</Data></Cell>
-   <Cell ss:StyleID="resumoValor"><Data ss:Type="Number">${totalNegociacao}</Data></Cell>
+   <Cell ss:StyleID="resumoValor"><Data ss:Type="Number">${totalNegociação}</Data></Cell>
   </Row>
   <Row ss:Height="8"></Row>
 `;
@@ -2808,7 +2816,7 @@ Aceita com ou sem formatação"></textarea>
             dadosExportar.forEach((l, i) => {
                 const score = l.score_prospeccao || 50;
                 const scoreStyle = score >= 70 ? 'scoreHigh' : score >= 50 ? 'scoreMed' : 'scoreLow';
-                const statusMap = { novo: 'statusNovo', contato: 'statusContato', qualificado: 'statusQualificado', negociacao: 'statusNegociacao', convertido: 'statusConvertido', perdido: 'statusPerdido' };
+                const statusMap = { novo: 'statusNovo', contato: 'statusContato', qualificado: 'statusQualificado', negociação: 'statusNegociação', convertido: 'statusConvertido', perdido: 'statusPerdido' };
                 const stStyle = statusMap[l.status || 'novo'] || 'statusNovo';
                 const dataAb = l.data_abertura ? new Date(l.data_abertura).toLocaleDateString('pt-BR') : '-';
                 xml += `  <Row>
@@ -2824,7 +2832,7 @@ Aceita com ou sem formatação"></textarea>
    <Cell ss:StyleID="${scoreStyle}"><Data ss:Type="Number">${score}</Data></Cell>
    <Cell ss:StyleID="normal"><Data ss:Type="String">${escXml(l.porte || '-')}</Data></Cell>
    <Cell ss:StyleID="moeda"><Data ss:Type="Number">${l.capital_social || 0}</Data></Cell>
-   <Cell ss:StyleID="normal"><Data ss:Type="String">${escXml(l.situação || '-')}</Data></Cell>
+   <Cell ss:StyleID="normal"><Data ss:Type="String">${escXml(l.situacao || '-')}</Data></Cell>
    <Cell ss:StyleID="normal"><Data ss:Type="String">${escXml(dataAb)}</Data></Cell>
    <Cell ss:StyleID="normal"><Data ss:Type="String">${escXml(l.cnae_descricao || '-')}</Data></Cell>
   </Row>\n`;
@@ -2892,7 +2900,7 @@ Aceita com ou sem formatação"></textarea>
                 cidade: dados.municipio,
                 uf: dados.uf,
                 bairro: dados.bairro,
-                endereco: `${dados.logradouro || ''}, ${dados.número || 's/n'}`.trim(),
+                endereço: `${dados.logradouro || ''}, ${dados.numero || 's/n'}`.trim(),
                 cep: dados.cep,
                 telefone: dados.ddd_telefone_1 ? `(${dados.ddd_telefone_1.substring(0,2)}) ${dados.ddd_telefone_1.substring(2)}` : '',
                 email: dados.email || '',
@@ -2913,7 +2921,7 @@ Aceita com ou sem formatação"></textarea>
             };
         },
 
-        async iniciarImportacao() {
+        async iniciarImportação() {
             const texto = document.getElementById('import-cnpjs').value;
             const linhas = texto.split('\n').filter(l => l.trim());
             const cnpjs = linhas.map(l => l.replace(/\D/g, '')).filter(c => c.length === 14);
@@ -3008,7 +3016,7 @@ Aceita com ou sem formatação"></textarea>
     <script src="/js/auth-unified.js?v=20260301"></script>
     <script src="/js/mobile-auto-enhance.js?v=20260202" defer></script>
     <!-- Chat Widget BOB AI - DESATIVADO -->
-    <!-- <script src="/chat/widget.js?v=20260218" defer></script> -->
+    <!-- <script src="/chat/widget.js?v=20260418" defer></script> -->
     <script src="/js/user-dropdown.js?v=20260223" defer></script>
 
     <!-- Sidebar Click Animation -->

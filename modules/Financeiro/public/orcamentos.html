@@ -240,7 +240,7 @@
 
         function abrirModalOrcamento() {
             editandoId = null;
-            document.getElementById('modal-orc-titulo').textContent = 'Novo Orçamento';
+            document.getElementById('modal-orc-título').textContent = 'Novo Orçamento';
             document.getElementById('orc-id').value = '';
             document.getElementById('orc-categoria').value = '';
             document.getElementById('orc-centro').value = '';
@@ -253,7 +253,7 @@
             const o = orcamentos.find(x => x.id === id);
             if (!o) return;
             editandoId = id;
-            document.getElementById('modal-orc-titulo').textContent = 'Editar Orçamento';
+            document.getElementById('modal-orc-título').textContent = 'Editar Orçamento';
             document.getElementById('orc-id').value = id;
             document.getElementById('orc-categoria').value = o.categoria || '';
             document.getElementById('orc-centro').value = o.centro_custo || '';

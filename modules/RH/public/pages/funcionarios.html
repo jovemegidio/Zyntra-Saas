@@ -916,7 +916,7 @@
 
 
         /* Lista de Solicitações */
-        .solicitação-item {
+        .solicitacao-item {
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -928,18 +928,18 @@
             transition: all 0.2s;
         }
 
-        .solicitação-item:hover {
+        .solicitacao-item:hover {
             border-color: #6366f1;
             box-shadow: 0 2px 8px rgba(99, 102, 241, 0.1);
         }
 
-        .solicitação-info {
+        .solicitacao-info {
             display: flex;
             align-items: center;
             gap: 14px;
         }
 
-        .solicitação-icon {
+        .solicitacao-icon {
             width: 44px;
             height: 44px;
             border-radius: 10px;
@@ -949,27 +949,27 @@
             font-size: 18px;
         }
 
-        .solicitação-icon.férias { background: #e0e7ff; color: #4f46e5; }
-        .solicitação-icon.horas { background: #fef3c7; color: #d97706; }
-        .solicitação-icon.documentos { background: #d1fae5; color: #059669; }
-        .solicitação-icon.outros { background: #f3e8ff; color: #6366f1; }
-        .solicitação-icon.material { background: #ffedd5; color: #ea580c; }
-        .solicitação-icon.treinamento { background: #cffafe; color: #0891b2; }
+        .solicitacao-icon.férias { background: #e0e7ff; color: #4f46e5; }
+        .solicitacao-icon.horas { background: #fef3c7; color: #d97706; }
+        .solicitacao-icon.documentos { background: #d1fae5; color: #059669; }
+        .solicitacao-icon.outros { background: #f3e8ff; color: #6366f1; }
+        .solicitacao-icon.material { background: #ffedd5; color: #ea580c; }
+        .solicitacao-icon.treinamento { background: #cffafe; color: #0891b2; }
 
-        .solicitação-details h5 {
+        .solicitacao-details h5 {
             margin: 0 0 4px 0;
             font-size: 14px;
             font-weight: 600;
             color: #111827;
         }
 
-        .solicitação-details p {
+        .solicitacao-details p {
             margin: 0;
             font-size: 12px;
             color: #6b7280;
         }
 
-        .solicitação-status {
+        .solicitacao-status {
             display: flex;
             flex-direction: column;
             align-items: flex-end;
@@ -988,7 +988,7 @@
         .status-badge-mini.rejeitado { background: #fee2e2; color: #b91c1c; }
         .status-badge-mini.em-analise { background: #e0e7ff; color: #4338ca; }
 
-        .solicitação-date {
+        .solicitacao-date {
             font-size: 11px;
             color: #9ca3af;
         }
@@ -1397,16 +1397,16 @@
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel de Controle"><i class="fas fa-home"></i></a>
             <nav class="sidebar-nav">
                 <a href="../areaadm.html" class="sidebar-btn" title="Dashboard RH"><i class="fas fa-chart-pie"></i></a>
-                <a href="funcionarios.html" class="sidebar-btn active" title="Funcionários"><i class="fas fa-users"></i></a>
+                <a href="funcionários.html" class="sidebar-btn active" title="Funcionários"><i class="fas fa-users"></i></a>
                 <a href="../gestao-holerites.html" class="sidebar-btn" title="Gestão de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="folha.html" class="sidebar-btn" title="Folha de Pagamento"><i class="fas fa-money-check-alt"></i></a>
                 <a href="gestao-ponto.html" class="sidebar-btn" title="Gestão do Ponto"><i class="fas fa-clock"></i></a>
                 <a href="importar-ponto.html" class="sidebar-btn" title="Importar Ponto (Control iD)"><i class="fas fa-upload"></i></a>
-                <a href="gestao-solicitacoes.html" class="sidebar-btn" title="Gestão de Solicitações"><i class="fas fa-tasks"></i></a>
+                <a href="gestao-solicitações.html" class="sidebar-btn" title="Gestão de Solicitações"><i class="fas fa-tasks"></i></a>
                 <a href="calendario-rh.html" class="sidebar-btn" title="Calendário RH"><i class="fas fa-calendar-alt"></i></a>
             </nav>
             <div class="sidebar-bottom">
-                <a href="../funcionario.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-user"></i></a>
+                <a href="../funcionário.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-user"></i></a>
             </div>
         </aside>
 
@@ -1442,7 +1442,7 @@
                 <div class="section-toolbar">
                     <div class="section-search">
                         <i class="fas fa-search"></i>
-                        <input type="text" placeholder="Buscar por nome, cargo ou email..." id="funcionários-search-input">
+                        <input type="text" placeholder="Buscar por nome, cargo ou email..." id="funcionarios-search-input">
                     </div>
                     <div class="section-actions">
                         <button class="btn-action btn-outline" onclick="toggleFiltros()"><i class="fas fa-filter"></i> Filtros</button>
@@ -1524,7 +1524,7 @@
                     <div class="metric-label">Admissões</div>
                 </div>
             </div>
-                <div class="items-grid" id="funcionários-grid"></div>
+                <div class="items-grid" id="funcionarios-grid"></div>
             </div>
         </main>
     </div>
@@ -1550,19 +1550,19 @@
 
                 <!-- Abas de Navegao -->
                 <div class="view-tabs" style="display: flex; border-bottom: 2px solid #e5e7eb; background: #f9fafb;">
-                    <button type="button" class="view-tab active" data-tab="dados" onclick="abrirAbaVisualizacao('dados')">
+                    <button type="button" class="view-tab active" data-tab="dados" onclick="abrirAbaVisualização('dados')">
                         <i class="fas fa-user"></i> Dados
                     </button>
-                    <button type="button" class="view-tab" data-tab="solicitações" onclick="abrirAbaVisualizacao('solicitações')">
+                    <button type="button" class="view-tab" data-tab="solicitações" onclick="abrirAbaVisualização('solicitações')">
                         <i class="fas fa-paper-plane"></i> Solicitações <span id="countSolicitacoes" class="tab-badge" style="display: none;">0</span>
                     </button>
-                    <button type="button" class="view-tab" data-tab="atestados" onclick="abrirAbaVisualizacao('atestados')">
+                    <button type="button" class="view-tab" data-tab="atestados" onclick="abrirAbaVisualização('atestados')">
                         <i class="fas fa-file-medical"></i> Atestados <span id="countAtestados" class="tab-badge" style="display: none;">0</span>
                     </button>
-                    <button type="button" class="view-tab" data-tab="pensao" onclick="abrirAbaVisualizacao('pensao')">
+                    <button type="button" class="view-tab" data-tab="pensao" onclick="abrirAbaVisualização('pensao')">
                         <i class="fas fa-gavel"></i> Pensão
                     </button>
-                    <button type="button" class="view-tab" data-tab="salariofamilia" onclick="abrirAbaVisualizacao('salariofamilia')">
+                    <button type="button" class="view-tab" data-tab="salariofamilia" onclick="abrirAbaVisualização('salariofamilia')">
                         <i class="fas fa-child"></i> Sal. Família
                     </button>
                 </div>
@@ -1679,7 +1679,7 @@
 
                     <!-- Aba Solicitações -->
                     <div id="tab-solicitacoes" class="view-tab-panel" style="display: none;">
-                        <div id="solicitaçõesContainer">
+                        <div id="solicitacoesContainer">
                             <div class="loading-placeholder" style="text-align: center; padding: 40px; color: #6b7280;">
                                 <i class="fas fa-spinner fa-spin fa-2x"></i>
                                 <p style="margin-top: 12px;">Carregando Solicitações...</p>
@@ -1737,9 +1737,9 @@
                             </div>
 
                             <!-- Observações (somente leitura) -->
-                            <div id="sfObservaçõesView" style="margin-top: 12px; display: none;">
+                            <div id="sfObservacoesView" style="margin-top: 12px; display: none;">
                                 <label style="font-size: 12px; font-weight: 600; color: #475569;">Observações</label>
-                                <div id="sfObservaçõesDisplay" style="margin-top: 4px; color: #64748b; font-size: 13px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px;">-</div>
+                                <div id="sfObservacoesDisplay" style="margin-top: 4px; color: #64748b; font-size: 13px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px;">-</div>
                             </div>
                         </div>
                     </div>
@@ -1962,7 +1962,7 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label>Título de Eleitor</label>
-                                <input type="text" id="editTítuloEleitor" class="form-input" placeholder="0000 0000 0000" maxlength="14" oninput="mascaraTituloEleitor(this)">
+                                <input type="text" id="editTituloEleitor" class="form-input" placeholder="0000 0000 0000" maxlength="14" oninput="mascaraTítuloEleitor(this)">
                             </div>
                             <div class="form-group">
                                 <label>CNH</label>
@@ -2194,7 +2194,7 @@
                             </div>
                             <div class="form-group" style="margin-top: 8px;">
                                 <label style="font-size: 12px; font-weight: 600; color: #475569;">Observações</label>
-                                <textarea id="pensaoObservaçõesEdit" class="form-input" rows="2" placeholder="Observações..."></textarea>
+                                <textarea id="pensaoObservacoesEdit" class="form-input" rows="2" placeholder="Observações..."></textarea>
                             </div>
                             <div style="display: flex; gap: 8px; margin-top: 12px; justify-content: flex-end;">
                                 <button type="button" class="btn-secondary" style="font-size: 12px; padding: 6px 14px;" onclick="fecharFormPensaoEdit()">Cancelar</button>
@@ -2275,7 +2275,7 @@
 
                         <div class="form-group" style="margin-top: 12px;">
                             <label style="font-size: 12px; font-weight: 600; color: #475569;">Observações</label>
-                            <textarea id="editSfObservações" class="form-input" rows="2" placeholder="Observações sobre salário família..." style="margin-top: 4px;"></textarea>
+                            <textarea id="editSfObservacoes" class="form-input" rows="2" placeholder="Observações sobre salário família..." style="margin-top: 4px;"></textarea>
                         </div>
 
                         <div style="display: flex; justify-content: flex-end; margin-top: 12px;">
@@ -2611,7 +2611,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn-secondary" onclick="fecharModal('modalImportar')">Cancelar</button>
-                <button type="button" class="btn-action btn-primary" id="btnImportar" onclick="processarImportacao()" disabled><i class="fas fa-upload"></i> Importar</button>
+                <button type="button" class="btn-action btn-primary" id="btnImportar" onclick="processarImportação()" disabled><i class="fas fa-upload"></i> Importar</button>
             </div>
         </div>
     </div>
@@ -2633,7 +2633,7 @@
             </div>
             <div class="modal-footer" style="justify-content: center;">
                 <button type="button" class="btn-secondary" onclick="fecharModal('modalExcluir')">Cancelar</button>
-                <button type="button" class="btn-danger" onclick="executarExclusaoFuncionario()"><i class="fas fa-trash"></i> Excluir</button>
+                <button type="button" class="btn-danger" onclick="executarExclusaoFuncionário()"><i class="fas fa-trash"></i> Excluir</button>
             </div>
         </div>
     </div>
@@ -3011,7 +3011,7 @@
                 const status = (f.status || 'ativo').toLowerCase();
                 return depto !== 'diretoria' && status === 'ativo';
             });
-            renderizarFuncionarios(funcionáriosFiltrados);
+            renderizarFuncionários(funcionáriosFiltrados);
             atualizarEstatisticas(funcionáriosFiltrados, null);
             showToast('success', 'Filtros Limpos', 'Exibindo apenas funcionários ativos', 2000);
         }
@@ -3051,7 +3051,7 @@
         }
 
         // ==== CARREGAR E RENDERIZAR FUNCIONÁRIOS ====
-        async function carregarFuncionarios() {
+        async function carregarFuncionários() {
             try {
                 const response = await fetch('/api/rh/funcionarios', {
                     credentials: 'include',
@@ -3156,7 +3156,7 @@
                     <div class="item-actions">
                         <button class="action-btn view" title="Visualizar" onclick="visualizarFuncionário(${f.id})"><i class="fas fa-eye"></i></button>
                         <button class="action-btn edit" title="Editar" onclick="editarFuncionário(${f.id})"><i class="fas fa-edit"></i></button>
-                        <button class="action-btn delete" title="Excluir" data-nome="${escapeHtml(nome)}" onclick="excluirFuncionario(${f.id}, this.dataset.nome)"><i class="fas fa-trash"></i></button>
+                        <button class="action-btn delete" title="Excluir" data-nome="${escapeHtml(nome)}" onclick="excluirFuncionário(${f.id}, this.dataset.nome)"><i class="fas fa-trash"></i></button>
                     </div>
                 </div>
             `}).join('');
@@ -3244,7 +3244,7 @@
                 document.getElementById('viewDataAdmissao').textContent = formatarData(f.data_admissao);
                 document.getElementById('viewStatus').textContent = f.status || '-';
                 document.getElementById('viewPisPasep').textContent = f.pis_pasep || '-';
-                document.getElementById('viewCtpsNumero').textContent = f.ctps_número || '-';
+                document.getElementById('viewCtpsNúmero').textContent = f.ctps_numero || '-';
                 document.getElementById('viewCtpsSerie').textContent = f.ctps_serie || '-';
                 document.getElementById('viewDependentes').textContent = f.dependentes || '0';
                 // Endereo - exibir campos separados com formatao Title Case
@@ -3324,14 +3324,14 @@
                 document.getElementById('viewLoginEmail').textContent = f.email || '-';
 
                 // Resetar para aba de dados
-                abrirAbaVisualizacao('dados');
+                abrirAbaVisualização('dados');
 
                 // Carregar Solicitações e atestados
-                carregarSolicitacoesFuncionario(id);
-                carregarAtestadosFuncionario(id);
+                carregarSolicitaçõesFuncionário(id);
+                carregarAtestadosFuncionário(id);
 
                 // Carregar pensão alimentícia e salário família
-                carregarPensaoFuncionario(id);
+                carregarPensaoFuncionário(id);
                 carregarSalarioFamilia(id);
 
                 // Mostrar/ocultar abas de Pensão e Salário Família baseado em dependentes
@@ -3360,7 +3360,7 @@
         }
 
         // ==== ABAS DE VISUALIZAO ====
-        function abrirAbaVisualizacao(nomeAba) {
+        function abrirAbaVisualização(nomeAba) {
             // Atualizar abas
             document.querySelectorAll('.view-tab').forEach(tab => {
                 tab.classList.remove('active');
@@ -3380,7 +3380,7 @@
         }
 
         // ==== Solicitações ====
-        async function carregarSolicitacoesFuncionario(funcionarioId) {
+        async function carregarSolicitaçõesFuncionário(funcionárioId) {
             const container = document.getElementById('solicitaçõesContainer');
             container.innerHTML = '<div class="loading-placeholder" style="text-align: center; padding: 40px; color: #6b7280;"><i class="fas fa-spinner fa-spin fa-2x"></i><p style="margin-top: 12px;">Carregando Solicitações...</p></div>';
 
@@ -3397,7 +3397,7 @@
                 }
 
                 // Atualizar badge de contagem
-                const countBadge = document.getElementById('countSolicitacoes');
+                const countBadge = document.getElementById('countSolicitações');
                 if (solicitações.length > 0) {
                     countBadge.textContent = solicitações.length;
                     countBadge.style.display = 'inline-block';
@@ -3417,7 +3417,7 @@
                 }
 
                 container.innerHTML = solicitações.map(s => {
-                    const _dc = String(s.created_at || s.data_solicitação || '').substring(0, 10); const _dcp = _dc.split('-'); const dataCriacao = _dcp.length === 3 ? _dcp[2]+'/'+_dcp[1]+'/'+_dcp[0] : _dc;
+                    const _dc = String(s.created_at || s.data_solicitacao || '').substring(0, 10); const _dcp = _dc.split('-'); const dataCriacao = _dcp.length === 3 ? _dcp[2]+'/'+_dcp[1]+'/'+_dcp[0] : _dc;
                     const tipo = (s.tipo || 'outros').toLowerCase();
                     let iconeClass = 'outros';
                     let icone = 'fa-file-alt';
@@ -3454,7 +3454,7 @@
                                 </div>
                                 <div class="solicitacao-details">
                                     <h5>${escapeHtml(s.tipo || 'Solicitação')}</h5>
-                                    <p>${escapeHtml(s.descrição || s.observação || 'Sem descrição')}</p>
+                                    <p>${escapeHtml(s.descricao || s.observação || 'Sem descrição')}</p>
                                 </div>
                             </div>
                             <div class="solicitacao-status">
@@ -3478,7 +3478,7 @@
         }
 
         // ==== ATESTADOS ====
-        async function carregarAtestadosFuncionario(funcionarioId) {
+        async function carregarAtestadosFuncionário(funcionárioId) {
             const container = document.getElementById('atestadosContainer');
             container.innerHTML = '<div class="loading-placeholder" style="text-align: center; padding: 40px; color: #6b7280;"><i class="fas fa-spinner fa-spin fa-2x"></i><p style="margin-top: 12px;">Carregando atestados...</p></div>';
 
@@ -3603,27 +3603,27 @@
             }
         }
 
-        const carregarAtestadosFuncionário = carregarAtestadosFuncionario;
+        const carregarAtestadosFuncionário = carregarAtestadosFuncionário;
 
         async function aprovarAtestado(atestadoId) {
             // Modal de confirmao profissional
-            if (typeof confirmarAcao === 'function') {
-                confirmarAcao({
+            if (typeof confirmarAção === 'function') {
+                confirmarAção({
                     título: 'Aprovar Atestado',
                     mensagem: 'Deseja aprovar este Atestado Médico?',
                     textoBtnConfirmar: 'Aprovar',
                     onConfirmar: async () => {
-                        await executarAprovacaoAtestado(atestadoId);
+                        await executarAprovaçãoAtestado(atestadoId);
                     }
                 });
             } else {
                 // Fallback para confirm nativo
                 if (!confirm('Confirma a aprovao deste atestado?')) return;
-                await executarAprovacaoAtestado(atestadoId);
+                await executarAprovaçãoAtestado(atestadoId);
             }
         }
 
-        async function executarAprovacaoAtestado(atestadoId) {
+        async function executarAprovaçãoAtestado(atestadoId) {
             try {
                 const response = await fetch(`/api/rh/atestados/${atestadoId}/aprovar`, { credentials: 'include', method: 'PUT',
                     credentials: 'include',
@@ -3710,7 +3710,7 @@
         }
 
         // ==== Pensão Alimentícia ====
-        async function carregarPensaoFuncionario(funcionarioId) {
+        async function carregarPensaoFuncionário(funcionárioId) {
             try {
                 const response = await fetch(`/api/rh/funcionarios/${funcionarioId}/pensao`, {
                     credentials: 'include', headers: getAuthHeaders()
@@ -3743,7 +3743,7 @@
                         </div>
                     </div>
                     ${p.banco_recebedor ? `<div style="font-size: 12px; color: #64748b; margin-top: 8px;"><i class="fas fa-university"></i> ${p.banco_recebedor} ${p.agencia_recebedor ? '| Ag: ' + p.agencia_recebedor : ''} ${p.conta_recebedor ? '| Conta: ' + p.conta_recebedor : ''}</div>` : ''}
-                    ${p.observacoes ? `<div style="font-size: 12px; color: #64748b; margin-top: 4px;"><i class="fas fa-sticky-note"></i> ${p.observacoes}</div>` : ''}
+                    ${p.observações ? `<div style="font-size: 12px; color: #64748b; margin-top: 4px;"><i class="fas fa-sticky-note"></i> ${p.observações}</div>` : ''}
                     ${p.documentos && p.documentos.length > 0 ? `<div style="margin-top: 8px; display: flex; flex-wrap: wrap; gap: 4px;">${p.documentos.map(d => `<span style="font-size: 11px; background: #eff6ff; color: #3b82f6; padding: 2px 8px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;"><i class="fas fa-paperclip"></i> ${d.nome_arquivo}</span>`).join('')}</div>` : ''}
                 </div>
             `).join('');
@@ -3779,7 +3779,7 @@
                 document.getElementById('pensaoBanco').value = p.banco_recebedor || '';
                 document.getElementById('pensaoAgencia').value = p.agencia_recebedor || '';
                 document.getElementById('pensaoConta').value = p.conta_recebedor || '';
-                document.getElementById('pensaoObservações').value = p.observacoes || '';
+                document.getElementById('pensaoObservações').value = p.observações || '';
                 document.getElementById('formPensaoWrapper').style.display = 'block';
             } catch (error) { console.error('Erro:', error); }
         }
@@ -3795,10 +3795,10 @@
                 banco_recebedor: document.getElementById('pensaoBanco').value,
                 agencia_recebedor: document.getElementById('pensaoAgencia').value,
                 conta_recebedor: document.getElementById('pensaoConta').value,
-                observacoes: document.getElementById('pensaoObservações').value
+                observações: document.getElementById('pensaoObservações').value
             };
             try {
-                const url = editId ? `/api/rh/funcionarios/${fid}/pensao/${editId}` : `/api/rh/funcionarios/${fid}/pensao`;
+                const url = editId ? `/api/rh/funcionários/${fid}/pensao/${editId}` : `/api/rh/funcionários/${fid}/pensao`;
                 const method = editId ? 'PUT' : 'POST';
                 const response = await fetch(url, { method, credentials: 'include', headers: getAuthHeaders(), body: JSON.stringify(dados) });
                 if (response.ok) {
@@ -3817,7 +3817,7 @@
             try {
                 await fetch(`/api/rh/funcionarios/${fid}/pensao/${pensaoId}`, { credentials: 'include', method: 'DELETE', headers: getAuthHeaders() });
                 showToast('success', 'Removido', 'Pensão removida com sucesso', 3000);
-                carregarPensaoFuncionario(fid);
+                carregarPensaoFuncionário(fid);
             } catch (error) { showToast('error', 'Erro', 'Erro ao remover', 3000); }
         }
 
@@ -3833,7 +3833,7 @@
                 });
                 if (response.ok) {
                     showToast('success', 'Anexado', 'Documento anexado com sucesso', 3000);
-                    carregarPensaoFuncionario(fid);
+                    carregarPensaoFuncionário(fid);
                 } else {
                     showToast('error', 'Erro', 'Falha ao anexar documento', 3000);
                 }
@@ -3846,12 +3846,12 @@
             const fid = funcionárioAtual?.id;
             try {
                 await fetch(`/api/rh/funcionarios/${fid}/pensao/${pensaoId}/documento/${docId}`, { credentials: 'include', method: 'DELETE', headers: getAuthHeaders() });
-                carregarPensaoFuncionario(fid);
+                carregarPensaoFuncionário(fid);
             } catch (error) { showToast('error', 'Erro', 'Erro ao remover documento', 3000); }
         }
 
         // ==== SALRIO Família ====
-        async function carregarSalarioFamilia(funcionarioId) {
+        async function carregarSalarioFamilia(funcionárioId) {
             try {
                 const response = await fetch(`/api/rh/funcionarios/${funcionarioId}/salario-familia`, {
                     credentials: 'include', headers: getAuthHeaders()
@@ -3865,9 +3865,9 @@
                 displayEl.style.color = recebe ? '#166534' : '#991b1b';
                 document.getElementById('sfDependentesSection').style.display = recebe ? 'block' : 'none';
                 const obsView = document.getElementById('sfObservaçõesView');
-                if (data.observacoes) {
+                if (data.observações) {
                     obsView.style.display = 'block';
-                    document.getElementById('sfObservaçõesDisplay').textContent = data.observacoes;
+                    document.getElementById('sfObservaçõesDisplay').textContent = data.observações;
                 } else {
                     obsView.style.display = 'none';
                 }
@@ -3952,7 +3952,7 @@
                     body: JSON.stringify({
                         recebe: document.getElementById('sfRecebe').checked,
                         quantidade_dependentes: document.querySelectorAll('#listaDependentes > div[style*="border"]').length,
-                        observacoes: document.getElementById('sfObservações').value
+                        observações: document.getElementById('sfObservações').value
                     })
                 });
                 if (response.ok) {
@@ -3964,7 +3964,7 @@
         }
 
         // ==== Pensão Alimentícia - MODAL EDIO ====
-        async function carregarPensaoEdit(funcionarioId) {
+        async function carregarPensaoEdit(funcionárioId) {
             try {
                 const response = await fetch(`/api/rh/funcionarios/${funcionarioId}/pensao`, { credentials: 'include', headers: getAuthHeaders() });
                 if (!response.ok) throw new Error('Erro ao carregar penses');
@@ -3995,7 +3995,7 @@
                         </div>
                     </div>
                     ${p.banco_recebedor ? `<div style="font-size: 12px; color: #64748b; margin-top: 8px;"><i class="fas fa-university"></i> ${p.banco_recebedor} ${p.agencia_recebedor ? '| Ag: ' + p.agencia_recebedor : ''} ${p.conta_recebedor ? '| Conta: ' + p.conta_recebedor : ''}</div>` : ''}
-                    ${p.observacoes ? `<div style="font-size: 12px; color: #64748b; margin-top: 4px;"><i class="fas fa-sticky-note"></i> ${p.observacoes}</div>` : ''}
+                    ${p.observações ? `<div style="font-size: 12px; color: #64748b; margin-top: 4px;"><i class="fas fa-sticky-note"></i> ${p.observações}</div>` : ''}
                     ${p.documentos && p.documentos.length > 0 ? `<div style="margin-top: 8px; display: flex; flex-wrap: wrap; gap: 4px;">${p.documentos.map(d => `<span style="font-size: 11px; background: #eff6ff; color: #3b82f6; padding: 2px 8px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;"><i class="fas fa-paperclip"></i> ${d.nome_arquivo} <button onclick="removerDocPensao(${p.id}, ${d.id})" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 10px;"><i class="fas fa-times"></i></button></span>`).join('')}</div>` : ''}
                     <div style="display: flex; gap: 6px; margin-top: 10px; justify-content: flex-end;">
                         <label style="font-size: 11px; padding: 4px 10px; border-radius: 6px; background: #eff6ff; color: #3b82f6; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
@@ -4040,7 +4040,7 @@
                 document.getElementById('pensaoBancoEdit').value = p.banco_recebedor || '';
                 document.getElementById('pensaoAgenciaEdit').value = p.agencia_recebedor || '';
                 document.getElementById('pensaoContaEdit').value = p.conta_recebedor || '';
-                document.getElementById('pensaoObservaçõesEdit').value = p.observacoes || '';
+                document.getElementById('pensaoObservaçõesEdit').value = p.observações || '';
                 document.getElementById('formPensaoWrapperEdit').style.display = 'block';
             } catch (error) { showToast('error', 'Erro', 'Erro ao carregar pensão', 3000); }
         }
@@ -4056,10 +4056,10 @@
                 banco_recebedor: document.getElementById('pensaoBancoEdit').value,
                 agencia_recebedor: document.getElementById('pensaoAgenciaEdit').value,
                 conta_recebedor: document.getElementById('pensaoContaEdit').value,
-                observacoes: document.getElementById('pensaoObservaçõesEdit').value
+                observações: document.getElementById('pensaoObservaçõesEdit').value
             };
             try {
-                const url = editId ? `/api/rh/funcionarios/${fid}/pensao/${editId}` : `/api/rh/funcionarios/${fid}/pensao`;
+                const url = editId ? `/api/rh/funcionários/${fid}/pensao/${editId}` : `/api/rh/funcionários/${fid}/pensao`;
                 const method = editId ? 'PUT' : 'POST';
                 const response = await fetch(url, { method, credentials: 'include', headers: getAuthHeaders(), body: JSON.stringify(data) });
                 if (response.ok) {
@@ -4083,7 +4083,7 @@
         }
 
         // ==== SALRIO Família - MODAL EDIO ====
-        async function carregarSfEdit(funcionarioId) {
+        async function carregarSfEdit(funcionárioId) {
             try {
                 const response = await fetch(`/api/rh/funcionarios/${funcionarioId}/salario-familia`, { credentials: 'include', headers: getAuthHeaders() });
                 if (!response.ok) throw new Error('Erro ao carregar');
@@ -4091,7 +4091,7 @@
                 const recebe = data.recebe === 1;
                 document.getElementById('editSfRecebe').checked = recebe;
                 document.getElementById('editSfRecebeLabel').textContent = recebe ? 'Sim' : 'No';
-                document.getElementById('editSfObservações').value = data.observacoes || '';
+                document.getElementById('editSfObservações').value = data.observações || '';
                 document.getElementById('editSfDependentesSection').style.display = recebe ? 'block' : 'none';
                 renderizarDependentesEdit(data.dependentes || []);
             } catch (error) {
@@ -4177,7 +4177,7 @@
                     body: JSON.stringify({
                         recebe: document.getElementById('editSfRecebe').checked,
                         quantidade_dependentes: document.querySelectorAll('#listaDependentesEdit > div[style*="border"]').length,
-                        observacoes: document.getElementById('editSfObservações').value
+                        observações: document.getElementById('editSfObservações').value
                     })
                 });
                 if (response.ok) {
@@ -4498,8 +4498,8 @@
                 document.getElementById('editEstadoCivil').value = f.estado_civil || '';
                 document.getElementById('editNacionalidade').value = f.nacionalidade || 'Brasileira';
                 document.getElementById('editNaturalidade').value = f.naturalidade || '';
-                document.getElementById('editFiliacaoMae').value = f.filiacao_mae || '';
-                document.getElementById('editFiliacaoPai').value = f.filiacao_pai || '';
+                document.getElementById('editFiliaçãoMae').value = f.filiacao_mae || '';
+                document.getElementById('editFiliaçãoPai').value = f.filiacao_pai || '';
                 document.getElementById('editEmail').value = f.email || '';
                 document.getElementById('editCargo').value = f.cargo || '';
                 document.getElementById('editDepartamento').value = f.departamento || '';
@@ -4519,10 +4519,10 @@
 
                 document.getElementById('editPisPasep').value = f.pis_pasep || '';
                 if (f.pis_pasep) { const pisEl = document.getElementById('editPisPasep'); mascaraPIS(pisEl); }
-                document.getElementById('editCtpsNumero').value = (f.ctps_número || '').replace(/\D/g, '');
+                document.getElementById('editCtpsNúmero').value = (f.ctps_numero || '').replace(/\D/g, '');
                 document.getElementById('editCtpsSerie').value = (f.ctps_serie || '').replace(/\D/g, '');
-                document.getElementById('editTítuloEleitor').value = f.título_eleitor || '';
-                if (f.titulo_eleitor) { const teEl = document.getElementById('editTituloEleitor'); mascaraTituloEleitor(teEl); }
+                document.getElementById('editTítuloEleitor').value = f.titulo_eleitor || '';
+                if (f.titulo_eleitor) { const teEl = document.getElementById('editTítuloEleitor'); mascaraTítuloEleitor(teEl); }
                 document.getElementById('editCnh').value = (f.cnh || '').replace(/\D/g, '');
                 document.getElementById('editCertificadoReservista').value = (f.certificado_reservista || '').replace(/\D/g, '');
                 // Endereo: separar logradouro, nmero e complemento
@@ -4530,11 +4530,11 @@
                 const endMatch = endRaw.match(/^(.+?),\s*(\d+)\s*(?:,\s*(.+))?$/);
                 if (endMatch) {
                     document.getElementById('editEndereco').value = endMatch[1].trim();
-                    document.getElementById('editNumero').value = endMatch[2];
+                    document.getElementById('editNúmero').value = endMatch[2];
                     document.getElementById('editComplemento').value = (endMatch[3] || '').trim();
                 } else {
                     document.getElementById('editEndereco').value = endRaw.replace(/[0-9]/g, '').replace(/,\s*$/, '').trim();
-                    document.getElementById('editNumero').value = (endRaw.match(/(\d+)/) || ['',''])[1];
+                    document.getElementById('editNúmero').value = (endRaw.match(/(\d+)/) || ['',''])[1];
                     document.getElementById('editComplemento').value = '';
                 }
                 document.getElementById('editBairro').value = f.bairro || '';
@@ -4594,8 +4594,8 @@
                 estado_civil: _v('editEstadoCivil'),
                 nacionalidade: _v('editNacionalidade'),
                 naturalidade: _v('editNaturalidade'),
-                filiacao_mae: _v('editFiliacaoMae'),
-                filiacao_pai: _v('editFiliacaoPai'),
+                filiacao_mae: _v('editFiliaçãoMae'),
+                filiacao_pai: _v('editFiliaçãoPai'),
                 email: _v('editEmail'),
                 cargo: _v('editCargo'),
                 departamento: _v('editDepartamento'),
@@ -4605,12 +4605,12 @@
                 data_demissao: status === 'Demitido' ? (_v('editDataDemissao') || null) : null,
                 motivo_demissao: status === 'Demitido' ? _v('editMotivoDemissao') : '',
                 pis_pasep: _v('editPisPasep'),
-                ctps_número: _v('editCtpsNumero'),
+                ctps_numero: _v('editCtpsNúmero'),
                 ctps_serie: _v('editCtpsSerie'),
-                titulo_eleitor: _v('editTituloEleitor'),
+                titulo_eleitor: _v('editTítuloEleitor'),
                 cnh: _v('editCnh'),
                 certificado_reservista: _v('editCertificadoReservista'),
-                endereco: [_v('editEndereco'), _v('editNumero')].filter(Boolean).join(', ') + (_v('editComplemento') ? ', ' + _v('editComplemento') : ''),
+                endereco: [_v('editEndereco'), _v('editNúmero')].filter(Boolean).join(', ') + (_v('editComplemento') ? ', ' + _v('editComplemento') : ''),
                 bairro: _v('editBairro'),
                 cidade: _v('editCidade'),
                 estado: _v('editEstado'),
@@ -4737,8 +4737,8 @@
                 sexo: document.getElementById('novoSexo').value,
                 nacionalidade: document.getElementById('novoNacionalidade').value,
                 naturalidade: document.getElementById('novoNaturalidade').value,
-                filiacao_mae: document.getElementById('novoFiliacaoMae').value,
-                filiacao_pai: document.getElementById('novoFiliacaoPai').value,
+                filiacao_mae: document.getElementById('novoFiliaçãoMae').value,
+                filiacao_pai: document.getElementById('novoFiliaçãoPai').value,
                 email: document.getElementById('novoEmail').value,
                 cargo: document.getElementById('novoCargo').value,
                 departamento: document.getElementById('novoDepartamento').value,
@@ -4746,12 +4746,12 @@
                 status: document.getElementById('novoStatus').value,
                 dependentes: parseInt(document.getElementById('novoDependentes').value) || 0,
                 pis_pasep: document.getElementById('novoPisPasep').value,
-                ctps_número: document.getElementById('novoCtpsNumero').value,
+                ctps_numero: document.getElementById('novoCtpsNúmero').value,
                 ctps_serie: document.getElementById('novoCtpsSerie').value,
-                titulo_eleitor: document.getElementById('novoTituloEleitor').value,
+                titulo_eleitor: document.getElementById('novoTítuloEleitor').value,
                 cnh: document.getElementById('novoCnh').value,
                 certificado_reservista: document.getElementById('novoCertificadoReservista').value,
-                endereco: [document.getElementById('novoEndereco').value, document.getElementById('novoNumero').value].filter(Boolean).join(', ') + (document.getElementById('novoComplemento').value ? ', ' + document.getElementById('novoComplemento').value : ''),
+                endereco: [document.getElementById('novoEndereco').value, document.getElementById('novoNúmero').value].filter(Boolean).join(', ') + (document.getElementById('novoComplemento').value ? ', ' + document.getElementById('novoComplemento').value : ''),
                 bairro: document.getElementById('novoBairro').value,
                 cidade: document.getElementById('novoCidade').value,
                 estado: document.getElementById('novoEstado').value,
@@ -4776,7 +4776,7 @@
                 if (response.ok) {
                     showToast('success', 'Sucesso!', 'Funcionário cadastrado com sucesso!', 5000);
                     fecharModal('modalNovo');
-                    carregarFuncionarios();
+                    carregarFuncionários();
                     // Mostrar popup com credenciais de acesso
                     mostrarCredenciais(dados.nome_completo);
                 } else {
@@ -4790,13 +4790,13 @@
         }
 
         // ==== EXCLUIR FUNCIONRIO ====
-        function excluirFuncionario(id, nome) {
+        function excluirFuncionário(id, nome) {
             document.getElementById('excluirId').value = id;
             document.getElementById('excluirNome').textContent = nome;
             abrirModal('modalExcluir');
         }
 
-        async function executarExclusaoFuncionario() {
+        async function executarExclusaoFuncionário() {
             const id = document.getElementById('excluirId').value;
             try {
                 const response = await fetch(`/api/rh/funcionarios/${id}`, { credentials: 'include', method: 'DELETE',
@@ -4807,7 +4807,7 @@
                 if (response.ok || response.status === 204) {
                     showToast('success', 'Excludo!', 'Funcionário excludo com sucesso!', 4000);
                     fecharModal('modalExcluir');
-                    carregarFuncionarios();
+                    carregarFuncionários();
                 } else {
                     showToast('error', 'Erro', 'No foi possível excluir o funcionário', 4000);
                 }
@@ -4818,10 +4818,10 @@
         }
 
         // ==== IMPORTAR FUNCIONÁRIOS ====
-        let arquivoImportacao = null;
+        let arquivoImportação = null;
 
         function abrirModalImportar() {
-            arquivoImportacao = null;
+            arquivoImportação = null;
             document.getElementById('importFile').value = '';
             document.getElementById('importFileName').textContent = '';
             document.getElementById('btnImportar').disabled = true;
@@ -4831,7 +4831,7 @@
         function handleFileSelect(event) {
             const file = event.target.files[0];
             if (file) {
-                arquivoImportacao = file;
+                arquivoImportação = file;
                 document.getElementById('importFileName').textContent = file.name;
                 document.getElementById('btnImportar').disabled = false;
             }
@@ -4847,7 +4847,7 @@
                 dropzone.classList.remove('dragover');
                 const file = e.dataTransfer.files[0];
                 if (file && (file.name.endsWith('.csv') || file.name.endsWith('.xlsx') || file.name.endsWith('.xls'))) {
-                    arquivoImportacao = file;
+                    arquivoImportação = file;
                     document.getElementById('importFileName').textContent = file.name;
                     document.getElementById('btnImportar').disabled = false;
                 } else {
@@ -4856,14 +4856,14 @@
             });
         }
 
-        async function processarImportacao() {
-            if (!arquivoImportacao) {
+        async function processarImportação() {
+            if (!arquivoImportação) {
                 showToast('warning', 'Arquivo Necessrio', 'Selecione um arquivo para importar.', 4000);
                 return;
             }
 
             const formData = new FormData();
-            formData.append('arquivo', arquivoImportacao);
+            formData.append('arquivo', arquivoImportação);
 
             try {
                 // Para FormData, no incluir Content-Type (browser define automaticamente com boundary)
@@ -4879,7 +4879,7 @@
                     const result = await response.json();
                     showToast('success', 'Importao Concluda!', result.message || 'Funcionários importados com sucesso.', 5000);
                     fecharModal('modalImportar');
-                    carregarFuncionarios();
+                    carregarFuncionários();
                 } else {
                     const err = await response.json();
                     showToast('error', 'Erro na Importao', 'Erro ao importar', 5000);
@@ -4896,8 +4896,8 @@
 
             // Baixar o template profissional Excel
             const link = document.createElement('a');
-            link.href = '/modules/RH/public/templates/Aluforce_Importar_Funcionários_v1.0.xlsx';
-            link.download = 'Aluforce_Importar_Funcionários_v1.0.xlsx';
+            link.href = '/modules/RH/public/templates/Aluforce_Importar_Funcionarios_v1.0.xlsx';
+            link.download = 'Aluforce_Importar_Funcionarios_v1.0.xlsx';
             link.click();
 
             showToast('success', 'Download Iniciado', 'O template Excel est sendo baixado', 3000);
@@ -4943,7 +4943,7 @@
         // ==== INICIALIZAO ====
         document.addEventListener('DOMContentLoaded', () => {
             carregarUsuarioLogado();
-            carregarFuncionarios();
+            carregarFuncionários();
 
             // Verificar se veio com ?action=new para abrir modal automaticamente
             const urlParams = new URLSearchParams(window.location.search);

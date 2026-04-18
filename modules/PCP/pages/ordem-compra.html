@@ -252,7 +252,7 @@
                 <a href="faturamento.html" class="sidebar-btn" title="Faturamento"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="../apontamentos.html" class="sidebar-btn" title="Apontamentos"><i class="fas fa-stopwatch"></i></a>
                 <a href="qualidade.html" class="sidebar-btn" title="Qualidade"><i class="fas fa-award"></i></a>
-                <a href="relatorios.html" class="sidebar-btn" title="Central de Relatórios"><i class="fas fa-chart-pie"></i></a>
+                <a href="relatórios.html" class="sidebar-btn" title="Central de Relatórios"><i class="fas fa-chart-pie"></i></a>
             </nav>
             <div class="sidebar-bottom">
                 <button class="sidebar-btn" title="Configurações" id="btn-config"><i class="fas fa-cog"></i></button>
@@ -679,16 +679,16 @@
                     const arrayPedidos = Array.isArray(data) ? data : (Array.isArray(data.pedidos) ? data.pedidos : []);
                     pedidosCompras = arrayPedidos.map(p => ({
                         id: p.id,
-                        numero: p.numero_pedido,
+                        número: p.numero_pedido,
                         fornecedor: p.fornecedor_nome || p.fornecedor_razao,
                         fornecedor_id: p.fornecedor_id,
                         data_emissao: p.data_pedido,
                         previsao_entrega: p.data_entrega_prevista,
                         valor_total: p.valor_total,
                         status: p.status,
-                        observacoes: p.observacoes,
+                        observações: p.observações,
                         origem: 'compras',
-                        integracao: true
+                        integração: true
                     }));
                 }
 
@@ -703,7 +703,7 @@
                         const pedidosPCP = (pcpData || []).map(p => ({
                             ...p,
                             origem: 'pcp',
-                            integracao: false
+                            integração: false
                         }));
                         ordensCompraData = [...pedidosCompras, ...pedidosPCP];
                     } else {
@@ -751,8 +751,8 @@
             tbody.innerHTML = ordensCompraData.map(oc => `
                 <tr>
                     <td>
-                        <strong>#${oc.número || oc.id || '-'}</strong>
-                        ${oc.integração ? '<i class="fas fa-link" style="color:#059669;margin-left:4px;" title="Integrado com Compras"></i>' : ''}
+                        <strong>#${oc.numero || oc.id || '-'}</strong>
+                        ${oc.integracao ? '<i class="fas fa-link" style="color:#059669;margin-left:4px;" title="Integrado com Compras"></i>' : ''}
                     </td>
                     <td>${oc.fornecedor || oc.fornecedor_nome || '-'}</td>
                     <td>${formatarData(oc.data || oc.data_emissao || oc.created_at)}</td>
@@ -830,19 +830,19 @@
         let itensOC = [];
 
         function adicionarItemOC() {
-            const codigo = prompt('Código do produto:');
-            if (!codigo) return;
+            const código = prompt('Código do produto:');
+            if (!código) return;
 
-            const descricao = prompt('Descrição do produto:');
-            if (!descricao) return;
+            const descrição = prompt('Descrição do produto:');
+            if (!descrição) return;
 
             const quantidade = parseFloat(prompt('Quantidade:', '1')) || 1;
             const precoUnit = parseFloat(prompt('Preço unitário:', '0')) || 0;
 
             itensOC.push({
                 id: itensOC.length + 1,
-                codigo,
-                descricao,
+                código,
+                descrição,
                 quantidade,
                 precoUnit,
                 total: quantidade * precoUnit
@@ -900,8 +900,8 @@
             tbody.innerHTML = itensOC.map(item => `
                 <tr>
                     <td>${item.id}</td>
-                    <td>${item.código}</td>
-                    <td>${item.descrição}</td>
+                    <td>${item.codigo}</td>
+                    <td>${item.descricao}</td>
                     <td style="text-align: center;">${item.quantidade}</td>
                     <td style="text-align: right;">${formatarMoeda(item.precoUnit)}</td>
                     <td style="text-align: right; font-weight: 600;">${formatarMoeda(item.total)}</td>
@@ -1043,25 +1043,25 @@
             const hoje = new Date();
             const dataStr = hoje.toISOString().slice(0,10).replace(/-/g,'');
             const random = Math.floor(1000 + Math.random() * 9000);
-            const numeroPedido = `OC-PCP-${dataStr}-${random}`;
+            const númeroPedido = `OC-PCP-${dataStr}-${random}`;
 
             // Formatar itens para API de Compras
             const itensFormatados = itensOC.map(item => ({
                 codigo_produto: item.codigo || item.id?.toString() || 'MAT-PCP',
-                descricao: item.nome || item.descricao,
+                descrição: item.nome || item.descricao,
                 quantidade: parseFloat(item.quantidade) || 1,
                 unidade: item.unidade || 'UN',
                 preco_unitario: parseFloat(item.preco) || parseFloat(item.preco_unitario) || 0,
                 preco_total: parseFloat(item.total) || (parseFloat(item.quantidade) * parseFloat(item.preco_unitario)) || 0,
-                observacoes: item.observacoes || `Solicitado pelo PCP`
+                observações: item.observações || `Solicitado pelo PCP`
             }));
 
             const dados = {
-                numero_pedido: numeroPedido,
+                numero_pedido: númeroPedido,
                 fornecedor_id: parseInt(fornecedorId),
                 data_pedido: document.getElementById('oc-data-emissão')?.value || hoje.toISOString().slice(0,10),
                 data_entrega_prevista: document.getElementById('oc-previsao-entrega').value || null,
-                observacoes: `[PCP] ${document.getElementById('oc-observacoes')?.value || 'Pedido originado do módulo PCP'}`,
+                observações: `[PCP] ${document.getElementById('oc-observações')?.value || 'Pedido originado do módulo PCP'}`,
                 itens: itensFormatados,
                 // Campos extras do PCP
                 origem: 'PCP',
@@ -1084,7 +1084,7 @@
 
                 if (response.ok) {
                     const result = await response.json();
-                    showToast(`Pedido ${numeroPedido} criado com sucesso! Integrado ao módulo Compras.`, 'success');
+                    showToast(`Pedido ${númeroPedido} criado com sucesso! Integrado ao módulo Compras.`, 'success');
                     fecharModalNovoPedido();
                     itensOC = [];
                     carregarOrdensCompra();
@@ -1130,7 +1130,7 @@
                 <div class="modal-overlay" id="modal-ver-oc" onclick="if(event.target===this)this.remove()">
                     <div class="modal" style="max-width:600px;">
                         <div class="modal-header">
-                            <h3><i class="fas fa-shopping-cart"></i> Ordem de Compra #${oc.número || oc.id}</h3>
+                            <h3><i class="fas fa-shopping-cart"></i> Ordem de Compra #${oc.numero || oc.id}</h3>
                             <button class="modal-close" onclick="document.getElementById('modal-ver-oc').remove()">&times;</button>
                         </div>
                         <div class="modal-body">
@@ -1141,7 +1141,7 @@
                                 <div><label style="font-size:12px;color:#6b7280;">Previsão Entrega</label><p>${formatarData(oc.previsao_entrega || oc.data_previsao)}</p></div>
                                 <div><label style="font-size:12px;color:#6b7280;">Valor Total</label><p style="font-size:20px;font-weight:700;color:#059669;">${formatarMoeda(oc.valor_total || oc.total || 0)}</p></div>
                             </div>
-                            ${oc.observacoes ? `<div style="margin-top:16px;"><label style="font-size:12px;color:#6b7280;">Observações</label><p>${oc.observacoes}</p></div>` : ''}
+                            ${oc.observações ? `<div style="margin-top:16px;"><label style="font-size:12px;color:#6b7280;">Observações</label><p>${oc.observações}</p></div>` : ''}
                         </div>
                         <div class="modal-footer">
                             <button class="btn btn-secondary" onclick="document.getElementById('modal-ver-oc').remove()">Fechar</button>
@@ -1160,7 +1160,7 @@
                 <div class="modal-overlay" id="modal-editar-oc" onclick="if(event.target===this)this.remove()">
                     <div class="modal" style="max-width:600px;">
                         <div class="modal-header">
-                            <h3><i class="fas fa-edit"></i> Editar OC #${oc.número || oc.id}</h3>
+                            <h3><i class="fas fa-edit"></i> Editar OC #${oc.numero || oc.id}</h3>
                             <button class="modal-close" onclick="document.getElementById('modal-editar-oc').remove()">&times;</button>
                         </div>
                         <div class="modal-body">
@@ -1186,7 +1186,7 @@
                                 </div>
                                 <div class="form-group">
                                     <label>Observações</label>
-                                    <textarea class="form-control" id="edit-obs" rows="3">${oc.observacoes || ''}</textarea>
+                                    <textarea class="form-control" id="edit-obs" rows="3">${oc.observações || ''}</textarea>
                                 </div>
                             </form>
                         </div>
@@ -1204,7 +1204,7 @@
                 fornecedor: document.getElementById('edit-fornecedor').value,
                 status: document.getElementById('edit-status').value,
                 previsao_entrega: document.getElementById('edit-previsao').value,
-                observacoes: document.getElementById('edit-obs').value
+                observações: document.getElementById('edit-obs').value
             };
             try {
                 const API_BASE = getAPIBase();
@@ -1226,7 +1226,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            atualizarSaudacao();
+            atualizarSaudação();
             carregarOrdensCompra();
 
             // Carregar modais via fetch

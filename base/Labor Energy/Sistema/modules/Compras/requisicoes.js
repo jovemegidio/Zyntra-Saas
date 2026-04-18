@@ -14,11 +14,7 @@ let usuarioLogado = { nome: 'Admin', departamento: 'Compras', nivel: 'gerente' }
 
 // Função para obter headers de autenticação
 function getAuthHeaders() {
-    const token = localStorage.getItem('token');
-    return {
-        'Content-Type': 'application/json',
-        'Authorization': token ? `Bearer ${token}` : ''
-    };
+    return { 'Content-Type': 'application/json' };
 }
 
 // Mostrar toast de notificação
@@ -583,7 +579,7 @@ function visualizarRequisicao(requisicaoId) {
                 </tr>
             </thead>
             <tbody>
-                ${req.itens.map(item => `
+                ${(req.itens || []).map(item => `
                     <tr style="border-bottom: 1px solid #e5e7eb;">
                         <td style="padding: 12px;">${item.descricao}</td>
                         <td style="padding: 12px; text-align: center;">${item.quantidade}</td>

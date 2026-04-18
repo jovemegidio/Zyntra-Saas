@@ -1,4 +1,4 @@
-﻿/**
+/**
  * GESTáO DE FORNECEDORES - ALUFORCE
  * Sistema completo de cadastro e gestão de fornecedores
  */
@@ -31,15 +31,9 @@ class FornecedoresManager {
 
     async carregarFornecedores() {
         try {
-            const token = this.getAuthToken();
-            const headers = {
-                'Content-Type': 'application/json'
-            };
-            if (token) {
-                headers['Authorization'] = `Bearer ${token}`;
-            }
-            
-            const response = await fetch('/api/compras/fornecedores', { headers });
+            const response = await fetch('/api/compras/fornecedores', {
+                credentials: 'include'
+            });
             if (!response.ok) throw new Error('Erro ao carregar fornecedores');
             
             const data = await response.json();

@@ -66,12 +66,12 @@
 
     <!-- Fun��es stub para evitar erros antes do carregamento -->
     <script>
-        function toggleNotificacoes() {
+        function toggleNotificações() {
             const panel = document.getElementById('notification-panel');
             if (panel) panel.classList.toggle('active');
         }
         function marcarTodasLidas() { console.log('Carregando...'); }
-        function limparNotificacoes() { console.log('Carregando...'); }
+        function limparNotificações() { console.log('Carregando...'); }
     </script>
 
     <!-- Chat Widget BOB AI -->
@@ -272,7 +272,7 @@
                                         <div class="icon"><i class="fas fa-plus-circle"></i></div>
                                         <span>Nova Requisi��o</span>
                                     </a>
-                                    <a href="cotacoes.html?action=new" class="quick-action">
+                                    <a href="cotações.html?action=new" class="quick-action">
                                         <div class="icon"><i class="fas fa-search-dollar"></i></div>
                                         <span>Nova Cota��o</span>
                                     </a>
@@ -321,12 +321,12 @@
 
     <script>
         // === Sauda��o ===
-        function atualizarSaudacao() {
+        function atualizarSaudação() {
             const hora = new Date().getHours();
-            let saudacao = 'Bom dia';
-            if (hora >= 12 && hora < 18) saudacao = 'Boa tarde';
-            else if (hora >= 18 || hora < 6) saudacao = 'Boa noite';
-            document.getElementById('greeting-text').textContent = saudacao;
+            let saudação = 'Bom dia';
+            if (hora >= 12 && hora < 18) saudação = 'Boa tarde';
+            else if (hora >= 18 || hora < 6) saudação = 'Boa noite';
+            document.getElementById('greeting-text').textContent = saudação;
         }
 
         // === Carregar KPIs ===
@@ -560,7 +560,7 @@
 
         // === Inicializa��o ===
         document.addEventListener('DOMContentLoaded', function () {
-            atualizarSaudacao();
+            atualizarSaudação();
             carregarKPIs();
             carregarRequisicoes();
             inicializarGrafico();
@@ -578,7 +578,7 @@
     <script src="/_shared/confirm-dialog.js?v=20260301"></script>
 
     <!-- Chat Widget BOB AI -->
-    <script src="/chat/widget.js?v=20260416" defer></script>
+    <script src="/chat/widget.js?v=20260418" defer></script>
 
     <!-- Enterprise Shared -->
     <script src="/js/sidebar-click-animation.js?v=20260301"></script>

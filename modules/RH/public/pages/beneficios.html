@@ -197,13 +197,13 @@
         <aside class="sidebar" id="mobile-sidebar">
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel de Controle"><i class="fas fa-home"></i></a>
             <nav class="sidebar-nav">
-                <a href="../funcionario.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-home"></i></a>
+                <a href="../funcionário.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-home"></i></a>
                 <a href="meus-holerites.html" class="sidebar-btn" title="Meus Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="dados-cadastrais.html" class="sidebar-btn" title="Dados Cadastrais"><i class="fas fa-id-card"></i></a>
                 <a href="beneficios.html" class="sidebar-btn active" title="Meus Benefícios"><i class="fas fa-gift"></i></a>
                 <a href="espelho-ponto.html" class="sidebar-btn" title="Espelho de Ponto"><i class="fas fa-list-check"></i></a>
                 <a href="enviar-atestado.html" class="sidebar-btn" title="Enviar Atestado"><i class="fas fa-file-medical"></i></a>
-                <a href="../solicitacoes.html" class="sidebar-btn" title="Minhas Solicitações"><i class="fas fa-clipboard-list"></i></a>
+                <a href="../solicitações.html" class="sidebar-btn" title="Minhas Solicitações"><i class="fas fa-clipboard-list"></i></a>
                 <a href="manual-colaborador.html" class="sidebar-btn" title="Manual do Colaborador"><i class="fas fa-book"></i></a>
             </nav>
             <div class="sidebar-bottom">
@@ -247,7 +247,7 @@
                 </div>
 
                 <div class="controls-bar">
-                    <a href="../funcionario.html" class="btn btn-outline">
+                    <a href="../funcionário.html" class="btn btn-outline">
                         <i class="fas fa-arrow-left"></i>
                         Voltar
                     </a>
@@ -328,7 +328,7 @@
         <div class="modal-overlay" onclick="fecharModalBeneficio()"></div>
         <div class="modal-content" style="max-width: 600px;">
             <div class="modal-header">
-                <h3 id="modal-benefício-título"><i class="fas fa-gift"></i> Novo Benefício</h3>
+                <h3 id="modal-benefício-titulo"><i class="fas fa-gift"></i> Novo Benefício</h3>
                 <button class="modal-close" onclick="fecharModalBeneficio()"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body">
@@ -378,7 +378,7 @@
                                     maxlength="14"
                                     style="padding-left: 38px;"
                                     oninput="mascaraMoeda(this)"
-                                    onkeypress="return somenteNumeros(event)">
+                                    onkeypress="return somenteNúmeros(event)">
                             </div>
                         </div>
                         <div class="form-group">
@@ -388,7 +388,7 @@
                     </div>
                     <div class="form-group">
                         <label>Descrição</label>
-                        <textarea id="benefício-descrição" class="form-input" rows="3" placeholder="Descrição detalhada do benefício..."></textarea>
+                        <textarea id="benefício-descricao" class="form-input" rows="3" placeholder="Descrição detalhada do benefício..."></textarea>
                     </div>
                 </form>
             </div>
@@ -602,7 +602,7 @@
                                 ` : ''}
                             </div>
                             ` : ''}
-                            ${b.descrição ? `<p class="benefit-description">${escapeHtml(b.descrição)}</p>` : ''}
+                            ${b.descricao ? `<p class="benefit-description">${escapeHtml(b.descricao)}</p>` : ''}
                             <div class="benefit-actions">
                                 ${b.status === 'inactive' ? `
                                 <button class="btn btn-success btn-sm" onclick="solicitarAdesao(${b.id})">
@@ -689,7 +689,7 @@
         }
 
         // === Máscara de Moeda ===
-        function somenteNumeros(e) {
+        function somenteNúmeros(e) {
             const char = String.fromCharCode(e.which || e.keyCode);
             if (!/[0-9]/.test(char)) {
                 e.preventDefault();
@@ -758,7 +758,7 @@
             document.getElementById('benefício-status').value = b.status || 'active';
             document.getElementById('benefício-valor').value = formatarValorParaExibicao(b.valor || '');
             document.getElementById('benefício-info').value = b.info || '';
-            document.getElementById('benefício-descrição').value = b.descrição || '';
+            document.getElementById('benefício-descrição').value = b.descricao || '';
 
             document.getElementById('modalBeneficio').classList.add('show');
         }
@@ -841,7 +841,7 @@
             const b = benefícios.find(x => x.id === id);
             if (!b) return;
 
-            mostrarPopupConfirmacao({
+            mostrarPopupConfirmação({
                 título: 'Excluir Benefício',
                 mensagem: 'Deseja realmente excluir este benefício?',
                 icone: 'fa-trash-alt',
@@ -939,10 +939,10 @@
                                 <span style="font-size: 0.875rem; color: #92400e;">${b.info}</span>
                             </div>
                             ` : ''}
-                            ${b.descrição ? `
+                            ${b.descricao ? `
                             <div style="margin-bottom: 16px;">
                                 <div style="font-size: 0.875rem; font-weight: 600; color: #374151; margin-bottom: 8px;">Descrição</div>
-                                <p style="font-size: 0.875rem; color: #64748b; line-height: 1.6; margin: 0;">${b.descrição}</p>
+                                <p style="font-size: 0.875rem; color: #64748b; line-height: 1.6; margin: 0;">${b.descricao}</p>
                             </div>
                             ` : ''}
                             ${b.link ? `
@@ -1070,12 +1070,12 @@
 
                 if (!pontoResp.ok) return;
                 const pontoData = await pontoResp.json();
-                const marcacoes = pontoData.marcacoes || [];
+                const marcações = pontoData.marcações || [];
 
                 // Filtrar marcações do funcionário logado
-                const minhasMarcacoes = marcacoes.filter(m => {
-                    if (me.funcionário_id && m.funcionário_id == me.funcionário_id) return true;
-                    const obs = (m.observacao || '').toUpperCase();
+                const minhasMarcações = marcações.filter(m => {
+                    if (me.funcionario_id && m.funcionario_id == me.funcionario_id) return true;
+                    const obs = (m.observação || '').toUpperCase();
                     const meuNome = (me.nome || '').toUpperCase();
                     return meuNome && obs.includes(meuNome);
                 });
@@ -1084,7 +1084,7 @@
                 // Agrupa por dia e verifica se h atraso de entrada ou saída antecipada
                 let possuiIrregularidade = false;
                 const porDia = {};
-                minhasMarcacoes.forEach(m => {
+                minhasMarcações.forEach(m => {
                     if (!porDia[m.data]) porDia[m.data] = [];
                     porDia[m.data].push(m);
                 });

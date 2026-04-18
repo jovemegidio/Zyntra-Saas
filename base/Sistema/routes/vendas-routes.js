@@ -1940,7 +1940,7 @@ module.exports = function createVendasRoutes(deps) {
                                     // Sync tabela estoque unificada se existir
                                     try {
                                         await connection.query('UPDATE estoque SET quantidade_disponivel = quantidade_disponivel + ? WHERE produto_id = ?', [quantidade, produto.id]);
-                                    } catch (syncErr) { /* tabela pode nao existir */ }
+                                    } catch (syncErr) { /* tabela pode não existir */ }
 
                                     await connection.query(`
                                         INSERT INTO estoque_movimentacoes
@@ -4771,7 +4771,7 @@ module.exports = function createVendasRoutes(deps) {
                 for (const itemFat of itens_faturar) {
                     const itemPedido = itensPedido.find(i => i.produto_id === itemFat.produto_id);
                     if (!itemPedido) {
-                        problemas.push(`Produto ID ${itemFat.produto_id} nao encontrado no pedido`);
+                        problemas.push(`Produto ID ${itemFat.produto_id} não encontrado no pedido`);
                         continue;
                     }
                     const qtdRestante = parseFloat(itemPedido.quantidade) - parseFloat(itemPedido.qtd_ja_faturada);
@@ -5059,7 +5059,7 @@ module.exports = function createVendasRoutes(deps) {
             const { id } = req.params;
 
             const [pedidoRows] = await pool.query(`SELECT p.*, e.nome_fantasia as empresa_nome, e.estado as empresa_uf, c.estado as cliente_uf FROM pedidos p LEFT JOIN empresas e ON p.empresa_id = e.id LEFT JOIN clientes c ON p.cliente_id = c.id WHERE p.id = ?`, [id]);
-            if (pedidoRows.length === 0) return res.status(404).json({ success: false, message: 'Pedido nao encontrado.' });
+            if (pedidoRows.length === 0) return res.status(404).json({ success: false, message: 'Pedido não encontrado.' });
 
             const pedido = pedidoRows[0];
             const [faturamentos] = await pool.query(`SELECT id, pedido_id, sequencia, tipo, valor, percentual, nfe_numero, nfe_chave, cfop, data_faturamento, status, observacoes, created_at FROM pedido_faturamentos WHERE pedido_id = ? ORDER BY sequencia ASC`, [id]);

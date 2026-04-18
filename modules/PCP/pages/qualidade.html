@@ -52,7 +52,7 @@
         .badge-critica { background: #fee2e2; color: #991b1b; }
         .badge-maior { background: #ffedd5; color: #9a3412; }
         .badge-menor { background: #fef3c7; color: #92400e; }
-        .badge-observacao { background: #e0e7ff; color: #3730a3; }
+        .badge-observação { background: #e0e7ff; color: #3730a3; }
         .badge-aberta { background: #fef3c7; color: #92400e; }
         .badge-resolvida { background: #d1fae5; color: #065f46; }
 
@@ -157,7 +157,7 @@
                 <a href="faturamento.html" class="sidebar-btn" title="Faturamento"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="../apontamentos.html" class="sidebar-btn" title="Apontamentos"><i class="fas fa-stopwatch"></i></a>
                 <a href="qualidade.html" class="sidebar-btn active" title="Qualidade"><i class="fas fa-award"></i></a>
-                <a href="relatorios.html" class="sidebar-btn" title="Central de Relatórios"><i class="fas fa-chart-pie"></i></a>
+                <a href="relatórios.html" class="sidebar-btn" title="Central de Relatórios"><i class="fas fa-chart-pie"></i></a>
             </nav>
             <div class="sidebar-bottom">
                 <button class="sidebar-btn" title="Configurações" id="btn-config"><i class="fas fa-cog"></i></button>
@@ -289,17 +289,17 @@
                                 <div class="pcp-filters">
                                     <div class="filter-group">
                                         <span class="filter-label">Severidade</span>
-                                        <select class="filter-select" id="filtro-nc-severidade" onchange="carregarNaoConformidades()">
+                                        <select class="filter-select" id="filtro-nc-severidade" onchange="carregarNãoConformidades()">
                                             <option value="">Todas</option>
                                             <option value="critica">Crítica</option>
                                             <option value="maior">Maior</option>
                                             <option value="menor">Menor</option>
-                                            <option value="observacao">Observação</option>
+                                            <option value="observação">Observação</option>
                                         </select>
                                     </div>
                                     <div class="filter-group">
                                         <span class="filter-label">Status</span>
-                                        <select class="filter-select" id="filtro-nc-status" onchange="carregarNaoConformidades()">
+                                        <select class="filter-select" id="filtro-nc-status" onchange="carregarNãoConformidades()">
                                             <option value="">Todos</option>
                                             <option value="aberta">Aberta</option>
                                             <option value="em_analise">Em Análise</option>
@@ -482,7 +482,7 @@
                     <div class="form-group">
                         <label>Severidade</label>
                         <select id="nc-severidade" required>
-                            <option value="observacao">Observação</option>
+                            <option value="observação">Observação</option>
                             <option value="menor">Menor</option>
                             <option value="maior">Maior</option>
                             <option value="critica">Crítica</option>
@@ -668,7 +668,7 @@
         document.getElementById('form-inspecao').reset();
         document.getElementById('insp-id').value = '';
         document.getElementById('insp-data').value = new Date().toISOString().split('T')[0];
-        document.getElementById('modal-insp-titulo').textContent = 'Nova Inspeção';
+        document.getElementById('modal-insp-título').textContent = 'Nova Inspeção';
         document.getElementById('checklist-area').style.display = 'none';
         carregarChecklistsSelect();
         abrirModal('modal-inspecao');
@@ -688,10 +688,10 @@
             document.getElementById('insp-produto').value = i.produto || '';
             document.getElementById('insp-qtd').value = i.quantidade_inspecionada || '';
             document.getElementById('insp-qtd-ok').value = i.quantidade_aprovada || '';
-            document.getElementById('insp-obs').value = i.observacoes || '';
+            document.getElementById('insp-obs').value = i.observações || '';
             document.getElementById('insp-status').value = i.status || 'pendente';
             document.getElementById('insp-data').value = i.data_inspecao ? i.data_inspecao.split('T')[0] : '';
-            document.getElementById('modal-insp-titulo').textContent = 'Editar Inspeção INS-' + String(i.id).padStart(4, '0');
+            document.getElementById('modal-insp-título').textContent = 'Editar Inspeção INS-' + String(i.id).padStart(4, '0');
             await carregarChecklistsSelect();
             if (i.checklist_id) document.getElementById('insp-checklist').value = i.checklist_id;
             abrirModal('modal-inspecao');
@@ -710,7 +710,7 @@
             produto: document.getElementById('insp-produto').value,
             quantidade_inspecionada: parseInt(document.getElementById('insp-qtd').value) || null,
             quantidade_aprovada: parseInt(document.getElementById('insp-qtd-ok').value) || null,
-            observacoes: document.getElementById('insp-obs').value,
+            observações: document.getElementById('insp-obs').value,
             status: document.getElementById('insp-status').value,
             data_inspecao: document.getElementById('insp-data').value,
             checklist_respostas: coletarRespostasChecklist()
@@ -758,7 +758,7 @@
     // ============================================
     // NÃO CONFORMIDADES
     // ============================================
-    async function carregarNaoConformidades() {
+    async function carregarNãoConformidades() {
         try {
             const severidade = document.getElementById('filtro-nc-severidade')?.value || '';
             const status = document.getElementById('filtro-nc-status')?.value || '';
@@ -798,7 +798,7 @@
     function abrirModalNC() {
         document.getElementById('form-nc').reset();
         document.getElementById('nc-id').value = '';
-        document.getElementById('modal-nc-titulo').textContent = 'Nova Não Conformidade';
+        document.getElementById('modal-nc-título').textContent = 'Nova Não Conformidade';
         abrirModal('modal-nc');
     }
 
@@ -811,16 +811,16 @@
             if (!data.data) return;
             const nc = data.data;
             document.getElementById('nc-id').value = nc.id;
-            document.getElementById('nc-descricao').value = nc.descricao || '';
+            document.getElementById('nc-descrição').value = nc.descricao || '';
             document.getElementById('nc-severidade').value = nc.severidade || 'menor';
             document.getElementById('nc-origem').value = nc.origem || 'inspecao';
             document.getElementById('nc-ordem').value = nc.ordem_producao || '';
             document.getElementById('nc-produto').value = nc.produto || '';
             document.getElementById('nc-causa').value = nc.causa_raiz || '';
-            document.getElementById('nc-acao').value = nc.acao_corretiva || '';
+            document.getElementById('nc-ação').value = nc.acao_corretiva || '';
             document.getElementById('nc-responsavel').value = nc.responsavel || '';
             document.getElementById('nc-prazo').value = nc.prazo ? nc.prazo.split('T')[0] : '';
-            document.getElementById('modal-nc-titulo').textContent = 'Editar NC-' + String(nc.id).padStart(4, '0');
+            document.getElementById('modal-nc-título').textContent = 'Editar NC-' + String(nc.id).padStart(4, '0');
             abrirModal('modal-nc');
         } catch (err) {
             console.error('[QUALIDADE] Erro ao carregar NC:', err);
@@ -831,13 +831,13 @@
         e.preventDefault();
         const id = document.getElementById('nc-id').value;
         const body = {
-            descricao: document.getElementById('nc-descricao').value,
+            descrição: document.getElementById('nc-descrição').value,
             severidade: document.getElementById('nc-severidade').value,
             origem: document.getElementById('nc-origem').value,
             ordem_producao: document.getElementById('nc-ordem').value,
             produto: document.getElementById('nc-produto').value,
             causa_raiz: document.getElementById('nc-causa').value,
-            acao_corretiva: document.getElementById('nc-acao').value,
+            acao_corretiva: document.getElementById('nc-ação').value,
             responsavel: document.getElementById('nc-responsavel').value,
             prazo: document.getElementById('nc-prazo').value || null
         };
@@ -852,7 +852,7 @@
             const result = await resp.json();
             if (result.success) {
                 fecharModal('modal-nc');
-                carregarNaoConformidades();
+                carregarNãoConformidades();
                 carregarKPIs();
             } else {
                 alert(result.message || 'Erro ao salvar');
@@ -870,7 +870,7 @@
                 method: 'DELETE',
                 headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
             });
-            carregarNaoConformidades();
+            carregarNãoConformidades();
             carregarKPIs();
         } catch (err) {
             console.error('[QUALIDADE] Erro ao excluir NC:', err);
@@ -981,7 +981,7 @@
         document.getElementById('form-checklist').reset();
         document.getElementById('ck-id').value = '';
         document.getElementById('ck-items-list').innerHTML = '';
-        document.getElementById('modal-ck-titulo').textContent = 'Novo Checklist';
+        document.getElementById('modal-ck-título').textContent = 'Novo Checklist';
         checklistItemCounter = 0;
         adicionarItemChecklist();
         adicionarItemChecklist();
@@ -1012,7 +1012,7 @@
             document.getElementById('ck-id').value = ck.id;
             document.getElementById('ck-nome').value = ck.nome;
             document.getElementById('ck-tipo').value = ck.tipo_inspecao;
-            document.getElementById('modal-ck-titulo').textContent = 'Editar Checklist';
+            document.getElementById('modal-ck-título').textContent = 'Editar Checklist';
 
             // Carregar itens
             const respItens = await fetch(`${API_BASE}/checklists/${encodeURIComponent(id)}/itens`, {
@@ -1046,7 +1046,7 @@
         const id = document.getElementById('ck-id').value;
         const itens = [];
         document.querySelectorAll('#ck-items-list .ck-item-desc').forEach((input, idx) => {
-            if (input.value.trim()) itens.push({ descricao: input.value.trim(), ordem: idx + 1 });
+            if (input.value.trim()) itens.push({ descrição: input.value.trim(), ordem: idx + 1 });
         });
         const body = {
             nome: document.getElementById('ck-nome').value,
@@ -1147,7 +1147,7 @@
     }
 
     function severidadeLabel(s) {
-        const map = { critica: 'Crítica', maior: 'Maior', menor: 'Menor', observacao: 'Observação' };
+        const map = { critica: 'Crítica', maior: 'Maior', menor: 'Menor', observação: 'Observação' };
         return map[s] || s || '-';
     }
 
@@ -1169,7 +1169,7 @@
 
         await carregarKPIs();
         await carregarInspecoes();
-        await carregarNaoConformidades();
+        await carregarNãoConformidades();
         await carregarChecklists();
     });
     </script>

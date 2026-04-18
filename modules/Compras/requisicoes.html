@@ -238,9 +238,9 @@
         .required { color: var(--danger-500); font-weight: 700; }
     </style>
     <script>
-        function toggleNotificacoes() { const p = document.getElementById('notification-panel'); if (p) p.classList.toggle('active'); }
+        function toggleNotificações() { const p = document.getElementById('notification-panel'); if (p) p.classList.toggle('active'); }
         function marcarTodasLidas() {}
-        function limparNotificacoes() {}
+        function limparNotificações() {}
     </script>
     <script src="/js/anti-copy-protection.js" defer></script>
     <!-- Chat Widget BOB AI -->
@@ -465,7 +465,7 @@
                         <div class="form-grid cols-1">
                             <div class="form-group">
                                 <label>Fornecedores Sugeridos</label>
-                                <input type="text" class="form-control" id="fornecedoresSugeridos" placeholder="Opcional � separe por vrgula">
+                                <input type="text" class="form-control" id="fornecedoresSugeridos" placeholder="Opcional � separe por vírgula">
                             </div>
                             <div class="form-group">
                                 <label>Observa��es</label>
@@ -624,7 +624,7 @@
         document.getElementById('totalRequisicoes').textContent = requisicoesData.length;
         document.getElementById('requisicoesPendentes').textContent = requisicoesData.filter(r => r.status === 'pendente' || r.status === 'urgente').length;
         document.getElementById('requisicoesAprovadas').textContent = requisicoesData.filter(r => r.status === 'aprovado' || r.status === 'aprovada').length;
-        document.getElementById('requisicoesCotacao').textContent = requisicoesData.filter(r => r.status === 'cota��o' || r.status === 'em_cota��o').length;
+        document.getElementById('requisicoesCotação').textContent = requisicoesData.filter(r => r.status === 'cota��o' || r.status === 'em_cota��o').length;
     }
 
     /* ========== Modal: Nova Requisi��o ========== */
@@ -635,7 +635,7 @@
         anexosFiles = [];
         document.getElementById('itensContainer').innerHTML = '';
         document.getElementById('anexosList').innerHTML = '';
-        document.getElementById('reqDataSolicitacao').value = new Date().toISOString().split('T')[0];
+        document.getElementById('reqDataSolicitação').value = new Date().toISOString().split('T')[0];
         if (usu�rioLogado) document.getElementById('reqSolicitante').value = usu�rioLogado.nome || usu�rioLogado.name || 'Usu�rio';
         // Populate CC
         const sel = document.getElementById('reqCentroCusto');
@@ -643,8 +643,8 @@
         // Get next number
         try {
             const r = await fetch('/api/compras/requisicoes/proximo-numero', { credentials: 'include' });
-            if (r.ok) { const d = await r.json(); document.getElementById('reqNumero').value = d.n�mero || d.proximo_n�mero || ''; }
-        } catch (e) { document.getElementById('reqNumero').value = 'RC-' + String(requisicoesData.length + 1).padStart(3, '0'); }
+            if (r.ok) { const d = await r.json(); document.getElementById('reqNúmero').value = d.n�mero || d.proximo_n�mero || ''; }
+        } catch (e) { document.getElementById('reqNúmero').value = 'RC-' + String(requisicoesData.length + 1).padStart(3, '0'); }
         // Restaurar t�tulo do modal para cria��o
         const modalTitle = document.querySelector('#modalNovaRequisicao .modal-header h3');
         if (modalTitle) modalTitle.innerHTML = '<i class="fas fa-clipboard-list"></i> Nova Requisi��o de Compra';
@@ -748,7 +748,7 @@
         const justificativa = document.getElementById('reqJustificativa').value;
         if (status !== 'rascunho' && !justificativa) { showToast('Preencha a justificativa', 'warning'); return; }
 
-        const n�mero = document.getElementById('reqNumero').value;
+        const n�mero = document.getElementById('reqNúmero').value;
         if (!n�mero) { showToast('N�mero da Requisi��o n�o gerado. Feche e reabra o formul�rio.', 'warning'); return; }
 
         const items = [];
@@ -762,7 +762,7 @@
                 unidade: document.getElementById('itemUnidade-' + id)?.value || 'UN',
                 valor_estimado: preco,
                 subtotal: qtd * preco,
-                observacao: document.getElementById('itemSpec-' + id)?.value || ''
+                observação: document.getElementById('itemSpec-' + id)?.value || ''
             });
         });
 
@@ -776,12 +776,12 @@
             solicitante,
             solicitante_id,
             centro_custo: document.getElementById('reqCentroCusto').value || null,
-            data_solicita��o: document.getElementById('reqDataSolicitacao')?.value || new Date().toISOString().split('T')[0],
+            data_solicita��o: document.getElementById('reqDataSolicitação')?.value || new Date().toISOString().split('T')[0],
             data_necessidade: document.getElementById('reqDataNecessidade').value || null,
             projeto: document.getElementById('reqProjeto').value || null,
             prioridade, justificativa, status, itens: items,
             fornecedores_sugeridos: document.getElementById('fornecedoresSugeridos').value || null,
-            observacoes: document.getElementById('reqObservacoes').value || null
+            observações: document.getElementById('reqObservações').value || null
         };
 
         // Desabilitar bot�es e marcar como salvando
@@ -822,7 +822,7 @@
             const r = await fetch(`/api/compras/requisicoes/${id}`, { credentials: 'include' });
             const d = await r.json();
             const req = d.requisicao || d;
-            document.getElementById('viewReqNumero').textContent = req.n�mero || '';
+            document.getElementById('viewReqNúmero').textContent = req.n�mero || '';
             let itensHtml = '';
             if (req.itens && req.itens.length) {
                 itensHtml = '<table class="data-table" style="font-size:0.8rem;"><thead><tr><th>Material</th><th>Qtd</th><th>Un</th><th>Pre�o</th><th>Subtotal</th></tr></thead><tbody>' +
@@ -840,7 +840,7 @@
                 '</div></div>' +
                 '<div class="view-section"><h4>Justificativa</h4><p style="font-size:0.85rem; color:var(--gray-700);">' + (req.justificativa || '-') + '</p></div>' +
                 (itensHtml ? '<div class="view-section"><h4>Itens</h4>' + itensHtml + '</div>' : '') +
-                (req.observacoes ? '<div class="view-section"><h4>Observa��es</h4><p style="font-size:0.85rem; color:var(--gray-700);">' + req.observacoes + '</p></div>' : '');
+                (req.observações ? '<div class="view-section"><h4>Observa��es</h4><p style="font-size:0.85rem; color:var(--gray-700);">' + req.observações + '</p></div>' : '');
             document.getElementById('modalVisualizarRequisicao').classList.add('active');
         } catch (e) { showToast('Erro ao carregar Requisi��o', 'error'); }
     }
@@ -858,9 +858,9 @@
             if (req.status !== 'rascunho' && req.status !== 'pendente') { showToast('Esta Requisi��o n�o pode ser editada', 'warning'); return; }
             await abrirModalNovaRequisicao();
             editingId = id;
-            document.getElementById('reqNumero').value = req.n�mero || '';
+            document.getElementById('reqNúmero').value = req.n�mero || '';
             document.getElementById('reqJustificativa').value = req.justificativa || '';
-            document.getElementById('reqObservacoes').value = req.observacoes || '';
+            document.getElementById('reqObservações').value = req.observações || '';
             // Preencher campos adicionais
             if (req.centro_custo) {
                 const sel = document.getElementById('reqCentroCusto');
@@ -889,7 +889,7 @@
                     document.getElementById('itemPreco-' + itemId).value = formatarMoeda(it.valor_estimado || it.preco_unitario || 0);
                     calcularSubtotal(itemId);
                     const specEl = document.getElementById('itemSpec-' + itemId);
-                    if (specEl) specEl.value = it.observacao || '';
+                    if (specEl) specEl.value = it.observação || '';
                 });
             }
             // Atualizar t�tulo do modal para edi�o
@@ -1039,7 +1039,7 @@
     <script src="/_shared/confirm-dialog.js?v=20260301"></script>
 
     <!-- Chat Widget BOB AI -->
-    <script src="/chat/widget.js?v=20260416" defer></script>
+    <script src="/chat/widget.js?v=20260418" defer></script>
 
     <!-- Enterprise Shared -->
     <script src="/js/sidebar-click-animation.js?v=20260301"></script>

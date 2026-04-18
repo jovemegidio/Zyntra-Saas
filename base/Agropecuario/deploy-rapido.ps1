@@ -44,7 +44,7 @@ function Enviar-Arquivo {
    }
 
    if (-not (Test-Path $arquivoCompleto)) {
-      Write-Host "  ERRO: Arquivo nao encontrado: $arquivo" -ForegroundColor Red
+      Write-Host "  ERRO: Arquivo não encontrado: $arquivo" -ForegroundColor Red
       return $false
    }
 

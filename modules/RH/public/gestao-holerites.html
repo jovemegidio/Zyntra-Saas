@@ -430,16 +430,16 @@
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel de Controle"><i class="fas fa-home"></i></a>
             <nav class="sidebar-nav">
                 <a href="areaadm.html" class="sidebar-btn" title="Dashboard RH"><i class="fas fa-chart-pie"></i></a>
-                <a href="pages/funcionarios.html" class="sidebar-btn" title="Funcionários"><i class="fas fa-users"></i></a>
+                <a href="pages/funcionários.html" class="sidebar-btn" title="Funcionários"><i class="fas fa-users"></i></a>
                 <a href="gestao-holerites.html" class="sidebar-btn active" title="Gestão de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="pages/folha.html" class="sidebar-btn" title="Folha de Pagamento"><i class="fas fa-money-check-alt"></i></a>
-                <a href="pages/gestao-ponto.html" class="sidebar-btn" title="Gesto do Ponto"><i class="fas fa-clock"></i></a>
+                <a href="pages/gestao-ponto.html" class="sidebar-btn" title="Gestão do Ponto"><i class="fas fa-clock"></i></a>
                 <a href="pages/importar-ponto.html" class="sidebar-btn" title="Importar Ponto (Control iD)"><i class="fas fa-upload"></i></a>
                 <a href="pages/beneficios.html" class="sidebar-btn" title="Benefícios"><i class="fas fa-gift"></i></a>
-                <a href="pages/calendario-rh.html" class="sidebar-btn" title="Calendrio RH"><i class="fas fa-calendar-alt"></i></a>
+                <a href="pages/calendario-rh.html" class="sidebar-btn" title="Calendário RH"><i class="fas fa-calendar-alt"></i></a>
             </nav>
             <div class="sidebar-bottom">
-                <a href="funcionario.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-user"></i></a>
+                <a href="funcionário.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-user"></i></a>
             </div>
         </aside>
 
@@ -462,7 +462,7 @@
                 <div class="header-right">
                     <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usurio</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
                     </div>
                 </div>
             </header>
@@ -522,12 +522,12 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Ms</label>
+                        <label class="form-label">Mês</label>
                         <select class="form-select" id="filtro-mes">
                             <option value="">Todos</option>
                             <option value="1">Janeiro</option>
                             <option value="2">Fevereiro</option>
-                            <option value="3">Maro</option>
+                            <option value="3">Março</option>
                             <option value="4">Abril</option>
                             <option value="5">Maio</option>
                             <option value="6">Junho</option>
@@ -561,15 +561,15 @@
                             <option value="">Todos</option>
                             <option value="salario">Salário</option>
                             <option value="adiantamento">Adiantamento</option>
-                            <option value="férias">Frias</option>
+                            <option value="férias">Férias</option>
                             <option value="13_salario">13 Salário</option>
-                            <option value="rescisão">Resciso</option>
+                            <option value="rescisão">Rescisão</option>
                         </select>
                     </div>
                     <button class="btn btn-primary" onclick="carregarHolerites()">
                         <i class="fas fa-search"></i> Filtrar
                     </button>
-                    <button class="btn btn-outline" onclick="exportarRelatorio()">
+                    <button class="btn btn-outline" onclick="exportarRelatório()">
                         <i class="fas fa-download"></i> Relatório
                     </button>
                 </div>
@@ -620,11 +620,11 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Ms *</label>
+                            <label class="form-label">Mês *</label>
                             <select class="form-select" id="holerite-mes" required>
                                 <option value="1">Janeiro</option>
                                 <option value="2">Fevereiro</option>
-                                <option value="3">Maro</option>
+                                <option value="3">Março</option>
                                 <option value="4">Abril</option>
                                 <option value="5">Maio</option>
                                 <option value="6">Junho</option>
@@ -653,7 +653,7 @@
                         <div class="item-row" style="font-weight: 600; font-size: 0.75rem; color: #64748b;">
                             <span>Código</span>
                             <span>Descrição</span>
-                            <span>Referncia</span>
+                            <span>Referência</span>
                             <span>Valor (R$)</span>
                             <span></span>
                         </div>
@@ -673,7 +673,7 @@
                         <div class="item-row" style="font-weight: 600; font-size: 0.75rem; color: #64748b;">
                             <span>Código</span>
                             <span>Descrição</span>
-                            <span>Referncia</span>
+                            <span>Referência</span>
                             <span>Valor (R$)</span>
                             <span></span>
                         </div>
@@ -742,9 +742,9 @@
                     <ul style="color: #15803d; font-size: 0.875rem; margin: 0; padding-left: 20px; line-height: 1.8;">
                         <li>Faça upload do <strong>PDF consolidado</strong> da contabilidade com os holerites de todos os funcionários</li>
                         <li>O sistema identifica automaticamente cada funcionário pelo <strong>nome ou CPF</strong> presente no documento</li>
-                        <li>O <strong>tipo (ADTO/MENSAL)</strong> e a <strong>data (ms/ano)</strong> so detectados automaticamente do PDF</li>
-                        <li>O PDF  separado automaticamente, gerando um <strong>arquivo individual por funcionário</strong></li>
-                        <li>Importe PDFs de <strong>Adiantamento</strong> e <strong>Mensal</strong> separadamente  cada um com seu arquivo da contabilidade</li>
+                        <li>O <strong>tipo (ADTO/MENSAL)</strong> e a <strong>data (mês/ano)</strong> são detectados automaticamente do PDF</li>
+                        <li>O PDF é separado automaticamente, gerando um <strong>arquivo individual por funcionário</strong></li>
+                        <li>Importe PDFs de <strong>Adiantamento</strong> e <strong>Mensal</strong> separadamente — cada um com seu arquivo da contabilidade</li>
                     </ul>
                 </div>
 
@@ -759,12 +759,12 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Ms de Referncia</label>
+                            <label class="form-label">Mês de Referência</label>
                             <select class="form-select" id="import-mes">
                                 <option value="">?? Auto-detectar do PDF</option>
                                 <option value="1">Janeiro</option>
                                 <option value="2">Fevereiro</option>
-                                <option value="3">Maro</option>
+                                <option value="3">Março</option>
                                 <option value="4">Abril</option>
                                 <option value="5">Maio</option>
                                 <option value="6">Junho</option>
@@ -789,7 +789,7 @@
                             <div id="drop-zone-content">
                                 <i class="fas fa-cloud-upload-alt" style="font-size: 2.5rem; color: #9ca3af; margin-bottom: 12px;"></i>
                                 <p style="font-weight: 600; color: #374151; margin-bottom: 4px;">Clique ou arraste o PDF aqui</p>
-                                <p style="font-size: 0.75rem; color: #9ca3af;">Formato aceito: PDF (mximo 20MB)</p>
+                                <p style="font-size: 0.75rem; color: #9ca3af;">Formato aceito: PDF (máximo 20MB)</p>
                             </div>
                         </div>
                     </div>
@@ -797,7 +797,7 @@
                     <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px; background: #f0fdf4; padding: 12px 16px; border-radius: 8px; border: 1px solid #bbf7d0;">
                         <i class="fas fa-check-circle" style="color: #16a34a; font-size: 1.1rem;"></i>
                         <span style="font-size: 0.875rem; color: #166534;">
-                            <strong>Publicao automtica</strong>  os holerites sero publicados imediatamente aps a importao
+                            <strong>Publicação automática</strong> — os holerites serão publicados imediatamente após a importação
                         </span>
                     </div>
                 </form>
@@ -818,7 +818,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline" onclick="fecharModalImportar()">Cancelar</button>
-                <button type="button" class="btn btn-success" id="btn-importar" onclick="executarImportacao()">
+                <button type="button" class="btn btn-success" id="btn-importar" onclick="executarImportação()">
                     <i class="fas fa-upload"></i> Importar e Processar
                 </button>
             </div>
@@ -849,13 +849,13 @@
 
     <!-- Modal Relatório de Visualizações -->
     <div class="modal" id="modal-relatorio">
-        <div class="modal-overlay" onclick="document.getElementById('modal-relatorio').classList.remove('show')"></div>
+        <div class="modal-overlay" onclick="document.getElementById('modal-relatório').classList.remove('show')"></div>
         <div class="modal-content" style="max-width: 900px; height: 85vh; display: flex; flex-direction: column;">
             <div class="modal-header">
                 <h2><i class="fas fa-chart-bar"></i> Relatório de Visualizações</h2>
                 <div style="display:flex;gap:8px;">
-                    <button class="modal-close" onclick="window.open(document.getElementById('relatorio-iframe').src, '_blank')" title="Abrir em nova aba" style="background:rgba(255,255,255,0.15);"><i class="fas fa-external-link-alt"></i></button>
-                    <button class="modal-close" onclick="document.getElementById('modal-relatorio').classList.remove('show')"><i class="fas fa-times"></i></button>
+                    <button class="modal-close" onclick="window.open(document.getElementById('relatório-iframe').src, '_blank')" title="Abrir em nova aba" style="background:rgba(255,255,255,0.15);"><i class="fas fa-external-link-alt"></i></button>
+                    <button class="modal-close" onclick="document.getElementById('modal-relatório').classList.remove('show')"><i class="fas fa-times"></i></button>
                 </div>
             </div>
             <div style="flex:1;padding:16px 24px 24px;overflow:hidden;">
@@ -908,7 +908,7 @@
 
         // Carregar dados iniciais
         async function init() {
-            await carregarFuncionarios();
+            await carregarFuncionários();
             await carregarEventosPadrao();
             await carregarHolerites();
             carregarUsuario();
@@ -952,7 +952,7 @@
             }
         }
 
-        async function carregarFuncionarios() {
+        async function carregarFuncionários() {
             try {
                 const resp = await fetch('/api/rh/funcionarios', { headers: getAuthHeaders() });
                 if (resp.ok) {
@@ -961,10 +961,10 @@
                     if (!Array.isArray(funcionários)) funcionários = [];
                     
                     // Preencher selects
-                    const selects = ['filtro-funcionario', 'holerite-funcionario'];
+                    const selects = ['filtro-funcionário', 'holerite-funcionário'];
                     selects.forEach(id => {
                         const select = document.getElementById(id);
-                        if (select && id !== 'filtro-funcionario') select.innerHTML = '<option value="">Selecione...</option>';
+                        if (select && id !== 'filtro-funcionário') select.innerHTML = '<option value="">Selecione...</option>';
                         funcionários.forEach(f => {
                             const opt = document.createElement('option');
                             opt.value = f.id;
@@ -991,7 +991,7 @@
 
         async function carregarHolerites() {
             try {
-                const funcionário = document.getElementById('filtro-funcionario')?.value || '';
+                const funcionário = document.getElementById('filtro-funcionário')?.value || '';
                 const mes = document.getElementById('filtro-mes').value;
                 const ano = document.getElementById('filtro-ano').value;
                 const status = document.getElementById('filtro-status').value;
@@ -1040,7 +1040,7 @@
                 return `
                 <tr>
                     <td>
-                        <div style="font-weight: 600;">${h.funcionário_nome || 'N/A'}</div>
+                        <div style="font-weight: 600;">${h.funcionario_nome || 'N/A'}</div>
                         <div style="font-size: 0.75rem; color: #64748b;">${h.cargo || ''} - ${h.departamento || ''}</div>
                     </td>
                     <td>${meses[h.mes]}/${h.ano}</td>
@@ -1049,7 +1049,7 @@
                     <td><span class="status-badge ${h.status}">${h.status.charAt(0).toUpperCase() + h.status.slice(1)}</span></td>
                     <td>
                         ${h.visualizado ? 
-                            `<span class="view-badge visualizado"><i class="fas fa-eye"></i> ${h.total_visualizacoes}x</span>` :
+                            `<span class="view-badge visualizado"><i class="fas fa-eye"></i> ${h.total_visualizações}x</span>` :
                             `<span class="view-badge nao-visualizado"><i class="fas fa-eye-slash"></i> No visto</span>`
                         }
                     </td>
@@ -1097,7 +1097,7 @@
 
         // Modal Novo
         function abrirModalNovo() {
-            document.getElementById('modal-titulo').textContent = 'Novo Holerite';
+            document.getElementById('modal-título').textContent = 'Novo Holerite';
             document.getElementById('holerite-id').value = '';
             document.getElementById('form-holerite').reset();
             document.getElementById('holerite-ano').value = new Date().getFullYear();
@@ -1119,7 +1119,7 @@
         }
 
         // Adicionar item
-        function adicionarItem(tipo, codigo = '', descrição = '', referencia = '', valor = 0) {
+        function adicionarItem(tipo, código = '', descrição = '', referencia = '', valor = 0) {
             const lista = document.getElementById(`lista-${tipo === 'provento' ? 'proventos' : 'descontos'}`);
             const id = Date.now();
             
@@ -1127,7 +1127,7 @@
             row.className = 'item-row';
             row.id = `item-${id}`;
             row.innerHTML = `
-                <input type="text" placeholder="001" value="${codigo}" data-field="codigo">
+                <input type="text" placeholder="001" value="${código}" data-field="código">
                 <input type="text" placeholder="Descrição" value="${descrição}" data-field="descrição" required>
                 <input type="text" placeholder="220h" value="${referencia}" data-field="referencia">
                 <input type="number" step="0.01" placeholder="0,00" value="${valor}" data-field="valor" onchange="calcularTotais()">
@@ -1168,7 +1168,7 @@
 
             document.querySelectorAll('#lista-proventos .item-row').forEach(row => {
                 proventos.push({
-                    codigo: row.querySelector('[data-field="codigo"]').value,
+                    código: row.querySelector('[data-field="código"]').value,
                     descrição: row.querySelector('[data-field="descrição"]').value,
                     referencia: row.querySelector('[data-field="referencia"]').value,
                     valor: parseFloat(row.querySelector('[data-field="valor"]').value) || 0
@@ -1177,7 +1177,7 @@
 
             document.querySelectorAll('#lista-descontos .item-row').forEach(row => {
                 descontos.push({
-                    codigo: row.querySelector('[data-field="codigo"]').value,
+                    código: row.querySelector('[data-field="código"]').value,
                     descrição: row.querySelector('[data-field="descrição"]').value,
                     referencia: row.querySelector('[data-field="referencia"]').value,
                     valor: parseFloat(row.querySelector('[data-field="valor"]').value) || 0
@@ -1188,7 +1188,7 @@
             const totalDescontos = descontos.reduce((sum, d) => sum + d.valor, 0);
 
             return {
-                funcionário_id: document.getElementById('holerite-funcionario').value,
+                funcionario_id: document.getElementById('holerite-funcionário').value,
                 mes: parseInt(document.getElementById('holerite-mes').value),
                 ano: parseInt(document.getElementById('holerite-ano').value),
                 salario_base: proventos[0]?.valor || 0,
@@ -1213,7 +1213,7 @@
         }
 
         async function salvarHolerite(dados) {
-            if (!dados.funcionário_id || !dados.mes || !dados.ano) {
+            if (!dados.funcionario_id || !dados.mes || !dados.ano) {
                 showToast('error', 'Preencha funcionário, mês e ano');
                 return;
             }
@@ -1250,9 +1250,9 @@
                 if (resp.ok) {
                     const h = await resp.json();
                     
-                    document.getElementById('modal-titulo').textContent = 'Editar Holerite';
+                    document.getElementById('modal-título').textContent = 'Editar Holerite';
                     document.getElementById('holerite-id').value = h.id;
-                    document.getElementById('holerite-funcionario').value = h.funcionário_id;
+                    document.getElementById('holerite-funcionário').value = h.funcionario_id;
                     document.getElementById('holerite-mes').value = h.mes;
                     document.getElementById('holerite-ano').value = h.ano;
                     
@@ -1261,10 +1261,10 @@
                     document.getElementById('lista-descontos').innerHTML = '';
                     
                     (h.proventos || []).forEach(p => {
-                        adicionarItem('provento', p.codigo, p.descrição, p.referencia, p.valor);
+                        adicionarItem('provento', p.codigo, p.descricao, p.referencia, p.valor);
                     });
                     (h.descontos || []).forEach(d => {
-                        adicionarItem('desconto', d.codigo, d.descrição, d.referencia, d.valor);
+                        adicionarItem('desconto', d.codigo, d.descricao, d.referencia, d.valor);
                     });
                     
                     calcularTotais();
@@ -1302,7 +1302,7 @@
                         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px;">
                             <div style="background: #f8fafc; padding: 16px 20px; border-radius: 12px; border: 1px solid #e2e8f0;">
                                 <div style="font-size:0.7rem;color:#94a3b8;text-transform:uppercase;font-weight:600;letter-spacing:0.5px;margin-bottom:4px;">Funcionário</div>
-                                <div style="font-weight:600;color:#1e293b;">${h.funcionário_nome}</div>
+                                <div style="font-weight:600;color:#1e293b;">${h.funcionario_nome}</div>
                             </div>
                             <div style="background: #f8fafc; padding: 16px 20px; border-radius: 12px; border: 1px solid #e2e8f0;">
                                 <div style="font-size:0.7rem;color:#94a3b8;text-transform:uppercase;font-weight:600;letter-spacing:0.5px;margin-bottom:4px;">CPF</div>
@@ -1336,7 +1336,7 @@
                                     ${(h.proventos || []).map((p, i) => `
                                         <tr style="border-bottom: 1px solid #f1f5f9;${i % 2 === 1 ? 'background:#fafbfc;' : ''}">
                                             <td style="padding: 10px 14px; font-size: 0.85rem; color: #64748b; font-family: monospace;">${p.codigo}</td>
-                                            <td style="padding: 10px 14px; font-size: 0.85rem; color: #1e293b; font-weight: 500;">${p.descrição || '-'}</td>
+                                            <td style="padding: 10px 14px; font-size: 0.85rem; color: #1e293b; font-weight: 500;">${p.descricao || '-'}</td>
                                             <td style="padding: 10px 14px; font-size: 0.85rem; color: #64748b;">${p.referencia || '-'}</td>
                                             <td style="padding: 10px 14px; text-align: right; font-size: 0.85rem; color: var(--success-green); font-weight: 600;">${formatCurrency(p.valor)}</td>
                                         </tr>
@@ -1363,7 +1363,7 @@
                                     ${(h.descontos || []).map((d, i) => `
                                         <tr style="border-bottom: 1px solid #f1f5f9;${i % 2 === 1 ? 'background:#fafbfc;' : ''}">
                                             <td style="padding: 10px 14px; font-size: 0.85rem; color: #64748b; font-family: monospace;">${d.codigo}</td>
-                                            <td style="padding: 10px 14px; font-size: 0.85rem; color: #1e293b; font-weight: 500;">${d.descrição || '-'}</td>
+                                            <td style="padding: 10px 14px; font-size: 0.85rem; color: #1e293b; font-weight: 500;">${d.descricao || '-'}</td>
                                             <td style="padding: 10px 14px; font-size: 0.85rem; color: #64748b;">${d.referencia || '-'}</td>
                                             <td style="padding: 10px 14px; text-align: right; font-size: 0.85rem; color: var(--danger-red); font-weight: 600;">${formatCurrency(d.valor)}</td>
                                         </tr>
@@ -1402,10 +1402,10 @@
                                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.8rem;color:#15803d;">
                                     <p><strong>Primeira:</strong> ${h.data_primeira_visualização ? new Date(h.data_primeira_visualização).toLocaleString('pt-BR') : 'N/A'}</p>
                                     <p><strong>ltima:</strong> ${h.data_ultima_visualização ? new Date(h.data_ultima_visualização).toLocaleString('pt-BR') : 'N/A'}</p>
-                                    <p><strong>Total:</strong> ${h.total_visualizacoes}x</p>
+                                    <p><strong>Total:</strong> ${h.total_visualizações}x</p>
                                     <p><strong>IP:</strong> ${h.ip_visualização || 'N/A'}</p>
                                 </div>
-                                ${h.confirmado_recebimento ? `<p style="margin-top:8px;font-size:0.8rem;color:#2563eb;"><i class="fas fa-check-double"></i> Recebimento confirmado em ${new Date(h.data_confirmacao).toLocaleString('pt-BR')}</p>` : ''}
+                                ${h.confirmado_recebimento ? `<p style="margin-top:8px;font-size:0.8rem;color:#2563eb;"><i class="fas fa-check-double"></i> Recebimento confirmado em ${new Date(h.data_confirmação).toLocaleString('pt-BR')}</p>` : ''}
                             </div>
                         ` : `
                             <div style="margin-top: 24px; padding: 16px 20px; background: #fef2f2; border-radius: 12px; border: 1px solid #fecaca;">
@@ -1465,13 +1465,13 @@
             }
         }
 
-        async function exportarRelatorio() {
-            const url = '/api/rh/holerites/relatorio/visualizacoes?' + new URLSearchParams({
+        async function exportarRelatório() {
+            const url = '/api/rh/holerites/relatório/visualizações?' + new URLSearchParams({
                 mes: document.getElementById('filtro-mes').value,
                 ano: document.getElementById('filtro-ano').value
             });
-            document.getElementById('relatorio-iframe').src = url;
-            document.getElementById('modal-relatorio').classList.add('show');
+            document.getElementById('relatório-iframe').src = url;
+            document.getElementById('modal-relatório').classList.add('show');
         }
 
         function downloadPDF(id) {
@@ -1595,7 +1595,7 @@
             }
         }
 
-        async function executarImportacao() {
+        async function executarImportação() {
             const fileInput = document.getElementById('import-pdf');
             const mes = document.getElementById('import-mes').value;
             const ano = document.getElementById('import-ano').value;
@@ -1650,7 +1650,7 @@
                 if (resp.ok) {
                     progressText.textContent = 'Importao concluda!';
                     showToast('success', data.message);
-                    exibirResultadoImportacao(data.resultados);
+                    exibirResultadoImportação(data.resultados);
                     carregarHolerites(); // Atualizar tabela
                 } else {
                     progressText.textContent = 'Erro na importao';
@@ -1666,7 +1666,7 @@
             }
         }
 
-        function exibirResultadoImportacao(resultados) {
+        function exibirResultadoImportação(resultados) {
             const div = document.getElementById('import-resultado');
             if (!resultados) { div.style.display = 'none'; return; }
 
@@ -1713,7 +1713,7 @@
                                     ${resultados.detalhes.map(d => `
                                         <tr style="border-bottom: 1px solid #f1f5f9;">
                                             <td style="padding: 8px 12px;">${d.paginas ? d.paginas.join(', ') : '-'}</td>
-                                            <td style="padding: 8px 12px; font-weight: 500;">${d.funcionário || '<em style="color: #ef4444;">No identificado</em>'}</td>
+                                            <td style="padding: 8px 12px; font-weight: 500;">${d.funcionario || '<em style="color: #ef4444;">No identificado</em>'}</td>
                                             <td style="padding: 8px 12px; color: #64748b;">${d.matchedBy || '-'}</td>
                                             <td style="padding: 8px 12px;">
                                                 <span style="padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 500;

@@ -298,7 +298,7 @@
                     </div>
                     <div class="summary-card" style="border-left-color:#f59e0b;">
                         <div class="summary-icon" style="color:#f59e0b;"><i class="fas fa-clock"></i></div>
-                        <div class="summary-value" style="color:#d97706;" id="kpi-ultimo">—</div>
+                        <div class="summary-value" style="color:#d97706;" id="kpi-Último">—</div>
                         <div class="summary-label">Último Relatório Gerado</div>
                     </div>
                 </div>
@@ -411,7 +411,7 @@
                         <div class="template-desc">Modelo XLSX para importação</div>
                         <div class="template-download"><i class="fas fa-download"></i> Baixar</div>
                     </div>
-                    <div class="template-card" onclick="baixarTemplate('movimentacoes')">
+                    <div class="template-card" onclick="baixarTemplate('movimentações')">
                         <div class="template-icon" style="background:#fef3c7;color:#d97706;"><i class="fas fa-exchange-alt"></i></div>
                         <div class="template-name">Movimentações</div>
                         <div class="template-desc">Modelo XLSX para importação</div>
@@ -489,7 +489,7 @@
                         <div class="resumo-item"><div class="resumo-label">Desconto</div><div class="resumo-value" id="resumo-desconto" style="color:#ef4444;">R$ 0,00</div></div>
                         <div class="resumo-item"><div class="resumo-label">IOF</div><div class="resumo-value" id="resumo-iof" style="color:#f59e0b;">R$ 0,00</div></div>
                         <div class="resumo-item"><div class="resumo-label">Tarifa Bancária</div><div class="resumo-value" id="resumo-tarifa">R$ 15,00</div></div>
-                        <div class="resumo-item"><div class="resumo-label">Valor Líquido</div><div class="resumo-value destaque" id="resumo-liquido">R$ 0,00</div></div>
+                        <div class="resumo-item"><div class="resumo-label">Valor Líquido</div><div class="resumo-value destaque" id="resumo-líquido">R$ 0,00</div></div>
                     </div>
                 </div>
 
@@ -518,7 +518,7 @@
 
     <script>
         function toggleMobileSidebar() { document.getElementById('mobile-sidebar')?.classList.toggle('mobile-open'); document.getElementById('sidebar-overlay')?.classList.toggle('active'); }
-        function toggleNotificacoes() { if (typeof window.NotificationsManager !== 'undefined') window.NotificationsManager.togglePanel(); }
+        function toggleNotificações() { if (typeof window.NotificationsManager !== 'undefined') window.NotificationsManager.togglePanel(); }
 
         // ===== TOAST =====
         function showToast(message) {
@@ -564,44 +564,44 @@
         function fecharModalDesconto() { document.getElementById('modal-desconto').classList.remove('active'); }
 
         function calcularDesconto() {
-            const valor = parseFloat(document.getElementById('valor-titulo').value) || 0;
+            const valor = parseFloat(document.getElementById('valor-título').value) || 0;
             const taxa = parseFloat(document.getElementById('taxa-desconto').value) || 0;
             const iofAnual = parseFloat(document.getElementById('iof-desconto').value) || 0;
             const dataVencimento = document.getElementById('data-vencimento').value;
-            const dataOperacao = document.getElementById('data-operacao').value || new Date().toISOString().split('T')[0];
+            const dataOperação = document.getElementById('data-operacao').value || new Date().toISOString().split('T')[0];
             const tarifa = 15;
 
             let prazo = 0;
-            if (dataVencimento && dataOperacao) {
-                const diff = new Date(dataVencimento) - new Date(dataOperacao);
+            if (dataVencimento && dataOperação) {
+                const diff = new Date(dataVencimento) - new Date(dataOperação);
                 prazo = Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
             }
 
             const taxaDiaria = taxa / 30;
             const desconto = valor * (taxaDiaria / 100) * prazo;
             const iof = valor * (iofAnual / 100) * (prazo / 365);
-            const liquido = valor - desconto - iof - tarifa;
+            const líquido = valor - desconto - iof - tarifa;
 
             document.getElementById('resumo-valor').textContent = `R$ ${valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
             document.getElementById('resumo-prazo').textContent = `${prazo} dias`;
             document.getElementById('resumo-desconto').textContent = `R$ ${desconto.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
             document.getElementById('resumo-iof').textContent = `R$ ${iof.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
             document.getElementById('resumo-tarifa').textContent = `R$ ${tarifa.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
-            document.getElementById('resumo-liquido').textContent = `R$ ${liquido.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+            document.getElementById('resumo-líquido').textContent = `R$ ${líquido.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
         }
 
         async function salvarDesconto(event) {
             event.preventDefault();
             const dados = {
-                numero_titulo: document.getElementById('numero-titulo').value,
+                numero_titulo: document.getElementById('número-título').value,
                 cliente_sacado: document.getElementById('cliente-sacado').value,
-                valor_titulo: parseFloat(document.getElementById('valor-titulo').value),
+                valor_titulo: parseFloat(document.getElementById('valor-título').value),
                 data_vencimento: document.getElementById('data-vencimento').value,
                 banco: document.getElementById('banco-desconto').value,
                 data_operacao: document.getElementById('data-operacao').value,
                 taxa_desconto: parseFloat(document.getElementById('taxa-desconto').value),
                 iof: parseFloat(document.getElementById('iof-desconto').value),
-                observacoes: document.getElementById('obs-desconto').value
+                observações: document.getElementById('obs-desconto').value
             };
             try {
                 const r = await fetch('/api/financeiro/operacoes/desconto', {
@@ -621,7 +621,7 @@
                 'contas_pagar': { nome: 'Contas a Pagar', arquivo: 'contas_pagar.xlsx' },
                 'contas_receber': { nome: 'Contas a Receber', arquivo: 'contas_receber.xlsx' },
                 'bancos': { nome: 'Contas Bancárias', arquivo: 'bancos.xlsx' },
-                'movimentacoes': { nome: 'Movimentações', arquivo: 'movimentacoes.xlsx' },
+                'movimentações': { nome: 'Movimentações', arquivo: 'movimentações.xlsx' },
                 'fluxo_caixa': { nome: 'Fluxo de Caixa', arquivo: 'fluxo_caixa.xlsx' }
             };
             const tmpl = templates[tipo];

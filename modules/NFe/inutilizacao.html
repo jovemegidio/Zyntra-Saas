@@ -95,7 +95,7 @@
             font-weight: 600;
         }
         .ambiente-homologacao { background: var(--warning-bg); color: #92400e; }
-        .ambiente-produção { background: var(--danger-bg); color: #991b1b; }
+        .ambiente-producao { background: var(--danger-bg); color: #991b1b; }
 
         .required-mark { color: var(--danger); }
 
@@ -115,15 +115,15 @@
             <nav class="sidebar-nav">
                 <a href="index.html" class="sidebar-btn" title="Dashboard"><i class="fas fa-chart-pie"></i></a>
                 <a href="consultar.html" class="sidebar-btn" title="Consultar NFe"><i class="fas fa-search"></i></a>
-                <a href="relatorios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
+                <a href="relatórios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
                 <a href="eventos.html" class="sidebar-btn" title="Eventos"><i class="fas fa-history"></i></a>
-                <a href="inutilizacao.html" class="sidebar-btn active" title="Inutilização"><i class="fas fa-ban"></i></a>
+                <a href="inutilização.html" class="sidebar-btn active" title="Inutilização"><i class="fas fa-ban"></i></a>
                 <a href="regua.html" class="sidebar-btn" title="Régua Cobrança"><i class="fas fa-bell"></i></a>
                 <a href="pix.html" class="sidebar-btn" title="PIX"><i class="fas fa-qrcode"></i></a>
                 <a href="logistica.html" class="sidebar-btn" title="Logística & Expedição"><i class="fas fa-truck"></i></a>
             </nav>
             <div class="sidebar-bottom">
-                <button class="sidebar-btn" title="Configurações" onclick="abrirModalConfiguracoes()"><i class="fas fa-cog"></i></button>
+                <button class="sidebar-btn" title="Configurações" onclick="abrirModalConfigurações()"><i class="fas fa-cog"></i></button>
             </div>
         </aside>
         <main class="main-area">
@@ -166,10 +166,10 @@
                     <!-- Warning Banner -->
                     <div class="danger-banner">
                         <div class="danger-title"><i class="fas fa-exclamation-triangle"></i> OPERAÇÃO IRREVERSÍVEL</div>
-                        <p>A inutilização de numeração é uma operação definitiva e não pode ser desfeita. Utilize quando houver quebra de sequncia na numeração das NF-e.</p>
+                        <p>A inutilização de numeração é uma operação definitiva e não pode ser desfeita. Utilize quando houver quebra de sequência na numeração das NF-e.</p>
                         <ul>
                             <li>Números inutilizados não poderão ser utilizados para emitir novas NF-e</li>
-                            <li>A inutilização deve ser feita até o 10 dia do mês subsequente</li>
+                            <li>A inutilização deve ser feita até o 10º dia do mês subsequente</li>
                             <li>A SEFAZ validará os dados de série, CNPJ e UF do emitente</li>
                         </ul>
                     </div>
@@ -293,7 +293,7 @@
             document.getElementById('mobile-sidebar').classList.toggle('open');
             document.getElementById('sidebar-overlay').classList.toggle('active');
         }
-        function toggleNotificacoes() {}
+        function toggleNotificações() {}
 
         const avatarNameMap = {
             'clemerson':'CM','isabela':'IB','thaina':'TH','thiago':'TG','nicolas':'NC',
@@ -401,16 +401,16 @@
             fetch('/api/nfe/inutilizacoes', { credentials:'include' })
             .then(r => r.json())
             .then(data => {
-                const historico = data.inutilizacoes || data.historico || data.data || data || [];
-                const tbody = document.getElementById('historicoBody');
-                const empty = document.getElementById('historicoEmpty');
-                if (!Array.isArray(historico) || historico.length === 0) {
+                const histórico = data.inutilizações || data.historico || data.data || data || [];
+                const tbody = document.getElementById('históricoBody');
+                const empty = document.getElementById('históricoEmpty');
+                if (!Array.isArray(histórico) || histórico.length === 0) {
                     tbody.innerHTML = '';
                     empty.style.display = 'block';
                     return;
                 }
                 empty.style.display = 'none';
-                tbody.innerHTML = historico.map(h => {
+                tbody.innerHTML = histórico.map(h => {
                     const dt = h.data ? new Date(h.data).toLocaleString('pt-BR') : '-';
                     const stClass = (h.status||'').toLowerCase().includes('homolog') || (h.status||'').toLowerCase().includes('sucesso') ? 'approved' : 'danger';
                     return `<tr>
@@ -424,8 +424,8 @@
                 }).join('');
             })
             .catch(() => {
-                document.getElementById('historicoBody').innerHTML = '';
-                document.getElementById('historicoEmpty').style.display = 'block';
+                document.getElementById('históricoBody').innerHTML = '';
+                document.getElementById('históricoEmpty').style.display = 'block';
             });
         }
 
@@ -442,7 +442,7 @@
             setTimeout(() => d.remove(), 5000);
         }
 
-        function abrirModalConfiguracoes() { alert('Configurações - Em desenvolvimento'); }
+        function abrirModalConfigurações() { alert('Configurações - Em desenvolvimento'); }
 
         document.addEventListener('DOMContentLoaded', () => {
             carregarUsuario();

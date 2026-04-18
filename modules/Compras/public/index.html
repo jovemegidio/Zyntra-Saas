@@ -139,8 +139,8 @@
                     onclick="navigateSection('pedidos', this)">
                     <i class="fas fa-shopping-cart"></i>
                 </button>
-                <button class="sidebar-btn nav-link" title="Cotações" data-section="cotacoes"
-                    onclick="navigateSection('cotacoes', this)">
+                <button class="sidebar-btn nav-link" title="Cotações" data-section="cotações"
+                    onclick="navigateSection('cotações', this)">
                     <i class="fas fa-file-invoice-dollar"></i>
                 </button>
                 <button class="sidebar-btn nav-link" title="Fornecedores" data-section="fornecedores"
@@ -159,8 +159,8 @@
                     onclick="navigateSection('estoque', this)">
                     <i class="fas fa-boxes"></i>
                 </button>
-                <button class="sidebar-btn nav-link" title="Relatórios" data-section="relatorios"
-                    onclick="navigateSection('relatorios', this)">
+                <button class="sidebar-btn nav-link" title="Relatórios" data-section="relatórios"
+                    onclick="navigateSection('relatórios', this)">
                     <i class="fas fa-chart-bar"></i>
                 </button>
             </nav>
@@ -229,7 +229,7 @@
                     <div id="cotacoes-section" class="content-section">
                         <div class="page-header-modern">
                             <h2><i class="fas fa-file-invoice-dollar"></i> Cotações</h2>
-                            <button class="btn btn-primary" onclick="novaCotacao()">
+                            <button class="btn btn-primary" onclick="novaCotação()">
                                 <i class="fas fa-plus"></i>
                                 Nova Cotação
                             </button>
@@ -302,12 +302,12 @@
     <script src="js/compras-main.js"></script>
     <script src="js/dashboard-compras-novo.js"></script>
     <script src="js/pedidos-compras-novo.js"></script>
-    <script src="js/cotacoes-compras-novo.js"></script>
+    <script src="js/cotações-compras-novo.js"></script>
     <script src="js/fornecedores-compras-novo.js"></script>
     <script src="js/materiais-compras-novo.js"></script>
     <script src="js/recebimento-compras-novo.js"></script>
     <script src="js/estoque-compras-novo.js"></script>
-    <script src="js/relatorios-compras-novo.js"></script>
+    <script src="js/relatórios-compras-novo.js"></script>
 
     <script>
         // =============================================
@@ -318,12 +318,12 @@
         const sectionTitles = {
             'dashboard': 'Dashboard',
             'pedidos': 'Pedidos de Compra',
-            'cotacoes': 'Cotações',
+            'cotações': 'Cotações',
             'fornecedores': 'Fornecedores',
             'materiais': 'Materiais',
             'recebimento': 'Recebimento',
             'estoque': 'Estoque',
-            'relatorios': 'Relatórios'
+            'relatórios': 'Relatórios'
         };
 
         // Carregar dados do usuário no header — Padrão ALUFORCE
@@ -339,9 +339,9 @@
 
                 // Atualizar saudação baseada na hora
                 const hora = new Date().getHours();
-                const saudacao = hora < 12 ? 'Bom dia' : hora < 18 ? 'Boa tarde' : 'Boa noite';
+                const saudação = hora < 12 ? 'Bom dia' : hora < 18 ? 'Boa tarde' : 'Boa noite';
                 const greetingEl = document.getElementById('greeting-text');
-                if (greetingEl) greetingEl.textContent = saudacao;
+                if (greetingEl) greetingEl.textContent = saudação;
 
                 // Atualizar nome do usuário
                 const userNameEl = document.getElementById('user-name');
@@ -420,7 +420,7 @@
         }
 
         // Notificações — Padrão ALUFORCE
-        function toggleNotificacoes() {
+        function toggleNotificações() {
             const panel = document.getElementById('notification-panel');
             if (panel) panel.classList.toggle('open');
         }
@@ -428,7 +428,7 @@
             const badge = document.getElementById('notification-count');
             if (badge) { badge.textContent = '0'; badge.style.display = 'none'; }
         }
-        function limparNotificacoes() {
+        function limparNotificações() {
             const list = document.getElementById('notification-list');
             if (list) list.innerHTML = '<div class="notification-empty"><i class="fas fa-check-circle"></i><p>Nenhuma notificação</p></div>';
             marcarTodasLidas();

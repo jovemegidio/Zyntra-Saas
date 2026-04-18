@@ -73,15 +73,15 @@
     <nav class="sidebar-nav">
         <a href="index.html" class="sidebar-btn" title="Dashboard"><i class="fas fa-chart-pie"></i></a>
         <a href="consultar.html" class="sidebar-btn" title="Consultar NFe"><i class="fas fa-search"></i></a>
-        <a href="relatorios.html" class="sidebar-btn active" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
+        <a href="relatórios.html" class="sidebar-btn active" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
         <a href="eventos.html" class="sidebar-btn" title="Eventos"><i class="fas fa-history"></i></a>
-        <a href="inutilizacao.html" class="sidebar-btn" title="Inutilização"><i class="fas fa-ban"></i></a>
+        <a href="inutilização.html" class="sidebar-btn" title="Inutilização"><i class="fas fa-ban"></i></a>
         <a href="regua.html" class="sidebar-btn" title="Régua Cobrança"><i class="fas fa-bell"></i></a>
         <a href="pix.html" class="sidebar-btn" title="PIX"><i class="fas fa-qrcode"></i></a>
         <a href="logistica.html" class="sidebar-btn" title="Logística & Expedição"><i class="fas fa-truck"></i></a>
     </nav>
     <div class="sidebar-bottom">
-        <button class="sidebar-btn" title="Configurações" onclick="abrirModalConfiguracoes()"><i class="fas fa-cog"></i></button>
+        <button class="sidebar-btn" title="Configurações" onclick="abrirModalConfigurações()"><i class="fas fa-cog"></i></button>
     </div>
 </aside>
 
@@ -140,32 +140,32 @@
                 </div>
                 <div class="card-body">
                     <div class="quick-actions" style="grid-template-columns:repeat(auto-fill,minmax(240px,1fr));">
-                        <button class="quick-action" onclick="gerarRelatorio('os_abertas')">
+                        <button class="quick-action" onclick="gerarRelatório('os_abertas')">
                             <div class="action-icon"><i class="fas fa-clipboard"></i></div>
                             <div class="action-text">
                                 <span>OS Abertas</span>
                                 <span class="action-desc">Ordens de serviço em aberto</span>
                             </div>
                         </button>
-                        <button class="quick-action" onclick="gerarRelatorio('os_periodo')">
+                        <button class="quick-action" onclick="gerarRelatório('os_periodo')">
                             <div class="action-icon"><i class="fas fa-calendar"></i></div>
                             <div class="action-text">
                                 <span>OS por Período</span>
                                 <span class="action-desc">Filtrar por data de abertura</span>
                             </div>
                         </button>
-                        <button class="quick-action" onclick="gerarRelatorio('os_tecnico')">
+                        <button class="quick-action" onclick="gerarRelatório('os_tecnico')">
                             <div class="action-icon"><i class="fas fa-user-cog"></i></div>
                             <div class="action-text">
                                 <span>OS por Técnico</span>
                                 <span class="action-desc">Agrupado por técnico responsável</span>
                             </div>
                         </button>
-                        <button class="quick-action" onclick="gerarRelatorio('os_status')">
+                        <button class="quick-action" onclick="gerarRelatório('os_status')">
                             <div class="action-icon"><i class="fas fa-tasks"></i></div>
                             <div class="action-text">
                                 <span>OS por Status</span>
-                                <span class="action-desc">Distribuião por status atual</span>
+                                <span class="action-desc">Distribuição por status atual</span>
                             </div>
                         </button>
                     </div>
@@ -179,53 +179,53 @@
                 </div>
                 <div class="card-body">
                     <div class="quick-actions" style="grid-template-columns:repeat(auto-fill,minmax(240px,1fr));">
-                        <button class="quick-action" onclick="gerarRelatorio('contratos_ativos')">
+                        <button class="quick-action" onclick="gerarRelatório('contratos_ativos')">
                             <div class="action-icon"><i class="fas fa-file-signature"></i></div>
                             <div class="action-text">
                                 <span>Contratos Ativos</span>
                                 <span class="action-desc">Contratos vigentes</span>
                             </div>
                         </button>
-                        <button class="quick-action" onclick="gerarRelatorio('contratos_vencimento')">
+                        <button class="quick-action" onclick="gerarRelatório('contratos_vencimento')">
                             <div class="action-icon"><i class="fas fa-clock"></i></div>
                             <div class="action-text">
                                 <span>Contratos por Vencimento</span>
                                 <span class="action-desc">Próximos a vencer</span>
                             </div>
                         </button>
-                        <button class="quick-action" onclick="gerarRelatorio('contratos_valor')">
+                        <button class="quick-action" onclick="gerarRelatório('contratos_valor')">
                             <div class="action-icon"><i class="fas fa-dollar-sign"></i></div>
                             <div class="action-text">
                                 <span>Contratos por Valor</span>
                                 <span class="action-desc">Ordenados por valor mensal</span>
                             </div>
                         </button>
-                        <button class="quick-action" onclick="gerarRelatorio('contratos_cliente')">
+                        <button class="quick-action" onclick="gerarRelatório('contratos_cliente')">
                             <div class="action-icon"><i class="fas fa-users"></i></div>
                             <div class="action-text">
                                 <span>Contratos por Cliente</span>
                                 <span class="action-desc">Agrupado por cliente</span>
                             </div>
                         </button>
-                        <button class="quick-action" onclick="gerarRelatorio('renovacoes')">
+                        <button class="quick-action" onclick="gerarRelatório('renovações')">
                             <div class="action-icon"><i class="fas fa-redo"></i></div>
                             <div class="action-text">
                                 <span>Renovações Pendentes</span>
                                 <span class="action-desc">Contratos para renovação</span>
                             </div>
                         </button>
-                        <button class="quick-action" onclick="gerarRelatorio('contratos_cancelados')">
+                        <button class="quick-action" onclick="gerarRelatório('contratos_cancelados')">
                             <div class="action-icon"><i class="fas fa-times-circle"></i></div>
                             <div class="action-text">
                                 <span>Contratos Cancelados</span>
                                 <span class="action-desc">Histórico de cancelamentos</span>
                             </div>
                         </button>
-                        <button class="quick-action" onclick="gerarRelatorio('receita_recorrente')">
+                        <button class="quick-action" onclick="gerarRelatório('receita_recorrente')">
                             <div class="action-icon"><i class="fas fa-chart-line"></i></div>
                             <div class="action-text">
                                 <span>Receita Recorrente</span>
-                                <span class="action-desc">MRR e evoluão mensal</span>
+                                <span class="action-desc">MRR e evolução mensal</span>
                             </div>
                         </button>
                     </div>
@@ -239,42 +239,42 @@
                 </div>
                 <div class="card-body">
                     <div class="quick-actions" style="grid-template-columns:repeat(auto-fill,minmax(240px,1fr));">
-                        <button class="quick-action" onclick="gerarRelatorio('faturamento_mensal')">
+                        <button class="quick-action" onclick="gerarRelatório('faturamento_mensal')">
                             <div class="action-icon"><i class="fas fa-calendar-alt"></i></div>
                             <div class="action-text">
                                 <span>Faturamento Mensal</span>
                                 <span class="action-desc">Total faturado por mês</span>
                             </div>
                         </button>
-                        <button class="quick-action" onclick="gerarRelatorio('nfe_status')">
+                        <button class="quick-action" onclick="gerarRelatório('nfe_status')">
                             <div class="action-icon"><i class="fas fa-check-circle"></i></div>
                             <div class="action-text">
                                 <span>NFe por Status</span>
                                 <span class="action-desc">Autorizadas, canceladas, etc</span>
                             </div>
                         </button>
-                        <button class="quick-action" onclick="gerarRelatorio('top_clientes')">
+                        <button class="quick-action" onclick="gerarRelatório('top_clientes')">
                             <div class="action-icon"><i class="fas fa-trophy"></i></div>
                             <div class="action-text">
                                 <span>Top Clientes</span>
                                 <span class="action-desc">Maiores compradores</span>
                             </div>
                         </button>
-                        <button class="quick-action" onclick="gerarRelatorio('produtos_vendidos')">
+                        <button class="quick-action" onclick="gerarRelatório('produtos_vendidos')">
                             <div class="action-icon"><i class="fas fa-box"></i></div>
                             <div class="action-text">
                                 <span>Produtos Mais Vendidos</span>
                                 <span class="action-desc">Ranking de produtos</span>
                             </div>
                         </button>
-                        <button class="quick-action" onclick="gerarRelatorio('impostos')">
+                        <button class="quick-action" onclick="gerarRelatório('impostos')">
                             <div class="action-icon"><i class="fas fa-percentage"></i></div>
                             <div class="action-text">
                                 <span>Impostos Recolhidos</span>
                                 <span class="action-desc">ICMS, IPI, PIS, COFINS</span>
                             </div>
                         </button>
-                        <button class="quick-action" onclick="gerarRelatorio('comparativo_anual')">
+                        <button class="quick-action" onclick="gerarRelatório('comparativo_anual')">
                             <div class="action-icon"><i class="fas fa-chart-area"></i></div>
                             <div class="action-text">
                                 <span>Comparativo Anual</span>
@@ -294,13 +294,13 @@
 <div class="modal-overlay" id="previewSection">
     <div class="modal modal-lg">
         <div class="modal-header">
-            <h3><i class="fas fa-chart-bar"></i> <span id="previewTitle">Relatério</span></h3>
+            <h3><i class="fas fa-chart-bar"></i> <span id="previewTitle">Relatório</span></h3>
             <button class="modal-close" onclick="fecharPreview()" title="Fechar"><i class="fas fa-times"></i></button>
         </div>
         <div class="modal-body" id="previewContent"></div>
         <div class="modal-footer">
             <button class="btn btn-secondary" onclick="fecharPreview()">Fechar</button>
-            <button class="btn btn-secondary" onclick="imprimirRelatorio()"><i class="fas fa-print"></i> Imprimir</button>
+            <button class="btn btn-secondary" onclick="imprimirRelatório()"><i class="fas fa-print"></i> Imprimir</button>
             <button class="btn btn-primary" onclick="exportarPDF()"><i class="fas fa-file-pdf"></i> Exportar PDF</button>
         </div>
     </div>
@@ -311,7 +311,7 @@ function toggleMobileSidebar() {
     document.getElementById('mobile-sidebar').classList.toggle('open');
     document.getElementById('sidebar-overlay').classList.toggle('active');
 }
-function toggleNotificacoes() {}
+function toggleNotificações() {}
 
 var _relOriginalTitle = document.title;
 
@@ -358,9 +358,9 @@ function showAlert(msg, type) {
     setTimeout(function() { if (d.parentNode) d.remove(); }, 5000);
 }
 
-var dadosRelatorioAtual = null;
+var dadosRelatórioAtual = null;
 
-function gerarRelatorio(tipo) {
+function gerarRelatório(tipo) {
     var di = document.getElementById('reportDataInicio').value;
     var df = document.getElementById('reportDataFim').value;
     var params = new URLSearchParams();
@@ -380,11 +380,11 @@ function gerarRelatorio(tipo) {
     })
     .then(function(dados) {
         if (!dados || (!dados.colunas && !dados.resumo)) throw new Error('Dados vazios');
-        dadosRelatorioAtual = dados;
-        renderizarRelatorio(dados);
+        dadosRelatórioAtual = dados;
+        renderizarRelatório(dados);
     })
     .catch(function(err) {
-        dadosRelatorioAtual = null;
+        dadosRelatórioAtual = null;
         document.getElementById('previewTitle').textContent = 'Relatério Indisponível';
         document.getElementById('previewContent').innerHTML = '<div style="text-align:center;padding:48px 24px;">' +
             '<i class="fas fa-database" style="font-size:48px;color:var(--text-muted);margin-bottom:16px;"></i>' +
@@ -394,8 +394,8 @@ function gerarRelatorio(tipo) {
     });
 }
 
-function renderizarRelatorio(dados) {
-    document.getElementById('previewTitle').textContent = dados.título || 'Relatério';
+function renderizarRelatório(dados) {
+    document.getElementById('previewTitle').textContent = dados.titulo || 'Relatério';
     document.title = 'Zyntra: ' + (dados.titulo || 'Relatério');
 
     var período = '';
@@ -451,7 +451,7 @@ document.addEventListener('click', function(e) {
 });
 
 function exportarPDF() {
-    var dados = dadosRelatorioAtual;
+    var dados = dadosRelatórioAtual;
     if (!dados) { showAlert('Nenhum relatério carregado para exportar', 'warning'); return; }
 
     var período = '';
@@ -460,7 +460,7 @@ function exportarPDF() {
     if (di && df) {
         período = new Date(di + 'T00:00:00').toLocaleDateString('pt-BR') + ' a ' + new Date(df + 'T00:00:00').toLocaleDateString('pt-BR');
     }
-    var dataGeracao = new Date().toLocaleString('pt-BR');
+    var dataGeração = new Date().toLocaleString('pt-BR');
 
     var win = window.open('', '_blank', 'width=900,height=700');
     var tableHtml = '';
@@ -487,7 +487,7 @@ function exportarPDF() {
 
     win.document.write(
         '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">' +
-        '<title>' + _escHtml(dados.título) + ' - ALUFORCE</title>' +
+        '<title>' + _escHtml(dados.titulo) + ' - ALUFORCE</title>' +
         '<style>' +
             ':root{--ink:#0c1726;--text:#385062;--muted:#6d8092;--line:#d8e4ed;--soft:#f6fafc;--brand:#0b2842;--brand-2:#103758;--accent:#18b6c8;--accent-soft:#e7fbfd}' +
             '@page{margin:10mm;size:A4 landscape}' +
@@ -539,11 +539,11 @@ function exportarPDF() {
             '<div><div class="brand-name">ALUFORCE</div><div class="brand-sub">Zyntra &mdash; M\u00f3dulo NFe</div></div>' +
             '<div class="rpt-meta">' +
                 '<div class="doc-tag">Relat\u00f3rio</div>' +
-                '<div class="meta-line">Emitido em: ' + dataGeracao + '</div>' +
+                '<div class="meta-line">Emitido em: ' + dataGeração + '</div>' +
                 (período ? '<div class="meta-line">Per\u00edodo: ' + período + '</div>' : '') +
             '</div>' +
         '</div>' +
-        '<div class="doc-card"><h1>' + _escHtml(dados.título) + '</h1><div class="subtitle">M\u00f3dulo NFe &mdash; Sistema Integrado de Gest\u00e3o Empresarial</div></div>' +
+        '<div class="doc-card"><h1>' + _escHtml(dados.titulo) + '</h1><div class="subtitle">M\u00f3dulo NFe &mdash; Sistema Integrado de Gest\u00e3o Empresarial</div></div>' +
         summaryHtml +
         '<div class="section-card"><div class="s-head">Dados do Relat\u00f3rio</div><div style="padding:0">' +
         tableHtml +
@@ -558,11 +558,11 @@ function exportarPDF() {
     showAlert('PDF gerado com sucesso. Use "Salvar como PDF" na janela de impress\u00e3o', 'success');
 }
 
-function imprimirRelatorio() {
+function imprimirRelatório() {
     exportarPDF();
 }
 
-function abrirModalConfiguracoes() { showAlert('Configurações é Em desenvolvimento', 'info'); }
+function abrirModalConfigurações() { showAlert('Configurações é Em desenvolvimento', 'info'); }
 
 document.addEventListener('DOMContentLoaded', function() {
     carregarUsuario();
@@ -584,7 +584,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <script src="/js/mobile-auto-enhance.js?v=20260325" defer></script>
 
 <!-- Chat Widget BOB AI -->
-<script src="/chat/widget.js?v=20260325" defer></script>
+<script src="/chat/widget.js?v=20260418" defer></script>
 
 <!-- Zyntra Chat Teams -->
 <script src="/socket.io/socket.io.js"></script>

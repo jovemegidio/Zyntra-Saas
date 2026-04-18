@@ -568,16 +568,16 @@
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel de Controle"><i class="fas fa-home"></i></a>
             <nav class="sidebar-nav">
                 <a href="../areaadm.html" class="sidebar-btn" title="Dashboard RH"><i class="fas fa-chart-pie"></i></a>
-                <a href="funcionarios.html" class="sidebar-btn" title="Funcionários"><i class="fas fa-users"></i></a>
+                <a href="funcionários.html" class="sidebar-btn" title="Funcionários"><i class="fas fa-users"></i></a>
                 <a href="../gestao-holerites.html" class="sidebar-btn" title="Gestão de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="folha.html" class="sidebar-btn" title="Folha de Pagamento"><i class="fas fa-money-check-alt"></i></a>
                 <a href="gestao-ponto.html" class="sidebar-btn" title="Gestão do Ponto"><i class="fas fa-clock"></i></a>
                 <a href="importar-ponto.html" class="sidebar-btn" title="Importar Ponto (Control iD)"><i class="fas fa-upload"></i></a>
-                <a href="gestao-solicitacoes.html" class="sidebar-btn" title="Gestão de Solicitações"><i class="fas fa-tasks"></i></a>
+                <a href="gestao-solicitações.html" class="sidebar-btn" title="Gestão de Solicitações"><i class="fas fa-tasks"></i></a>
                 <a href="calendario-rh.html" class="sidebar-btn active" title="Calendário RH"><i class="fas fa-calendar-alt"></i></a>
             </nav>
             <div class="sidebar-bottom">
-                <a href="../funcionario.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-user"></i></a>
+                <a href="../funcionário.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-user"></i></a>
             </div>
         </aside>
 
@@ -619,7 +619,7 @@
                             <i class="fas fa-plus"></i>
                             Novo Evento
                         </button>
-                        <a href="../funcionario.html" class="btn btn-outline">
+                        <a href="../funcionário.html" class="btn btn-outline">
                             <i class="fas fa-arrow-left"></i>
                             Voltar
                         </a>
@@ -735,7 +735,7 @@
         <div class="modal-overlay" onclick="fecharModal()"></div>
         <div class="modal-content">
             <div class="modal-header">
-                <h2><i class="fas fa-calendar-plus"></i> <span id="modal-título">Novo Evento</span></h2>
+                <h2><i class="fas fa-calendar-plus"></i> <span id="modal-titulo">Novo Evento</span></h2>
                 <button class="modal-close" onclick="fecharModal()"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body">
@@ -744,12 +744,12 @@
                     
                     <div class="form-group">
                         <label class="form-label">Título *</label>
-                        <input type="text" class="form-input" id="evento-título" required>
+                        <input type="text" class="form-input" id="evento-titulo" required>
                     </div>
 
                     <div class="form-group">
                         <label class="form-label">Descrição</label>
-                        <textarea class="form-textarea" id="evento-descrição"></textarea>
+                        <textarea class="form-textarea" id="evento-descricao"></textarea>
                     </div>
 
                     <div class="form-row">
@@ -985,15 +985,15 @@
                     try {
                         const dataFer = await respFer.value.json();
                         const todosFeriados = dataFer.feriados || [];
-                        const titulosExistentes = new Set(todosEventos.filter(e => e.tipo === 'feriado').map(e => e.titulo));
+                        const títulosExistentes = new Set(todosEventos.filter(e => e.tipo === 'feriado').map(e => e.titulo));
                         const feriadosMes = todosFeriados
                             .filter(f => {
                                 const [ano, mes] = f.data.split('-').map(Number);
-                                return mes === (mesBusca + 1) && !titulosExistentes.has(f.titulo);
+                                return mes === (mesBusca + 1) && !títulosExistentes.has(f.titulo);
                             })
                             .map(f => ({
                                 id: `fer-${f.data}`,
-                                titulo: f.titulo,
+                                título: f.titulo,
                                 data: f.data,
                                 data_inicio: f.data,
                                 tipo: 'feriado',
@@ -1080,7 +1080,7 @@
                     eventosHoje.slice(0, 2).forEach(evento => {
                         const eventEl = document.createElement('div');
                         eventEl.className = `day-event ${evento.tipo}`;
-                        eventEl.textContent = evento.título;
+                        eventEl.textContent = evento.titulo;
                         eventEl.title = evento.titulo;
                         eventsDiv.appendChild(eventEl);
                     });
@@ -1177,7 +1177,7 @@
                     <div class="event-item" onclick="verEvento('${evento.id}')">
                         <div class="event-color" style="background: ${cor};"></div>
                         <div class="event-content">
-                            <div class="event-title">${evento.título}</div>
+                            <div class="event-title">${evento.titulo}</div>
                             <div class="event-date">${dataFormatada}</div>
                             <span class="event-type">${formatarTipo(evento.tipo)}</span>
                         </div>
@@ -1316,7 +1316,7 @@
             if (evento && isAdmin) {
                 document.getElementById('evento-id').value = evento.id;
                 document.getElementById('evento-título').value = evento.titulo;
-                document.getElementById('evento-descrição').value = evento.descrição || '';
+                document.getElementById('evento-descrição').value = evento.descricao || '';
                 document.getElementById('evento-data-inicio').value = evento.data_inicio.split('T')[0];
                 document.getElementById('evento-data-fim').value = evento.data_fim ? evento.data_fim.split('T')[0] : '';
                 document.getElementById('evento-hora-inicio').value = evento.hora_inicio || '';

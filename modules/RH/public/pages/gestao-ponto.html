@@ -187,16 +187,16 @@
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel de Controle"><i class="fas fa-home"></i></a>
             <nav class="sidebar-nav">
                 <a href="../areaadm.html" class="sidebar-btn" title="Dashboard RH"><i class="fas fa-chart-pie"></i></a>
-                <a href="funcionarios.html" class="sidebar-btn" title="Funcionários"><i class="fas fa-users"></i></a>
+                <a href="funcionários.html" class="sidebar-btn" title="Funcionários"><i class="fas fa-users"></i></a>
                 <a href="../gestao-holerites.html" class="sidebar-btn" title="Gestão de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="folha.html" class="sidebar-btn" title="Folha de Pagamento"><i class="fas fa-money-check-alt"></i></a>
                 <a href="gestao-ponto.html" class="sidebar-btn active" title="Gestão do Ponto"><i class="fas fa-clock"></i></a>
                 <a href="importar-ponto.html" class="sidebar-btn" title="Importar Ponto (Control iD)"><i class="fas fa-upload"></i></a>
-                <a href="gestao-solicitacoes.html" class="sidebar-btn" title="Gestão de Solicitações"><i class="fas fa-tasks"></i></a>
+                <a href="gestao-solicitações.html" class="sidebar-btn" title="Gestão de Solicitações"><i class="fas fa-tasks"></i></a>
                 <a href="calendario-rh.html" class="sidebar-btn" title="Calendário RH"><i class="fas fa-calendar-alt"></i></a>
             </nav>
             <div class="sidebar-bottom">
-                <a href="../funcionario.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-user"></i></a>
+                <a href="../funcionário.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-user"></i></a>
             </div>
         </aside>
 
@@ -226,7 +226,7 @@
                 <div class="page-header">
                     <div></div>
                     <div class="header-actions">
-                        <button class="btn btn-outline" onclick="exportarRelatorio()"><i class="fas fa-download"></i> Exportar</button>
+                        <button class="btn btn-outline" onclick="exportarRelatório()"><i class="fas fa-download"></i> Exportar</button>
                         <button class="btn btn-success" onclick="sincronizarRhid()" id="btn-sync-rhid"><i class="fas fa-cloud-download-alt"></i> Sincronizar RHiD</button>
                         <button class="btn btn-warning" onclick="window.location.href='importar-ponto.html'"><i class="fas fa-upload"></i> Importar Ponto</button>
                         <button class="btn btn-primary" onclick="abrirModalAjuste()"><i class="fas fa-plus"></i> Ajuste Manual</button>
@@ -240,7 +240,7 @@
                         <div class="metric-icon blue"><i class="fas fa-users"></i></div>
                         <span class="metric-trend">&mdash;</span>
                     </div>
-                    <div class="metric-value" id="stat-funcionários">--</div>
+                    <div class="metric-value" id="stat-funcionarios">--</div>
                     <div class="metric-label">Funcionários Ativos</div>
                 </div>
                 <div class="metric-card green">
@@ -272,7 +272,7 @@
                 <div class="tabs">
                     <button class="tab-btn active" data-tab="registros">Registros do Dia</button>
                     <button class="tab-btn" data-tab="histórico">Histórico</button>
-                    <button class="tab-btn" data-tab="alteracoes">Histórico de Alterações</button>
+                    <button class="tab-btn" data-tab="alterações">Histórico de Alterações</button>
                     <button class="tab-btn" data-tab="resumo">Resumo Mensal</button>
                 </div>
 
@@ -390,9 +390,9 @@
                         </div>
                         <div class="form-group">
                             <label class="form-label">Tipo de Ao</label>
-                            <select class="form-select" id="filter-ação-alteracoes">
+                            <select class="form-select" id="filter-acao-alteracoes">
                                 <option value="">Todas</option>
-                                <option value="criacao">Criação</option>
+                                <option value="criação">Criação</option>
                                 <option value="edição">Edição</option>
                                 <option value="exclusão">Exclusão</option>
                             </select>
@@ -405,7 +405,7 @@
                             <label class="form-label">Data Fim</label>
                             <input type="date" class="form-input" id="filter-alteracoes-fim">
                         </div>
-                        <button class="btn btn-primary" onclick="carregarAlteracoes()"><i class="fas fa-search"></i> Buscar</button>
+                        <button class="btn btn-primary" onclick="carregarAlterações()"><i class="fas fa-search"></i> Buscar</button>
                     </div>
                     <div class="card" style="position:relative">
                         <div class="card-header">
@@ -475,7 +475,7 @@
                             <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 10px;">
                                 <i class="fas fa-user" style="color: #6366f1;"></i> Funcionário
                             </label>
-                            <select class="form-select" id="ajuste-funcionário" style="width: 100%; padding: 14px 16px; border: 2px solid #e5e7eb; border-radius: 12px; font-size: 15px; background: #f9fafb;"></select>
+                            <select class="form-select" id="ajuste-funcionario" style="width: 100%; padding: 14px 16px; border: 2px solid #e5e7eb; border-radius: 12px; font-size: 15px; background: #f9fafb;"></select>
                         </div>
                         <div>
                             <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 10px;">
@@ -502,7 +502,7 @@
                                 <option value="saida_almoco">Saída Almoço</option>
                                 <option value="retorno_almoco">Retorno Almoço</option>
                                 <option value="saida">Saída</option>
-                                <option value="marcacao">Marcação</option>
+                                <option value="marcação">Marcação</option>
                             </select>
                         </div>
                     </div>
@@ -511,7 +511,7 @@
                     <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 10px;">
                         <i class="fas fa-comment-alt" style="color: #f59e0b;"></i> Observação
                     </label>
-                    <textarea id="ajuste-observação" placeholder="Observação sobre a marcação..." style="width: 100%; padding: 14px 16px; border: 2px solid #e5e7eb; border-radius: 12px; font-size: 15px; min-height: 80px; resize: vertical; background: #f9fafb; box-sizing: border-box; font-family: inherit;"></textarea>
+                    <textarea id="ajuste-observacao" placeholder="Observação sobre a marcação..." style="width: 100%; padding: 14px 16px; border: 2px solid #e5e7eb; border-radius: 12px; font-size: 15px; min-height: 80px; resize: vertical; background: #f9fafb; box-sizing: border-box; font-family: inherit;"></textarea>
                 </div>
                 <div id="motivo-section" style="display:none; background: #ffffff; border-radius: 16px; border: 2px solid #6366f1; padding: 24px; margin-top: 16px;">
                     <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 10px;">
@@ -641,7 +641,7 @@
 
         // ============= GLOBAL STATE =============
         var funcionáriosList = [];
-        var marcacoesCache = [];
+        var marcaçõesCache = [];
         var autoRefreshTimer = null;
 
         // ============= LOAD USER =============
@@ -668,7 +668,7 @@
         }
 
         // ============= LOAD FUNCIONARIOS =============
-        async function carregarFuncionarios() {
+        async function carregarFuncionários() {
             try {
                 var resp = await fetch('/api/rh/funcionarios?status=Ativo&limit=500', {
                     credentials: 'include',
@@ -678,7 +678,7 @@
                 var data = await resp.json();
                 funcionáriosList = data.funcionarios || data || [];
 
-                var selects = ['filter-func', 'filter-func-hist', 'filter-func-resumo', 'filter-func-alteracoes', 'ajuste-funcionário'];
+                var selects = ['filter-func', 'filter-func-hist', 'filter-func-resumo', 'filter-func-alterações', 'ajuste-funcionário'];
                 selects.forEach(function(id) {
                     var el = document.getElementById(id);
                     if (!el) return;
@@ -715,7 +715,7 @@
             return timeStr.substring(0, 5);
         }
         function tipoLabel(tipo) {
-            var map = { entrada: 'Entrada', saida_almoco: 'Saída Almoço', retorno_almoco: 'Retorno Almoço', saida: 'Saída', marcacao: 'Marcação' };
+            var map = { entrada: 'Entrada', saida_almoco: 'Saída Almoço', retorno_almoco: 'Retorno Almoço', saida: 'Saída', marcação: 'Marcação' };
             return map[tipo] || tipo || 'Marcação';
         }
         function origemLabel(origem) {
@@ -768,7 +768,7 @@
             document.getElementById('data-atual').textContent = formatDate(data);
 
             try {
-                var url = '/api/rh/ponto/marcacoes?data_inicio=' + data + '&data_fim=' + data;
+                var url = '/api/rh/ponto/marcações?data_inicio=' + data + '&data_fim=' + data;
                 if (funcFilter) url += '&funcionario_id=' + funcFilter;
 
                 var resp = await fetch(url, {
@@ -777,14 +777,14 @@
                 });
                 if (!resp.ok) throw new Error('HTTP ' + resp.status);
                 var result = await resp.json();
-                marcacoesCache = result.marcacoes || [];
+                marcaçõesCache = result.marcações || [];
 
-                updateSyncStatus(true, marcacoesCache.length);
-                renderMarcacoes(marcacoesCache, 'tbody-registros', 'empty-registros', 'total-registros');
+                updateSyncStatus(true, marcaçõesCache.length);
+                renderMarcações(marcaçõesCache, 'tbody-registros', 'empty-registros', 'total-registros');
 
-                var uniqueFuncs = new Set(marcacoesCache.map(function(m) { return m.funcionário_id; }));
+                var uniqueFuncs = new Set(marcaçõesCache.map(function(m) { return m.funcionario_id; }));
                 document.getElementById('stat-presentes').textContent = uniqueFuncs.size;
-                document.getElementById('stat-marcacoes').textContent = marcacoesCache.length;
+                document.getElementById('stat-marcações').textContent = marcaçõesCache.length;
 
             } catch (e) {
                 console.error('Erro marcações:', e);
@@ -794,11 +794,11 @@
         }
 
         // ============= RENDER MARCAES TABLE =============
-        function renderMarcacoes(marcacoes, tbodyId, emptyId, totalId) {
+        function renderMarcações(marcações, tbodyId, emptyId, totalId) {
             var tbody = document.getElementById(tbodyId);
             var empty = document.getElementById(emptyId);
 
-            if (!marcacoes || marcacoes.length === 0) {
+            if (!marcações || marcações.length === 0) {
                 tbody.innerHTML = '';
                 if (empty) empty.style.display = 'block';
                 if (totalId) document.getElementById(totalId).textContent = '0 registros';
@@ -806,21 +806,21 @@
             }
 
             if (empty) empty.style.display = 'none';
-            if (totalId) document.getElementById(totalId).textContent = marcacoes.length + ' registros';
+            if (totalId) document.getElementById(totalId).textContent = marcações.length + ' registros';
 
-            tbody.innerHTML = marcacoes.map(function(m) {
-                var nome = m.funcionário_nome || getFuncName(m.funcionário_id);
+            tbody.innerHTML = marcações.map(function(m) {
+                var nome = m.funcionario_nome || getFuncName(m.funcionario_id);
                 // Fallback: extrair nome da observação (RHiD importa como "RHiD: NOME")
-                if (!nome && m.observacao) {
-                    var rhidMatch = m.observacao.match(/^RHi?D:\s*(.+)/i);
+                if (!nome && m.observação) {
+                    var rhidMatch = m.observação.match(/^RHi?D:\s*(.+)/i);
                     if (rhidMatch) nome = rhidMatch[1].trim();
                 }
                 if (!nome) nome = 'No identificado';
                 nome = toTitleCase(nome);
-                var dept = m.departamento || m.cargo || getFuncDept(m.funcionário_id);
-                if (!dept && m.observacao && m.observacao.match(/^RHi?D:/i)) dept = 'Pendente de vnculo';
+                var dept = m.departamento || m.cargo || getFuncDept(m.funcionario_id);
+                if (!dept && m.observação && m.observação.match(/^RHi?D:/i)) dept = 'Pendente de vnculo';
                 var initial = nome.charAt(0).toUpperCase();
-                var foto = getFuncPhoto(m.funcionário_id);
+                var foto = getFuncPhoto(m.funcionario_id);
                 var avatarHtml = foto
                     ? '<div class="employee-avatar" style="overflow:hidden;padding:0"><img src="' + foto + '" alt="' + initial + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.parentElement.innerHTML=\'' + initial + '\'"></div>'
                     : '<div class="employee-avatar">' + initial + '</div>';
@@ -835,10 +835,10 @@
                     '<td><strong>' + formatTime(m.hora) + '</strong></td>' +
                     '<td><span class="status-badge normal">' + tipoLabel(m.tipo) + '</span></td>' +
                     '<td><span class="status-badge ' + origemBadgeClass(m.origem) + '">' + origemLabel(m.origem) + '</span></td>' +
-                    '<td style="max-width:150px;overflow:hidden;text-overflow:ellipsis">' + (m.observacao || '-') + '</td>' +
+                    '<td style="max-width:150px;overflow:hidden;text-overflow:ellipsis">' + (m.observação || '-') + '</td>' +
                     '<td><div class="action-btns">' +
-                        '<button class="action-btn edit" onclick="editarMarcacao(' + m.id + ')" title="Editar"><i class="fas fa-edit"></i></button>' +
-                        '<button class="action-btn delete" onclick="excluirMarcacao(' + m.id + ')" title="Excluir"><i class="fas fa-trash"></i></button>' +
+                        '<button class="action-btn edit" onclick="editarMarcação(' + m.id + ')" title="Editar"><i class="fas fa-edit"></i></button>' +
+                        '<button class="action-btn delete" onclick="excluirMarcação(' + m.id + ')" title="Excluir"><i class="fas fa-trash"></i></button>' +
                     '</div></td>' +
                 '</tr>';
             }).join('');
@@ -853,7 +853,7 @@
             if (!inicio || !fim) { showToast('Selecione data incio e fim', 'error'); return; }
 
             try {
-                var url = '/api/rh/ponto/marcacoes?data_inicio=' + inicio + '&data_fim=' + fim;
+                var url = '/api/rh/ponto/marcações?data_inicio=' + inicio + '&data_fim=' + fim;
                 if (funcId) url += '&funcionario_id=' + funcId;
 
                 var resp = await fetch(url, {
@@ -862,10 +862,10 @@
                 });
                 if (!resp.ok) throw new Error('HTTP ' + resp.status);
                 var result = await resp.json();
-                var marcacoes = result.marcacoes || [];
+                var marcações = result.marcações || [];
 
-                renderMarcacoes(marcacoes, 'tbody-histórico', 'empty-histórico', 'total-histórico');
-                showToast(marcacoes.length + ' registros encontrados', 'success');
+                renderMarcações(marcações, 'tbody-histórico', 'empty-histórico', 'total-histórico');
+                showToast(marcações.length + ' registros encontrados', 'success');
 
             } catch (e) {
                 console.error('Erro histórico:', e);
@@ -908,7 +908,7 @@
                         '</div>' +
                         '<div style="text-align:center;padding:16px;background:#f8fafc;border-radius:12px">' +
                             '<div style="font-size:0.8rem;color:#64748b">Total Marcações</div>' +
-                            '<div style="font-size:1.5rem;font-weight:700;color:#1e293b">' + (r.total_marcacoes || 0) + '</div>' +
+                            '<div style="font-size:1.5rem;font-weight:700;color:#1e293b">' + (r.total_marcações || 0) + '</div>' +
                         '</div>' +
                         '<div style="text-align:center;padding:16px;background:#f8fafc;border-radius:12px">' +
                             '<div style="font-size:0.8rem;color:#64748b">Entradas</div>' +
@@ -942,11 +942,11 @@
                 });
                 if (resp.ok) {
                     var data = await resp.json();
-                    var marcacoes = data.marcacoes || [];
+                    var marcações = data.marcações || [];
                     // Contar dias úúteis sem marcação para cada funcionário (simplificado)
-                    var diasComMarcacao = new Set();
-                    marcacoes.forEach(function(m) {
-                        if (m.funcionário_id) diasComMarcacao.add(m.funcionário_id + '_' + m.data);
+                    var diasComMarcação = new Set();
+                    marcações.forEach(function(m) {
+                        if (m.funcionario_id) diasComMarcação.add(m.funcionario_id + '_' + m.data);
                     });
                     document.getElementById('stat-faltas').textContent = '-';
                 }
@@ -972,16 +972,16 @@
             document.body.classList.add('modal-open');
         }
 
-        function editarMarcacao(id) {
-            var m = marcacoesCache.find(function(x) { return x.id === id; });
+        function editarMarcação(id) {
+            var m = marcaçõesCache.find(function(x) { return x.id === id; });
             if (!m) { showToast('Marcação não encontrada', 'error'); return; }
 
             document.getElementById('ajuste-id').value = m.id;
-            document.getElementById('ajuste-funcionário').value = m.funcionário_id || '';
+            document.getElementById('ajuste-funcionário').value = m.funcionario_id || '';
             document.getElementById('ajuste-data').value = m.data ? m.data.substring(0, 10) : '';
             document.getElementById('ajuste-hora').value = formatTime(m.hora);
-            document.getElementById('ajuste-tipo').value = m.tipo || 'marcacao';
-            document.getElementById('ajuste-observação').value = m.observacao || '';
+            document.getElementById('ajuste-tipo').value = m.tipo || 'marcação';
+            document.getElementById('ajuste-observação').value = m.observação || '';
             document.getElementById('ajuste-motivo').value = '';
             document.getElementById('modal-ajuste-title').textContent = 'Editar Marcação #' + m.id;
             document.getElementById('motivo-section').style.display = 'block';
@@ -1016,13 +1016,13 @@
             try {
                 var url, method, body;
                 if (id) {
-                    url = '/api/rh/ponto/marcacoes/' + id;
+                    url = '/api/rh/ponto/marcações/' + id;
                     method = 'PUT';
-                    body = { hora: hora, tipo: tipo, observacao: obs, funcionário_id: parseInt(funcId), data: data, motivo: motivo };
+                    body = { hora: hora, tipo: tipo, observação: obs, funcionario_id: parseInt(funcId), data: data, motivo: motivo };
                 } else {
-                    url = '/api/rh/ponto/marcacoes';
+                    url = '/api/rh/ponto/marcações';
                     method = 'POST';
-                    body = { funcionário_id: parseInt(funcId), data: data, hora: hora, tipo: tipo, observacao: obs };
+                    body = { funcionario_id: parseInt(funcId), data: data, hora: hora, tipo: tipo, observação: obs };
                 }
 
                 var resp = await fetchWithCsrf(url, { method: method, body: JSON.stringify(body) });
@@ -1045,13 +1045,13 @@
             }
         }
 
-        var excluirMarcacaoId = null;
+        var excluirMarcaçãoId = null;
 
-        function excluirMarcacao(id) {
-            var m = marcacoesCache.find(function(x) { return x.id === id; });
-            var info = m ? (getFuncName(m.funcionário_id) + ' - ' + formatDate(m.data) + ' ' + formatTime(m.hora)) : ('Marcação #' + id);
+        function excluirMarcação(id) {
+            var m = marcaçõesCache.find(function(x) { return x.id === id; });
+            var info = m ? (getFuncName(m.funcionario_id) + ' - ' + formatDate(m.data) + ' ' + formatTime(m.hora)) : ('Marcação #' + id);
 
-            excluirMarcacaoId = id;
+            excluirMarcaçãoId = id;
             document.getElementById('excluir-info').textContent = info;
             document.getElementById('excluir-motivo').value = '';
             document.getElementById('modal-excluir').classList.add('show');
@@ -1069,7 +1069,7 @@
             }
 
             try {
-                var resp = await fetchWithCsrf('/api/rh/ponto/marcacoes/' + excluirMarcacaoId, {
+                var resp = await fetchWithCsrf('/api/rh/ponto/marcações/' + excluirMarcaçãoId, {
                     method: 'DELETE',
                     body: JSON.stringify({ motivo: motivo })
                 });
@@ -1087,12 +1087,12 @@
         }
 
         // ============= EXPORT =============
-        function exportarRelatorio() {
-            if (marcacoesCache.length === 0) { showToast('Nenhum dado para exportar', 'error'); return; }
+        function exportarRelatório() {
+            if (marcaçõesCache.length === 0) { showToast('Nenhum dado para exportar', 'error'); return; }
 
             var csv = 'Funcionário;Data;Hora;Tipo;Origem;Observação\n';
-            marcacoesCache.forEach(function(m) {
-                csv += '"' + (m.funcionário_nome || getFuncName(m.funcionário_id)) + '";"' + formatDate(m.data) + '";"' + formatTime(m.hora) + '";"' + tipoLabel(m.tipo) + '";"' + origemLabel(m.origem) + '";"' + (m.observação || '') + '"\n';
+            marcaçõesCache.forEach(function(m) {
+                csv += '"' + (m.funcionario_nome || getFuncName(m.funcionario_id)) + '";"' + formatDate(m.data) + '";"' + formatTime(m.hora) + '";"' + tipoLabel(m.tipo) + '";"' + origemLabel(m.origem) + '";"' + (m.observação || '') + '"\n';
             });
 
             var blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
@@ -1187,34 +1187,34 @@
         }
 
         // ============= HISTÓRICO DE ALTERAES =============
-        async function carregarAlteracoes() {
-            var funcId = document.getElementById('filter-func-alteracoes').value;
-            var ação = document.getElementById('filter-ação-alteracoes').value;
-            var inicio = document.getElementById('filter-alteracoes-inicio').value;
-            var fim = document.getElementById('filter-alteracoes-fim').value;
+        async function carregarAlterações() {
+            var funcId = document.getElementById('filter-func-alterações').value;
+            var ação = document.getElementById('filter-ação-alterações').value;
+            var inicio = document.getElementById('filter-alterações-inicio').value;
+            var fim = document.getElementById('filter-alterações-fim').value;
 
             try {
                 var params = [];
                 if (funcId) params.push('funcionario_id=' + funcId);
-                if (acao) params.push('ação=' + ação);
+                if (ação) params.push('ação=' + ação);
                 if (inicio) params.push('data_inicio=' + inicio);
                 if (fim) params.push('data_fim=' + fim);
                 params.push('limit=100');
 
-                var url = '/api/rh/ponto/alteracoes' + (params.length ? '?' + params.join('&') : '');
+                var url = '/api/rh/ponto/alterações' + (params.length ? '?' + params.join('&') : '');
                 var resp = await fetch(url, {
                     credentials: 'include',
                     headers: authHeaders()
                 });
                 if (!resp.ok) throw new Error('HTTP ' + resp.status);
                 var data = await resp.json();
-                var alteracoes = data.alteracoes || [];
+                var alterações = data.alterações || [];
 
-                document.getElementById('total-alteracoes').textContent = alteracoes.length + ' registros';
+                document.getElementById('total-alterações').textContent = alterações.length + ' registros';
                 var timeline = document.getElementById('audit-timeline');
-                var empty = document.getElementById('empty-alteracoes');
+                var empty = document.getElementById('empty-alterações');
 
-                if (alteracoes.length === 0) {
+                if (alterações.length === 0) {
                     timeline.innerHTML = '';
                     empty.style.display = 'block';
                     return;
@@ -1223,13 +1223,13 @@
 
                 // Group by marcacao_id + criado_em (same second = same action)
                 var grouped = {};
-                alteracoes.forEach(function(a) {
+                alterações.forEach(function(a) {
                     var key = a.marcacao_id + '_' + (a.criado_em || '').substring(0, 19);
                     if (!grouped[key]) {
                         grouped[key] = {
                             marcacao_id: a.marcacao_id,
-                            funcionário_id: a.funcionário_id,
-                            ação: a.ação,
+                            funcionario_id: a.funcionario_id,
+                            ação: a.acao,
                             motivo: a.motivo,
                             usuário_id: a.usuário_id,
                             ip_address: a.ip_address,
@@ -1251,17 +1251,17 @@
                 });
 
                 timeline.innerHTML = items.map(function(item) {
-                    var iconClass = item.ação || 'edição';
-                    var iconMap = { criacao: 'fa-plus-circle', edicao: 'fa-edit', exclusão: 'fa-trash-alt' };
-                    var acaoMap = { criacao: 'Criação', edicao: 'Edição', exclusão: 'Exclusão' };
+                    var iconClass = item.acao || 'edição';
+                    var iconMap = { criação: 'fa-plus-circle', edicao: 'fa-edit', exclusão: 'fa-trash-alt' };
+                    var açãoMap = { criação: 'Criação', edicao: 'Edição', exclusão: 'Exclusão' };
                     var icon = iconMap[iconClass] || 'fa-edit';
-                    var funcName = getFuncName(item.funcionário_id);
+                    var funcName = getFuncName(item.funcionario_id);
                     var dtStr = item.criado_em ? new Date(item.criado_em).toLocaleString('pt-BR') : '-';
 
                     var changesHtml = '';
                     if (item.changes.length > 0) {
                         changesHtml = '<div style="margin-top:6px">' + item.changes.map(function(c) {
-                            var campoLabel = { hora: 'Horário', tipo: 'Tipo', observacao: 'Observação', data: 'Data', funcionário_id: 'Funcionário' };
+                            var campoLabel = { hora: 'Horário', tipo: 'Tipo', observação: 'Observação', data: 'Data', funcionario_id: 'Funcionário' };
                             return '<div class="audit-change">' +
                                 '<strong>' + (campoLabel[c.campo] || c.campo) + ':</strong> ' +
                                 '<span class="old">' + (c.anterior || 'vazio') + '</span>' +
@@ -1278,7 +1278,7 @@
                         '<div class="audit-icon ' + iconClass + '"><i class="fas ' + icon + '"></i></div>' +
                         '<div class="audit-body">' +
                             '<div class="audit-header">' +
-                                '<span class="audit-action">' + (acaoMap[item.ação] || item.ação) + '  Marcação #' + item.marcacao_id + ' (' + funcName + ')</span>' +
+                                '<span class="audit-action">' + (açãoMap[item.acao] || item.acao) + '  Marcação #' + item.marcacao_id + ' (' + funcName + ')</span>' +
                                 '<span class="audit-time">' + dtStr + '</span>' +
                             '</div>' +
                             changesHtml +
@@ -1301,8 +1301,8 @@
             document.getElementById('filter-data').value = today;
             document.getElementById('filter-inicio').value = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
             document.getElementById('filter-fim').value = today;
-            document.getElementById('filter-alteracoes-inicio').value = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
-            document.getElementById('filter-alteracoes-fim').value = today;
+            document.getElementById('filter-alterações-inicio').value = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
+            document.getElementById('filter-alterações-fim').value = today;
             document.getElementById('filter-ano-resumo').value = new Date().getFullYear();
 
             var meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
@@ -1318,7 +1318,7 @@
             document.getElementById('data-atual').textContent = formatDate(today);
 
             await carregarUsuario();
-            await carregarFuncionarios();
+            await carregarFuncionários();
             carregarRegistrosDia();
             carregarStats();
             startAutoRefresh();

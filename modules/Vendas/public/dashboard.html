@@ -866,7 +866,7 @@
                 <!-- Gráficos -->
                 <div class="charts-grid">
                     <div class="chart-card">
-                        <h3><i class="fas fa-chart-line"></i> Evolução de Vendas (últimos 6 Meses)</h3>
+                        <h3><i class="fas fa-chart-line"></i> Evolução de Vendas (últimos 6 meses)</h3>
                         <div class="chart-container">
                             <canvas id="chartVendasMensal"></canvas>
                         </div>
@@ -1086,7 +1086,7 @@
                 }
                 
                 // Carregar dados completos do dashboard do vendedor
-                const response = await fetch('/api/vendas/dashboard/vendedor?período=30', { credentials: 'include' });
+                const response = await fetch('/api/vendas/dashboard/vendedor?periodo=30', { credentials: 'include' });
                 if (response.ok) {
                     const data = await response.json();
                     
@@ -1136,7 +1136,7 @@
                     if (data.pipeline && data.pipeline.length > 0) {
                         const statusMap = {
                             'faturado': { label: 'Faturados', color: '#10b981' },
-                            'analise': { label: 'Em Negociação', color: '#f59e0b' },
+                            'análise': { label: 'Em Negociação', color: '#f59e0b' },
                             'aprovado': { label: 'Aprovados', color: '#3b82f6' },
                             'orcamento': { label: 'Pedidos', color: '#8b5cf6' },
                             'cancelado': { label: 'Cancelados', color: '#ef4444' }
@@ -1269,7 +1269,7 @@
                                         <i class="fas ${icon}"></i>
                                     </div>
                                     <div class="atividade-content">
-                                        <div class="atividade-título">${n.título || 'Atividade'}</div>
+                                        <div class="atividade-título">${n.titulo || 'Atividade'}</div>
                                         <div class="atividade-desc">${n.mensagem || ''}</div>
                                     </div>
                                     <div class="atividade-horário">${n.prioridade === 'alta' ? '🔴' : ''}</div>
@@ -1310,8 +1310,8 @@
                 }
                 
                 // Determinar número do pedido
-                const numeroPedido = cliente.pedido_id || cliente.numero_pedido || cliente.id || '';
-                const infoPedido = numeroPedido ? `Pedido #${numeroPedido}` : `${cliente.total_pedidos || 0} pedido(s)`;
+                const númeroPedido = cliente.pedido_id || cliente.numero_pedido || cliente.id || '';
+                const infoPedido = númeroPedido ? `Pedido #${númeroPedido}` : `${cliente.total_pedidos || 0} pedido(s)`;
                 
                 return `
                     <div class="venda-item">
@@ -1340,13 +1340,13 @@
                             const dataFormatada = pedido.data_faturamento || pedido.created_at 
                                 ? formatarData(pedido.data_faturamento || pedido.created_at) 
                                 : '';
-                            const numeroPedido = pedido.numero_pedido || pedido.id;
+                            const númeroPedido = pedido.numero_pedido || pedido.id;
                             
                             return `
                                 <div class="venda-item">
                                     <div class="venda-info">
                                         <span class="venda-cliente">${pedido.cliente_nome || pedido.empresa_nome || 'Cliente'}</span>
-                                        <span class="venda-data">${dataFormatada}${dataFormatada ? ' - ' : ''}Pedido #${numeroPedido}</span>
+                                        <span class="venda-data">${dataFormatada}${dataFormatada ? ' - ' : ''}Pedido #${númeroPedido}</span>
                                     </div>
                                     <div class="venda-valor">${formatarMoeda(pedido.valor || pedido.valor_total || 0)}</div>
                                 </div>
@@ -1570,7 +1570,7 @@
     <script src="/js/auth-unified.js?v=20260301"></script>
     <script src="/js/mobile-auto-enhance.js?v=20260202" defer></script>
     <!-- Chat Widget BOB AI - DESATIVADO -->
-    <!-- <script src="/chat/widget.js?v=20260218" defer></script> -->
+    <!-- <script src="/chat/widget.js?v=20260418" defer></script> -->
     <script src="/js/user-dropdown.js?v=20260223" defer></script>
 
     <!-- Sidebar Click Animation -->

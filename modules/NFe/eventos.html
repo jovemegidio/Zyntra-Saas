@@ -74,9 +74,9 @@
             <nav class="sidebar-nav">
                 <a href="index.html" class="sidebar-btn" title="Dashboard"><i class="fas fa-chart-pie"></i></a>
                 <a href="consultar.html" class="sidebar-btn" title="Consultar NFe"><i class="fas fa-search"></i></a>
-                <a href="relatorios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
+                <a href="relatórios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
                 <a href="eventos.html" class="sidebar-btn active" title="Eventos"><i class="fas fa-history"></i></a>
-                <a href="inutilizacao.html" class="sidebar-btn" title="Inutilização"><i class="fas fa-ban"></i></a>
+                <a href="inutilização.html" class="sidebar-btn" title="Inutilização"><i class="fas fa-ban"></i></a>
                 <a href="regua.html" class="sidebar-btn" title="Régua Cobrança"><i class="fas fa-bell"></i></a>
                 <a href="pix.html" class="sidebar-btn" title="PIX"><i class="fas fa-qrcode"></i></a>
                 <a href="logistica.html" class="sidebar-btn" title="Logística & Expedição"><i class="fas fa-truck"></i></a>
@@ -114,7 +114,7 @@
                                 <div class="page-icon cyan"><i class="fas fa-history"></i></div>
                                 <div>
                                     <h2 class="page-title">Eventos da NFe</h2>
-                                    <p class="page-subtitle">Consulte, cancele e registre correães em notas fiscais</p>
+                                    <p class="page-subtitle">Consulte, cancele e registre correções em notas fiscais</p>
                                 </div>
                             </div>
                         </div>
@@ -139,7 +139,7 @@
                                 <div class="nfe-info-item"><div class="lbl">Número</div><div class="val" id="infoNumero">-</div></div>
                                 <div class="nfe-info-item"><div class="lbl">Série</div><div class="val" id="infoSerie">-</div></div>
                                 <div class="nfe-info-item"><div class="lbl">Chave de Acesso</div><div class="val" id="infoChave" style="word-break:break-all;">-</div></div>
-                                <div class="nfe-info-item"><div class="lbl">Destinatério</div><div class="val" id="infoDestinatario">-</div></div>
+                                <div class="nfe-info-item"><div class="lbl">Destinatário</div><div class="val" id="infoDestinatario">-</div></div>
                                 <div class="nfe-info-item"><div class="lbl">Valor</div><div class="val" id="infoValor">-</div></div>
                                 <div class="nfe-info-item"><div class="lbl">Status</div><div class="val" id="infoStatus">-</div></div>
                             </div>
@@ -154,7 +154,7 @@
                         <div class="card-body">
                             <div class="danger-banner">
                                 <i class="fas fa-exclamation-triangle"></i>
-                                <span><strong>Atenão:</strong> O cancelamento é irreversível e deve ser feito em até 24 horas após a autorização.</span>
+                                <span><strong>Atenção:</strong> O cancelamento é irreversível e deve ser feito em até 24 horas após a autorização.</span>
                             </div>
                             <div class="form-group">
                                 <label>Justificativa do Cancelamento <span style="color:#ef4444;">*</span></label>
@@ -175,7 +175,7 @@
                         <div class="card-body">
                             <div class="warning-banner">
                                 <i class="fas fa-info-circle"></i>
-                                <span>A CC-e não permite alterar valores, impostos, dados do emitente/destinatério ou a descrição da mercadoria.</span>
+                                <span>A CC-e não permite alterar valores, impostos, dados do emitente/destinatário ou a descrição da mercadoria.</span>
                             </div>
                             <div class="form-group">
                                 <label>Texto da Correção <span style="color:#ef4444;">*</span></label>
@@ -228,7 +228,7 @@
             s.classList.toggle('open');
             o.classList.toggle('active');
         }
-        function toggleNotificacoes() {}
+        function toggleNotificações() {}
 
         // == Avatar map ==
         const avatarNameMap = {
@@ -278,7 +278,7 @@
             })
             .then(data => {
                 nfeCarregada = data.nfe || data.data || data;
-                const elNum = document.getElementById('infoNumero'); if (elNum) elNum.textContent = nfeCarregada.numero || nfeCarregada.id || '-';
+                const elNum = document.getElementById('infoNúmero'); if (elNum) elNum.textContent = nfeCarregada.numero || nfeCarregada.id || '-';
                 const elSerie = document.getElementById('infoSerie'); if (elSerie) elSerie.textContent = nfeCarregada.serie || '1';
                 const elChave = document.getElementById('infoChave'); if (elChave) elChave.textContent = nfeCarregada.chave || nfeCarregada.chave_acesso || '-';
                 const elDest = document.getElementById('infoDestinatario'); if (elDest) elDest.textContent = nfeCarregada.destinatario || nfeCarregada.cliente || '-';
@@ -365,7 +365,7 @@
                         <td><strong>${ev.tipo || '-'}</strong></td>
                         <td>${dt}</td>
                         <td class="code">${ev.protocolo || '-'}</td>
-                        <td>${ev.descrição || ev.texto || '-'}</td>
+                        <td>${ev.descricao || ev.texto || '-'}</td>
                         <td><span class="badge ${statusClass}">${ev.status || '-'}</span></td>
                     </tr>`;
                 }).join('');
@@ -392,7 +392,7 @@
             setTimeout(() => div.remove(), 5000);
         }
 
-        function abrirModalConfiguracoes() {
+        function abrirModalConfigurações() {
             alert('Configurações - Em desenvolvimento');
         }
 

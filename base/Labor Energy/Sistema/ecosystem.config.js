@@ -1,19 +1,19 @@
-// ecosystem.config.js - Configuração PM2 para desenvolvimento e produção
-const isProduction = process.env.NODE_ENV === 'production';
-
+// ecosystem.config.js - Configuração PM2 para Labor Energy (porta 4002)
 module.exports = {
   apps: [{
-    name: 'aluforce-dashboard',
+    name: 'labor-energy',
     script: 'server.js',
-    instances: isProduction ? 'max' : 1,
-    exec_mode: isProduction ? 'cluster' : 'fork',
+    instances: 1,
+    exec_mode: 'fork',
     env: {
-      NODE_ENV: 'development',
-      PORT: 3000
+      NODE_ENV: 'production',
+      SERVER_PORT: 4002,
+      EMPRESA_NOME: 'ENERGY COMERCIO LTDA',
+      EMPRESA_FANTASIA: 'LABOR ENERGY'
     },
     env_production: {
       NODE_ENV: 'production',
-      PORT: 3000,
+      SERVER_PORT: 4002,
       SKIP_MIGRATIONS: '1',
       DB_CONN_LIMIT: '200',
       DB_QUERY_TIMEOUT: '15000',

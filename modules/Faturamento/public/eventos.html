@@ -32,10 +32,10 @@
                 <a href="consultar.html" class="sidebar-btn" title="Consultar"><i class="fas fa-search"></i></a>
                 <a href="eventos.html" class="sidebar-btn active" title="Eventos"><i
                         class="fas fa-calendar-check"></i></a>
-                <a href="inutilizacao.html" class="sidebar-btn" title="Inutilização"><i class="fas fa-ban"></i></a>
+                <a href="inutilização.html" class="sidebar-btn" title="Inutilização"><i class="fas fa-ban"></i></a>
             </nav>
             <div class="sidebar-bottom">
-                <a href="relatorios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
+                <a href="relatórios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
             </div>
         </aside>
 
@@ -219,11 +219,11 @@
                 const r = await fetch(`/api/faturamento/nfes/${nfeId}`, { credentials: 'include' });
                 if (r.ok) {
                     const nfe = await r.json();
-                    document.getElementById('infoNumero').textContent = nfe.numero || '-';
+                    document.getElementById('infoNúmero').textContent = nfe.numero || '-';
                     document.getElementById('infoSerie').textContent = nfe.serie || '-';
                     document.getElementById('infoChave').textContent = nfe.chave_acesso || '-';
                     document.getElementById('infoStatus').innerHTML = `<span class="badge ${(nfe.status || '').toLowerCase()}">${nfe.status || '-'}</span>`;
-                    document.getElementById('infoDataAutorizacao').textContent = nfe.data_autorizacao ? new Date(nfe.data_autorizacao).toLocaleString('pt-BR') : '-';
+                    document.getElementById('infoDataAutorização').textContent = nfe.data_autorizacao ? new Date(nfe.data_autorizacao).toLocaleString('pt-BR') : '-';
                     document.getElementById('nfeInfo').classList.remove('hidden');
                     carregarEventos(nfeId);
                 } else { showAlert('NF-e não encontrada', 'danger'); }
@@ -245,7 +245,7 @@
                         <strong style="font-size:13px;">${ev.tipo || ev.evento || 'Evento'}</strong>
                         <span class="text-muted" style="font-size:11px;">${ev.data ? new Date(ev.data).toLocaleString('pt-BR') : '-'}</span>
                     </div>
-                    <p style="margin:0;font-size:12px;color:var(--text-secondary);">${ev.descrição || ev.justificativa || '-'}</p>
+                    <p style="margin:0;font-size:12px;color:var(--text-secondary);">${ev.descricao || ev.justificativa || '-'}</p>
                     ${ev.protocolo ? '<p style="margin:4px 0 0;font-size:11px;"><span class="code">' + ev.protocolo + '</span></p>' : ''}
                 </div>
             `).join('');

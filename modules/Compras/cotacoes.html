@@ -101,9 +101,9 @@
     </style>
 
     <script>
-        function toggleNotificacoes() { const p = document.getElementById('notification-panel'); if (p) p.classList.toggle('active'); }
+        function toggleNotificações() { const p = document.getElementById('notification-panel'); if (p) p.classList.toggle('active'); }
         function marcarTodasLidas() {}
-        function limparNotificacoes() {}
+        function limparNotificações() {}
     </script>
     <script src="/js/anti-copy-protection.js" defer></script>
     <!-- Chat Widget BOB AI -->
@@ -157,8 +157,8 @@
                 <div class="page-header">
                     <div class="page-header-top">
                         <div class="page-actions">
-                            <button class="btn btn-secondary" onclick="cotacoesManager.exportar()"><i class="fas fa-download"></i> Exportar</button>
-                            <button class="btn btn-primary" onclick="abrirModalNovaCotacao()"><i class="fas fa-plus"></i> Nova Cota��o</button>
+                            <button class="btn btn-secondary" onclick="cotaçõesManager.exportar()"><i class="fas fa-download"></i> Exportar</button>
+                            <button class="btn btn-primary" onclick="abrirModalNovaCotação()"><i class="fas fa-plus"></i> Nova Cota��o</button>
                         </div>
                     </div>
                 </div>
@@ -189,12 +189,12 @@
 
                 <!-- Filters -->
                 <div class="filters-bar">
-                    <div class="search-box"><i class="fas fa-search"></i><input type="text" id="searchCotacao" placeholder="Buscar por c�digo, fornecedor, material..." oninput="cotacoesManager.filtrar()"></div>
-                    <button class="filter-btn active" onclick="cotacoesManager.filtrarPorStatus('todos')"><i class="fas fa-list"></i> Todas</button>
-                    <button class="filter-btn" onclick="cotacoesManager.filtrarPorStatus('Rascunho')"><i class="fas fa-edit"></i> Rascunho</button>
-                    <button class="filter-btn" onclick="cotacoesManager.filtrarPorStatus('Enviada')"><i class="fas fa-paper-plane"></i> Enviadas</button>
-                    <button class="filter-btn" onclick="cotacoesManager.filtrarPorStatus('Em An�lise')"><i class="fas fa-search-dollar"></i> Em An�lise</button>
-                    <button class="filter-btn" onclick="cotacoesManager.filtrarPorStatus('Aprovada')"><i class="fas fa-check-circle"></i> Aprovadas</button>
+                    <div class="search-box"><i class="fas fa-search"></i><input type="text" id="searchCotacao" placeholder="Buscar por c�digo, fornecedor, material..." oninput="cotaçõesManager.filtrar()"></div>
+                    <button class="filter-btn active" onclick="cotaçõesManager.filtrarPorStatus('todos')"><i class="fas fa-list"></i> Todas</button>
+                    <button class="filter-btn" onclick="cotaçõesManager.filtrarPorStatus('Rascunho')"><i class="fas fa-edit"></i> Rascunho</button>
+                    <button class="filter-btn" onclick="cotaçõesManager.filtrarPorStatus('Enviada')"><i class="fas fa-paper-plane"></i> Enviadas</button>
+                    <button class="filter-btn" onclick="cotaçõesManager.filtrarPorStatus('Em An�lise')"><i class="fas fa-search-dollar"></i> Em An�lise</button>
+                    <button class="filter-btn" onclick="cotaçõesManager.filtrarPorStatus('Aprovada')"><i class="fas fa-check-circle"></i> Aprovadas</button>
                 </div>
 
                 <!-- Table -->
@@ -232,7 +232,7 @@
         <div class="modal" style="max-width:800px;">
             <div class="modal-header">
                 <h3><i class="fas fa-plus-circle"></i> <span id="modalCotacaoTitulo">Nova Cota��o de Compra</span></h3>
-                <button class="modal-close" onclick="fecharModalCotacao()"><i class="fas fa-times"></i></button>
+                <button class="modal-close" onclick="fecharModalCotação()"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body">
                 <form id="formCotacao">
@@ -267,7 +267,7 @@
                             <label>Unidade</label>
                             <select id="cotUnidade" class="form-control">
                                 <option value="UN">UN - Unidade</option>
-                                <option value="M2">M - Metro Quadrado</option>
+                                <option value="M2">m² - Metro Quadrado</option>
                                 <option value="M">M - Metro Linear</option>
                                 <option value="KG">KG - Quilograma</option>
                                 <option value="PC">PC - Pe�a</option>
@@ -290,8 +290,8 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="fecharModalCotacao()">Cancelar</button>
-                <button class="btn btn-primary" onclick="salvarCotacao()"><i class="fas fa-save"></i> Salvar Cota��o</button>
+                <button class="btn btn-secondary" onclick="fecharModalCotação()">Cancelar</button>
+                <button class="btn btn-primary" onclick="salvarCotação()"><i class="fas fa-save"></i> Salvar Cota��o</button>
             </div>
         </div>
     </div>
@@ -326,7 +326,7 @@
             }
         }
 
-        async function carregarMateriaisCotacao() {
+        async function carregarMateriaisCotação() {
             const select = document.getElementById('cotMaterial');
             if (!select) return;
             try {
@@ -342,39 +342,39 @@
             }
         }
 
-        async function abrirModalNovaCotacao() {
-            document.getElementById('modalNovaCotacao').classList.add('active');
-            document.getElementById('modalCotacaoTitulo').textContent = 'Nova Cota��o de Compra';
-            document.getElementById('formCotacao').reset();
-            document.getElementById('cotacaoId').value = '';
-            document.getElementById('cotacaoNumero').value = '';
+        async function abrirModalNovaCotação() {
+            document.getElementById('modalNovaCotação').classList.add('active');
+            document.getElementById('modalCotaçãoTítulo').textContent = 'Nova Cota��o de Compra';
+            document.getElementById('formCotação').reset();
+            document.getElementById('cotaçãoId').value = '';
+            document.getElementById('cotaçãoNúmero').value = '';
             // Carregar materiais e fornecedores dinamicamente
-            carregarMateriaisCotacao();
+            carregarMateriaisCotação();
             carregarFornecedores();
             // Buscar pr�ximo n�mero
             try {
                 const r = await fetch('/api/compras/cotacoes/proximo-numero', { headers: {  } });
-                if (r.ok) { const d = await r.json(); document.getElementById('cotacaoNumero').value = d.n�mero || d.proximo_n�mero || ''; }
-            } catch (e) { document.getElementById('cotacaoNumero').value = 'COT-' + String(Date.now()).slice(-4); }
+                if (r.ok) { const d = await r.json(); document.getElementById('cotaçãoNúmero').value = d.n�mero || d.proximo_n�mero || ''; }
+            } catch (e) { document.getElementById('cotaçãoNúmero').value = 'COT-' + String(Date.now()).slice(-4); }
         }
 
-        function fecharModalCotacao() {
-            document.getElementById('modalNovaCotacao').classList.remove('active');
+        function fecharModalCotação() {
+            document.getElementById('modalNovaCotação').classList.remove('active');
         }
 
-        let _salvandoCotacao = false;
-        async function salvarCotacao() {
-            if (_salvandoCotacao) return;
-            _salvandoCotacao = true;
+        let _salvandoCotação = false;
+        async function salvarCotação() {
+            if (_salvandoCotação) return;
+            _salvandoCotação = true;
             const btn = event && event.target ? event.target : null;
             if (btn) btn.disabled = true;
-            const descri��o = document.getElementById('cotDescricao').value;
+            const descri��o = document.getElementById('cotDescrição').value;
             const validade = document.getElementById('cotValidade').value;
             const material = document.getElementById('cotMaterial').value;
             const quantidade = document.getElementById('cotQuantidade').value;
             if (!descri��o || !validade || !material || !quantidade) {
                 showToast('Por favor, preencha todos os campos obrigat�rios.', 'warning');
-                _salvandoCotacao = false; if (btn) btn.disabled = false;
+                _salvandoCotação = false; if (btn) btn.disabled = false;
                 return;
             }
 
@@ -382,20 +382,20 @@
             const fornecedores_ids = Array.from(fornecedoresChecked).map(cb => parseInt(cb.value));
 
             const body = {
-                n�mero: document.getElementById('cotacaoNumero').value,
+                n�mero: document.getElementById('cotaçãoNúmero').value,
                 descri��o: descri��o,
                 data_abertura: new Date().toISOString().split('T')[0],
                 data_validade: validade,
                 quantidade: parseFloat(quantidade),
                 unidade: document.getElementById('cotUnidade').value,
-                observacoes: document.getElementById('cotObservacoes').value,
+                observações: document.getElementById('cotObservações').value,
                 fornecedores_ids: fornecedores_ids
             };
 
             try {
-                const cotacaoId = document.getElementById('cotacaoId').value;
-                const url = cotacaoId ? `/api/compras/cotacoes/${cotacaoId}` : '/api/compras/cotacoes';
-                const method = cotacaoId ? 'PUT' : 'POST';
+                const cotaçãoId = document.getElementById('cotaçãoId').value;
+                const url = cotaçãoId ? `/api/compras/cotações/${cotaçãoId}` : '/api/compras/cotações';
+                const method = cotaçãoId ? 'PUT' : 'POST';
 
                 const r = await fetch(url, {
                     method: method,
@@ -409,7 +409,7 @@
                 }
 
                 showToast(cota��oId ? 'Cota��o atualizada com sucesso!' : 'Cota��o salva com sucesso!', 'success');
-                fecharModalCotacao();
+                fecharModalCotação();
 
                 // Recarregar dados na tabela
                 if (typeof cota��esManager !== 'undefined') {
@@ -420,12 +420,12 @@
             } catch (e) {
                 showToast('Erro: ' + e.message, 'error');
             } finally {
-                _salvandoCotacao = false; if (btn) btn.disabled = false;
+                _salvandoCotação = false; if (btn) btn.disabled = false;
             }
         }
 
-        document.getElementById('modalNovaCotacao').addEventListener('click', function(e) {
-            if (e.target === this) fecharModalCotacao();
+        document.getElementById('modalNovaCotação').addEventListener('click', function(e) {
+            if (e.target === this) fecharModalCotação();
         });
     </script>
 
@@ -434,13 +434,13 @@
         <div class="modal" style="max-width:700px;">
             <div class="modal-header">
                 <h3><i class="fas fa-eye"></i> Detalhes da Cota��o</h3>
-                <button class="modal-close" onclick="document.getElementById('modalVisualizarCotacao').classList.remove('active')">&times;</button>
+                <button class="modal-close" onclick="document.getElementById('modalVisualizarCotação').classList.remove('active')">&times;</button>
             </div>
             <div class="modal-body" id="viewCotacaoBody" style="max-height:60vh; overflow-y:auto;">
                 <p style="text-align:center; color:var(--gray-400);"><i class="fas fa-spinner fa-spin"></i> Carregando...</p>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="document.getElementById('modalVisualizarCotacao').classList.remove('active')">Fechar</button>
+                <button class="btn btn-secondary" onclick="document.getElementById('modalVisualizarCotação').classList.remove('active')">Fechar</button>
             </div>
         </div>
     </div>
@@ -493,7 +493,7 @@
     <script src="/_shared/confirm-dialog.js?v=20260301"></script>
 
     <!-- Chat Widget BOB AI -->
-    <script src="/chat/widget.js?v=20260416" defer></script>
+    <script src="/chat/widget.js?v=20260418" defer></script>
 
     <!-- Enterprise Shared -->
     <script src="/js/sidebar-click-animation.js?v=20260301"></script>

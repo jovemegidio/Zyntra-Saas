@@ -1,4 +1,4 @@
-﻿// ========================================
+// ========================================
 // MATERIAIS MANAGER - VERSÍO COM API REAL
 // Sistema de Gestão de Materiais - ALUFORCE
 // ========================================
@@ -18,11 +18,7 @@ class MateriaisManager {
     }
 
     getAuthHeaders() {
-        const token = localStorage.getItem('token');
-        return {
-            'Content-Type': 'application/json',
-            'Authorization': token ? `Bearer ${token}` : ''
-        };
+        return { 'Content-Type': 'application/json' };
     }
 
     async init() {

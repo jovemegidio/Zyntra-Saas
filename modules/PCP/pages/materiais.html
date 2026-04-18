@@ -168,7 +168,7 @@
                 <a href="faturamento.html" class="sidebar-btn" title="Faturamento"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="../apontamentos.html" class="sidebar-btn" title="Apontamentos"><i class="fas fa-stopwatch"></i></a>
                 <a href="qualidade.html" class="sidebar-btn" title="Qualidade"><i class="fas fa-award"></i></a>
-                <a href="relatorios.html" class="sidebar-btn" title="Central de Relatórios"><i class="fas fa-chart-pie"></i></a>
+                <a href="relatórios.html" class="sidebar-btn" title="Central de Relatórios"><i class="fas fa-chart-pie"></i></a>
             </nav>
             <div class="sidebar-bottom">
                 <button class="sidebar-btn" title="Configurações" id="btn-config"><i class="fas fa-cog"></i></button>
@@ -248,7 +248,7 @@
                         <button class="btn btn-success" onclick="abrirEntradaRapidaMaterial()"><i class="fas fa-arrow-up"></i> Entrada Rápida</button>
                         <button class="btn btn-danger" onclick="abrirSaidaRapidaMaterial()"><i class="fas fa-arrow-down"></i> Saída Rápida</button>
                         <button class="btn btn-warning" onclick="abrirAjusteInventarioMaterial()"><i class="fas fa-sliders-h"></i> Ajuste de Inventário</button>
-                        <button class="btn btn-secondary" onclick="verHistoricoMaterial()"><i class="fas fa-history"></i> Histórico</button>
+                        <button class="btn btn-secondary" onclick="verHistóricoMaterial()"><i class="fas fa-history"></i> Histórico</button>
                     </div>
 
                     <!-- Busca -->
@@ -348,8 +348,8 @@
                     materiaisData = Array.isArray(data) ? data : (data.rows || data.materiais || []);
                     materiaisData = materiaisData.map(m => ({
                         ...m,
-                        codigo: m.codigo || m.codigo_material || '',
-                        descricao: m.descricao || m.nome || '',
+                        código: m.codigo || m.codigo_material || '',
+                        descrição: m.descricao || m.nome || '',
                         estoque: m.quantidade_estoque ?? m.estoque ?? 0,
                         estoque_minimo: m.estoque_minimo ?? 10,
                         unidade: m.unidade_medida || m.unidade || 'UN',
@@ -420,15 +420,15 @@
 
         function buscarMateriais() { renderizarMateriais(); }
         function exportarMateriais() { exportarParaExcel(materiaisData, 'materiais'); }
-        function abrirEntradaRapidaMaterial() { abrirModalMovimentacaoMaterial('entrada'); }
-        function abrirSaidaRapidaMaterial() { abrirModalMovimentacaoMaterial('saida'); }
-        function abrirAjusteInventarioMaterial() { abrirModalMovimentacaoMaterial('ajuste'); }
-        function verHistoricoMaterial() { showToast('Histórico em desenvolvimento', 'info'); }
+        function abrirEntradaRapidaMaterial() { abrirModalMovimentaçãoMaterial('entrada'); }
+        function abrirSaidaRapidaMaterial() { abrirModalMovimentaçãoMaterial('saida'); }
+        function abrirAjusteInventarioMaterial() { abrirModalMovimentaçãoMaterial('ajuste'); }
+        function verHistóricoMaterial() { showToast('Histórico em desenvolvimento', 'info'); }
 
         document.getElementById('search-materiais').addEventListener('keypress', e => { if (e.key === 'Enter') buscarMateriais(); });
 
         document.addEventListener('DOMContentLoaded', function() {
-            atualizarSaudacao();
+            atualizarSaudação();
             carregarMateriais();
 
             // Carregar modais via fetch

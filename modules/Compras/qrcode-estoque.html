@@ -1097,7 +1097,7 @@
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
 
         try {
-            const res = await fetch(`${API_BASE}/movimentacao`, {
+            const res = await fetch(`${API_BASE}/movimentação`, {
                 method: 'POST',
                 headers: getAuthHeaders(),
                 body: JSON.stringify({
@@ -1106,7 +1106,7 @@
                     quantidade: qty,
                     motivo: motivo + (obs ? ' | Via QR Code' : ' | Via QR Code'),
                     documento: documento,
-                    observacoes: obs ? `[QR] ${obs}` : '[QR] Movimentação via leitura QR Code'
+                    observações: obs ? `[QR] ${obs}` : '[QR] Movimentação via leitura QR Code'
                 })
             });
 
@@ -1129,7 +1129,7 @@
             // Add to recent movements
             recentMovements.unshift({
                 material: currentMaterial.descricao || currentMaterial.nome,
-                codigo: currentMaterial.codigo || currentMaterial.id,
+                código: currentMaterial.codigo || currentMaterial.id,
                 tipo: currentAction,
                 quantidade: qty,
                 saldo: data.saldo_atual,
@@ -1190,11 +1190,11 @@
         }, 300);
     }
 
-    function generateQR(id, codigo, descricao) {
+    function generateQR(id, código, descrição) {
         const section = document.getElementById('qr-print-section');
         section.classList.add('visible');
 
-        const qrData = 'ZYNTRA:MAT:' + (codigo || id);
+        const qrData = 'ZYNTRA:MAT:' + (código || id);
         const canvas = document.getElementById('qr-canvas');
 
         QRCode.toCanvas(canvas, qrData, {
@@ -1203,8 +1203,8 @@
             color: { dark: '#000000', light: '#ffffff' }
         });
 
-        document.getElementById('qr-label-name').textContent = descricao;
-        document.getElementById('qr-label-code').textContent = 'Código: ' + (codigo || id);
+        document.getElementById('qr-label-name').textContent = descrição;
+        document.getElementById('qr-label-code').textContent = 'Código: ' + (código || id);
 
         section.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
@@ -1227,11 +1227,11 @@
 
         // Show local recent movements + API data
         try {
-            const res = await fetch(`${API_BASE}/movimentacoes?limit=20`, {
+            const res = await fetch(`${API_BASE}/movimentações?limit=20`, {
                 headers: getAuthHeaders()
             });
             const data = await res.json();
-            const movs = data.movimentacoes || [];
+            const movs = data.movimentações || [];
 
             if (movs.length === 0 && recentMovements.length === 0) {
                 container.innerHTML = '<div class="empty-state"><i class="fas fa-clipboard-list"></i><p>Nenhuma movimentação recente</p></div>';
@@ -1301,7 +1301,7 @@
 
     <!-- Chat Widget BOB AI -->
     <link rel="stylesheet" href="/chat/widget.css?v=20260416">
-    <script src="/chat/widget.js?v=20260416" defer></script>
+    <script src="/chat/widget.js?v=20260418" defer></script>
 
     <!-- Enterprise Shared -->
     <script src="/_shared/accessibility-widget.js?v=20260301"></script>

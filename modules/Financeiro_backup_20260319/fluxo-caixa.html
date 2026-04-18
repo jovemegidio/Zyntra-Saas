@@ -641,7 +641,7 @@
             hoje.setHours(0, 0, 0, 0);
 
             // Status considerados como pagos/quitados
-            const statusPagos = ['pago', 'recebido', 'liquidado', 'baixado', 'quitado', 'concluido', 'concluído'];
+            const statusPagos = ['pago', 'recebido', 'liquidado', 'baixado', 'quitado', 'concluído'];
             const isPendente = (item) => {
                 if (!item.status) return true;
                 return !statusPagos.includes(item.status.toLowerCase().trim());

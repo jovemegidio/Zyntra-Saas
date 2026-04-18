@@ -213,13 +213,13 @@
         <aside class="sidebar" id="mobile-sidebar">
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel de Controle"><i class="fas fa-home"></i></a>
             <nav class="sidebar-nav">
-                <a href="../funcionario.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-home"></i></a>
+                <a href="../funcionário.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-home"></i></a>
                 <a href="meus-holerites.html" class="sidebar-btn" title="Meus Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="dados-cadastrais.html" class="sidebar-btn" title="Dados Cadastrais"><i class="fas fa-id-card"></i></a>
                 <a href="beneficios.html" class="sidebar-btn" title="Meus Benefícios"><i class="fas fa-gift"></i></a>
                 <a href="espelho-ponto.html" class="sidebar-btn" title="Espelho de Ponto"><i class="fas fa-list-check"></i></a>
                 <a href="enviar-atestado.html" class="sidebar-btn active" title="Enviar Atestado"><i class="fas fa-file-medical"></i></a>
-                <a href="../solicitacoes.html" class="sidebar-btn" title="Minhas Solicitações"><i class="fas fa-clipboard-list"></i></a>
+                <a href="../solicitações.html" class="sidebar-btn" title="Minhas Solicitações"><i class="fas fa-clipboard-list"></i></a>
                 <a href="manual-colaborador.html" class="sidebar-btn" title="Manual do Colaborador"><i class="fas fa-book"></i></a>
             </nav>
             <div class="sidebar-bottom">
@@ -323,7 +323,7 @@
                                             <option value="">Selecione o tipo</option>
                                             <option value="consulta">Consulta Mdica</option>
                                             <option value="exame">Exame Médico</option>
-                                            <option value="internacao">Internao</option>
+                                            <option value="internação">Internao</option>
                                             <option value="acompanhamento">Acompanhamento Familiar</option>
                                             <option value="outros">Outros</option>
                                         </select>
@@ -339,7 +339,7 @@
                                 </div>
 
                                 <div class="form-actions">
-                                    <a href="../funcionario.html" class="btn btn-outline">
+                                    <a href="../funcionário.html" class="btn btn-outline">
                                         <i class="fas fa-arrow-left"></i>
                                         Voltar
                                     </a>
@@ -528,7 +528,7 @@
             const crm = document.getElementById('crm').value;
             const tipoAtestado = document.getElementById('tipo-atestado').value;
             const cid = document.getElementById('cid').value;
-            const observacoes = document.getElementById('observacoes').value;
+            const observações = document.getElementById('observações').value;
             const arquivo = fileInput.files[0];
             
             if (!arquivo) {
@@ -550,7 +550,7 @@
                 formData.append('crm', crm);
                 formData.append('tipo_atestado', tipoAtestado);
                 formData.append('cid', cid || '');
-                formData.append('observacoes', observacoes || '');
+                formData.append('observações', observações || '');
                 
                 const response = await fetch('/api/rh/atestados', { credentials: 'include', method: 'POST',
                     credentials: 'include',
@@ -614,19 +614,19 @@
                     if (!altResponse.ok) return;
                     
                     const atestados = await altResponse.json();
-                    renderizarHistorico(atestados);
+                    renderizarHistórico(atestados);
                     return;
                 }
                 
                 const atestados = await response.json();
-                renderizarHistorico(atestados);
+                renderizarHistórico(atestados);
             } catch (error) {
                 console.error('Erro ao carregar histórico:', error);
-                renderizarHistorico([]);
+                renderizarHistórico([]);
             }
         }
 
-        function renderizarHistorico(atestados) {
+        function renderizarHistórico(atestados) {
             const container = document.querySelector('.history-section .card-body');
             if (!container) return;
             
@@ -648,7 +648,7 @@
                             <i class="fas ${statusIcon}"></i>
                         </div>
                         <div class="history-content">
-                            <div class="history-title">${a.tipo_atestado || a.observacoes || 'Atestado Médico'}</div>
+                            <div class="history-title">${a.tipo_atestado || a.observações || 'Atestado Médico'}</div>
                             <div class="history-date">${dataInicio} - ${dias} dia${dias > 1 ? 's' : ''}</div>
                         </div>
                         <span class="history-status ${statusClass}">${statusLabel}</span>

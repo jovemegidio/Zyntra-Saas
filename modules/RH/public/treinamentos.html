@@ -79,7 +79,7 @@
         .treinamento-header.online { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
         .treinamento-header.hibrido { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); }
         .treinamento-tipo { position: absolute; top: 12px; right: 12px; background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
-        .treinamento-titulo { font-size: 18px; font-weight: 700; margin-bottom: 8px; padding-right: 80px; }
+        .treinamento-título { font-size: 18px; font-weight: 700; margin-bottom: 8px; padding-right: 80px; }
         .treinamento-categoria { font-size: 12px; opacity: 0.9; display: flex; align-items: center; gap: 6px; }
         .treinamento-body { padding: 20px; }
         .treinamento-info { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
@@ -262,7 +262,7 @@
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel de Controle"><i class="fas fa-home"></i></a>
             <nav class="sidebar-nav">
                 <a href="areaadm.html" class="sidebar-btn" title="Dashboard RH"><i class="fas fa-chart-pie"></i></a>
-                <a href="pages/funcionarios.html" class="sidebar-btn" title="FUNCIONÁRIOS"><i class="fas fa-users"></i></a>
+                <a href="pages/funcionários.html" class="sidebar-btn" title="FUNCIONÁRIOS"><i class="fas fa-users"></i></a>
                 <a href="gestao-holerites.html" class="sidebar-btn" title="Gestão de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="pages/gestao-ponto.html" class="sidebar-btn" title="Gestão do Ponto"><i class="fas fa-clock"></i></a>
                 <a href="pages/importar-ponto.html" class="sidebar-btn" title="Importar Ponto (Control iD)"><i class="fas fa-upload"></i></a>
@@ -270,7 +270,7 @@
                 <a href="pages/calendario-rh.html" class="sidebar-btn" title="Calendário RH"><i class="fas fa-calendar-alt"></i></a>
             </nav>
             <div class="sidebar-bottom">
-                <a href="funcionario.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-user"></i></a>
+                <a href="funcionário.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-user"></i></a>
             </div>
         </aside>
         
@@ -330,7 +330,7 @@
                 
                 <!-- Prximos Treinamentos -->
                 <div class="calendar-preview" id="proximosContainer">
-                    <h4><i class="fas fa-calendar-check"></i> Prximos Treinamentos</h4>
+                    <h4><i class="fas fa-calendar-check"></i> Próximos Treinamentos</h4>
                     <div id="proximosLista"></div>
                 </div>
                 
@@ -339,7 +339,7 @@
                     <button class="tab active" onclick="filtrarPorStatus('todos')">Todos</button>
                     <button class="tab" onclick="filtrarPorStatus('agendado')">Agendados</button>
                     <button class="tab" onclick="filtrarPorStatus('em_andamento')">Em Andamento</button>
-                    <button class="tab" onclick="filtrarPorStatus('concluido')">Concludos</button>
+                    <button class="tab" onclick="filtrarPorStatus('concluido')">Concluídos</button>
                 </div>
                 
                 <!-- Filters -->
@@ -352,7 +352,7 @@
                         <option value="">Todos os tipos</option>
                         <option value="presencial">Presencial</option>
                         <option value="online">Online</option>
-                        <option value="hibrido">Hbrido</option>
+                        <option value="hibrido">Híbrido</option>
                     </select>
                     <select class="filter-select" id="filtroCategoria" onchange="filtrarTreinamentos()">
                         <option value="">Todas as categorias</option>
@@ -377,8 +377,8 @@
                     <input type="hidden" id="treinamentoId">
                     
                     <div class="form-group">
-                        <label for="titulo">Título do Treinamento *</label>
-                        <input type="text" id="titulo" placeholder="Ex: Treinamento de Segurana do Trabalho" required>
+                        <label for="título">Título do Treinamento *</label>
+                        <input type="text" id="titulo" placeholder="Ex: Treinamento de Segurança do Trabalho" required>
                     </div>
                     
                     <div class="form-group">
@@ -392,15 +392,15 @@
                             <select id="tipo">
                                 <option value="presencial">Presencial</option>
                                 <option value="online">Online</option>
-                                <option value="hibrido">Hbrido</option>
+                                <option value="hibrido">Híbrido</option>
                             </select>
                         </div>
                         <div class="form-group">
                             <label for="categoria">Categoria</label>
-                            <input type="text" id="categoria" placeholder="Ex: Segurana">
+                            <input type="text" id="categoria" placeholder="Ex: Segurança">
                         </div>
                         <div class="form-group">
-                            <label for="cargaHoraria">Carga Horria (h)</label>
+                            <label for="cargaHoraria">Carga Horária (h)</label>
                             <input type="number" id="cargaHoraria" min="0" value="8">
                         </div>
                     </div>
@@ -412,13 +412,13 @@
                         </div>
                         <div class="form-group">
                             <label for="local">Local</label>
-                            <input type="text" id="local" placeholder="Sala de Reunies / Link da Plataforma">
+                            <input type="text" id="local" placeholder="Sala de Reuniões / Link da Plataforma">
                         </div>
                     </div>
                     
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="dataInicio">Data Incio *</label>
+                            <label for="dataInicio">Data Início *</label>
                             <input type="date" id="dataInicio" required>
                         </div>
                         <div class="form-group">
@@ -429,11 +429,11 @@
                     
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="horarioInicio">Horrio Incio</label>
+                            <label for="horarioInicio">Horário Início</label>
                             <input type="time" id="horarioInicio" value="08:00">
                         </div>
                         <div class="form-group">
-                            <label for="horarioFim">Horrio Fim</label>
+                            <label for="horarioFim">Horário Fim</label>
                             <input type="time" id="horarioFim" value="17:00">
                         </div>
                     </div>
@@ -626,7 +626,7 @@
                 if (filtroStatusAtual !== 'todos' && t.status !== filtroStatusAtual) return false;
                 if (tipo && t.tipo !== tipo) return false;
                 if (categoria && t.categoria !== categoria) return false;
-                if (search && !t.titulo.toLowerCase().includes(search) && !t.descrição?.toLowerCase().includes(search)) return false;
+                if (search && !t.titulo.toLowerCase().includes(search) && !t.descricao?.toLowerCase().includes(search)) return false;
                 return true;
             });
             
@@ -650,7 +650,7 @@
                     <div class="treinamento-card">
                         <div class="treinamento-header ${t.tipo}">
                             <span class="treinamento-tipo">${t.tipo}</span>
-                            <h3 class="treinamento-titulo">${t.titulo}</h3>
+                            <h3 class="treinamento-título">${t.titulo}</h3>
                             <div class="treinamento-categoria"><i class="fas fa-tag"></i> ${t.categoria || 'Sem categoria'}</div>
                         </div>
                         <div class="treinamento-body">
@@ -706,7 +706,7 @@
             const map = {
                 'agendado': 'Agendado',
                 'em_andamento': 'Em Andamento',
-                'concluido': 'Concludo',
+                'concluido': 'Concluído',
                 'cancelado': 'Cancelado'
             };
             return map[status] || status;
@@ -727,8 +727,8 @@
                     const t = await response.json();
                     
                     document.getElementById('treinamentoId').value = t.id;
-                    document.getElementById('titulo').value = t.titulo;
-                    document.getElementById('descricao').value = t.descricao || t.descrição || '';
+                    document.getElementById('título').value = t.titulo;
+                    document.getElementById('descrição').value = t.descricao || t.descricao || '';
                     document.getElementById('tipo').value = t.tipo;
                     document.getElementById('categoria').value = t.categoria || '';
                     document.getElementById('cargaHoraria').value = t.carga_horaria || 0;
@@ -757,8 +757,8 @@
             const id = document.getElementById('treinamentoId').value;
             
             const dados = {
-                titulo: document.getElementById('titulo').value,
-                descricao: document.getElementById('descricao').value,
+                título: document.getElementById('título').value,
+                descrição: document.getElementById('descrição').value,
                 tipo: document.getElementById('tipo').value,
                 categoria: document.getElementById('categoria').value,
                 carga_horaria: parseInt(document.getElementById('cargaHoraria').value) || 0,
@@ -773,7 +773,7 @@
             };
             
             if (!dados.titulo || !dados.data_inicio) {
-                showToast('Preencha o Título e data de incio', 'warning');
+                showToast('Preencha o título e a data de início', 'warning');
                 return;
             }
             
@@ -803,7 +803,7 @@
                 if (response.ok) {
                     const t = await response.json();
                     
-                    document.getElementById('detalhesTitulo').textContent = t.titulo;
+                    document.getElementById('detalhesTítulo').textContent = t.titulo;
                     
                     const dataInicio = t.data_inicio ? new Date(t.data_inicio).toLocaleDateString('pt-BR') : '-';
                     const dataFim = t.data_fim ? new Date(t.data_fim).toLocaleDateString('pt-BR') : '-';
@@ -842,11 +842,11 @@
                                 <p style="font-size: 16px; font-weight: 600;">${dataInicio} a ${dataFim}</p>
                             </div>
                             <div>
-                                <h4 style="font-size: 14px; color: #64748b; margin-bottom: 4px;">Horrio</h4>
-                                <p style="font-size: 16px; font-weight: 600;">${t.horario_inicio || '-'} s ${t.horario_fim || '-'}</p>
+                                <h4 style="font-size: 14px; color: #64748b; margin-bottom: 4px;">Horário</h4>
+                                <p style="font-size: 16px; font-weight: 600;">${t.horario_inicio || '-'} às ${t.horario_fim || '-'}</p>
                             </div>
                             <div>
-                                <h4 style="font-size: 14px; color: #64748b; margin-bottom: 4px;">Carga Horria</h4>
+                                <h4 style="font-size: 14px; color: #64748b; margin-bottom: 4px;">Carga Horária</h4>
                                 <p style="font-size: 16px; font-weight: 600;">${t.carga_horaria || 0} horas</p>
                             </div>
                             <div>
@@ -862,10 +862,10 @@
                                 <p style="font-size: 16px; font-weight: 600;">${t.local_treinamento || '-'}</p>
                             </div>
                         </div>
-                        ${t.descrição ? `
+                        ${t.descricao ? `
                             <div style="margin-top: 20px;">
                                 <h4 style="font-size: 14px; color: #64748b; margin-bottom: 8px;">Descrição</h4>
-                                <p style="background: #f8fafc; padding: 16px; border-radius: 10px;">${t.descrição}</p>
+                                <p style="background: #f8fafc; padding: 16px; border-radius: 10px;">${t.descricao}</p>
                             </div>
                         ` : ''}
                         ${inscritosHtml}

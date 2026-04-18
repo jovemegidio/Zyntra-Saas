@@ -31,8 +31,8 @@
         <input type="text" class="form-control" id="codigoProduto" required>
       </div>
       <div class="mb-3">
-        <label for="descricao" class="form-label">Descrição do Produto</label>
-        <input type="text" class="form-control" id="descricao">
+        <label for="descrição" class="form-label">Descrição do Produto</label>
+        <input type="text" class="form-control" id="descrição">
       </div>
       <div class="mb-3">
         <label class="form-label">Componentes</label>
@@ -64,7 +64,7 @@
           <input type="text" class="form-control" placeholder="Código" onchange="componentes[${idx}].codigoComponente = this.value">
         </div>
         <div class="col-md-3">
-          <input type="text" class="form-control" placeholder="Descrição" onchange="componentes[${idx}].descricao = this.value">
+          <input type="text" class="form-control" placeholder="Descrição" onchange="componentes[${idx}].descrição = this.value">
         </div>
         <div class="col-md-2">
           <input type="number" class="form-control" placeholder="Qtd" min="0.01" step="0.01" onchange="componentes[${idx}].quantidade = parseFloat(this.value)">
@@ -85,7 +85,7 @@
     document.getElementById('bomForm').onsubmit = async function(e) {
       e.preventDefault();
       const codigoProduto = document.getElementById('codigoProduto').value.trim();
-      const descricao = document.getElementById('descricao').value.trim();
+      const descrição = document.getElementById('descrição').value.trim();
       const comps = componentes.filter(c => c && c.codigoComponente && c.quantidade);
       if (!codigoProduto || comps.length === 0) {
         mostrarAlerta('Preencha o código do produto e ao menos um componente válido.', 'danger');
@@ -94,7 +94,7 @@
       const resp = await fetch('/api/pcp/mrp/bom', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ codigoProduto, descricao, componentes: comps })
+        body: JSON.stringify({ codigoProduto, descrição, componentes: comps })
       });
       const data = await resp.json();
       if (data.success) {
@@ -108,12 +108,12 @@
     };
     document.getElementById('consultaForm').onsubmit = async function(e) {
       e.preventDefault();
-      const codigo = document.getElementById('consultaCodigo').value.trim();
-      if (!codigo) return;
-      const resp = await fetch(`/api/pcp/mrp/bom/${codigo}`);
+      const código = document.getElementById('consultaCodigo').value.trim();
+      if (!código) return;
+      const resp = await fetch(`/api/pcp/mrp/bom/${código}`);
       const data = await resp.json();
       if (data.success) {
-        let html = `<h4>BOM de ${data.bom.codigoProduto} - ${data.bom.descricao || ''}</h4><ul class="list-group">`;
+        let html = `<h4>BOM de ${data.bom.codigoProduto} - ${data.bom.descrição || ''}</h4><ul class="list-group">`;
         for (const c of data.bom.componentes) {
           html += `<li class="list-group-item">${c.codigo_componente} - ${c.descricao_componente || ''} | Qtd: ${c.quantidade} ${c.unidade}</li>`;
         }

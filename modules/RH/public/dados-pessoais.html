@@ -90,14 +90,14 @@
             padding: 32px;
         }
         
-        .funcionário-info-grid {
+        .funcionario-info-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 24px;
             margin-top: 24px;
         }
         
-        .funcionário-info-item {
+        .funcionario-info-item {
             background: var(--rh-light);
             padding: 24px;
             border-radius: var(--rh-radius);
@@ -107,7 +107,7 @@
             overflow: hidden;
         }
 
-        .funcionário-info-item::before {
+        .funcionario-info-item::before {
             content: '';
             position: absolute;
             top: 0;
@@ -117,13 +117,13 @@
             background: linear-gradient(90deg, var(--rh-primary) 0%, var(--rh-primary-dark) 100%);
         }
 
-        .funcionário-info-item:hover {
+        .funcionario-info-item:hover {
             transform: translateY(-2px);
             box-shadow: var(--rh-shadow-lg);
             border-color: var(--rh-primary);
         }
         
-        .funcionário-info-label {
+        .funcionario-info-label {
             font-size: 0.75rem;
             font-weight: 700;
             color: var(--rh-secondary);
@@ -135,7 +135,7 @@
             gap: 6px;
         }
 
-        .funcionário-info-label::before {
+        .funcionario-info-label::before {
             content: '';
             width: 3px;
             height: 3px;
@@ -143,7 +143,7 @@
             border-radius: 50%;
         }
         
-        .funcionário-info-value {
+        .funcionario-info-value {
             font-size: 1.1rem;
             font-weight: 600;
             color: #1e293b;
@@ -186,7 +186,7 @@
 
         /* Responsividade aprimorada */
         @media (max-width: 1200px) {
-            .funcionário-info-grid {
+            .funcionario-info-grid {
                 grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
                 gap: 20px;
             }
@@ -201,12 +201,12 @@
                 padding: 20px;
             }
 
-            .funcionário-info-grid {
+            .funcionario-info-grid {
                 grid-template-columns: 1fr;
                 gap: 16px;
             }
 
-            .funcionário-info-item {
+            .funcionario-info-item {
                 padding: 20px;
             }
 
@@ -222,7 +222,7 @@
         }
 
         /* Estados de loading */
-        .funcionário-info-value:empty::after {
+        .funcionario-info-value:empty::after {
             content: 'Carregando...';
             color: var(--rh-secondary);
             font-style: italic;
@@ -392,7 +392,7 @@
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel de Controle"><i class="fas fa-home"></i></a>
             <nav class="sidebar-nav">
                 <a href="areaadm.html" class="sidebar-btn" title="Dashboard RH"><i class="fas fa-chart-pie"></i></a>
-                <a href="pages/funcionarios.html" class="sidebar-btn" title="FUNCIONÁRIOS"><i class="fas fa-users"></i></a>
+                <a href="pages/funcionários.html" class="sidebar-btn" title="FUNCIONÁRIOS"><i class="fas fa-users"></i></a>
                 <a href="gestao-holerites.html" class="sidebar-btn" title="Gestão de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="pages/folha.html" class="sidebar-btn" title="Folha de Pagamento"><i class="fas fa-money-check-alt"></i></a>
                 <a href="pages/gestao-ponto.html" class="sidebar-btn" title="Gestão do Ponto"><i class="fas fa-clock"></i></a>
@@ -401,7 +401,7 @@
                 <a href="pages/calendario-rh.html" class="sidebar-btn" title="Calendário RH"><i class="fas fa-calendar-alt"></i></a>
             </nav>
             <div class="sidebar-bottom">
-                <a href="funcionario.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-user"></i></a>
+                <a href="funcionário.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-user"></i></a>
             </div>
         </aside>
 
@@ -432,62 +432,62 @@
                     <div class="panel">
                         <h2><i class="fas fa-user"></i> Meus Dados Pessoais</h2>
                         <div class="panel-body">
-                            <div class="funcionario-info-grid">
-                                <div class="funcionario-info-item">
-                                    <div class="funcionario-info-label">Nome Completo</div>
-                                    <div class="funcionario-info-value" id="dados-nome">Joo Silva Santos</div>
+                            <div class="funcionário-info-grid">
+                                <div class="funcionário-info-item">
+                                    <div class="funcionário-info-label">Nome Completo</div>
+                                    <div class="funcionário-info-value" id="dados-nome">Joo Silva Santos</div>
                                 </div>
-                                <div class="funcionario-info-item">
-                                    <div class="funcionario-info-label">CPF</div>
-                                    <div class="funcionario-info-value" id="dados-cpf">123.456.789-10</div>
+                                <div class="funcionário-info-item">
+                                    <div class="funcionário-info-label">CPF</div>
+                                    <div class="funcionário-info-value" id="dados-cpf">123.456.789-10</div>
                                 </div>
-                                <div class="funcionario-info-item">
-                                    <div class="funcionario-info-label">RG</div>
-                                    <div class="funcionario-info-value" id="dados-rg">12.345.678-9</div>
+                                <div class="funcionário-info-item">
+                                    <div class="funcionário-info-label">RG</div>
+                                    <div class="funcionário-info-value" id="dados-rg">12.345.678-9</div>
                                 </div>
-                                <div class="funcionario-info-item">
-                                    <div class="funcionario-info-label">Data de Nascimento</div>
-                                    <div class="funcionario-info-value" id="dados-nascimento">15/03/1990</div>
+                                <div class="funcionário-info-item">
+                                    <div class="funcionário-info-label">Data de Nascimento</div>
+                                    <div class="funcionário-info-value" id="dados-nascimento">15/03/1990</div>
                                 </div>
-                                <div class="funcionario-info-item">
-                                    <div class="funcionario-info-label">Email</div>
-                                    <div class="funcionario-info-value" id="dados-email">joao.silva@aluforce.com</div>
+                                <div class="funcionário-info-item">
+                                    <div class="funcionário-info-label">Email</div>
+                                    <div class="funcionário-info-value" id="dados-email">joao.silva@aluforce.com</div>
                                 </div>
-                                <div class="funcionario-info-item">
-                                    <div class="funcionario-info-label">Telefone</div>
-                                    <div class="funcionario-info-value" id="dados-telefone">(11) 99999-9999</div>
+                                <div class="funcionário-info-item">
+                                    <div class="funcionário-info-label">Telefone</div>
+                                    <div class="funcionário-info-value" id="dados-telefone">(11) 99999-9999</div>
                                 </div>
-                                <div class="funcionario-info-item">
-                                    <div class="funcionario-info-label">Endereço</div>
-                                    <div class="funcionario-info-value" id="dados-endereco">Rua das Flores, 123 - Centro</div>
+                                <div class="funcionário-info-item">
+                                    <div class="funcionário-info-label">Endereço</div>
+                                    <div class="funcionário-info-value" id="dados-endereco">Rua das Flores, 123 - Centro</div>
                                 </div>
-                                <div class="funcionario-info-item">
-                                    <div class="funcionario-info-label">CEP</div>
-                                    <div class="funcionario-info-value" id="dados-cep">01234-567</div>
+                                <div class="funcionário-info-item">
+                                    <div class="funcionário-info-label">CEP</div>
+                                    <div class="funcionário-info-value" id="dados-cep">01234-567</div>
                                 </div>
-                                <div class="funcionario-info-item">
-                                    <div class="funcionario-info-label">Cidade</div>
-                                    <div class="funcionario-info-value" id="dados-cidade">São Paulo - SP</div>
+                                <div class="funcionário-info-item">
+                                    <div class="funcionário-info-label">Cidade</div>
+                                    <div class="funcionário-info-value" id="dados-cidade">São Paulo - SP</div>
                                 </div>
-                                <div class="funcionario-info-item">
-                                    <div class="funcionario-info-label">Estado Civil</div>
-                                    <div class="funcionario-info-value" id="dados-estado-civil">Solteiro(a)</div>
+                                <div class="funcionário-info-item">
+                                    <div class="funcionário-info-label">Estado Civil</div>
+                                    <div class="funcionário-info-value" id="dados-estado-civil">Solteiro(a)</div>
                                 </div>
-                                <div class="funcionario-info-item">
-                                    <div class="funcionario-info-label">Cargo</div>
-                                    <div class="funcionario-info-value" id="dados-cargo">Carregando...</div>
+                                <div class="funcionário-info-item">
+                                    <div class="funcionário-info-label">Cargo</div>
+                                    <div class="funcionário-info-value" id="dados-cargo">Carregando...</div>
                                 </div>
-                                <div class="funcionario-info-item">
-                                    <div class="funcionario-info-label">Departamento</div>
-                                    <div class="funcionario-info-value" id="dados-departamento">Carregando...</div>
+                                <div class="funcionário-info-item">
+                                    <div class="funcionário-info-label">Departamento</div>
+                                    <div class="funcionário-info-value" id="dados-departamento">Carregando...</div>
                                 </div>
-                                <div class="funcionario-info-item">
-                                    <div class="funcionario-info-label">Data de Admissão</div>
-                                    <div class="funcionario-info-value" id="dados-admissao">Carregando...</div>
+                                <div class="funcionário-info-item">
+                                    <div class="funcionário-info-label">Data de Admissão</div>
+                                    <div class="funcionário-info-value" id="dados-admissao">Carregando...</div>
                                 </div>
-                                <div class="funcionario-info-item">
-                                    <div class="funcionario-info-label">Registro</div>
-                                    <div class="funcionario-info-value" id="dados-registro">Carregando...</div>
+                                <div class="funcionário-info-item">
+                                    <div class="funcionário-info-label">Registro</div>
+                                    <div class="funcionário-info-value" id="dados-registro">Carregando...</div>
                                 </div>
                             </div>
                             <button class="editar-dados-btn" onclick="editarDados()">

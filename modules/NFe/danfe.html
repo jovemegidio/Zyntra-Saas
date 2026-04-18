@@ -428,9 +428,9 @@
                 <a href="index.html" class="sidebar-btn" title="Dashboard"><i class="fas fa-chart-pie"></i></a>
                 <a href="consultar.html" class="sidebar-btn" title="Consultar NFe"><i class="fas fa-search"></i></a>
                 <a href="nfse.html" class="sidebar-btn" title="NFSe Serviços"><i class="fas fa-file-contract"></i></a>
-                <a href="relatorios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
+                <a href="relatórios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
                 <a href="eventos.html" class="sidebar-btn" title="Eventos"><i class="fas fa-history"></i></a>
-                <a href="inutilizacao.html" class="sidebar-btn" title="Inutilização"><i class="fas fa-ban"></i></a>
+                <a href="inutilização.html" class="sidebar-btn" title="Inutilização"><i class="fas fa-ban"></i></a>
                 <a href="regua.html" class="sidebar-btn" title="Régua Cobrança"><i class="fas fa-bell"></i></a>
                 <a href="pix.html" class="sidebar-btn" title="PIX"><i class="fas fa-qrcode"></i></a>
                 <a href="logistica.html" class="sidebar-btn" title="Logística & Expedição"><i class="fas fa-truck"></i></a>
@@ -478,7 +478,7 @@
                                     <input type="text" id="chaveAcesso" class="form-control" placeholder="Informe a chave de acesso (44 dígitos)" maxlength="44">
                                 </div>
                                 <div class="form-group">
-                                    <label for="numeroNFe">Número da NFe</label>
+                                    <label for="númeroNFe">Número da NFe</label>
                                     <input type="text" id="numeroNFe" class="form-control" placeholder="Número">
                                 </div>
                                 <div class="form-group">
@@ -553,7 +553,7 @@
             overlay.classList.toggle('active');
         }
 
-        function toggleNotificacoes() {
+        function toggleNotificações() {
             const panel = document.getElementById('notification-panel');
             if (panel) panel.classList.toggle('active');
         }
@@ -664,10 +664,10 @@
         // ===== BUSCAR NFE =====
         async function buscarNFe() {
             const chave = document.getElementById('chaveAcesso').value.trim();
-            const numero = document.getElementById('numeroNFe').value.trim();
+            const número = document.getElementById('númeroNFe').value.trim();
             const serie = document.getElementById('serieNFe').value.trim();
 
-            if (!chave && !numero) {
+            if (!chave && !número) {
                 showAlert('Informe a chave de acesso ou o número da NFe.', 'warning');
                 return;
             }
@@ -681,7 +681,7 @@
                 if (chave) {
                     url = `/api/nfe/${encodeURIComponent(chave)}`;
                 } else {
-                    url = `/api/nfe/buscar?numero=${encodeURIComponent(número)}&serie=${encodeURIComponent(serie)}`;
+                    url = `/api/nfe/buscar?número=${encodeURIComponent(número)}&serie=${encodeURIComponent(serie)}`;
                 }
 
                 const response = await fetch(url, { credentials: 'include' });
@@ -792,15 +792,15 @@
             const telefone = prompt('Informe o número do WhatsApp (com DDD):');
             if (!telefone || !telefone.trim()) return;
 
-            const numero = telefone.replace(/\D/g, '');
+            const número = telefone.replace(/\D/g, '');
             const chave = nfeData.chaveAcesso || nfeData.chave || nfeData.chNFe || '';
-            const nfNumero = nfeData.numero || nfeData.nNF || '';
+            const nfNúmero = nfeData.numero || nfeData.nNF || '';
             const empresa = (nfeData.emitente || nfeData.emit || {}).razaoSocial || 'Aluforce';
 
             const mensagem = encodeURIComponent(
                 `?? *DANFE - Nota Fiscal Eletrônica*\n\n` +
                 `Empresa: ${empresa}\n` +
-                `NF-e Nº: ${nfNumero}\n` +
+                `NF-e Nº: ${nfNúmero}\n` +
                 `Chave: ${chave}\n\n` +
                 `Consulte em: https://www.nfe.fazenda.gov.br/portal/consultaRecaptcha.aspx`
             );
@@ -812,7 +812,7 @@
         // ===== LIMPAR BUSCA =====
         function limparBusca() {
             document.getElementById('chaveAcesso').value = '';
-            document.getElementById('numeroNFe').value = '';
+            document.getElementById('númeroNFe').value = '';
             document.getElementById('serieNFe').value = '';
             document.getElementById('formatoSection').classList.add('hidden-section');
             document.getElementById('previewSection').classList.add('hidden-section');
@@ -846,7 +846,7 @@
         }
 
         // ===== MODAL CONFIGURAÇÕES (STUB) =====
-        function abrirModalConfiguracoes() {
+        function abrirModalConfigurações() {
             showAlert('Módulo de configurações em desenvolvimento.', 'info');
         }
 

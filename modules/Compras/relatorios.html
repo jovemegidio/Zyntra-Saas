@@ -52,8 +52,8 @@
         .rc-fornecedores .report-icon { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
         .rc-estoque::before { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
         .rc-estoque .report-icon { background: linear-gradient(135deg, #f59e0b, #d97706); }
-        .rc-movimentacoes::before { background: linear-gradient(90deg, #10b981, #34d399); }
-        .rc-movimentacoes .report-icon { background: linear-gradient(135deg, #10b981, #059669); }
+        .rc-movimentações::before { background: linear-gradient(90deg, #10b981, #34d399); }
+        .rc-movimentações .report-icon { background: linear-gradient(135deg, #10b981, #059669); }
         .rc-criticos::before { background: linear-gradient(90deg, #ef4444, #f87171); }
         .rc-criticos .report-icon { background: linear-gradient(135deg, #ef4444, #dc2626); }
         .rc-cota��es::before { background: linear-gradient(90deg, #06b6d4, #22d3ee); }
@@ -73,9 +73,9 @@
         .toast.info { background: var(--info-500); }
     </style>
     <script>
-        function toggleNotificacoes() { const p = document.getElementById('notification-panel'); if (p) p.classList.toggle('active'); }
+        function toggleNotificações() { const p = document.getElementById('notification-panel'); if (p) p.classList.toggle('active'); }
         function marcarTodasLidas() {}
-        function limparNotificacoes() {}
+        function limparNotificações() {}
     </script>
     <script src="/js/anti-copy-protection.js" defer></script>
     <!-- Chat Widget BOB AI -->
@@ -165,7 +165,7 @@
 
                 <!-- Report Cards -->
                 <div class="reports-grid">
-                    <div class="report-card rc-pedidos" onclick="RelatoriosCompras.abrirModalRelatorio('pedidos')">
+                    <div class="report-card rc-pedidos" onclick="RelatóriosCompras.abrirModalRelatório('pedidos')">
                         <span class="pdf-badge">PDF</span>
                         <div class="report-card-header">
                             <div class="report-icon"><i class="fas fa-shopping-cart"></i></div>
@@ -174,7 +174,7 @@
                         <p>Hist�rico completo de pedidos de compra com valores, fornecedores e status.</p>
                         <span class="report-action"><i class="fas fa-file-pdf"></i> Exportar PDF</span>
                     </div>
-                    <div class="report-card rc-fornecedores" onclick="RelatoriosCompras.abrirModalRelatorio('fornecedores')">
+                    <div class="report-card rc-fornecedores" onclick="RelatóriosCompras.abrirModalRelatório('fornecedores')">
                         <span class="pdf-badge">PDF</span>
                         <div class="report-card-header">
                             <div class="report-icon"><i class="fas fa-users"></i></div>
@@ -183,7 +183,7 @@
                         <p>Cadastro de fornecedores, avalia��es, categorias e dados de contato.</p>
                         <span class="report-action"><i class="fas fa-file-pdf"></i> Exportar PDF</span>
                     </div>
-                    <div class="report-card rc-estoque" onclick="RelatoriosCompras.abrirModalRelatorio('estoque')">
+                    <div class="report-card rc-estoque" onclick="RelatóriosCompras.abrirModalRelatório('estoque')">
                         <span class="pdf-badge">PDF</span>
                         <div class="report-card-header">
                             <div class="report-icon"><i class="fas fa-boxes"></i></div>
@@ -192,7 +192,7 @@
                         <p>Posi��o de estoque, materiais cr�ticos, custos e n�veis de reposi��o.</p>
                         <span class="report-action"><i class="fas fa-file-pdf"></i> Exportar PDF</span>
                     </div>
-                    <div class="report-card rc-movimentacoes" onclick="RelatoriosCompras.abrirModalRelatorio('movimentacoes')">
+                    <div class="report-card rc-movimentações" onclick="RelatóriosCompras.abrirModalRelatório('movimentações')">
                         <span class="pdf-badge">PDF</span>
                         <div class="report-card-header">
                             <div class="report-icon"><i class="fas fa-exchange-alt"></i></div>
@@ -201,7 +201,7 @@
                         <p>Entradas, sa�das e ajustes de estoque por per�odo com rastreabilidade.</p>
                         <span class="report-action"><i class="fas fa-file-pdf"></i> Exportar PDF</span>
                     </div>
-                    <div class="report-card rc-criticos" onclick="RelatoriosCompras.abrirModalRelatorio('criticos')">
+                    <div class="report-card rc-criticos" onclick="RelatóriosCompras.abrirModalRelatório('criticos')">
                         <span class="pdf-badge">PDF</span>
                         <div class="report-card-header">
                             <div class="report-icon"><i class="fas fa-exclamation-triangle"></i></div>
@@ -210,7 +210,7 @@
                         <p>Materiais abaixo do estoque m�nimo que necessitam de reposi��o urgente.</p>
                         <span class="report-action"><i class="fas fa-file-pdf"></i> Exportar PDF</span>
                     </div>
-                    <div class="report-card rc-cota��es" onclick="RelatoriosCompras.abrirModalRelatorio('cota��es')">
+                    <div class="report-card rc-cota��es" onclick="RelatóriosCompras.abrirModalRelatório('cota��es')">
                         <span class="pdf-badge">PDF</span>
                         <div class="report-card-header">
                             <div class="report-icon"><i class="fas fa-file-invoice-dollar"></i></div>
@@ -230,7 +230,7 @@
                 <div class="card-body" style="padding:0;">
                     <table class="data-table" id="tabela-pedidos">
                         <thead>
-                            <tr><th>N</th><th>Fornecedor</th><th>Valor</th><th>Status</th></tr>
+                            <tr><th>Nº</th><th>Fornecedor</th><th>Valor</th><th>Status</th></tr>
                         </thead>
                         <tbody id="tbody-pedidos">
                             <tr><td colspan="4" style="text-align:center; padding:var(--space-6); color:var(--gray-400);"><i class="fas fa-spinner fa-spin"></i></td></tr>
@@ -361,16 +361,16 @@
 
         configurarBotoes() { /* Report cards use onclick directly */ },
 
-        abrirModalRelatorio(tipo) {
-            const configs = this.getConfigRelatorio(tipo);
+        abrirModalRelatório(tipo) {
+            const configs = this.getConfigRelatório(tipo);
             // Remove existing
-            document.getElementById('modal-relatorio')?.remove();
+            document.getElementById('modal-relatório')?.remove();
             const html = `
-            <div class="modal-overlay active" id="modal-relatorio" onclick="if(event.target===this) RelatoriosCompras.fecharModal();">
+            <div class="modal-overlay active" id="modal-relatorio" onclick="if(event.target===this) RelatóriosCompras.fecharModal();">
                 <div class="modal" style="max-width:500px;">
                     <div class="modal-header">
                         <h3><i class="${configs.icon}"></i> ${configs.t�tulo}</h3>
-                        <button class="modal-close" onclick="RelatoriosCompras.fecharModal()">&times;</button>
+                        <button class="modal-close" onclick="RelatóriosCompras.fecharModal()">&times;</button>
                     </div>
                     <div class="modal-body">
                         <p style="font-size:0.85rem; color:var(--gray-600); margin-bottom:var(--space-4);">${configs.descri��o}</p>
@@ -389,8 +389,8 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button class="btn btn-secondary" onclick="RelatoriosCompras.fecharModal()">Cancelar</button>
-                        <button class="btn btn-primary" onclick="RelatoriosCompras.gerarRelatorio('${tipo}')"><i class="fas fa-file-pdf"></i> Gerar PDF</button>
+                        <button class="btn btn-secondary" onclick="RelatóriosCompras.fecharModal()">Cancelar</button>
+                        <button class="btn btn-primary" onclick="RelatóriosCompras.gerarRelatório('${tipo}')"><i class="fas fa-file-pdf"></i> Gerar PDF</button>
                     </div>
                 </div>
             </div>`;
@@ -402,23 +402,23 @@
             document.getElementById('data-inicio').value = inicio.toISOString().split('T')[0];
         },
 
-        getConfigRelatorio(tipo) {
+        getConfigRelatório(tipo) {
             const configs = {
                 pedidos: { t�tulo: 'Relat�rio de Pedidos', descri��o: 'Exportar hist�rico de pedidos de compra com valores, fornecedores e status.', icon: 'fas fa-shopping-cart' },
-                fornecedores: { titulo: 'Relat�rio de Fornecedores', descri��o: 'Exportar cadastro de fornecedores com contatos, categorias e avalia��es.', icon: 'fas fa-users' },
-                estoque: { titulo: 'Relat�rio de Estoque', descri��o: 'Exportar posi��o atual de estoque com custos e n�veis de reposi��o.', icon: 'fas fa-boxes' },
-                movimentacoes: { titulo: 'Movimenta��es de Estoque', descri��o: 'Exportar entradas, sa�das e ajustes de estoque por per�odo.', icon: 'fas fa-exchange-alt' },
-                criticos: { titulo: 'Materiais Cr�ticos', descri��o: 'Exportar materiais abaixo do estoque m�nimo que precisam de reposi��o.', icon: 'fas fa-exclamation-triangle' },
-                cota��es: { titulo: 'Relat�rio de Cota��es', descri��o: 'Exportar an�lise comparativa de cota��es e economia obtida.', icon: 'fas fa-file-invoice-dollar' }
+                fornecedores: { título: 'Relat�rio de Fornecedores', descri��o: 'Exportar cadastro de fornecedores com contatos, categorias e avalia��es.', icon: 'fas fa-users' },
+                estoque: { título: 'Relat�rio de Estoque', descri��o: 'Exportar posi��o atual de estoque com custos e n�veis de reposi��o.', icon: 'fas fa-boxes' },
+                movimentações: { título: 'Movimenta��es de Estoque', descri��o: 'Exportar entradas, sa�das e ajustes de estoque por per�odo.', icon: 'fas fa-exchange-alt' },
+                criticos: { título: 'Materiais Cr�ticos', descri��o: 'Exportar materiais abaixo do estoque m�nimo que precisam de reposi��o.', icon: 'fas fa-exclamation-triangle' },
+                cota��es: { título: 'Relat�rio de Cota��es', descri��o: 'Exportar an�lise comparativa de cota��es e economia obtida.', icon: 'fas fa-file-invoice-dollar' }
             };
             return configs[tipo] || configs.pedidos;
         },
 
         fecharModal() {
-            document.getElementById('modal-relatorio')?.remove();
+            document.getElementById('modal-relatório')?.remove();
         },
 
-        async gerarRelatorio(tipo) {
+        async gerarRelatório(tipo) {
             const dataInicio = document.getElementById('data-inicio')?.value || '';
             const dataFim = document.getElementById('data-fim')?.value || '';
             this.fecharModal();
@@ -452,9 +452,9 @@
                         if (r.ok) { const d = await r.json(); return d.materiais || d.data || d || []; }
                         break;
                     }
-                    case 'movimentacoes': {
+                    case 'movimentações': {
                         const r = await fetch('/api/compras/estoque/movimentacoes', { headers });
-                        if (r.ok) { const d = await r.json(); return d.movimentacoes || d.data || d || []; }
+                        if (r.ok) { const d = await r.json(); return d.movimentações || d.data || d || []; }
                         const r2 = await fetch('/api/pcp/materias-primas', { headers });
                         if (r2.ok) { const d = await r2.json(); return d.materiais || d.data || d || []; }
                         break;
@@ -503,7 +503,7 @@
                     resumo = { 'Total Materiais': arr.length, 'Qtd. Total Estoque': Math.round(totalEst), 'Valor em Estoque': this.formatarMoeda(totalCusto), 'Abaixo do M�nimo': arr.filter(m => (m.quantidade_estoque||m.estoque_atual||m.quantidade||0) <= (m.estoque_minimo||m.minimo||0) && (m.estoque_minimo||m.minimo||0) > 0).length };
                     rows = arr.map(m => { const a = m.quantidade_estoque||m.estoque_atual||m.quantidade||0; const mn = m.estoque_minimo||m.minimo||0; const cr = mn>0 && a<=mn; return `<tr><td class="font-bold">${m.codigo_material||m.c�digo||'-'}</td><td>${m.descri��o||m.nome||'-'}</td><td>${m.tipo||'-'}</td><td class="text-center">${m.unidade_medida||m.unidade||'-'}</td><td class="text-right font-bold" style="${cr?'color:#dc2626;':''}">${a}</td><td class="text-right">${mn}</td><td class="text-right">${this.formatarMoeda(m.custo_unitario)}</td><td><span class="badge badge-${cr?'danger':'success'}">${cr?'Cr�tico':'Normal'}</span></td></tr>`; });
                     break;
-                case 'movimentacoes':
+                case 'movimentações':
                     headers = ['Data', 'Material', 'Tipo', 'Quantidade', 'Respons�vel', 'Observa��o'];
                     resumo = { 'Total Movimenta��es': arr.length, 'Entradas': arr.filter(m => m.tipo==='entrada').length, 'Sa�das': arr.filter(m => m.tipo==='saida').length };
                     rows = arr.map(m => `<tr><td>${this.formatarData(m.data||m.created_at)}</td><td class="font-bold">${m.material||m.descri��o||'-'}</td><td><span class="badge badge-${m.tipo==='entrada'?'success':'warning'}">${m.tipo==='entrada'?'Entrada':'Sa�da'}</span></td><td class="text-right font-bold">${m.quantidade||0}</td><td>${m.responsavel||m.usu�rio||'-'}</td><td>${m.observa��o||'-'}</td></tr>`);
@@ -534,7 +534,7 @@
         },
 
         async exportarPDF(tipo, dataInicio, dataFim) {
-            const config = this.getConfigRelatorio(tipo);
+            const config = this.getConfigRelatório(tipo);
             const dados = await this.fetchReportData(tipo);
             const { headers, rows, resumo } = this.formatReportData(tipo, dados);
             const win = window.open('', '_blank');
@@ -680,7 +680,7 @@ ${this.gerarResumoPDF(resumo)}
     <script src="/_shared/confirm-dialog.js?v=20260301"></script>
 
     <!-- Chat Widget BOB AI -->
-    <script src="/chat/widget.js?v=20260416" defer></script>
+    <script src="/chat/widget.js?v=20260418" defer></script>
 
     <!-- Enterprise Shared -->
     <script src="/js/sidebar-click-animation.js?v=20260301"></script>

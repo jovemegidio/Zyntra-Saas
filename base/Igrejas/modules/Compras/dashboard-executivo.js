@@ -1,4 +1,4 @@
-﻿// ========================================
+// ========================================
 // DASHBOARD EXECUTIVO
 // KPIs em Tempo Real e Análise Estratégica
 // ========================================
@@ -27,10 +27,8 @@ class DashboardExecutivoManager {
     async carregarDados() {
         try {
             // Buscar dados reais da API
-            const token = localStorage.getItem('token');
             const response = await fetch('/api/compras/dashboard', {
-                credentials: 'include',
-                headers: { 'Authorization': token ? `Bearer ${token}` : '' }
+                credentials: 'include'
             });
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             const apiData = await response.json();

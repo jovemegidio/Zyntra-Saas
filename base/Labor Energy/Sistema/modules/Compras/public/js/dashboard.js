@@ -1,5 +1,5 @@
-﻿/**
- * ZYNTRA - Dashboard Compras
+/**
+ * ALUFORCE - Dashboard Compras
  * Dashboard profissional para módulo de Compras
  */
 
@@ -231,9 +231,8 @@ function renderDashboard() {
 
 async function loadDashboardData() {
     try {
-        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
         const response = await fetch('/api/compras/dashboard', {
-            headers: { 'Authorization': `Bearer ${token}` }
+            credentials: 'include'
         });
 
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -273,15 +272,12 @@ async function loadRecentCotacoes() {
 
     let cotacoes = [];
     try {
-        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
         const response = await fetch('/api/compras/cotacoes', {
-            headers: { 'Authorization': `Bearer ${token}` }
+            credentials: 'include'
         });
         if (response.ok) {
             const data = await response.json();
             cotacoes = (data.cotacoes || data || []).slice(0, 5);
-        } else {
-            console.warn('Erro HTTP ao carregar cotações:', response.status);
         }
     } catch (error) {
         console.error('Erro ao carregar cotações:', error);

@@ -325,9 +325,9 @@
             <div class="modal-header-institucional">
                 <div class="modal-header-icon"><i class="fas fa-exchange-alt"></i></div>
                 <div class="modal-header-info"><h3 class="modal-title">Nova Movimentação</h3><p class="modal-subtitle">Registre uma entrada ou saída</p></div>
-                <button class="close-modal-inst" onclick="fecharModalMovimentacao()">×</button>
+                <button class="close-modal-inst" onclick="fecharModalMovimentação()">×</button>
             </div>
-            <form id="form-movimentacao" onsubmit="salvarMovimentacao(event)">
+            <form id="form-movimentacao" onsubmit="salvarMovimentação(event)">
                 <input type="hidden" id="mov-conta-id">
                 <div class="form-body">
                     <div class="form-row">
@@ -347,7 +347,7 @@
                     <div class="form-group"><label><i class="fas fa-calendar"></i> Data *</label><input type="date" class="form-input" id="mov-data" required></div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn-cancel" onclick="fecharModalMovimentacao()"><i class="fas fa-times"></i> Cancelar</button>
+                    <button type="button" class="btn-cancel" onclick="fecharModalMovimentação()"><i class="fas fa-times"></i> Cancelar</button>
                     <button type="submit" class="btn-save" style="background:linear-gradient(135deg,#059669,#10b981);"><i class="fas fa-check"></i> Registrar</button>
                 </div>
             </form>
@@ -438,7 +438,7 @@
                 </div>
             </div>
             <div class="view-footer">
-                <button class="bank-btn mov" onclick="abrirMovimentacaoFromView()"><i class="fas fa-plus-circle"></i> Movimentação</button>
+                <button class="bank-btn mov" onclick="abrirMovimentaçãoFromView()"><i class="fas fa-plus-circle"></i> Movimentação</button>
                 <button class="bank-btn extrato" onclick="abrirExtratoFromView()"><i class="fas fa-list"></i> Extrato</button>
                 <button class="bank-btn edit" onclick="editarContaFromView()"><i class="fas fa-edit"></i> Editar</button>
             </div>
@@ -450,18 +450,18 @@
         function esc(s) { return String(s || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
 
         function toggleMobileSidebar() { document.getElementById('mobile-sidebar')?.classList.toggle('mobile-open'); document.getElementById('sidebar-overlay')?.classList.toggle('active'); }
-        function toggleNotificacoes() { if (typeof window.NotificationsManager !== 'undefined') window.NotificationsManager.togglePanel(); }
+        function toggleNotificações() { if (typeof window.NotificationsManager !== 'undefined') window.NotificationsManager.togglePanel(); }
 
         let contasBancarias = [];
-        let extratoMovimentacoes = [];
+        let extratoMovimentações = [];
         let contaVisualizando = null;
 
         const bankLogos = { '001': 'bancodobrasil.png', '237': 'bradesco.png', '104': 'caixa-economica.png', '341': 'itaú.png', '033': 'santander.png', '260': 'nubank.png', '077': 'inter.png' };
         const bankNames = { '001': 'Banco do Brasil', '237': 'Bradesco', '104': 'Caixa Econômica', '341': 'Itaú', '033': 'Santander', '260': 'Nubank', '077': 'Inter' };
         const tipoNames = { 'corrente': 'Conta Corrente', 'poupanca': 'Poupança', 'investimento': 'Investimento', 'pagamento': 'Conta Pagamento' };
 
-        function getBankLogoHtml(codigo, size = 42) {
-            const logo = bankLogos[codigo];
+        function getBankLogoHtml(código, size = 42) {
+            const logo = bankLogos[código];
             if (logo) return `<img src="../bancos-vetores/${logo}" class="bank-logo" style="width:${size}px;height:${size}px;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="bank-logo-placeholder" style="width:${size}px;height:${size}px;display:none;"><i class="fas fa-university"></i></div>`;
             return `<div class="bank-logo-placeholder" style="width:${size}px;height:${size}px;"><i class="fas fa-university"></i></div>`;
         }
@@ -494,7 +494,7 @@
 
         async function carregarContas() {
             try {
-                const r = await fetch('/api/financeiro/contas-bancarias', { credentials: 'include' });
+                const r = await fetch('/api/financeiro/contas-bancárias', { credentials: 'include' });
                 if (r.ok) { const rawBancos = await r.json(); const arrBancos = rawBancos?.data || rawBancos; contasBancarias = Array.isArray(arrBancos) ? arrBancos : []; renderizarContas(); atualizarResumo(); }
             } catch(e) { console.error(e); document.getElementById('bank-cards-grid').innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i><p>Erro ao carregar contas</p></div>'; }
         }
@@ -530,7 +530,7 @@
                     </div>
                     <div class="bank-card-actions">
                         <button class="bank-btn view" onclick="abrirModalVisualizar(${c.id})"><i class="fas fa-eye"></i> Ver</button>
-                        <button class="bank-btn mov" onclick="abrirModalMovimentacao(${c.id})"><i class="fas fa-plus-circle"></i> Mov.</button>
+                        <button class="bank-btn mov" onclick="abrirModalMovimentação(${c.id})"><i class="fas fa-plus-circle"></i> Mov.</button>
                         <button class="bank-btn extrato" onclick="abrirModalExtrato(${c.id})"><i class="fas fa-list"></i> Extrato</button>
                         <button class="bank-btn edit" onclick="editarConta(${c.id})"><i class="fas fa-edit"></i></button>
                         <button class="bank-btn delete" onclick="excluirConta(${c.id})"><i class="fas fa-trash"></i></button>
@@ -544,18 +544,18 @@
             document.getElementById('modal-conta').classList.add('active');
             document.getElementById('form-conta').reset();
             document.getElementById('conta-id').value = '';
-            document.getElementById('modal-conta-titulo').textContent = 'Nova Conta Bancária';
+            document.getElementById('modal-conta-título').textContent = 'Nova Conta Bancária';
             if (id) {
                 const c = contasBancarias.find(x => x.id === id); if (!c) return;
-                document.getElementById('modal-conta-titulo').textContent = 'Editar Conta Bancária';
+                document.getElementById('modal-conta-título').textContent = 'Editar Conta Bancária';
                 document.getElementById('conta-id').value = c.id;
                 document.getElementById('nome-conta').value = c.nome;
                 document.getElementById('banco').value = c.banco_codigo || c.codigo_banco || '';
                 document.getElementById('tipo-conta').value = c.tipo || 'corrente';
                 document.getElementById('agencia').value = c.agencia || '';
-                document.getElementById('numero-conta').value = c.numero_conta || '';
+                document.getElementById('número-conta').value = c.numero_conta || '';
                 document.getElementById('saldo-inicial').value = c.saldo || 0;
-                document.getElementById('observacoes').value = c.observacoes || '';
+                document.getElementById('observações').value = c.observações || '';
             }
         }
         function fecharModalConta() { document.getElementById('modal-conta').classList.remove('active'); }
@@ -564,9 +564,9 @@
         async function salvarConta(event) {
             event.preventDefault();
             const id = document.getElementById('conta-id').value;
-            const dados = { nome: document.getElementById('nome-conta').value, banco: document.getElementById('banco').value, tipo: document.getElementById('tipo-conta').value, agencia: document.getElementById('agencia').value, numero_conta: document.getElementById('numero-conta').value, saldo: parseFloat(document.getElementById('saldo-inicial').value) || 0, observacoes: document.getElementById('observacoes').value };
+            const dados = { nome: document.getElementById('nome-conta').value, banco: document.getElementById('banco').value, tipo: document.getElementById('tipo-conta').value, agencia: document.getElementById('agencia').value, numero_conta: document.getElementById('número-conta').value, saldo: parseFloat(document.getElementById('saldo-inicial').value) || 0, observações: document.getElementById('observações').value };
             try {
-                const url = id ? `/api/financeiro/contas-bancarias/${id}` : '/api/financeiro/contas-bancarias';
+                const url = id ? `/api/financeiro/contas-bancárias/${id}` : '/api/financeiro/contas-bancárias';
                 const r = await fetch(url, { method: id ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(dados) });
                 if (r.ok) { alert('Conta salva com sucesso!'); fecharModalConta(); await init(); } else { alert('Erro ao salvar conta'); }
             } catch(e) { console.error(e); alert('Erro ao salvar conta'); }
@@ -575,26 +575,26 @@
         async function excluirConta(id) {
             if (!confirm('Excluir esta conta bancária?')) return;
             try {
-                const r = await fetch(`/api/financeiro/contas-bancarias/${id}`, { method: 'DELETE', credentials: 'include' });
+                const r = await fetch(`/api/financeiro/contas-bancárias/${id}`, { method: 'DELETE', credentials: 'include' });
                 if (r.ok) { alert('Conta excluída!'); await init(); } else { alert('Erro ao excluir'); }
             } catch(e) { alert('Erro ao excluir'); }
         }
 
-        // ===== MODAL MOVIMENTAÇÃO =====
-        function abrirModalMovimentacao(contaId) {
+        // ===== MODAL MOVIMENTAÇÁO =====
+        function abrirModalMovimentação(contaId) {
             document.getElementById('modal-movimentacao').classList.add('active');
             document.getElementById('form-movimentacao').reset();
             document.getElementById('mov-conta-id').value = contaId;
             document.getElementById('mov-data').value = new Date().toISOString().split('T')[0];
         }
-        function fecharModalMovimentacao() { document.getElementById('modal-movimentacao').classList.remove('active'); }
+        function fecharModalMovimentação() { document.getElementById('modal-movimentacao').classList.remove('active'); }
 
-        async function salvarMovimentacao(event) {
+        async function salvarMovimentação(event) {
             event.preventDefault();
-            const dados = { conta_id: document.getElementById('mov-conta-id').value, tipo: document.getElementById('mov-tipo').value, valor: parseFloat(document.getElementById('mov-valor').value), descricao: document.getElementById('mov-descricao').value, data: document.getElementById('mov-data').value };
+            const dados = { conta_id: document.getElementById('mov-conta-id').value, tipo: document.getElementById('mov-tipo').value, valor: parseFloat(document.getElementById('mov-valor').value), descrição: document.getElementById('mov-descrição').value, data: document.getElementById('mov-data').value };
             try {
-                const r = await fetch('/api/financeiro/movimentacoes-bancarias', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(dados) });
-                if (r.ok) { alert('Movimentação registrada!'); fecharModalMovimentacao(); await init(); } else { alert('Erro ao registrar'); }
+                const r = await fetch('/api/financeiro/movimentacoes-bancárias', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(dados) });
+                if (r.ok) { alert('Movimentação registrada!'); fecharModalMovimentação(); await init(); } else { alert('Erro ao registrar'); }
             } catch(e) { alert('Erro ao registrar'); }
         }
 
@@ -602,7 +602,7 @@
         function abrirModalExtrato(contaId) {
             const c = contasBancarias.find(x => x.id === contaId); if (!c) return;
             contaVisualizando = c;
-            document.getElementById('extrato-titulo').textContent = `Extrato — ${c.nome}`;
+            document.getElementById('extrato-título').textContent = `Extrato — ${c.nome}`;
             const hoje = new Date();
             const inicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
             document.getElementById('extrato-data-inicio').value = inicio.toISOString().split('T')[0];
@@ -617,8 +617,8 @@
             const inicio = document.getElementById('extrato-data-inicio').value;
             const fim = document.getElementById('extrato-data-fim').value;
             try {
-                const r = await fetch(`/api/financeiro/movimentacoes-bancarias?conta_id=${contaId}&inicio=${inicio}&fim=${fim}`, { credentials: 'include' });
-                if (r.ok) { const rawExtrato = await r.json(); const arrExtrato = rawExtrato?.data || rawExtrato; extratoMovimentacoes = Array.isArray(arrExtrato) ? arrExtrato : []; renderizarExtrato(); }
+                const r = await fetch(`/api/financeiro/movimentacoes-bancárias?conta_id=${contaId}&inicio=${inicio}&fim=${fim}`, { credentials: 'include' });
+                if (r.ok) { const rawExtrato = await r.json(); const arrExtrato = rawExtrato?.data || rawExtrato; extratoMovimentações = Array.isArray(arrExtrato) ? arrExtrato : []; renderizarExtrato(); }
             } catch(e) { console.error(e); }
         }
 
@@ -628,7 +628,7 @@
 
         function renderizarExtrato() {
             const tipo = document.getElementById('extrato-tipo').value;
-            let dados = [...extratoMovimentacoes];
+            let dados = [...extratoMovimentações];
             if (tipo) dados = dados.filter(m => m.tipo === tipo);
             const lista = document.getElementById('extrato-lista');
             if (dados.length === 0) { lista.innerHTML = '<p style="text-align:center;color:var(--gray-400);padding:40px;">Nenhuma movimentação encontrada</p>'; } else {
@@ -647,7 +647,7 @@
             const inicio = document.getElementById('extrato-data-inicio').value;
             const fim = document.getElementById('extrato-data-fim').value;
             const escHtml = (v) => String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-            const rows = extratoMovimentacoes.map(m => {
+            const rows = extratoMovimentações.map(m => {
                 const tipo = m.tipo === 'entrada' ? 'entrada' : 'saida';
                 const sinal = tipo === 'entrada' ? '+' : '-';
                 const valor = (parseFloat(m.valor) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
@@ -681,11 +681,11 @@
             const destinoId = document.getElementById('transf-conta-destino').value;
             const valor = parseFloat(document.getElementById('transf-valor').value);
             const data = document.getElementById('transf-data').value;
-            const desc = document.getElementById('transf-descricao').value || 'Transferência entre contas';
+            const desc = document.getElementById('transf-descrição').value || 'Transferência entre contas';
             if (origemId === destinoId) { alert('Selecione contas diferentes'); return; }
             try {
-                const r1 = await fetch('/api/financeiro/movimentacoes-bancarias', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ conta_id: origemId, tipo: 'saida', valor, descricao: `${desc} (Saída)`, data }) });
-                const r2 = await fetch('/api/financeiro/movimentacoes-bancarias', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ conta_id: destinoId, tipo: 'entrada', valor, descricao: `${desc} (Entrada)`, data }) });
+                const r1 = await fetch('/api/financeiro/movimentacoes-bancárias', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ conta_id: origemId, tipo: 'saida', valor, descrição: `${desc} (Saída)`, data }) });
+                const r2 = await fetch('/api/financeiro/movimentacoes-bancárias', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ conta_id: destinoId, tipo: 'entrada', valor, descrição: `${desc} (Entrada)`, data }) });
                 if (r1.ok && r2.ok) { alert('Transferência realizada!'); fecharModalTransferencia(); await init(); } else { alert('Erro na transferência'); }
             } catch(e) { alert('Erro na transferência'); }
         }
@@ -701,13 +701,13 @@
             document.getElementById('view-banco').textContent = bankNames[c.banco_codigo || c.codigo_banco] || c.banco_nome || '-';
             document.getElementById('view-tipo').textContent = tipoNames[c.tipo] || c.tipo || '-';
             document.getElementById('view-agencia').textContent = c.agencia || '-';
-            document.getElementById('view-numero').textContent = c.numero_conta || '-';
+            document.getElementById('view-número').textContent = c.numero_conta || '-';
             document.getElementById('view-status').textContent = c.status === 'inativa' ? 'Inativa' : 'Ativa';
-            document.getElementById('view-obs').textContent = c.observacoes || 'Nenhuma observação';
+            document.getElementById('view-obs').textContent = c.observações || 'Nenhuma observação';
             document.getElementById('modal-visualizar').classList.add('active');
         }
         function fecharModalVisualizar() { document.getElementById('modal-visualizar').classList.remove('active'); }
-        function abrirMovimentacaoFromView() { if(contaVisualizando){fecharModalVisualizar();abrirModalMovimentacao(contaVisualizando.id);}}
+        function abrirMovimentaçãoFromView() { if(contaVisualizando){fecharModalVisualizar();abrirModalMovimentação(contaVisualizando.id);}}
         function abrirExtratoFromView() { if(contaVisualizando){fecharModalVisualizar();abrirModalExtrato(contaVisualizando.id);}}
         function editarContaFromView() { if(contaVisualizando){fecharModalVisualizar();editarConta(contaVisualizando.id);}}
 
