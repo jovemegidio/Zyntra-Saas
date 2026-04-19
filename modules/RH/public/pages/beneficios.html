@@ -511,6 +511,7 @@
 
         // Helper: Obtém headers de Autenticação
         function getApiHeaders(json = false) {
+            const h = {};
             if (json) h['Content-Type'] = 'application/json';
             return h;
         }
@@ -1052,7 +1053,7 @@
         // Verificar elegibilidade da Cesta Básica (sem atrasos/saídas > 20 min)
         async function verificarElegibilidadeCestaBasica() {
             try {
-                const headers = { 'Authorization': token ? `Bearer ${token}` : '' };
+                const headers = getApiHeaders();
 
                 // Buscar dados do Usuário logado
                 const meResp = await fetch('/api/me', { headers, credentials: 'include' });

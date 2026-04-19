@@ -1307,7 +1307,7 @@
                         let funcionárioDetalhado = funcionárioData;
                         if (funcionárioData.id) {
                             try {
-                                const detalheResponse = await fetch(`/api/rh/funcionarios/${funcionarioData.id}`, {
+                                const detalheResponse = await fetch(`/api/rh/funcionarios/${funcionárioData.id}`, {
                                     credentials: 'include'
                                 });
                                 if (detalheResponse.ok) {
@@ -1352,21 +1352,23 @@
         }
 
         function preencherDadosBasicos(user) {
-            const nomeEl = document.getElementById('funcionário-nome-completo');
+            const nomeEl = document.getElementById('funcionario-nome-completo');
             if (nomeEl) nomeEl.textContent = user.nome || user.apelido || 'Usuário';
 
             setValor('dado-nome', user.nome || user.apelido);
             setValor('dado-email', user.email);
 
-            document.getElementById('funcionário-cargo-dept').textContent = 'Dados completos no encontrados';
-            document.getElementById('funcionário-status').textContent = 'N/A';
+            const cargoDeptEl = document.getElementById('funcionario-cargo-dept');
+            if (cargoDeptEl) cargoDeptEl.textContent = 'Dados completos não encontrados';
+            const statusBasicoEl = document.getElementById('funcionario-status');
+            if (statusBasicoEl) statusBasicoEl.textContent = 'N/A';
         }
 
         function preencherDados(f) {
             funcionárioData = f;
 
-            const fotoEl = document.getElementById('funcionário-foto');
-            const iniciaisEl = document.getElementById('funcionário-iniciais');
+            const fotoEl = document.getElementById('funcionario-foto');
+            const iniciaisEl = document.getElementById('funcionario-iniciais');
 
             // Tentar obter foto do funcionário (mesma lgica usaída no card de funcionários)
             let fotoUrl = f.foto_perfil_url || f.foto_thumb_url || null;
@@ -1400,14 +1402,18 @@
                 if (fotoEl) fotoEl.style.display = 'none';
             }
 
-            document.getElementById('funcionário-nome-completo').textContent = f.nome_completo || '-';
-            document.getElementById('funcionário-cargo-dept').textContent =
-                `${f.cargo || 'Cargo no definido'} - ${f.departamento || 'Departamento no definido'}`;
+            const nomeCompEl = document.getElementById('funcionario-nome-completo');
+            if (nomeCompEl) nomeCompEl.textContent = f.nome_completo || '-';
+            const cargoDeptEl2 = document.getElementById('funcionario-cargo-dept');
+            if (cargoDeptEl2) cargoDeptEl2.textContent =
+                `${f.cargo || 'Cargo não definido'} - ${f.departamento || 'Departamento não definido'}`;
 
-            const statusEl = document.getElementById('funcionário-status');
+            const statusEl = document.getElementById('funcionario-status');
             const status = f.status || 'Ativo';
-            statusEl.textContent = status.toUpperCase();
-            statusEl.className = 'employee-status status-' + status.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            if (statusEl) {
+                statusEl.textContent = status.toUpperCase();
+                statusEl.className = 'employee-status status-' + status.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            }
 
             setValor('dado-nome', f.nome_completo);
             const cpfRaw = f.cpf || '';
