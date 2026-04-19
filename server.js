@@ -1372,8 +1372,11 @@ const finRootAliases = {
     'contas-receber': 'contas_receber',
     'contas-bancarias': 'contas_bancarias',
     'fluxo-caixa': 'fluxo_caixa',
-    'plano-contas': 'plano_contas'
+    'plano-contas': 'plano_contas',
+    'relatorios': 'relatorios'
 };
+// Alias singular /relatorio → redireciona para /relatorios
+app.get('/relatorio', (req, res) => res.redirect(301, '/relatorios'));
 Object.entries(finRootAliases).forEach(([alias, file]) => {
     app.get(`/${alias}`, (req, res, next) => {
         req.params = { 0: `${file}.html` };
