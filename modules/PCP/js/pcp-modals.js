@@ -1955,9 +1955,9 @@ function abrirModalMovimentacao(tipo, produto) {
     }
     
     // Reset form
-    document.getElementById('modal-mov-quantidade').value = '';
-    document.getElementById('modal-mov-observacao').value = '';
-    document.getElementById('modal-mov-documento').value = '';
+    const _qty = document.getElementById('modal-mov-quantidade'); if (_qty) _qty.value = '';
+    const _obs = document.getElementById('modal-mov-observacao'); if (_obs) _obs.value = '';
+    const _doc = document.getElementById('modal-mov-documento'); if (_doc) _doc.value = '';
     const motivoPreset = document.getElementById('modal-mov-motivo-preset');
     if (motivoPreset) motivoPreset.value = '';
     // Reset color selector

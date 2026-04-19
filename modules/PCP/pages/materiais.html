@@ -420,15 +420,15 @@
 
         function buscarMateriais() { renderizarMateriais(); }
         function exportarMateriais() { exportarParaExcel(materiaisData, 'materiais'); }
-        function abrirEntradaRapidaMaterial() { abrirModalMovimentaçãoMaterial('entrada'); }
-        function abrirSaidaRapidaMaterial() { abrirModalMovimentaçãoMaterial('saida'); }
-        function abrirAjusteInventarioMaterial() { abrirModalMovimentaçãoMaterial('ajuste'); }
+        function abrirEntradaRapidaMaterial() { abrirModalMovimentacaoMaterial('entrada'); }
+        function abrirSaidaRapidaMaterial() { abrirModalMovimentacaoMaterial('saida'); }
+        function abrirAjusteInventarioMaterial() { abrirModalMovimentacaoMaterial('ajuste'); }
         function verHistóricoMaterial() { showToast('Histórico em desenvolvimento', 'info'); }
 
         document.getElementById('search-materiais').addEventListener('keypress', e => { if (e.key === 'Enter') buscarMateriais(); });
 
         document.addEventListener('DOMContentLoaded', function() {
-            atualizarSaudação();
+            atualizarSaudacao();
             carregarMateriais();
 
             // Carregar modais via fetch

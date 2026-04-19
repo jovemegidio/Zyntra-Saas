@@ -1737,9 +1737,9 @@
 
         function buscarProdutos() { renderizarProdutos(); }
         function exportarProdutos() { exportarParaExcel(produtosData, 'produtos_estoque'); }
-        function abrirEntradaRapida() { abrirModalMovimentação('entrada'); }
-        function abrirSaidaRapida() { abrirModalMovimentação('saida'); }
-        function abrirAjusteInventario() { abrirModalMovimentação('ajuste'); }
+        function abrirEntradaRapida() { abrirModalMovimentacao('entrada'); }
+        function abrirSaidaRapida() { abrirModalMovimentacao('saida'); }
+        function abrirAjusteInventario() { abrirModalMovimentacao('ajuste'); }
         function verHistórico() {
             // Toggle na seção de histórico se o modal estiver aberto
             if (produtoAtual) {
@@ -1967,15 +1967,15 @@
 
         function registrarEntradaView() {
             fecharModalVisualização();
-            if (produtoAtual && typeof abrirModalMovimentação === 'function') {
-                abrirModalMovimentação('entrada', produtoAtual);
+            if (produtoAtual && typeof abrirModalMovimentacao === 'function') {
+                abrirModalMovimentacao('entrada', produtoAtual);
             }
         }
 
         function registrarSaidaView() {
             fecharModalVisualização();
-            if (produtoAtual && typeof abrirModalMovimentação === 'function') {
-                abrirModalMovimentação('saida', produtoAtual);
+            if (produtoAtual && typeof abrirModalMovimentacao === 'function') {
+                abrirModalMovimentacao('saida', produtoAtual);
             }
         }
 
@@ -2541,8 +2541,8 @@ var qrDataMap = {`;
         function registrarEntradaProduto() { registrarEntradaView(); }
         function registrarSaidaProduto() { registrarSaidaView(); }
         function ajustarEstoqueProduto() {
-            if (produtoAtual && typeof abrirModalMovimentação === 'function') {
-                abrirModalMovimentação('ajuste', produtoAtual);
+            if (produtoAtual && typeof abrirModalMovimentacao === 'function') {
+                abrirModalMovimentacao('ajuste', produtoAtual);
             }
         }
         function transferirEstoque() { showToast('Transferência em desenvolvimento', 'info'); }
@@ -2566,7 +2566,7 @@ var qrDataMap = {`;
         function abrirModalMovProduto(produtoId, tipo) {
             const produto = produtosData.find(p => p.id === produtoId);
             if (!produto) return;
-            abrirModalMovimentação(tipo, produto);
+            abrirModalMovimentacao(tipo, produto);
         }
 
         // Download Template de Estoque
@@ -2754,7 +2754,7 @@ var qrDataMap = {`;
         });
 
         document.addEventListener('DOMContentLoaded', function() {
-            atualizarSaudação();
+            atualizarSaudacao();
             carregarProdutos();
 
             // Carregar modais via fetch
