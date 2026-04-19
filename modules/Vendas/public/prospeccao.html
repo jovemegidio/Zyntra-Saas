@@ -1692,7 +1692,7 @@ Aceita com ou sem formatação"></textarea>
         renderLeadCard(lead) {
             const segmentoClass = lead.segmento || 'default';
             const inicial = (lead.nome_fantasia || lead.razao_social || 'E')[0].toUpperCase();
-            const score = lead.score_prospeccao || 50;
+            const score = this.calcularScore(lead);
             
             return `
                 <div class="lead-card" draggable="true" data-id="${lead.id}" data-status="${lead.status || 'novo'}">
@@ -1737,7 +1737,7 @@ Aceita com ou sem formatação"></textarea>
             }
 
             tbody.innerHTML = this.leads.map(lead => {
-                const score = lead.score_prospeccao || 50;
+                const score = this.calcularScore(lead);
                 const scoreClass = score >= 70 ? 'high' : score >= 50 ? 'medium' : 'low';
                 
                 return `
@@ -1938,7 +1938,7 @@ Aceita com ou sem formatação"></textarea>
                 return;
             }
             tbody.innerHTML = leads.map(lead => {
-                const score = lead.score_prospeccao || 50;
+                const score = this.calcularScore(lead);
                 const scoreClass = score >= 70 ? 'high' : score >= 50 ? 'medium' : 'low';
                 return `
                     <tr>
@@ -2470,6 +2470,7 @@ Aceita com ou sem formatação"></textarea>
             const capitalFormatado = lead.capital_social ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(lead.capital_social) : '-';
             const dataAbertura = lead.data_abertura ? new Date(lead.data_abertura).toLocaleDateString('pt-BR') : '-';
             const idadeEmpresa = lead.data_abertura ? Math.floor((new Date() - new Date(lead.data_abertura)) / (365.25 * 24 * 60 * 60 * 1000)) : null;
+            const scoreCalc = this.calcularScore(lead);
             
             document.getElementById('modal-detalhes-body').innerHTML = `
                 <!-- Badges de Fontes -->
@@ -2548,13 +2549,13 @@ Aceita com ou sem formatação"></textarea>
                         </div>
                         
                         <div class="form-section-title"><i class="fas fa-chart-line"></i> Score de Prospecção</div>
-                        <div style="background: linear-gradient(135deg, #f8fafc 0%, ${(lead.score_prospeccao || 50) >= 70 ? '#f0fdf4' : '#fefce8'} 100%); border-radius: 12px; padding: 20px; text-align: center; border: 2px solid ${(lead.score_prospeccao || 50) >= 70 ? '#22c55e' : '#f59e0b'};">
-                            <div style="font-size: 56px; font-weight: 800; color: ${(lead.score_prospeccao || 50) >= 70 ? '#22c55e' : '#f59e0b'}; line-height: 1;">${lead.score_prospeccao || 50}<span style="font-size: 24px;">%</span></div>
+                        <div style="background: linear-gradient(135deg, #f8fafc 0%, ${scoreCalc >= 70 ? '#f0fdf4' : '#fefce8'} 100%); border-radius: 12px; padding: 20px; text-align: center; border: 2px solid ${scoreCalc >= 70 ? '#22c55e' : '#f59e0b'};">
+                            <div style="font-size: 56px; font-weight: 800; color: ${scoreCalc >= 70 ? '#22c55e' : '#f59e0b'}; line-height: 1;">${scoreCalc}<span style="font-size: 24px;">%</span></div>
                             <p style="color: #64748b; font-size: 13px; margin-top: 4px;">Probabilidade de conversão</p>
                             <div style="margin-top: 12px; display: flex; justify-content: center; gap: 8px;">
-                                ${(lead.score_prospeccao || 50) >= 80 ? '<span style="background: #22c55e; color: white; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600;">HOT LEAD</span>' : ''}
-                                ${(lead.score_prospeccao || 50) >= 60 && (lead.score_prospeccao || 50) < 80 ? '<span style="background: #f59e0b; color: white; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600;">QUALIFICADO</span>' : ''}
-                                ${(lead.score_prospeccao || 50) < 60 ? '<span style="background: #94a3b8; color: white; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600;">NOVO</span>' : ''}
+                                ${scoreCalc >= 80 ? '<span style="background: #22c55e; color: white; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600;">HOT LEAD</span>' : ''}
+                                ${scoreCalc >= 60 && scoreCalc < 80 ? '<span style="background: #f59e0b; color: white; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600;">QUALIFICADO</span>' : ''}
+                                ${scoreCalc < 60 ? '<span style="background: #94a3b8; color: white; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600;">NOVO</span>' : ''}
                             </div>
                         </div>
                     </div>
@@ -2641,6 +2642,25 @@ Aceita com ou sem formatação"></textarea>
             }
         },
 
+        calcularScore(lead) {
+            if (lead.score_prospeccao) return lead.score_prospeccao;
+            let score = 0;
+            if (lead.razao_social) score += 5;
+            if (lead.nome_fantasia) score += 5;
+            if (lead.cnpj) score += 10;
+            if (lead.telefone) score += 10;
+            if (lead.email) score += 10;
+            if (lead.capital_social && lead.capital_social > 0) score += 10;
+            if (lead.data_abertura) score += 5;
+            if (lead.cidade || lead.uf) score += 5;
+            if (lead.cnae_codigo || lead.cnae_descricao) score += 5;
+            if (lead.situacao === 'ATIVA') score += 5;
+            const statusBonus = { novo: 0, contato: 10, qualificado: 15, 'negociação': 20, convertido: 25 };
+            score += statusBonus[lead.status] || 0;
+            if (lead.socios && lead.socios.length > 0) score += 5;
+            return Math.min(score, 100);
+        },
+
         abrirWhatsApp(telefone) {
             if (!telefone) return;
             const numero = telefone.replace(/\D/g, '');
@@ -2649,7 +2669,11 @@ Aceita com ou sem formatação"></textarea>
 
         abrirEmail(email) {
             if (!email) return;
-            window.location.href = `mailto:${email}`;
+            const lead = this.leadAtual;
+            const nome = lead ? (lead.nome_fantasia || lead.razao_social || '') : '';
+            const subject = encodeURIComponent(nome ? `Contato Comercial - ${nome}` : 'Contato Comercial');
+            const body = encodeURIComponent(nome ? `Olá,\n\nEntro em contato referente à empresa ${nome}.\n\nAtenciosamente.` : '');
+            window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
         },
 
         fecharModal(id) {
@@ -2823,7 +2847,7 @@ Aceita com ou sem formatação"></textarea>
 `;
             // Dados
             dadosExportar.forEach((l, i) => {
-                const score = l.score_prospeccao || 50;
+                const score = this.calcularScore(l);
                 const scoreStyle = score >= 70 ? 'scoreHigh' : score >= 50 ? 'scoreMed' : 'scoreLow';
                 const statusMap = { novo: 'statusNovo', contato: 'statusContato', qualificado: 'statusQualificado', negociação: 'statusNegociação', convertido: 'statusConvertido', perdido: 'statusPerdido' };
                 const stStyle = statusMap[l.status || 'novo'] || 'statusNovo';
