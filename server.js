@@ -1381,6 +1381,15 @@ Object.entries(finRootAliases).forEach(([alias, file]) => {
     });
 });
 
+// Vendas
+app.get('/Vendas/*.html', (req, res, next) => {
+    safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'Vendas', 'public'));
+});
+app.get('/Vendas/*', (req, res, next) => {
+    if (req.params[0].includes('.')) return next();
+    serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'Vendas', 'public'));
+});
+
 // Compras
 app.get('/Compras/*.html', (req, res, next) => {
     safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'Compras'));
