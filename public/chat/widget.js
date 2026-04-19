@@ -49,6 +49,9 @@
   }
 
   function init() {
+    // Se o HTML do widget não existe na página, não inicializar
+    if (!$('afw-fab')) return;
+
     // Detectar usuário logado
     detectLoggedUser();
 
@@ -241,6 +244,7 @@
 
   function updateBadge() {
     const badge = $('afw-fab-badge');
+    if (!badge) return;
     if (W.unreadCount > 0) {
       badge.textContent = W.unreadCount > 9 ? '9+' : W.unreadCount;
       badge.classList.remove('hidden');
@@ -868,7 +872,7 @@
 
     document.addEventListener('click', (e) => {
       const picker = $('afw-emoji-picker');
-      if (!picker.contains(e.target) && e.target !== $('afw-btn-emoji')) {
+      if (picker && !picker.contains(e.target) && e.target !== $('afw-btn-emoji')) {
         picker.classList.add('hidden');
       }
     });

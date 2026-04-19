@@ -519,7 +519,7 @@
                 <a href="pages/beneficios.html" class="sidebar-btn" title="Meus Benefícios"><i class="fas fa-gift"></i></a>
                 <a href="pages/espelho-ponto.html" class="sidebar-btn" title="Espelho de Ponto"><i class="fas fa-list-check"></i></a>
                 <a href="pages/enviar-atestado.html" class="sidebar-btn" title="Enviar Atestado"><i class="fas fa-file-medical"></i></a>
-                <a href="solicitações.html" class="sidebar-btn" title="Minhas Solicitações"><i class="fas fa-clipboard-list"></i></a>
+                <a href="solicitacoes.html" class="sidebar-btn" title="Minhas Solicitações"><i class="fas fa-clipboard-list"></i></a>
                 <a href="pages/manual-colaborador.html" class="sidebar-btn" title="Manual do Colaborador"><i class="fas fa-book"></i></a>
             </nav>
             <div class="sidebar-bottom">
@@ -613,7 +613,7 @@
                         <h3>Enviar Atestado</h3>
                         <p>Enviar documentos</p>
                     </a>
-                    <a href="solicitações.html" class="action-card">
+                    <a href="solicitacoes.html" class="action-card">
                         <div class="action-icon blue">
                             <i class="fas fa-envelope"></i>
                         </div>
@@ -1005,17 +1005,17 @@
         let _userHasRHAccess = null;
 
         async function carregarNotificacoes() {
-            const container = document.getElementById('notificações-container');
+            const container = document.getElementById('notificacoes-container');
             const badge = document.getElementById('notif-badge');
 
             try {
                 // Buscar funcionário logado
                 const meResponse = await fetch('/api/me', { credentials: 'include' });
-                let funcionárioId = null;
+                let funcionarioId = null;
                 let userData = null;
                 if (meResponse.ok) {
                     userData = await meResponse.json();
-                    funcionárioId = userData.funcionario_id || userData.id;
+                    funcionarioId = userData.funcionario_id || userData.id;
                 } else {
                     if (_notifInterval) { clearInterval(_notifInterval); _notifInterval = null; }
                     return;
