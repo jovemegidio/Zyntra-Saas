@@ -3704,7 +3704,7 @@
         }
 
         function _renderMovRows(items) {
-            const tbody = document.getElementById('movimentaçõesBody');
+            const tbody = document.getElementById('movimentacoesBody');
 
             if (items.length === 0) {
                 tbody.innerHTML = `
@@ -3750,7 +3750,7 @@
             const config = bancosConfig[banco.codigo] || { nome: banco.nome, classe: 'bb', sigla: '?' };
 
             // Preencher informações
-            document.getElementById('extratoTítulo').textContent = `Extrato - ${banco.apelido || config.nome}`;
+            document.getElementById('extratoTitulo').textContent = `Extrato - ${banco.apelido || config.nome}`;
 
             // Logo do banco com classe correta
             const logoEl = document.getElementById('extratoBancoLogo');
@@ -3763,7 +3763,7 @@
             document.getElementById('extratoEntradas').textContent = formatarMoeda(banco.entradas);
             document.getElementById('extratoSaidas').textContent = formatarMoeda(banco.saidas);
             document.getElementById('extratoSaldoInicial').textContent = formatarMoeda(banco.saldo_inicial);
-            document.getElementById('extratoCódigo').textContent = banco.codigo;
+            document.getElementById('extratoCodigo').textContent = banco.codigo;
             document.getElementById('extratoTipo').textContent = banco.tipo === 'corrente' ? 'Conta Corrente' : banco.tipo === 'poupanca' ? 'Poupana' : 'Investimento';
 
             // Status com classe apropriada
@@ -3774,7 +3774,7 @@
             document.getElementById('extratoCadastro').textContent = formatarData(banco.created_at);
 
             // Carregar movimentações do banco
-            const movDiv = document.getElementById('extratoMovimentações');
+            const movDiv = document.getElementById('extratoMovimentacoes');
             movDiv.innerHTML = '<div class="extrato-loading"><i class="fas fa-spinner fa-spin"></i><span>Carregando movimentações...</span></div>';
 
             document.getElementById('modalExtrato').classList.add('active');
@@ -3844,20 +3844,20 @@
         function abrirModalBanco(id = null) {
             document.getElementById('formBanco').reset();
             document.getElementById('bancoId').value = '';
-            document.getElementById('modalBancoTítulo').textContent = 'Nova Conta Bancária';
+            document.getElementById('modalBancoTitulo').textContent = 'Nova Conta Bancária';
             limparIntegração();
 
             if (id) {
                 const banco = bancos.find(b => b.id === id);
                 if (banco) {
                     document.getElementById('bancoId').value = banco.id;
-                    document.getElementById('bancoCódigo').value = banco.codigo;
+                    document.getElementById('bancoCodigo').value = banco.codigo;
                     document.getElementById('tipoConta').value = banco.tipo;
                     document.getElementById('agencia').value = banco.agencia;
                     document.getElementById('conta').value = banco.conta;
                     document.getElementById('apelido').value = banco.apelido || '';
-                    document.getElementById('observações').value = banco.observações || '';
-                    document.getElementById('modalBancoTítulo').textContent = 'Editar Conta Bancária';
+                    document.getElementById('observacoes').value = banco.observações || '';
+                    document.getElementById('modalBancoTitulo').textContent = 'Editar Conta Bancária';
                     // Carregar dados da integração bancária
                     carregarIntegraçãoBancaria(banco.id);
                     // Webhook URL com ID do banco
@@ -3909,7 +3909,7 @@
 
         async function salvarBanco() {
             const id = document.getElementById('bancoId').value;
-            const códigoSelect = document.getElementById('bancoCódigo');
+            const códigoSelect = document.getElementById('bancoCodigo');
             const código = códigoSelect.value;
             const nome = bancosConfig[código]?.nome || códigoSelect.options[códigoSelect.selectedIndex]?.text.split(' - ')[1] || '';
 
@@ -3926,14 +3926,14 @@
                 limite_credito: parseFloat(document.getElementById('limiteCredito')?.value?.replace(/[^\d,-]/g, '').replace(',', '.')) || 0,
                 conta_vinculada: document.getElementById('contaVinculada').value || null,
                 nao_considerar_resumo: document.getElementById('naoConsiderarResumo').checked,
-                observações: document.getElementById('observações').value || null,
+                observações: document.getElementById('observacoes').value || null,
                 // Dados da agência
                 gerente_conta: document.getElementById('gerenteConta')?.value || null,
                 email_gerente: document.getElementById('emailGerente')?.value || null,
                 ddd_agencia: document.getElementById('dddAgencia')?.value || null,
                 telefone_agencia: document.getElementById('telefoneAgencia')?.value || null,
                 endereco_agencia: document.getElementById('enderecoAgencia')?.value || null,
-                numero_agencia: document.getElementById('númeroAgencia')?.value || null,
+                numero_agencia: document.getElementById('numeroAgencia')?.value || null,
                 bairro_agencia: document.getElementById('bairroAgencia')?.value || null,
                 complemento_agencia: document.getElementById('complementoAgencia')?.value || null,
                 estado_agencia: document.getElementById('estadoAgencia')?.value || null,
@@ -3994,7 +3994,7 @@
             const destino = parseInt(document.getElementById('contaDestino').value);
             const valor = parseFloat(document.getElementById('valorTransferencia').value.replace(/[^\d,-]/g, '').replace(',', '.')) || 0;
             const data = document.getElementById('dataTransferencia').value;
-            const descrição = document.getElementById('descriçãoTransferencia').value;
+            const descrição = document.getElementById('descricaoTransferencia').value;
 
             if (!origem || !destino || origem === destino) {
                 showToast('warning', 'Atenão', 'Selecione contas diferentes para origem e destino.');
@@ -4039,7 +4039,7 @@
             const tipo = document.getElementById('tipoMovimento').value;
             const valor = parseFloat(document.getElementById('valorMovimento').value.replace(/[^\d,-]/g, '').replace(',', '.')) || 0;
             const data = document.getElementById('dataMovimento').value;
-            const descrição = document.getElementById('descriçãoMovimento').value;
+            const descrição = document.getElementById('descricaoMovimento').value;
             const categoria = document.getElementById('categoriaMovimento').value;
 
             if (!bancoId || valor <= 0 || !descrição) {
@@ -4143,14 +4143,14 @@
         };
 
         // Auto-preencher URLs ao selecionar provedor
-        document.getElementById('integraçãoProvedor')?.addEventListener('change', function() {
+        document.getElementById('integracaoProvedor')?.addEventListener('change', function() {
             const config = provedorConfigs[this.value];
             if (config) {
-                document.getElementById('integraçãoUrlBase').value = config.url;
-                document.getElementById('integraçãoUrlAuth').value = config.auth;
+                document.getElementById('integracaoUrlBase').value = config.url;
+                document.getElementById('integracaoUrlAuth').value = config.auth;
             }
             // Habilitar botão de teste
-            const btn = document.getElementById('btnTestarIntegração');
+            const btn = document.getElementById('btnTestarIntegracao');
             if (btn) btn.disabled = !this.value;
         });
 
@@ -4195,15 +4195,15 @@
 
         // Testar conexão com API bancária
         async function testarIntegraçãoBancaria() {
-            const btn = document.getElementById('btnTestarIntegração');
-            const statusCard = document.getElementById('integraçãoStatusCard');
-            const statusIcon = document.getElementById('integraçãoStatusIcon');
-            const statusTítulo = document.getElementById('integraçãoStatusTítulo');
-            const statusDesc = document.getElementById('integraçãoStatusDesc');
+            const btn = document.getElementById('btnTestarIntegracao');
+            const statusCard = document.getElementById('integracaoStatusCard');
+            const statusIcon = document.getElementById('integracaoStatusIcon');
+            const statusTítulo = document.getElementById('integracaoStatusTitulo');
+            const statusDesc = document.getElementById('integracaoStatusDesc');
 
-            const clientId = document.getElementById('integraçãoClientId').value.trim();
-            const clientSecret = document.getElementById('integraçãoClientSecret').value.trim();
-            const provedor = document.getElementById('integraçãoProvedor').value;
+            const clientId = document.getElementById('integracaoClientId').value.trim();
+            const clientSecret = document.getElementById('integracaoClientSecret').value.trim();
+            const provedor = document.getElementById('integracaoProvedor').value;
 
             if (!clientId || !clientSecret) {
                 showToast('Preencha o Client ID e Client Secret', 'warning');
@@ -4226,9 +4226,9 @@
                         provedor,
                         client_id: clientId,
                         client_secret: clientSecret,
-                        url_base: document.getElementById('integraçãoUrlBase').value,
-                        url_auth: document.getElementById('integraçãoUrlAuth').value,
-                        ambiente: document.getElementById('integraçãoAmbiente').value
+                        url_base: document.getElementById('integracaoUrlBase').value,
+                        url_auth: document.getElementById('integracaoUrlAuth').value,
+                        ambiente: document.getElementById('integracaoAmbiente').value
                     })
                 });
 
@@ -4275,13 +4275,13 @@
                 const data = await resp.json();
                 if (data.success && data.integracao) {
                     const i = data.integracao;
-                    document.getElementById('integraçãoProvedor').value = i.provedor || '';
-                    document.getElementById('integraçãoAmbiente').value = i.ambiente || 'sandbox';
-                    document.getElementById('integraçãoClientId').value = i.client_id || '';
-                    document.getElementById('integraçãoUrlBase').value = i.url_base || '';
-                    document.getElementById('integraçãoUrlAuth').value = i.url_auth || '';
-                    document.getElementById('integraçãoSyncAuto').checked = !!i.sync_automatico;
-                    document.getElementById('integraçãoWebhookAtivo').checked = !!i.webhook_ativo;
+                    document.getElementById('integracaoProvedor').value = i.provedor || '';
+                    document.getElementById('integracaoAmbiente').value = i.ambiente || 'sandbox';
+                    document.getElementById('integracaoClientId').value = i.client_id || '';
+                    document.getElementById('integracaoUrlBase').value = i.url_base || '';
+                    document.getElementById('integracaoUrlAuth').value = i.url_auth || '';
+                    document.getElementById('integracaoSyncAuto').checked = !!i.sync_automatico;
+                    document.getElementById('integracaoWebhookAtivo').checked = !!i.webhook_ativo;
                     
                     // Escopos
                     if (i.escopos) {
@@ -4299,9 +4299,9 @@
                     // Boletos
                     if (i.boleto_carteira) document.getElementById('boletoCarteira').value = i.boleto_carteira;
                     if (i.boleto_convenio) document.getElementById('boletoConvenio').value = i.boleto_convenio;
-                    if (i.boleto_variação) document.getElementById('boletoVariação').value = i.boleto_variação;
-                    if (i.boleto_nosso_numero_inicio) document.getElementById('boletoNossoNúmeroInicio').value = i.boleto_nosso_numero_inicio;
-                    if (i.boleto_nosso_numero_proximo) document.getElementById('boletoNossoNúmeroProximo').value = i.boleto_nosso_numero_proximo;
+                    if (i.boleto_variação) document.getElementById('boletoVariacao').value = i.boleto_variação;
+                    if (i.boleto_nosso_numero_inicio) document.getElementById('boletoNossoNumeroInicio').value = i.boleto_nosso_numero_inicio;
+                    if (i.boleto_nosso_numero_proximo) document.getElementById('boletoNossoNumeroProximo').value = i.boleto_nosso_numero_proximo;
                     if (i.boleto_instrucao1) document.getElementById('boletoInstrucao1').value = i.boleto_instrucao1;
                     if (i.boleto_instrucao2) document.getElementById('boletoInstrucao2').value = i.boleto_instrucao2;
                     if (i.boleto_multa) document.getElementById('boletoMulta').value = i.boleto_multa;
@@ -4318,10 +4318,10 @@
                     document.getElementById('cnabAutoProcessar').checked = !!i.cnab_auto_processar;
 
                     // Status
-                    const statusCard = document.getElementById('integraçãoStatusCard');
-                    const statusTítulo = document.getElementById('integraçãoStatusTítulo');
-                    const statusDesc = document.getElementById('integraçãoStatusDesc');
-                    const statusIcon = document.getElementById('integraçãoStatusIcon');
+                    const statusCard = document.getElementById('integracaoStatusCard');
+                    const statusTítulo = document.getElementById('integracaoStatusTitulo');
+                    const statusDesc = document.getElementById('integracaoStatusDesc');
+                    const statusIcon = document.getElementById('integracaoStatusIcon');
                     if (i.status === 'conectado') {
                         statusCard.className = 'integracao-status-card status-conectado';
                         statusIcon.innerHTML = '<i class="fas fa-check-circle"></i>';
@@ -4334,7 +4334,7 @@
                         `${window.location.origin}/api/financeiro/webhook/banco/${bancoId}`;
 
                     // Habilitar botão de teste
-                    const btn = document.getElementById('btnTestarIntegração');
+                    const btn = document.getElementById('btnTestarIntegracao');
                     if (btn) btn.disabled = false;
                 }
             } catch (err) {
@@ -4345,14 +4345,14 @@
         // Coletar dados de integração para salvar junto com o banco
         function coletarDadosIntegração() {
             return {
-                provedor: document.getElementById('integraçãoProvedor').value,
-                ambiente: document.getElementById('integraçãoAmbiente').value,
-                client_id: document.getElementById('integraçãoClientId').value.trim(),
-                client_secret: document.getElementById('integraçãoClientSecret').value.trim(),
-                url_base: document.getElementById('integraçãoUrlBase').value.trim(),
-                url_auth: document.getElementById('integraçãoUrlAuth').value.trim(),
-                sync_automatico: document.getElementById('integraçãoSyncAuto').checked,
-                webhook_ativo: document.getElementById('integraçãoWebhookAtivo').checked,
+                provedor: document.getElementById('integracaoProvedor').value,
+                ambiente: document.getElementById('integracaoAmbiente').value,
+                client_id: document.getElementById('integracaoClientId').value.trim(),
+                client_secret: document.getElementById('integracaoClientSecret').value.trim(),
+                url_base: document.getElementById('integracaoUrlBase').value.trim(),
+                url_auth: document.getElementById('integracaoUrlAuth').value.trim(),
+                sync_automatico: document.getElementById('integracaoSyncAuto').checked,
+                webhook_ativo: document.getElementById('integracaoWebhookAtivo').checked,
                 escopos: JSON.stringify({
                     extrato: document.getElementById('escopoExtrato').checked,
                     saldo: document.getElementById('escopoSaldo').checked,
@@ -4366,9 +4366,9 @@
                 // Boletos
                 boleto_carteira: document.getElementById('boletoCarteira').value,
                 boleto_convenio: document.getElementById('boletoConvenio').value,
-                boleto_variação: document.getElementById('boletoVariação').value,
-                boleto_nosso_numero_inicio: document.getElementById('boletoNossoNúmeroInicio').value,
-                boleto_nosso_numero_proximo: document.getElementById('boletoNossoNúmeroProximo').value,
+                boleto_variação: document.getElementById('boletoVariacao').value,
+                boleto_nosso_numero_inicio: document.getElementById('boletoNossoNumeroInicio').value,
+                boleto_nosso_numero_proximo: document.getElementById('boletoNossoNumeroProximo').value,
                 boleto_instrucao1: document.getElementById('boletoInstrucao1').value,
                 boleto_instrucao2: document.getElementById('boletoInstrucao2').value,
                 boleto_multa: document.getElementById('boletoMulta').value,
@@ -4387,21 +4387,21 @@
 
         // Limpar campos de integração ao fechar modal
         function limparIntegração() {
-            ['integraçãoProvedor', 'integraçãoClientId', 'integraçãoClientSecret', 
-             'integraçãoUrlBase', 'integraçãoUrlAuth', 'integraçãoCertSenha',
-             'boletoCarteira', 'boletoConvenio', 'boletoVariação',
-             'boletoNossoNúmeroInicio', 'boletoNossoNúmeroProximo',
+            ['integracaoProvedor', 'integracaoClientId', 'integracaoClientSecret', 
+             'integracaoUrlBase', 'integracaoUrlAuth', 'integraçãoCertSenha',
+             'boletoCarteira', 'boletoConvenio', 'boletoVariacao',
+             'boletoNossoNumeroInicio', 'boletoNossoNumeroProximo',
              'boletoInstrucao1', 'boletoInstrucao2', 'boletoMulta', 'boletoJuros', 'boletoProtesto',
              'cnabCodTransmissao', 'cnabSeqRemessa'
             ].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.value = '';
             });
-            document.getElementById('integraçãoAmbiente').value = 'sandbox';
+            document.getElementById('integracaoAmbiente').value = 'sandbox';
             document.getElementById('cnabLayout').value = '';
             document.getElementById('cnabServico').value = 'cobranca';
-            document.getElementById('integraçãoSyncAuto').checked = false;
-            document.getElementById('integraçãoWebhookAtivo').checked = false;
+            document.getElementById('integracaoSyncAuto').checked = false;
+            document.getElementById('integracaoWebhookAtivo').checked = false;
             document.getElementById('cnabAutoProcessar').checked = false;
             document.getElementById('boletoRegistrado').checked = true;
             document.getElementById('boletoPixQrcode').checked = false;
@@ -4417,11 +4417,11 @@
             document.getElementById('escopoCNAB').checked = false;
 
             // Reset status card
-            const statusCard = document.getElementById('integraçãoStatusCard');
+            const statusCard = document.getElementById('integracaoStatusCard');
             if (statusCard) statusCard.className = 'integracao-status-card';
-            document.getElementById('integraçãoStatusIcon').innerHTML = '<i class="fas fa-plug"></i>';
-            document.getElementById('integraçãoStatusTítulo').textContent = 'Integração não configurada';
-            document.getElementById('integraçãoStatusDesc').textContent = 'Configure as credenciais da API bancária para habilitar a integração automática';
+            document.getElementById('integracaoStatusIcon').innerHTML = '<i class="fas fa-plug"></i>';
+            document.getElementById('integracaoStatusTitulo').textContent = 'Integração não configurada';
+            document.getElementById('integracaoStatusDesc').textContent = 'Configure as credenciais da API bancária para habilitar a integração automática';
 
             // Reset cert upload
             document.getElementById('certFileName').textContent = 'Clique para enviar o certificado digital';
@@ -4429,7 +4429,7 @@
             document.getElementById('certFile').value = '';
 
             // Disable test button
-            const btn = document.getElementById('btnTestarIntegração');
+            const btn = document.getElementById('btnTestarIntegracao');
             if (btn) btn.disabled = true;
         }
 

@@ -984,12 +984,14 @@
 
   function toggleTheme() {
     const widget = $('aluforce-widget');
+    if (!widget) return;
     const isDark = widget.classList.contains('afw-dark');
     applyTheme(isDark ? 'light' : 'dark');
   }
 
   function applyTheme(theme) {
     const widget = $('aluforce-widget');
+    if (!widget) return;
     const iconBrand = $('afw-theme-icon');
     const iconChat = $('afw-theme-icon-chat');
     const iconSupport = $('afw-support-theme-icon');

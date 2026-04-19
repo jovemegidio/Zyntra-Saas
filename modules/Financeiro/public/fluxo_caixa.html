@@ -293,7 +293,7 @@
             const alertRec = document.getElementById('alert-recorrência');
             alertErro.style.display = 'none';
             alertRec.style.display = 'none';
-            document.getElementById('tabela-movimentações').innerHTML = '<tr><td colspan="6" style="text-align:center;padding:60px;color:var(--gray-400);"><i class="fas fa-spinner fa-spin" style="font-size:48px;margin-bottom:16px;display:block;"></i>Carregando...</td></tr>';
+            document.getElementById('tabela-movimentacoes').innerHTML = '<tr><td colspan="6" style="text-align:center;padding:60px;color:var(--gray-400);"><i class="fas fa-spinner fa-spin" style="font-size:48px;margin-bottom:16px;display:block;"></i>Carregando...</td></tr>';
             try {
                 const r = await fetch(`/api/financeiro/fluxo-caixa?inicio=${encodeURIComponent(inicio)}&fim=${encodeURIComponent(fim)}`, { credentials: 'include' });
                 if (r.status === 401) { window.location.href = '/login.html?expired=1'; return; }
@@ -330,7 +330,7 @@
             const saldoProjetado = saldoRealizado + entradasFut - saidasFut;
             document.getElementById('total-entradas').textContent = `R$ ${entradas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
             document.getElementById('total-saidas').textContent = `R$ ${saidas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
-            const saldoEl = document.getElementById('saldo-período');
+            const saldoEl = document.getElementById('saldo-periodo');
             saldoEl.textContent = `R$ ${saldoRealizado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
             saldoEl.style.color = saldoRealizado >= 0 ? '#3b82f6' : '#ef4444';
             const projEl = document.getElementById('saldo-projetado');
@@ -381,7 +381,7 @@
         }
 
         function renderizarTabela() {
-            const tbody = document.getElementById('tabela-movimentações');
+            const tbody = document.getElementById('tabela-movimentacoes');
             if (fluxoData.length === 0) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:60px;color:#9ca3af;"><i class="fas fa-inbox" style="font-size:48px;margin-bottom:16px;display:block;"></i>Nenhuma movimentação no período</td></tr>'; return; }
             let saldoAcum = 0;
             const sorted = [...fluxoData].sort((a, b) => new Date(a.data) - new Date(b.data));
