@@ -434,13 +434,13 @@ async function salvarPedido() {
     const fornecedorId = document.getElementById('fornecedorId').value;
 
     if (!fornecedorId) {
-        alert('Selecione um fornecedor!');
+        mostrarToast('Selecione um fornecedor!', 'error');
         return;
     }
 
     const itens = coletarItens();
     if (itens.length === 0) {
-        alert('Adicione pelo menos um item ao pedido!');
+        mostrarToast('Adicione pelo menos um item ao pedido!', 'error');
         return;
     }
 
@@ -969,7 +969,21 @@ function gerarNumeroPedido() {
 }
 
 function preencherSelectFornecedores() {
-    // Fornecedores loaded - autocomplete ready
+    // Preencher select com options de fornecedores
+    const select = document.getElementById('fornecedorId');
+    if (select) {
+        const valorAtual = select.value;
+        select.innerHTML = '<option value="">Selecione o fornecedor...</option>';
+        fornecedores.forEach(f => {
+            const nome = escapeHtml(f.razao_social || f.nome || f.nome_fantasia || '');
+            const opt = document.createElement('option');
+            opt.value = f.id;
+            opt.textContent = nome;
+            select.appendChild(opt);
+        });
+        if (valorAtual) select.value = valorAtual;
+    }
+    // Autocomplete input (se existir)
     const input = document.getElementById('fornecedorBusca');
     if (input) input.placeholder = `Digite para buscar (${fornecedores.length} fornecedores)...`;
 }
