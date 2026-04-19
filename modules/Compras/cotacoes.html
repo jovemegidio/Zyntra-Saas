@@ -289,11 +289,8 @@
 
                     <div class="form-group">
                         <label>Fornecedores para Cotação</label>
-                        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;">
-                            <label class="fornecedor-checkbox"><input type="checkbox" name="fornecedores" value="1"> Alumínio Brasil LTDA</label>
-                            <label class="fornecedor-checkbox"><input type="checkbox" name="fornecedores" value="2"> Metais Premium SA</label>
-                            <label class="fornecedor-checkbox"><input type="checkbox" name="fornecedores" value="3"> Vidros & Cia</label>
-                            <label class="fornecedor-checkbox"><input type="checkbox" name="fornecedores" value="4"> Fixadores Industriais</label>
+                        <div id="fornecedoresContainer" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;">
+                            <span style="color:var(--gray-500);font-size:0.85rem;">Carregando fornecedores...</span>
                         </div>
                     </div>
 
@@ -317,6 +314,29 @@
             if (sidebar) sidebar.classList.toggle('open');
             if (overlay) overlay.classList.toggle('active');
         }
+
+        async function carregarFornecedores() {
+            const container = document.getElementById('fornecedoresContainer');
+            try {
+                const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+                const r = await fetch('/api/compras/fornecedores', { headers: { 'Authorization': `Bearer ${token}` } });
+                if (r.ok) {
+                    const data = await r.json();
+                    const fornecedores = data.fornecedores || data || [];
+                    if (fornecedores.length > 0) {
+                        container.innerHTML = fornecedores.map(f =>
+                            `<label class="fornecedor-checkbox"><input type="checkbox" name="fornecedores" value="${f.id}"> ${f.razao_social || f.nome || f.name}</label>`
+                        ).join('');
+                    } else {
+                        container.innerHTML = '<span style="color:var(--gray-500);font-size:0.85rem;">Nenhum fornecedor cadastrado</span>';
+                    }
+                }
+            } catch (e) {
+                console.warn('[Cotações] Erro ao carregar fornecedores:', e);
+                container.innerHTML = '<span style="color:var(--gray-500);font-size:0.85rem;">Erro ao carregar fornecedores</span>';
+            }
+        }
+        carregarFornecedores();
 
         async function abrirModalNovaCotacao() {
             document.getElementById('modalNovaCotacao').classList.add('active');
