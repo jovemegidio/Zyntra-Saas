@@ -1203,10 +1203,10 @@
             modal.classList.add('active');
 
             // Limpar formulário
-            document.getElementById('fat-pedido-número').value = '';
+            document.getElementById('fat-pedido-numero').value = '';
             document.getElementById('fat-cliente').value = '';
             document.getElementById('fat-valor').value = '';
-            document.getElementById('fat-observações').value = '';
+            document.getElementById('fat-observacoes').value = '';
             document.getElementById('fat-responsavel').value = '';
             document.getElementById('fat-status').value = 'programado';
             document.getElementById('fat-tipo').value = 'normal';
@@ -1222,7 +1222,7 @@
 
             // Focar no primeiro campo
             setTimeout(() => {
-                document.getElementById('fat-pedido-número').focus();
+                document.getElementById('fat-pedido-numero').focus();
             }, 100);
         }
 
@@ -1268,7 +1268,7 @@
 
                     // Mostrar info card
                     document.getElementById('info-pedido-card').style.display = 'block';
-                    document.getElementById('info-pedido-número').textContent = `#${pedido.id || pedido.numero || número}`;
+                    document.getElementById('info-pedido-numero').textContent = `#${pedido.id || pedido.numero || número}`;
                     document.getElementById('info-pedido-cliente').textContent = pedido.cliente || pedido.empresa || '-';
                     document.getElementById('info-pedido-data').textContent = formatarData(pedido.data_criacao || pedido.data_pedido || new Date());
                     document.getElementById('info-pedido-valor').textContent = formatarMoeda(pedido.valor_total || pedido.total || 0);
@@ -1298,7 +1298,7 @@
         }
 
         async function salvarNovoFaturamento() {
-            const pedidoNúmero = document.getElementById('fat-pedido-número').value.trim();
+            const pedidoNúmero = document.getElementById('fat-pedido-numero').value.trim();
             const cliente = document.getElementById('fat-cliente').value.trim();
             const dataProgramada = document.getElementById('fat-data-programada').value;
             const valorStr = document.getElementById('fat-valor').value.replace(/\./g, '').replace(',', '.');
@@ -1306,12 +1306,12 @@
             const status = document.getElementById('fat-status').value;
             const tipo = document.getElementById('fat-tipo').value;
             const responsavel = document.getElementById('fat-responsavel').value.trim();
-            const observações = document.getElementById('fat-observações').value.trim();
+            const observações = document.getElementById('fat-observacoes').value.trim();
 
             // Validações
             if (!pedidoNúmero) {
                 showToast('Informe o número do pedido', 'error');
-                document.getElementById('fat-pedido-número').focus();
+                document.getElementById('fat-pedido-numero').focus();
                 return;
             }
 
@@ -1384,7 +1384,7 @@
         });
 
         document.addEventListener('DOMContentLoaded', function() {
-            atualizarSaudação();
+            atualizarSaudacao();
             carregarFaturamentos();
             renderizarCalendario();
         });
