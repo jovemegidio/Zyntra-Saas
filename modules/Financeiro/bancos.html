@@ -3560,7 +3560,7 @@
 
         async function carregarMovimentações() {
             try {
-                const response = await fetch('/api/financeiro/movimentacoes-bancárias?limit=20', { credentials: 'include' });
+                const response = await fetch('/api/financeiro/movimentacoes-bancarias?limit=20', { credentials: 'include' });
                 const data = await response.json();
 
                 if (Array.isArray(data)) {
@@ -4048,7 +4048,7 @@
             }
 
             try {
-                const response = await fetch('/api/financeiro/movimentacoes-bancárias', { credentials: 'include', method: 'POST',
+                const response = await fetch('/api/financeiro/movimentacoes-bancarias', { credentials: 'include', method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
                     body: JSON.stringify({
