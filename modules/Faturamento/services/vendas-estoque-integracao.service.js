@@ -23,10 +23,10 @@ class VendasEstoqueIntegracaoService {
                     p.codigo as produto_codigo,
                     p.controla_estoque,
                     p.estoque_minimo,
-                    COALESCE(e.quantidade_disponivel, 0) as estoque_disponivel
+                    COALESCE(e.quantidade_atual, 0) as estoque_disponivel
                 FROM pedido_itens pi
                 INNER JOIN produtos p ON pi.produto_id = p.id
-                LEFT JOIN estoque e ON p.id = e.produto_id
+                LEFT JOIN estoque e ON p.id = e.material_id
                 WHERE pi.pedido_id = ?
             `, [pedido_id]);
             
@@ -103,7 +103,7 @@ class VendasEstoqueIntegracaoService {
                     await connection.query(`
                         UPDATE estoque
                         SET quantidade_reservada = quantidade_reservada + ?
-                        WHERE produto_id = ?
+                        WHERE material_id = ?
                     `, [item.quantidade, item.produto_id]);
                 }
             }
@@ -185,10 +185,10 @@ class VendasEstoqueIntegracaoService {
                     // Atualizar estoque
                     await connection.query(`
                         UPDATE estoque
-                        SET quantidade_disponivel = quantidade_disponivel - ?,
+                        SET quantidade_atual = quantidade_atual - ?,
                             quantidade_reservada = GREATEST(0, quantidade_reservada - ?),
                             ultima_saida = NOW()
-                        WHERE produto_id = ?
+                        WHERE material_id = ?
                     `, [item.quantidade, item.quantidade, item.produto_id]);
                     
                     // Liberar reserva se existir
@@ -287,8 +287,8 @@ class VendasEstoqueIntegracaoService {
                     // Devolver ao estoque
                     await connection.query(`
                         UPDATE estoque
-                        SET quantidade_disponivel = quantidade_disponivel + ?
-                        WHERE produto_id = ?
+                        SET quantidade_atual = quantidade_atual + ?
+                        WHERE material_id = ?
                     `, [item.quantidade, item.produto_id]);
                 }
             }

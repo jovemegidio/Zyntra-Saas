@@ -82,22 +82,22 @@
                             <div class="form-row">
                                 <div class="form-group">
                                     <label>Número da NF-e</label>
-                                    <input type="text" class="form-control" id="filtro-numero" placeholder="Nº da nota">
+                                    <input type="text" class="form-control" id="filtro-numero" placeholder="Nº da nota" maxlength="9" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
                                 </div>
                                 <div class="form-group">
                                     <label>Série</label>
-                                    <input type="text" class="form-control" id="filtro-serie" placeholder="Série">
+                                    <input type="text" class="form-control" id="filtro-serie" placeholder="Série" maxlength="3" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
                                 </div>
                                 <div class="form-group">
                                     <label>Chave de Acesso</label>
-                                    <input type="text" class="form-control" id="filtro-chave" placeholder="44 dígitos">
+                                    <input type="text" class="form-control" id="filtro-chave" placeholder="44 dígitos" maxlength="44" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
                                 </div>
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
                                     <label>Cliente / Destinatário</label>
                                     <input type="text" class="form-control" id="filtro-cliente"
-                                        placeholder="Nome ou CNPJ">
+                                        placeholder="Nome ou CNPJ" maxlength="60">
                                 </div>
                                 <div class="form-group">
                                     <label>Data Início</label>
@@ -184,7 +184,7 @@
             try {
                 // Coletar filtros
                 const params = new URLSearchParams();
-                const número = document.getElementById('filtro-número').value.trim();
+                const número = document.getElementById('filtro-numero').value.trim();
                 const serie = document.getElementById('filtro-serie').value.trim();
                 const chave = document.getElementById('filtro-chave').value.trim();
                 const cliente = document.getElementById('filtro-cliente').value.trim();
