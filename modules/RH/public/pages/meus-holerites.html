@@ -1345,6 +1345,10 @@
                 } else if (resp.status === 401) {
                     // No autenticado - carregar normalmente (auth-unified vai redirecionar)
                     await carregarHolerites();
+                } else if (resp.status === 404) {
+                    // Endpoint não existe ainda - carregar holerites normalmente
+                    consentimentoVerificado = true;
+                    await carregarHolerites();
                 } else {
                     // Erro no servidor - mostrar modal de consentimento por segurana
                     console.warn('Erro ao verificar consentimento, exibindo modal:', resp.status);
@@ -1441,7 +1445,7 @@
     
 <!-- Zyntra: Confirm Dialog Profissional v2.0 --><script src="/_shared/confirm-dialog.js?v=20260217" defer></script>
     <!-- Chat Widget BOB AI -->
-    <script src="/chat/widget.js?v=20260218" defer></script>
+    <script src="/chat/widget.js?v=20260419" defer></script>
     <script src="/_shared/accessibility-widget.js?v=20260226" defer></script>
 
     <!-- Chat Corporativo (Teams) -->
