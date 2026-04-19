@@ -528,7 +528,7 @@
             const crm = document.getElementById('crm').value;
             const tipoAtestado = document.getElementById('tipo-atestado').value;
             const cid = document.getElementById('cid').value;
-            const observações = document.getElementById('observações').value;
+            const observacoes = document.getElementById('observacoes').value;
             const arquivo = fileInput.files[0];
             
             if (!arquivo) {
@@ -550,7 +550,7 @@
                 formData.append('crm', crm);
                 formData.append('tipo_atestado', tipoAtestado);
                 formData.append('cid', cid || '');
-                formData.append('observações', observações || '');
+                formData.append('observacoes', observacoes || '');
                 
                 const response = await fetch('/api/rh/atestados', { credentials: 'include', method: 'POST',
                     credentials: 'include',

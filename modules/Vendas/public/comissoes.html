@@ -1009,7 +1009,7 @@
             
             // Definir período atual
             const agora = new Date();
-            document.getElementById('filtroPeríodo').value = agora.toISOString().substring(0, 7);
+            document.getElementById('filtroPeriodo').value = agora.toISOString().substring(0, 7);
             
             carregarVendedores();
             carregarDados();
@@ -1038,7 +1038,7 @@
 
         // Carregar dados principais
         async function carregarDados() {
-            const período = document.getElementById('filtroPeríodo').value;
+            const periodo = document.getElementById('filtroPeriodo').value;
             let vendedor = document.getElementById('filtroVendedor').value;
             
             // Se NÁO é admin, forçar filtro para o próprio ID do usuário
@@ -1047,14 +1047,14 @@
             }
             
             // Atualizar label do período
-            const [ano, mes] = período.split('-');
+            const [ano, mes] = periodo.split('-');
             const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
                           'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-            document.getElementById('períodoLabel').textContent = `${meses[parseInt(mes) - 1]} ${ano}`;
+            document.getElementById('periodoLabel').textContent = `${meses[parseInt(mes) - 1]} ${ano}`;
             
             await Promise.all([
-                carregarResumo(período, vendedor),
-                carregarDetalhes(período, vendedor),
+                carregarResumo(periodo, vendedor),
+                carregarDetalhes(periodo, vendedor),
                 carregarHistorico()
             ]);
         }
@@ -1355,7 +1355,7 @@
         }
 
         function exportarComissoes() {
-            const período = document.getElementById('filtroPeríodo').value;
+            const periodo = document.getElementById('filtroPeriodo').value;
             window.open(`/api/vendas/comissoes/exportar?periodo=${periodo}&formato=csv`, '_blank');
         }
     </script>
