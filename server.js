@@ -1559,6 +1559,7 @@ app.use('/modules', express.static(path.join(__dirname, 'modules'), {
     dotfiles: 'deny',
     index: false,
     setHeaders: (res, filePath) => {
+        moduleStaticOpts(res, filePath);
         if (filePath.endsWith('.html')) {
             res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
             res.setHeader('Pragma', 'no-cache');

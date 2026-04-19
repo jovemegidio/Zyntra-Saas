@@ -467,8 +467,8 @@
                             <tbody id="base-portador-body"></tbody></table>
                         </div>
                         <div class="table-container">
-                            <div class="table-header"><h3 class="table-title"><i class="fas fa-tags" style="color:#3b82f6;margin-right:6px;"></i> Status / Situação / Posição</h3></div>
-                            <table><thead><tr><th>Status</th><th>Situação</th><th>Posição</th></tr></thead>
+                            <div class="table-header"><h3 class="table-title"><i class="fas fa-tags" style="color:#3b82f6;margin-right:6px;"></i> Status / Situa&ccedil;&atilde;o / Posi&ccedil;&atilde;o</h3></div>
+                            <table><thead><tr><th>Status</th><th>Situa&ccedil;&atilde;o</th><th>Posi&ccedil;&atilde;o</th></tr></thead>
                             <tbody id="base-status-body"></tbody></table>
                         </div>
                         <div class="table-container">
@@ -530,7 +530,7 @@
                 <!-- Filtros -->
                 <div class="filters-bar">
                     <div class="filter-group">
-                        <label><i class="fas fa-calendar"></i> Período</label>
+                        <label><i class="fas fa-calendar"></i> Per&iacute;odo</label>
                         <select class="filter-input" id="filtro-periodo" onchange="filtrarContas()">
                             <option value="todas" selected>Todas</option>
                             <option value="mes">Este Mês</option>
@@ -567,7 +567,7 @@
                         </select>
                     </div>
                     <div class="filter-group">
-                        <label><i class="fas fa-map-marker-alt"></i> Situação</label>
+                        <label><i class="fas fa-map-marker-alt"></i> Situa&ccedil;&atilde;o</label>
                         <select class="filter-input" id="filtro-situacao" onchange="filtrarContas()">
                             <option value="">Todas</option>
                             <option value="OPERADO">Operado</option>
@@ -608,8 +608,8 @@
                         <thead id="tabela-header">
                             <tr>
                                 <th>Empresa</th><th>NFe</th><th>Parcela</th><th>Cliente</th><th>CNPJ</th>
-                                <th>Valor</th><th>Vencimento</th><th>Situação</th><th>Portador</th>
-                                <th>Status</th><th>Dias</th><th>Ações</th>
+                                <th>Valor</th><th>Vencimento</th><th>Situa&ccedil;&atilde;o</th><th>Portador</th>
+                                <th>Status</th><th>Dias</th><th>A&ccedil;&otilde;es</th>
                             </tr>
                         </thead>
                         <tbody id="tabela-contas">
@@ -676,7 +676,7 @@
                 <div class="tab-pane-view" id="pane-faturamento">
                     <div class="table-container" style="flex:1;">
                         <div class="table-header" style="display:flex;align-items:center;justify-content:space-between;">
-                            <h3 class="table-title"><i class="fas fa-file-invoice-dollar" style="color:#f59e0b;margin-right:6px;"></i> Faturamento / Operações</h3>
+                            <h3 class="table-title"><i class="fas fa-file-invoice-dollar" style="color:#f59e0b;margin-right:6px;"></i> Faturamento / Opera&ccedil;&otilde;es</h3>
                             <div style="font-size:11px;color:#6b7280;" id="fat-totais"></div>
                         </div>
                         <div style="overflow-x:auto;flex:1;min-height:0;">
@@ -684,7 +684,7 @@
                             <thead><tr>
                                 <th>Empresa</th><th>Tipo</th><th>NFe</th><th>Parcela</th>
                                 <th>Cliente</th><th style="text-align:right">Valor</th>
-                                <th>Emissão</th><th>Vcto</th><th>Situação</th>
+                                <th>Emissão</th><th>Vcto</th><th>Situa&ccedil;&atilde;o</th>
                                 <th>Portador</th><th>Status</th>
                                 <th style="text-align:right">Dias</th><th>Posição</th>
                             </tr></thead>
@@ -822,7 +822,7 @@
                         <div style="overflow-x:auto;flex:1;min-height:0;">
                         <table>
                             <thead><tr>
-                                <th>Mês/Período</th>
+                                <th>M&ecirc;s/Per&iacute;odo</th>
                                 <th style="text-align:right">A Vencer</th>
                                 <th style="text-align:right">Vencido</th>
                                 <th style="text-align:right">Liquidado</th>
@@ -899,7 +899,7 @@
                     <div class="workbook-tab" data-pane="pane-diario" onclick="switchPane(this)"><span class="tab-dot green"></span> DIARIO</div>
                     <div class="workbook-tab" data-pane="pane-pm" onclick="switchPane(this)"><span class="tab-dot pink"></span> PM</div>
                     <div class="workbook-tab" data-pane="pane-fundos" onclick="switchPane(this)"><span class="tab-dot purple"></span> FUNDOS</div>
-                    <div class="workbook-tab" data-pane="pane-operações" onclick="switchPane(this)"><span class="tab-dot indigo"></span> OPERAÇÕES</div>
+                    <div class="workbook-tab" data-pane="pane-operacoes" onclick="switchPane(this)"><span class="tab-dot indigo"></span> OPERA&Ccedil;&Otilde;ES</div>
                     <div class="workbook-tab" data-pane="pane-td" onclick="switchPane(this)"><span class="tab-dot blue"></span> TD</div>
                 </div>
 
@@ -1127,7 +1127,7 @@
                 <div class="footer-info"><i class="fas fa-info-circle"></i><span>Formatos aceitos: .xlsx, .xls</span></div>
                 <div class="footer-actions">
                     <button type="button" class="btn-cancel" onclick="fecharModalImportar()"><i class="fas fa-times"></i> Cancelar</button>
-                    <button type="button" class="btn-save" id="btn-importar" onclick="executarImportação()" style="background:linear-gradient(135deg,#059669,#10b981);"><i class="fas fa-upload"></i> Importar</button>
+                    <button type="button" class="btn-save" id="btn-importar" onclick="executarImportacao()" style="background:linear-gradient(135deg,#059669,#10b981);"><i class="fas fa-upload"></i> Importar</button>
                 </div>
             </div>
         </div>
@@ -1161,7 +1161,7 @@
     </div>
     <script>
         function toggleMobileSidebar() { document.getElementById('mobile-sidebar').classList.toggle('mobile-open'); document.getElementById('sidebar-overlay').classList.toggle('active'); }
-        function toggleNotificações() { if (typeof window.NotificationsManager !== 'undefined') window.NotificationsManager.togglePanel(); }
+        function toggleNotificacoes() { if (typeof window.NotificationsManager !== 'undefined') window.NotificationsManager.togglePanel(); }
         let contas = [];
         let clientesList = [];
         let currentView = 'completa';
@@ -1445,9 +1445,9 @@
         }
 
         function getTableHeaders() {
-            if (currentView === 'completa') return ['Empresa','CNPJ Emp.','NFe','Parcela','Cliente','CNPJ/CPF','Emissão','Vencimento','Categoria','Conta Corrente','Documento','Boleto','Vendedor','Projeto','Valor','Vl.Líquido','Recebido','A Receber','Situação','Portador','Status','Dias','Ações'];
-            if (currentView === 'impostos') return ['Cliente','NFe','Parcela','Valor','PIS','COFINS','CSLL','IR','ISS','INSS','Vl.Líquido','Recebido','A Receber','Ações'];
-            return ['Empresa','NFe','Parcela','Cliente','CNPJ','Valor','Vencimento','Situação','Portador','Status','Dias','Ações'];
+            if (currentView === 'completa') return ['Empresa','CNPJ Emp.','NFe','Parcela','Cliente','CNPJ/CPF','Emiss&atilde;o','Vencimento','Categoria','Conta Corrente','Documento','Boleto','Vendedor','Projeto','Valor','Vl.L&iacute;quido','Recebido','A Receber','Situa&ccedil;&atilde;o','Portador','Status','Dias','A&ccedil;&otilde;es'];
+            if (currentView === 'impostos') return ['Cliente','NFe','Parcela','Valor','PIS','COFINS','CSLL','IR','ISS','INSS','Vl.L&iacute;quido','Recebido','A Receber','A&ccedil;&otilde;es'];
+            return ['Empresa','NFe','Parcela','Cliente','CNPJ','Valor','Vencimento','Situa&ccedil;&atilde;o','Portador','Status','Dias','A&ccedil;&otilde;es'];
         }
 
         function renderizarTabela(dados, pesquisa) {
@@ -1469,18 +1469,18 @@
                 var hl = function(t) { if(!pesquisa||!t) return t||'-'; try{var e=pesquisa.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(new RegExp('('+e+')','gi'),'<span class="highlight">$1</span>');}catch(ex){return String(t);} };
                 var dias = parseInt(c.dias_vencido) || 0;
                 var diasStyle = dias > 0 ? 'color:#dc2626;font-weight:700;' : '';
-                var ações = '<td style="white-space:nowrap;"><button class="action-btn view" onclick="visualizarConta('+c.id+')" title="Visualizar"><i class="fas fa-eye"></i></button>';
-                if(st!=='recebido'&&st!=='pago'&&st!=='liquidado') ações += '<button class="action-btn success" onclick="abrirModalReceber('+c.id+','+(parseFloat(c.valor_total||c.valor)||0)+')" title="Receber"><i class="fas fa-check-circle"></i></button>';
-                ações += '<button class="action-btn edit" onclick="editarConta('+c.id+')" title="Editar"><i class="fas fa-edit"></i></button>';
-                ações += '<button class="action-btn danger" onclick="excluirConta('+c.id+')" title="Excluir"><i class="fas fa-trash"></i></button></td>';
+                var acoes = '<td style="white-space:nowrap;"><button class="action-btn view" onclick="visualizarConta('+c.id+')" title="Visualizar"><i class="fas fa-eye"></i></button>';
+                if(st!=='recebido'&&st!=='pago'&&st!=='liquidado') acoes += '<button class="action-btn success" onclick="abrirModalReceber('+c.id+','+(parseFloat(c.valor_total||c.valor)||0)+')" title="Receber"><i class="fas fa-check-circle"></i></button>';
+                acoes += '<button class="action-btn edit" onclick="editarConta('+c.id+')" title="Editar"><i class="fas fa-edit"></i></button>';
+                acoes += '<button class="action-btn danger" onclick="excluirConta('+c.id+')" title="Excluir"><i class="fas fa-trash"></i></button></td>';
 
                 if (currentView === 'completa') {
-                    return '<tr style="cursor:pointer;" ondblclick="visualizarConta('+c.id+')"><td>'+hl(c.empresa||'-')+'</td><td style="font-size:10px;">'+hl(c.cnpj_cpf||'-')+'</td><td>'+hl(c.nota_fiscal||'-')+'</td><td>'+(c.parcela_info||'-')+'</td><td><strong>'+hl(c.cliente_nome||'-')+'</strong></td><td style="font-size:10px;">'+hl(c.cnpj_cpf||'-')+'</td><td>'+fmtData(c.data_emissao)+'</td><td>'+fmtData(c.data_vencimento||c.vencimento)+'</td><td>'+(c.categoria||'-')+'</td><td>'+(c.centro_receita||'-')+'</td><td>'+(c.numero_documento||'-')+'</td><td>'+(c.numero_boleto||'-')+'</td><td>'+(c.vendedor||'-')+'</td><td>'+(c.projeto||'-')+'</td><td><strong>'+fmtMoeda(c.valor_total||c.valor)+'</strong></td><td>'+fmtMoeda(c.valor_liquido)+'</td><td style="color:#059669;">'+fmtMoeda(c.valor_recebido)+'</td><td><strong>'+fmtMoeda(c.a_receber)+'</strong></td><td><span style="font-size:11px;font-weight:600;">'+(c.situacao||'-')+'</span></td><td><span style="font-size:11px;">'+(c.portador||'-')+'</span></td><td>'+(badges[st]||badges.pendente)+'</td><td style="'+diasStyle+'">'+(dias||'-')+'</td>'+ações+'</tr>';
+                    return '<tr style="cursor:pointer;" ondblclick="visualizarConta('+c.id+')"><td>'+hl(c.empresa||'-')+'</td><td style="font-size:10px;">'+hl(c.cnpj_cpf||'-')+'</td><td>'+hl(c.nota_fiscal||'-')+'</td><td>'+(c.parcela_info||'-')+'</td><td><strong>'+hl(c.cliente_nome||'-')+'</strong></td><td style="font-size:10px;">'+hl(c.cnpj_cpf||'-')+'</td><td>'+fmtData(c.data_emissao)+'</td><td>'+fmtData(c.data_vencimento||c.vencimento)+'</td><td>'+(c.categoria||'-')+'</td><td>'+(c.centro_receita||'-')+'</td><td>'+(c.numero_documento||'-')+'</td><td>'+(c.numero_boleto||'-')+'</td><td>'+(c.vendedor||'-')+'</td><td>'+(c.projeto||'-')+'</td><td><strong>'+fmtMoeda(c.valor_total||c.valor)+'</strong></td><td>'+fmtMoeda(c.valor_liquido)+'</td><td style="color:#059669;">'+fmtMoeda(c.valor_recebido)+'</td><td><strong>'+fmtMoeda(c.a_receber)+'</strong></td><td><span style="font-size:11px;font-weight:600;">'+(c.situacao||'-')+'</span></td><td><span style="font-size:11px;">'+(c.portador||'-')+'</span></td><td>'+(badges[st]||badges.pendente)+'</td><td style="'+diasStyle+'">'+(dias||'-')+'</td>'+acoes+'</tr>';
                 }
                 if (currentView === 'impostos') {
-                    return '<tr style="cursor:pointer;" ondblclick="visualizarConta('+c.id+')"><td><strong>'+hl(c.cliente_nome||'-')+'</strong></td><td>'+hl(c.nota_fiscal||'-')+'</td><td>'+(c.parcela_info||'-')+'</td><td><strong>'+fmtMoeda(c.valor_total||c.valor)+'</strong></td><td>'+fmtMoeda(c.valor_pis)+'</td><td>'+fmtMoeda(c.valor_cofins)+'</td><td>'+fmtMoeda(c.valor_csll)+'</td><td>'+fmtMoeda(c.valor_ir)+'</td><td>'+fmtMoeda(c.valor_iss)+'</td><td>'+fmtMoeda(c.valor_inss)+'</td><td><strong>'+fmtMoeda(c.valor_liquido)+'</strong></td><td style="color:#059669;">'+fmtMoeda(c.valor_recebido)+'</td><td><strong>'+fmtMoeda(c.a_receber)+'</strong></td>'+ações+'</tr>';
+                    return '<tr style="cursor:pointer;" ondblclick="visualizarConta('+c.id+')"><td><strong>'+hl(c.cliente_nome||'-')+'</strong></td><td>'+hl(c.nota_fiscal||'-')+'</td><td>'+(c.parcela_info||'-')+'</td><td><strong>'+fmtMoeda(c.valor_total||c.valor)+'</strong></td><td>'+fmtMoeda(c.valor_pis)+'</td><td>'+fmtMoeda(c.valor_cofins)+'</td><td>'+fmtMoeda(c.valor_csll)+'</td><td>'+fmtMoeda(c.valor_ir)+'</td><td>'+fmtMoeda(c.valor_iss)+'</td><td>'+fmtMoeda(c.valor_inss)+'</td><td><strong>'+fmtMoeda(c.valor_liquido)+'</strong></td><td style="color:#059669;">'+fmtMoeda(c.valor_recebido)+'</td><td><strong>'+fmtMoeda(c.a_receber)+'</strong></td>'+acoes+'</tr>';
                 }
-                return '<tr style="cursor:pointer;" ondblclick="visualizarConta('+c.id+')"><td>'+hl(c.empresa||'-')+'</td><td>'+hl(c.nota_fiscal||'-')+'</td><td>'+(c.parcela_info||'-')+'</td><td><strong>'+hl(c.cliente_nome||'-')+'</strong></td><td style="font-size:11px;">'+hl(c.cnpj_cpf||c.cnpj_cliente||'-')+'</td><td><strong>'+fmtMoeda(c.valor_total||c.valor)+'</strong></td><td>'+fmtData(c.data_vencimento||c.vencimento)+'</td><td><span style="font-size:11px;font-weight:600;">'+(c.situacao||'-')+'</span></td><td><span style="font-size:11px;">'+(c.portador||'-')+'</span></td><td>'+(badges[st]||badges.pendente)+'</td><td style="'+diasStyle+'">'+(dias||'-')+'</td>'+ações+'</tr>';
+                return '<tr style="cursor:pointer;" ondblclick="visualizarConta('+c.id+')"><td>'+hl(c.empresa||'-')+'</td><td>'+hl(c.nota_fiscal||'-')+'</td><td>'+(c.parcela_info||'-')+'</td><td><strong>'+hl(c.cliente_nome||'-')+'</strong></td><td style="font-size:11px;">'+hl(c.cnpj_cpf||c.cnpj_cliente||'-')+'</td><td><strong>'+fmtMoeda(c.valor_total||c.valor)+'</strong></td><td>'+fmtData(c.data_vencimento||c.vencimento)+'</td><td><span style="font-size:11px;font-weight:600;">'+(c.situacao||'-')+'</span></td><td><span style="font-size:11px;">'+(c.portador||'-')+'</span></td><td>'+(badges[st]||badges.pendente)+'</td><td style="'+diasStyle+'">'+(dias||'-')+'</td>'+acoes+'</tr>';
             }).join('');
         }
 
@@ -1572,7 +1572,7 @@
                 document.getElementById('conta-valor').value = val ? val.toFixed(2).replace('.',',') : '';
                 document.getElementById('conta-vencimento').value = (c.data_vencimento||c.vencimento||'').split('T')[0];
                 document.getElementById('forma-pagamento').value = c.forma_recebimento || c.forma_pagamento || 'pix';
-                document.getElementById('observacoes').value = c.observações || '';
+                document.getElementById('observacoes').value = c.observacoes || c['observações'] || '';
                 document.getElementById('numero-documento').value = c.numero_documento || '';
                 document.getElementById('num-parcelas').value = c.num_parcelas || 1;
                 document.getElementById('cr-nota-fiscal').value = c.nota_fiscal || '';
@@ -1629,7 +1629,7 @@
             if (window._guardConfirmarReceb) return;
             window._guardConfirmarReceb = true;
             var id = document.getElementById('receber-conta-id').value;
-            var dados = { valor_recebido: parseFloat(document.getElementById('receber-valor').value), data_recebimento: document.getElementById('receber-data').value, forma_pagamento: document.getElementById('receber-forma').value, observações: document.getElementById('receber-obs').value };
+            var dados = { valor_recebido: parseFloat(document.getElementById('receber-valor').value), data_recebimento: document.getElementById('receber-data').value, forma_pagamento: document.getElementById('receber-forma').value, observacoes: document.getElementById('receber-obs').value };
             try {
                 var r = await fetch('/api/financeiro/contas-receber/'+id+'/receber', { method: 'POST', headers:{'Content-Type':'application/json'}, credentials: 'include', body: JSON.stringify(dados) });
                 if (r.ok) { showToast('Recebimento confirmado com sucesso!'); fecharModalReceber(); await init(); } else { showToast('Erro ao confirmar recebimento', 'error'); }
@@ -1644,7 +1644,7 @@
             var statusVal = document.getElementById('cr-status').value;
             var pagoNoDia = document.getElementById('cr-pago-no-dia').value;
             var aceitaTroca = document.getElementById('cr-aceita-troca').checked;
-            var dados = { descrição: document.getElementById('descricao').value, cliente_id: document.getElementById('cliente-id').value, categoria_id: document.getElementById('categoria-id').value, valor: parseMoeda(document.getElementById('conta-valor').value), data_vencimento: document.getElementById('conta-vencimento').value, vencimento: document.getElementById('conta-vencimento').value, forma_recebimento: document.getElementById('forma-pagamento').value, observações: document.getElementById('observacoes').value, numero_documento: document.getElementById('numero-documento').value, num_parcelas: parseInt(document.getElementById('num-parcelas').value) || 1 };
+            var dados = { descricao: document.getElementById('descricao').value, cliente_id: document.getElementById('cliente-id').value, categoria_id: document.getElementById('categoria-id').value, valor: parseMoeda(document.getElementById('conta-valor').value), data_vencimento: document.getElementById('conta-vencimento').value, vencimento: document.getElementById('conta-vencimento').value, forma_recebimento: document.getElementById('forma-pagamento').value, observacoes: document.getElementById('observacoes').value, numero_documento: document.getElementById('numero-documento').value, num_parcelas: parseInt(document.getElementById('num-parcelas').value) || 1 };
             // [DEV SPEC 2.4] Novos campos
             if (statusVal) dados.status = statusVal;
             if (pagoNoDia) dados.pago_no_dia = pagoNoDia;
@@ -1695,15 +1695,15 @@
             } catch(e) { showToast('Erro ao enviar cobrancas', 'error'); } finally { window._guardEnviarCobrancas = false; }
         }
         function getFilteredContas() {
-            var período = document.getElementById('filtro-periodo').value;
+            var periodo = document.getElementById('filtro-periodo').value;
             var status = document.getElementById('filtro-status').value;
             var portador = document.getElementById('filtro-portador') ? document.getElementById('filtro-portador').value : '';
-            var situação = document.getElementById('filtro-situacao') ? document.getElementById('filtro-situacao').value : '';
+            var situacaoFiltro = document.getElementById('filtro-situacao') ? document.getElementById('filtro-situacao').value : '';
             var clienteNome = document.getElementById('filtro-cliente-select').value;
             var pesquisa = document.getElementById('pesquisa-global').value.toLowerCase();
             var filtradas = contas.slice();
             var hoje = new Date(); hoje.setHours(0,0,0,0);
-            if (período && período !== 'todas') {
+            if (periodo && periodo !== 'todas') {
                 filtradas = filtradas.filter(function(c){
                     var vRaw = c.data_vencimento || c.vencimento || '';
                     var v = new Date(String(vRaw).slice(0,10) + 'T00:00:00');
@@ -1711,11 +1711,11 @@
                     if (isNaN(v.getTime())) return false;
                     var h = hoje;
                     // YYYY-MM month filter
-                    if (/^\d{4}-\d{2}$/.test(período)) {
-                        var p = período.split('-');
+                    if (/^\d{4}-\d{2}$/.test(periodo)) {
+                        var p = periodo.split('-');
                         return v.getFullYear() === parseInt(p[0]) && (v.getMonth()+1) === parseInt(p[1]);
                     }
-                    switch(período) {
+                    switch(periodo) {
                         case 'hoje': return v.getTime()===h.getTime();
                         case 'semana':{ var d=h.getDay(); var ini=new Date(h.getTime()-d*86400000); var fim=new Date(ini.getTime()+6*86400000); return v>=ini&&v<=fim; }
                         case 'mes': return v.getMonth()===h.getMonth()&&v.getFullYear()===h.getFullYear();
@@ -1734,7 +1734,7 @@
             }
             if (status) filtradas = filtradas.filter(function(c){ return (c.status||'').toLowerCase() === status.toLowerCase(); });
             if (portador) filtradas = filtradas.filter(function(c){ return c.portador === portador; });
-            if (situação) filtradas = filtradas.filter(function(c){ return (c.situacao||'').toUpperCase() === situação.toUpperCase(); });
+            if (situacaoFiltro) filtradas = filtradas.filter(function(c){ return (c.situacao||'').toUpperCase() === situacaoFiltro.toUpperCase(); });
             if (clienteNome) filtradas = filtradas.filter(function(c){ return c.cliente_nome === clienteNome; });
             if (pesquisa) filtradas = filtradas.filter(function(c){ return (c.descricao||'').toLowerCase().indexOf(pesquisa)>-1||(c.cliente_nome||'').toLowerCase().indexOf(pesquisa)>-1||(c.valor+'').indexOf(pesquisa)>-1||(c.numero_documento||'').toLowerCase().indexOf(pesquisa)>-1||(c.nota_fiscal||'').toLowerCase().indexOf(pesquisa)>-1||(c.portador||'').toLowerCase().indexOf(pesquisa)>-1||(c.cnpj_cpf||c.cnpj_cliente||'').indexOf(pesquisa)>-1||(c.vendedor||'').toLowerCase().indexOf(pesquisa)>-1; });
             // Sort by vencimento ascending (vencidas first within vencidas filter, otherwise by date)
@@ -1834,7 +1834,7 @@
                 '"'+(parseFloat(c.valor_recebido)||0).toFixed(2).replace('.',',')+'"',
                 '"'+(parseFloat(c.a_receber)||0).toFixed(2).replace('.',',')+'"',
                 csvSafe(c.situacao||''),csvSafe(c.portador||''),csvSafe(c.status||'pendente'),c.dias_vencido||'',
-                '"'+csvSafe(c.observações||'').replace(/"/g,'""')+'"'
+                '"'+csvSafe(c.observacoes||c['observações']||'').replace(/"/g,'""')+'"'
             ];});
             var csv=[headers.join(';')].concat(linhas.map(function(l){return l.join(';');})).join('\n');
             var blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});
@@ -1851,7 +1851,7 @@
         }
         function fecharModalImportar() { document.getElementById('modal-importar').classList.remove('active'); }
 
-        async function executarImportação() {
+        async function executarImportacao() {
             var fileInput = document.getElementById('arquivo-excel');
             if (!fileInput.files || !fileInput.files[0]) { showToast('Selecione um arquivo Excel', 'warning'); return; }
             var file = fileInput.files[0];
@@ -1924,13 +1924,13 @@
                             cnpj_cliente:  String(row[colMap['CNPJ']]     || ''),
                             valor:         valor,
                             data_vencimento: vcto,
-                            situação:      String(row[colMap['SITUAÇÁƒO']] || ''),
+                            situacao:      String(row[colMap['SITUAÇÁƒO']] || ''),
                             portador:      String(row[colMap['PORTADOR']] || ''),
                             data_operacao: parseDate(row[colMap['DATA']]),
                             status:        statusRaw,
                             dias_vencido:  parseInt(row[colMap['DIAS']]) || 0,
                             posicao:       String(row[colMap['POSIÇÁƒO']]  || ''),
-                            observações:   String(row[colMap['OBSERVAÇÁƒO']] || '')
+                            observacoes:   String(row[colMap['OBSERVAÇÁƒO']] || '')
                         });
                     }
                 } else {
@@ -1951,7 +1951,7 @@
                             cnpj_cliente: String(get(row,'cnpj')||''),
                             valor: valor, data_vencimento: vcto,
                             status: String(get(row,'status')||'pendente').toLowerCase(),
-                            observações: String(get(row,'observações')||get(row,'descrição')||'')
+                            observacoes: String(get(row,'observações')||get(row,'descrição')||'')
                         });
                     }
                 }
