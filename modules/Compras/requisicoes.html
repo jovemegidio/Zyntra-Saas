@@ -585,7 +585,7 @@
     async function carregarCentrosCusto() {
         try {
             const token = localStorage.getItem('token');
-            const r = await fetch('/api/compras/centros-custo', { headers: { 'Authorization': `Bearer ${token}` } });
+            const r = await fetch('/api/compras/centros-custo', { headers: { 'Authorization': `Bearer ${token}` }, credentials: 'include' });
             if (r.ok) { const d = await r.json(); centrosCustoData = d.centros || d || []; }
         } catch (e) { console.log('Erro CC:', e); }
     }
@@ -820,9 +820,10 @@
             const method = editingId ? 'PUT' : 'POST';
             const r = await fetch(url, {
                 method, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                credentials: 'include',
                 body: JSON.stringify(body)
             });
-            if (!r.ok) { const err = await r.json().catch(() => ({})); throw new Error(err.message || 'Erro ao salvar requisição'); }
+            if (!r.ok) { const err = await r.json().catch(() => ({})); throw new Error(err.error || err.message || 'Erro ao salvar requisição'); }
             fecharModalNovaRequisicao();
             carregarRequisicoes();
             showToast(editingId ? 'Requisição atualizada com sucesso!' : (status === 'rascunho' ? 'Rascunho salvo com sucesso!' : 'Requisição enviada com sucesso!'), 'success');

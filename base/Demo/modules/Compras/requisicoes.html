@@ -1,8 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <!-- Favicon -->
-    <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 
     <meta charset="UTF-8">
@@ -12,11 +14,10 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Zyntra: Requisições de Compra</title>
+    <title>Aluforce: Requisições de Compra</title>
 
     <!-- Sistema de Autenticação Unificado -->
-    <script src="/js/auth-unified.js?v=20260326" defer></script>
-    <script src="/js/inactivity-manager.js?v=20260324" defer></script>
+    <script src="/js/auth-unified.js?v=20260301" defer></script>
 
     <!-- Fontes -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -137,22 +138,22 @@
         .priority-option label:hover {
             color: var(--gray-700); background: rgba(255,255,255,0.7);
         }
-        /* Selecionado é Baixa (verde) */
+        /* Selecionado — Baixa (verde) */
         .priority-option input[value="baixa"]:checked + label {
             background: #ecfdf5; color: #059669; border-color: #a7f3d0;
             box-shadow: 0 1px 3px rgba(5,150,105,0.12);
         }
-        /* Selecionado é Normal (azul) */
+        /* Selecionado — Normal (azul) */
         .priority-option input[value="normal"]:checked + label {
             background: #eff6ff; color: #2563eb; border-color: #bfdbfe;
             box-shadow: 0 1px 3px rgba(37,99,235,0.12);
         }
-        /* Selecionado é Alta (amber) */
+        /* Selecionado — Alta (amber) */
         .priority-option input[value="alta"]:checked + label {
             background: #fffbeb; color: #d97706; border-color: #fde68a;
             box-shadow: 0 1px 3px rgba(217,119,6,0.12);
         }
-        /* Selecionado é Urgente (vermelho) */
+        /* Selecionado — Urgente (vermelho) */
         .priority-option input[value="urgente"]:checked + label {
             background: #fef2f2; color: #dc2626; border-color: #fecaca;
             box-shadow: 0 1px 3px rgba(220,38,38,0.15);
@@ -245,9 +246,8 @@
     <script src="/js/anti-copy-protection.js" defer></script>
     <!-- Chat Widget BOB AI -->
     <link rel="stylesheet" href="/chat/widget.css?v=20260301">
-    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260326">
 </head>
-<body class="dark-mode">
+<body>
     <div class="app-container">
         <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
 
@@ -264,7 +264,6 @@
             </nav>
             <div class="sidebar-bottom">
                 <button class="sidebar-btn" title="Estoque MP" onclick="window.location.href='gestao-estoque.html'"><i class="fas fa-boxes"></i></button>
-                <button class="sidebar-btn" title="QR Code Estoque" onclick="window.location.href='qrcode-estoque.html'"><i class="fas fa-qrcode"></i></button>
                 <button class="sidebar-btn" title="Relatórios" onclick="window.location.href='relatorios.html'"><i class="fas fa-chart-bar"></i></button>
             </div>
         </aside>
@@ -278,7 +277,7 @@
                         <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
-                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;"></span>
+                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">—</span>
                         <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Requisições</span>
                     </div>
                 </div>
@@ -315,26 +314,26 @@
                 </div>
 
                 <!-- Stats -->
-                <div class="metrics-grid">
-                    <div class="metric-card purple">
-                        <div class="metric-header"><div class="metric-icon purple"><i class="fas fa-clipboard-list"></i></div></div>
-                        <div class="metric-value" id="totalRequisicoes">0</div>
-                        <div class="metric-label">Total Requisições</div>
+                <div class="stats-grid">
+                    <div class="stat-card purple">
+                        <div class="stat-header"><div class="stat-icon purple"><i class="fas fa-clipboard-list"></i></div></div>
+                        <div class="stat-value" id="totalRequisicoes">0</div>
+                        <div class="stat-label">Total Requisições</div>
                     </div>
-                    <div class="metric-card orange">
-                        <div class="metric-header"><div class="metric-icon orange"><i class="fas fa-clock"></i></div></div>
-                        <div class="metric-value" id="requisicoesPendentes">0</div>
-                        <div class="metric-label">Pendentes</div>
+                    <div class="stat-card amber">
+                        <div class="stat-header"><div class="stat-icon amber"><i class="fas fa-clock"></i></div></div>
+                        <div class="stat-value" id="requisicoesPendentes">0</div>
+                        <div class="stat-label">Pendentes</div>
                     </div>
-                    <div class="metric-card green">
-                        <div class="metric-header"><div class="metric-icon green"><i class="fas fa-check-double"></i></div></div>
-                        <div class="metric-value" id="requisicoesAprovadas">0</div>
-                        <div class="metric-label">Aprovadas</div>
+                    <div class="stat-card green">
+                        <div class="stat-header"><div class="stat-icon green"><i class="fas fa-check-double"></i></div></div>
+                        <div class="stat-value" id="requisicoesAprovadas">0</div>
+                        <div class="stat-label">Aprovadas</div>
                     </div>
-                    <div class="metric-card blue">
-                        <div class="metric-header"><div class="metric-icon blue"><i class="fas fa-file-invoice-dollar"></i></div></div>
-                        <div class="metric-value" id="requisicoesCotacao">0</div>
-                        <div class="metric-label">Em Cotação</div>
+                    <div class="stat-card cyan">
+                        <div class="stat-header"><div class="stat-icon cyan"><i class="fas fa-file-invoice-dollar"></i></div></div>
+                        <div class="stat-value" id="requisicoesCotacao">0</div>
+                        <div class="stat-label">Em Cotação</div>
                     </div>
                 </div>
 
@@ -342,13 +341,13 @@
         <div class="filters-bar">
             <div class="search-box">
                 <i class="fas fa-search"></i>
-                <input type="text" id="searchRequisicao" placeholder="Buscar Requisição...">
+                <input type="text" id="searchRequisicao" placeholder="Buscar requisição...">
             </div>
             <div class="filter-buttons">
                 <button class="filter-btn active" onclick="filtrarRequisicoes('todos', this)">Todas</button>
                 <button class="filter-btn" onclick="filtrarRequisicoes('pendente', this)">Pendentes</button>
                 <button class="filter-btn" onclick="filtrarRequisicoes('aprovado', this)">Aprovadas</button>
-                <button class="filter-btn" onclick="filtrarRequisicoes('cotação', this)">Em Cotação</button>
+                <button class="filter-btn" onclick="filtrarRequisicoes('cotacao', this)">Em Cotação</button>
                 <button class="filter-btn" onclick="filtrarRequisicoes('rascunho', this)">Rascunhos</button>
             </div>
         </div>
@@ -477,7 +476,7 @@
                         <div class="form-grid cols-1">
                             <div class="form-group">
                                 <label>Fornecedores Sugeridos</label>
-                                <input type="text" class="form-control" id="fornecedoresSugeridos" placeholder="Opcional é separe por vrgula">
+                                <input type="text" class="form-control" id="fornecedoresSugeridos" placeholder="Opcional — separe por vírgula">
                             </div>
                             <div class="form-group">
                                 <label>Observações</label>
@@ -489,7 +488,7 @@
                                     <input type="file" id="reqAnexos" multiple onchange="handleAnexos(this)">
                                     <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
                                     <div class="upload-text"><strong>Clique para enviar</strong> ou arraste arquivos aqui</div>
-                                    <div class="upload-hint">PDF, imagens, planilhas é máx. 10MB por arquivo</div>
+                                    <div class="upload-hint">PDF, imagens, planilhas — máx. 10MB por arquivo</div>
                                 </div>
                                 <div class="anexos-list" id="anexosList"></div>
                             </div>
@@ -528,7 +527,7 @@
     let requisicoesData = [];
     let materiaisData = [];
     let centrosCustoData = [];
-    let usuárioLogado = null;
+    let usuarioLogado = null;
     let filtroAtual = 'todos';
     let termoBusca = '';
     let itemCounter = 0;
@@ -554,7 +553,7 @@
         try {
             const token = localStorage.getItem('token');
             const r = await fetch('/api/me', { headers: { 'Authorization': `Bearer ${token}` } });
-            if (r.ok) { usuárioLogado = await r.json(); }
+            if (r.ok) { usuarioLogado = await r.json(); }
         } catch (e) { console.log('Erro user:', e); }
     }
 
@@ -570,7 +569,7 @@
                 const data = await r.json();
                 requisicoesData = data.requisicoes || data || [];
             }
-        } catch (e) { console.log('Erro requisiães:', e); requisicoesData = []; }
+        } catch (e) { console.log('Erro requisições:', e); requisicoesData = gerarDadosExemplo(); }
         atualizarContadores();
         filtrarRequisicoes(filtroAtual);
     }
@@ -586,9 +585,16 @@
     async function carregarCentrosCusto() {
         try {
             const token = localStorage.getItem('token');
-            const r = await fetch('/api/compras/centros-custo', { headers: { 'Authorization': `Bearer ${token}` } });
+            const r = await fetch('/api/compras/centros-custo', { headers: { 'Authorization': `Bearer ${token}` }, credentials: 'include' });
             if (r.ok) { const d = await r.json(); centrosCustoData = d.centros || d || []; }
         } catch (e) { console.log('Erro CC:', e); }
+    }
+
+    function gerarDadosExemplo() {
+        return [
+            { id: 1, numero: 'RC-001', solicitante: 'Admin', data_solicitacao: new Date().toISOString(), centro_custo: 'Produção', prioridade: 'normal', valor_estimado: 1500, status: 'pendente' },
+            { id: 2, numero: 'RC-002', solicitante: 'Admin', data_solicitacao: new Date().toISOString(), centro_custo: 'Manutenção', prioridade: 'alta', valor_estimado: 3200, status: 'aprovado' }
+        ];
     }
 
     function configurarEventos() {
@@ -604,7 +610,7 @@
         if (status !== 'todos') dados = dados.filter(r => r.status === status);
         if (termoBusca) {
             const t = termoBusca.toLowerCase();
-            dados = dados.filter(r => (r.número || '').toLowerCase().includes(t) || (r.solicitante || '').toLowerCase().includes(t));
+            dados = dados.filter(r => (r.numero || '').toLowerCase().includes(t) || (r.solicitante || '').toLowerCase().includes(t));
         }
         renderizarTabela(dados);
     }
@@ -612,15 +618,15 @@
     function renderizarTabela(dados) {
         const tbody = document.getElementById('requisicoesTableBody');
         if (!dados.length) {
-            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding:var(--space-8); color:var(--gray-400);"><i class="fas fa-inbox"></i> Nenhuma Requisição encontrada</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding:var(--space-8); color:var(--gray-400);"><i class="fas fa-inbox"></i> Nenhuma requisição encontrada</td></tr>';
             return;
         }
         tbody.innerHTML = dados.map((r, i) => `
             <tr>
                 <td>${i + 1}</td>
-                <td><strong>${r.número || '-'}</strong></td>
+                <td><strong>${r.numero || '-'}</strong></td>
                 <td>${r.solicitante || '-'}</td>
-                <td>${formatarData(r.data_solicitação)}</td>
+                <td>${formatarData(r.data_solicitacao)}</td>
                 <td>${r.centro_custo || '-'}</td>
                 <td><span class="badge badge-${r.prioridade === 'urgente' ? 'urgent' : r.prioridade === 'alta' ? 'pending' : r.prioridade === 'normal' ? 'in-progress' : 'approved'}">${r.prioridade || 'normal'}</span></td>
                 <td>${formatarMoeda(r.valor_estimado)}</td>
@@ -640,7 +646,7 @@
         document.getElementById('totalRequisicoes').textContent = requisicoesData.length;
         document.getElementById('requisicoesPendentes').textContent = requisicoesData.filter(r => r.status === 'pendente' || r.status === 'urgente').length;
         document.getElementById('requisicoesAprovadas').textContent = requisicoesData.filter(r => r.status === 'aprovado' || r.status === 'aprovada').length;
-        document.getElementById('requisicoesCotacao').textContent = requisicoesData.filter(r => r.status === 'cotação' || r.status === 'em_cotação').length;
+        document.getElementById('requisicoesCotacao').textContent = requisicoesData.filter(r => r.status === 'cotacao' || r.status === 'em_cotacao').length;
     }
 
     /* ========== Modal: Nova Requisição ========== */
@@ -652,15 +658,15 @@
         document.getElementById('itensContainer').innerHTML = '';
         document.getElementById('anexosList').innerHTML = '';
         document.getElementById('reqDataSolicitacao').value = new Date().toISOString().split('T')[0];
-        if (usuárioLogado) document.getElementById('reqSolicitante').value = usuárioLogado.nome || usuárioLogado.name || 'Usuário';
+        if (usuarioLogado) document.getElementById('reqSolicitante').value = usuarioLogado.nome || usuarioLogado.name || 'Usuário';
         // Populate CC
         const sel = document.getElementById('reqCentroCusto');
-        sel.innerHTML = '<option value="">Selecione</option>' + centrosCustoData.map(c => `<option value="${c.id || c.nome}">${c.nome || c.descrição}</option>`).join('');
+        sel.innerHTML = '<option value="">Selecione</option>' + centrosCustoData.map(c => `<option value="${c.id || c.nome}">${c.nome || c.descricao}</option>`).join('');
         // Get next number
         try {
             const token = localStorage.getItem('token');
             const r = await fetch('/api/compras/requisicoes/proximo-numero', { headers: { 'Authorization': `Bearer ${token}` } });
-            if (r.ok) { const d = await r.json(); document.getElementById('reqNumero').value = d.número || d.proximo_número || ''; }
+            if (r.ok) { const d = await r.json(); document.getElementById('reqNumero').value = d.numero || d.proximo_numero || ''; }
         } catch (e) { document.getElementById('reqNumero').value = 'RC-' + String(requisicoesData.length + 1).padStart(3, '0'); }
         // Restaurar título do modal para criação
         const modalTitle = document.querySelector('#modalNovaRequisicao .modal-header h3');
@@ -676,7 +682,7 @@
     function adicionarItemReq() {
         itemCounter++;
         const id = itemCounter;
-        const materiaisOptions = materiaisData.map(m => `<option value="${m.nome || m.descrição}">${m.código ? m.código + ' - ' : ''}${m.nome || m.descrição}</option>`).join('');
+        const materiaisOptions = materiaisData.map(m => `<option value="${m.nome || m.descricao}">${m.codigo ? m.codigo + ' - ' : ''}${m.nome || m.descricao}</option>`).join('');
         const html = `
         <div class="item-card" id="item-${id}">
             <div class="item-header">
@@ -717,7 +723,7 @@
 
     function removerItem(id) {
         const items = document.querySelectorAll('.item-card');
-        if (items.length <= 1) { showToast('Mínimo 1 item na Requisição', 'warning'); return; }
+        if (items.length <= 1) { showToast('Mínimo 1 item na requisição', 'warning'); return; }
         document.getElementById('item-' + id)?.remove();
         atualizarResumoItens();
     }
@@ -747,7 +753,7 @@
     }
 
     function buscarPrecoMaterial(input, itemId) {
-        const mat = materiaisData.find(m => (m.nome || m.descrição) === input.value);
+        const mat = materiaisData.find(m => (m.nome || m.descricao) === input.value);
         if (mat && mat.preco_unitario) {
             document.getElementById('itemPreco-' + itemId).value = formatarMoeda(mat.preco_unitario);
             calcularSubtotal(itemId);
@@ -765,8 +771,8 @@
         const justificativa = document.getElementById('reqJustificativa').value;
         if (status !== 'rascunho' && !justificativa) { showToast('Preencha a justificativa', 'warning'); return; }
 
-        const número = document.getElementById('reqNumero').value;
-        if (!número) { showToast('Número da Requisição não gerado. Feche e reabra o formulário.', 'warning'); return; }
+        const numero = document.getElementById('reqNumero').value;
+        if (!numero) { showToast('Número da requisição não gerado. Feche e reabra o formulário.', 'warning'); return; }
 
         const items = [];
         document.querySelectorAll('.item-card').forEach(card => {
@@ -774,7 +780,7 @@
             const qtd = parseFloat(document.getElementById('itemQtd-' + id)?.value) || 0;
             const preco = parseMoeda(document.getElementById('itemPreco-' + id)?.value);
             items.push({
-                descrição: document.getElementById('itemMaterial-' + id)?.value || '',
+                descricao: document.getElementById('itemMaterial-' + id)?.value || '',
                 quantidade: qtd,
                 unidade: document.getElementById('itemUnidade-' + id)?.value || 'UN',
                 valor_estimado: preco,
@@ -786,14 +792,14 @@
         if (items.length === 0) { showToast('Adicione pelo menos 1 item', 'warning'); return; }
 
         const prioridade = document.querySelector('input[name="prioridade"]:checked')?.value || 'normal';
-        const solicitante = document.getElementById('reqSolicitante')?.value || (usuárioLogado ? (usuárioLogado.nome || usuárioLogado.name) : 'Usuário');
-        const solicitante_id = usuárioLogado ? (usuárioLogado.id || null) : null;
+        const solicitante = document.getElementById('reqSolicitante')?.value || (usuarioLogado ? (usuarioLogado.nome || usuarioLogado.name) : 'Usuário');
+        const solicitante_id = usuarioLogado ? (usuarioLogado.id || null) : null;
         const body = {
-            número,
+            numero,
             solicitante,
             solicitante_id,
             centro_custo: document.getElementById('reqCentroCusto').value || null,
-            data_solicitação: document.getElementById('reqDataSolicitacao')?.value || new Date().toISOString().split('T')[0],
+            data_solicitacao: document.getElementById('reqDataSolicitacao')?.value || new Date().toISOString().split('T')[0],
             data_necessidade: document.getElementById('reqDataNecessidade').value || null,
             projeto: document.getElementById('reqProjeto').value || null,
             prioridade, justificativa, status, itens: items,
@@ -814,9 +820,10 @@
             const method = editingId ? 'PUT' : 'POST';
             const r = await fetch(url, {
                 method, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                credentials: 'include',
                 body: JSON.stringify(body)
             });
-            if (!r.ok) { const err = await r.json().catch(() => ({})); throw new Error(err.message || 'Erro ao salvar Requisição'); }
+            if (!r.ok) { const err = await r.json().catch(() => ({})); throw new Error(err.error || err.message || 'Erro ao salvar requisição'); }
             fecharModalNovaRequisicao();
             carregarRequisicoes();
             showToast(editingId ? 'Requisição atualizada com sucesso!' : (status === 'rascunho' ? 'Rascunho salvo com sucesso!' : 'Requisição enviada com sucesso!'), 'success');
@@ -839,18 +846,18 @@
             const r = await fetch(`/api/compras/requisicoes/${id}`, { headers: { 'Authorization': `Bearer ${token}` } });
             const d = await r.json();
             const req = d.requisicao || d;
-            document.getElementById('viewReqNumero').textContent = req.número || '';
+            document.getElementById('viewReqNumero').textContent = req.numero || '';
             let itensHtml = '';
             if (req.itens && req.itens.length) {
                 itensHtml = '<table class="data-table" style="font-size:0.8rem;"><thead><tr><th>Material</th><th>Qtd</th><th>Un</th><th>Preço</th><th>Subtotal</th></tr></thead><tbody>' +
-                    req.itens.map(it => `<tr><td>${it.descrição || it.material || '-'}</td><td>${it.quantidade}</td><td>${it.unidade}</td><td>${formatarMoeda(it.valor_estimado || it.preco_unitario)}</td><td>${formatarMoeda(it.subtotal || (it.quantidade || 0) * (it.valor_estimado || it.preco_unitario || 0))}</td></tr>`).join('') +
+                    req.itens.map(it => `<tr><td>${it.descricao || it.material || '-'}</td><td>${it.quantidade}</td><td>${it.unidade}</td><td>${formatarMoeda(it.valor_estimado || it.preco_unitario)}</td><td>${formatarMoeda(it.subtotal || (it.quantidade || 0) * (it.valor_estimado || it.preco_unitario || 0))}</td></tr>`).join('') +
                     '</tbody></table>';
             }
             document.getElementById('viewReqContent').innerHTML =
                 '<div class="view-section"><h4>Informações Gerais</h4><div class="view-grid">' +
-                '<div class="view-item"><label>Nº Requisição</label><p>' + (req.número || '-') + '</p></div>' +
+                '<div class="view-item"><label>Nº Requisição</label><p>' + (req.numero || '-') + '</p></div>' +
                 '<div class="view-item"><label>Solicitante</label><p>' + (req.solicitante || '-') + '</p></div>' +
-                '<div class="view-item"><label>Data</label><p>' + formatarData(req.data_solicitação) + '</p></div>' +
+                '<div class="view-item"><label>Data</label><p>' + formatarData(req.data_solicitacao) + '</p></div>' +
                 '<div class="view-item"><label>Centro de Custo</label><p>' + (req.centro_custo || '-') + '</p></div>' +
                 '<div class="view-item"><label>Prioridade</label><p><span class="badge badge-' + (req.prioridade === 'urgente' ? 'urgent' : 'pending') + '">' + (req.prioridade || 'normal') + '</span></p></div>' +
                 '<div class="view-item"><label>Status</label><p><span class="badge badge-' + getStatusClass(req.status) + '">' + getStatusLabel(req.status) + '</span></p></div>' +
@@ -859,7 +866,7 @@
                 (itensHtml ? '<div class="view-section"><h4>Itens</h4>' + itensHtml + '</div>' : '') +
                 (req.observacoes ? '<div class="view-section"><h4>Observações</h4><p style="font-size:0.85rem; color:var(--gray-700);">' + req.observacoes + '</p></div>' : '');
             document.getElementById('modalVisualizarRequisicao').classList.add('active');
-        } catch (e) { showToast('Erro ao carregar Requisição', 'error'); }
+        } catch (e) { showToast('Erro ao carregar requisição', 'error'); }
     }
 
     function fecharModalVisualizar() {
@@ -870,13 +877,13 @@
         try {
             const token = localStorage.getItem('token');
             const r = await fetch(`/api/compras/requisicoes/${id}`, { headers: { 'Authorization': `Bearer ${token}` } });
-            if (!r.ok) throw new Error('Erro ao buscar Requisição');
+            if (!r.ok) throw new Error('Erro ao buscar requisição');
             const d = await r.json();
             const req = d.requisicao || d;
-            if (req.status !== 'rascunho' && req.status !== 'pendente') { showToast('Esta Requisição não pode ser editada', 'warning'); return; }
+            if (req.status !== 'rascunho' && req.status !== 'pendente') { showToast('Esta requisição não pode ser editada', 'warning'); return; }
             await abrirModalNovaRequisicao();
             editingId = id;
-            document.getElementById('reqNumero').value = req.número || '';
+            document.getElementById('reqNumero').value = req.numero || '';
             document.getElementById('reqJustificativa').value = req.justificativa || '';
             document.getElementById('reqObservacoes').value = req.observacoes || '';
             // Preencher campos adicionais
@@ -900,7 +907,7 @@
                 req.itens.forEach(it => {
                     adicionarItemReq();
                     const itemId = itemCounter;
-                    document.getElementById('itemMaterial-' + itemId).value = it.descrição || it.material || '';
+                    document.getElementById('itemMaterial-' + itemId).value = it.descricao || it.material || '';
                     document.getElementById('itemQtd-' + itemId).value = it.quantidade || 1;
                     const unSel = document.getElementById('itemUnidade-' + itemId);
                     if (unSel && it.unidade) unSel.value = it.unidade;
@@ -910,24 +917,21 @@
                     if (specEl) specEl.value = it.observacao || '';
                 });
             }
-            // Atualizar título do modal para edião
+            // Atualizar título do modal para edição
             const modalTitle = document.querySelector('#modalNovaRequisicao .modal-header h3');
             if (modalTitle) modalTitle.innerHTML = '<i class="fas fa-edit"></i> Editar Requisição de Compra';
-        } catch (e) { showToast('Erro ao carregar para edião', 'error'); console.error('[Requisição] Erro edião:', e); }
+        } catch (e) { showToast('Erro ao carregar para edição', 'error'); console.error('[Requisição] Erro edição:', e); }
     }
 
-    let _excluindoRequisicao = false;
     async function excluirRequisicao(id) {
-        if (_excluindoRequisicao) return;
-        if (!confirm('Excluir esta Requisição?')) return;
-        _excluindoRequisicao = true;
+        if (!confirm('Excluir esta requisição?')) return;
         try {
             const token = localStorage.getItem('token');
             const r = await fetch(`/api/compras/requisicoes/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
-            if (!r.ok) { const err = await r.json().catch(() => ({})); throw new Error(err.error || err.message || 'Erro ao excluir Requisição'); }
+            if (!r.ok) { const err = await r.json().catch(() => ({})); throw new Error(err.message || 'Erro ao excluir requisição'); }
             carregarRequisicoes();
             showToast('Requisição excluída com sucesso!', 'success');
-        } catch (e) { showToast('Erro: ' + e.message, 'error'); } finally { _excluindoRequisicao = false; }
+        } catch (e) { showToast('Erro: ' + e.message, 'error'); }
     }
 
     /* ========== Attachments ========== */
@@ -978,9 +982,9 @@
     function exportarDados() {
         if (!requisicoesData.length) { showToast('Sem dados para exportar', 'info'); return; }
         const bom = '\uFEFF';
-        let csv = bom + 'N;Solicitante;Data;Centro Custo;Prioridade;Valor;Status\n';
+        let csv = bom + 'Nº;Solicitante;Data;Centro Custo;Prioridade;Valor;Status\n';
         requisicoesData.forEach(r => {
-            csv += `${r.número};${r.solicitante};${formatarData(r.data_solicitação)};${r.centro_custo};${r.prioridade};${r.valor_estimado || 0};${r.status}\n`;
+            csv += `${r.numero};${r.solicitante};${formatarData(r.data_solicitacao)};${r.centro_custo};${r.prioridade};${r.valor_estimado || 0};${r.status}\n`;
         });
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
@@ -991,11 +995,11 @@
 
     /* ========== Helpers ========== */
     function getStatusClass(s) {
-        const map = { pendente: 'pending', aprovado: 'approved', aprovada: 'approved', rascunho: 'in-progress', cotação: 'in-progress', em_cotação: 'in-progress', rejeitado: 'cancelled', rejeitada: 'cancelled', cancelado: 'cancelled', urgente: 'urgent', finalizada: 'approved' };
+        const map = { pendente: 'pending', aprovado: 'approved', aprovada: 'approved', rascunho: 'in-progress', cotacao: 'in-progress', em_cotacao: 'in-progress', rejeitado: 'cancelled', rejeitada: 'cancelled', cancelado: 'cancelled', urgente: 'urgent', finalizada: 'approved' };
         return map[s] || 'pending';
     }
     function getStatusLabel(s) {
-        const map = { pendente: 'Pendente', aprovado: 'Aprovada', aprovada: 'Aprovada', rascunho: 'Rascunho', cotação: 'Em Cotação', em_cotação: 'Em Cotação', rejeitado: 'Rejeitada', rejeitada: 'Rejeitada', cancelado: 'Cancelado', urgente: 'Urgente', finalizada: 'Finalizada' };
+        const map = { pendente: 'Pendente', aprovado: 'Aprovada', aprovada: 'Aprovada', rascunho: 'Rascunho', cotacao: 'Em Cotação', em_cotacao: 'Em Cotação', rejeitado: 'Rejeitada', rejeitada: 'Rejeitada', cancelado: 'Cancelado', urgente: 'Urgente', finalizada: 'Finalizada' };
         return map[s] || s || '-';
     }
     function formatarData(d) { if (!d) return '-'; try { return new Date(d).toLocaleDateString('pt-BR'); } catch (e) { return d; } }
@@ -1058,15 +1062,10 @@
     <script src="/_shared/confirm-dialog.js?v=20260301"></script>
 
     <!-- Chat Widget BOB AI -->
-    <script src="/chat/widget.js?v=20260416" defer></script>
+    <script src="/chat/widget.js?v=20260418" defer></script>
 
     <!-- Enterprise Shared -->
     <script src="/js/sidebar-click-animation.js?v=20260301"></script>
-    <script src="/_shared/accessibility-widget.js?v=20260301"></script>
-
-    <!-- Chat Corporativo (Teams) -->
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
-    <script src="/js/user-dropdown.js?v=20260319" defer></script>
+    <script src="/_shared/accessibility-widget.js?v=20260418"></script>
 </body>
 </html>

@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
+const { getDatabase } = require('../database');
 
 // GET /api/compras/centros-custo
 router.get('/', async (req, res) => {
     try {
-        const { pool } = req.app.locals;
-        const [rows] = await pool.query('SELECT id, codigo, nome, descricao FROM centros_custo WHERE ativo = 1 ORDER BY nome');
+        const db = getDatabase();
+        const [rows] = await db.query('SELECT id, codigo, nome, descricao FROM centros_custo WHERE ativo = 1 ORDER BY nome');
         res.json({ centros: rows });
     } catch (error) {
         console.error('[COMPRAS] Erro GET centros-custo:', error);

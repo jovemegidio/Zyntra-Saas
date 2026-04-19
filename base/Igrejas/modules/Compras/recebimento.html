@@ -2,7 +2,9 @@
 <html lang="pt-BR">
 <head>
     <!-- Favicon -->
-    <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 
     <meta charset="UTF-8">
@@ -12,11 +14,10 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Zyntra: Recebimento</title>
+    <title>Aluforce: Recebimento</title>
 
     <!-- Sistema de Autenticação Unificado -->
-    <script src="/js/auth-unified.js?v=20260326" defer></script>
-    <script src="/js/inactivity-manager.js?v=20260324" defer></script>
+    <script src="/js/auth-unified.js?v=20260301" defer></script>
 
     <!-- Fontes -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -101,7 +102,6 @@
     <script src="/js/anti-copy-protection.js" defer></script>
     <!-- Chat Widget BOB AI -->
     <link rel="stylesheet" href="/chat/widget.css?v=20260301">
-    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260326">
 </head>
 <body>
     <div class="app-container">
@@ -120,7 +120,6 @@
             </nav>
             <div class="sidebar-bottom">
                 <button class="sidebar-btn" title="Estoque MP" onclick="window.location.href='gestao-estoque.html'"><i class="fas fa-boxes"></i></button>
-                <button class="sidebar-btn" title="QR Code Estoque" onclick="window.location.href='qrcode-estoque.html'"><i class="fas fa-qrcode"></i></button>
                 <button class="sidebar-btn" title="Relatórios" onclick="window.location.href='relatorios.html'"><i class="fas fa-chart-bar"></i></button>
             </div>
         </aside>
@@ -134,7 +133,7 @@
                         <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
-                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;"></span>
+                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">—</span>
                         <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Recebimento</span>
                     </div>
                 </div>
@@ -172,7 +171,7 @@
                 <!-- ==================== TAB: XML IMPORT ==================== -->
                 <div class="tab-content" id="tab-xml-import">
                     <div class="xml-import-section">
-                        <h3><i class="fas fa-file-code"></i> Entrada Automática é Importar NF-e de Fornecedor</h3>
+                        <h3><i class="fas fa-file-code"></i> Entrada Automática — Importar NF-e de Fornecedor</h3>
                         <p style="font-size:0.8rem; color:var(--gray-600); margin-bottom:var(--space-3);">
                             Cole o XML da NF-e abaixo ou faça upload do arquivo. O sistema extrai automaticamente todos os dados: emitente, itens, impostos e valores.
                         </p>
@@ -250,26 +249,26 @@
 
 
                 <!-- Stats -->
-                <div class="metrics-grid">
-                    <div class="metric-card orange">
-                        <div class="metric-header"><div class="metric-icon orange"><i class="fas fa-clock"></i></div></div>
-                        <div class="metric-value" id="totalPendentes">0</div>
-                        <div class="metric-label">Pendentes</div>
+                <div class="stats-grid">
+                    <div class="stat-card amber">
+                        <div class="stat-header"><div class="stat-icon amber"><i class="fas fa-clock"></i></div></div>
+                        <div class="stat-value" id="totalPendentes">0</div>
+                        <div class="stat-label">Pendentes</div>
                     </div>
-                    <div class="metric-card red">
-                        <div class="metric-header"><div class="metric-icon red"><i class="fas fa-exclamation-triangle"></i></div></div>
-                        <div class="metric-value" id="totalAtrasados">0</div>
-                        <div class="metric-label">Atrasados</div>
+                    <div class="stat-card red">
+                        <div class="stat-header"><div class="stat-icon red"><i class="fas fa-exclamation-triangle"></i></div></div>
+                        <div class="stat-value" id="totalAtrasados">0</div>
+                        <div class="stat-label">Atrasados</div>
                     </div>
-                    <div class="metric-card green">
-                        <div class="metric-header"><div class="metric-icon green"><i class="fas fa-check-circle"></i></div></div>
-                        <div class="metric-value" id="recebidosHoje">0</div>
-                        <div class="metric-label">Recebidos Hoje</div>
+                    <div class="stat-card green">
+                        <div class="stat-header"><div class="stat-icon green"><i class="fas fa-check-circle"></i></div></div>
+                        <div class="stat-value" id="recebidosHoje">0</div>
+                        <div class="stat-label">Recebidos Hoje</div>
                     </div>
-                    <div class="metric-card blue">
-                        <div class="metric-header"><div class="metric-icon blue"><i class="fas fa-dollar-sign"></i></div></div>
-                        <div class="metric-value" id="valorPendente">R$ 0</div>
-                        <div class="metric-label">Valor Pendente</div>
+                    <div class="stat-card cyan">
+                        <div class="stat-header"><div class="stat-icon cyan"><i class="fas fa-dollar-sign"></i></div></div>
+                        <div class="stat-value" id="valorPendente">R$ 0</div>
+                        <div class="stat-label">Valor Pendente</div>
                     </div>
                 </div>
 
@@ -431,6 +430,16 @@
     let anexosNfe = [];
     let xmlImportadoData = null;
 
+    function showToast(msg, type) {
+        if (typeof ComprasUtils !== 'undefined' && ComprasUtils.toast) { ComprasUtils.toast.show(msg, type); return; }
+        const t = document.createElement('div');
+        t.style.cssText = 'position:fixed;top:20px;right:20px;z-index:99999;padding:12px 20px;border-radius:8px;color:#fff;font-size:0.85rem;max-width:360px;box-shadow:0 4px 12px rgba(0,0,0,.15);animation:fadeIn .3s ease;';
+        t.style.background = type === 'success' ? '#16a34a' : type === 'error' ? '#dc2626' : '#2563eb';
+        t.textContent = msg;
+        document.body.appendChild(t);
+        setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity .3s'; setTimeout(() => t.remove(), 300); }, 3500);
+    }
+
     function toggleMobileSidebar() {
         const sidebar = document.getElementById('mobile-sidebar');
         const overlay = document.getElementById('sidebar-overlay');
@@ -458,9 +467,9 @@
     /* ========== XML Import ========== */
     async function importarXmlTexto() {
         const xml = document.getElementById('xmlTextoInput').value.trim();
-        if (!xml) { alert('Cole o conteúdo XML primeiro'); return; }
+        if (!xml) { showToast('Cole o conteúdo XML primeiro', 'error'); return; }
         if (!xml.includes('<nfeProc') && !xml.includes('<NFe') && !xml.includes('<infNFe')) {
-            alert('O conteúdo não parece ser um XML de NF-e válido'); return;
+            showToast('O conteúdo não parece ser um XML de NF-e válido', 'error'); return;
         }
         const btn = document.getElementById('btnImportarXml');
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
@@ -487,7 +496,7 @@
                 <div class="xml-result-card">
                     <h4 style="font-size:0.85rem; color:var(--success-700); margin-bottom:var(--space-2);"><i class="fas fa-check-circle"></i> NF-e Importada com Sucesso!</h4>
                     <div class="xml-result-grid">
-                        <div class="field"><label>Nº NF-e</label><p><strong>${d.número_nfe}</strong></p></div>
+                        <div class="field"><label>Nº NF-e</label><p><strong>${d.numero_nfe}</strong></p></div>
                         <div class="field"><label>Chave de Acesso</label><p style="font-size:0.7rem; word-break:break-all;">${d.chave_acesso}</p></div>
                         <div class="field"><label>Fornecedor</label><p>${d.fornecedor?.razao_social || d.fornecedor || '-'}</p></div>
                         <div class="field"><label>CNPJ</label><p>${formatarCNPJ(d.fornecedor?.cnpj)}</p></div>
@@ -523,8 +532,8 @@
     function handleXmlUpload(files) {
         if (!files || !files.length) return;
         const file = files[0];
-        if (!file.name.endsWith('.xml')) { alert('Apenas arquivos XML são aceitos'); return; }
-        if (file.size > 5 * 1024 * 1024) { alert('Arquivo excede 5MB'); return; }
+        if (!file.name.endsWith('.xml')) { showToast('Apenas arquivos XML são aceitos', 'error'); return; }
+        if (file.size > 5 * 1024 * 1024) { showToast('Arquivo excede 5MB', 'error'); return; }
         const reader = new FileReader();
         reader.onload = (e) => {
             document.getElementById('xmlTextoInput').value = e.target.result;
@@ -548,7 +557,7 @@
                 return;
             }
             tbody.innerHTML = notas.map(nf => `<tr>
-                <td><strong>${nf.número_nfe || '-'}</strong></td>
+                <td><strong>${nf.numero_nfe || '-'}</strong></td>
                 <td>${nf.fornecedor_razao_social || '-'}</td>
                 <td>${formatarCNPJ(nf.fornecedor_cnpj)}</td>
                 <td>${formatarMoeda(nf.valor_total)}</td>
@@ -638,7 +647,7 @@
         tbody.innerHTML = pedidosData.map(p => {
             const atrasado = p.atrasado || (p.data_entrega && new Date(p.data_entrega) < new Date() && p.status !== 'recebido');
             return `<tr>
-                <td><strong>${p.número || p.id}</strong></td>
+                <td><strong>${p.numero || p.id}</strong></td>
                 <td>${p.fornecedor || p.fornecedor_nome || '-'}</td>
                 <td>${formatarData(p.data_pedido || p.created_at)}</td>
                 <td>${formatarData(p.data_entrega)}${atrasado ? ' <span class="badge badge-urgent">Atrasado</span>' : ''}</td>
@@ -666,7 +675,7 @@
         const termo = document.getElementById('searchInput').value.toLowerCase();
         if (!termo) { carregarPedidos(); return; }
         const filtrados = pedidosData.filter(p =>
-            (p.número || '').toLowerCase().includes(termo) ||
+            (p.numero || '').toLowerCase().includes(termo) ||
             (p.fornecedor || p.fornecedor_nome || '').toLowerCase().includes(termo)
         );
         const tbody = document.getElementById('pedidosTableBody');
@@ -689,11 +698,11 @@
             let itensHtml = '';
             if (p.itens && p.itens.length) {
                 itensHtml = '<table class="data-table" style="font-size:0.8rem;"><thead><tr><th>Material</th><th>Qtd</th><th>Valor Unit</th><th>Total</th></tr></thead><tbody>' +
-                    p.itens.map(it => `<tr><td>${it.material || it.descrição}</td><td>${it.quantidade}</td><td>${formatarMoeda(it.valor_unitario || it.preco_unitario)}</td><td>${formatarMoeda((it.quantidade || 0) * (it.valor_unitario || it.preco_unitario || 0))}</td></tr>`).join('') + '</tbody></table>';
+                    p.itens.map(it => `<tr><td>${it.material || it.descricao}</td><td>${it.quantidade}</td><td>${formatarMoeda(it.valor_unitario || it.preco_unitario)}</td><td>${formatarMoeda((it.quantidade || 0) * (it.valor_unitario || it.preco_unitario || 0))}</td></tr>`).join('') + '</tbody></table>';
             }
             document.getElementById('modalDetalhesBody').innerHTML =
                 '<div class="view-section"><h4>Informações do Pedido</h4><div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px,1fr)); gap:var(--space-3);">' +
-                '<div><label style="font-size:0.65rem; color:var(--gray-500); text-transform:uppercase;">Número</label><p style="font-size:0.85rem; color:var(--gray-800);">' + (p.número || p.id) + '</p></div>' +
+                '<div><label style="font-size:0.65rem; color:var(--gray-500); text-transform:uppercase;">Número</label><p style="font-size:0.85rem; color:var(--gray-800);">' + (p.numero || p.id) + '</p></div>' +
                 '<div><label style="font-size:0.65rem; color:var(--gray-500); text-transform:uppercase;">Fornecedor</label><p style="font-size:0.85rem; color:var(--gray-800);">' + (p.fornecedor || p.fornecedor_nome || '-') + '</p></div>' +
                 '<div><label style="font-size:0.65rem; color:var(--gray-500); text-transform:uppercase;">Data Pedido</label><p style="font-size:0.85rem;">' + formatarData(p.data_pedido || p.created_at) + '</p></div>' +
                 '<div><label style="font-size:0.65rem; color:var(--gray-500); text-transform:uppercase;">Previsão</label><p style="font-size:0.85rem;">' + formatarData(p.data_entrega) + '</p></div>' +
@@ -703,7 +712,7 @@
                 (itensHtml ? '<div class="view-section"><h4>Itens</h4>' + itensHtml + '</div>' : '') +
                 (p.observacoes ? '<div class="view-section"><h4>Observações</h4><p style="font-size:0.85rem; color:var(--gray-700);">' + p.observacoes + '</p></div>' : '');
             document.getElementById('modalDetalhes').classList.add('active');
-        } catch (e) { alert('Erro ao carregar detalhes'); }
+        } catch (e) { showToast('Erro ao carregar detalhes', 'error'); }
     }
 
     function fecharModalDetalhes() { document.getElementById('modalDetalhes').classList.remove('active'); }
@@ -716,7 +725,7 @@
             const d = await r.json();
             const p = d.pedido || d;
             document.getElementById('pedidoId').value = p.id;
-            document.getElementById('infoPedidoNumero').textContent = p.número || p.id;
+            document.getElementById('infoPedidoNumero').textContent = p.numero || p.id;
             document.getElementById('infoPedidoFornecedor').textContent = p.fornecedor || p.fornecedor_nome || '-';
             document.getElementById('infoPedidoValor').textContent = formatarMoeda(p.valor_total);
             document.getElementById('dataRecebimento').value = new Date().toISOString().split('T')[0];
@@ -732,7 +741,7 @@
             if (p.itens && p.itens.length) {
                 itensBody.innerHTML = p.itens.map((it, i) =>
                     `<tr>
-                        <td>${it.material || it.descrição}</td>
+                        <td>${it.material || it.descricao}</td>
                         <td style="text-align:center;">${it.quantidade}</td>
                         <td><input type="number" id="qtdRec-${i}" value="${it.quantidade}" min="0" max="${it.quantidade}"></td>
                         <td style="text-align:center;"><input type="checkbox" id="conforme-${i}" checked></td>
@@ -742,21 +751,15 @@
                 itensBody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--gray-400);">Sem itens detalhados</td></tr>';
             }
             document.getElementById('modalRecebimento').classList.add('active');
-        } catch (e) { alert('Erro ao abrir recebimento'); }
+        } catch (e) { showToast('Erro ao abrir recebimento', 'error'); }
     }
 
     async function salvarRecebimento() {
-        // SECURITY FIX: Idempotency guard - prevent double-click on inventory operation
-        if (salvarRecebimento._running) return;
-        salvarRecebimento._running = true;
-        const _btnRec = document.querySelector('#formRecebimento button[type="submit"]');
-        if (_btnRec) _btnRec.disabled = true;
-        try {
         const pedidoId = document.getElementById('pedidoId').value;
         if (!pedidoId) return;
         const body = {
             data_recebimento: document.getElementById('dataRecebimento').value,
-            número_nfe: document.getElementById('numeroNfe').value,
+            numero_nfe: document.getElementById('numeroNfe').value,
             tipo: document.getElementById('tipoRecebimento').value,
             chave_acesso: document.getElementById('chaveAcessoNfe').value || document.getElementById('chaveNfeSalvar').value,
             responsavel: document.getElementById('responsavelRecebimento').value,
@@ -765,7 +768,7 @@
             observacoes: document.getElementById('observacoesRecebimento').value,
             dados_sefaz: dadosNfeSefaz
         };
-        if (!body.número_nfe || !body.responsavel) { alert('Preencha NF-e e Responsável'); return; }
+        if (!body.numero_nfe || !body.responsavel) { showToast('Preencha NF-e e Responsável', 'error'); return; }
         // Collect items received
         const itensRows = document.getElementById('itensRecebimentoBody').querySelectorAll('tr');
         body.itens = [];
@@ -776,6 +779,7 @@
                 body.itens.push({ quantidade_recebida: parseFloat(qtdInput.value) || 0, conforme: conformeInput?.checked ?? true });
             }
         });
+        try {
             const token = localStorage.getItem('token');
             const r = await fetch(`${API_BASE}/pedidos/${pedidoId}/receber`, {
                 method: 'POST',
@@ -785,11 +789,8 @@
             if (!r.ok) throw new Error('Erro ao registrar');
             fecharModal();
             atualizarLista();
-            alert('Recebimento registrado com sucesso!');
-        } catch (e) { alert('Erro: ' + e.message); } finally {
-            salvarRecebimento._running = false;
-            if (_btnRec) _btnRec.disabled = false;
-        }
+            showToast('Recebimento registrado com sucesso!', 'success');
+        } catch (e) { showToast('Erro: ' + e.message, 'error'); }
     }
 
     function fecharModal() {
@@ -801,7 +802,7 @@
     /* ========== SEFAZ NF-e Lookup ========== */
     async function buscarNfeSefaz() {
         const chave = document.getElementById('chaveAcessoNfe').value.replace(/\D/g, '');
-        if (chave.length !== 44) { alert('Chave de acesso deve ter 44 dígitos'); return; }
+        if (chave.length !== 44) { showToast('Chave de acesso deve ter 44 dígitos', 'error'); return; }
         const btn = document.getElementById('btnBuscarSefaz');
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Consultando...';
         btn.disabled = true;
@@ -817,7 +818,7 @@
                 <div class="sefaz-card success">
                     <h5><i class="fas fa-check-circle" style="color:var(--success-500);"></i> NF-e Encontrada</h5>
                     <div class="sefaz-info-grid">
-                        <div><label>Número</label><p>${d.número || d.nNF || '-'}</p></div>
+                        <div><label>Número</label><p>${d.numero || d.nNF || '-'}</p></div>
                         <div><label>Série</label><p>${d.serie || '-'}</p></div>
                         <div><label>Emissão</label><p>${formatarDataHora(d.data_emissao || d.dhEmi)}</p></div>
                         <div><label>Emitente</label><p>${d.emitente?.razao_social || d.emit?.xNome || '-'}</p></div>
@@ -835,14 +836,14 @@
 
     function preencherDadosNfe() {
         if (!dadosNfeSefaz) return;
-        document.getElementById('numeroNfe').value = dadosNfeSefaz.número || dadosNfeSefaz.nNF || '';
+        document.getElementById('numeroNfe').value = dadosNfeSefaz.numero || dadosNfeSefaz.nNF || '';
     }
 
     /* ========== Files ========== */
     function handleFiles(files) {
         Array.from(files).forEach(f => {
-            if (f.size > 10 * 1024 * 1024) { alert(`${f.name} excede 10MB`); return; }
-            if (!f.name.match(/\.(xml|pdf)$/i)) { alert(`${f.name}: apenas XML e PDF`); return; }
+            if (f.size > 10 * 1024 * 1024) { showToast(`${f.name} excede 10MB`, 'error'); return; }
+            if (!f.name.match(/\.(xml|pdf)$/i)) { showToast(`${f.name}: apenas XML e PDF`, 'error'); return; }
             anexosNfe.push(f);
         });
         renderizarAnexos();
@@ -896,7 +897,7 @@
         return map[s] || { label: s || '-', class: 'pending' };
     }
     function debounce(func, wait) { let t; return function(...args) { clearTimeout(t); t = setTimeout(() => func.apply(this, args), wait); }; }
-    function exportarRelatorio() { alert('Funcionalidade em desenvolvimento'); }
+    function exportarRelatorio() { showToast('Funcionalidade em desenvolvimento', 'info'); }
     </script>
 
     <!-- Module Scripts -->
@@ -909,15 +910,10 @@
     <script src="/_shared/confirm-dialog.js?v=20260301"></script>
 
     <!-- Chat Widget BOB AI -->
-    <script src="/chat/widget.js?v=20260416" defer></script>
+    <script src="/chat/widget.js?v=20260418" defer></script>
 
     <!-- Enterprise Shared -->
     <script src="/js/sidebar-click-animation.js?v=20260301"></script>
-    <script src="/_shared/accessibility-widget.js?v=20260301"></script>
-
-    <!-- Chat Corporativo (Teams) -->
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
-    <script src="/js/user-dropdown.js?v=20260319" defer></script>
+    <script src="/_shared/accessibility-widget.js?v=20260418"></script>
 </body>
 </html>

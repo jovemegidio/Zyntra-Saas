@@ -219,6 +219,10 @@ class FornecedoresManager {
         return labels[status] || status;
     }
 
+    filtrar() {
+        this.renderizarTabela();
+    }
+
     filtrarFornecedoresPorStatus() {
         let resultado = this.fornecedores;
         
@@ -344,14 +348,24 @@ function filterByStatus(status, evt) {
     }
 }
 
-function filtrarFornecedores() {
-    const searchTerm = document.getElementById('searchFornecedor').value.toLowerCase();
-    const rows = document.querySelectorAll('#fornecedoresTableBody tr');
-    
-    rows.forEach(row => {
-        const text = row.textContent.toLowerCase();
-        row.style.display = text.includes(searchTerm) ? '' : 'none';
-    });
+function filtrarFornecedores(filtro, btn) {
+    if (filtro !== undefined) {
+        // Called from HTML filter buttons
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        if (btn) btn.classList.add('active');
+        if (typeof fornecedoresManager !== 'undefined') {
+            fornecedoresManager.filtroAtual = filtro;
+            fornecedoresManager.renderizarTabela();
+        }
+    } else {
+        // Called as search (legacy)
+        const el = document.getElementById('buscaFornecedor') || document.getElementById('searchFornecedor');
+        const searchTerm = el ? el.value.toLowerCase() : '';
+        if (typeof fornecedoresManager !== 'undefined') {
+            fornecedoresManager.termoBusca = searchTerm;
+            fornecedoresManager.renderizarTabela();
+        }
+    }
 }
 
 function toggleSelectAll() {
@@ -361,11 +375,14 @@ function toggleSelectAll() {
 }
 
 function openNovoFornecedorModal() {
-    alert('Abrir modal de novo fornecedor\n\nFuncionalidade em desenvolvimento.');
+    if (typeof abrirModalNovoFornecedor === 'function') { abrirModalNovoFornecedor(); return; }
+    if (typeof ComprasUtils !== 'undefined' && ComprasUtils.toast) { ComprasUtils.toast.show('Funcionalidade em desenvolvimento', 'info'); return; }
+    console.log('[Fornecedores] Modal de novo fornecedor em desenvolvimento');
 }
 
 function exportarFornecedores() {
-    alert('Exportar fornecedores\n\nFuncionalidade em desenvolvimento.');
+    if (typeof ComprasUtils !== 'undefined' && ComprasUtils.toast) { ComprasUtils.toast.show('Exportação em desenvolvimento', 'info'); return; }
+    console.log('[Fornecedores] Exportação em desenvolvimento');
 }
 
 // Inicializar ao carregar a página
