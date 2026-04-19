@@ -16491,6 +16491,12 @@ td{padding:5px 8px;border-bottom:1px solid #e5e7eb;font-size:10px}
 
         // Carregar itens do pedido da API
         async function carregarItensPedido(pedidoId) {
+            // Guard: não buscar itens para pedido ainda não salvo
+            if (!pedidoId || pedidoId === 'NOVO') {
+                itensPedidoAtual = [];
+                renderizarTabelaItens();
+                return;
+            }
             try {
                 const response = await fetch(`/api/vendas/pedidos/${pedidoId}/itens`, {
                     credentials: 'include',
@@ -17509,6 +17515,14 @@ td{padding:5px 8px;border-bottom:1px solid #e5e7eb;font-size:10px}
                 showNotification('Nenhum pedido selecionado', 'error');
                 return;
             }
+
+            // Guard: pedido ainda não salvo — apenas descartar sem chamar API
+            if (pedidoAlvo.id === 'NOVO' || modoNovoPedido) {
+                fecharModalEditar();
+                showNotification('Orçamento descartado', 'info');
+                return;
+            }
+
             window._excluindoPedido = true;
 
             // Salvar dados do pedido ANTES do confirm (pois pode ser alterado)

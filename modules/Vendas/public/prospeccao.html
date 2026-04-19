@@ -1827,6 +1827,14 @@ Aceita com ou sem formatação"></textarea>
             if (!lead) return;
 
             const statusAnterior = lead.status;
+
+            // Guard: não processar se já está no mesmo status
+            if (statusAnterior === novoStatus) return;
+
+            // Guard: evitar chamadas concorrentes
+            if (this._movendoLead) return;
+            this._movendoLead = true;
+
             lead.status = novoStatus;
 
             try {
@@ -1842,6 +1850,7 @@ Aceita com ou sem formatação"></textarea>
             this.toast(`Lead movido para ${this.formatarStatus(novoStatus)}`, 'success');
             this.atualizarMetricas();
             this.renderizarKanban();
+            this._movendoLead = false;
         },
 
         async buscarEmpresas() {
@@ -2634,7 +2643,7 @@ Aceita com ou sem formatação"></textarea>
 
         abrirWhatsApp(telefone) {
             if (!telefone) return;
-            const número = telefone.replace(/\D/g, '');
+            const numero = telefone.replace(/\D/g, '');
             window.open(`https://wa.me/55${numero}`, '_blank');
         },
 
