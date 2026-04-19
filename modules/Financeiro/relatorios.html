@@ -1164,7 +1164,7 @@
                         <p class="subtitle">Visualização detalhada dos dados</p>
                     </div>
                 </div>
-                <button class="modal-close-padrão" onclick="fecharModal('modalRelatório')">
+                <button class="modal-close-padrão" onclick="fecharModal('modalRelatorio')">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
@@ -1179,7 +1179,7 @@
                 <div id="conteudo-relatorio" style="display: none;"></div>
             </div>
             <div class="modal-footer-padrão">
-                <button class="btn-padrão-ghost" onclick="fecharModal('modalRelatório')">
+                <button class="btn-padrão-ghost" onclick="fecharModal('modalRelatorio')">
                     <i class="fas fa-times"></i> Fechar
                 </button>
                 <button class="btn-padrão-danger" onclick="exportarRelatórioAtual('pdf')">
@@ -1997,7 +1997,7 @@
 
         async function carregarBancos() {
             try {
-                const response = await fetch('/api/financeiro/contas-bancárias', { credentials: 'include' });
+                const response = await fetch('/api/financeiro/contas-bancarias', { credentials: 'include' });
                 if (response.ok) {
                     const data = await response.json();
                     bancos = data.data || data || [];
@@ -2333,7 +2333,7 @@
             }
 
             const dados = {
-                numero_titulo: document.getElementById('desconto-número').value,
+                numero_titulo: document.getElementById('desconto-numero').value,
                 cliente_sacado: document.getElementById('desconto-cliente').value,
                 valor_titulo: parsearMoedaInput(document.getElementById('desconto-valor').value),
                 data_vencimento: document.getElementById('desconto-vencimento').value,
@@ -2415,7 +2415,7 @@
                 // Atualizar período exibido
                 const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
                                'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-                const períodoEl = document.getElementById('períodoResumo');
+                const períodoEl = document.getElementById('periodoResumo');
                 if (períodoEl) {
                     const dI = new Date(primeiroDia + 'T00:00:00');
                     const dF = new Date(ultimoDia + 'T00:00:00');
@@ -2437,7 +2437,7 @@
                 const contasPagar = Array.isArray(pagarData) ? pagarData : (pagarData.data || []);
 
                 // Buscar saldo das contas bancárias
-                const bancosResp = await fetch('/api/financeiro/contas-bancárias', { credentials: 'include' });
+                const bancosResp = await fetch('/api/financeiro/contas-bancarias', { credentials: 'include' });
                 const bancosData = bancosResp.ok ? await bancosResp.json() : { data: [] };
                 const bancosArr = Array.isArray(bancosData) ? bancosData : (bancosData.data || []);
 
@@ -2968,7 +2968,7 @@
         }
 
         function atualizarRelatórios() {
-            const período = document.getElementById('filtroPeríodo').value;
+            const período = document.getElementById('filtroPeriodo').value;
             const hoje = new Date();
             let dataInicio, dataFim;
 
@@ -3065,15 +3065,15 @@
                 'contas-receber-período': 'Contas a Receber por Período'
             };
 
-            document.getElementById('modalRelatórioTítulo').textContent = títulos[tipo] || 'Relatório';
+            document.getElementById('modalRelatorioTitulo').textContent = títulos[tipo] || 'Relatório';
 
             // Mostrar loading
-            const loadingEl = document.getElementById('loading-relatório');
-            const conteudoEl = document.getElementById('conteudo-relatório');
+            const loadingEl = document.getElementById('loading-relatorio');
+            const conteudoEl = document.getElementById('conteudo-relatorio');
             if (loadingEl) loadingEl.style.display = 'flex';
             if (conteudoEl) conteudoEl.style.display = 'none';
 
-            document.getElementById('modalRelatório').classList.add('active');
+            document.getElementById('modalRelatorio').classList.add('active');
 
             // Carregar conteúdo real da API
             try {
@@ -3084,7 +3084,7 @@
                     conteudoEl.style.display = 'block';
                     conteudoEl.classList.add('resultado-relatório');
                 } else {
-                    document.getElementById('modalRelatórioBody').innerHTML = html;
+                    document.getElementById('modalRelatorioBody').innerHTML = html;
                 }
             } catch (err) {
                 console.error('Erro ao gerar relatório:', err);
@@ -3384,7 +3384,7 @@
                         </tbody></table>`;
                 }
                 case 'bancos': {
-                    const bancosArr = await fetchAPI('/api/financeiro/contas-bancárias');
+                    const bancosArr = await fetchAPI('/api/financeiro/contas-bancarias');
                     const saldoTotal = bancosArr.reduce((s, b) => s + parseFloat(b.saldo_atual || b.saldo || 0), 0);
                     const rows = bancosArr.map(b => `<tr><td><strong>${b.banco || b.nome_banco || b.nome || '-'}</strong></td><td>${b.agencia || '-'}</td><td>${b.conta || b.numero_conta || '-'}</td><td style="text-align:right" class="valor-cell positivo">${fmtM(b.saldo_atual || b.saldo)}</td></tr>`).join('');
                     return `
@@ -3725,8 +3725,8 @@
         function fecharModal(id) {
             document.getElementById(id).classList.remove('active');
             // Resetar loading ao fechar
-            const loadingEl = document.getElementById('loading-relatório');
-            const conteudoEl = document.getElementById('conteudo-relatório');
+            const loadingEl = document.getElementById('loading-relatorio');
+            const conteudoEl = document.getElementById('conteudo-relatorio');
             if (loadingEl) loadingEl.style.display = 'flex';
             if (conteudoEl) conteudoEl.style.display = 'none';
         }
@@ -4065,7 +4065,7 @@
         }
 
         function salvarAgendamento() {
-            const tipo = document.getElementById('agendTipoRelatório').value;
+            const tipo = document.getElementById('agendTipoRelatorio').value;
             const freq = document.querySelector('input[name="agendFreq"]:checked')?.value || 'semanal';
             const horario = document.getElementById('agendHorario').value;
             const formato = document.getElementById('agendFormato').value;
@@ -4169,9 +4169,9 @@
             const fmtMoeda = (v) => parseFloat(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
             // Usar o conteúdo já renderizado no modal se disponível
-            const conteudoEl = document.getElementById('conteudo-relatório');
+            const conteudoEl = document.getElementById('conteudo-relatorio');
             if (conteudoEl && conteudoEl.innerHTML.trim().length > 100) {
-                return `<div class="section"><div class="section-header">${document.getElementById('modalRelatórioTítulo')?.textContent || 'Relatório'}</div>
+                return `<div class="section"><div class="section-header">${document.getElementById('modalRelatorioTitulo')?.textContent || 'Relatório'}</div>
                 <div class="section-content">${conteudoEl.innerHTML}</div></div>`;
             }
 

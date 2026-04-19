@@ -740,7 +740,7 @@
 
         async function carregarBancos() {
             try {
-                const r = await fetch(`${API}/contas-bancárias`, { credentials: 'include', headers: hdrs() });
+                const r = await fetch(`${API}/contas-bancarias`, { credentials: 'include', headers: hdrs() });
                 const data = await r.json();
                 const sel = document.getElementById('filtroBanco');
                 const bancos = data.data || data || [];
@@ -789,7 +789,7 @@
             try {
                 const contaId = document.getElementById('filtroBanco').value;
                 contaBancariaAtual = contaId;
-                let url = `${API}/conciliação?tipo=extrato`;
+                let url = `${API}/conciliacao?tipo=extrato`;
                 if (contaId) url += `&conta_id=${contaId}`;
                 const r = await fetch(url, { credentials: 'include', headers: hdrs() });
                 const data = await r.json();
@@ -806,7 +806,7 @@
         async function carregarHistorico() {
             try {
                 const contaId = document.getElementById('filtroBanco').value;
-                let url = `${API}/conciliação?tipo=conciliações`;
+                let url = `${API}/conciliacao?tipo=conciliacoes`;
                 if (contaId) url += `&conta_id=${contaId}`;
                 const r = await fetch(url, { credentials: 'include', headers: hdrs() });
                 const data = await r.json();
@@ -848,7 +848,7 @@
             const listaSistema = document.getElementById('listaSistema');
             if (lancamentosSistema.length === 0) {
                 listaSistema.innerHTML = '<li style="padding:40px;text-align:center;color:var(--text-secondary)"><i class="fas fa-inbox" style="font-size:32px;margin-bottom:12px;display:block;color:#cbd5e1"></i>Nenhum lançamento no período</li>';
-                document.getElementById('paginaçãoSistema').innerHTML = '';
+                document.getElementById('paginacaoSistema').innerHTML = '';
                 return;
             }
             const total = lancamentosSistema.length;
@@ -869,14 +869,14 @@
                 </li>
             `).join('');
 
-            renderizarPaginação('paginaçãoSistema', paginaSistema, totalPags, total, inicio, fim, 'sistema');
+            renderizarPaginação('paginacaoSistema', paginaSistema, totalPags, total, inicio, fim, 'sistema');
         }
 
         function renderizarPainelExtrato() {
             const listaExtrato = document.getElementById('listaExtrato');
             if (lancamentosExtrato.length === 0) {
                 listaExtrato.innerHTML = '<li style="padding:40px;text-align:center;color:var(--text-secondary)"><i class="fas fa-file-import" style="font-size:32px;margin-bottom:12px;display:block;color:#cbd5e1"></i>Importe um extrato OFX para começar</li>';
-                document.getElementById('paginaçãoExtrato').innerHTML = '';
+                document.getElementById('paginacaoExtrato').innerHTML = '';
                 return;
             }
             const total = lancamentosExtrato.length;
@@ -897,7 +897,7 @@
                 </li>
             `).join('');
 
-            renderizarPaginação('paginaçãoExtrato', paginaExtrato, totalPags, total, inicio, fim, 'extrato');
+            renderizarPaginação('paginacaoExtrato', paginaExtrato, totalPags, total, inicio, fim, 'extrato');
         }
 
         function renderizarPaginação(containerId, paginaAtual, totalPags, total, inicio, fim, tipo) {
@@ -960,7 +960,7 @@
         }
 
         function renderizarHistórico() {
-            const tbody = document.getElementById('históricoConciliações');
+            const tbody = document.getElementById('historicoConciliacoes');
             if (histórico.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-secondary)">Nenhuma conciliação realizada</td></tr>';
                 return;
@@ -1008,7 +1008,7 @@
                     valor: sisItem.valor,
                     tipo_match: 'manual'
                 };
-                const r = await fetch(`${API}/conciliação`, { credentials: 'include', method: 'POST', headers: hdrs(), body: JSON.stringify(payload) });
+                const r = await fetch(`${API}/conciliacao`, { credentials: 'include', method: 'POST', headers: hdrs(), body: JSON.stringify(payload) });
                 const data = await r.json();
                 if (data.success) {
                     mostrarToastFinanceiro('Conciliação manual realizada!', 'success');
@@ -1028,7 +1028,7 @@
                 const contaId = document.getElementById('filtroBanco').value;
                 const payload = {};
                 if (contaId) payload.conta_id = contaId;
-                const r = await fetch(`${API}/conciliação/automatica`, { credentials: 'include', method: 'POST', headers: hdrs(), body: JSON.stringify(payload) });
+                const r = await fetch(`${API}/conciliacao/automatica`, { credentials: 'include', method: 'POST', headers: hdrs(), body: JSON.stringify(payload) });
                 const data = await r.json();
                 if (data.success) {
                     const total = data.conciliados || 0;
@@ -1044,7 +1044,7 @@
                 : confirm('Deseja desfazer esta conciliação?');
             if (!confirmado) return;
             try {
-                const r = await fetch(`${API}/conciliação/${id}`, { credentials: 'include', method: 'DELETE', headers: hdrs() });
+                const r = await fetch(`${API}/conciliacao/${id}`, { credentials: 'include', method: 'DELETE', headers: hdrs() });
                 const data = await r.json();
                 if (data.success) { mostrarToastFinanceiro('Conciliação desfeita', 'success'); await carregarTudo(); }
                 else { mostrarToastFinanceiro(data.message || 'Erro', 'error'); }
@@ -1071,7 +1071,7 @@
                 // Ler arquivo e enviar como texto (OFX/CSV)
                 const texto = await arquivo.text();
                 const payload = { conta_id: contaId || null, conteudo: texto, nome_arquivo: arquivo.name };
-                const r = await fetch(`${API}/conciliação/importar-ofx`, { credentials: 'include', method: 'POST',
+                const r = await fetch(`${API}/conciliacao/importar-ofx`, { credentials: 'include', method: 'POST',
                     headers: hdrs(),
                     body: JSON.stringify(payload)
                 });
