@@ -796,6 +796,20 @@
     </div>
 
     <script>
+        function showToast(msg, type) {
+            type = type || 'info';
+            var colors = { success: '#22c55e', error: '#ef4444', warning: '#f59e0b', info: '#3b82f6' };
+            var t = document.createElement('div');
+            t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:' + (colors[type] || colors.info) + ';color:#fff;padding:12px 20px;border-radius:8px;font-size:14px;font-weight:500;box-shadow:0 4px 12px rgba(0,0,0,.2);z-index:99999;max-width:360px;animation:_toast-in .3s ease';
+            t.textContent = msg;
+            if (!document.getElementById('_toast-kf')) {
+                var s = document.createElement('style'); s.id = '_toast-kf';
+                s.textContent = '@keyframes _toast-in{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}';
+                document.head.appendChild(s);
+            }
+            document.body.appendChild(t);
+            setTimeout(function(){ t.remove(); }, 3500);
+        }
         function toggleMobileSidebar() { document.getElementById('mobile-sidebar').classList.toggle('open'); document.getElementById('sidebar-overlay').classList.toggle('active'); }
         function openModal(id) { document.getElementById(id).classList.add('active'); }
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
@@ -825,7 +839,7 @@
                 if (r.ok) {
                     const d = await r.json();
                     document.getElementById('count-aguardando').textContent = d.aguardando_separação || d.aguardando || 0;
-                    document.getElementById('count-separação').textContent = d.em_separação || d.separação || 0;
+                    document.getElementById('count-separacao').textContent = d.em_separação || d.separação || 0;
                     document.getElementById('count-expedicao').textContent = d.em_expedicao || d.expedicao || 0;
                     document.getElementById('count-transporte').textContent = d.em_transporte || d.transporte || 0;
                     document.getElementById('count-entregues').textContent = d.entregues || 0;
@@ -919,15 +933,15 @@
                     carregarDashboard();
                 } else {
                     const err = await r.json().catch(() => ({}));
-                    alert('Erro ao atualizar status');
+                    showToast('Erro ao atualizar status', 'error');
                 }
-            } catch (e) { alert('Erro de conexão'); } finally { window._guardConfirmarStatus = false; }
+            } catch (e) { showToast('Erro de conexão', 'error'); } finally { window._guardConfirmarStatus = false; }
         }
 
         // ========== Modal Detalhes Pedido ==========
         function verDetalhes(id) {
             const p = pedidos.find(x => x.id === id);
-            if (!p) { alert('Pedido não encontrado'); return; }
+            if (!p) { showToast('Pedido não encontrado', 'error'); return; }
             const statusLabel = { pendente: 'Aguardando', em_separação: 'Em Separação', em_expedicao: 'Em Expedição', em_transporte: 'Em Transporte', entregue: 'Entregue' };
             document.getElementById('modal-detalhes-body').innerHTML = `
         <div style="display:flex;flex-direction:column;gap:20px;">
@@ -1049,7 +1063,7 @@
         // ========== Imprimir Etiqueta ==========
         function imprimirEtiqueta(id) {
             const p = pedidos.find(x => x.id === id);
-            if (!p) { alert('Pedido não encontrado'); return; }
+            if (!p) { showToast('Pedido não encontrado', 'error'); return; }
             const esc = s => String(s || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m]));
             const previsao = p.previsao && p.previsao !== '-' ? new Date(p.previsao).toLocaleDateString('pt-BR') : '-';
             const priorLabel = { urgente: 'URGENTE', alta: 'ALTA', media: 'NORMAL', baixa: 'BAIXA', normal: 'NORMAL' }[(p.prioridade || 'normal').toLowerCase()] || 'NORMAL';
@@ -1194,7 +1208,7 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
 
         // ========== Exportar Excel ==========
         function exportarExcel() {
-            if (!pedidos.length) { alert('Nenhum pedido para exportar'); return; }
+            if (!pedidos.length) { showToast('Nenhum pedido para exportar', 'warning'); return; }
             const statusLabel = { pendente: 'Aguardando', em_separação: 'Em Separação', em_expedicao: 'Em Expedição', em_transporte: 'Em Transporte', entregue: 'Entregue' };
             const headers = ['Pedido', 'NF-e', 'Cliente', 'Cidade/UF', 'Transportadora', 'Previsão', 'Status', 'Prioridade', 'Valor'];
             const rows = pedidos.map(p => [
@@ -1241,9 +1255,9 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
                     carregarDashboard();
                 } else {
                     const err = await r.json().catch(() => ({}));
-                    alert('Erro ao salvar expedição');
+                    showToast('Erro ao salvar expedição', 'error');
                 }
-            } catch (e) { alert('Erro de conexão'); } finally { window._guardSalvarExpedicao = false; }
+            } catch (e) { showToast('Erro de conexão', 'error'); } finally { window._guardSalvarExpedicao = false; }
         }
 
         async function carregarTransportadoras() {
@@ -1293,7 +1307,7 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
 
         async function salvarTransportadora() {
             const razao = document.getElementById('transp-razao').value.trim();
-            if (!razao) { alert('Razão Social é obrigatória'); return; }
+            if (!razao) { showToast('Razão Social é obrigatória', 'warning'); return; }
             if (window._guardSalvarTransp) return;
             window._guardSalvarTransp = true;
             const editId = document.getElementById('transp-edit-id').value;
@@ -1333,9 +1347,9 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
                     document.getElementById('transp-edit-id').value = '';
                     carregarTransportadoras();
                 } else {
-                    alert(data.error || 'Erro ao salvar transportadora');
+                    showToast(data.error || 'Erro ao salvar transportadora', 'error');
                 }
-            } catch (e) { alert('Erro de conexão'); } finally { window._guardSalvarTransp = false; }
+            } catch (e) { showToast('Erro de conexão', 'error'); } finally { window._guardSalvarTransp = false; }
         }
 
         function adicionarTransportadora() {
@@ -1382,8 +1396,8 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
             window._guardExcluirTransp = true;
             try {
                 const r = await fetch(`/api/logistica/transportadoras/${id}`, { method: 'DELETE', credentials: 'include' });
-                if (r.ok) { carregarTransportadoras(); } else { const d = await r.json().catch(() => ({})); alert(d.error || 'Erro ao excluir'); }
-            } catch (e) { alert('Erro de conexão'); } finally { window._guardExcluirTransp = false; }
+                if (r.ok) { carregarTransportadoras(); } else { const d = await r.json().catch(() => ({})); showToast(d.error || 'Erro ao excluir', 'error'); }
+            } catch (e) { showToast('Erro de conexão', 'error'); } finally { window._guardExcluirTransp = false; }
         }
 
         // ========== Atribuir Transportadora ao Pedido ==========
@@ -1409,7 +1423,7 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
             if (!_atribPedidoId) return;
             const transportadoraId = document.getElementById('modal-atrib-transportadora').value;
             const previsao = document.getElementById('modal-atrib-previsao').value;
-            if (!transportadoraId) { alert('Selecione uma transportadora'); return; }
+            if (!transportadoraId) { showToast('Selecione uma transportadora', 'warning'); return; }
             if (window._guardAtribuirTransp) return;
             window._guardAtribuirTransp = true;
             try {
@@ -1420,13 +1434,13 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
                 if (r.ok) {
                     closeModal('modal-atribuir-transportadora');
                     carregarPedidos();
-                } else { alert('Erro ao atribuir transportadora'); }
-            } catch (e) { alert('Erro de conexão'); } finally { window._guardAtribuirTransp = false; }
+                } else { showToast('Erro ao atribuir transportadora', 'error'); }
+            } catch (e) { showToast('Erro de conexão', 'error'); } finally { window._guardAtribuirTransp = false; }
         }
 
         function verTransportadora(id) {
             const t = transportadoras.find(tr => tr.id === id);
-            if (!t) { alert('Transportadora não encontrada'); return; }
+            if (!t) { showToast('Transportadora não encontrada', 'error'); return; }
             document.getElementById('modal-detalhes-body').innerHTML = `
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
             <div class="form-group">
@@ -1465,7 +1479,7 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
         // ========== COTAÇÃO DE FRETE ==========
         async function cotarFrete() {
             const uf = document.getElementById('cot-uf-destino').value;
-            if (!uf) { alert('Selecione a UF de destino'); return; }
+            if (!uf) { showToast('Selecione a UF de destino', 'warning'); return; }
             const div = document.getElementById('cotação-resultado');
             div.innerHTML = '<p style="color:var(--text-secondary);"><i class="fas fa-spinner fa-spin"></i> Calculando cotações...</p>';
             try {
@@ -1505,7 +1519,7 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
         // ========== RASTREAMENTO ==========
         async function rastrearPedido() {
             const pedidoId = document.getElementById('rastr-pedido-id').value;
-            if (!pedidoId) { alert('Informe o ID do pedido'); return; }
+            if (!pedidoId) { showToast('Informe o ID do pedido', 'warning'); return; }
             const div = document.getElementById('rastreamento-resultado');
             div.innerHTML = '<p style="color:var(--text-secondary);"><i class="fas fa-spinner fa-spin"></i> Buscando rastreamento...</p>';
             try {
@@ -1550,7 +1564,7 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
 
         async function consultarApiTransportadora() {
             const pedidoId = document.getElementById('rastr-pedido-id').value;
-            if (!pedidoId) { alert('Informe o ID do pedido'); return; }
+            if (!pedidoId) { showToast('Informe o ID do pedido', 'warning'); return; }
             const div = document.getElementById('rastreamento-resultado');
             div.innerHTML = '<p style="color:var(--text-secondary);"><i class="fas fa-spinner fa-spin"></i> Consultando API da transportadora...</p>';
             try {
@@ -1581,7 +1595,7 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
         async function salvarEventoRastreamento() {
             const pedidoId = document.getElementById('rastr-add-pedido-id').value;
             const descrição = document.getElementById('rastr-desc').value.trim();
-            if (!descrição) { alert('Descrição é obrigatória'); return; }
+            if (!descrição) { showToast('Descrição é obrigatória', 'warning'); return; }
             try {
                 const r = await fetch(`/api/logistica/pedidos/${encodeURIComponent(pedidoId)}/rastreamento`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
@@ -1594,8 +1608,8 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
                     })
                 });
                 if (r.ok) { closeModal('modal-rastreamento-add'); rastrearPedido(); }
-                else { const d = await r.json().catch(() => ({})); alert(d.error || 'Erro ao salvar'); }
-            } catch (e) { alert('Erro de conexão'); }
+                else { const d = await r.json().catch(() => ({})); showToast(d.error || 'Erro ao salvar', 'error'); }
+            } catch (e) { showToast('Erro de conexão', 'error'); }
         }
 
         // ========== CT-e ==========
@@ -1642,7 +1656,7 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
         async function salvarCTe() {
             const transportadora_id = document.getElementById('cte-transportadora').value;
             const valor_frete = document.getElementById('cte-valor-frete').value;
-            if (!transportadora_id || !valor_frete) { alert('Transportadora e valor do frete são obrigatórios'); return; }
+            if (!transportadora_id || !valor_frete) { showToast('Transportadora e valor do frete são obrigatórios', 'warning'); return; }
             if (window._guardSalvarCTe) return;
             window._guardSalvarCTe = true;
             const editId = document.getElementById('cte-edit-id').value;
@@ -1669,8 +1683,8 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
                 const r = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(payload) });
                 const data = await r.json();
                 if (r.ok) { closeModal('modal-novo-cte'); carregarCTes(); }
-                else { alert(data.error || 'Erro ao salvar CT-e'); }
-            } catch (e) { alert('Erro de conexão'); } finally { window._guardSalvarCTe = false; }
+                else { showToast(data.error || 'Erro ao salvar CT-e', 'error'); }
+            } catch (e) { showToast('Erro de conexão', 'error'); } finally { window._guardSalvarCTe = false; }
         }
 
         function editarCTe(id) {
@@ -1701,8 +1715,8 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
             if (!confirm('Deseja excluir este CT-e?')) return;
             try {
                 const r = await fetch(`/api/logistica/ctes/${id}`, { method: 'DELETE', credentials: 'include' });
-                if (r.ok) carregarCTes(); else { const d = await r.json().catch(() => ({})); alert(d.error || 'Erro'); }
-            } catch (e) { alert('Erro de conexão'); }
+                if (r.ok) carregarCTes(); else { const d = await r.json().catch(() => ({})); showToast(d.error || 'Erro', 'error'); }
+            } catch (e) { showToast('Erro de conexão', 'error'); }
         }
 
         // ========== MDF-e ==========
@@ -1751,7 +1765,7 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
         function adicionarDocMdfe() {
             const tipo = document.getElementById('mdfe-doc-tipo').value;
             const chave = document.getElementById('mdfe-doc-chave').value.trim();
-            if (!chave || chave.length !== 44) { alert('Chave de acesso deve ter 44 dígitos'); return; }
+            if (!chave || chave.length !== 44) { showToast('Chave de acesso deve ter 44 dígitos', 'warning'); return; }
             mdfeDocumentos.push({ tipo, chave_acesso: chave });
             document.getElementById('mdfe-doc-chave').value = '';
             renderizarDocsMdfe();
@@ -1773,7 +1787,7 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
 
         function adicionarPercursoMdfe() {
             const uf = document.getElementById('mdfe-percurso-uf').value.trim().toUpperCase();
-            if (!uf || uf.length !== 2) { alert('UF deve ter 2 caracteres'); return; }
+            if (!uf || uf.length !== 2) { showToast('UF deve ter 2 caracteres', 'warning'); return; }
             mdfePercursos.push(uf);
             document.getElementById('mdfe-percurso-uf').value = '';
             renderizarPercursosMdfe();
@@ -1793,7 +1807,7 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
             const transportadora_id = document.getElementById('mdfe-transportadora').value;
             const uf_inicio = document.getElementById('mdfe-uf-inicio').value.trim().toUpperCase();
             const uf_fim = document.getElementById('mdfe-uf-fim').value.trim().toUpperCase();
-            if (!transportadora_id || !uf_inicio || !uf_fim) { alert('Transportadora, UF início e UF fim são obrigatórios'); return; }
+            if (!transportadora_id || !uf_inicio || !uf_fim) { showToast('Transportadora, UF início e UF fim são obrigatórios', 'warning'); return; }
             if (window._guardSalvarMDFe) return;
             window._guardSalvarMDFe = true;
             try {
@@ -1817,8 +1831,8 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
                     closeModal('modal-novo-mdfe');
                     mdfeDocumentos = []; mdfePercursos = [];
                     carregarMDFes();
-                } else { alert(data.error || 'Erro ao salvar MDF-e'); }
-            } catch (e) { alert('Erro de conexão'); } finally { window._guardSalvarMDFe = false; }
+                } else { showToast(data.error || 'Erro ao salvar MDF-e', 'error'); }
+            } catch (e) { showToast('Erro de conexão', 'error'); } finally { window._guardSalvarMDFe = false; }
         }
 
         async function encerrarMDFe(id) {
@@ -1830,24 +1844,24 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
                     method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
                     body: JSON.stringify({ uf_encerramento: uf.toUpperCase(), municipio_encerramento: municipio })
                 });
-                if (r.ok) carregarMDFes(); else { const d = await r.json().catch(() => ({})); alert(d.error || 'Erro'); }
-            } catch (e) { alert('Erro de conexão'); }
+                if (r.ok) carregarMDFes(); else { const d = await r.json().catch(() => ({})); showToast(d.error || 'Erro', 'error'); }
+            } catch (e) { showToast('Erro de conexão', 'error'); }
         }
 
         async function cancelarMDFe(id) {
             if (!confirm('Deseja cancelar este MDF-e?')) return;
             try {
                 const r = await fetch(`/api/logistica/mdfes/${id}/cancelar`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: '{}' });
-                if (r.ok) carregarMDFes(); else { const d = await r.json().catch(() => ({})); alert(d.error || 'Erro'); }
-            } catch (e) { alert('Erro de conexão'); }
+                if (r.ok) carregarMDFes(); else { const d = await r.json().catch(() => ({})); showToast(d.error || 'Erro', 'error'); }
+            } catch (e) { showToast('Erro de conexão', 'error'); }
         }
 
         async function excluirMDFe(id) {
             if (!confirm('Deseja excluir este MDF-e?')) return;
             try {
                 const r = await fetch(`/api/logistica/mdfes/${id}`, { method: 'DELETE', credentials: 'include' });
-                if (r.ok) carregarMDFes(); else { const d = await r.json().catch(() => ({})); alert(d.error || 'Erro'); }
-            } catch (e) { alert('Erro de conexão'); }
+                if (r.ok) carregarMDFes(); else { const d = await r.json().catch(() => ({})); showToast(d.error || 'Erro', 'error'); }
+            } catch (e) { showToast('Erro de conexão', 'error'); }
         }
 
         function carregarDadosUsuario() {
