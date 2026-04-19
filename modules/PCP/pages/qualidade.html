@@ -69,7 +69,7 @@
         .kpi-icon.purple { background: #ede9fe; color: #7c3aed; }
 
         /* Botão premium */
-        .btn-nova-premium { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s; box-shadow: 0 2px 8px rgba(37,99,235,0.25); }
+        .btn-nova-premium { display: inline-flex; align-items: center; gap: 8px; padding: 7px 12px; background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; border: none; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.3s; box-shadow: 0 2px 8px rgba(37,99,235,0.25); }
         .btn-nova-premium:hover { background: linear-gradient(135deg, #2563eb, #1d4ed8); box-shadow: 0 4px 16px rgba(37,99,235,0.4); transform: translateY(-2px); }
 
         /* Checklist visual */
@@ -668,7 +668,7 @@
         document.getElementById('form-inspecao').reset();
         document.getElementById('insp-id').value = '';
         document.getElementById('insp-data').value = new Date().toISOString().split('T')[0];
-        document.getElementById('modal-insp-título').textContent = 'Nova Inspeção';
+        document.getElementById('modal-insp-titulo').textContent = 'Nova Inspeção';
         document.getElementById('checklist-area').style.display = 'none';
         carregarChecklistsSelect();
         abrirModal('modal-inspecao');
@@ -691,7 +691,7 @@
             document.getElementById('insp-obs').value = i.observações || '';
             document.getElementById('insp-status').value = i.status || 'pendente';
             document.getElementById('insp-data').value = i.data_inspecao ? i.data_inspecao.split('T')[0] : '';
-            document.getElementById('modal-insp-título').textContent = 'Editar Inspeção INS-' + String(i.id).padStart(4, '0');
+            document.getElementById('modal-insp-titulo').textContent = 'Editar Inspeção INS-' + String(i.id).padStart(4, '0');
             await carregarChecklistsSelect();
             if (i.checklist_id) document.getElementById('insp-checklist').value = i.checklist_id;
             abrirModal('modal-inspecao');
@@ -798,7 +798,7 @@
     function abrirModalNC() {
         document.getElementById('form-nc').reset();
         document.getElementById('nc-id').value = '';
-        document.getElementById('modal-nc-título').textContent = 'Nova Não Conformidade';
+        document.getElementById('modal-nc-titulo').textContent = 'Nova Não Conformidade';
         abrirModal('modal-nc');
     }
 
@@ -811,16 +811,16 @@
             if (!data.data) return;
             const nc = data.data;
             document.getElementById('nc-id').value = nc.id;
-            document.getElementById('nc-descrição').value = nc.descricao || '';
+            document.getElementById('nc-descricao').value = nc.descricao || '';
             document.getElementById('nc-severidade').value = nc.severidade || 'menor';
             document.getElementById('nc-origem').value = nc.origem || 'inspecao';
             document.getElementById('nc-ordem').value = nc.ordem_producao || '';
             document.getElementById('nc-produto').value = nc.produto || '';
             document.getElementById('nc-causa').value = nc.causa_raiz || '';
-            document.getElementById('nc-ação').value = nc.acao_corretiva || '';
+            document.getElementById('nc-acao').value = nc.acao_corretiva || '';
             document.getElementById('nc-responsavel').value = nc.responsavel || '';
             document.getElementById('nc-prazo').value = nc.prazo ? nc.prazo.split('T')[0] : '';
-            document.getElementById('modal-nc-título').textContent = 'Editar NC-' + String(nc.id).padStart(4, '0');
+            document.getElementById('modal-nc-titulo').textContent = 'Editar NC-' + String(nc.id).padStart(4, '0');
             abrirModal('modal-nc');
         } catch (err) {
             console.error('[QUALIDADE] Erro ao carregar NC:', err);
@@ -831,13 +831,13 @@
         e.preventDefault();
         const id = document.getElementById('nc-id').value;
         const body = {
-            descrição: document.getElementById('nc-descrição').value,
+            descricao: document.getElementById('nc-descricao').value,
             severidade: document.getElementById('nc-severidade').value,
             origem: document.getElementById('nc-origem').value,
             ordem_producao: document.getElementById('nc-ordem').value,
             produto: document.getElementById('nc-produto').value,
             causa_raiz: document.getElementById('nc-causa').value,
-            acao_corretiva: document.getElementById('nc-ação').value,
+            acao_corretiva: document.getElementById('nc-acao').value,
             responsavel: document.getElementById('nc-responsavel').value,
             prazo: document.getElementById('nc-prazo').value || null
         };
@@ -981,7 +981,7 @@
         document.getElementById('form-checklist').reset();
         document.getElementById('ck-id').value = '';
         document.getElementById('ck-items-list').innerHTML = '';
-        document.getElementById('modal-ck-título').textContent = 'Novo Checklist';
+        document.getElementById('modal-ck-titulo').textContent = 'Novo Checklist';
         checklistItemCounter = 0;
         adicionarItemChecklist();
         adicionarItemChecklist();
@@ -1012,7 +1012,7 @@
             document.getElementById('ck-id').value = ck.id;
             document.getElementById('ck-nome').value = ck.nome;
             document.getElementById('ck-tipo').value = ck.tipo_inspecao;
-            document.getElementById('modal-ck-título').textContent = 'Editar Checklist';
+            document.getElementById('modal-ck-titulo').textContent = 'Editar Checklist';
 
             // Carregar itens
             const respItens = await fetch(`${API_BASE}/checklists/${encodeURIComponent(id)}/itens`, {
