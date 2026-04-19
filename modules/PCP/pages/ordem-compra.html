@@ -978,13 +978,7 @@
                 if (response.ok) {
                     let usuarios = await response.json();
                     // Se retornar todos os usuários, filtrar por compradores
-                    if (Array.isArray(usuarios)) {
-                        usuarios = usuarios.filter(u =>
-                            u.role === 'comprador' ||
-                            u.cargo?.toLowerCase().includes('compra') ||
-                            u.departamento?.toLowerCase().includes('compra')
-                        );
-                    }
+                    // Mostrar todos os usuarios como possiveis compradores
                     const select = document.getElementById('oc-comprador');
                     if (select) {
                         select.innerHTML = '<option value="">Selecione...</option>' +
@@ -1006,7 +1000,7 @@
             }
 
             buscarFornecedores(termo).then(fornecedores => {
-                if (fornecedores.length === 0) {
+                if (!Array.isArray(fornecedores) || fornecedores.length === 0) {
                     fecharListaFornecedores();
                     return;
                 }
@@ -1154,7 +1148,8 @@
                 });
 
                 if (response.ok) {
-                    return await response.json();
+                    const data = await response.json();
+                    return Array.isArray(data) ? data : (Array.isArray(data?.data) ? data.data : []);
                 }
             } catch (e) {
                 console.error('[PCP] Erro ao buscar fornecedores:', e);
@@ -1266,7 +1261,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            atualizarSaudação();
+            atualizarSaudacao();
             carregarOrdensCompra();
 
             // Carregar modais via fetch
