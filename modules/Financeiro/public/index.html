@@ -2370,7 +2370,7 @@
         // Carregar contas bancárias
         async function carregarContasBancarias() {
             try {
-                const response = await fetch('/api/financeiro/contas-bancárias', { credentials: 'include' });
+                const response = await fetch('/api/financeiro/contas-bancarias', { credentials: 'include' });
                 const data = await response.json();
                 const raw = data.data || data || [];
                 contasBancarias = Array.isArray(raw) ? raw : [];

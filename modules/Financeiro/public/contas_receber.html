@@ -1559,7 +1559,7 @@
 
         async function carregarContasBancarias() {
             try {
-                var response = await fetch('/api/financeiro/contas-bancárias', { credentials: 'include' });
+                var response = await fetch('/api/financeiro/contas-bancarias', { credentials: 'include' });
                 if (response.ok) {
                     var bancos = await response.json();
                     var sel = document.getElementById('cr-conta-corrente');
@@ -1853,7 +1853,7 @@
             var form = document.getElementById('form-conta');
             if (form) form.reset();
             document.getElementById('conta-id').value = '';
-            document.getElementById('modal-título').textContent = 'Nova Conta a Receber';
+            document.getElementById('modal-titulo').textContent = 'Nova Conta a Receber';
             document.getElementById('conta-vencimento').value = new Date().toISOString().split('T')[0];
             document.getElementById('cr-nota-fiscal').value = '';
             document.getElementById('cr-emissão').value = '';
@@ -1880,9 +1880,9 @@
             resetTabsCR();
             if (id) {
                 var c = contas.find(function(x){return String(x.id)===String(id);}); if (!c) { console.error('Conta não encontrada para id:', id); return; }
-                document.getElementById('modal-título').textContent = 'Editar Conta a Receber';
+                document.getElementById('modal-titulo').textContent = 'Editar Conta a Receber';
                 document.getElementById('conta-id').value = c.id;
-                document.getElementById('descrição').value = c.descricao || [c.cliente_nome, c.nota_fiscal ? 'NFe ' + c.nota_fiscal : '', c.parcela_info].filter(Boolean).join(' - ') || '';
+                document.getElementById('descricao').value = c.descricao || [c.cliente_nome, c.nota_fiscal ? 'NFe ' + c.nota_fiscal : '', c.parcela_info].filter(Boolean).join(' - ') || '';
                 // Match cliente by ID or by name fallback
                 var clienteId = c.cliente_id || '';
                 if (!clienteId && c.cliente_nome) {
@@ -1906,8 +1906,8 @@
                 document.getElementById('conta-valor').value = val ? val.toFixed(2).replace('.',',') : '';
                 document.getElementById('conta-vencimento').value = (c.data_vencimento||c.vencimento||'').split('T')[0];
                 document.getElementById('forma-pagamento').value = c.forma_recebimento || c.forma_pagamento || 'pix';
-                document.getElementById('observações').value = c.observações || c['observações'] || '';
-                document.getElementById('número-documento').value = c.numero_documento || '';
+                document.getElementById('observacoes').value = c.observações || c['observações'] || '';
+                document.getElementById('numero-documento').value = c.numero_documento || '';
                 document.getElementById('num-parcelas').value = c.num_parcelas || 1;
                 document.getElementById('cr-nota-fiscal').value = c.nota_fiscal || '';
                 document.getElementById('cr-emissão').value = (c.data_emissao||'').split('T')[0];
@@ -1987,7 +1987,7 @@
             event.preventDefault();
             var id = document.getElementById('conta-id').value;
             var dados = {
-                descrição: document.getElementById('descrição').value,
+                descrição: document.getElementById('descricao').value,
                 cliente_id: document.getElementById('cliente-id').value,
                 categoria_id: document.getElementById('categoria-id').value,
                 valor: parseMoeda(document.getElementById('conta-valor').value),
@@ -1995,8 +1995,8 @@
                 data_vencimento: document.getElementById('conta-vencimento').value,
                 vencimento: document.getElementById('conta-vencimento').value,
                 forma_recebimento: document.getElementById('forma-pagamento').value,
-                observações: document.getElementById('observações').value,
-                numero_documento: document.getElementById('número-documento').value,
+                observações: document.getElementById('observacoes').value,
+                numero_documento: document.getElementById('numero-documento').value,
                 num_parcelas: parseInt(document.getElementById('num-parcelas').value) || 1,
                 status: document.getElementById('cr-status').value,
                 pago_no_dia: document.getElementById('cr-pago-no-dia').value || null,
@@ -2053,7 +2053,7 @@
             } catch(e) { showToast('Erro ao enviar cobranças', 'error'); }
         }
         function getFilteredContas() {
-            var período = document.getElementById('filtro-período').value;
+            var período = document.getElementById('filtro-periodo').value;
             var status = document.getElementById('filtro-status').value;
             var portador = document.getElementById('filtro-portador') ? document.getElementById('filtro-portador').value : '';
             var situação = document.getElementById('filtro-situacao') ? document.getElementById('filtro-situacao').value : '';
@@ -2077,7 +2077,7 @@
         var pesquisaTimeout;
         function pesquisarGlobal() { clearTimeout(pesquisaTimeout); var i=document.getElementById('pesquisa-global'); i.parentElement.querySelector('.btn-clear-search').style.display=i.value?'flex':'none'; pesquisaTimeout=setTimeout(function(){filtrarContas();},300); }
         function limparPesquisa() { document.getElementById('pesquisa-global').value=''; document.querySelector('.btn-clear-search').style.display='none'; filtrarContas(); }
-        function limparFiltros() { document.getElementById('pesquisa-global').value=''; document.getElementById('filtro-período').value='todas'; document.getElementById('filtro-status').value=''; document.getElementById('filtro-cliente-select').value=''; if(document.getElementById('filtro-portador'))document.getElementById('filtro-portador').value=''; if(document.getElementById('filtro-situacao'))document.getElementById('filtro-situacao').value=''; if(document.getElementById('filtro-empresa'))document.getElementById('filtro-empresa').value=''; document.querySelector('.btn-clear-search').style.display='none'; filtrarContas(); }
+        function limparFiltros() { document.getElementById('pesquisa-global').value=''; document.getElementById('filtro-periodo').value='todas'; document.getElementById('filtro-status').value=''; document.getElementById('filtro-cliente-select').value=''; if(document.getElementById('filtro-portador'))document.getElementById('filtro-portador').value=''; if(document.getElementById('filtro-situacao'))document.getElementById('filtro-situacao').value=''; if(document.getElementById('filtro-empresa'))document.getElementById('filtro-empresa').value=''; document.querySelector('.btn-clear-search').style.display='none'; filtrarContas(); }
 
         var contaVisualizando = null;
         function visualizarConta(id) {
@@ -2226,9 +2226,9 @@
             hoje.setHours(0,0,0,0);
             var taxaMensal = parseFloat(document.getElementById('pm-taxa-mensal').value) || 1.5;
             var prazoSimulado = parseInt(document.getElementById('pm-prazo-simulado').value) || 30;
-            var valorSimulação = parseMoeda(document.getElementById('pm-valor-simulação').value) || 0;
+            var valorSimulação = parseMoeda(document.getElementById('pm-valor-simulacao').value) || 0;
             var filtroEmpresa = (document.getElementById('pm-filtro-empresa') || {}).value || '';
-            var filtroMódulo = (document.getElementById('pm-filtro-módulo') || {}).value || 'receber';
+            var filtroMódulo = (document.getElementById('pm-filtro-modulo') || {}).value || 'receber';
 
             var somaValorDias = 0;
             var somaValor = 0;
@@ -2306,7 +2306,7 @@
             // Cards globais
             document.getElementById('pm-recebimento').textContent = pmDias + ' dias';
             document.getElementById('pm-total-ponderado').textContent = fmtMoeda(somaValor);
-            document.getElementById('pm-títulos-aberto').textContent = qtdAberto;
+            document.getElementById('pm-titulos-aberto').textContent = qtdAberto;
             document.getElementById('pm-custo-financeiro').textContent = fmtMoeda(custoFinanceiro);
 
             // === TABELA PM POR EMPRESA ===
@@ -2414,7 +2414,7 @@
 
             // Simulação
             if (valorSimulação > 0) {
-                document.getElementById('pm-resultado-simulação').style.display = 'block';
+                document.getElementById('pm-resultado-simulacao').style.display = 'block';
                 var custoSim = valorSimulação * taxaDiaria * prazoSimulado;
                 var liquidoSim = valorSimulação - custoSim;
                 var taxaEfetiva = valorSimulação > 0 ? (custoSim / valorSimulação * 100) : 0;
@@ -2422,7 +2422,7 @@
                 document.getElementById('pm-sim-líquido').textContent = fmtMoeda(liquidoSim);
                 document.getElementById('pm-sim-taxa-efetiva').textContent = taxaEfetiva.toFixed(2) + '%';
             } else {
-                document.getElementById('pm-resultado-simulação').style.display = 'none';
+                document.getElementById('pm-resultado-simulacao').style.display = 'none';
             }
         }
 
@@ -2642,7 +2642,7 @@
         async function carregarOperacoesPub() {
             try {
                 if(!operaçõesCache) {
-                    var r = await fetch('/api/financeiro/operacoes-crédito', { credentials: 'include' });
+                    var r = await fetch('/api/financeiro/operacoes-credito', { credentials: 'include' });
                     if(!r.ok) throw new Error('API error ' + r.status);
                     var json = await r.json(); operaçõesCache = json.data || [];
                     var emps={},insts={},tipos={};
@@ -2654,7 +2654,7 @@
                 filtrarOperaçõesPub();
             } catch(e) {
                 console.error('[Operações] Erro:', e);
-                document.getElementById('tabela-operações-body-pub').innerHTML = '<tr><td colspan="24" style="text-align:center;padding:36px;color:#dc2626;"><i class="fas fa-exclamation-triangle"></i> Erro ao carregar</td></tr>';
+                document.getElementById('tabela-operacoes-body-pub').innerHTML = '<tr><td colspan="24" style="text-align:center;padding:36px;color:#dc2626;"><i class="fas fa-exclamation-triangle"></i> Erro ao carregar</td></tr>';
             }
         }
 
@@ -2673,7 +2673,7 @@
             document.getElementById('op-kpis-pub').innerHTML = [{label:'Operações',val:countOps,color:'#7c3aed'},{label:'Vlr Bruto',val:fmtMoeda(totalBruto),color:'#1e40af'},{label:'Títulos',val:totalTit,color:'#059669'},{label:'Deduções',val:fmtMoeda(totalDed),color:'#dc2626'},{label:'Líq Liberado',val:fmtMoeda(totalLiq),color:'#0891b2'}].map(function(k){ return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;border-left:3px solid '+k.color+';"><div style="font-size:10px;color:#6b7280;text-transform:uppercase;">'+k.label+'</div><div style="font-size:16px;font-weight:800;color:'+k.color+';">'+k.val+'</div></div>'; }).join('');
             var infoEl = document.getElementById('op-filtro-info-pub'); if(infoEl) infoEl.textContent = data.length + ' de ' + (operaçõesCache||[]).length + ' operações';
             var totaisEl = document.getElementById('op-totais-pub'); if(totaisEl) totaisEl.textContent = data.length + ' registros';
-            var body = document.getElementById('tabela-operações-body-pub');
+            var body = document.getElementById('tabela-operacoes-body-pub');
             if(!data.length) { body.innerHTML='<tr><td colspan="24" style="text-align:center;padding:36px;color:var(--gray-400);">Nenhuma operação</td></tr>'; return; }
             var fmtDec = function(v){ return (parseFloat(v)||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); };
             var fmtPct = function(v){ return (parseFloat(v)||0).toLocaleString('pt-BR',{minimumFractionDigits:4,maximumFractionDigits:4})+'%'; };
@@ -2739,7 +2739,7 @@
             document.getElementById('fat-edit-valor-recebido').value = parseFloat(item.valor_recebido || 0) || 0;
             document.getElementById('fat-edit-num-doc').value = item.numero_documento || '';
             document.getElementById('fat-edit-num-boleto').value = item.numero_boleto || '';
-            document.getElementById('fat-edit-observações').value = item.observações || '';
+            document.getElementById('fat-edit-observacoes').value = item.observações || '';
             document.getElementById('modalEditarFaturado').style.display = 'flex';
         }
 
@@ -2769,7 +2769,7 @@
                 valor_recebido: parseFloat(document.getElementById('fat-edit-valor-recebido').value) || 0,
                 numero_documento: document.getElementById('fat-edit-num-doc').value,
                 numero_boleto: document.getElementById('fat-edit-num-boleto').value,
-                observações: document.getElementById('fat-edit-observações').value
+                observações: document.getElementById('fat-edit-observacoes').value
             };
             try {
                 var r = await fetch('/api/financeiro/contas-receber/' + id, {
@@ -2840,14 +2840,14 @@
             document.getElementById('op-edit-empresa').value = op.empresa || '';
             document.getElementById('op-edit-tipo-operacao').value = op.tipo_operacao || '';
             document.getElementById('op-edit-instituicao').value = op.instituicao || '';
-            document.getElementById('op-edit-prorrogação').value = op.prorrogação || '';
+            document.getElementById('op-edit-prorrogacao').value = op.prorrogação || '';
             document.getElementById('op-edit-prazo-medio').value = op.prazo_medio || '';
             var dtOp = op.data_operacao ? String(op.data_operacao).slice(0,10) : '';
             document.getElementById('op-edit-data-operacao').value = dtOp;
-            document.getElementById('op-edit-taxa-período').value = op.taxa_periodo || '';
+            document.getElementById('op-edit-taxa-periodo').value = op.taxa_periodo || '';
             document.getElementById('op-edit-tmp').value = op.tmp || '';
             document.getElementById('op-edit-vlr-bruto').value = op.vlr_bruto || '';
-            document.getElementById('op-edit-qtde-títulos').value = op.qtde_titulos || '';
+            document.getElementById('op-edit-qtde-titulos').value = op.qtde_titulos || '';
             document.getElementById('op-edit-dif-monet').value = op.dif_monet || '';
             document.getElementById('op-edit-tarifas').value = op.tarifas || '';
             document.getElementById('op-edit-iss-perc').value = op.iss_riss_irrf_perc || '';
@@ -2861,11 +2861,11 @@
             document.getElementById('op-edit-amort-fom').value = op.amort_fom || '';
             document.getElementById('op-edit-conta-grafica').value = op.conta_grafica || '';
             document.getElementById('op-edit-liq-lib').value = op.liq_lib || '';
-            document.getElementById('modalEditarOperação').style.display = 'flex';
+            document.getElementById('modalEditarOperacao').style.display = 'flex';
         }
 
         function fecharModalOperação() {
-            document.getElementById('modalEditarOperação').style.display = 'none';
+            document.getElementById('modalEditarOperacao').style.display = 'none';
         }
 
         async function salvarOperação() {
@@ -2876,13 +2876,13 @@
                 empresa: document.getElementById('op-edit-empresa').value,
                 tipo_operacao: document.getElementById('op-edit-tipo-operacao').value,
                 instituicao: document.getElementById('op-edit-instituicao').value,
-                prorrogação: document.getElementById('op-edit-prorrogação').value,
+                prorrogação: document.getElementById('op-edit-prorrogacao').value,
                 prazo_medio: parseFloat(document.getElementById('op-edit-prazo-medio').value) || 0,
                 data_operacao: document.getElementById('op-edit-data-operacao').value || null,
-                taxa_periodo: parseFloat(document.getElementById('op-edit-taxa-período').value) || 0,
+                taxa_periodo: parseFloat(document.getElementById('op-edit-taxa-periodo').value) || 0,
                 tmp: parseFloat(document.getElementById('op-edit-tmp').value) || 0,
                 vlr_bruto: parseFloat(document.getElementById('op-edit-vlr-bruto').value) || 0,
-                qtde_titulos: parseInt(document.getElementById('op-edit-qtde-títulos').value) || 0,
+                qtde_titulos: parseInt(document.getElementById('op-edit-qtde-titulos').value) || 0,
                 dif_monet: parseFloat(document.getElementById('op-edit-dif-monet').value) || 0,
                 tarifas: parseFloat(document.getElementById('op-edit-tarifas').value) || 0,
                 iss_riss_irrf_perc: parseFloat(document.getElementById('op-edit-iss-perc').value) || 0,
@@ -2898,7 +2898,7 @@
                 liq_lib: parseFloat(document.getElementById('op-edit-liq-lib').value) || 0
             };
             try {
-                var r = await fetch('/api/financeiro/operacoes-crédito/' + id, {
+                var r = await fetch('/api/financeiro/operacoes-credito/' + id, {
                     method: 'PUT', credentials: 'include',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(body)

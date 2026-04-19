@@ -494,7 +494,7 @@
 
         async function carregarContas() {
             try {
-                const r = await fetch('/api/financeiro/contas-bancárias', { credentials: 'include' });
+                const r = await fetch('/api/financeiro/contas-bancarias', { credentials: 'include' });
                 if (r.ok) { const rawBancos = await r.json(); const arrBancos = rawBancos?.data || rawBancos; contasBancarias = Array.isArray(arrBancos) ? arrBancos : []; renderizarContas(); atualizarResumo(); }
             } catch(e) { console.error(e); document.getElementById('bank-cards-grid').innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i><p>Erro ao carregar contas</p></div>'; }
         }
@@ -566,7 +566,7 @@
             const id = document.getElementById('conta-id').value;
             const dados = { nome: document.getElementById('nome-conta').value, banco: document.getElementById('banco').value, tipo: document.getElementById('tipo-conta').value, agencia: document.getElementById('agencia').value, numero_conta: document.getElementById('número-conta').value, saldo: parseFloat(document.getElementById('saldo-inicial').value) || 0, observações: document.getElementById('observações').value };
             try {
-                const url = id ? `/api/financeiro/contas-bancárias/${id}` : '/api/financeiro/contas-bancárias';
+                const url = id ? `/api/financeiro/contas-bancarias/${id}` : '/api/financeiro/contas-bancarias';
                 const r = await fetch(url, { method: id ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(dados) });
                 if (r.ok) { alert('Conta salva com sucesso!'); fecharModalConta(); await init(); } else { alert('Erro ao salvar conta'); }
             } catch(e) { console.error(e); alert('Erro ao salvar conta'); }
@@ -575,7 +575,7 @@
         async function excluirConta(id) {
             if (!confirm('Excluir esta conta bancária?')) return;
             try {
-                const r = await fetch(`/api/financeiro/contas-bancárias/${id}`, { method: 'DELETE', credentials: 'include' });
+                const r = await fetch(`/api/financeiro/contas-bancarias/${id}`, { method: 'DELETE', credentials: 'include' });
                 if (r.ok) { alert('Conta excluída!'); await init(); } else { alert('Erro ao excluir'); }
             } catch(e) { alert('Erro ao excluir'); }
         }
@@ -593,7 +593,7 @@
             event.preventDefault();
             const dados = { conta_id: document.getElementById('mov-conta-id').value, tipo: document.getElementById('mov-tipo').value, valor: parseFloat(document.getElementById('mov-valor').value), descrição: document.getElementById('mov-descrição').value, data: document.getElementById('mov-data').value };
             try {
-                const r = await fetch('/api/financeiro/movimentacoes-bancárias', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(dados) });
+                const r = await fetch('/api/financeiro/movimentacoes-bancarias', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(dados) });
                 if (r.ok) { alert('Movimentação registrada!'); fecharModalMovimentação(); await init(); } else { alert('Erro ao registrar'); }
             } catch(e) { alert('Erro ao registrar'); }
         }
@@ -617,7 +617,7 @@
             const inicio = document.getElementById('extrato-data-inicio').value;
             const fim = document.getElementById('extrato-data-fim').value;
             try {
-                const r = await fetch(`/api/financeiro/movimentacoes-bancárias?conta_id=${contaId}&inicio=${inicio}&fim=${fim}`, { credentials: 'include' });
+                const r = await fetch(`/api/financeiro/movimentacoes-bancarias?conta_id=${contaId}&inicio=${inicio}&fim=${fim}`, { credentials: 'include' });
                 if (r.ok) { const rawExtrato = await r.json(); const arrExtrato = rawExtrato?.data || rawExtrato; extratoMovimentações = Array.isArray(arrExtrato) ? arrExtrato : []; renderizarExtrato(); }
             } catch(e) { console.error(e); }
         }
@@ -684,8 +684,8 @@
             const desc = document.getElementById('transf-descrição').value || 'Transferência entre contas';
             if (origemId === destinoId) { alert('Selecione contas diferentes'); return; }
             try {
-                const r1 = await fetch('/api/financeiro/movimentacoes-bancárias', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ conta_id: origemId, tipo: 'saida', valor, descrição: `${desc} (Saída)`, data }) });
-                const r2 = await fetch('/api/financeiro/movimentacoes-bancárias', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ conta_id: destinoId, tipo: 'entrada', valor, descrição: `${desc} (Entrada)`, data }) });
+                const r1 = await fetch('/api/financeiro/movimentacoes-bancarias', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ conta_id: origemId, tipo: 'saida', valor, descrição: `${desc} (Saída)`, data }) });
+                const r2 = await fetch('/api/financeiro/movimentacoes-bancarias', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ conta_id: destinoId, tipo: 'entrada', valor, descrição: `${desc} (Entrada)`, data }) });
                 if (r1.ok && r2.ok) { alert('Transferência realizada!'); fecharModalTransferencia(); await init(); } else { alert('Erro na transferência'); }
             } catch(e) { alert('Erro na transferência'); }
         }

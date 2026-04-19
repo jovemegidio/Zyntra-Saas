@@ -1346,7 +1346,7 @@
             document.getElementById('modal-conta').classList.add('active');
             document.getElementById('form-conta').reset();
             document.getElementById('conta-id').value = '';
-            document.getElementById('modal-título').textContent = 'Nova Despesa';
+            document.getElementById('modal-titulo').textContent = 'Nova Despesa';
             document.querySelector('.modal-header-info .modal-subtitle').textContent = 'Preencha os dados da conta a pagar';
             document.getElementById('conta-vencimento').value = new Date().toISOString().split('T')[0];
             document.getElementById('conta-parcelas').value = 1;
@@ -1354,17 +1354,17 @@
             if (id) {
                 const conta = contas.find(c => String(c.id) === String(id));
                 if (conta) {
-                    document.getElementById('modal-título').textContent = 'Editar Despesa';
+                    document.getElementById('modal-titulo').textContent = 'Editar Despesa';
                     document.querySelector('.modal-header-info .modal-subtitle').textContent = 'Altere os dados da conta a pagar';
                     document.getElementById('conta-id').value = conta.id;
-                    document.getElementById('descrição').value = conta.descricao || conta.descricao || '';
+                    document.getElementById('descricao').value = conta.descricao || conta.descricao || '';
                     document.getElementById('fornecedor-id').value = conta.fornecedor_id;
                     document.getElementById('categoria-id').value = conta.categoria_id;
                     document.getElementById('conta-valor').value = formatarMoedaInput(Math.round((parseFloat(conta.valor_total || conta.valor) || 0) * 100).toString());
                     document.getElementById('conta-vencimento').value = (conta.data_vencimento || conta.vencimento || '')?.split('T')[0];
                     document.getElementById('forma-pagamento').value = conta.forma_pagamento || 'pix';
-                    document.getElementById('observações').value = conta.observações || '';
-                    document.getElementById('número-documento').value = conta.numero_documento || '';
+                    document.getElementById('observacoes').value = conta.observações || '';
+                    document.getElementById('numero-documento').value = conta.numero_documento || '';
                     document.getElementById('centro-custo').value = conta.centro_custo_id || '';
                 }
             }
@@ -1420,7 +1420,7 @@
             const btnSave = event.target.querySelector('.btn-save');
             if (btnSave) { if (btnSave.disabled) return; btnSave.disabled = true; btnSave.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...'; }
             const id = document.getElementById('conta-id').value;
-            const dados = { descrição: document.getElementById('descrição').value, fornecedor_id: document.getElementById('fornecedor-id').value, categoria_id: document.getElementById('categoria-id').value, valor: parseMoeda(document.getElementById('conta-valor').value), data_vencimento: document.getElementById('conta-vencimento').value, forma_pagamento: document.getElementById('forma-pagamento').value, observações: document.getElementById('observações').value, numero_documento: document.getElementById('número-documento').value, centro_custo_id: document.getElementById('centro-custo').value || null, num_parcelas: parseInt(document.getElementById('conta-parcelas').value) || 1 };
+            const dados = { descrição: document.getElementById('descricao').value, fornecedor_id: document.getElementById('fornecedor-id').value, categoria_id: document.getElementById('categoria-id').value, valor: parseMoeda(document.getElementById('conta-valor').value), data_vencimento: document.getElementById('conta-vencimento').value, forma_pagamento: document.getElementById('forma-pagamento').value, observações: document.getElementById('observacoes').value, numero_documento: document.getElementById('numero-documento').value, centro_custo_id: document.getElementById('centro-custo').value || null, num_parcelas: parseInt(document.getElementById('conta-parcelas').value) || 1 };
             try {
                 const url = id ? `/api/financeiro/contas-pagar/${id}` : '/api/financeiro/contas-pagar';
                 const method = id ? 'PUT' : 'POST';
@@ -1445,7 +1445,7 @@
         }
 
         function filtrarContas() {
-            const período = document.getElementById('filtro-período').value;
+            const período = document.getElementById('filtro-periodo').value;
             const status = document.getElementById('filtro-status').value;
             const fornecedorId = document.getElementById('filtro-fornecedor-select').value;
             const pesquisa = document.getElementById('pesquisa-global').value.toLowerCase();
@@ -1483,7 +1483,7 @@
             pesquisaTimeout = setTimeout(() => filtrarContas(), 300);
         }
         function limparPesquisa() { document.getElementById('pesquisa-global').value = ''; document.querySelector('.btn-clear-search').style.display = 'none'; filtrarContas(); }
-        function limparFiltros() { document.getElementById('pesquisa-global').value = ''; document.getElementById('filtro-período').value = 'todas'; document.getElementById('filtro-status').value = ''; document.getElementById('filtro-fornecedor-select').value = ''; var catFiltro = document.getElementById('filtro-categoria-select'); if (catFiltro) catFiltro.value = ''; document.querySelector('.btn-clear-search').style.display = 'none'; renderizarTabela(contas); }
+        function limparFiltros() { document.getElementById('pesquisa-global').value = ''; document.getElementById('filtro-periodo').value = 'todas'; document.getElementById('filtro-status').value = ''; document.getElementById('filtro-fornecedor-select').value = ''; var catFiltro = document.getElementById('filtro-categoria-select'); if (catFiltro) catFiltro.value = ''; document.querySelector('.btn-clear-search').style.display = 'none'; renderizarTabela(contas); }
 
         // ===== VISUALIZAR =====
         let contaVisualizando = null;
@@ -1491,14 +1491,14 @@
             const conta = contas.find(c => String(c.id) === String(id)); if (!conta) return;
             contaVisualizando = conta;
             document.getElementById('view-id').textContent = '#' + conta.id;
-            document.getElementById('view-descrição').textContent = conta.descricao || conta.descricao || '-';
+            document.getElementById('view-descricao').textContent = conta.descricao || conta.descricao || '-';
             document.getElementById('view-fornecedor').textContent = conta.fornecedor_nome || '-';
             document.getElementById('view-categoria').textContent = conta.categoria_nome || '-';
             document.getElementById('view-valor').textContent = `R$ ${(conta.valor || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
             document.getElementById('view-vencimento').textContent = new Date(String(conta.data_vencimento).slice(0,10) + 'T00:00:00').toLocaleDateString('pt-BR');
             document.getElementById('view-forma').textContent = formatarFormaPagamento(conta.forma_pagamento);
             document.getElementById('view-documento').textContent = conta.numero_documento || '-';
-            document.getElementById('view-observações').textContent = conta.observações || 'Nenhuma observação';
+            document.getElementById('view-observacoes').textContent = conta.observações || 'Nenhuma observação';
             const badges = { 'pendente': {class:'pending',text:'Pendente',icon:'fa-clock'}, 'pago': {class:'paid',text:'Pago',icon:'fa-check-circle'}, 'vencido': {class:'overdue',text:'Vencido',icon:'fa-exclamation-circle'} };
             const statusInfo = badges[conta.status] || badges.pendente;
             const badge = document.getElementById('view-status-badge');
