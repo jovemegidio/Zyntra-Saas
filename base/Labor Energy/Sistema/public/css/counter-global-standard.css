@@ -1,0 +1,233 @@
+/* Metric Card Global Standard — ALL modules
+   Migrated from stat-card to metric-card pattern (prospeccao.html)
+   2026-03-26 */
+
+/* Grid */
+.metrics-grid, .stats-grid, .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+@media (max-width: 1400px) {
+    .metrics-grid, .stats-grid, .kpi-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+@media (max-width: 1024px) {
+    .metrics-grid, .stats-grid, .kpi-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+@media (max-width: 768px) {
+    .metrics-grid, .stats-grid, .kpi-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Card base */
+.metric-card, .stat-card, .kpi-card {
+    background: white !important;
+    border-radius: 16px !important;
+    padding: 20px !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+    border: 1px solid #e2e8f0 !important;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+    display: block !important;
+    cursor: default;
+}
+
+.metric-card:hover, .stat-card:hover, .kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08) !important;
+}
+
+/* Gradient top bar */
+.metric-card::before, .stat-card::before, .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    display: block !important;
+}
+.metric-card::after, .stat-card::after, .kpi-card::after { display: none !important; }
+
+/* Color gradient bars */
+.metric-card.blue::before, .stat-card.blue::before { background: linear-gradient(90deg, #3b82f6, #60a5fa) !important; }
+.metric-card.orange::before, .stat-card.orange::before { background: linear-gradient(90deg, #f59e0b, #fbbf24) !important; }
+.metric-card.purple::before, .stat-card.purple::before { background: linear-gradient(90deg, #8b5cf6, #a78bfa) !important; }
+.metric-card.green::before, .stat-card.green::before { background: linear-gradient(90deg, #22c55e, #4ade80) !important; }
+.metric-card.red::before, .stat-card.red::before { background: linear-gradient(90deg, #ef4444, #f87171) !important; }
+
+/* Header (icon + trend row) */
+.metric-header, .stat-header {
+    display: flex !important;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px !important;
+    gap: 0 !important;
+}
+
+/* Icon */
+.metric-icon, .stat-icon, .kpi-icon {
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 12px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 20px !important;
+    flex-shrink: 0;
+    box-shadow: none !important;
+    color: inherit;
+    margin-bottom: 12px;
+}
+
+/* Icon colors */
+.metric-icon.blue, .stat-icon.blue { background: #eff6ff !important; color: #3b82f6 !important; }
+.metric-icon.orange, .stat-icon.orange { background: #fff7ed !important; color: #f59e0b !important; }
+.metric-icon.purple, .stat-icon.purple { background: #faf5ff !important; color: #8b5cf6 !important; }
+.metric-icon.green, .stat-icon.green { background: #f0fdf4 !important; color: #22c55e !important; }
+.metric-icon.red, .stat-icon.red { background: #fef2f2 !important; color: #ef4444 !important; }
+
+.metric-icon i, .stat-icon i { color: inherit !important; }
+
+/* Trend badge */
+.metric-trend, .stat-trend, .stat-change {
+    font-size: 11px !important;
+    padding: 4px 8px !important;
+    border-radius: 20px !important;
+    font-weight: 600 !important;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.metric-trend.up, .stat-trend.up, .stat-change.up { background: #dcfce7 !important; color: #16a34a !important; }
+.metric-trend.down, .stat-trend.down, .stat-change.down { background: #fee2e2 !important; color: #dc2626 !important; }
+
+/* Value */
+.metric-value, .stat-value, .kpi-value {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+    font-size: 32px !important;
+    font-weight: 800 !important;
+    color: #1e293b !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+    display: block;
+}
+
+/* KPI Content Layout */
+.kpi-content {
+    flex: 1;
+}
+.kpi-header {
+    margin-bottom: 12px;
+}
+
+/* Label */
+.metric-label, .stat-label, .kpi-content h3 {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+    font-size: 12px !important;
+    color: #64748b !important;
+    font-weight: 600 !important;
+    margin: 10px 0 8px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    line-height: 1.2 !important;
+}
+
+/* Optional sublabel: informational text below metric-label */
+.metric-sublabel {
+    font-size: 11px;
+    color: #94a3b8;
+    margin-top: 6px;
+    line-height: 1.4;
+}
+
+/* Legacy compat: old patterns */
+.stat-card h3 i, .metric-card h3 i, .kpi-card .label i { display: none !important; }
+.stat-footer, .metric-footer { display: none !important; }
+
+/* Value color variants */
+.metric-value.green, .stat-value.green, .kpi-value.green { color: #15803d !important; }
+.metric-value.red, .stat-value.red, .kpi-value.red { color: #dc2626 !important; }
+.metric-value.blue, .stat-value.blue, .kpi-value.blue { color: #2563eb !important; }
+.metric-value.purple, .stat-value.purple, .kpi-value.purple { color: #6d28d9 !important; }
+.metric-value.orange, .stat-value.orange, .kpi-value.orange { color: #d97706 !important; }
+
+/* Summary cards (Vendas relatorios, NFe relatorios) */
+.summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+.summary-card {
+    background: white !important;
+    border-radius: 16px !important;
+    padding: 20px !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+    border: 1px solid #e2e8f0 !important;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+.summary-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08) !important;
+}
+.summary-card .summary-icon {
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 12px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 20px !important;
+    flex-shrink: 0;
+}
+.summary-card .summary-label, .summary-card h4 {
+    font-family: 'Inter', sans-serif !important;
+    font-size: 12px !important;
+    color: #64748b !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    margin: 0 0 8px !important;
+}
+.summary-card .summary-value, .summary-card h3 {
+    font-family: 'Inter', sans-serif !important;
+    font-size: 32px !important;
+    font-weight: 800 !important;
+    color: #1e293b !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+}
+
+/* KPI icon soft colors (pastel bg, not gradient) */
+.kpi-icon.purple { background: #faf5ff !important; color: #8b5cf6 !important; }
+.kpi-icon.green { background: #f0fdf4 !important; color: #22c55e !important; }
+.kpi-icon.orange { background: #fff7ed !important; color: #f59e0b !important; }
+.kpi-icon.blue { background: #eff6ff !important; color: #3b82f6 !important; }
+.kpi-icon.red { background: #fef2f2 !important; color: #ef4444 !important; }
+.kpi-icon.teal { background: #f0fdfa !important; color: #14b8a6 !important; }
+.kpi-icon.indigo { background: #eef2ff !important; color: #6366f1 !important; }
+.kpi-icon i { color: inherit !important; }
+
+/* 5-col forced (for pages that need it) */
+.metrics-grid.cols-5, .stats-grid.cols-5 {
+    grid-template-columns: repeat(5, 1fr) !important;
+}
+
+/* ============================================
+   FONT INTER — Force on all card elements
+   (exclude <i> to preserve Font Awesome icons)
+   ============================================ */
+.metric-card, .stat-card, .kpi-card, .summary-card,
+.metric-card *:not(i), .stat-card *:not(i), .kpi-card *:not(i), .summary-card *:not(i) {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+}
