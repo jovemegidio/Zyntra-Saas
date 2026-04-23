@@ -287,6 +287,10 @@ function Test-DeployablePath {
     param([Parameter(Mandatory)][string]$RelativePath)
 
     $normalized = $RelativePath.Replace("\", "/")
+    # Excluir scripts de debug/utilitário, bytecode Python e diretórios não-produtivos
+    if ($normalized -match '\.(py|pyc|sh)$') { return $false }
+    if ($normalized -match '^_') { return $false }
+    if ($normalized -match '^(AUDITORIA|__pycache__)') { return $false }
     return ($normalized -notmatch '^(node_modules|\.git|logs/|uploads/|backups/|backup-|_Zyntra_Legacy/|test-results/|storage/)')
 }
 
@@ -424,7 +428,10 @@ function Group-DeployFiles {
         }
 
         $localPath = Join-Path $PROJECT_ROOT ($target.LocalPath.Replace("/", "\"))
-        if (-not (Test-Path $localPath -PathType Leaf)) {
+        try {
+            if (-not (Test-Path $localPath -PathType Leaf)) { continue }
+        } catch {
+            Write-Warn "Ignorando caminho invalido: $localPath"
             continue
         }
 
@@ -627,7 +634,7 @@ if (-not $SkipVPS) {
             $failedApps = Test-RemoteHealth -AppNames $appsToDeploy
 
             if ($failedApps.Count -gt 0) {
-                Restore-RemoteBackups -AppNames $failedApps.ToArray() -BackupMap $backupMap
+                Restore-RemoteBackups -AppNames @($failedApps) -BackupMap $backupMap
                 throw "Deploy revertido para: $($failedApps -join ', ')"
             }
 
