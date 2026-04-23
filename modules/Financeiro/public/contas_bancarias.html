@@ -544,18 +544,18 @@
             document.getElementById('modal-conta').classList.add('active');
             document.getElementById('form-conta').reset();
             document.getElementById('conta-id').value = '';
-            document.getElementById('modal-conta-título').textContent = 'Nova Conta Bancária';
+            document.getElementById('modal-conta-titulo').textContent = 'Nova Conta Bancária';
             if (id) {
                 const c = contasBancarias.find(x => x.id === id); if (!c) return;
-                document.getElementById('modal-conta-título').textContent = 'Editar Conta Bancária';
+                document.getElementById('modal-conta-titulo').textContent = 'Editar Conta Bancária';
                 document.getElementById('conta-id').value = c.id;
                 document.getElementById('nome-conta').value = c.nome;
                 document.getElementById('banco').value = c.banco_codigo || c.codigo_banco || '';
                 document.getElementById('tipo-conta').value = c.tipo || 'corrente';
                 document.getElementById('agencia').value = c.agencia || '';
-                document.getElementById('número-conta').value = c.numero_conta || '';
+                document.getElementById('numero-conta').value = c.numero_conta || '';
                 document.getElementById('saldo-inicial').value = c.saldo || 0;
-                document.getElementById('observações').value = c.observações || '';
+                document.getElementById('observacoes').value = c.observações || '';
             }
         }
         function fecharModalConta() { document.getElementById('modal-conta').classList.remove('active'); }
@@ -564,7 +564,7 @@
         async function salvarConta(event) {
             event.preventDefault();
             const id = document.getElementById('conta-id').value;
-            const dados = { nome: document.getElementById('nome-conta').value, banco: document.getElementById('banco').value, tipo: document.getElementById('tipo-conta').value, agencia: document.getElementById('agencia').value, numero_conta: document.getElementById('número-conta').value, saldo: parseFloat(document.getElementById('saldo-inicial').value) || 0, observações: document.getElementById('observações').value };
+            const dados = { nome: document.getElementById('nome-conta').value, banco: document.getElementById('banco').value, tipo: document.getElementById('tipo-conta').value, agencia: document.getElementById('agencia').value, numero_conta: document.getElementById('numero-conta').value, saldo: parseFloat(document.getElementById('saldo-inicial').value) || 0, observações: document.getElementById('observacoes').value };
             try {
                 const url = id ? `/api/financeiro/contas-bancarias/${id}` : '/api/financeiro/contas-bancarias';
                 const r = await fetch(url, { method: id ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(dados) });
@@ -591,7 +591,7 @@
 
         async function salvarMovimentação(event) {
             event.preventDefault();
-            const dados = { conta_id: document.getElementById('mov-conta-id').value, tipo: document.getElementById('mov-tipo').value, valor: parseFloat(document.getElementById('mov-valor').value), descrição: document.getElementById('mov-descrição').value, data: document.getElementById('mov-data').value };
+            const dados = { conta_id: document.getElementById('mov-conta-id').value, tipo: document.getElementById('mov-tipo').value, valor: parseFloat(document.getElementById('mov-valor').value), descrição: document.getElementById('mov-descricao').value, data: document.getElementById('mov-data').value };
             try {
                 const r = await fetch('/api/financeiro/movimentacoes-bancarias', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(dados) });
                 if (r.ok) { alert('Movimentação registrada!'); fecharModalMovimentação(); await init(); } else { alert('Erro ao registrar'); }
