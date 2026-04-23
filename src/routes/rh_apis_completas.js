@@ -1040,4 +1040,99 @@ router.post('/ferias/solicitar', async (req, res) => {
     }
 });
 
+// ============================================================================
+// SOLICITAÇÕES RH - GESTÃO
+// ============================================================================
+
+/**
+ * GET /api/rh/solicitacoes/todas
+ * Lista todas as solicitações (admin/gestão)
+ */
+router.get('/solicitacoes/todas', async (req, res) => {
+    try {
+        const { status, tipo, prioridade } = req.query;
+        let query = `
+            SELECT s.*, u.nome AS funcionario_nome, u.email AS funcionario_email
+            FROM rh_solicitacoes s
+            LEFT JOIN usuarios u ON u.id = s.funcionario_id
+            WHERE 1=1
+        `;
+        const params = [];
+        if (status) { query += ' AND s.status = ?'; params.push(status); }
+        if (tipo)   { query += ' AND s.tipo = ?';   params.push(tipo); }
+        if (prioridade) { query += ' AND s.prioridade = ?'; params.push(prioridade); }
+        query += ' ORDER BY s.created_at DESC';
+
+        const [rows] = await pool.query(query, params);
+        res.json(rows);
+    } catch (error) {
+        console.error('❌ Erro ao listar solicitações:', error);
+        res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+});
+
+/**
+ * GET /api/rh/solicitacoes/:id
+ * Retorna uma solicitação pelo ID
+ */
+router.get('/solicitacoes/:id', async (req, res) => {
+    try {
+        const [rows] = await pool.query(
+            `SELECT s.*, u.nome AS funcionario_nome, u.email AS funcionario_email
+             FROM rh_solicitacoes s
+             LEFT JOIN usuarios u ON u.id = s.funcionario_id
+             WHERE s.id = ? LIMIT 1`,
+            [req.params.id]
+        );
+        if (!rows.length) return res.status(404).json({ error: 'Solicitação não encontrada' });
+        res.json(rows[0]);
+    } catch (error) {
+        console.error('❌ Erro ao buscar solicitação:', error);
+        res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+});
+
+/**
+ * PUT /api/rh/solicitacoes/:id/status
+ * Atualiza o status de uma solicitação (aprovação/rejeição)
+ */
+router.put('/solicitacoes/:id/status', async (req, res) => {
+    try {
+        const { status, resposta } = req.body;
+        if (!status) return res.status(400).json({ error: 'Status é obrigatório' });
+
+        await pool.query(
+            `UPDATE rh_solicitacoes
+             SET status = ?, resposta = ?, respondido_por = ?, data_resposta = NOW(), updated_at = NOW()
+             WHERE id = ?`,
+            [status, resposta || null, req.user?.id || null, req.params.id]
+        );
+        res.json({ success: true, message: 'Status atualizado com sucesso' });
+    } catch (error) {
+        console.error('❌ Erro ao atualizar status da solicitação:', error);
+        res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+});
+
+/**
+ * POST /api/rh/solicitacoes
+ * Cria uma nova solicitação
+ */
+router.post('/solicitacoes', async (req, res) => {
+    try {
+        const { funcionario_id, tipo, categoria, assunto, descricao, prioridade } = req.body;
+        if (!tipo || !assunto) return res.status(400).json({ error: 'Tipo e assunto são obrigatórios' });
+
+        const [result] = await pool.query(
+            `INSERT INTO rh_solicitacoes (funcionario_id, tipo, categoria, assunto, descricao, prioridade, status)
+             VALUES (?, ?, ?, ?, ?, ?, 'Pendente')`,
+            [funcionario_id || null, tipo, categoria || null, assunto, descricao || null, prioridade || 'normal']
+        );
+        res.status(201).json({ success: true, id: result.insertId });
+    } catch (error) {
+        console.error('❌ Erro ao criar solicitação:', error);
+        res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+});
+
 module.exports = router;

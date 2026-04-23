@@ -479,7 +479,7 @@
         let dadosEmpresa = {};
         async function carregarDadosEmpresa() {
             try {
-                const res = await fetch('/api/configuracoes/empresa', { credentials: 'include', headers });
+                const res = await fetch('/api/configuracoes/empresa', { credentials: 'include', headers: getAuthHeaders() });
                 if (res.ok) { const d = await res.json(); dadosEmpresa = d.empresa || d; }
             } catch(e) { console.warn('[RH] Erro ao carregar dados empresa:', e); }
         }
@@ -572,10 +572,6 @@
         <div style="margin-top:3px;">Documento gerado em ${escHTML(dataGeração)}</div>
     </div>
 
-    <!-- Chat Corporativo (Teams) -->
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
-    <script src="/js/user-dropdown.js?v=20260319" defer></script>
 </body>
 </html>`);
             doc.close();

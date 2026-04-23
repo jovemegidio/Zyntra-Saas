@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <!-- Favicon -->
@@ -14,7 +14,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Zyntra: Requisições de Compra</title>
+    <title>Aluforce: Requisições de Compra</title>
 
     <!-- Sistema de Autenticação Unificado -->
     <script src="/js/auth-unified.js?v=20260301" defer></script>
@@ -247,7 +247,7 @@
     <!-- Chat Widget BOB AI -->
     <link rel="stylesheet" href="/chat/widget.css?v=20260301">
 </head>
-<body class="dark-mode">
+<body>
     <div class="app-container">
         <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
 
@@ -585,7 +585,7 @@
     async function carregarCentrosCusto() {
         try {
             const token = localStorage.getItem('token');
-            const r = await fetch('/api/compras/centros-custo', { headers: { 'Authorization': `Bearer ${token}` } });
+            const r = await fetch('/api/compras/centros-custo', { headers: { 'Authorization': `Bearer ${token}` }, credentials: 'include' });
             if (r.ok) { const d = await r.json(); centrosCustoData = d.centros || d || []; }
         } catch (e) { console.log('Erro CC:', e); }
     }
@@ -682,7 +682,13 @@
     function adicionarItemReq() {
         itemCounter++;
         const id = itemCounter;
-        const materiaisOptions = materiaisData.map(m => `<option value="${m.nome || m.descricao}">${m.codigo ? m.codigo + ' - ' : ''}${m.nome || m.descricao}</option>`).join('');
+        const materiaisOptions = materiaisData.map(m => {
+            const preco = m.preco_unitario || m.preco_compra || 0;
+            const unidade = m.unidade || 'UN';
+            const label = (m.codigo ? m.codigo + ' - ' : '') + (m.nome || m.descricao || '');
+            const val = m.nome || m.descricao || '';
+            return `<option value="${val}" data-preco="${preco}" data-unidade="${unidade}">${label}</option>`;
+        }).join('');
         const html = `
         <div class="item-card" id="item-${id}">
             <div class="item-header">
@@ -692,8 +698,10 @@
             <div class="form-grid cols-4">
                 <div class="form-group" style="grid-column:span 2;">
                     <label>Material/Produto</label>
-                    <input type="text" class="form-control" id="itemMaterial-${id}" list="listMateriais-${id}" placeholder="Buscar material..." oninput="buscarPrecoMaterial(this, ${id})">
-                    <datalist id="listMateriais-${id}">${materiaisOptions}</datalist>
+                    <select class="form-control" id="itemMaterial-${id}" onchange="buscarPrecoMaterial(this, ${id})">
+                        <option value="">— Selecionar material —</option>
+                        ${materiaisOptions}
+                    </select>
                 </div>
                 <div class="form-group">
                     <label>Quantidade</label>
@@ -752,12 +760,16 @@
         document.getElementById('valorTotal').textContent = formatarMoeda(totalVal);
     }
 
-    function buscarPrecoMaterial(input, itemId) {
-        const mat = materiaisData.find(m => (m.nome || m.descricao) === input.value);
-        if (mat && mat.preco_unitario) {
-            document.getElementById('itemPreco-' + itemId).value = formatarMoeda(mat.preco_unitario);
-            calcularSubtotal(itemId);
-        }
+    function buscarPrecoMaterial(select, itemId) {
+        const opt = select.options[select.selectedIndex];
+        if (!opt || !opt.value) return;
+        const preco = parseFloat(opt.dataset.preco) || 0;
+        const unidade = opt.dataset.unidade || 'UN';
+        const precoEl = document.getElementById('itemPreco-' + itemId);
+        if (precoEl) precoEl.value = formatarMoeda(preco);
+        const unEl = document.getElementById('itemUnidade-' + itemId);
+        if (unEl) unEl.value = unidade;
+        calcularSubtotal(itemId);
     }
 
     function enviarRequisicao() { salvarRequisicaoAPI('pendente'); }
@@ -820,9 +832,10 @@
             const method = editingId ? 'PUT' : 'POST';
             const r = await fetch(url, {
                 method, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                credentials: 'include',
                 body: JSON.stringify(body)
             });
-            if (!r.ok) { const err = await r.json().catch(() => ({})); throw new Error(err.message || 'Erro ao salvar requisição'); }
+            if (!r.ok) { const err = await r.json().catch(() => ({})); throw new Error(err.error || err.message || 'Erro ao salvar requisição'); }
             fecharModalNovaRequisicao();
             carregarRequisicoes();
             showToast(editingId ? 'Requisição atualizada com sucesso!' : (status === 'rascunho' ? 'Rascunho salvo com sucesso!' : 'Requisição enviada com sucesso!'), 'success');
@@ -1061,10 +1074,10 @@
     <script src="/_shared/confirm-dialog.js?v=20260301"></script>
 
     <!-- Chat Widget BOB AI -->
-    <script src="/chat/widget.js?v=20260416" defer></script>
+    <script src="/chat/widget.js?v=20260418" defer></script>
 
     <!-- Enterprise Shared -->
     <script src="/js/sidebar-click-animation.js?v=20260301"></script>
-    <script src="/_shared/accessibility-widget.js?v=20260301"></script>
+    <script src="/_shared/accessibility-widget.js?v=20260418"></script>
 </body>
 </html>

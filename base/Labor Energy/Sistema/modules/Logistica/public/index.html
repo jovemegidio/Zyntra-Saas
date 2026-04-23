@@ -404,9 +404,62 @@
     </div>
 
     <script>
+        function showToast(msg, type) {
+            type = type || 'info';
+            var colors = { success: '#22c55e', error: '#ef4444', warning: '#f59e0b', info: '#3b82f6' };
+            var t = document.createElement('div');
+            t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:' + (colors[type] || colors.info) + ';color:#fff;padding:12px 20px;border-radius:8px;font-size:14px;font-weight:500;box-shadow:0 4px 12px rgba(0,0,0,.2);z-index:99999;max-width:360px;animation:_toast-in .3s ease';
+            t.textContent = msg;
+            if (!document.getElementById('_toast-kf')) {
+                var s = document.createElement('style'); s.id = '_toast-kf';
+                s.textContent = '@keyframes _toast-in{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}';
+                document.head.appendChild(s);
+            }
+            document.body.appendChild(t);
+            setTimeout(function(){ t.remove(); }, 3500);
+        }
         function toggleMobileSidebar() { document.getElementById('mobile-sidebar').classList.toggle('open'); document.getElementById('sidebar-overlay').classList.toggle('active'); }
-        function openModal(id) { document.getElementById(id).classList.add('active'); }
-        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+        function openModal(id) {
+            const modal = document.getElementById(id);
+            if (!modal) return;
+            modal.classList.add('active');
+            modal.style.display = '';
+            modal.removeAttribute('aria-hidden');
+            if (window.ZyntraUI?.refreshUi) window.ZyntraUI.refreshUi(modal);
+        }
+        function closeModal(id) {
+            const modal = document.getElementById(id);
+            if (!modal) return;
+            if (window.ZyntraUI?.closeModal) {
+                window.ZyntraUI.closeModal(modal);
+                return;
+            }
+            modal.classList.remove('active');
+            modal.setAttribute('aria-hidden', 'true');
+        }
+
+        function getModalPrimaryActionButton(modalId) {
+            const activeElement = document.activeElement;
+            if (activeElement instanceof HTMLButtonElement && activeElement.closest(`#${modalId}`)) {
+                return activeElement;
+            }
+            return document.querySelector(`#${modalId} .modal-buttons .btn-primary:last-of-type`) ||
+                   document.querySelector(`#${modalId} .btn-primary:last-of-type`);
+        }
+
+        function setModalButtonBusy(button, busy, label = 'Salvando...') {
+            if (!button) return;
+            if (busy) {
+                if (!button.dataset.originalHtml) button.dataset.originalHtml = button.innerHTML;
+                button.disabled = true;
+                button.setAttribute('aria-busy', 'true');
+                button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${label}`;
+                return;
+            }
+            if (button.dataset.originalHtml) button.innerHTML = button.dataset.originalHtml;
+            button.disabled = false;
+            button.removeAttribute('aria-busy');
+        }
 
         function mostrarTab(tab, btn) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -526,15 +579,15 @@
                     carregarDashboard();
                 } else {
                     const err = await r.json().catch(() => ({}));
-                    alert('Erro ao atualizar status');
+                    showToast('Erro ao atualizar status', 'error');
                 }
-            } catch (e) { alert('Erro de conexão'); } finally { window._guardConfirmarStatus = false; }
+            } catch (e) { showToast('Erro de conexão', 'error'); } finally { window._guardConfirmarStatus = false; }
         }
 
         // ========== Modal Detalhes Pedido ==========
         function verDetalhes(id) {
             const p = pedidos.find(x => x.id === id);
-            if (!p) { alert('Pedido não encontrado'); return; }
+            if (!p) { showToast('Pedido não encontrado', 'error'); return; }
             const statusLabel = { pendente: 'Aguardando', em_separacao: 'Em Separação', em_expedicao: 'Em Expedição', em_transporte: 'Em Transporte', entregue: 'Entregue' };
             document.getElementById('modal-detalhes-body').innerHTML = `
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
@@ -590,7 +643,7 @@
         // ========== Imprimir Etiqueta ==========
         function imprimirEtiqueta(id) {
             const p = pedidos.find(x => x.id === id);
-            if (!p) { alert('Pedido não encontrado'); return; }
+            if (!p) { showToast('Pedido não encontrado', 'error'); return; }
             const esc = s => String(s || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m]));
             const previsao = p.previsao && p.previsao !== '-' ? new Date(p.previsao).toLocaleDateString('pt-BR') : '-';
             const priorClass = (p.prioridade || 'media').toLowerCase();
@@ -625,7 +678,7 @@
 
         // ========== Exportar Excel ==========
         function exportarExcel() {
-            if (!pedidos.length) { alert('Nenhum pedido para exportar'); return; }
+            if (!pedidos.length) { showToast('Nenhum pedido para exportar', 'warning'); return; }
             const statusLabel = { pendente: 'Aguardando', em_separacao: 'Em Separação', em_expedicao: 'Em Expedição', em_transporte: 'Em Transporte', entregue: 'Entregue' };
             const headers = ['Pedido', 'NF-e', 'Cliente', 'Cidade/UF', 'Transportadora', 'Previsão', 'Status', 'Prioridade', 'Valor'];
             const rows = pedidos.map(p => [
@@ -652,6 +705,8 @@
         async function salvarExpedicao() {
             if (window._guardSalvarExpedicao) return;
             window._guardSalvarExpedicao = true;
+            const actionButton = getModalPrimaryActionButton('modal-nova-expedicao');
+            setModalButtonBusy(actionButton, true);
             try {
                 const r = await fetch('/api/logistica/expedicao', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({
@@ -672,9 +727,9 @@
                     carregarDashboard();
                 } else {
                     const err = await r.json().catch(() => ({}));
-                    alert('Erro ao salvar expedição');
+                    showToast('Erro ao salvar expedição', 'error');
                 }
-            } catch (e) { alert('Erro de conexão'); } finally { window._guardSalvarExpedicao = false; }
+            } catch (e) { showToast('Erro de conexão', 'error'); } finally { setModalButtonBusy(actionButton, false); window._guardSalvarExpedicao = false; }
         }
 
         async function carregarTransportadoras() {
@@ -722,9 +777,11 @@
 
         async function salvarTransportadora() {
             const razao = document.getElementById('transp-razao').value.trim();
-            if (!razao) { alert('Razão Social é obrigatória'); return; }
+            if (!razao) { showToast('Razão Social é obrigatória', 'warning'); return; }
             if (window._guardSalvarTransp) return;
             window._guardSalvarTransp = true;
+            const actionButton = getModalPrimaryActionButton('modal-transportadoras');
+            setModalButtonBusy(actionButton, true);
             const editId = document.getElementById('transp-edit-id').value;
             const payload = {
                 razao_social: razao,
@@ -751,9 +808,9 @@
                     document.getElementById('transp-edit-id').value = '';
                     carregarTransportadoras();
                 } else {
-                    alert(data.error || 'Erro ao salvar transportadora');
+                    showToast(data.error || 'Erro ao salvar transportadora', 'error');
                 }
-            } catch (e) { alert('Erro de conexão'); } finally { window._guardSalvarTransp = false; }
+            } catch (e) { showToast('Erro de conexão', 'error'); } finally { setModalButtonBusy(actionButton, false); window._guardSalvarTransp = false; }
         }
 
         function adicionarTransportadora() {
@@ -786,8 +843,8 @@
             window._guardExcluirTransp = true;
             try {
                 const r = await fetch(`/api/logistica/transportadoras/${id}`, { method: 'DELETE', credentials: 'include' });
-                if (r.ok) { carregarTransportadoras(); } else { const d = await r.json().catch(() => ({})); alert(d.error || 'Erro ao excluir'); }
-            } catch (e) { alert('Erro de conexão'); } finally { window._guardExcluirTransp = false; }
+                if (r.ok) { carregarTransportadoras(); } else { const d = await r.json().catch(() => ({})); showToast(d.error || 'Erro ao excluir', 'error'); }
+            } catch (e) { showToast('Erro de conexão', 'error'); } finally { window._guardExcluirTransp = false; }
         }
 
         // ========== Atribuir Transportadora ao Pedido ==========
@@ -813,7 +870,7 @@
             if (!_atribPedidoId) return;
             const transportadoraId = document.getElementById('modal-atrib-transportadora').value;
             const previsao = document.getElementById('modal-atrib-previsao').value;
-            if (!transportadoraId) { alert('Selecione uma transportadora'); return; }
+            if (!transportadoraId) { showToast('Selecione uma transportadora', 'warning'); return; }
             if (window._guardAtribuirTransp) return;
             window._guardAtribuirTransp = true;
             try {
@@ -824,13 +881,13 @@
                 if (r.ok) {
                     closeModal('modal-atribuir-transportadora');
                     carregarPedidos();
-                } else { alert('Erro ao atribuir transportadora'); }
-            } catch (e) { alert('Erro de conexão'); } finally { window._guardAtribuirTransp = false; }
+                } else { showToast('Erro ao atribuir transportadora', 'error'); }
+            } catch (e) { showToast('Erro de conexão', 'error'); } finally { window._guardAtribuirTransp = false; }
         }
 
         function verTransportadora(id) {
             const t = transportadoras.find(tr => tr.id === id);
-            if (!t) { alert('Transportadora não encontrada'); return; }
+            if (!t) { showToast('Transportadora não encontrada', 'error'); return; }
             document.getElementById('modal-detalhes-body').innerHTML = `
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
             <div class="form-group">

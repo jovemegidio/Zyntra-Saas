@@ -24,6 +24,237 @@
 })();
 
 // =============================================================================
+// 🧹 FRONTEND POLISH: corrige mojibake visível e padroniza modais básicos
+// =============================================================================
+;(function frontendPolish() {
+    const suspiciousPattern = /(Ã.|Â.|â.|ðŸ)/;
+    const modalSelector = '.modal-overlay, .modal, [role="dialog"]';
+    const registeredModals = new WeakSet();
+    const modalState = new WeakMap();
+
+    function mojibakeScore(value) {
+        const matches = String(value || '').match(/(?:Ã.|Â.|â.|ðŸ)/g);
+        return matches ? matches.length : 0;
+    }
+
+    function repairMojibake(value) {
+        if (!value || !suspiciousPattern.test(value)) return value;
+        let current = value;
+
+        for (let attempt = 0; attempt < 2; attempt++) {
+            try {
+                const bytes = Uint8Array.from(Array.from(current), (char) => char.charCodeAt(0) & 0xff);
+                const candidate = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+                if (!candidate || mojibakeScore(candidate) >= mojibakeScore(current)) break;
+                current = candidate;
+            } catch (e) {
+                break;
+            }
+        }
+
+        return current;
+    }
+
+    function normalizeTextNode(node) {
+        if (!node || node.nodeType !== Node.TEXT_NODE || !node.parentElement) return;
+        if (node.parentElement.closest('script, style, textarea, pre, code')) return;
+
+        const fixedValue = repairMojibake(node.nodeValue);
+        if (fixedValue !== node.nodeValue) {
+            node.nodeValue = fixedValue;
+        }
+    }
+
+    function normalizeAttributes(element) {
+        if (!(element instanceof Element)) return;
+
+        ['placeholder', 'title', 'aria-label', 'alt'].forEach((attributeName) => {
+            const value = element.getAttribute(attributeName);
+            if (!value) return;
+
+            const fixedValue = repairMojibake(value);
+            if (fixedValue !== value) {
+                element.setAttribute(attributeName, fixedValue);
+            }
+        });
+    }
+
+    function normalizeTree(root) {
+        if (!root) return;
+
+        if (root.nodeType === Node.TEXT_NODE) {
+            normalizeTextNode(root);
+            return;
+        }
+
+        if (root instanceof Element) {
+            normalizeAttributes(root);
+        }
+
+        if (root.childNodes) {
+            root.childNodes.forEach((childNode) => normalizeTree(childNode));
+        }
+    }
+
+    function isModalOpen(modal) {
+        if (!(modal instanceof Element)) return false;
+        if (modal.hasAttribute('hidden') || modal.getAttribute('aria-hidden') === 'true') return false;
+        if (modal.classList.contains('show') || modal.classList.contains('active') || modal.classList.contains('open')) return true;
+
+        const styles = window.getComputedStyle(modal);
+        const rect = modal.getBoundingClientRect();
+        return styles.display !== 'none' && styles.visibility !== 'hidden' && rect.width > 0 && rect.height > 0;
+    }
+
+    function syncBodyOverflow() {
+        if (!document.body) return;
+        const hasOpenModal = Array.from(document.querySelectorAll(modalSelector)).some((modal) => isModalOpen(modal));
+        document.body.style.overflow = hasOpenModal ? 'hidden' : '';
+    }
+
+    function getFocusableElement(modal) {
+        return modal.querySelector('[autofocus], input:not([type="hidden"]):not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])');
+    }
+
+    function syncModalState(modal, force = false) {
+        if (!(modal instanceof Element)) return;
+
+        const state = modalState.get(modal) || {};
+        const isOpen = isModalOpen(modal);
+        if (!force && state.isOpen === isOpen) return;
+
+        state.isOpen = isOpen;
+        modalState.set(modal, state);
+
+        if (isOpen) {
+            if (!modal.hasAttribute('role')) modal.setAttribute('role', 'dialog');
+            modal.setAttribute('aria-modal', 'true');
+            modal.removeAttribute('aria-hidden');
+
+            if (!state.previousFocus && document.activeElement instanceof HTMLElement) {
+                state.previousFocus = document.activeElement;
+            }
+
+            syncBodyOverflow();
+
+            window.requestAnimationFrame(() => {
+                if (!isModalOpen(modal)) return;
+                const target = getFocusableElement(modal) || modal;
+                if (typeof target.focus === 'function') {
+                    target.focus({ preventScroll: true });
+                }
+            });
+            return;
+        }
+
+        modal.setAttribute('aria-hidden', 'true');
+        syncBodyOverflow();
+
+        if (state.previousFocus && document.contains(state.previousFocus) && typeof state.previousFocus.focus === 'function') {
+            state.previousFocus.focus({ preventScroll: true });
+        }
+        state.previousFocus = null;
+    }
+
+    function closeModal(modal) {
+        if (!(modal instanceof Element)) return;
+        modal.classList.remove('show', 'active', 'open');
+        if (modal.style.display && modal.style.display !== 'none') {
+            modal.style.display = 'none';
+        }
+        syncModalState(modal, true);
+    }
+
+    function registerModal(modal) {
+        if (!(modal instanceof Element) || registeredModals.has(modal)) return;
+
+        registeredModals.add(modal);
+        if (!modal.hasAttribute('role')) modal.setAttribute('role', 'dialog');
+        modal.setAttribute('aria-modal', 'true');
+        if (!modal.hasAttribute('tabindex')) modal.setAttribute('tabindex', '-1');
+
+        modal.addEventListener('click', (event) => {
+            if (event.target === modal) {
+                closeModal(modal);
+            }
+        });
+
+        modal.querySelectorAll('.modal-close, [data-close-modal], [data-dismiss="modal"]').forEach((button) => {
+            button.addEventListener('click', () => closeModal(modal));
+        });
+
+        syncModalState(modal, true);
+    }
+
+    function enhanceModalTree(root) {
+        if (!root) return;
+
+        if (root instanceof Element && root.matches(modalSelector)) {
+            registerModal(root);
+        }
+
+        if (root.querySelectorAll) {
+            root.querySelectorAll(modalSelector).forEach((modal) => registerModal(modal));
+        }
+
+        document.querySelectorAll(modalSelector).forEach((modal) => syncModalState(modal));
+    }
+
+    function refreshUi(root = document.body || document.documentElement) {
+        normalizeTree(root);
+        enhanceModalTree(root);
+    }
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key !== 'Escape') return;
+
+        const openModals = Array.from(document.querySelectorAll(modalSelector)).filter((modal) => isModalOpen(modal));
+        const lastOpenModal = openModals[openModals.length - 1];
+        if (lastOpenModal) {
+            closeModal(lastOpenModal);
+        }
+    });
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => refreshUi(), { once: true });
+    } else {
+        refreshUi();
+    }
+
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.type === 'characterData') {
+                normalizeTextNode(mutation.target);
+                return;
+            }
+
+            if (mutation.type === 'attributes' && mutation.target instanceof Element) {
+                normalizeAttributes(mutation.target);
+                syncModalState(mutation.target);
+                return;
+            }
+
+            mutation.addedNodes.forEach((node) => {
+                refreshUi(node);
+            });
+        });
+    });
+
+    observer.observe(document.documentElement, {
+        subtree: true,
+        childList: true,
+        characterData: true,
+        attributes: true,
+        attributeFilter: ['class', 'style', 'hidden', 'aria-hidden', 'placeholder', 'title', 'aria-label', 'alt']
+    });
+
+    window.ZyntraUI = Object.assign(window.ZyntraUI || {}, {
+        closeModal,
+        refreshUi
+    });
+})();
+
+// =============================================================================
 // 🔒 STORAGE ISOLATOR - Deve rodar ANTES de qualquer outro código
 // Intercepta localStorage.getItem para chaves de autenticação
 // Retorna valores do sessionStorage (isolado por aba) quando disponíveis
@@ -455,7 +686,7 @@
             loginUrl = `${AUTH_CONFIG.loginUrl}?returnTo=${returnTo}`;
         }
 
-        window.location.href = loginUrl;
+        window.location.assign(loginUrl);
     }
 
     // =========================================================================
@@ -698,7 +929,7 @@
                 await _originalFetch('/api/logout', { method: 'POST', credentials: 'include' });
             } catch (e) { /* ignore network errors during logout */ }
             clearAuthData();
-            window.location.href = AUTH_CONFIG.loginUrl;
+            window.location.assign(AUTH_CONFIG.loginUrl);
         }
     };
 

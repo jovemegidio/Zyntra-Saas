@@ -6279,15 +6279,15 @@
                     </div>
 
                     <!-- Tab Content: Observações -->
-                    <div class="tab-content" id="tab-observacoes">
+                    <div class="tab-content" id="tab-observações">
                         <div class="form-group">
                             <label>Observações Internas</label>
-                            <textarea id="edit-observacoes" placeholder="Observações internas (não aparecem na NF)..."
+                            <textarea id="edit-observações" placeholder="Observações internas (não aparecem na NF)..."
                                 style="min-height: 120px;"></textarea>
                         </div>
                         <div class="form-group">
                             <label>Observações para o Cliente</label>
-                            <textarea id="edit-observacoes-cliente"
+                            <textarea id="edit-observações-cliente"
                                 placeholder="Observações que aparecerão para o cliente..."
                                 style="min-height: 120px;"></textarea>
                         </div>
@@ -9258,7 +9258,7 @@
                             </div>
                         </div>
 
-                        <div id="tab-observacoes" class="produto-tab-panel" style="display: none;">
+                        <div id="tab-observações" class="produto-tab-panel" style="display: none;">
                             <h4 style="font-size: 14px; color: #333; margin: 0 0 16px 0;">Observações</h4>
                             <textarea id="produto-observacoes" placeholder="Observações sobre o produto..."
                                 style="width: 100%; min-height: 150px; padding: 12px; border: 1px solid #ddd; border-radius: 6px; resize: vertical;"></textarea>
@@ -10024,7 +10024,7 @@
         // Mapeamento de coluna para status da API
         const colunaParaStatus = {
             'orcamento': 'orcamento',
-            'análise': 'análise-crédito',
+            'análise': 'analise-credito',
             'aprovado': 'pedido-aprovado',
             'faturar': 'faturar',
             'faturado': 'faturado',
@@ -11298,7 +11298,7 @@
             pedidoAtual = pedido;
 
             // Atualizar título do modal
-            document.getElementById('modal-título-pedido').textContent = `Pedido de Venda Nº ${pedido.numero_pedido || pedido.id}`;
+            document.getElementById('modal-titulo-pedido').textContent = `Pedido de Venda Nº ${pedido.numero_pedido || pedido.id}`;
 
             // Atualizar avatar do cliente (primeiras 2 letras)
             const clienteNome = pedido.cliente || 'Cliente';
@@ -13533,7 +13533,7 @@ td{padding:5px 8px;border-bottom:1px solid #e5e7eb;font-size:10px}
                 };
 
                 // Atualizar título do modal
-                document.getElementById('modal-título-pedido').textContent = 'Novo Orçamento de Venda';
+                document.getElementById('modal-titulo-pedido').textContent = 'Novo Orçamento de Venda';
 
                 // Limpar avatar do cliente
                 document.getElementById('modal-cliente-avatar').textContent = 'NC';
@@ -16307,7 +16307,7 @@ td{padding:5px 8px;border-bottom:1px solid #e5e7eb;font-size:10px}
 
         // Toggle observações
         function toggleObservaçõesItem() {
-            const container = document.getElementById('item-observações-container');
+            const container = document.getElementById('item-observacoes-container');
             if (container) {
                 container.style.display = container.style.display === 'none' ? 'block' : 'none';
             }
@@ -16643,7 +16643,7 @@ td{padding:5px 8px;border-bottom:1px solid #e5e7eb;font-size:10px}
             document.getElementById('item-pedido-cenario')?.value != null && (document.getElementById('item-pedido-cenario').value = 'Padrão');
             document.getElementById('item-pedido-npc')?.value != null && (document.getElementById('item-pedido-npc').value = '');
             document.getElementById('item-pedido-item-npc')?.value != null && (document.getElementById('item-pedido-item-npc').value = '0');
-            document.getElementById('item-pedido-observações').value = '';
+            document.getElementById('item-pedido-observacoes').value = '';
 
             // Limpar checkboxes
             document.getElementById('item-nao-gerar-saida').checked = false;
@@ -16651,7 +16651,7 @@ td{padding:5px 8px;border-bottom:1px solid #e5e7eb;font-size:10px}
             document.getElementById('item-continuar-incluindo').checked = false; // Padrão: fechar modal após adicionar item
 
             // Esconder observações
-            document.getElementById('item-observações-container').style.display = 'none';
+            document.getElementById('item-observacoes-container').style.display = 'none';
 
             // Resetar cálculos
             document.getElementById('calc-valor-mercadoria').textContent = 'R$ 0,00';
@@ -16675,7 +16675,7 @@ td{padding:5px 8px;border-bottom:1px solid #e5e7eb;font-size:10px}
             }, 0);
             document.getElementById('calc-total-pedido').textContent = formatarMoeda(totalExistente);
 
-            document.getElementById('modal-item-título').textContent = 'Novo Item de Pedido de Venda';
+            document.getElementById('modal-item-titulo').textContent = 'Novo Item de Pedido de Venda';
             // Restaurar campo produto como editável para novo item
             document.getElementById('item-pedido-produto').readOnly = false;
             document.getElementById('item-pedido-produto').style.background = '';
@@ -16730,12 +16730,12 @@ td{padding:5px 8px;border-bottom:1px solid #e5e7eb;font-size:10px}
             document.getElementById('item-pedido-cenario')?.value != null && (document.getElementById('item-pedido-cenario').value = item.cenario_fiscal || 'Padrão');
             document.getElementById('item-pedido-npc')?.value != null && (document.getElementById('item-pedido-npc').value = item.numero_pedido_compra || '');
             document.getElementById('item-pedido-item-npc')?.value != null && (document.getElementById('item-pedido-item-npc').value = item.item_pedido_compra || '0');
-            document.getElementById('item-pedido-observações').value = item.observações || '';
+            document.getElementById('item-pedido-observacoes').value = item.observações || '';
 
             // Atualizar cálculos
             atualizarCalculosItem();
 
-            document.getElementById('modal-item-título').textContent = 'Editar Item de Pedido de Venda';
+            document.getElementById('modal-item-titulo').textContent = 'Editar Item de Pedido de Venda';
             document.getElementById('modal-item-pedido').classList.add('active');
         }
 
@@ -16792,7 +16792,7 @@ td{padding:5px 8px;border-bottom:1px solid #e5e7eb;font-size:10px}
                 const localEstoque = document.getElementById('item-pedido-estoque').value;
                 const cfop = document.getElementById('item-pedido-cfop').value;
                 const cenarioFiscal = document.getElementById('item-pedido-cenario')?.value || 'Padrão';
-                const observações = document.getElementById('item-pedido-observações').value;
+                const observações = document.getElementById('item-pedido-observacoes').value;
                 const unidade = produtoSelecionadoAutoComplete?.unidade || 'M';
 
                 if (!código && !produtoInput) {
@@ -20814,6 +20814,21 @@ td{padding:5px 8px;border-bottom:1px solid #e5e7eb;font-size:10px}
                 if (btnFaturarTodos) btnFaturarTodos.style.display = 'none';
                 if (btnComunicarSefaz) btnComunicarSefaz.style.display = 'none';
             }
+
+            // ---- COMISSÕES: ocultar para quem não é admin e não é do departamento Comercial ----
+            if (!usuarioLogado.isAdmin) {
+                const isComercial = (
+                    usuarioLogado.departamento === 'Comercial' ||
+                    usuarioLogado.role === 'comercial' ||
+                    usuarioLogado.role === 'vendedor'
+                );
+                if (!isComercial) {
+                    document.querySelectorAll('.sidebar-btn[data-page="page.comissoes"]').forEach(function(btn) {
+                        btn.style.display = 'none';
+                    });
+                    console.log('[Vendas] Comissões oculto — usuário não é Comercial');
+                }
+            }
         }
 
         async function carregarUsuarioLogado() {
@@ -22199,8 +22214,8 @@ td{padding:5px 8px;border-bottom:1px solid #e5e7eb;font-size:10px}
         let confirmCallback = null;
 
         function mostrarConfirmação(opcoes = {}) {
-            const modal = document.getElementById('modal-confirmação-custom');
-            const título = document.getElementById('confirm-título');
+            const modal = document.getElementById('modal-confirmacao-custom');
+            const título = document.getElementById('confirm-titulo');
             const mensagem = document.getElementById('confirm-mensagem');
             const iconContainer = document.getElementById('confirm-icon-container');
             const icon = document.getElementById('confirm-icon');
@@ -22208,7 +22223,8 @@ td{padding:5px 8px;border-bottom:1px solid #e5e7eb;font-size:10px}
             const btnCancelar = document.getElementById('btn-confirm-cancelar');
 
             // Configurar textos
-            título.textContent = opcoes.titulo || 'Confirmar Ação';
+            if (!título || !modal) { console.warn('[modal-confirmacao] Elementos do modal não encontrados'); return; }
+            título.textContent = opcoes['título'] || opcoes.titulo || 'Confirmar Ação';
             mensagem.textContent = opcoes.mensagem || 'Deseja realmente realizar esta ação?';
             btnOk.textContent = opcoes.textoBotaoOk || 'Confirmar';
             btnCancelar.textContent = opcoes.textoBotaoCancelar || 'Cancelar';
@@ -22284,7 +22300,7 @@ td{padding:5px 8px;border-bottom:1px solid #e5e7eb;font-size:10px}
         }
 
         function fecharConfirmação() {
-            const modal = document.getElementById('modal-confirmação-custom');
+            const modal = document.getElementById('modal-confirmacao-custom');
             modal.classList.remove('active');
             confirmCallback = null;
         }

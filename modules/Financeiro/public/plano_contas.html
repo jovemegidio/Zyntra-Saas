@@ -257,9 +257,9 @@
 
         function abrirModalConta() {
             editandoId = null;
-            document.getElementById('modal-conta-título').textContent = 'Nova Conta';
+            document.getElementById('modal-conta-titulo').textContent = 'Nova Conta';
             document.getElementById('conta-id').value = '';
-            document.getElementById('conta-código').value = '';
+            document.getElementById('conta-codigo').value = '';
             document.getElementById('conta-nome').value = '';
             document.getElementById('conta-tipo').value = 'receita';
             document.getElementById('conta-pai').value = '';
@@ -271,9 +271,9 @@
             const conta = planoContas.find(c => c.id === id);
             if (!conta) return;
             editandoId = id;
-            document.getElementById('modal-conta-título').textContent = 'Editar Conta';
+            document.getElementById('modal-conta-titulo').textContent = 'Editar Conta';
             document.getElementById('conta-id').value = id;
-            document.getElementById('conta-código').value = conta.codigo || '';
+            document.getElementById('conta-codigo').value = conta.codigo || '';
             document.getElementById('conta-nome').value = conta.nome || '';
             document.getElementById('conta-tipo').value = conta.tipo || 'receita';
             document.getElementById('conta-pai').value = conta.pai_id || conta.conta_pai_id || '';
@@ -284,7 +284,7 @@
         function fecharModalConta() { document.getElementById('modal-conta').classList.remove('active'); }
 
         async function salvarConta() {
-            const código = document.getElementById('conta-código').value.trim();
+            const código = document.getElementById('conta-codigo').value.trim();
             const nome = document.getElementById('conta-nome').value.trim();
             const tipo = document.getElementById('conta-tipo').value;
             const pai_id = document.getElementById('conta-pai').value || null;

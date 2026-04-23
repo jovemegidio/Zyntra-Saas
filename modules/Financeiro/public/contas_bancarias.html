@@ -658,7 +658,8 @@
         }
 
         // ===== MODAL TRANSFERÊNCIA =====
-        function abrirModalTransferencia() {
+        async function abrirModalTransferencia() {
+            if (!contasBancarias.length) await carregarContas();
             document.getElementById('modal-transferencia').classList.add('active');
             document.getElementById('form-transferencia').reset();
             document.getElementById('transf-data').value = new Date().toISOString().split('T')[0];
@@ -681,7 +682,7 @@
             const destinoId = document.getElementById('transf-conta-destino').value;
             const valor = parseFloat(document.getElementById('transf-valor').value);
             const data = document.getElementById('transf-data').value;
-            const desc = document.getElementById('transf-descrição').value || 'Transferência entre contas';
+            const desc = document.getElementById('transf-descricao').value || 'Transferência entre contas';
             if (origemId === destinoId) { alert('Selecione contas diferentes'); return; }
             try {
                 const r1 = await fetch('/api/financeiro/movimentacoes-bancarias', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ conta_id: origemId, tipo: 'saida', valor, descrição: `${desc} (Saída)`, data }) });

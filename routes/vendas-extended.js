@@ -1252,18 +1252,20 @@ module.exports = function createVendasExtendedRoutes(deps) {
     router.get('/clientes', authorizeArea('vendas'), async (req, res) => {
         try {
             const { search } = req.query;
-            let query = 'SELECT id, nome, razao_social, nome_fantasia, cnpj, cnpj_cpf, email, telefone, cidade, estado, vendedor_responsavel, ativo FROM clientes';
+            const limitParam = Math.min(Math.max(1, parseInt(req.query.limit) || 500), 2000);
+            let query = 'SELECT id, nome, razao_social, nome_fantasia, cnpj, cnpj_cpf, cpf, contato, email, telefone, cidade, estado, uf, vendedor_responsavel, ativo, data_criacao FROM clientes';
             const params = [];
 
             if (search) {
-                query += ' WHERE nome LIKE ? OR email LIKE ? OR telefone LIKE ?';
+                query += ' WHERE nome LIKE ? OR razao_social LIKE ? OR email LIKE ? OR telefone LIKE ? OR cnpj_cpf LIKE ?';
                 const searchTerm = `%${search}%`;
-                params.push(searchTerm, searchTerm, searchTerm);
+                params.push(searchTerm, searchTerm, searchTerm, searchTerm, searchTerm);
             }
 
-            query += ' ORDER BY nome LIMIT 100';
+            query += ' ORDER BY nome LIMIT ?';
+            params.push(limitParam);
 
-            const [clientes] = await vendasPool.query(query, params);
+            const [clientes] = await pool.query(query, params);
             res.json(clientes);
         } catch (error) {
             console.error('Erro ao listar clientes:', error);
@@ -1274,7 +1276,8 @@ module.exports = function createVendasExtendedRoutes(deps) {
     router.get('/clientes/:id', authorizeArea('vendas'), async (req, res) => {
         try {
             const { id } = req.params;
-            const [clientes] = await vendasPool.query('SELECT * FROM clientes WHERE id = ?', [id]);
+            if (!/^\d+$/.test(id)) return res.status(400).json({ error: 'ID inválido' });
+            const [clientes] = await pool.query('SELECT * FROM clientes WHERE id = ? LIMIT 1', [id]);
 
             if (clientes.length === 0) {
                 return res.status(404).json({ error: 'Cliente não encontrado' });

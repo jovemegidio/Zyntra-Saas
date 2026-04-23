@@ -129,12 +129,12 @@
 
     W.socket.on('typing:update', (data) => {
       const t = $('afw-typing');
-      data.isTyping ? t.classList.remove('hidden') : t.classList.add('hidden');
+      if (t) { data.isTyping ? t.classList.remove('hidden') : t.classList.add('hidden'); }
       scrollBottom();
     });
 
     W.socket.on('support:suggest', () => {
-      $('afw-support-bar').classList.remove('hidden');
+      const sb = $('afw-support-bar'); if (sb) sb.classList.remove('hidden');
       scrollBottom();
     });
 
@@ -184,14 +184,14 @@
 
       const panel = $('afw-support-panel');
       if (panel) panel.classList.add('hidden');
-      $('afw-chat').classList.remove('hidden');
+      const chatEl = $('afw-chat'); if (chatEl) chatEl.classList.remove('hidden');
 
       $('afw-header-name').textContent = data.ticket.userName || 'Usuário';
       $('afw-header-status').innerHTML = '<i class="fas fa-circle" style="color:#4caf50"></i> Suporte Ativo';
 
       // Renderizar histórico
       const inner = $('afw-messages-inner');
-      inner.innerHTML = '<div class="afw-date-divider"><span>Hoje</span></div>';
+      if (inner) inner.innerHTML = '<div class="afw-date-divider"><span>Hoje</span></div>';
       if (data.conversationHistory) {
         data.conversationHistory.forEach(msg => renderMessage(msg));
       }
@@ -310,8 +310,8 @@
     W.socket.emit('user:register', { name, email });
     W.isLoggedIn = true;
 
-    $('afw-welcome').classList.add('hidden');
-    $('afw-chat').classList.remove('hidden');
+    const welcome = $('afw-welcome'); if (welcome) welcome.classList.add('hidden');
+    const chatEl2 = $('afw-chat'); if (chatEl2) chatEl2.classList.remove('hidden');
 
     setTimeout(() => {
       scrollBottom();
@@ -419,7 +419,7 @@
     const btnBack = $('afw-support-back-btn');
     if (btnBack) {
       btnBack.addEventListener('click', () => {
-        $('afw-chat').classList.add('hidden');
+        const chatBk = $('afw-chat'); if (chatBk) chatBk.classList.add('hidden');
         panel.classList.remove('hidden');
         btnBack.classList.add('hidden');
         W.isSupportMode = false;
@@ -537,12 +537,12 @@
 
     if (!customText) input.value = '';
     autoResize(input);
-    $('afw-btn-send').classList.add('hidden');
-    $('afw-btn-mic').classList.remove('hidden');
+    const sendBtn = $('afw-btn-send'); if (sendBtn) sendBtn.classList.add('hidden');
+    const micBtn = $('afw-btn-mic'); if (micBtn) micBtn.classList.remove('hidden');
     scrollBottom();
 
     W.socket.emit('typing:stop', { conversationId: W.conversationId });
-    $('afw-support-bar').classList.add('hidden');
+    const supBar = $('afw-support-bar'); if (supBar) supBar.classList.add('hidden');
   }
 
   // ==================== RENDERIZAR MENSAGEM ====================
@@ -626,8 +626,8 @@
       W.mediaRecorder.start();
       W.isRecording = true;
       W.recStartTime = Date.now();
-      $('afw-input-bar').classList.add('hidden');
-      $('afw-audio-bar').classList.remove('hidden');
+      const iBar = $('afw-input-bar'); if (iBar) iBar.classList.add('hidden');
+      const aBar = $('afw-audio-bar'); if (aBar) aBar.classList.remove('hidden');
       W.recTimer = setInterval(updateRecTime, 500);
     } catch (e) { showNotif('❌ Microfone não disponível'); }
   }
@@ -639,8 +639,8 @@
     }
     W.isRecording = false;
     clearInterval(W.recTimer);
-    $('afw-input-bar').classList.remove('hidden');
-    $('afw-audio-bar').classList.add('hidden');
+    const iBar2 = $('afw-input-bar'); if (iBar2) iBar2.classList.remove('hidden');
+    const aBar2 = $('afw-audio-bar'); if (aBar2) aBar2.classList.add('hidden');
   }
 
   function stopAndSendRec() {
@@ -664,8 +664,8 @@
     W.mediaRecorder.stop();
     W.isRecording = false;
     clearInterval(W.recTimer);
-    $('afw-input-bar').classList.remove('hidden');
-    $('afw-audio-bar').classList.add('hidden');
+    const iBar3 = $('afw-input-bar'); if (iBar3) iBar3.classList.remove('hidden');
+    const aBar3 = $('afw-audio-bar'); if (aBar3) aBar3.classList.add('hidden');
   }
 
   function updateRecTime() {
@@ -747,7 +747,7 @@
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       menu.classList.toggle('hidden');
-      $('afw-emoji-picker').classList.add('hidden');
+      const ep = $('afw-emoji-picker'); if (ep) ep.classList.add('hidden');
     });
 
     const af = $('afw-attach-file');
@@ -837,10 +837,10 @@
     if (btnSupport) btnSupport.addEventListener('click', requestSupport);
 
     const btnYes = $('afw-btn-yes-support');
-    if (btnYes) btnYes.addEventListener('click', () => { $('afw-support-bar').classList.add('hidden'); requestSupport(); });
+    if (btnYes) btnYes.addEventListener('click', () => { const sbY = $('afw-support-bar'); if (sbY) sbY.classList.add('hidden'); requestSupport(); });
 
     const btnNo = $('afw-btn-no-support');
-    if (btnNo) btnNo.addEventListener('click', () => { $('afw-support-bar').classList.add('hidden'); sendText('Não, obrigado. Vou tentar reformular minha pergunta.'); });
+    if (btnNo) btnNo.addEventListener('click', () => { const sbN = $('afw-support-bar'); if (sbN) sbN.classList.add('hidden'); sendText('Não, obrigado. Vou tentar reformular minha pergunta.'); });
   }
 
   function requestSupport() {
@@ -935,11 +935,11 @@
       img.classList.remove('hidden'); img.src = src; img.style.transform = '';
       dl.href = src;
     }
-    $('afw-modal').classList.remove('hidden');
+    const modal = $('afw-modal'); if (modal) modal.classList.remove('hidden');
   };
 
   function closeModal() {
-    $('afw-modal').classList.add('hidden');
+    const modal2 = $('afw-modal'); if (modal2) modal2.classList.add('hidden');
     $('afw-modal-img').style.transform = '';
     $('afw-modal-pdf').src = '';
     $('afw-modal-pdf').style.transform = '';

@@ -8746,7 +8746,8 @@ module.exports = function createPCPRoutes(deps) {
     });
 
     // Listar apontamentos do usuário logado
-    router.get('/apontamentos/meus', async (req, res) => {
+    // Handler compartilhado: apontamentos do usuário (usado em /meus e /mcvs)
+    async function _listarApontamentosUsuario(req, res) {
         console.log('[API_APONTAMENTOS] Listando apontamentos do usuário...');
         try {
             const usuario_id = req.user?.id;
@@ -8791,7 +8792,13 @@ module.exports = function createPCPRoutes(deps) {
             console.error('[API_APONTAMENTOS] Erro:', error.message);
             res.status(500).json({ success: false, message: 'Erro ao listar apontamentos' });
         }
-    });
+    }
+
+    // /mcvs é alias de /meus (compatibilidade com versões anteriores do front-end)
+    router.get('/apontamentos/mcvs', _listarApontamentosUsuario);
+
+    router.get('/apontamentos/meus', _listarApontamentosUsuario);
+
 
     // ==================== ROTAS DE RELATÓRIOS PCP (extraído → routes/pcp/relatorios.js) ====================
     require('./pcp/relatorios')(router, pool);

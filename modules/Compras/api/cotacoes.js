@@ -138,14 +138,27 @@ router.post('/', async (req, res) => {
             itens
         } = req.body;
         
-        const numeroCotacao = titulo || numero || descricao;
+        const numeroCotacaoBase = titulo || numero || descricao;
         const dataLimite = data_limite || data_validade;
         const descricaoFinal = descricao || observacoes || '';
         const dataSolicitacao = data_abertura || new Date().toISOString().split('T')[0];
         
-        if (!numeroCotacao) {
+        if (!numeroCotacaoBase) {
             await connection.rollback();
             return res.status(400).json({ error: 'Número/descrição da cotação é obrigatório' });
+        }
+        
+        // Auto-gerar numero_cotacao único
+        let numeroCotacao = numeroCotacaoBase;
+        if (!numero || numero === numeroCotacaoBase) {
+            const ano = new Date().getFullYear();
+            const [maxRows] = await connection.query(
+                `SELECT MAX(CAST(SUBSTRING_INDEX(numero_cotacao, '-', -1) AS UNSIGNED)) as max_num 
+                 FROM cotacoes WHERE numero_cotacao LIKE ?`,
+                [`COT-${ano}-%`]
+            );
+            const maxNum = maxRows[0]?.max_num || 0;
+            numeroCotacao = `COT-${ano}-${String(maxNum + 1).padStart(4, '0')}`;
         }
         
         // Inserir cotação
@@ -159,14 +172,28 @@ router.post('/', async (req, res) => {
         const cotacao_id = result.insertId;
         
         // Criar propostas vazias para fornecedores selecionados
+        // Usa compras_fornecedores como fonte primária de IDs
         if (fornecedores_ids.length > 0) {
             for (const fornecedor_id of fornecedores_ids) {
-                await connection.query(
-                    `INSERT INTO propostas_cotacao (
-                        cotacao_id, fornecedor_id, valor_total
-                    ) VALUES (?, ?, 0)`,
-                    [cotacao_id, fornecedor_id]
-                );
+                try {
+                    // Verificar se o fornecedor existe em compras_fornecedores
+                    const [exists] = await connection.query(
+                        'SELECT id FROM compras_fornecedores WHERE id = ? UNION SELECT id FROM fornecedores WHERE id = ? LIMIT 1',
+                        [fornecedor_id, fornecedor_id]
+                    );
+                    if (exists.length > 0) {
+                        await connection.query(
+                            `INSERT INTO propostas_cotacao (
+                                cotacao_id, fornecedor_id, valor_total
+                            ) VALUES (?, ?, 0)`,
+                            [cotacao_id, fornecedor_id]
+                        );
+                    } else {
+                        console.warn(`[COTACAO] Fornecedor ID ${fornecedor_id} não encontrado, ignorando`);
+                    }
+                } catch (fkErr) {
+                    console.warn(`[COTACAO] Erro ao vincular fornecedor ${fornecedor_id}:`, fkErr.message);
+                }
             }
         }
         

@@ -308,6 +308,42 @@ function fecharModalPedido() {
 
 // ============ GERENCIAMENTO DE ITENS ============
 
+function filtrarProdutosItem(itemId, termo) {
+    const dropdown = document.getElementById(`prod-dropdown-${itemId}`);
+    if (!dropdown) return;
+    if (!termo || termo.length < 1) { dropdown.style.display = 'none'; return; }
+    const termoLower = termo.toLowerCase();
+    const filtrados = produtos.filter(p => {
+        const nome = (p.nome || p.descricao || p.nome_material || '').toLowerCase();
+        const codigo = (p.codigo || p.cod || '').toLowerCase();
+        return nome.includes(termoLower) || codigo.includes(termoLower);
+    }).slice(0, 8);
+    if (filtrados.length === 0) { dropdown.style.display = 'none'; return; }
+    dropdown.innerHTML = filtrados.map(p => {
+        const nome = escapeHtml(p.nome || p.descricao || p.nome_material || '');
+        const preco = p.preco_custo || p.preco || p.valor || 0;
+        const codigo = escapeHtml(p.codigo || p.cod || '');
+        return `<div style="padding:8px 12px;cursor:pointer;border-bottom:1px solid #f1f5f9;font-size:0.82rem;display:flex;justify-content:space-between;align-items:center;"
+                     onmouseover="this.style.background='#f0f9ff'" onmouseout="this.style.background='#fff'"
+                     onclick="selecionarProdutoItem(${itemId}, '${nome.replace(/'/g,"\\'")}', ${preco})">
+            <span>${codigo ? '<span style=\'color:#94a3b8;margin-right:6px;\'>' + codigo + '</span>' : ''}${nome}</span>
+            ${preco > 0 ? '<span style="color:#22c55e;font-weight:600;">R$ ' + Number(preco).toFixed(2) + '</span>' : ''}
+        </div>`;
+    }).join('');
+    dropdown.style.display = 'block';
+}
+
+function selecionarProdutoItem(itemId, nome, preco) {
+    const row = document.getElementById(`item-${itemId}`);
+    if (!row) return;
+    row.querySelector('.item-descricao').value = nome;
+    if (preco > 0) row.querySelector('.item-preco').value = Number(preco).toFixed(2);
+    const dropdown = document.getElementById(`prod-dropdown-${itemId}`);
+    if (dropdown) dropdown.style.display = 'none';
+    calcularItemTotal(itemId);
+    calcularTotais();
+}
+
 function adicionarItem(itemData = null) {
     itemCounter++;
     const tbody = document.getElementById('itensTableBody');
@@ -317,14 +353,21 @@ function adicionarItem(itemData = null) {
     tr.id = `item-${itemCounter}`;
 
     const unidadeAtual = itemData?.unidade || 'UN';
+    const currentId = itemCounter;
 
     tr.innerHTML = `
-        <td>
+        <td style="position:relative;">
             <input type="text" class="item-descricao"
-                   value="${itemData?.descricao || ''}"
-                   placeholder="Descrição do item"
+                   value="${escapeHtml(itemData?.descricao || '')}"
+                   placeholder="Digite para buscar produto/material..."
+                   autocomplete="off"
                    style="width: 100%; padding: 8px; border: 1px solid #e5e7eb; border-radius: 6px;"
-                   onchange="calcularTotais()">
+                   oninput="filtrarProdutosItem(${currentId}, this.value)"
+                   onchange="calcularTotais()"
+                   onfocus="filtrarProdutosItem(${currentId}, this.value)"
+                   onblur="setTimeout(()=>{ const d=document.getElementById('prod-dropdown-${currentId}'); if(d)d.style.display='none'; }, 200)">
+            <div id="prod-dropdown-${currentId}"
+                 style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #e2e8f0;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.12);max-height:180px;overflow-y:auto;z-index:9999;"></div>
         </td>
         <td>
             <input type="number" class="item-quantidade"

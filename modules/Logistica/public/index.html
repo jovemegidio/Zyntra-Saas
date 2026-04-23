@@ -811,8 +811,47 @@
             setTimeout(function(){ t.remove(); }, 3500);
         }
         function toggleMobileSidebar() { document.getElementById('mobile-sidebar').classList.toggle('open'); document.getElementById('sidebar-overlay').classList.toggle('active'); }
-        function openModal(id) { document.getElementById(id).classList.add('active'); }
-        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+        function openModal(id) {
+            const modal = document.getElementById(id);
+            if (!modal) return;
+            modal.classList.add('active');
+            modal.style.display = '';
+            modal.removeAttribute('aria-hidden');
+            if (window.ZyntraUI?.refreshUi) window.ZyntraUI.refreshUi(modal);
+        }
+        function closeModal(id) {
+            const modal = document.getElementById(id);
+            if (!modal) return;
+            if (window.ZyntraUI?.closeModal) {
+                window.ZyntraUI.closeModal(modal);
+                return;
+            }
+            modal.classList.remove('active');
+            modal.setAttribute('aria-hidden', 'true');
+        }
+
+        function getModalPrimaryActionButton(modalId) {
+            const activeElement = document.activeElement;
+            if (activeElement instanceof HTMLButtonElement && activeElement.closest(`#${modalId}`)) {
+                return activeElement;
+            }
+            return document.querySelector(`#${modalId} .modal-buttons .btn-primary:last-of-type`) ||
+                   document.querySelector(`#${modalId} .btn-primary:last-of-type`);
+        }
+
+        function setModalButtonBusy(button, busy, label = 'Salvando...') {
+            if (!button) return;
+            if (busy) {
+                if (!button.dataset.originalHtml) button.dataset.originalHtml = button.innerHTML;
+                button.disabled = true;
+                button.setAttribute('aria-busy', 'true');
+                button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${label}`;
+                return;
+            }
+            if (button.dataset.originalHtml) button.innerHTML = button.dataset.originalHtml;
+            button.disabled = false;
+            button.removeAttribute('aria-busy');
+        }
 
         function mostrarTab(tab, btn) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -1235,6 +1274,8 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
         async function salvarExpedicao() {
             if (window._guardSalvarExpedicao) return;
             window._guardSalvarExpedicao = true;
+            const actionButton = getModalPrimaryActionButton('modal-nova-expedicao');
+            setModalButtonBusy(actionButton, true);
             try {
                 const r = await fetch('/api/logistica/expedicao', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({
@@ -1245,7 +1286,7 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
                         status: document.getElementById('exp-status').value,
                         previsao: document.getElementById('exp-previsao').value,
                         prioridade: document.getElementById('exp-prioridade').value,
-                        observações: document.getElementById('exp-observações').value
+                        observacoes: document.getElementById('exp-observacoes').value
                     })
                 });
                 if (r.ok) {
@@ -1257,7 +1298,7 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
                     const err = await r.json().catch(() => ({}));
                     showToast('Erro ao salvar expedição', 'error');
                 }
-            } catch (e) { showToast('Erro de conexão', 'error'); } finally { window._guardSalvarExpedicao = false; }
+            } catch (e) { showToast('Erro de conexão', 'error'); } finally { setModalButtonBusy(actionButton, false); window._guardSalvarExpedicao = false; }
         }
 
         async function carregarTransportadoras() {
@@ -1310,6 +1351,8 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
             if (!razao) { showToast('Razão Social é obrigatória', 'warning'); return; }
             if (window._guardSalvarTransp) return;
             window._guardSalvarTransp = true;
+            const actionButton = getModalPrimaryActionButton('modal-transportadoras');
+            setModalButtonBusy(actionButton, true);
             const editId = document.getElementById('transp-edit-id').value;
             const payload = {
                 razao_social: razao,
@@ -1349,7 +1392,7 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
                 } else {
                     showToast(data.error || 'Erro ao salvar transportadora', 'error');
                 }
-            } catch (e) { showToast('Erro de conexão', 'error'); } finally { window._guardSalvarTransp = false; }
+            } catch (e) { showToast('Erro de conexão', 'error'); } finally { setModalButtonBusy(actionButton, false); window._guardSalvarTransp = false; }
         }
 
         function adicionarTransportadora() {
@@ -1596,6 +1639,10 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
             const pedidoId = document.getElementById('rastr-add-pedido-id').value;
             const descrição = document.getElementById('rastr-desc').value.trim();
             if (!descrição) { showToast('Descrição é obrigatória', 'warning'); return; }
+            if (window._guardSalvarRastreamento) return;
+            window._guardSalvarRastreamento = true;
+            const actionButton = getModalPrimaryActionButton('modal-rastreamento-add');
+            setModalButtonBusy(actionButton, true);
             try {
                 const r = await fetch(`/api/logistica/pedidos/${encodeURIComponent(pedidoId)}/rastreamento`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
@@ -1609,7 +1656,7 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
                 });
                 if (r.ok) { closeModal('modal-rastreamento-add'); rastrearPedido(); }
                 else { const d = await r.json().catch(() => ({})); showToast(d.error || 'Erro ao salvar', 'error'); }
-            } catch (e) { showToast('Erro de conexão', 'error'); }
+            } catch (e) { showToast('Erro de conexão', 'error'); } finally { setModalButtonBusy(actionButton, false); window._guardSalvarRastreamento = false; }
         }
 
         // ========== CT-e ==========
@@ -1659,6 +1706,8 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
             if (!transportadora_id || !valor_frete) { showToast('Transportadora e valor do frete são obrigatórios', 'warning'); return; }
             if (window._guardSalvarCTe) return;
             window._guardSalvarCTe = true;
+            const actionButton = getModalPrimaryActionButton('modal-novo-cte');
+            setModalButtonBusy(actionButton, true);
             const editId = document.getElementById('cte-edit-id').value;
             const payload = {
                 transportadora_id, tipo_cte: document.getElementById('cte-tipo').value,
@@ -1684,7 +1733,7 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
                 const data = await r.json();
                 if (r.ok) { closeModal('modal-novo-cte'); carregarCTes(); }
                 else { showToast(data.error || 'Erro ao salvar CT-e', 'error'); }
-            } catch (e) { showToast('Erro de conexão', 'error'); } finally { window._guardSalvarCTe = false; }
+            } catch (e) { showToast('Erro de conexão', 'error'); } finally { setModalButtonBusy(actionButton, false); window._guardSalvarCTe = false; }
         }
 
         function editarCTe(id) {
@@ -1810,6 +1859,8 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
             if (!transportadora_id || !uf_inicio || !uf_fim) { showToast('Transportadora, UF início e UF fim são obrigatórios', 'warning'); return; }
             if (window._guardSalvarMDFe) return;
             window._guardSalvarMDFe = true;
+            const actionButton = getModalPrimaryActionButton('modal-novo-mdfe');
+            setModalButtonBusy(actionButton, true);
             try {
                 const r = await fetch('/api/logistica/mdfes', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
@@ -1832,7 +1883,7 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
                     mdfeDocumentos = []; mdfePercursos = [];
                     carregarMDFes();
                 } else { showToast(data.error || 'Erro ao salvar MDF-e', 'error'); }
-            } catch (e) { showToast('Erro de conexão', 'error'); } finally { window._guardSalvarMDFe = false; }
+            } catch (e) { showToast('Erro de conexão', 'error'); } finally { setModalButtonBusy(actionButton, false); window._guardSalvarMDFe = false; }
         }
 
         async function encerrarMDFe(id) {

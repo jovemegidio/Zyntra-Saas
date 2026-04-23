@@ -16,7 +16,6 @@ module.exports = function createLogisticaRoutes(deps) {
     
     // Dashboard da Logística - Contadores por status
     router.get('/dashboard', async (req, res, next) => {
-        console.log('[LOGISTICA/DASHBOARD] Requisição recebida');
         try {
             // Sprint E2E-S2 (E4-HIGH-06): Separar pendente de aguardando_separacao no dashboard
             // HOTFIX Pipeline E2E: Incluir status 'entregue' para que pedidos entregues não sumam do dashboard
@@ -26,13 +25,11 @@ module.exports = function createLogisticaRoutes(deps) {
                 WHERE status IN ('faturado', 'recibo', 'entregue')
                 AND (status_logistica IS NULL OR status_logistica = 'pendente' OR status_logistica = '')
             `);
-            console.log('[LOGISTICA/DASHBOARD] Pendente:', aguardando);
 
             const [[aguardandoSep]] = await pool.query(`
                 SELECT COUNT(*) as total FROM pedidos
                 WHERE status IN ('faturado', 'recibo', 'entregue') AND status_logistica = 'aguardando_separacao'
             `);
-            console.log('[LOGISTICA/DASHBOARD] Aguardando separação:', aguardandoSep);
     
             const [[separacao]] = await pool.query(`
                 SELECT COUNT(*) as total FROM pedidos
@@ -62,7 +59,6 @@ module.exports = function createLogisticaRoutes(deps) {
                 em_transporte: transporte?.total || 0,
                 entregues: entregues?.total || 0
             };
-            console.log('[LOGISTICA/DASHBOARD] Resultado:', result);
             res.json(result);
         } catch (error) {
             console.error('[LOGISTICA/DASHBOARD] Erro:', error);
@@ -79,7 +75,6 @@ module.exports = function createLogisticaRoutes(deps) {
     
     // Listar pedidos em logística (sem autenticação)
     router.get('/pedidos', async (req, res, next) => {
-        console.log('[LOGISTICA/PEDIDOS] Requisição recebida');
         try {
             const { status, transportadora, nfe, data_inicio, data_fim, limit = 100 } = req.query;
     
@@ -149,11 +144,7 @@ module.exports = function createLogisticaRoutes(deps) {
             query += ' ORDER BY p.prioridade DESC, p.created_at DESC LIMIT ?';
             params.push(parseInt(limit));
     
-            console.log('[LOGISTICA/PEDIDOS] Query:', query);
-            console.log('[LOGISTICA/PEDIDOS] Params:', params);
-    
             const [rows] = await pool.query(query, params);
-            console.log('[LOGISTICA/PEDIDOS] Rows encontrados:', rows.length);
     
             // Formatar dados para o frontend
             const pedidos = rows.map(row => ({

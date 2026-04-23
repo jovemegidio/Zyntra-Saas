@@ -1,8 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <!-- Favicon -->
-    <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 
     <meta charset="UTF-8">
@@ -12,11 +14,10 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Zyntra: Fornecedores</title>
+    <title>Aluforce: Fornecedores</title>
 
     <!-- Sistema de Autenticação Unificado -->
-    <script src="/js/auth-unified.js?v=20260326" defer></script>
-    <script src="/js/inactivity-manager.js?v=20260324" defer></script>
+    <script src="/js/auth-unified.js?v=20260301" defer></script>
 
     <!-- Fontes -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -59,9 +60,8 @@
     <script src="/js/anti-copy-protection.js" defer></script>
     <!-- Chat Widget BOB AI -->
     <link rel="stylesheet" href="/chat/widget.css?v=20260301">
-    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260326">
 </head>
-<body class="dark-mode">
+<body>
     <div class="app-container">
         <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
 
@@ -78,7 +78,6 @@
             </nav>
             <div class="sidebar-bottom">
                 <button class="sidebar-btn" title="Estoque MP" onclick="window.location.href='gestao-estoque.html'"><i class="fas fa-boxes"></i></button>
-                <button class="sidebar-btn" title="QR Code Estoque" onclick="window.location.href='qrcode-estoque.html'"><i class="fas fa-qrcode"></i></button>
                 <button class="sidebar-btn" title="Relatórios" onclick="window.location.href='relatorios.html'"><i class="fas fa-chart-bar"></i></button>
             </div>
         </aside>
@@ -92,7 +91,7 @@
                         <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
-                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;"></span>
+                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">—</span>
                         <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Fornecedores</span>
                     </div>
                 </div>
@@ -128,26 +127,26 @@
                 </div>
 
                 <!-- Stats -->
-                <div class="metrics-grid">
-                    <div class="metric-card orange">
-                        <div class="metric-header"><div class="metric-icon orange"><i class="fas fa-building"></i></div></div>
-                        <div class="metric-value" id="totalFornecedores">0</div>
-                        <div class="metric-label">Total Cadastrados</div>
+                <div class="stats-grid">
+                    <div class="stat-card amber">
+                        <div class="stat-header"><div class="stat-icon amber"><i class="fas fa-building"></i></div></div>
+                        <div class="stat-value" id="totalFornecedores">0</div>
+                        <div class="stat-label">Total Cadastrados</div>
                     </div>
-                    <div class="metric-card green">
-                        <div class="metric-header"><div class="metric-icon green"><i class="fas fa-check-circle"></i></div></div>
-                        <div class="metric-value" id="fornecedoresAtivos">0</div>
-                        <div class="metric-label">Ativos</div>
+                    <div class="stat-card green">
+                        <div class="stat-header"><div class="stat-icon green"><i class="fas fa-check-circle"></i></div></div>
+                        <div class="stat-value" id="fornecedoresAtivos">0</div>
+                        <div class="stat-label">Ativos</div>
                     </div>
-                    <div class="metric-card blue">
-                        <div class="metric-header"><div class="metric-icon blue"><i class="fas fa-user-plus"></i></div></div>
-                        <div class="metric-value" id="fornecedoresNovos">0</div>
-                        <div class="metric-label">Novos (Mês)</div>
+                    <div class="stat-card cyan">
+                        <div class="stat-header"><div class="stat-icon cyan"><i class="fas fa-user-plus"></i></div></div>
+                        <div class="stat-value" id="fornecedoresNovos">0</div>
+                        <div class="stat-label">Novos (Mês)</div>
                     </div>
-                    <div class="metric-card orange">
-                        <div class="metric-header"><div class="metric-icon orange"><i class="fas fa-star"></i></div></div>
-                        <div class="metric-value" id="avaliacaoMedia">0.0</div>
-                        <div class="metric-label">Avaliação Média</div>
+                    <div class="stat-card amber">
+                        <div class="stat-header"><div class="stat-icon amber"><i class="fas fa-star"></i></div></div>
+                        <div class="stat-value" id="avaliacaoMedia">0.0</div>
+                        <div class="stat-label">Avaliação Média</div>
                     </div>
                 </div>
 
@@ -281,19 +280,19 @@
                                 </select>
                             </div>
                             <div class="form-group"><label>Prazo de Entrega</label><input type="text" id="prazoEntrega" placeholder="Ex: 15 dias úteis"></div>
-                            <div class="form-group"><label>Banco</label><input type="text" id="banco"></div>
-                            <div class="form-group"><label>Agência</label><input type="text" id="agencia"></div>
-                            <div class="form-group"><label>Conta</label><input type="text" id="conta"></div>
-                            <div class="form-group"><label>Chave PIX</label><input type="text" id="chavePix"></div>
+                            <div class="form-group"><label>Banco</label><input type="text" id="banco" maxlength="50" placeholder="Ex: Bradesco"></div>
+                            <div class="form-group"><label>Agência</label><input type="text" id="agencia" maxlength="10" placeholder="Ex: 0001-5"></div>
+                            <div class="form-group"><label>Conta</label><input type="text" id="conta" maxlength="20" placeholder="Ex: 12345678-9"></div>
+                            <div class="form-group"><label>Chave PIX</label><input type="text" id="chavePix" maxlength="77" placeholder="CPF, CNPJ, telefone, e-mail ou EVP"></div>
                             <div class="form-group" style="grid-column:span 2;">
                                 <label>Avaliação (1-5)</label>
-                                <select id="avaliação">
+                                <select id="avaliacao">
                                     <option value="0">Sem avaliação</option>
-                                    <option value="1">1 é Ruim</option>
-                                    <option value="2">2 é Regular</option>
-                                    <option value="3">3 é Bom</option>
-                                    <option value="4">4 é Muito Bom</option>
-                                    <option value="5">5 é Excelente</option>
+                                    <option value="1">1 — Ruim</option>
+                                    <option value="2">2 — Regular</option>
+                                    <option value="3">3 — Bom</option>
+                                    <option value="4">4 — Muito Bom</option>
+                                    <option value="5">5 — Excelente</option>
                                 </select>
                             </div>
                         </div>
@@ -339,6 +338,26 @@
     </div>
 
     <script>
+    // Toast helper - usa ComprasUtils se disponível, senão fallback
+    function _toast(msg, tipo) {
+        if (typeof ComprasUtils !== 'undefined' && ComprasUtils.toast) {
+            return ComprasUtils.toast.show(msg, tipo);
+        }
+        // Fallback simples
+        const colors = { success: '#22c55e', error: '#ef4444', warning: '#f59e0b', info: '#3b82f6' };
+        const icons = { success: 'check-circle', error: 'exclamation-circle', warning: 'exclamation-triangle', info: 'info-circle' };
+        const t = document.createElement('div');
+        t.style.cssText = 'position:fixed;top:20px;right:20px;z-index:99999;background:#fff;border-left:4px solid '+(colors[tipo]||colors.info)+';padding:14px 20px;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.15);font-size:14px;display:flex;align-items:center;gap:10px;animation:toastIn .3s ease;max-width:380px';
+        t.innerHTML = '<i class="fas fa-'+(icons[tipo]||icons.info)+'" style="color:'+(colors[tipo]||colors.info)+'"></i><span>'+msg+'</span>';
+        if (!document.getElementById('_toastStyle')) {
+            const s = document.createElement('style'); s.id = '_toastStyle';
+            s.textContent = '@keyframes toastIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}@keyframes toastOut{from{opacity:1}to{opacity:0}}';
+            document.head.appendChild(s);
+        }
+        document.body.appendChild(t);
+        setTimeout(() => { t.style.animation = 'toastOut .3s ease'; setTimeout(() => t.remove(), 300); }, 4000);
+    }
+
     function toggleMobileSidebar() {
         const sidebar = document.getElementById('mobile-sidebar');
         const overlay = document.getElementById('sidebar-overlay');
@@ -388,22 +407,19 @@
 
     async function buscarCEP(cep) {
         cep = (cep || '').replace(/\D/g, '');
-        if (cep.length !== 8) { alert('CEP inválido'); return; }
+        if (cep.length !== 8) { _toast('CEP inválido', 'error'); return; }
         try {
             const r = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
             const d = await r.json();
-            if (d.erro) { alert('CEP não encontrado'); return; }
+            if (d.erro) { _toast('CEP não encontrado', 'warning'); return; }
             document.getElementById('endereco').value = d.logradouro || '';
             document.getElementById('bairro').value = d.bairro || '';
             document.getElementById('cidade').value = d.localidade || '';
             document.getElementById('estado').value = d.uf || '';
-        } catch (e) { alert('Erro ao buscar CEP'); }
+        } catch (e) { _toast('Erro ao buscar CEP', 'error'); }
     }
 
-    let _salvandoFornecedor = false;
     async function salvarFornecedorAPI() {
-        if (_salvandoFornecedor) return;
-        _salvandoFornecedor = true;
         const id = document.getElementById('fornecedorId').value;
         const dados = {
             razao_social: document.getElementById('razaoSocial').value,
@@ -431,26 +447,30 @@
             agencia: document.getElementById('agencia').value,
             conta: document.getElementById('conta').value,
             chave_pix: document.getElementById('chavePix').value,
-            avaliação: parseInt(document.getElementById('avaliação').value) || 0,
+            avaliacao: parseInt(document.getElementById('avaliacao').value) || 0,
             logo: document.getElementById('logoPath').value,
             produtos_fornecidos: document.getElementById('produtosFornecidos').value,
             certificacoes: document.getElementById('certificacoes').value,
             observacoes: document.getElementById('observacoes').value
         };
-        if (!dados.razao_social || !dados.cnpj) { alert('Preencha os campos obrigatórios'); _salvandoFornecedor = false; return; }
+        if (!dados.razao_social || !dados.cnpj) { _toast('Preencha os campos obrigatórios', 'error'); return; }
         try {
             const url = id ? `/api/compras/fornecedores/${id}` : '/api/compras/fornecedores';
             const method = id ? 'PUT' : 'POST';
             const token = localStorage.getItem('token');
             const r = await fetch(url, {
                 method, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                credentials: 'include',
                 body: JSON.stringify(dados)
             });
-            if (!r.ok) throw new Error('Erro ao salvar');
+            if (!r.ok) {
+                const errData = await r.json().catch(() => ({}));
+                throw new Error(errData.error || 'Erro ao salvar');
+            }
             fecharModalFornecedor();
             if (typeof fornecedoresManager !== 'undefined') fornecedoresManager.carregarFornecedores();
-            alert(id ? 'Fornecedor atualizado!' : 'Fornecedor cadastrado!');
-        } catch (e) { alert('Erro: ' + e.message); } finally { _salvandoFornecedor = false; }
+            _toast(id ? 'Fornecedor atualizado!' : 'Fornecedor cadastrado!', 'success');
+        } catch (e) { _toast(e.message || 'Erro ao salvar', 'error'); }
     }
 
     async function editarFornecedorModal(id) {
@@ -485,7 +505,7 @@
             document.getElementById('agencia').value = f.agencia || '';
             document.getElementById('conta').value = f.conta || '';
             document.getElementById('chavePix').value = f.chave_pix || '';
-            document.getElementById('avaliação').value = f.avaliação || '0';
+            document.getElementById('avaliacao').value = f.avaliacao || '0';
             document.getElementById('logoPath').value = f.logo || '';
             document.getElementById('produtosFornecidos').value = f.produtos_fornecidos || '';
             document.getElementById('certificacoes').value = f.certificacoes || '';
@@ -493,7 +513,7 @@
             document.getElementById('modalFornecedorTitle').innerHTML = '<i class="fas fa-edit"></i> Editar Fornecedor';
             trocarAbaFornecedor('dados', document.querySelector('.modal-tabs button'));
             document.getElementById('modalFornecedor').classList.add('active');
-        } catch (e) { alert('Erro ao carregar fornecedor'); }
+        } catch (e) { _toast('Erro ao carregar fornecedor', 'error'); }
     }
 
     async function visualizarFornecedorModal(id) {
@@ -504,7 +524,7 @@
             const f = d.fornecedor || d;
             document.getElementById('viewFornNome').innerHTML = '<i class="fas fa-building"></i> ' + (f.razao_social || f.nome_fantasia || 'Fornecedor');
             let stars = '';
-            for (let i = 1; i <= 5; i++) stars += '<i class="fas fa-star" style="color:' + (i <= (f.avaliação || 0) ? '#f59e0b' : '#d1d5db') + '; font-size:0.8rem;"></i>';
+            for (let i = 1; i <= 5; i++) stars += '<i class="fas fa-star" style="color:' + (i <= (f.avaliacao || 0) ? '#f59e0b' : '#d1d5db') + '; font-size:0.8rem;"></i>';
             document.getElementById('viewFornBody').innerHTML =
                 '<div class="view-section"><h4><i class="fas fa-building"></i> Dados Gerais</h4><div class="view-grid">' +
                     '<div class="view-item"><label>Razão Social</label><p>' + (f.razao_social || '-') + '</p></div>' +
@@ -542,23 +562,20 @@
                     (f.observacoes ? '<div class="view-item"><label>Observações</label><p>' + f.observacoes + '</p></div>' : '') +
                     '</div>' : '');
             document.getElementById('modalVisualizarFornecedor').classList.add('active');
-        } catch (e) { alert('Erro ao carregar detalhes'); }
+        } catch (e) { _toast('Erro ao carregar detalhes', 'error'); }
     }
 
-    let _excluindoFornecedor = false;
     async function excluirFornecedorAPI(id) {
-        if (_excluindoFornecedor) return;
         if (!confirm('Deseja realmente excluir este fornecedor?')) return;
-        _excluindoFornecedor = true;
         try {
             const token = localStorage.getItem('token');
             const r = await fetch(`/api/compras/fornecedores/${id}`, {
                 method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` }
             });
-            if (!r.ok) { const err = await r.json().catch(() => ({})); throw new Error(err.error || 'Erro ao excluir'); }
+            if (!r.ok) throw new Error('Erro ao excluir');
             if (typeof fornecedoresManager !== 'undefined') fornecedoresManager.carregarFornecedores();
-            alert('Fornecedor desativado!');
-        } catch (e) { alert('Erro: ' + e.message); } finally { _excluindoFornecedor = false; }
+            _toast('Fornecedor excluído!', 'success');
+        } catch (e) { _toast(e.message || 'Erro ao excluir', 'error'); }
     }
 
     function filtrarFornecedores(filtro, btn) {
@@ -592,15 +609,10 @@
     <script src="/_shared/confirm-dialog.js?v=20260301"></script>
 
     <!-- Chat Widget BOB AI -->
-    <script src="/chat/widget.js?v=20260416" defer></script>
+    <script src="/chat/widget.js?v=20260418" defer></script>
 
     <!-- Enterprise Shared -->
     <script src="/js/sidebar-click-animation.js?v=20260301"></script>
-    <script src="/_shared/accessibility-widget.js?v=20260301"></script>
-
-    <!-- Chat Corporativo (Teams) -->
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
-    <script src="/js/user-dropdown.js?v=20260319" defer></script>
+    <script src="/_shared/accessibility-widget.js?v=20260418"></script>
 </body>
 </html>

@@ -1254,7 +1254,7 @@
             document.getElementById('modal-evento').classList.add('show');
             document.getElementById('form-evento').reset();
             document.getElementById('evento-id').value = '';
-            document.getElementById('modal-título').textContent = 'Novo Evento';
+            document.getElementById('modal-titulo').textContent = 'Novo Evento';
             
             if (data) {
                 document.getElementById('evento-data-inicio').value = data;
@@ -1273,8 +1273,8 @@
         async function salvarEvento() {
             const id = document.getElementById('evento-id').value;
             const evento = {
-                título: document.getElementById('evento-título').value,
-                descrição: document.getElementById('evento-descrição').value,
+                titulo: document.getElementById('evento-titulo').value,
+                descricao: document.getElementById('evento-descricao').value,
                 data_inicio: document.getElementById('evento-data-inicio').value,
                 data_fim: document.getElementById('evento-data-fim').value || null,
                 hora_inicio: document.getElementById('evento-hora-inicio').value || null,
@@ -1315,15 +1315,15 @@
             const evento = eventos.find(e => e.id === id);
             if (evento && isAdmin) {
                 document.getElementById('evento-id').value = evento.id;
-                document.getElementById('evento-título').value = evento.titulo;
-                document.getElementById('evento-descrição').value = evento.descricao || '';
+                document.getElementById('evento-titulo').value = evento.titulo;
+                document.getElementById('evento-descricao').value = evento.descricao || '';
                 document.getElementById('evento-data-inicio').value = evento.data_inicio.split('T')[0];
                 document.getElementById('evento-data-fim').value = evento.data_fim ? evento.data_fim.split('T')[0] : '';
                 document.getElementById('evento-hora-inicio').value = evento.hora_inicio || '';
                 document.getElementById('evento-hora-fim').value = evento.hora_fim || '';
                 document.getElementById('evento-tipo').value = evento.tipo;
                 document.getElementById('evento-cor').value = evento.cor || '#6366f1';
-                document.getElementById('modal-título').textContent = 'Editar Evento';
+                document.getElementById('modal-titulo').textContent = 'Editar Evento';
                 
                 // Selecionar cor
                 document.querySelectorAll('.color-option').forEach(opt => {

@@ -968,8 +968,8 @@
                     credentials: 'include'
                 });
 
-                // Se a rota não existir (404), tentar rota alternativa
-                if (response.status === 404) {
+                // Se a rota não existir (404) ou erro (500), tentar rota alternativa
+                if (response.status === 404 || !response.ok) {
                     response = await fetch(`${API_BASE}/api/usuarios`, {
                         credentials: 'include'
                     });

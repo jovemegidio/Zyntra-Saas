@@ -133,7 +133,13 @@ router.post('/', async (req, res) => {
         } = req.body;
         
         const dept = departamento || centro_custo || null;
-        
+
+        // Mapear valores do frontend para valores aceitos pelo ENUM do banco
+        const prioridadeMap = { 'normal': 'media', 'baixa': 'baixa', 'media': 'media', 'alta': 'alta', 'urgente': 'urgente' };
+        const statusMap = { 'rascunho': 'pendente', 'pendente': 'pendente', 'aprovada': 'aprovada', 'aprovado': 'aprovada', 'em_cotacao': 'em_cotacao', 'cotacao': 'em_cotacao', 'rejeitada': 'rejeitada', 'rejeitado': 'rejeitada', 'concluida': 'concluida' };
+        const prioridadeDB = prioridadeMap[prioridade] || 'media';
+        const statusDB = statusMap[statusReq] || 'pendente';
+
         if (!solicitante || !itens || itens.length === 0) {
             await connection.rollback();
             return res.status(400).json({ error: 'Solicitante e itens são obrigatórios' });
@@ -162,9 +168,9 @@ router.post('/', async (req, res) => {
                 numeroRequisicao,
                 solicitante,
                 dept,
-                prioridade || 'media',
+                prioridadeDB,
                 observacoes || justificativa || null,
-                statusReq || 'pendente'
+                statusDB
             ]
         );
         

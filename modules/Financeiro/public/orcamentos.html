@@ -140,7 +140,9 @@
                     </div>
                     <div class="form-group">
                         <label>Centro de Custo</label>
-                        <input type="text" id="orc-centro" class="form-input" placeholder="Ex: Produção, Administrativo...">
+                        <select id="orc-centro" class="form-select">
+                            <option value="">Selecione um centro de custo</option>
+                        </select>
                     </div>
                     <div class="form-row">
                         <div class="form-group">
@@ -176,6 +178,26 @@
         const API_BASE = window.location.origin;
         let orcamentos = [];
         let editandoId = null;
+
+        async function carregarCentrosCusto() {
+            const sel = document.getElementById('orc-centro');
+            if (!sel) return;
+            const staticOpts = ['Produção','Administrativo','Comercial','Marketing','Financeiro','Logística','Recursos Humanos','Tecnologia','Qualidade','Manutenção'];
+            try {
+                const r = await fetch('/api/financeiro/centros-custo', { credentials: 'include' });
+                if (r.ok) {
+                    const data = await r.json();
+                    const items = Array.isArray(data) ? data : (data.data || []);
+                    if (items.length) {
+                        sel.innerHTML = '<option value="">Selecione um centro de custo</option>' +
+                            items.map(c => { const n = (c.nome||c.descricao||c.name||'').replace(/</g,'&lt;'); return `<option value="${n}">${n}</option>`; }).join('');
+                        return;
+                    }
+                }
+            } catch(e) {}
+            sel.innerHTML = '<option value="">Selecione um centro de custo</option>' +
+                staticOpts.map(n => `<option value="${n}">${n}</option>`).join('');
+        }
 
         document.addEventListener('DOMContentLoaded', () => { carregarOrcamentos(); });
 
@@ -238,27 +260,31 @@
             document.getElementById('lista-orcamentos').innerHTML = html;
         }
 
-        function abrirModalOrcamento() {
+        async function abrirModalOrcamento() {
             editandoId = null;
-            document.getElementById('modal-orc-título').textContent = 'Novo Orçamento';
+            const tituloEl = document.getElementById('modal-orc-titulo');
+            if (tituloEl) tituloEl.textContent = 'Novo Orçamento';
             document.getElementById('orc-id').value = '';
             document.getElementById('orc-categoria').value = '';
-            document.getElementById('orc-centro').value = '';
             document.getElementById('orc-limite').value = '';
             document.getElementById('orc-alerta').value = '80';
+            await carregarCentrosCusto();
+            document.getElementById('orc-centro').value = '';
             document.getElementById('modal-orcamento').classList.add('active');
         }
 
-        function editarOrcamento(id) {
+        async function editarOrcamento(id) {
             const o = orcamentos.find(x => x.id === id);
             if (!o) return;
             editandoId = id;
-            document.getElementById('modal-orc-título').textContent = 'Editar Orçamento';
+            const tituloEl = document.getElementById('modal-orc-titulo');
+            if (tituloEl) tituloEl.textContent = 'Editar Orçamento';
             document.getElementById('orc-id').value = id;
             document.getElementById('orc-categoria').value = o.categoria || '';
-            document.getElementById('orc-centro').value = o.centro_custo || '';
             document.getElementById('orc-limite').value = o.limite || '';
             document.getElementById('orc-alerta').value = o.alerta || '80';
+            await carregarCentrosCusto();
+            document.getElementById('orc-centro').value = o.centro_custo || '';
             document.getElementById('modal-orcamento').classList.add('active');
         }
 

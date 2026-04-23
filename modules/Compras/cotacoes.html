@@ -289,7 +289,7 @@
 
                     <div class="form-group">
                         <label>Fornecedores para Cotação</label>
-                        <div id="fornecedoresContainer" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;">
+                        <div id="fornecedoresContainer" style="display:flex;flex-direction:column;gap:6px;margin-top:8px;max-height:200px;overflow-y:auto;border:1px solid var(--gray-200);border-radius:6px;padding:8px;">
                             <span style="color:var(--gray-500);font-size:0.85rem;">Carregando fornecedores...</span>
                         </div>
                     </div>
@@ -322,10 +322,10 @@
                 const r = await fetch('/api/compras/fornecedores', { headers: { 'Authorization': `Bearer ${token}` } });
                 if (r.ok) {
                     const data = await r.json();
-                    const fornecedores = data.fornecedores || data || [];
-                    if (fornecedores.length > 0) {
+                    const fornecedores = data.data || data.fornecedores || (Array.isArray(data) ? data : []);
+                    if (Array.isArray(fornecedores) && fornecedores.length > 0) {
                         container.innerHTML = fornecedores.map(f =>
-                            `<label class="fornecedor-checkbox"><input type="checkbox" name="fornecedores" value="${f.id}"> ${f.razao_social || f.nome || f.name}</label>`
+                            `<label style="display:flex;align-items:center;gap:8px;padding:4px 6px;border-radius:4px;cursor:pointer;" onmouseover="this.style.background='var(--gray-50)'" onmouseout="this.style.background=''"><input type="checkbox" name="fornecedores" value="${f.id}"> ${f.razao_social || f.nome_fantasia || f.nome || f.name || 'Fornecedor #' + f.id}</label>`
                         ).join('');
                     } else {
                         container.innerHTML = '<span style="color:var(--gray-500);font-size:0.85rem;">Nenhum fornecedor cadastrado</span>';
@@ -415,6 +415,22 @@
             if (e.target === this) fecharModalCotacao();
         });
     </script>
+
+    <!-- Modal: Visualizar Cotação -->
+    <div class="modal-overlay" id="modalVisualizarCotacao">
+        <div class="modal" style="max-width:700px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-eye"></i> Detalhes da Cotação</h3>
+                <button class="modal-close" onclick="document.getElementById('modalVisualizarCotacao').classList.remove('active')">&times;</button>
+            </div>
+            <div class="modal-body" id="viewCotacaoBody" style="max-height:60vh; overflow-y:auto;">
+                <p style="text-align:center; color:var(--gray-400);"><i class="fas fa-spinner fa-spin"></i> Carregando...</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="document.getElementById('modalVisualizarCotacao').classList.remove('active')">Fechar</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>

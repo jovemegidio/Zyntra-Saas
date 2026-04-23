@@ -24,6 +24,71 @@
     <link rel="stylesheet" href="/chat-teams/chat-widget.css?v=20260615">
     <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260324">
     <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260326">
+    <style>
+        /* === Zyntra Modal Standard Pattern === */
+        .modal-content {
+            background: #fff;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 520px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+            animation: modalSlideIn 0.22s ease;
+            overflow: hidden;
+        }
+        .modal-content.modal-small { max-width: 480px; }
+        .modal-header.orange {
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            color: #fff;
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-radius: 12px 12px 0 0;
+        }
+        .modal-header.orange .modal-close {
+            background: rgba(255,255,255,0.12);
+            border: none;
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+            border-radius: 50px;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+            flex-shrink: 0;
+            line-height: 1;
+        }
+        .modal-header.orange .modal-close:hover { background: rgba(255,255,255,0.25); }
+        .modal-content .modal-footer {
+            background: #f9f9f9;
+            border-top: 1px solid #f0f0f0;
+            padding: 14px 20px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            border-radius: 0 0 12px 12px;
+        }
+        .btn-modal {
+            padding: 9px 22px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: background 0.2s, opacity 0.2s;
+        }
+        .btn-modal-cancel { background: #e5e7eb; color: #374151; }
+        .btn-modal-cancel:hover { background: #d1d5db; }
+        .btn-modal-save { background: #f97316; color: #fff; }
+        .btn-modal-save:hover { background: #ea580c; }
+        @keyframes modalSlideIn {
+            from { opacity: 0; transform: scale(0.95) translateY(-8px); }
+            to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+    </style>
 </head>
 
 <body>
@@ -174,11 +239,13 @@
 
     <!-- Modal Nova NF-e -->
     <div class="modal-overlay" id="modalNovaNovenfe">
-        <div class="modal" style="max-width:600px;">
-            <div class="modal-header">
-                <h3><i class="fas fa-plus-circle"></i> Gerar NF-e a partir de Pedido</h3>
-                <button class="modal-close" onclick="fecharModal('modalNovaNovenfe')"><i
-                        class="fas fa-times"></i></button>
+        <div class="modal-content modal-small">
+            <div class="modal-header orange">
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <i class="fas fa-file-invoice" style="font-size:18px;"></i>
+                    <span style="font-size:16px;font-weight:700;">Gerar NF-e a partir de Pedido</span>
+                </div>
+                <button class="modal-close" onclick="fecharModal('modalNovaNovenfe')" title="Fechar">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
@@ -201,9 +268,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="fecharModal('modalNovaNovenfe')">Cancelar</button>
-                <button class="btn btn-primary" onclick="gerarNFe()"><i class="fas fa-file-invoice"></i> Gerar
-                    NF-e</button>
+                <button class="btn-modal btn-modal-cancel" onclick="fecharModal('modalNovaNovenfe')">Cancelar</button>
+                <button class="btn-modal btn-modal-save" onclick="gerarNFe()"><i class="fas fa-file-invoice"></i> Gerar NF-e</button>
             </div>
         </div>
     </div>

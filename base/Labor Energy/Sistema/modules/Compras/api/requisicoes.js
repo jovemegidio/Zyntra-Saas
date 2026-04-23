@@ -123,16 +123,26 @@ router.post('/', async (req, res) => {
             numero,
             solicitante,
             departamento,
+            centro_custo,
             prioridade,
             data_necessidade,
             justificativa,
             observacoes,
-            itens
+            itens,
+            status: statusReq
         } = req.body;
         
-        if (!solicitante || !departamento || !itens || itens.length === 0) {
+        const dept = departamento || centro_custo || null;
+
+        // Mapear valores do frontend para valores aceitos pelo ENUM do banco
+        const prioridadeMap = { 'normal': 'media', 'baixa': 'baixa', 'media': 'media', 'alta': 'alta', 'urgente': 'urgente' };
+        const statusMap = { 'rascunho': 'pendente', 'pendente': 'pendente', 'aprovada': 'aprovada', 'aprovado': 'aprovada', 'em_cotacao': 'em_cotacao', 'cotacao': 'em_cotacao', 'rejeitada': 'rejeitada', 'rejeitado': 'rejeitada', 'concluida': 'concluida' };
+        const prioridadeDB = prioridadeMap[prioridade] || 'media';
+        const statusDB = statusMap[statusReq] || 'pendente';
+
+        if (!solicitante || !itens || itens.length === 0) {
             await connection.rollback();
-            return res.status(400).json({ error: 'Solicitante, departamento e itens são obrigatórios' });
+            return res.status(400).json({ error: 'Solicitante e itens são obrigatórios' });
         }
         
         // Gerar número da requisição se não informado
@@ -153,13 +163,14 @@ router.post('/', async (req, res) => {
             `INSERT INTO requisicoes_compras (
                 numero, solicitante, departamento, data_requisicao,
                 prioridade, observacoes, status
-            ) VALUES (?, ?, ?, CURDATE(), ?, ?, 'pendente')`,
+            ) VALUES (?, ?, ?, CURDATE(), ?, ?, ?)`,
             [
                 numeroRequisicao,
                 solicitante,
-                departamento,
-                prioridade || 'media',
-                observacoes || justificativa || null
+                dept,
+                prioridadeDB,
+                observacoes || justificativa || null,
+                statusDB
             ]
         );
         

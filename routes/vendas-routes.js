@@ -1480,8 +1480,8 @@ module.exports = function createVendasRoutes(deps) {
 
     // Mapa de transições válidas de status de pedido
     const VALID_STATUS_TRANSITIONS = {
-        'orcamento': ['analise', 'analise-credito', 'cancelado'],
-        'orçamento': ['analise', 'analise-credito', 'cancelado'],
+        'orcamento': ['analise', 'analise-credito', 'aprovado', 'pedido-aprovado', 'cancelado'],
+        'orçamento': ['analise', 'analise-credito', 'aprovado', 'pedido-aprovado', 'cancelado'],
         'analise': ['analise-credito', 'aprovado', 'orcamento', 'cancelado'],
         'analise-credito': ['aprovado', 'pedido-aprovado', 'orcamento', 'cancelado'],
         'aprovado': ['pedido-aprovado', 'faturar', 'analise-credito', 'cancelado'],

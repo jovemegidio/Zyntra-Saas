@@ -1189,160 +1189,14 @@ router.post('/auth/verify-email', async (req, res) => {
     }
 });
 
-// Passo 2: Verificar dados do usuário (nome e departamento) — now uses email instead of userId
-// AUDIT-FIX: Accepts email (not userId) and generates a time-limited reset token on success
-router.post('/auth/verify-user-data', async (req, res) => {
-    try {
-        const { email, name, department } = req.body;
-        console.log('[AUTH/VERIFY-DATA] Verificando dados para email:', email);
-
-        if (!email || !name || !department) {
-            return res.status(400).json({ message: 'Dados incompletos.' });
-        }
-
-        // Busca usuário no banco BY EMAIL (not by userId)
-        const [rows] = await safeQuery('SELECT id, nome, setor FROM usuarios WHERE email = ? LIMIT 1', [email]);
-
-        if (!rows.length) {
-            return res.status(404).json({ message: 'Usuário não encontrado.' });
-        }
-
-        const user = rows[0];
-
-        // Verifica se nome e setor conferem (case-insensitive, exact match)
-        // AUDIT-FIX: Use strict equality instead of .includes() to prevent partial name attacks
-        const nameMatches = user.nome.toLowerCase().trim() === name.toLowerCase().trim();
-        const deptMatches = user.setor && user.setor.toLowerCase().trim() === department.toLowerCase().trim();
-
-        if (!nameMatches) {
-            console.log('[AUTH/VERIFY-DATA] ❌ Nome não confere');
-            return res.status(401).json({ message: 'Nome não confere com nossos registros.' });
-        }
-
-        if (!deptMatches) {
-            console.log('[AUTH/VERIFY-DATA] ❌ Departamento não confere');
-            return res.status(401).json({ message: 'Departamento não confere com nossos registros.' });
-        }
-
-        // AUDIT-FIX: Generate a signed, time-limited reset token
-        await ensurePasswordResetTokensTable();
-
-        // Invalidate any existing tokens for this user
-        await safeQuery('UPDATE password_reset_tokens SET used = 1 WHERE user_id = ? AND used = 0', [user.id]);
-
-        // Generate cryptographically secure token
-        const resetToken = crypto.randomBytes(32).toString('hex');
-        const tokenHash = crypto.createHash('sha256').update(resetToken).digest('hex');
-        const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
-
-        await safeQuery(
-            'INSERT INTO password_reset_tokens (user_id, token_hash, expires_at) VALUES (?, ?, ?)',
-            [user.id, tokenHash, expiresAt]
-        );
-
-        console.log('[AUTH/VERIFY-DATA] ✅ Dados verificados, reset token gerado (expira em 15min)');
-        res.json({
-            success: true,
-            resetToken: resetToken, // Client stores this temporarily for step 3
-            message: 'Dados verificados com sucesso.'
-        });
-    } catch (error) {
-        console.error('[AUTH/VERIFY-DATA] Erro:', error.stack || error);
-        res.status(500).json({
-            message: 'Erro ao verificar dados.'
-        });
-    }
+// [DEPRECATED] Passo 2 do fluxo antigo de recuperação de senha — removido do frontend em favor de /auth/forgot-password
+router.post('/auth/verify-user-data', (req, res) => {
+    res.status(410).json({ message: 'Este endpoint foi descontinuado. Use POST /api/auth/forgot-password.' });
 });
 
-// Passo 3: Alterar senha — now requires valid reset token (not userId)
-// AUDIT-FIX: Uses signed token from step 2 instead of accepting arbitrary userId
-router.post('/auth/change-password', async (req, res) => {
-    try {
-        const { resetToken, newPassword } = req.body;
-        console.log('[AUTH/CHANGE-PASSWORD] Tentativa de alteração de senha com token');
-
-        if (!resetToken || !newPassword) {
-            return res.status(400).json({ message: 'Dados incompletos. Token e nova senha são obrigatórios.' });
-        }
-
-        const pwCheck = validatePasswordStrength(newPassword);
-        if (!pwCheck.valid) {
-            return res.status(400).json({ message: pwCheck.errors.join('. ') });
-        }
-
-        // AUDIT-FIX: Validate the reset token (hashed comparison, time-limited)
-        const tokenHash = crypto.createHash('sha256').update(resetToken).digest('hex');
-        const [tokenRows] = await safeQuery(
-            'SELECT user_id, expires_at, used FROM password_reset_tokens WHERE token_hash = ? LIMIT 1',
-            [tokenHash]
-        );
-
-        if (!tokenRows.length) {
-            return res.status(401).json({ message: 'Token de recuperação inválido.' });
-        }
-
-        const tokenData = tokenRows[0];
-
-        if (tokenData.used) {
-            return res.status(401).json({ message: 'Token já foi utilizado. Inicie o processo novamente.' });
-        }
-
-        if (new Date(tokenData.expires_at) < new Date()) {
-            return res.status(401).json({ message: 'Token expirado. Inicie o processo novamente.' });
-        }
-
-        const userId = tokenData.user_id;
-
-        // Verifica se usuário existe
-        const [rows] = await safeQuery('SELECT id FROM usuarios WHERE id = ? LIMIT 1', [userId]);
-
-        if (!rows.length) {
-            return res.status(404).json({ message: 'Usuário não encontrado.' });
-        }
-
-        // Gera hash bcrypt da nova senha (salt rounds = 12)
-        // AUDIT-FIX: Increased from 10 to 12 rounds
-        const hashedPassword = await bcrypt.hash(newPassword, 12);
-        console.log('[AUTH/CHANGE-PASSWORD] Hash gerado com sucesso');
-
-        // Detecta qual campo usar para senha
-        const [cols] = await safeQuery('SHOW COLUMNS FROM usuarios');
-        const colNames = cols.map(x => x.Field.toLowerCase());
-
-        let passwordField = 'senha_hash'; // padrão
-        if (colNames.includes('senha_hash')) {
-            passwordField = 'senha_hash';
-        } else if (colNames.includes('senha')) {
-            passwordField = 'senha';
-        } else if (colNames.includes('password')) {
-            passwordField = 'password';
-        }
-
-        // Atualiza senha no banco com hash bcrypt
-        await safeQuery(`UPDATE usuarios SET ${passwordField} = ? WHERE id = ?`, [hashedPassword, userId]);
-
-        // AUDIT-FIX: Invalidate the used token
-        await safeQuery('UPDATE password_reset_tokens SET used = 1 WHERE token_hash = ?', [tokenHash]);
-
-        // AUDIT-FIX: Invalidate all refresh tokens for this user (force re-login)
-        try {
-            await safeQuery('DELETE FROM refresh_tokens WHERE user_id = ?', [userId]);
-        } catch (e) { /* table may not exist */ }
-
-        console.log('[AUTH/CHANGE-PASSWORD] ✅ Senha alterada com sucesso no banco (token invalidado)');
-
-        auditLog('PASSWORD_CHANGE', userId, 'Senha alterada via token de recuperação', req);
-
-        res.json({
-            success: true,
-            message: 'Senha alterada com sucesso!'
-        });
-    } catch (error) {
-        console.error('[AUTH/CHANGE-PASSWORD] Erro:', error.stack || error);
-        res.status(500).json({
-            message: 'Erro ao alterar senha.'
-        });
-    }
+// [DEPRECATED] Passo 3 do fluxo antigo de recuperação de senha — removido do frontend em favor de /auth/forgot-password
+router.post('/auth/change-password', (req, res) => {
+    res.status(410).json({ message: 'Este endpoint foi descontinuado. Use POST /api/auth/forgot-password.' });
 });
 
 // ===================== FUNCIONALIDADE "LEMBRAR-ME" =====================
@@ -2255,13 +2109,35 @@ router.get('/me', async (req, res) => {
         }
 
         const [rows] = await safeQuery(
-            'SELECT id, nome, email, role, is_admin, avatar, foto, login, setor FROM usuarios WHERE id = ? LIMIT 1',
+            'SELECT id, nome, email, role, is_admin, avatar, foto, login, setor, areas FROM usuarios WHERE id = ? LIMIT 1',
             [userId]
         );
         if (!rows.length) {
             return res.status(404).json({ message: 'Usuário não encontrado' });
         }
         const u = rows[0];
+
+        // Resolver áreas (mesmo padrão do login)
+        let areas = [];
+        if (u.areas) {
+            try {
+                areas = typeof u.areas === 'string' ? JSON.parse(u.areas) : (Array.isArray(u.areas) ? u.areas : []);
+            } catch(e) {
+                areas = String(u.areas).split(',').map(a => a.trim()).filter(a => a);
+            }
+        }
+        if (areas.length === 0) {
+            try {
+                const permServer = require('../../src/permissions-server');
+                const fn = (u.nome || '').split(' ')[0].toLowerCase() || (u.email || '').split('@')[0].split('.')[0].toLowerCase();
+                const serverAreas = permServer.getUserAreas(fn);
+                if (serverAreas && serverAreas.length > 0) areas = serverAreas;
+            } catch(e) {}
+        }
+        if (u.is_admin) {
+            areas = ['vendas', 'rh', 'pcp', 'financeiro', 'nfe', 'compras', 'ti'];
+        }
+
         res.json({
             id: u.id,
             nome: u.nome,
@@ -2271,7 +2147,8 @@ router.get('/me', async (req, res) => {
             avatar: u.avatar || u.foto,
             foto: u.foto || u.avatar,
             login: u.login,
-            setor: u.setor
+            setor: u.setor,
+            areas
         });
     } catch (err) {
         if (err.name === 'TokenExpiredError') {

@@ -52,7 +52,7 @@ class CotacoesManager {
                 });
             if (respForn.ok) {
                 const data = await respForn.json();
-                this.fornecedores = Array.isArray(data) ? data : (data.fornecedores || []);
+                this.fornecedores = Array.isArray(data) ? data : (data.data || data.fornecedores || []);
             }
         } catch (e) {
             console.error('Erro ao carregar fornecedores:', e);
@@ -479,7 +479,8 @@ class CotacoesManager {
     }
 
     renderizarFornecedoresCheckbox() {
-        const container = document.getElementById('fornecedoresCheckboxes');
+        const container = document.getElementById('fornecedoresCheckboxes') || document.getElementById('fornecedoresContainer');
+        if (!container) return;
         container.innerHTML = '';
 
         this.fornecedores.forEach(fornecedor => {
@@ -488,7 +489,7 @@ class CotacoesManager {
             div.innerHTML = `
                 <label>
                     <input type="checkbox" class="fornecedor-checkbox" value="${fornecedor.id}">
-                    ${this.escapeHtml(fornecedor.nome)}
+                    ${this.escapeHtml(fornecedor.razao_social || fornecedor.nome_fantasia || fornecedor.nome || "Fornecedor #" + fornecedor.id)}
                 </label>
             `;
             container.appendChild(div);

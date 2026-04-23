@@ -138,9 +138,36 @@ module.exports = function createComprasRoutes(deps) {
             `;
             params.push(hoje);
 
-            // Count total
-            const countSql = sql.replace(/SELECT pc\.\*, COALESCE\(f\.razao_social, f\.nome\) as fornecedor_nome/i, 'SELECT COUNT(*) as total');
-            const [countResult] = await pool.query(countSql, params);
+            // Count total — query explícita para não depender de regex frágil
+            let countSql = `
+                SELECT COUNT(*) as total
+                FROM pedidos_compra pc
+                LEFT JOIN fornecedores f ON pc.fornecedor_id = f.id
+                WHERE 1=1
+            `;
+            const countParams = [];
+
+            if (status === 'pendente') {
+                countSql += ` AND pc.status IN ('aprovado', 'enviado', 'pendente')
+                         AND pc.data_recebimento IS NULL`;
+            } else if (status === 'atrasado') {
+                countSql += ` AND pc.status IN ('aprovado', 'enviado', 'pendente')
+                         AND pc.data_recebimento IS NULL
+                         AND pc.data_entrega_prevista < ?`;
+                countParams.push(hoje);
+            } else if (status === 'recebido') {
+                countSql += ` AND pc.status = 'recebido'`;
+            } else if (status === 'parcial') {
+                countSql += ` AND pc.status = 'parcial'`;
+            }
+
+            if (busca) {
+                countSql += ` AND (pc.numero_pedido LIKE ? OR f.razao_social LIKE ? OR pc.numero_nfe LIKE ?)`;
+                const buscaTerm = `%${busca}%`;
+                countParams.push(buscaTerm, buscaTerm, buscaTerm);
+            }
+
+            const [countResult] = await pool.query(countSql, countParams);
             const total = countResult[0].total;
 
             sql += ` LIMIT ? OFFSET ?`;

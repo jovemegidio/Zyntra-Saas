@@ -52,7 +52,7 @@ class CotacoesManager {
                 });
             if (respForn.ok) {
                 const data = await respForn.json();
-                this.fornecedores = Array.isArray(data) ? data : (data.fornecedores || []);
+                this.fornecedores = Array.isArray(data) ? data : (data.data || data.fornecedores || []);
             }
         } catch (e) {
             console.error('Erro ao carregar fornecedores:', e);
@@ -479,16 +479,17 @@ class CotacoesManager {
     }
 
     renderizarFornecedoresCheckbox() {
-        const container = document.getElementById('fornecedoresCheckboxes');
+        const container = document.getElementById('fornecedoresCheckboxes') || document.getElementById('fornecedoresContainer');
+        if (!container) return;
         container.innerHTML = '';
 
         this.fornecedores.forEach(fornecedor => {
             const div = document.createElement('div');
             div.className = 'checkbox-item';
             div.innerHTML = `
-                <label>
+                <label style="display:flex;align-items:center;gap:8px;padding:4px 6px;border-radius:4px;cursor:pointer;">
                     <input type="checkbox" class="fornecedor-checkbox" value="${fornecedor.id}">
-                    ${this.escapeHtml(fornecedor.nome)}
+                    ${this.escapeHtml(fornecedor.razao_social || fornecedor.nome_fantasia || fornecedor.nome || 'Fornecedor #' + fornecedor.id)}
                 </label>
             `;
             container.appendChild(div);
@@ -534,17 +535,21 @@ class CotacoesManager {
             return;
         }
 
+        const setVal = (elId, val) => { const el = document.getElementById(elId); if (el) el.value = val ?? ''; };
+
         document.getElementById('modalCotacaoTitulo').textContent = 'Editar Cotação';
-        document.getElementById('cotacaoId').value = cotacao.id;
-        document.getElementById('cotacaoNumero').value = cotacao.numero;
-        document.getElementById('cotacaoData').value = cotacao.data;
-        document.getElementById('cotacaoPrazoResposta').value = cotacao.prazoResposta;
-        document.getElementById('cotacaoSolicitante').value = cotacao.solicitante;
-        document.getElementById('cotacaoDescricao').value = cotacao.descricao || '';
-        document.getElementById('cotacaoPrazoEntrega').value = cotacao.prazoEntrega || '';
-        document.getElementById('cotacaoFormaPagamento').value = cotacao.formaPagamento || '';
-        document.getElementById('cotacaoLocalEntrega').value = cotacao.localEntrega || '';
-        document.getElementById('cotacaoObservacoes').value = cotacao.observacoes || '';
+        setVal('cotacaoId', cotacao.id);
+        setVal('cotacaoNumero', cotacao.numero);
+        setVal('cotacaoData', cotacao.data);
+        setVal('cotacaoPrazoResposta', cotacao.prazoResposta);
+        setVal('cotacaoSolicitante', cotacao.solicitante);
+        setVal('cotacaoDescricao', cotacao.descricao || '');
+        setVal('cotDescricao', cotacao.descricao || '');
+        setVal('cotacaoPrazoEntrega', cotacao.prazoEntrega || '');
+        setVal('cotacaoFormaPagamento', cotacao.formaPagamento || '');
+        setVal('cotacaoLocalEntrega', cotacao.localEntrega || '');
+        setVal('cotacaoObservacoes', cotacao.observacoes || '');
+        setVal('cotObservacoes', cotacao.observacoes || '');
 
         // Carregar materiais
         const tbody = document.getElementById('materiaisCotacaoBody');

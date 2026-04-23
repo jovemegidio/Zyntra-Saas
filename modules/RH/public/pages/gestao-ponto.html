@@ -187,12 +187,12 @@
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel de Controle"><i class="fas fa-home"></i></a>
             <nav class="sidebar-nav">
                 <a href="../areaadm.html" class="sidebar-btn" title="Dashboard RH"><i class="fas fa-chart-pie"></i></a>
-                <a href="funcionários.html" class="sidebar-btn" title="Funcionários"><i class="fas fa-users"></i></a>
+                <a href="funcionarios.html" class="sidebar-btn" title="Funcionários"><i class="fas fa-users"></i></a>
                 <a href="../gestao-holerites.html" class="sidebar-btn" title="Gestão de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="folha.html" class="sidebar-btn" title="Folha de Pagamento"><i class="fas fa-money-check-alt"></i></a>
                 <a href="gestao-ponto.html" class="sidebar-btn active" title="Gestão do Ponto"><i class="fas fa-clock"></i></a>
                 <a href="importar-ponto.html" class="sidebar-btn" title="Importar Ponto (Control iD)"><i class="fas fa-upload"></i></a>
-                <a href="gestao-solicitações.html" class="sidebar-btn" title="Gestão de Solicitações"><i class="fas fa-tasks"></i></a>
+                <a href="gestao-solicitacoes.html" class="sidebar-btn" title="Gestão de Solicitações"><i class="fas fa-tasks"></i></a>
                 <a href="calendario-rh.html" class="sidebar-btn" title="Calendário RH"><i class="fas fa-calendar-alt"></i></a>
             </nav>
             <div class="sidebar-bottom">
@@ -271,8 +271,8 @@
                 <!-- Tabs -->
                 <div class="tabs">
                     <button class="tab-btn active" data-tab="registros">Registros do Dia</button>
-                    <button class="tab-btn" data-tab="histórico">Histórico</button>
-                    <button class="tab-btn" data-tab="alterações">Histórico de Alterações</button>
+                    <button class="tab-btn" data-tab="historico">Histórico</button>
+                    <button class="tab-btn" data-tab="alteracoes">Histórico de Alterações</button>
                     <button class="tab-btn" data-tab="resumo">Resumo Mensal</button>
                 </div>
 
@@ -678,7 +678,7 @@
                 var data = await resp.json();
                 funcionáriosList = data.funcionarios || data || [];
 
-                var selects = ['filter-func', 'filter-func-hist', 'filter-func-resumo', 'filter-func-alterações', 'ajuste-funcionário'];
+                var selects = ['filter-func', 'filter-func-hist', 'filter-func-resumo', 'filter-func-alteracoes', 'ajuste-funcionario'];
                 selects.forEach(function(id) {
                     var el = document.getElementById(id);
                     if (!el) return;
@@ -693,10 +693,10 @@
                     });
                 });
 
-                document.getElementById('stat-funcionários').textContent = funcionáriosList.length;
+                document.getElementById('stat-funcionarios').textContent = funcionáriosList.length;
             } catch (e) {
                 console.error('Erro funcionários:', e);
-                document.getElementById('stat-funcionários').textContent = '?';
+                document.getElementById('stat-funcionarios').textContent = '?';
             }
         }
 
@@ -768,7 +768,7 @@
             document.getElementById('data-atual').textContent = formatDate(data);
 
             try {
-                var url = '/api/rh/ponto/marcações?data_inicio=' + data + '&data_fim=' + data;
+                var url = '/api/rh/ponto/marcacoes?data_inicio=' + data + '&data_fim=' + data;
                 if (funcFilter) url += '&funcionario_id=' + funcFilter;
 
                 var resp = await fetch(url, {
@@ -777,14 +777,14 @@
                 });
                 if (!resp.ok) throw new Error('HTTP ' + resp.status);
                 var result = await resp.json();
-                marcaçõesCache = result.marcações || [];
+                marcaçõesCache = result.marcacoes || result.marcações || [];
 
                 updateSyncStatus(true, marcaçõesCache.length);
                 renderMarcações(marcaçõesCache, 'tbody-registros', 'empty-registros', 'total-registros');
 
                 var uniqueFuncs = new Set(marcaçõesCache.map(function(m) { return m.funcionario_id; }));
                 document.getElementById('stat-presentes').textContent = uniqueFuncs.size;
-                document.getElementById('stat-marcações').textContent = marcaçõesCache.length;
+                document.getElementById('stat-marcacoes').textContent = marcaçõesCache.length;
 
             } catch (e) {
                 console.error('Erro marcações:', e);
@@ -961,9 +961,9 @@
             document.getElementById('ajuste-data').value = document.getElementById('filter-data').value;
             document.getElementById('ajuste-hora').value = '';
             document.getElementById('ajuste-tipo').value = 'entrada';
-            document.getElementById('ajuste-observação').value = '';
+            document.getElementById('ajuste-observacao').value = '';
             document.getElementById('ajuste-motivo').value = '';
-            document.getElementById('ajuste-funcionário').value = '';
+            document.getElementById('ajuste-funcionario').value = '';
             document.getElementById('modal-ajuste-title').textContent = 'Ajuste Manual de Ponto';
             document.getElementById('motivo-section').style.display = 'none';
             document.getElementById('motivo-warning').classList.remove('show');
@@ -977,11 +977,11 @@
             if (!m) { showToast('Marcação não encontrada', 'error'); return; }
 
             document.getElementById('ajuste-id').value = m.id;
-            document.getElementById('ajuste-funcionário').value = m.funcionario_id || '';
+            document.getElementById('ajuste-funcionario').value = m.funcionario_id || '';
             document.getElementById('ajuste-data').value = m.data ? m.data.substring(0, 10) : '';
             document.getElementById('ajuste-hora').value = formatTime(m.hora);
             document.getElementById('ajuste-tipo').value = m.tipo || 'marcação';
-            document.getElementById('ajuste-observação').value = m.observação || '';
+            document.getElementById('ajuste-observacao').value = m.observação || '';
             document.getElementById('ajuste-motivo').value = '';
             document.getElementById('modal-ajuste-title').textContent = 'Editar Marcação #' + m.id;
             document.getElementById('motivo-section').style.display = 'block';
@@ -993,11 +993,11 @@
 
         async function salvarAjuste() {
             var id = document.getElementById('ajuste-id').value;
-            var funcId = document.getElementById('ajuste-funcionário').value;
+            var funcId = document.getElementById('ajuste-funcionario').value;
             var data = document.getElementById('ajuste-data').value;
             var hora = document.getElementById('ajuste-hora').value;
             var tipo = document.getElementById('ajuste-tipo').value;
-            var obs = document.getElementById('ajuste-observação').value;
+            var obs = document.getElementById('ajuste-observacao').value;
             var motivo = document.getElementById('ajuste-motivo').value.trim();
 
             if (!funcId || !data || !hora) {
@@ -1016,11 +1016,11 @@
             try {
                 var url, method, body;
                 if (id) {
-                    url = '/api/rh/ponto/marcações/' + id;
+                    url = '/api/rh/ponto/marcacoes/' + id;
                     method = 'PUT';
                     body = { hora: hora, tipo: tipo, observação: obs, funcionario_id: parseInt(funcId), data: data, motivo: motivo };
                 } else {
-                    url = '/api/rh/ponto/marcações';
+                    url = '/api/rh/ponto/marcacoes';
                     method = 'POST';
                     body = { funcionario_id: parseInt(funcId), data: data, hora: hora, tipo: tipo, observação: obs };
                 }
@@ -1069,7 +1069,7 @@
             }
 
             try {
-                var resp = await fetchWithCsrf('/api/rh/ponto/marcações/' + excluirMarcaçãoId, {
+                var resp = await fetchWithCsrf('/api/rh/ponto/marcacoes/' + excluirMarcaçãoId, {
                     method: 'DELETE',
                     body: JSON.stringify({ motivo: motivo })
                 });
@@ -1188,10 +1188,10 @@
 
         // ============= HISTÓRICO DE ALTERAES =============
         async function carregarAlterações() {
-            var funcId = document.getElementById('filter-func-alterações').value;
-            var ação = document.getElementById('filter-ação-alterações').value;
-            var inicio = document.getElementById('filter-alterações-inicio').value;
-            var fim = document.getElementById('filter-alterações-fim').value;
+            var funcId = document.getElementById('filter-func-alteracoes').value;
+            var ação = document.getElementById('filter-acao-alteracoes').value;
+            var inicio = document.getElementById('filter-alteracoes-inicio').value;
+            var fim = document.getElementById('filter-alteracoes-fim').value;
 
             try {
                 var params = [];
@@ -1201,18 +1201,18 @@
                 if (fim) params.push('data_fim=' + fim);
                 params.push('limit=100');
 
-                var url = '/api/rh/ponto/alterações' + (params.length ? '?' + params.join('&') : '');
+                var url = '/api/rh/ponto/alteracoes' + (params.length ? '?' + params.join('&') : '');
                 var resp = await fetch(url, {
                     credentials: 'include',
                     headers: authHeaders()
                 });
                 if (!resp.ok) throw new Error('HTTP ' + resp.status);
                 var data = await resp.json();
-                var alterações = data.alterações || [];
+                var alterações = data.alteracoes || data.alterações || [];
 
-                document.getElementById('total-alterações').textContent = alterações.length + ' registros';
+                document.getElementById('total-alteracoes').textContent = alterações.length + ' registros';
                 var timeline = document.getElementById('audit-timeline');
-                var empty = document.getElementById('empty-alterações');
+                var empty = document.getElementById('empty-alteracoes');
 
                 if (alterações.length === 0) {
                     timeline.innerHTML = '';
@@ -1301,8 +1301,8 @@
             document.getElementById('filter-data').value = today;
             document.getElementById('filter-inicio').value = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
             document.getElementById('filter-fim').value = today;
-            document.getElementById('filter-alterações-inicio').value = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
-            document.getElementById('filter-alterações-fim').value = today;
+            document.getElementById('filter-alteracoes-inicio').value = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
+            document.getElementById('filter-alteracoes-fim').value = today;
             document.getElementById('filter-ano-resumo').value = new Date().getFullYear();
 
             var meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];

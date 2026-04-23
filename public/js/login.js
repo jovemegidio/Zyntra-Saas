@@ -143,7 +143,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ==================== API HELPER ====================
   function apiFetch(path, options = {}) {
-    return fetch(path, options);
+    return fetch(path, {
+      credentials: 'include',
+      ...options
+    });
   }
 
   // ==================== MULTI-COMPANY ROUTING ====================
@@ -393,8 +396,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const forgotPasswordModal = document.getElementById('forgot-password-modal');
   const forgotPasswordLink = document.getElementById('forgot-password');
   const modalClose = document.getElementById('modal-close');
-  let currentStep = 1;
-  let userVerificationData = {};
 
   if (forgotPasswordLink && forgotPasswordModal) {
     forgotPasswordLink.addEventListener('click', (e) => {
@@ -410,6 +411,7 @@ document.addEventListener('DOMContentLoaded', () => {
     forgotPasswordModal.classList.add('show');
     document.body.style.overflow = 'hidden';
     resetModal();
+    setTimeout(() => verifyEmailInput?.focus(), 50);
   }
 
   function closeForgotPasswordModal() {
@@ -419,9 +421,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function resetModal() {
-    currentStep = 1;
-    showStep(1);
+    showStep('step-1');
     clearModalInputs();
+    clearModalMessage();
   }
 
   function clearModalInputs() {
@@ -429,6 +431,10 @@ document.addEventListener('DOMContentLoaded', () => {
     inputs.forEach(input => {
       if (input.id !== 'verify-email') input.value = '';
     });
+  }
+
+  function clearModalMessage() {
+    forgotPasswordModal.querySelector('.modal-message')?.remove();
   }
 
   if (modalClose) modalClose.addEventListener('click', closeForgotPasswordModal);
@@ -441,18 +447,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key === 'Escape' && forgotPasswordModal?.classList.contains('show')) closeForgotPasswordModal();
   });
 
-  function showStep(step) {
-    for (let i = 1; i <= 3; i++) {
-      const stepEl = document.getElementById(`step-${i}`);
-      const dotEl = document.getElementById(`step-dot-${i}`);
-      if (stepEl) stepEl.classList.remove('active');
-      if (dotEl) dotEl.classList.remove('active');
-    }
-    const activeStep = document.getElementById(`step-${step}`);
-    const activeDot = document.getElementById(`step-dot-${step}`);
-    if (activeStep) activeStep.classList.add('active');
-    if (activeDot) activeDot.classList.add('active');
-    currentStep = step;
+  function showStep(step = 'step-1') {
+    const activeStepId = typeof step === 'number' ? `step-${step}` : step;
+    forgotPasswordModal.querySelectorAll('.modal-step').forEach((stepEl) => {
+      stepEl.classList.toggle('active', stepEl.id === activeStepId);
+    });
+    forgotPasswordModal.querySelectorAll('.step-dot').forEach((dotEl) => {
+      const relatedStepId = dotEl.id.replace('step-dot-', 'step-');
+      dotEl.classList.toggle('active', relatedStepId === activeStepId);
+    });
   }
 
   // Step 1: Verify Email
@@ -484,8 +487,8 @@ document.addEventListener('DOMContentLoaded', () => {
         data = { message: text || `Erro (${response.status})` };
       }
       if (response.ok || data.success) {
-        showModalMessage('✅ Link de recuperação enviado! Verifique seu email para continuar.', 'success');
-        setTimeout(() => closeForgotPasswordModal(), 3000);
+        showModalMessage(data.message || '✅ Se o email estiver cadastrado, você receberá uma senha temporária para entrar e redefinir o acesso.', 'success');
+        setTimeout(() => closeForgotPasswordModal(), 3500);
       } else {
         showModalMessage(data.message || 'Erro ao enviar email de recuperação.', 'error');
       }
@@ -499,133 +502,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   cancelStep1?.addEventListener('click', closeForgotPasswordModal);
-
-  // Step 2: Verify Data
-  const nextStep2 = document.getElementById('next-step-2');
-  const backStep2 = document.getElementById('back-step-2');
-
-  nextStep2?.addEventListener('click', async () => {
-    const name = document.getElementById('verify-name')?.value.trim();
-    const department = document.getElementById('verify-department')?.value;
-    if (!name || !department) {
-      showModalMessage('Por favor, preencha todos os campos.', 'error');
-      return;
-    }
-    nextStep2.disabled = true;
-    nextStep2.textContent = 'Verificando...';
-
-    try {
-      const response = await apiFetch('/api/auth/verify-user-data', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: userVerificationData.userId, name, department })
-      });
-      let data = {};
-      const contentType = response.headers.get('content-type') || '';
-      if (contentType.includes('application/json')) {
-        try { data = await response.json(); } catch (e) { data = { message: 'Resposta inválida do servidor.' }; }
-      } else {
-        const text = await response.text();
-        data = { message: text || `Erro (${response.status})` };
-      }
-      if (response.ok) {
-        userVerificationData.name = name;
-        userVerificationData.department = department;
-        showStep(3);
-      } else {
-        showModalMessage(data.message || 'Dados não conferem com nossos registros.', 'error');
-      }
-    } catch (error) {
-      showModalMessage('Erro de conexão. Tente novamente.', 'error');
-    } finally {
-      nextStep2.disabled = false;
-      nextStep2.textContent = 'Verificar →';
-    }
-  });
-
-  backStep2?.addEventListener('click', () => showStep(1));
-
-  // Step 3: Change Password
-  const newPasswordInput = document.getElementById('new-password');
-  const confirmPasswordInput = document.getElementById('confirm-password');
-  const changePasswordBtn = document.getElementById('change-password');
-  const backStep3 = document.getElementById('back-step-3');
-
-  newPasswordInput?.addEventListener('input', (e) => checkPasswordStrength(e.target.value));
-
-  function checkPasswordStrength(password) {
-    const strengthBar = document.querySelector('.password-strength');
-    const strengthText = document.querySelector('.strength-text');
-    if (!strengthBar || !strengthText) return;
-
-    let strength = 0;
-    if (password.length >= 8) strength++;
-    if (/[a-z]/.test(password)) strength++;
-    if (/[A-Z]/.test(password)) strength++;
-    if (/[0-9]/.test(password)) strength++;
-    if (/[^A-Za-z0-9]/.test(password)) strength++;
-
-    strengthBar.className = 'password-strength';
-    let message = '';
-    if (strength <= 2) { strengthBar.classList.add('strength-weak'); message = 'Senha fraca'; }
-    else if (strength === 3) { strengthBar.classList.add('strength-fair'); message = 'Senha razoável'; }
-    else if (strength === 4) { strengthBar.classList.add('strength-good'); message = 'Senha boa'; }
-    else { strengthBar.classList.add('strength-strong'); message = 'Senha forte'; }
-    strengthText.textContent = message;
-  }
-
-  changePasswordBtn?.addEventListener('click', async () => {
-    const newPassword = newPasswordInput?.value;
-    const confirmPassword = confirmPasswordInput?.value;
-    if (!newPassword || !confirmPassword) {
-      showModalMessage('Por favor, preencha ambos os campos de senha.', 'error');
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      showModalMessage('As senhas não coincidem.', 'error');
-      return;
-    }
-    if (newPassword.length < 6) {
-      showModalMessage('A senha deve ter pelo menos 6 caracteres.', 'error');
-      return;
-    }
-    changePasswordBtn.disabled = true;
-    const originalHTML = changePasswordBtn.innerHTML;
-    changePasswordBtn.innerHTML = '<svg class="spinner-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Alterando...';
-
-    try {
-      const response = await apiFetch('/api/auth/change-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: userVerificationData.userId, email: userVerificationData.email, newPassword })
-      });
-      let data = {};
-      const contentType = response.headers.get('content-type') || '';
-      if (contentType.includes('application/json')) {
-        try { data = await response.json(); } catch (e) { data = {}; }
-      } else {
-        const text = await response.text();
-        data = { message: text || `Erro (${response.status})` };
-      }
-      if (response.ok) {
-        showModalMessage('Senha alterada com sucesso!', 'success');
-        setTimeout(() => {
-          closeForgotPasswordModal();
-          if (emailInput) emailInput.value = userVerificationData.email;
-          showMessage('Senha alterada! Faça login com sua nova senha.', 'success');
-        }, 2000);
-      } else {
-        showModalMessage(data.message || 'Erro ao alterar senha.', 'error');
-      }
-    } catch (error) {
-      showModalMessage('Erro de conexão. Tente novamente.', 'error');
-    } finally {
-      changePasswordBtn.disabled = false;
-      changePasswordBtn.innerHTML = originalHTML;
-    }
-  });
-
-  backStep3?.addEventListener('click', () => showStep(2));
 
   function showModalMessage(message, type = 'error') {
     const existingMessage = forgotPasswordModal.querySelector('.modal-message');
@@ -1418,7 +1294,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateStrength(password) {
       if (!strengthBar || !strengthText) return;
       let strength = 0;
-      if (password.length >= 8) strength++;
+      if (password.length >= 10) strength++;
       if (/[a-z]/.test(password)) strength++;
       if (/[A-Z]/.test(password)) strength++;
       if (/[0-9]/.test(password)) strength++;
@@ -1470,8 +1346,8 @@ document.addEventListener('DOMContentLoaded', () => {
           if (errDiv) { errDiv.textContent = 'Preencha ambos os campos de senha.'; errDiv.style.display = 'block'; }
           return;
         }
-        if (newPassword.length < 6) {
-          if (errDiv) { errDiv.textContent = 'A senha deve ter pelo menos 6 caracteres.'; errDiv.style.display = 'block'; }
+        if (newPassword.length < 10) {
+          if (errDiv) { errDiv.textContent = 'A senha deve ter pelo menos 10 caracteres.'; errDiv.style.display = 'block'; }
           return;
         }
         if (newPassword !== confirmPassword) {

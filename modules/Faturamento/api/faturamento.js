@@ -657,6 +657,15 @@ module.exports = (pool, authenticateToken) => {
             } else if (msg.includes('já existe')) {
                 statusCode = 409;
                 errorCode = 'NFE_DUPLICADA';
+            } else if (
+                msg.includes('não encontrado') || msg.includes('nao encontrado') ||
+                msg.includes('sem itens') || msg.includes('sem cnpj') || msg.includes('sem cpf') ||
+                msg.includes('quantidade inv') || msg.includes('quantidade inválida') ||
+                msg.includes('cnpj do cliente') || msg.includes('cpf do cliente') ||
+                msg.includes('obrigatório') || msg.includes('obrigatorio')
+            ) {
+                statusCode = 400;
+                errorCode = 'VALIDACAO_ERRO';
             }
             res.status(statusCode).json({
                 success: false,

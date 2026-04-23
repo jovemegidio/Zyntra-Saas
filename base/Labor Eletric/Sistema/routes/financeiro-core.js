@@ -10,8 +10,17 @@
 const express = require('express');
 
 module.exports = function createFinanceiroCoreRoutes(deps) {
-    const { pool, jwt, JWT_SECRET, authenticateToken, authorizeArea, writeAuditLog, cacheMiddleware, CACHE_CONFIG } = deps;
+    const { pool, authenticateToken, authorizeArea, writeAuditLog, cacheMiddleware, CACHE_CONFIG } = deps;
     const router = express.Router();
+    const ADMIN_ROLES = new Set(['admin', 'administrador']);
+
+    function normalizeRole(role) {
+        return String(role || '').trim().toLowerCase();
+    }
+
+    function isAdminUser(...users) {
+        return users.some((user) => ADMIN_ROLES.has(normalizeRole(user?.role)) || user?.is_admin === true || user?.is_admin === 1);
+    }
 
     // ============================================================
     // MIDDLEWARE: Verificar permissões financeiras (SINGLE definition)
@@ -19,19 +28,9 @@ module.exports = function createFinanceiroCoreRoutes(deps) {
     // ============================================================
     function checkFinanceiroPermission(requiredPermission) {
         return async (req, res, next) => {
-            // FIX-100: Use req.user from authenticateToken middleware (avoids JWT duplication)
-            // Fallback to manual JWT if req.user not set (backwards compatibility)
-            let user = req.user;
+            const user = req.user;
             if (!user) {
-                const authHeader = req.headers['authorization'];
-                let token = null;
-                if (authHeader && authHeader.startsWith('Bearer ')) {
-                    const ht = authHeader.split(' ')[1];
-                    if (ht && ht !== 'null' && ht !== 'undefined') token = ht;
-                }
-                if (!token) token = req.cookies?.authToken || req.cookies?.token;
-                if (!token) return res.status(401).json({ message: 'Não autenticado' });
-                user = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
+                return res.status(401).json({ message: 'Não autenticado' });
             }
 
             try {
@@ -57,12 +56,7 @@ module.exports = function createFinanceiroCoreRoutes(deps) {
                     return res.status(403).json({ message: 'Usuário não encontrado' });
                 }
 
-                // Admins têm acesso total
-                const isAdmin = userData.role === 'admin' || userData.role === 'Admin' ||
-                               userData.role === 'administrador' || userData.role === 'Administrador' ||
-                               user.role === 'admin' || user.role === 'Admin';
-
-                if (isAdmin) {
+                if (isAdminUser(user, userData)) {
                     req.user = user;
                     req.userPermissions = {
                         acesso: 'total', contas_receber: true, contas_pagar: true,
@@ -126,11 +120,10 @@ module.exports = function createFinanceiroCoreRoutes(deps) {
     // PERMISSÕES DO USUÁRIO NO FINANCEIRO
     // ============================================================
     router.get('/permissoes', authenticateToken, async (req, res) => {
-        const token = req.cookies?.authToken || req.cookies?.token || req.headers['authorization']?.replace('Bearer ', '');
-        if (!token) return res.status(401).json({ message: 'Não autenticado' });
+        const user = req.user;
+        if (!user) return res.status(401).json({ message: 'Não autenticado' });
 
         try {
-            const user = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
             const [users] = await pool.query(
                 'SELECT id, nome_completo as nome, nome_completo as apelido, email, role, permissoes_financeiro FROM funcionarios WHERE email = ?',
                 [user.email]
@@ -146,11 +139,7 @@ module.exports = function createFinanceiroCoreRoutes(deps) {
                 } catch (e) { /* tabela pode não existir */ }
             }
 
-            const isAdmin = user.role === 'admin' || user.role === 'Admin' ||
-                            userData?.role === 'admin' || userData?.role === 'Admin' ||
-                            userData?.role === 'administrador' || userData?.role === 'Administrador';
-
-            if (isAdmin) {
+            if (isAdminUser(user, userData)) {
                 return res.json({
                     success: true,
                     permissoes: {

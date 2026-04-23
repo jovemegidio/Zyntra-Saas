@@ -481,8 +481,8 @@ module.exports = function registerAllRoutes(app, deps) {
     app.get('/api/usuarios', authenticateToken, async (req, res) => {
         try {
             const role = req.query.role;
-            let sql = 'SELECT id, nome, email, role, departamento FROM funcionarios WHERE status = "Ativo"';
-            const params = [];
+            let sql = 'SELECT id, nome, email, role, departamento FROM usuarios WHERE status = ?';
+            const params = ['ativo'];
             if (role) {
                 sql += ' AND (role = ? OR departamento = ?)';
                 params.push(role, role);

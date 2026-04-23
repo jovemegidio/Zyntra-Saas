@@ -267,24 +267,22 @@
     </div>
 
     <!-- ===== MODAL DE RECUPERAÇÃO DE SENHA ===== -->
-    <div id="forgot-password-modal" class="modal-overlay">
+    <div id="forgot-password-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-recovery-title">
         <div class="modal-content">
             <button class="modal-close" id="modal-close">&times;</button>
             
             <div class="modal-header">
-                <h3>
+                <h3 id="modal-recovery-title">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
                     </svg>
                     Recuperar Senha
                 </h3>
-                <p>Siga os passos para redefinir sua senha</p>
+                <p>Informe seu email para receber uma senha temporária e redefinir o acesso.</p>
             </div>
 
             <div class="step-indicator">
                 <div class="step-dot active" id="step-dot-1"></div>
-                <div class="step-dot" id="step-dot-2"></div>
-                <div class="step-dot" id="step-dot-3"></div>
             </div>
 
             <!-- Passo 1: Verificar Email -->
@@ -299,57 +297,7 @@
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
                         </svg>
-                        Enviar Link
-                    </button>
-                </div>
-            </div>
-
-            <!-- Passo 2: Verificar Dados -->
-            <div class="modal-step" id="step-2">
-                <div class="modal-form-group">
-                    <label for="verify-name">Nome Completo</label>
-                    <input type="text" id="verify-name" class="modal-input" placeholder="Seu nome completo" required>
-                </div>
-                <div class="modal-form-group">
-                    <label for="verify-department">Departamento</label>
-                    <select id="verify-department" class="modal-input" required>
-                        <option value="">Selecione seu departamento</option>
-                        <option value="PCP">PCP - Planejamento e Controle</option>
-                        <option value="Produção">Produção</option>
-                        <option value="Vendas">Vendas</option>
-                        <option value="Administrativo">Administrativo</option>
-                        <option value="TI">Tecnologia da Informação</option>
-                    </select>
-                </div>
-                <div class="modal-buttons">
-                    <button type="button" class="modal-btn modal-btn-secondary" id="back-step-2">← Voltar</button>
-                    <button type="button" class="modal-btn modal-btn-primary" id="next-step-2">Verificar →</button>
-                </div>
-            </div>
-
-            <!-- Passo 3: Nova Senha -->
-            <div class="modal-step" id="step-3">
-                <div class="modal-form-group">
-                    <label for="new-password">Nova Senha</label>
-                    <input type="password" id="new-password" class="modal-input" placeholder="Digite sua nova senha" required>
-                    <div class="password-strength">
-                        <div class="strength-bar">
-                            <div class="strength-fill"></div>
-                        </div>
-                        <span class="strength-text">Digite uma senha forte</span>
-                    </div>
-                </div>
-                <div class="modal-form-group">
-                    <label for="confirm-password">Confirmar Senha</label>
-                    <input type="password" id="confirm-password" class="modal-input" placeholder="Digite novamente sua nova senha" required>
-                </div>
-                <div class="modal-buttons">
-                    <button type="button" class="modal-btn modal-btn-secondary" id="back-step-3">← Voltar</button>
-                    <button type="button" class="modal-btn modal-btn-primary" id="change-password">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="20 6 9 17 4 12"/>
-                        </svg>
-                        Alterar Senha
+                        Enviar Senha Temporária
                     </button>
                 </div>
             </div>
@@ -821,8 +769,8 @@
     </style>
 
     <!-- Scripts -->
-    <script src="/js/auth-unified.js?v=20260222b"></script>
-    <script src="/js/login.js?v=20260226_force_pw"></script>
+    <script src="/js/auth-unified.js?v=20260423a"></script>
+    <script src="/js/login.js?v=20260423a"></script>
     <!-- Login Tab Switcher & CPF Mask -->
     <script>
     // Switch between Email and CPF login tabs

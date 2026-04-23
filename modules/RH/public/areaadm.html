@@ -517,12 +517,12 @@
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel de Controle"><i class="fas fa-home"></i></a>
             <nav class="sidebar-nav">
                 <a href="areaadm.html" class="sidebar-btn active" title="Dashboard RH"><i class="fas fa-chart-pie"></i></a>
-                <a href="pages/funcionários.html" class="sidebar-btn" title="Funcionários"><i class="fas fa-users"></i></a>
+                <a href="pages/funcionarios.html" class="sidebar-btn" title="Funcionários"><i class="fas fa-users"></i></a>
                 <a href="gestao-holerites.html" class="sidebar-btn" title="Gestão de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="pages/folha.html" class="sidebar-btn" title="Folha de Pagamento"><i class="fas fa-money-check-alt"></i></a>
                 <a href="pages/gestao-ponto.html" class="sidebar-btn" title="Gestão do Ponto"><i class="fas fa-clock"></i></a>
                 <a href="pages/importar-ponto.html" class="sidebar-btn" title="Importar Ponto (Control iD)"><i class="fas fa-upload"></i></a>
-                <a href="pages/gestao-solicitações.html" class="sidebar-btn" title="Gestão de Solicitações"><i class="fas fa-tasks"></i></a>
+                <a href="pages/gestao-solicitacoes.html" class="sidebar-btn" title="Gestão de Solicitações"><i class="fas fa-tasks"></i></a>
                 <a href="pages/requisicoes-compra.html" class="sidebar-btn" title="Requisições de Compra"><i class="fas fa-shopping-cart"></i></a>
                 <a href="pages/calendario-rh.html" class="sidebar-btn" title="Calendário RH"><i class="fas fa-calendar-alt"></i></a>
             </nav>
@@ -644,7 +644,7 @@
                             </div>
                             <div class="card-body">
                                 <div class="quick-actions">
-                                    <a href="pages/funcionários.html?action=new" class="quick-action-btn">
+                                    <a href="pages/funcionarios.html?action=new" class="quick-action-btn">
                                         <i class="fas fa-user-plus"></i>
                                         <span>Novo Funcionário</span>
                                     </a>
@@ -887,7 +887,7 @@
                     const férias = stats.férias || funcionários.filter(f => f.status === 'Férias').length;
                     const admissoes = stats.admissoes_mes || 0;
 
-                    document.getElementById('stat-funcionários').textContent = ativos;
+                    document.getElementById('stat-funcionarios').textContent = ativos;
                     document.getElementById('stat-ferias').textContent = férias;
                     document.getElementById('stat-admissoes').textContent = admissoes;
                 } else {
@@ -902,7 +902,7 @@
         }
 
         function mostrarErroEstatisticas(mensagem) {
-            document.getElementById('stat-funcionários').textContent = '-';
+            document.getElementById('stat-funcionarios').textContent = '-';
             document.getElementById('stat-ferias').textContent = '-';
             document.getElementById('stat-admissoes').textContent = '-';
         }
@@ -911,7 +911,7 @@
         // CARREGAR MARCAÇÕES EM TEMPO REAL
         // ========================================
         async function carregarMarcaçõesTempoReal() {
-            const tbody = document.getElementById('tbody-marcações');
+            const tbody = document.getElementById('tbody-marcacoes');
             if (!tbody) return;
 
             try {
@@ -925,16 +925,16 @@
 
                 if (!resp.ok) throw new Error('HTTP ' + resp.status);
                 const data = await resp.json();
-                const marcações = data.marcações || [];
+                const marcações = data.marcacoes || data.marcações || [];
 
                 // Atualizar contadores
-                document.getElementById('marcações-count').textContent = marcações.length;
+                document.getElementById('marcacoes-count').textContent = marcações.length;
                 const uniqueFuncs = new Set(marcações.filter(m => m.funcionario_id).map(m => m.funcionario_id));
-                document.getElementById('marcações-presentes').textContent = uniqueFuncs.size;
+                document.getElementById('marcacoes-presentes').textContent = uniqueFuncs.size;
 
                 const agora = new Date();
                 const horas = agora.getHours();
-                document.getElementById('marcações-data-label').textContent = 
+                document.getElementById('marcacoes-data-label').textContent = 
                     `Hoje, ${String(agora.getDate()).padStart(2,'0')}/${String(agora.getMonth()+1).padStart(2,'0')}`;
 
                 if (marcações.length === 0) {
@@ -993,7 +993,7 @@
                 }).join('');
 
                 // Atualizar status de sync
-                document.getElementById('marcações-sync-status').innerHTML = 
+                document.getElementById('marcacoes-sync-status').innerHTML = 
                     `<i class="fas fa-circle" style="font-size:8px;margin-right:4px;color:#10b981;"></i> Atualizado às ${String(agora.getHours()).padStart(2,'0')}:${String(agora.getMinutes()).padStart(2,'0')}`;
 
             } catch (error) {
@@ -1069,7 +1069,7 @@
 
         function gerarAtividadesLocal(activityList) {
             // Tentar buscar funcionários da tabela para gerar atividades reais
-            const rows = document.querySelectorAll('#tbody-funcionários tr');
+            const rows = document.querySelectorAll('#tbody-funcionarios tr');
             const atividades = [];
 
             rows.forEach(row => {

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <!-- Favicon -->
@@ -61,7 +61,7 @@
     <!-- Chat Widget BOB AI -->
     <link rel="stylesheet" href="/chat/widget.css?v=20260301">
 </head>
-<body class="dark-mode">
+<body>
     <div class="app-container">
         <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
 
@@ -280,10 +280,10 @@
                                 </select>
                             </div>
                             <div class="form-group"><label>Prazo de Entrega</label><input type="text" id="prazoEntrega" placeholder="Ex: 15 dias úteis"></div>
-                            <div class="form-group"><label>Banco</label><input type="text" id="banco"></div>
-                            <div class="form-group"><label>Agência</label><input type="text" id="agencia"></div>
-                            <div class="form-group"><label>Conta</label><input type="text" id="conta"></div>
-                            <div class="form-group"><label>Chave PIX</label><input type="text" id="chavePix"></div>
+                            <div class="form-group"><label>Banco</label><input type="text" id="banco" maxlength="50" placeholder="Ex: Bradesco"></div>
+                            <div class="form-group"><label>Agência</label><input type="text" id="agencia" maxlength="10" placeholder="Ex: 0001-5"></div>
+                            <div class="form-group"><label>Conta</label><input type="text" id="conta" maxlength="20" placeholder="Ex: 12345678-9"></div>
+                            <div class="form-group"><label>Chave PIX</label><input type="text" id="chavePix" maxlength="77" placeholder="CPF, CNPJ, telefone, e-mail ou EVP"></div>
                             <div class="form-group" style="grid-column:span 2;">
                                 <label>Avaliação (1-5)</label>
                                 <select id="avaliacao">
@@ -338,6 +338,26 @@
     </div>
 
     <script>
+    // Toast helper - usa ComprasUtils se disponível, senão fallback
+    function _toast(msg, tipo) {
+        if (typeof ComprasUtils !== 'undefined' && ComprasUtils.toast) {
+            return ComprasUtils.toast.show(msg, tipo);
+        }
+        // Fallback simples
+        const colors = { success: '#22c55e', error: '#ef4444', warning: '#f59e0b', info: '#3b82f6' };
+        const icons = { success: 'check-circle', error: 'exclamation-circle', warning: 'exclamation-triangle', info: 'info-circle' };
+        const t = document.createElement('div');
+        t.style.cssText = 'position:fixed;top:20px;right:20px;z-index:99999;background:#fff;border-left:4px solid '+(colors[tipo]||colors.info)+';padding:14px 20px;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.15);font-size:14px;display:flex;align-items:center;gap:10px;animation:toastIn .3s ease;max-width:380px';
+        t.innerHTML = '<i class="fas fa-'+(icons[tipo]||icons.info)+'" style="color:'+(colors[tipo]||colors.info)+'"></i><span>'+msg+'</span>';
+        if (!document.getElementById('_toastStyle')) {
+            const s = document.createElement('style'); s.id = '_toastStyle';
+            s.textContent = '@keyframes toastIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}@keyframes toastOut{from{opacity:1}to{opacity:0}}';
+            document.head.appendChild(s);
+        }
+        document.body.appendChild(t);
+        setTimeout(() => { t.style.animation = 'toastOut .3s ease'; setTimeout(() => t.remove(), 300); }, 4000);
+    }
+
     function toggleMobileSidebar() {
         const sidebar = document.getElementById('mobile-sidebar');
         const overlay = document.getElementById('sidebar-overlay');
@@ -387,16 +407,16 @@
 
     async function buscarCEP(cep) {
         cep = (cep || '').replace(/\D/g, '');
-        if (cep.length !== 8) { alert('CEP inválido'); return; }
+        if (cep.length !== 8) { _toast('CEP inválido', 'error'); return; }
         try {
             const r = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
             const d = await r.json();
-            if (d.erro) { alert('CEP não encontrado'); return; }
+            if (d.erro) { _toast('CEP não encontrado', 'warning'); return; }
             document.getElementById('endereco').value = d.logradouro || '';
             document.getElementById('bairro').value = d.bairro || '';
             document.getElementById('cidade').value = d.localidade || '';
             document.getElementById('estado').value = d.uf || '';
-        } catch (e) { alert('Erro ao buscar CEP'); }
+        } catch (e) { _toast('Erro ao buscar CEP', 'error'); }
     }
 
     async function salvarFornecedorAPI() {
@@ -433,20 +453,24 @@
             certificacoes: document.getElementById('certificacoes').value,
             observacoes: document.getElementById('observacoes').value
         };
-        if (!dados.razao_social || !dados.cnpj) { alert('Preencha os campos obrigatórios'); return; }
+        if (!dados.razao_social || !dados.cnpj) { _toast('Preencha os campos obrigatórios', 'error'); return; }
         try {
             const url = id ? `/api/compras/fornecedores/${id}` : '/api/compras/fornecedores';
             const method = id ? 'PUT' : 'POST';
             const token = localStorage.getItem('token');
             const r = await fetch(url, {
                 method, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                credentials: 'include',
                 body: JSON.stringify(dados)
             });
-            if (!r.ok) throw new Error('Erro ao salvar');
+            if (!r.ok) {
+                const errData = await r.json().catch(() => ({}));
+                throw new Error(errData.error || 'Erro ao salvar');
+            }
             fecharModalFornecedor();
             if (typeof fornecedoresManager !== 'undefined') fornecedoresManager.carregarFornecedores();
-            alert(id ? 'Fornecedor atualizado!' : 'Fornecedor cadastrado!');
-        } catch (e) { alert('Erro: ' + e.message); }
+            _toast(id ? 'Fornecedor atualizado!' : 'Fornecedor cadastrado!', 'success');
+        } catch (e) { _toast(e.message || 'Erro ao salvar', 'error'); }
     }
 
     async function editarFornecedorModal(id) {
@@ -489,7 +513,7 @@
             document.getElementById('modalFornecedorTitle').innerHTML = '<i class="fas fa-edit"></i> Editar Fornecedor';
             trocarAbaFornecedor('dados', document.querySelector('.modal-tabs button'));
             document.getElementById('modalFornecedor').classList.add('active');
-        } catch (e) { alert('Erro ao carregar fornecedor'); }
+        } catch (e) { _toast('Erro ao carregar fornecedor', 'error'); }
     }
 
     async function visualizarFornecedorModal(id) {
@@ -538,7 +562,7 @@
                     (f.observacoes ? '<div class="view-item"><label>Observações</label><p>' + f.observacoes + '</p></div>' : '') +
                     '</div>' : '');
             document.getElementById('modalVisualizarFornecedor').classList.add('active');
-        } catch (e) { alert('Erro ao carregar detalhes'); }
+        } catch (e) { _toast('Erro ao carregar detalhes', 'error'); }
     }
 
     async function excluirFornecedorAPI(id) {
@@ -550,8 +574,8 @@
             });
             if (!r.ok) throw new Error('Erro ao excluir');
             if (typeof fornecedoresManager !== 'undefined') fornecedoresManager.carregarFornecedores();
-            alert('Fornecedor excluído!');
-        } catch (e) { alert('Erro: ' + e.message); }
+            _toast('Fornecedor excluído!', 'success');
+        } catch (e) { _toast(e.message || 'Erro ao excluir', 'error'); }
     }
 
     function filtrarFornecedores(filtro, btn) {
@@ -585,10 +609,10 @@
     <script src="/_shared/confirm-dialog.js?v=20260301"></script>
 
     <!-- Chat Widget BOB AI -->
-    <script src="/chat/widget.js?v=20260416" defer></script>
+    <script src="/chat/widget.js?v=20260418" defer></script>
 
     <!-- Enterprise Shared -->
     <script src="/js/sidebar-click-animation.js?v=20260301"></script>
-    <script src="/_shared/accessibility-widget.js?v=20260301"></script>
+    <script src="/_shared/accessibility-widget.js?v=20260418"></script>
 </body>
 </html>

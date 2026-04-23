@@ -792,6 +792,7 @@
 
   function toggleTheme() {
     const widget = $('aluforce-widget');
+    if (!widget) return;
     const isDark = widget.classList.contains('afw-dark');
     applyTheme(isDark ? 'light' : 'dark');
   }
@@ -801,6 +802,7 @@
     const iconBrand = $('afw-theme-icon');
     const iconChat = $('afw-theme-icon-chat');
 
+    if (!widget) return;
     if (theme === 'dark') {
       widget.classList.add('afw-dark');
       if (iconBrand) iconBrand.className = 'fas fa-sun';

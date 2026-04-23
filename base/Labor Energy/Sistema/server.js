@@ -76,7 +76,6 @@ const {
 } = require('./src/middleware/security-integration');
 
 // AUDIT-FIX R-01: Sistema de autenticação unificado
-const authUnified = require('./middleware/auth-unified');
 
 // Zyntra Branding Middleware (ativado via env BRAND=zyntra)
 const { zyntraBrandingMiddleware, zyntraBrandInfo } = require('./middleware/zyntra-branding');
@@ -361,7 +360,7 @@ const DB_CONFIG = {
     database: process.env.DB_NAME || 'aluforce_vendas',
     port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 3306,
     waitForConnections: true,
-    connectionLimit: parseInt(process.env.DB_CONN_LIMIT) || 200, // ENTERPRISE: 200 conexões para suportar 10K+ usuários
+    connectionLimit: parseInt(process.env.DB_CONN_LIMIT) || 25, // Limite seguro abaixo do max_connections padrão do MySQL (151)
     queueLimit: parseInt(process.env.DB_QUEUE_LIMIT) || 500, // ENTERPRISE: Fila ampla para picos
     // ⚡ ENTERPRISE: Otimizações de performance
     enableKeepAlive: true,
@@ -2169,9 +2168,9 @@ registerAllRoutes(app, {
     cacheMiddleware,
     CACHE_CONFIG,
     // AUDIT-FIX SEC-001: Pass checkOwnership for IDOR protection on data endpoints
-    checkOwnership: authUnified.checkOwnership,
+    checkOwnership: authCentral.checkOwnership,
     // AUDIT-FIX PERM-004: Write-guard blocks consultoria/restricted roles from mutations
-    writeGuard: authUnified.writeGuard,
+    writeGuard: authCentral.writeGuard,
     VENDAS_DB_CONFIG: {
         host: process.env.DB_HOST || 'localhost',
         port: parseInt(process.env.DB_PORT) || 3306,

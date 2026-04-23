@@ -7121,7 +7121,7 @@
                             quantidade em estoque</p>
                     </div>
                 </div>
-                <button onclick="fecharModalMovimentaçãoMaterial()"
+                <button onclick="fecharModalMovimentacaoMaterial()"
                     style="background: none; border: none; cursor: pointer; font-size: 13px; color: #999; display: flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 4px;"
                     onmouseover="this.style.color='#333';this.style.background='#f5f5f5'"
                     onmouseout="this.style.color='#999';this.style.background='none'">
@@ -7180,12 +7180,12 @@
             <!-- Footer -->
             <div
                 style="padding: 14px 20px; background: #f9fafb; border-top: 1px solid #e5e5e5; display: flex; gap: 10px; justify-content: flex-end;">
-                <button onclick="fecharModalMovimentaçãoMaterial()"
+                <button onclick="fecharModalMovimentacaoMaterial()"
                     style="padding: 9px 18px; background: white; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 13px; color: #666; font-weight: 500;"
                     onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='white'">
                     Cancelar
                 </button>
-                <button id="btn-confirmar-mov-mat" onclick="confirmarMovimentaçãoMaterial()"
+                <button id="btn-confirmar-mov-mat" onclick="confirmarMovimentacaoMaterial()"
                     style="padding: 9px 22px; background: #f59e0b; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px;"
                     onmouseover="this.style.background='#d97706'" onmouseout="this.style.background='#f59e0b'">
                     <i class="fas fa-check"></i> Confirmar
@@ -7210,7 +7210,7 @@
                             quantidade em estoque</p>
                     </div>
                 </div>
-                <button onclick="fecharModalMovimentação()"
+                <button onclick="fecharModalMovimentacao()"
                     style="background: none; border: none; cursor: pointer; font-size: 13px; color: #999; display: flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 4px;"
                     onmouseover="this.style.color='#333';this.style.background='#f5f5f5'"
                     onmouseout="this.style.color='#999';this.style.background='none'">
@@ -7288,12 +7288,12 @@
             <!-- Footer -->
             <div
                 style="padding: 14px 20px; background: #f9fafb; border-top: 1px solid #e5e5e5; display: flex; gap: 10px; justify-content: flex-end;">
-                <button onclick="fecharModalMovimentação()"
+                <button onclick="fecharModalMovimentacao()"
                     style="padding: 9px 18px; background: white; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; font-weight: 500; color: #666; cursor: pointer;"
                     onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='white'">
                     Cancelar
                 </button>
-                <button onclick="confirmarMovimentação()" id="modal-mov-btn-confirmar"
+                <button onclick="confirmarMovimentacao()" id="modal-mov-btn-confirmar"
                     style="padding: 9px 22px; background: #f59e0b; border: none; border-radius: 4px; font-size: 13px; font-weight: 600; color: white; cursor: pointer; display: flex; align-items: center; gap: 6px;"
                     onmouseover="this.style.background='#d97706'" onmouseout="this.style.background='#f59e0b'">
                     <i class="fas fa-check"></i> Confirmar Ajuste
@@ -11035,7 +11035,7 @@
         // Abrir modal de adicionar produto
         function adicionarProdutoOP() {
             produtoEditandoIndex = -1;
-            document.getElementById('modal-produto-título').textContent = 'Adicionar Produto';
+            document.getElementById('modal-produto-titulo').textContent = 'Adicionar Produto';
             document.getElementById('prod-código').value = '';
             document.getElementById('prod-descrição').value = '';
             document.getElementById('prod-embalagem').value = '';
@@ -11409,7 +11409,7 @@
             const prod = produtosOP[index];
 
             produtoEditandoIndex = index;
-            document.getElementById('modal-produto-título').textContent = 'Editar Produto';
+            document.getElementById('modal-produto-titulo').textContent = 'Editar Produto';
             document.getElementById('prod-código').value = prod.codigo;
             document.getElementById('prod-descrição').value = prod.descricao || '';
             document.getElementById('prod-embalagem').value = prod.embalagem || '';
@@ -13507,7 +13507,7 @@
             modal.style.display = 'flex';
         }
 
-        function fecharModalMovimentaçãoMaterial() {
+        function fecharModalMovimentacaoMaterial() {
             document.getElementById('modal-movimentacao-material').style.display = 'none';
         }
 
@@ -13523,7 +13523,7 @@
             }
         }
 
-        async function confirmarMovimentaçãoMaterial() {
+        async function confirmarMovimentacaoMaterial() {
             const materialId = document.getElementById('material-id')?.value;
             const quantidade = parseFloat(document.getElementById('modal-mov-mat-quantidade').value);
             const local = document.getElementById('modal-mov-mat-local').value;
@@ -13612,7 +13612,7 @@
             atualizarUltimasMovimentaçõesMaterial(movimentação);
 
             // Fechar modal
-            fecharModalMovimentaçãoMaterial();
+            fecharModalMovimentacaoMaterial();
 
             // Mostrar sucesso
             const tipoTexto = tipoMovimentaçãoMaterialAtual === 'entrada' ? 'Entrada' : tipoMovimentaçãoMaterialAtual === 'saida' ? 'Saída' : 'Ajuste';
@@ -14139,9 +14139,9 @@
         window.previewImagemMaterial = previewImagemMaterial;
         window.filtrarHistóricoMaterial = filtrarHistóricoMaterial;
         window.abrirModalMovimentaçãoMaterial = abrirModalMovimentaçãoMaterial;
-        window.fecharModalMovimentaçãoMaterial = fecharModalMovimentaçãoMaterial;
+        window.fecharModalMovimentacaoMaterial = fecharModalMovimentacaoMaterial;
         window.selecionarMotivoPresetMaterial = selecionarMotivoPresetMaterial;
-        window.confirmarMovimentaçãoMaterial = confirmarMovimentaçãoMaterial;
+        window.confirmarMovimentacaoMaterial = confirmarMovimentacaoMaterial;
         window.carregarMovimentaçõesMaterial = carregarMovimentaçõesMaterial;
         window.atualizarUltimasMovimentaçõesMaterial = atualizarUltimasMovimentaçõesMaterial;
         window.abrirNovoProdutoPCP = abrirNovoProdutoPCP;
@@ -14166,8 +14166,8 @@
 
         // Funções de Movimentação de Estoque do Modal de Produto
         window.abrirModalMovimentação = abrirModalMovimentação;
-        window.fecharModalMovimentação = fecharModalMovimentação;
-        window.confirmarMovimentação = confirmarMovimentação;
+        window.fecharModalMovimentacao = fecharModalMovimentacao;
+        window.confirmarMovimentacao = confirmarMovimentacao;
         window.selecionarMotivoPreset = selecionarMotivoPreset;
 
         // Ações Rápidas de Estoque - Produtos
@@ -14182,7 +14182,7 @@
         window.selecionarProdutoParaMovimentação = selecionarProdutoParaMovimentação;
         window.abrirModalQuantidadeRapida = abrirModalQuantidadeRapida;
         window.fecharModalQuantidadeRapida = fecharModalQuantidadeRapida;
-        window.confirmarMovimentaçãoRapida = confirmarMovimentaçãoRapida;
+        window.confirmarMovimentacaoRapida = confirmarMovimentacaoRapida;
         window.abrirModalHistóricoGeral = abrirModalHistóricoGeral;
         window.fecharModalHistóricoGeral = fecharModalHistóricoGeral;
 
@@ -15081,7 +15081,7 @@
             modal.style.display = 'flex';
         }
 
-        function fecharModalMovimentação() {
+        function fecharModalMovimentacao() {
             document.getElementById('modal-movimentacao-estoque').style.display = 'none';
         }
 
@@ -15097,7 +15097,7 @@
             }
         }
 
-        async function confirmarMovimentação() {
+        async function confirmarMovimentacao() {
             const produtoId = document.getElementById('pcp-produto-id')?.value;
             const quantidade = parseFloat(document.getElementById('modal-mov-quantidade').value);
             const local = document.getElementById('modal-mov-local').value;
@@ -15185,7 +15185,7 @@
             atualizarUltimasMovimentações(movimentação);
 
             // Fechar modal
-            fecharModalMovimentação();
+            fecharModalMovimentacao();
 
             // Mostrar sucesso
             const tipoTexto = tipoMovimentaçãoAtual === 'entrada' ? 'Entrada' : tipoMovimentaçãoAtual === 'saida' ? 'Saída' : 'Ajuste';
@@ -15588,7 +15588,7 @@
 
                             <!-- Sidebar Direita - Ações -->
                             <div style="width: 140px; background: #f8f8f8; border-left: 1px solid #e5e5e5; padding: 20px 16px; display: flex; flex-direction: column; flex-shrink: 0;">
-                                <button id="btn-confirmar-mov" onclick="confirmarMovimentaçãoEstoque()" style="display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: white; border: 1px solid #e5e5e5; border-radius: 6px; cursor: pointer; font-size: 13px; color: #333; margin-bottom: 12px;" disabled>
+                                <button id="btn-confirmar-mov" onclick="confirmarMovimentacaoEstoque()" style="display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: white; border: 1px solid #e5e5e5; border-radius: 6px; cursor: pointer; font-size: 13px; color: #333; margin-bottom: 12px;" disabled>
                                     <i class="fas fa-check" style="color: #22c55e;"></i> Confirmar
                                 </button>
                                 <button onclick="limparFormMovimentação()" style="display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: white; border: 1px solid #e5e5e5; border-radius: 6px; cursor: pointer; font-size: 13px; color: #333; margin-bottom: 12px;">
@@ -15787,7 +15787,7 @@
             }
         }
 
-        async function confirmarMovimentaçãoEstoque() {
+        async function confirmarMovimentacaoEstoque() {
             const modal = document.getElementById('modal-seleção-produto-estoque');
             const tipo = modal.getAttribute('data-tipo-movimentacao');
             const produtoId = modal.getAttribute('data-produto-id');
@@ -16021,7 +16021,7 @@
                                 <textarea id="input-obs-rápida" rows="2" placeholder="Motivo da movimentação..."
                                     style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 13px; resize: none; box-sizing: border-box;"></textarea>
                             </fieldset>
-                            <button id="btn-confirmar-qtd-rápida" onclick="confirmarMovimentaçãoRapida()"
+                            <button id="btn-confirmar-qtd-rápida" onclick="confirmarMovimentacaoRapida()"
                                 style="width: 100%; padding: 10px; border: none; border-radius: 4px; color: white; font-size: 13px; font-weight: 600; cursor: pointer;">
                                 <i class="fas fa-check"></i> Confirmar
                             </button>
@@ -16096,7 +16096,7 @@
             if (modal) modal.style.display = 'none';
         }
 
-        async function confirmarMovimentaçãoRapida() {
+        async function confirmarMovimentacaoRapida() {
             const modal = document.getElementById('modal-quantidade-rápida');
             const tipo = modal.getAttribute('data-tipo');
             const itemId = modal.getAttribute('data-item-id');
@@ -18199,7 +18199,7 @@
                 .pcp-readonly-mode .modal-op-btn-action.add,
                 .pcp-readonly-mode [onclick*="abrirNovoProduto"],
                 .pcp-readonly-mode [onclick*="excluir"],
-                .pcp-readonly-mode [onclick*="confirmarMovimentação"],
+                .pcp-readonly-mode [onclick*="confirmarMovimentacao"],
                 .pcp-readonly-mode #btn-confirmar-mov-mat {
                     display: none !important;
                 }

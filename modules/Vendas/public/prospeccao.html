@@ -1384,7 +1384,7 @@
                         <option value="novo">Novo Lead</option>
                         <option value="contato">Em Contato</option>
                         <option value="qualificado">Qualificado</option>
-                        <option value="negociação">Em Negociação</option>
+                        <option value="negociacao">Em Negociação</option>
                         <option value="convertido">Convertido</option>
                         <option value="perdido">Perdido</option>
                     </select>
@@ -1655,28 +1655,29 @@ Aceita com ou sem formatação"></textarea>
             const total = this.leads.length;
             const contato = this.leads.filter(l => l.status === 'contato').length;
             const qualificado = this.leads.filter(l => l.status === 'qualificado').length;
-            const negociação = this.leads.filter(l => l.status === 'negociação').length;
+            const negociacao_leads = this.leads.filter(l => l.status === 'negociacao').length;
             const convertido = this.leads.filter(l => l.status === 'convertido').length;
 
             document.getElementById('metric-total').textContent = total;
             document.getElementById('metric-contato').textContent = contato;
             document.getElementById('metric-qualificado').textContent = qualificado;
-            document.getElementById('metric-negociacao').textContent = negociação;
+            document.getElementById('metric-negociacao').textContent = negociacao_leads;
             document.getElementById('metric-convertido').textContent = convertido;
 
             document.getElementById('count-novo').textContent = this.leads.filter(l => l.status === 'novo' || !l.status).length;
             document.getElementById('count-contato').textContent = contato;
             document.getElementById('count-qualificado').textContent = qualificado;
-            document.getElementById('count-negociacao').textContent = negociação;
+            document.getElementById('count-negociacao').textContent = negociacao_leads;
             document.getElementById('count-convertido').textContent = convertido;
         },
 
         renderizarKanban() {
-            const colunas = ['novo', 'contato', 'qualificado', 'negociação', 'convertido'];
+            const colunas = ['novo', 'contato', 'qualificado', 'negociacao', 'convertido'];
             
             colunas.forEach(status => {
                 const leads = this.leads.filter(l => (l.status || 'novo') === status);
                 const container = document.getElementById(`col-${status}`);
+                if (!container) return;
                 
                 if (leads.length === 0) {
                     container.innerHTML = `<div class="empty-column"><i class="fas fa-inbox"></i><p>Nenhum lead</p></div>`;
@@ -1776,8 +1777,20 @@ Aceita com ou sem formatação"></textarea>
             document.getElementById('pagination-total').textContent = this.leads.length;
         },
 
+        paginaAnterior() {
+            if (this.paginaAtual > 1) {
+                this.paginaAtual--;
+                this.renderizarTabela();
+            }
+        },
+
+        proximaPagina() {
+            this.paginaAtual++;
+            this.renderizarTabela();
+        },
+
         formatarStatus(status) {
-            const map = { novo: 'Novo', contato: 'Em Contato', qualificado: 'Qualificado', negociação: 'Negociação', convertido: 'Convertido', perdido: 'Perdido' };
+            const map = { novo: 'Novo', contato: 'Em Contato', qualificado: 'Qualificado', negociacao: 'Negociação', convertido: 'Convertido', perdido: 'Perdido' };
             return map[status] || 'Novo';
         },
 
@@ -1918,7 +1931,7 @@ Aceita com ou sem formatação"></textarea>
         },
 
         renderizarKanbanFiltrado(leads) {
-            const colunas = ['novo', 'contato', 'qualificado', 'negociação', 'convertido'];
+            const colunas = ['novo', 'contato', 'qualificado', 'negociacao', 'convertido'];
             colunas.forEach(status => {
                 const filtered = leads.filter(l => (l.status || 'novo') === status);
                 const container = document.getElementById(`col-${status}`);
@@ -2655,7 +2668,7 @@ Aceita com ou sem formatação"></textarea>
             if (lead.cidade || lead.uf) score += 5;
             if (lead.cnae_codigo || lead.cnae_descricao) score += 5;
             if (lead.situacao === 'ATIVA') score += 5;
-            const statusBonus = { novo: 0, contato: 10, qualificado: 15, 'negociação': 20, convertido: 25 };
+            const statusBonus = { novo: 0, contato: 10, qualificado: 15, 'negociacao': 20, convertido: 25 };
             score += statusBonus[lead.status] || 0;
             if (lead.socios && lead.socios.length > 0) score += 5;
             return Math.min(score, 100);
@@ -2698,7 +2711,7 @@ Aceita com ou sem formatação"></textarea>
 
             const dataHoje = new Date().toLocaleDateString('pt-BR');
             const horaAtual = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-            const statusLabel = (s) => ({ novo: 'Novo', contato: 'Em Contato', qualificado: 'Qualificado', negociação: 'Negociação', convertido: 'Convertido', perdido: 'Perdido' }[s] || 'Novo');
+            const statusLabel = (s) => ({ novo: 'Novo', contato: 'Em Contato', qualificado: 'Qualificado', negociacao: 'Negociação', convertido: 'Convertido', perdido: 'Perdido' }[s] || 'Novo');
             const escXml = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
             const formatMoeda = (v) => v ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v) : '-';
 
@@ -2706,7 +2719,7 @@ Aceita com ou sem formatação"></textarea>
             const totalNovo = dadosExportar.filter(l => (l.status || 'novo') === 'novo').length;
             const totalContato = dadosExportar.filter(l => l.status === 'contato').length;
             const totalQualificado = dadosExportar.filter(l => l.status === 'qualificado').length;
-            const totalNegociação = dadosExportar.filter(l => l.status === 'negociação').length;
+            const totalNegociação = dadosExportar.filter(l => l.status === 'negociacao').length;
             const totalConvertido = dadosExportar.filter(l => l.status === 'convertido').length;
 
             // Gerar Excel XML (abre direto no Excel)
@@ -2849,7 +2862,7 @@ Aceita com ou sem formatação"></textarea>
             dadosExportar.forEach((l, i) => {
                 const score = this.calcularScore(l);
                 const scoreStyle = score >= 70 ? 'scoreHigh' : score >= 50 ? 'scoreMed' : 'scoreLow';
-                const statusMap = { novo: 'statusNovo', contato: 'statusContato', qualificado: 'statusQualificado', negociação: 'statusNegociação', convertido: 'statusConvertido', perdido: 'statusPerdido' };
+                const statusMap = { novo: 'statusNovo', contato: 'statusContato', qualificado: 'statusQualificado', negociacao: 'statusNegociação', convertido: 'statusConvertido', perdido: 'statusPerdido' };
                 const stStyle = statusMap[l.status || 'novo'] || 'statusNovo';
                 const dataAb = l.data_abertura ? new Date(l.data_abertura).toLocaleDateString('pt-BR') : '-';
                 xml += `  <Row>

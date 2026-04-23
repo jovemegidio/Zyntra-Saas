@@ -2957,8 +2957,8 @@
 
             const novaOrdem = {
                 id: Date.now(),
-                número: document.getElementById('opNúmero').value,
-                número: document.getElementById('opNúmero').value,
+                número: document.getElementById('opNumero').value,
+                número: document.getElementById('opNumero').value,
                 num_orçamento: document.getElementById('opOrcamento').value,
                 revisao: document.getElementById('opRevisao').value,
                 num_pedido: document.getElementById('opPedido').value,
@@ -3105,7 +3105,7 @@
         // Limpar apenas campos (sem confirmação)
         function limparCamposNovaOrdem() {
             document.querySelectorAll('#modalNovaOrdem input, #modalNovaOrdem textarea').forEach(el => {
-                if (el.id !== 'opNúmero') el.value = '';
+                if (el.id !== 'opNumero') el.value = '';
             });
             document.querySelectorAll('#modalNovaOrdem select').forEach(el => el.selectedIndex = 0);
             const tbody = document.getElementById('nova-produtos-lista');
@@ -3484,7 +3484,7 @@
             if (!confirm('Limpar todos os campos da nova ordem?')) return;
             document.querySelectorAll('#modalNovaOrdem input, #modalNovaOrdem textarea, #modalNovaOrdem select').forEach(el => {
                 if (el.type === 'select-one') el.selectedIndex = 0;
-                else if (el.id !== 'opNúmero') el.value = '';
+                else if (el.id !== 'opNumero') el.value = '';
             });
             // Manter apenas uma linha de produto
             const tbody = document.getElementById('nova-produtos-lista');
@@ -7030,7 +7030,7 @@
             const ano = new Date().getFullYear();
             const proximoNúmero = ordensProdução.length + 1;
             const númeroFormatado = String(proximoNúmero).padStart(5, '0');
-            document.getElementById('opNúmero').value = `OP Nº ${ano}/${númeroFormatado}`;
+            document.getElementById('opNumero').value = `OP Nº ${ano}/${númeroFormatado}`;
         }
 
         // Fechar modal ao clicar fora

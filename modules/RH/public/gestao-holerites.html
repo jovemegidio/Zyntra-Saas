@@ -430,7 +430,7 @@
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel de Controle"><i class="fas fa-home"></i></a>
             <nav class="sidebar-nav">
                 <a href="areaadm.html" class="sidebar-btn" title="Dashboard RH"><i class="fas fa-chart-pie"></i></a>
-                <a href="pages/funcionários.html" class="sidebar-btn" title="Funcionários"><i class="fas fa-users"></i></a>
+                <a href="pages/funcionarios.html" class="sidebar-btn" title="Funcionários"><i class="fas fa-users"></i></a>
                 <a href="gestao-holerites.html" class="sidebar-btn active" title="Gestão de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="pages/folha.html" class="sidebar-btn" title="Folha de Pagamento"><i class="fas fa-money-check-alt"></i></a>
                 <a href="pages/gestao-ponto.html" class="sidebar-btn" title="Gestão do Ponto"><i class="fas fa-clock"></i></a>
@@ -854,8 +854,8 @@
             <div class="modal-header">
                 <h2><i class="fas fa-chart-bar"></i> Relatório de Visualizações</h2>
                 <div style="display:flex;gap:8px;">
-                    <button class="modal-close" onclick="window.open(document.getElementById('relatório-iframe').src, '_blank')" title="Abrir em nova aba" style="background:rgba(255,255,255,0.15);"><i class="fas fa-external-link-alt"></i></button>
-                    <button class="modal-close" onclick="document.getElementById('modal-relatório').classList.remove('show')"><i class="fas fa-times"></i></button>
+                    <button class="modal-close" onclick="window.open(document.getElementById('relatorio-iframe').src, '_blank')" title="Abrir em nova aba" style="background:rgba(255,255,255,0.15);"><i class="fas fa-external-link-alt"></i></button>
+                    <button class="modal-close" onclick="document.getElementById('modal-relatorio').classList.remove('show')"><i class="fas fa-times"></i></button>
                 </div>
             </div>
             <div style="flex:1;padding:16px 24px 24px;overflow:hidden;">
@@ -900,7 +900,7 @@
             setTimeout(() => toast.remove(), 4000);
         }
 
-        const meses = ['', 'Janeiro', 'Fevereiro', 'Maro', 'Abril', 'Maio', 'Junho', 
+        const meses = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
                       'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 
         let funcionários = [];
@@ -961,10 +961,11 @@
                     if (!Array.isArray(funcionários)) funcionários = [];
                     
                     // Preencher selects
-                    const selects = ['filtro-funcionário', 'holerite-funcionário'];
+                    const selects = ['filtro-funcionario', 'holerite-funcionario'];
                     selects.forEach(id => {
                         const select = document.getElementById(id);
-                        if (select && id !== 'filtro-funcionário') select.innerHTML = '<option value="">Selecione...</option>';
+                        if (!select) return;
+                        if (id !== 'filtro-funcionario') select.innerHTML = '<option value="">Selecione...</option>';
                         funcionários.forEach(f => {
                             const opt = document.createElement('option');
                             opt.value = f.id;
@@ -991,7 +992,7 @@
 
         async function carregarHolerites() {
             try {
-                const funcionário = document.getElementById('filtro-funcionário')?.value || '';
+                const funcionário = document.getElementById('filtro-funcionario')?.value || ''
                 const mes = document.getElementById('filtro-mes').value;
                 const ano = document.getElementById('filtro-ano').value;
                 const status = document.getElementById('filtro-status').value;
@@ -1097,7 +1098,7 @@
 
         // Modal Novo
         function abrirModalNovo() {
-            document.getElementById('modal-título').textContent = 'Novo Holerite';
+            document.getElementById('modal-titulo').textContent = 'Novo Holerite';
             document.getElementById('holerite-id').value = '';
             document.getElementById('form-holerite').reset();
             document.getElementById('holerite-ano').value = new Date().getFullYear();
@@ -1188,7 +1189,7 @@
             const totalDescontos = descontos.reduce((sum, d) => sum + d.valor, 0);
 
             return {
-                funcionario_id: document.getElementById('holerite-funcionário').value,
+                funcionario_id: document.getElementById('holerite-funcionario').value,
                 mes: parseInt(document.getElementById('holerite-mes').value),
                 ano: parseInt(document.getElementById('holerite-ano').value),
                 salario_base: proventos[0]?.valor || 0,
@@ -1250,9 +1251,9 @@
                 if (resp.ok) {
                     const h = await resp.json();
                     
-                    document.getElementById('modal-título').textContent = 'Editar Holerite';
+                    document.getElementById('modal-titulo').textContent = 'Editar Holerite';
                     document.getElementById('holerite-id').value = h.id;
-                    document.getElementById('holerite-funcionário').value = h.funcionario_id;
+                    document.getElementById('holerite-funcionario').value = h.funcionario_id;
                     document.getElementById('holerite-mes').value = h.mes;
                     document.getElementById('holerite-ano').value = h.ano;
                     
@@ -1427,7 +1428,14 @@
         }
 
         async function publicarDireto(id) {
-            if (!confirm('Deseja publicar este holerite? O funcionário ser notificado.')) return;
+            const _okPub = await ConfirmDialog.show({
+                title: 'Publicar Holerite',
+                message: 'Deseja publicar este holerite? O funcionário será notificado.',
+                type: 'info',
+                confirmText: 'Publicar',
+                confirmIcon: 'fa-paper-plane'
+            });
+            if (!_okPub) return;
             
             try {
                 const resp = await fetch(`/api/rh/holerites/${id}/publicar`, { credentials: 'include', method: 'POST',
@@ -1447,7 +1455,8 @@
         }
 
         async function excluirHolerite(id) {
-            if (!confirm('Tem certeza que deseja excluir este holerite? Esta ao no pode ser desfeita.')) return;
+            const _okDel = await ConfirmDialog.delete('este holerite', 'Holerite');
+            if (!_okDel) return;
             
             try {
                 const resp = await fetch(`/api/rh/holerites/${id}`, { credentials: 'include', method: 'DELETE',
@@ -1466,12 +1475,12 @@
         }
 
         async function exportarRelatório() {
-            const url = '/api/rh/holerites/relatório/visualizações?' + new URLSearchParams({
+            const url = '/api/rh/holerites/relatorio/visualizacoes?' + new URLSearchParams({
                 mes: document.getElementById('filtro-mes').value,
                 ano: document.getElementById('filtro-ano').value
             });
-            document.getElementById('relatório-iframe').src = url;
-            document.getElementById('modal-relatório').classList.add('show');
+            document.getElementById('relatorio-iframe').src = url;
+            document.getElementById('modal-relatorio').classList.add('show');
         }
 
         function downloadPDF(id) {

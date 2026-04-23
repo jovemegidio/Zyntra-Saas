@@ -97,6 +97,7 @@
 
   // ==================== SOCKET ====================
   function initSocket() {
+    if (typeof io === 'undefined') return;
     W.socket = io();
 
     W.socket.on('user:registered', (data) => {

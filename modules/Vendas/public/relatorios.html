@@ -3457,7 +3457,7 @@ tbody tr:nth-child(even) { background: #f8fafc; }
                 if (dataInicio) params.append('dataInicio', dataInicio);
                 if (dataFim) params.append('dataFim', dataFim);
                 
-                const res = await fetchAutenticado(`/api/vendas/relatório/mapa-brasil?${params}`);
+                const res = await fetchAutenticado(`/api/vendas/relatorio/mapa-brasil?${params}`);
                 
                 if (res.status === 401 || res.status === 403 || res.status === 404) {
                     console.log('?? Mapa do Brasil: endpoint não disponível ou sem permissão');

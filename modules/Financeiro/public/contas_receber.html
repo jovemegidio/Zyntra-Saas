@@ -264,6 +264,7 @@
         .input-icon-conta, .input-search-conta { position:relative; }
         .input-icon-conta input, .input-search-conta input { padding-right:40px; width:100%; }
         .input-icon-conta i, .input-search-conta i { position:absolute; right:14px; top:50%; transform:translateY(-50%); color:#9ca3af; font-size:14px; pointer-events:none; }
+        .input-icon-conta input[type="date"]::-webkit-calendar-picker-indicator { opacity:0; position:absolute; right:0; width:100%; height:100%; cursor:pointer; }
         .input-search-conta select { width:100%; }
         .link-adicionar { font-size:12px; color:#3b82f6; text-decoration:none; font-weight:500; }
         .link-adicionar:hover { text-decoration:underline; }
@@ -1307,7 +1308,7 @@
                                 </div>
                                 <div class="form-group-conta">
                                     <label>Projeto <a href="#" class="link-adicionar" onclick="event.preventDefault()"><i class="fas fa-plus"></i></a></label>
-                                    <div class="input-search-conta"><input type="text" id="cr-projeto" placeholder=""><i class="fas fa-search"></i></div>
+                                    <div class="input-search-conta"><input type="text" id="cr-projeto" placeholder="" list="lista-projetos" autocomplete="off"><datalist id="lista-projetos"></datalist><i class="fas fa-search"></i></div>
                                 </div>
                             </div>
                             <div class="form-row-conta">
@@ -1546,7 +1547,7 @@
         }
 
         async function init() {
-            await Promise.all([carregarUsuarioLogado(), carregarContas(), carregarClientes(), carregarCategorias(), carregarContasBancarias()]);
+            await Promise.all([carregarUsuarioLogado(), carregarContas(), carregarClientes(), carregarCategorias(), carregarContasBancarias(), carregarProjetos()]);
             const urlParams = new URLSearchParams(window.location.search);
             const ação = urlParams.get('ação');
             const id = urlParams.get('id');
@@ -1574,6 +1575,19 @@
                     }
                 }
             } catch(e) { console.error('Erro ao carregar contas bancárias:', e); }
+        }
+
+        async function carregarProjetos() {
+            try {
+                var response = await fetch('/api/projetos', { credentials: 'include' });
+                if (response.ok) {
+                    var rows = await response.json();
+                    var dl = document.getElementById('lista-projetos');
+                    if (dl && Array.isArray(rows)) {
+                        dl.innerHTML = rows.filter(function(p){return p.nome;}).map(function(p){return '<option value="' + _escFin(p.nome) + '"></option>';}).join('');
+                    }
+                }
+            } catch(e) { console.error('Erro projetos:', e); }
         }
 
         async function carregarResumo() {
@@ -1813,14 +1827,29 @@
         }
 
         async function carregarCategorias() {
+            var fallback = [
+                {id:'vendas',nome:'Vendas'},
+                {id:'servicos_prestados',nome:'Serviços Prestados'},
+                {id:'comissoes',nome:'Comissões'},
+                {id:'aluguel_receita',nome:'Aluguel / Locação'},
+                {id:'juros_receita',nome:'Juros e Rendimentos'},
+                {id:'outras_receitas',nome:'Outras Receitas'}
+            ];
             try {
                 var response = await fetch('/api/financeiro/categorias', { credentials: 'include' });
                 if (response.ok) {
                     var rawCats = await response.json();
                     var cats = Array.isArray(rawCats) ? rawCats : (Array.isArray(rawCats && rawCats.data) ? rawCats.data : []);
-                    document.getElementById('categoria-id').innerHTML = '<option value="">Selecione...</option>' + cats.filter(function(c){return c.tipo==='receita';}).map(function(c){return '<option value="'+_escFin(c.id)+'">'+_escFin(c.nome)+'</option>';}).join('');
+                    var receitas = cats.filter(function(c){return c.tipo==='receita';});
+                    if (receitas.length === 0) receitas = cats;
+                    if (receitas.length > 0) {
+                        document.getElementById('categoria-id').innerHTML = '<option value="">Selecione...</option>' + receitas.map(function(c){return '<option value="'+_escFin(c.id)+'">'+_escFin(c.nome)+'</option>';}).join('');
+                        return;
+                    }
                 }
             } catch(e) { console.error('Erro categorias:', e); }
+            // Fallback estático quando API não retorna dados
+            document.getElementById('categoria-id').innerHTML = '<option value="">Selecione...</option>' + fallback.map(function(c){return '<option value="'+c.id+'">'+c.nome+'</option>';}).join('');
         }
         function formatarMoedaInput(el) {
             var v = el.value.replace(/\D/g, '');

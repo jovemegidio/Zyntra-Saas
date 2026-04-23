@@ -877,126 +877,113 @@
             color: #94a3b8;
         }
 
-        /* ==================== MODAL DEFINIR META ==================== */
-        /* Usando .modal-box para evitar conflito com modal-responsive.css */
-        #modalMeta.modal-overlay {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            right: 0 !important;
-            bottom: 0 !important;
-            background: rgba(0, 0, 0, 0.5) !important;
+
+
+        /* === MODAL META (classes de vendas.css) === */
+        .modal-overlay {
             display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
             align-items: center;
             justify-content: center;
-            z-index: 10000 !important;
-            backdrop-filter: blur(4px);
         }
-
-        #modalMeta.modal-overlay.active {
-            display: flex !important;
-        }
-
-        .modal-box {
-            position: relative;
+        .modal-overlay.active { display: flex; }
+        .modal-content {
             background: white;
-            border-radius: 16px;
-            max-width: 500px;
-            width: 90%;
+            border-radius: 12px;
+            width: 95%;
+            max-width: 600px;
             max-height: 90vh;
-            overflow: hidden;
-            z-index: 10001;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            animation: modalSlideIn 0.3s ease;
+            overflow-y: auto;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+            animation: modalMetaSlideIn 0.2s ease;
         }
-
-        @keyframes modalSlideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        @keyframes modalMetaSlideIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
         }
-
-        .modal-box .modal-header {
-            padding: 20px 24px;
-            border-bottom: 1px solid #e5e7eb;
+        .modal-content.modal-small { max-width: 500px; }
+        .modal-header {
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
+            padding: 16px 24px;
+            background: #1a2744;
+            border-radius: 12px 12px 0 0;
         }
-
-        .modal-box .modal-header h2 {
-            font-size: 18px;
+        .modal-header h2 {
+            color: white;
+            font-size: 16px;
             font-weight: 600;
-            color: #1a1a1a;
+            display: flex;
+            align-items: center;
+            gap: 10px;
             margin: 0;
         }
-
-        .modal-box .modal-close {
-            background: none;
-            border: none;
-            font-size: 24px;
-            color: #6b7280;
+        .modal-header.orange { background: linear-gradient(135deg, #f97316, #ea580c); }
+        .modal-header.orange h2 i { color: white; }
+        .modal-header .modal-close {
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: rgba(255,255,255,0.9);
+            font-size: 13px;
+            font-weight: 500;
             cursor: pointer;
-            padding: 0;
-            line-height: 1;
-            width: auto;
-            height: auto;
-        }
-
-        .modal-box .modal-close:hover {
-            color: #1a1a1a;
-        }
-
-        .modal-box .modal-body {
-            padding: 24px;
-            overflow-y: auto;
-        }
-
-        .modal-box .form-group {
-            margin-bottom: 20px;
-        }
-
-        .modal-box .form-group label {
-            display: block;
-            font-size: 14px;
-            font-weight: 600;
-            color: #374151;
-            margin-bottom: 8px;
-        }
-
-        .modal-box .form-group input, 
-        .modal-box .form-group select {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: border-color 0.2s;
-        }
-
-        .modal-box .form-group input:focus, 
-        .modal-box .form-group select:focus {
-            outline: none;
-            border-color: var(--primary-orange);
-        }
-
-        .modal-box .modal-footer {
-            padding: 16px 24px;
-            border-top: 1px solid #e5e7eb;
+            padding: 6px 14px;
+            border-radius: 20px;
             display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+        .modal-header .modal-close:hover {
+            background: rgba(255,255,255,0.25);
+            color: #fff;
+        }
+        .modal-body { padding: 24px; }
+        .modal-footer {
+            display: flex;
+            align-items: center;
             justify-content: flex-end;
             gap: 12px;
-            flex-direction: row;
+            padding: 16px 24px;
+            border-top: 1px solid #e5e7eb;
+            background: #f9f9f9;
+            border-radius: 0 0 12px 12px;
         }
-
-        .modal-box .modal-footer button {
-            width: auto;
-            min-height: auto;
+        .btn-modal {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-modal-cancel { background: #e5e5e5; color: #333; }
+        .btn-modal-cancel:hover { background: #d5d5d5; }
+        .btn-modal-save { background: #f97316; color: white; }
+        .btn-modal-save:hover { background: #ea580c; }
+        .modal-body .form-group { margin-bottom: 16px; }
+        .modal-body .form-group label {
+            display: block; font-size: 14px; font-weight: 600;
+            color: #374151; margin-bottom: 8px;
+        }
+        .modal-body .form-group input,
+        .modal-body .form-group select {
+            width: 100%; padding: 10px 14px;
+            border: 1px solid #d1d5db; border-radius: 8px;
+            font-size: 14px; transition: border-color 0.2s;
+            background: white; color: #111;
+        }
+        .modal-body .form-group input:focus,
+        .modal-body .form-group select:focus {
+            outline: none; border-color: #f97316;
         }
     </style>
     <script src="/js/anti-copy-protection.js" defer></script>
@@ -1332,10 +1319,10 @@
 
     <!-- Modal Definir Meta -->
     <div class="modal-overlay" id="modalMeta">
-        <div class="modal-box">
-            <div class="modal-header">
-                <h2><i class="fas fa-bullseye" style="color: var(--primary-orange); margin-right: 8px;"></i> Definir Nova Meta</h2>
-                <button class="modal-close" onclick="fecharModalMeta()">&times;</button>
+        <div class="modal-content modal-small">
+            <div class="modal-header orange">
+                <h2><i class="fas fa-bullseye"></i> Definir Nova Meta</h2>
+                <button class="modal-close" onclick="fecharModalMeta()"><i class="fas fa-times"></i> Fechar</button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
@@ -1369,10 +1356,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn-secondary" onclick="fecharModalMeta()">Cancelar</button>
-                <button class="btn-primary" onclick="salvarMeta()">
-                    <i class="fas fa-save"></i> Salvar Meta
-                </button>
+                <button class="btn-modal btn-modal-cancel" onclick="fecharModalMeta()">Cancelar</button>
+                <button class="btn-modal btn-modal-save" onclick="salvarMeta()"><i class="fas fa-save"></i> Salvar Meta</button>
             </div>
         </div>
     </div>
@@ -1574,7 +1559,7 @@
             }
 
             // Usar o mês selecionado como período
-            const períodoStr = mesMeta; // Já está no formato YYYY-MM
+            const periodoStr = mesMeta; // Já está no formato YYYY-MM
 
             try {
                 let response;
@@ -1587,7 +1572,7 @@
                         credentials: 'include',
                         body: JSON.stringify({
                             vendedor_id: parseInt(vendedor),
-                            período: períodoStr,
+                            periodo: periodoStr,
                             tipo: 'mensal',
                             valor_meta: valor
                         })
@@ -1599,7 +1584,7 @@
                         headers: { 'Content-Type': 'application/json' },
                         credentials: 'include',
                         body: JSON.stringify({
-                            período: períodoStr,
+                            periodo: periodoStr,
                             valor_meta_padrao: valor
                         })
                     });
@@ -1632,7 +1617,7 @@
                 const agora = new Date();
                 const inicioMes = new Date(agora.getFullYear(), agora.getMonth(), 1).toISOString().split('T')[0];
                 const fimMes = new Date(agora.getFullYear(), agora.getMonth() + 1, 0).toISOString().split('T')[0];
-                const períodoAtual = agora.toISOString().substring(0, 7);
+                const periodoAtual = agora.toISOString().substring(0, 7);
 
                 const [pedidosRes, rankingRes] = await Promise.all([
                     fetch(`/api/vendas/pedidos?data_inicio=${inicioMes}&data_fim=${fimMes}`, { credentials: 'include' }),
@@ -1681,7 +1666,7 @@
                 const url = URL.createObjectURL(blob);
                 const link = document.createElement('a');
                 link.href = url;
-                link.download = `relatório-vendas-${períodoAtual}.csv`;
+                link.download = `relatório-vendas-${periodoAtual}.csv`;
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
@@ -1728,7 +1713,7 @@
             try {
                 // Buscar dados de vendas do mês atual
                 const agora = new Date();
-                const períodoAtual = agora.toISOString().substring(0, 7); // YYYY-MM
+                const periodoAtual = agora.toISOString().substring(0, 7); // YYYY-MM
                 const inicioMes = new Date(agora.getFullYear(), agora.getMonth(), 1).toISOString().split('T')[0];
                 const fimMes = new Date(agora.getFullYear(), agora.getMonth() + 1, 0).toISOString().split('T')[0];
 
@@ -2015,7 +2000,7 @@
             
             // Atualizar título com mês/ano atual
             const agora = new Date();
-            const períodoAtual = agora.toISOString().substring(0, 7);
+            const periodoAtual = agora.toISOString().substring(0, 7);
             const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
                           'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
             if (mesAnoEl) {
@@ -2133,7 +2118,7 @@
         }
 
         async function carregarLigações() {
-            const container = document.getElementById('ligaçõesContent');
+            const container = document.getElementById('ligacoesContent');
             
             try {
                 // Verificar status da API
@@ -2304,7 +2289,7 @@
             const tipo = document.getElementById('ligTipo')?.value || '';
             const ramal = document.getElementById('ligRamal')?.value || '';
             
-            const tbody = document.getElementById('ligaçõesTableBody');
+            const tbody = document.getElementById('ligacoesTableBody');
             if (tbody) {
                 tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:#94a3b8;"><i class="fas fa-spinner fa-spin"></i> Carregando...</td></tr>';
             }
@@ -2382,7 +2367,7 @@
         }
 
         function renderizarGraficoRamais(porRamal) {
-            const container = document.getElementById('ligaçõesRamaisChart');
+            const container = document.getElementById('ligacoesRamaisChart');
             if (!container) return;
             
             const ramais = Object.entries(porRamal);
@@ -2434,8 +2419,8 @@
         }
 
         function renderizarPagina() {
-            const tbody = document.getElementById('ligaçõesTableBody');
-            const pagDiv = document.getElementById('ligaçõesPagination');
+            const tbody = document.getElementById('ligacoesTableBody');
+            const pagDiv = document.getElementById('ligacoesPagination');
             if (!tbody) return;
             
             if (todasChamadas.length === 0) {
@@ -2534,8 +2519,8 @@
                 const res = await fetch('/api/vendas/ligacoes/online', { credentials: 'include' });
                 if (res.ok) {
                     const data = await res.json();
-                    const badge = document.getElementById('ligaçõesOnlineBadge');
-                    const count = document.getElementById('ligaçõesOnlineCount');
+                    const badge = document.getElementById('ligacoesOnlineBadge');
+                    const count = document.getElementById('ligacoesOnlineCount');
                     if (badge && data.total > 0) {
                         badge.style.display = 'inline-flex';
                         if (count) count.textContent = data.total;

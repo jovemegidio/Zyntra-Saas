@@ -771,7 +771,7 @@
                 const tipo = document.getElementById('filterTipo').value;
                 const prioridade = document.getElementById('filterPrioridade').value;
 
-                let url = '/api/rh/solicitações/todas?';
+                let url = '/api/rh/solicitacoes/todas?';
                 if (status) url += `status=${encodeURIComponent(status)}&`;
                 if (tipo) url += `tipo=${encodeURIComponent(tipo)}&`;
                 if (prioridade) url += `prioridade=${encodeURIComponent(prioridade)}&`;
@@ -807,7 +807,7 @@
 
         // Renderizar tabela
         function renderizarTabela() {
-            const tbody = document.getElementById('tabelaSolicitações');
+            const tbody = document.getElementById('tabelaSolicitacoes');
             const empty = document.getElementById('emptyState');
 
             if (solicitações.length === 0) {

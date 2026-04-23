@@ -229,6 +229,28 @@
             .resumo-grid { grid-template-columns: 1fr 1fr; }
         }
         @media (max-width: 480px) { .templates-grid { grid-template-columns: 1fr; } }
+
+        /* ===== DATE FILTER ROW ===== */
+        .date-filter-row { display:flex; align-items:center; gap:10px; background:white; padding:10px 16px; border-radius:12px; margin-bottom:16px; box-shadow:0 1px 3px rgba(0,0,0,0.06); border:1px solid var(--gray-100); flex-wrap:wrap; }
+        .date-filter-row label { font-size:12px; font-weight:600; color:var(--gray-600); white-space:nowrap; }
+        .date-filter-row select, .date-filter-row input[type=date] { padding:7px 10px; border:1px solid var(--gray-200); border-radius:8px; font-size:12px; font-family:'Inter',sans-serif; color:var(--gray-800); }
+        .btn-filtrar { padding:8px 14px; background:var(--info-500,#06b6d4); color:white; border:none; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:6px; }
+        .btn-filtrar:hover { opacity:0.9; }
+        .filtro-status { font-size:11px; color:var(--gray-400); margin-left:auto; }
+        /* ===== REPORT LIST SECTION ===== */
+        .report-list-section { background:white; border-radius:14px; box-shadow:0 1px 3px rgba(0,0,0,0.06); border:1px solid var(--gray-100); overflow:hidden; margin-bottom:24px; }
+        .report-list-item { display:flex; align-items:center; gap:14px; padding:13px 20px; border-bottom:1px solid var(--gray-50); transition:background 0.15s; }
+        .report-list-item:last-child { border-bottom:none; }
+        .report-list-item:hover { background:#f9fafb; }
+        .report-list-icon { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; }
+        .report-list-info { flex:1; }
+        .report-list-title { font-size:13px; font-weight:700; color:var(--gray-800); margin-bottom:2px; }
+        .report-list-desc { font-size:11px; color:var(--gray-500); line-height:1.4; }
+        .report-list-actions { display:flex; gap:6px; align-items:center; }
+        .btn-rview { padding:6px 12px; background:var(--info-500,#06b6d4); color:white; border:none; border-radius:6px; font-size:11px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:4px; white-space:nowrap; }
+        .btn-rview:hover { opacity:0.9; }
+        .btn-rexport { width:28px; height:28px; border:1px solid var(--gray-200); border-radius:6px; background:white; color:var(--gray-500); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:11px; transition:all 0.15s; }
+        .btn-rexport:hover { background:var(--gray-100); }
     </style>
     <!-- Chat Widget BOB AI -->
     <link rel="stylesheet" href="/chat/widget.css?v=20260408">
@@ -279,27 +301,122 @@
             </header>
 
             <div class="content-area">
+                <!-- Date Filter -->
+                <div class="date-filter-row">
+                    <label><i class="fas fa-calendar-alt"></i> Período</label>
+                    <select id="filtro-periodo" onchange="aplicarPeriodo()">
+                        <option value="mes">Este Mês</option>
+                        <option value="semana">Esta Semana</option>
+                        <option value="trimestre">Este Trimestre</option>
+                        <option value="ano">Este Ano</option>
+                        <option value="custom">Personalizado</option>
+                    </select>
+                    <label>DE</label>
+                    <input type="date" id="filtro-de" onchange="document.getElementById('filtro-periodo').value='custom'">
+                    <label>ATÉ</label>
+                    <input type="date" id="filtro-ate" onchange="document.getElementById('filtro-periodo').value='custom'">
+                    <button class="btn-filtrar" onclick="filtrarRelatorios()"><i class="fas fa-search"></i> Filtrar</button>
+                    <span class="filtro-status" id="filtro-status"></span>
+                </div>
+
                 <!-- KPI Summary Cards -->
                 <div class="summary-cards">
+                    <div class="summary-card" style="border-left-color:#16a34a;">
+                        <div class="summary-icon" style="color:#16a34a;"><i class="fas fa-sign-in-alt"></i></div>
+                        <div class="summary-value" style="color:#16a34a;" id="kpi-receber">R$ 0,00</div>
+                        <div class="summary-label">Total a Receber</div>
+                    </div>
+                    <div class="summary-card" style="border-left-color:#ef4444;">
+                        <div class="summary-icon" style="color:#ef4444;"><i class="fas fa-sign-out-alt"></i></div>
+                        <div class="summary-value" style="color:#ef4444;" id="kpi-pagar">R$ 0,00</div>
+                        <div class="summary-label">Total a Pagar</div>
+                    </div>
                     <div class="summary-card" style="border-left-color:#3b82f6;">
-                        <div class="summary-icon" style="color:#3b82f6;"><i class="fas fa-file-alt"></i></div>
-                        <div class="summary-value" style="color:#1e40af;" id="kpi-relatorios">5</div>
-                        <div class="summary-label">Relatórios Disponíveis</div>
+                        <div class="summary-icon" style="color:#3b82f6;"><i class="fas fa-chart-line"></i></div>
+                        <div class="summary-value" style="color:#1e40af;" id="kpi-saldo">R$ 0,00</div>
+                        <div class="summary-label">Saldo Projetado</div>
                     </div>
                     <div class="summary-card" style="border-left-color:#8b5cf6;">
-                        <div class="summary-icon" style="color:#8b5cf6;"><i class="fas fa-tools"></i></div>
-                        <div class="summary-value" style="color:#7c3aed;" id="kpi-operacoes">1</div>
-                        <div class="summary-label">Operações Financeiras</div>
+                        <div class="summary-icon" style="color:#8b5cf6;"><i class="fas fa-university"></i></div>
+                        <div class="summary-value" style="color:#7c3aed;" id="kpi-bancario">R$ 0,00</div>
+                        <div class="summary-label">Saldo em Contas</div>
                     </div>
-                    <div class="summary-card" style="border-left-color:#10b981;">
-                        <div class="summary-icon" style="color:#10b981;"><i class="fas fa-download"></i></div>
-                        <div class="summary-value" style="color:#059669;" id="kpi-templates">5</div>
-                        <div class="summary-label">Templates de Importação</div>
+                </div>
+
+                <!-- Relatórios de Contas a Receber -->
+                <h3 class="section-title"><i class="fas fa-hand-holding-usd"></i> Relatórios de Contas a Receber <span style="font-size:11px;font-weight:400;color:var(--gray-400);margin-left:8px;">Liquidados, vencidos, a vencer e por cliente</span></h3>
+                <div class="report-list-section">
+                    <div class="report-list-item">
+                        <div class="report-list-icon" style="background:#dcfce7;color:#16a34a;"><i class="fas fa-check-circle"></i></div>
+                        <div class="report-list-info">
+                            <div class="report-list-title">Títulos Liquidados</div>
+                            <div class="report-list-desc">Listagem de todos os títulos que foram pagos/recebidos no período selecionado.</div>
+                        </div>
+                        <div class="report-list-actions">
+                            <button class="btn-rview" onclick="window.location.href='/Financeiro/contas_receber.html?filtro=liquidado'"><i class="fas fa-eye"></i> Visualizar</button>
+                            <button class="btn-rexport" title="Exportar PDF"><i class="fas fa-file-pdf" style="color:#ef4444;"></i></button>
+                            <button class="btn-rexport" title="Exportar CSV"><i class="fas fa-table" style="color:#16a34a;"></i></button>
+                        </div>
                     </div>
-                    <div class="summary-card" style="border-left-color:#f59e0b;">
-                        <div class="summary-icon" style="color:#f59e0b;"><i class="fas fa-clock"></i></div>
-                        <div class="summary-value" style="color:#d97706;" id="kpi-Último">—</div>
-                        <div class="summary-label">Último Relatório Gerado</div>
+                    <div class="report-list-item">
+                        <div class="report-list-icon" style="background:#fef3c7;color:#d97706;"><i class="fas fa-exclamation-triangle"></i></div>
+                        <div class="report-list-info">
+                            <div class="report-list-title">Títulos Vencidos</div>
+                            <div class="report-list-desc">Títulos com data de vencimento ultrapassada e ainda não liquidados.</div>
+                        </div>
+                        <div class="report-list-actions">
+                            <button class="btn-rview" onclick="window.location.href='/Financeiro/contas_receber.html?filtro=vencido'"><i class="fas fa-eye"></i> Visualizar</button>
+                            <button class="btn-rexport" title="Exportar PDF"><i class="fas fa-file-pdf" style="color:#ef4444;"></i></button>
+                            <button class="btn-rexport" title="Exportar CSV"><i class="fas fa-table" style="color:#16a34a;"></i></button>
+                        </div>
+                    </div>
+                    <div class="report-list-item">
+                        <div class="report-list-icon" style="background:#dbeafe;color:#3b82f6;"><i class="fas fa-clock"></i></div>
+                        <div class="report-list-info">
+                            <div class="report-list-title">Títulos a Vencer</div>
+                            <div class="report-list-desc">Títulos com vencimento futuro, organizados por data de vencimento.</div>
+                        </div>
+                        <div class="report-list-actions">
+                            <button class="btn-rview" onclick="window.location.href='/Financeiro/contas_receber.html?filtro=avencer'"><i class="fas fa-eye"></i> Visualizar</button>
+                            <button class="btn-rexport" title="Exportar PDF"><i class="fas fa-file-pdf" style="color:#ef4444;"></i></button>
+                            <button class="btn-rexport" title="Exportar CSV"><i class="fas fa-table" style="color:#16a34a;"></i></button>
+                        </div>
+                    </div>
+                    <div class="report-list-item">
+                        <div class="report-list-icon" style="background:#ede9fe;color:#7c3aed;"><i class="fas fa-user"></i></div>
+                        <div class="report-list-info">
+                            <div class="report-list-title">Por Cliente</div>
+                            <div class="report-list-desc">Títulos a receber agrupados por cliente, com totais e detalhamento.</div>
+                        </div>
+                        <div class="report-list-actions">
+                            <button class="btn-rview" onclick="window.location.href='/Financeiro/contas_receber.html?filtro=cliente'"><i class="fas fa-eye"></i> Visualizar</button>
+                            <button class="btn-rexport" title="Exportar PDF"><i class="fas fa-file-pdf" style="color:#ef4444;"></i></button>
+                            <button class="btn-rexport" title="Exportar CSV"><i class="fas fa-table" style="color:#16a34a;"></i></button>
+                        </div>
+                    </div>
+                    <div class="report-list-item">
+                        <div class="report-list-icon" style="background:#e0e7ff;color:#4f46e5;"><i class="fas fa-wallet"></i></div>
+                        <div class="report-list-info">
+                            <div class="report-list-title">Portador &quot;Carteira&quot;</div>
+                            <div class="report-list-desc">Títulos em carteira (não enviados para cobrança bancária).</div>
+                        </div>
+                        <div class="report-list-actions">
+                            <button class="btn-rview" onclick="window.location.href='/Financeiro/contas_receber.html?filtro=carteira'"><i class="fas fa-eye"></i> Visualizar</button>
+                            <button class="btn-rexport" title="Exportar PDF"><i class="fas fa-file-pdf" style="color:#ef4444;"></i></button>
+                            <button class="btn-rexport" title="Exportar CSV"><i class="fas fa-table" style="color:#16a34a;"></i></button>
+                        </div>
+                    </div>
+                    <div class="report-list-item">
+                        <div class="report-list-icon" style="background:#ede9fe;color:#7c3aed;"><i class="fas fa-percentage"></i></div>
+                        <div class="report-list-info">
+                            <div class="report-list-title">Descontos</div>
+                            <div class="report-list-desc">Histórico de operações de desconto de títulos realizadas.</div>
+                        </div>
+                        <div class="report-list-actions">
+                            <button class="btn-rview" onclick="abrirModalDesconto()"><i class="fas fa-eye"></i> Visualizar</button>
+                            <button class="btn-rexport" title="Exportar PDF"><i class="fas fa-file-pdf" style="color:#ef4444;"></i></button>
+                            <button class="btn-rexport" title="Exportar CSV"><i class="fas fa-table" style="color:#16a34a;"></i></button>
+                        </div>
                     </div>
                 </div>
 
@@ -564,7 +681,7 @@
         function fecharModalDesconto() { document.getElementById('modal-desconto').classList.remove('active'); }
 
         function calcularDesconto() {
-            const valor = parseFloat(document.getElementById('valor-título').value) || 0;
+            const valor = parseFloat(document.getElementById('valor-titulo').value) || 0;
             const taxa = parseFloat(document.getElementById('taxa-desconto').value) || 0;
             const iofAnual = parseFloat(document.getElementById('iof-desconto').value) || 0;
             const dataVencimento = document.getElementById('data-vencimento').value;
@@ -593,9 +710,9 @@
         async function salvarDesconto(event) {
             event.preventDefault();
             const dados = {
-                numero_titulo: document.getElementById('número-título').value,
+                numero_titulo: document.getElementById('numero-titulo').value,
                 cliente_sacado: document.getElementById('cliente-sacado').value,
-                valor_titulo: parseFloat(document.getElementById('valor-título').value),
+                valor_titulo: parseFloat(document.getElementById('valor-titulo').value),
                 data_vencimento: document.getElementById('data-vencimento').value,
                 banco: document.getElementById('banco-desconto').value,
                 data_operacao: document.getElementById('data-operacao').value,
@@ -633,7 +750,91 @@
             showToast(`Template "${tmpl.nome}" baixado!`);
         }
 
-        document.addEventListener('DOMContentLoaded', () => { carregarUsuarioLogado().catch(e => console.error(e)); });
+        // ===== DATE FILTER FUNCTIONS =====
+        function inicializarFiltros() {
+            const hoje = new Date();
+            const de = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+            const ate = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
+            document.getElementById('filtro-de').value = de.toISOString().split('T')[0];
+            document.getElementById('filtro-ate').value = ate.toISOString().split('T')[0];
+        }
+
+        function aplicarPeriodo() {
+            const periodo = document.getElementById('filtro-periodo').value;
+            const hoje = new Date();
+            let de, ate;
+            if (periodo === 'mes') {
+                de = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+                ate = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
+            } else if (periodo === 'semana') {
+                de = new Date(hoje); de.setDate(hoje.getDate() - hoje.getDay());
+                ate = new Date(de); ate.setDate(de.getDate() + 6);
+            } else if (periodo === 'trimestre') {
+                const q = Math.floor(hoje.getMonth() / 3);
+                de = new Date(hoje.getFullYear(), q * 3, 1);
+                ate = new Date(hoje.getFullYear(), q * 3 + 3, 0);
+            } else if (periodo === 'ano') {
+                de = new Date(hoje.getFullYear(), 0, 1);
+                ate = new Date(hoje.getFullYear(), 11, 31);
+            } else { return; }
+            document.getElementById('filtro-de').value = de.toISOString().split('T')[0];
+            document.getElementById('filtro-ate').value = ate.toISOString().split('T')[0];
+            filtrarRelatorios();
+        }
+
+        const _kpiVals = { receber: 0, pagar: 0, bancario: 0 };
+
+        async function filtrarRelatorios() {
+            const de = document.getElementById('filtro-de').value;
+            const ate = document.getElementById('filtro-ate').value;
+            if (!de || !ate) return;
+            const statusEl = document.getElementById('filtro-status');
+            const fmtDate = d => d.split('-').reverse().join('/');
+            if (statusEl) statusEl.textContent = `Relatórios atualizados: ${fmtDate(de)} até ${fmtDate(ate)}`;
+            await carregarKPIsFinanceiros(de, ate);
+        }
+
+        async function carregarKPIsFinanceiros(de, ate) {
+            const fmt = v => 'R$ ' + (parseFloat(v) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+            try {
+                const r = await fetch(`/api/financeiro/contas-receber?data_inicio=${de}&data_fim=${ate}`, { credentials: 'include' });
+                if (r.ok) {
+                    const data = await r.json();
+                    const items = Array.isArray(data) ? data : (data.data || []);
+                    _kpiVals.receber = items.filter(i => i.status !== 'liquidado' && i.status !== 'cancelado').reduce((s, i) => s + (parseFloat(i.valor) || 0), 0);
+                    const el = document.getElementById('kpi-receber');
+                    if (el) el.textContent = fmt(_kpiVals.receber);
+                }
+            } catch(e) {}
+            try {
+                const r = await fetch(`/api/financeiro/contas-pagar?data_inicio=${de}&data_fim=${ate}`, { credentials: 'include' });
+                if (r.ok) {
+                    const data = await r.json();
+                    const items = Array.isArray(data) ? data : (data.data || []);
+                    _kpiVals.pagar = items.filter(i => i.status !== 'pago' && i.status !== 'cancelado').reduce((s, i) => s + (parseFloat(i.valor) || 0), 0);
+                    const el = document.getElementById('kpi-pagar');
+                    if (el) el.textContent = fmt(_kpiVals.pagar);
+                }
+            } catch(e) {}
+            try {
+                const r = await fetch('/api/financeiro/contas-bancarias', { credentials: 'include' });
+                if (r.ok) {
+                    const data = await r.json();
+                    const items = Array.isArray(data) ? data : (data.data || []);
+                    _kpiVals.bancario = items.filter(c => c.status !== 'inativa').reduce((s, c) => s + (parseFloat(c.saldo) || 0), 0);
+                    const elB = document.getElementById('kpi-bancario');
+                    if (elB) elB.textContent = fmt(_kpiVals.bancario);
+                    const elS = document.getElementById('kpi-saldo');
+                    if (elS) elS.textContent = fmt(_kpiVals.bancario + _kpiVals.receber - _kpiVals.pagar);
+                }
+            } catch(e) {}
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            carregarUsuarioLogado().catch(e => console.error(e));
+            inicializarFiltros();
+            filtrarRelatorios();
+        });
     </script>
 
     <script src="/js/notifications-manager.js?v=20260408"></script>
