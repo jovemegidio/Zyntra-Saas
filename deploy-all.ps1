@@ -463,7 +463,8 @@ function Backup-RemoteApps {
         $app = $REMOTE_APP_INDEX[$appName]
         $backupPath = "$REMOTE_BACKUP_DIR/$appName-predeploy-$timestamp.tar.gz"
         $backupMap[$appName] = $backupPath
-        $commands += "tar -czf '$backupPath' -C '$($app.RemoteRoot)' ."
+        # Exclui node_modules, uploads, logs e backups para backup leve (só código)
+        $commands += "tar -czf '$backupPath' -C '$($app.RemoteRoot)' --exclude='./node_modules' --exclude='./uploads' --exclude='./logs' --exclude='./storage' --exclude='./.git' ."
     }
 
     Invoke-Remote -Command ($commands -join " && ") | Out-Null
