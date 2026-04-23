@@ -148,11 +148,22 @@ class SpedFiscalService {
         linhas.push(`|E990|${qtdE}|`);
         totalRegistros++;
 
-        // ==================== BLOCOS G, H, K (vazios) ====================
-        for (const bloco of ['G', 'H', 'K']) {
-            linhas.push(`|${bloco}001|1|`);
-            totalRegistros++;
-            linhas.push(`|${bloco}990|2|`);
+        // ==================== BLOCO G (vazio — CIAP) ====================
+        linhas.push('|G001|1|');
+        totalRegistros++;
+        linhas.push('|G990|2|');
+        totalRegistros++;
+
+        // ==================== BLOCO H (vazio — Inventário físico) ====================
+        linhas.push('|H001|1|');
+        totalRegistros++;
+        linhas.push('|H990|2|');
+        totalRegistros++;
+
+        // ==================== BLOCO K — CONTROLE DE INVENTÁRIO E PRODUÇÃO ====================
+        const blocoKResult = await SpedFiscalService._gerarBlocoK(pool, mes, ano, empresa, dtIni, dtFin);
+        for (const linha of blocoKResult.linhas) {
+            linhas.push(linha);
             totalRegistros++;
         }
 
@@ -527,6 +538,138 @@ class SpedFiscalService {
             saldo_credor_transportar: saldoCredor,
             debito_extra: 0
         };
+    }
+
+    // ==================== BLOCO K — CONTROLE DE INVENTÁRIO E PRODUÇÃO ====================
+
+    static async _loadBlocoKConfig(pool) {
+        const defaults = { habilitado: false, perfil: 'A', ind_atividade: '0',
+            incluir_ordens_producao: true, incluir_ajustes: true,
+            incluir_perdas: true, incluir_transferencias: true };
+        try {
+            const [rows] = await pool.query(
+                "SELECT config_valor FROM empresa_config_fiscal WHERE config_chave = 'bloco_k' LIMIT 1"
+            );
+            return rows.length > 0
+                ? { ...defaults, ...JSON.parse(rows[0].config_valor || '{}') }
+                : defaults;
+        } catch (_) { return defaults; }
+    }
+
+    /**
+     * Gera o Bloco K do SPED EFD ICMS/IPI conforme Guia Prático v017
+     * Cobre: K001, K010, K100, K200, K220, K230, K235, K270, K280, K990
+     */
+    static async _gerarBlocoK(pool, mes, ano, empresa, dtIni, dtFin) {
+        const linhas = [];
+
+        const [config, estoqueCheck] = await Promise.all([
+            SpedFiscalService._loadBlocoKConfig(pool),
+            pool.query('SELECT 1 FROM estoque_saldos WHERE quantidade > 0 LIMIT 1').catch(() => [[]])
+        ]);
+
+        const hasMovement = config.habilitado && estoqueCheck[0].length > 0;
+
+        linhas.push(`|K001|${hasMovement ? '0' : '1'}|`);
+
+        if (hasMovement) {
+            linhas.push(`|K010|${empresa.cnpj || ''}|${config.ind_atividade || '0'}|`);
+            linhas.push(`|K100|${dtIni}|${dtFin}|`);
+
+            // K200 — Inventário final do período
+            try {
+                const dtUltimo = SpedFiscalService._data(new Date(ano, mes, 0));
+                const [saldos] = await pool.query(`
+                    SELECT p.codigo AS cod_item, s.quantidade AS qtd
+                    FROM estoque_saldos s
+                    JOIN produtos p ON p.id = s.produto_id
+                    WHERE s.quantidade > 0 ORDER BY p.codigo
+                `);
+                for (const s of saldos)
+                    linhas.push(`|K200|${dtUltimo}|${s.cod_item}|${SpedFiscalService._dec(s.qtd)}|0||`);
+            } catch (_) {}
+
+            // K220 — Transferências internas
+            if (config.incluir_transferencias) {
+                try {
+                    const [movs] = await pool.query(`
+                        SELECT DATE_FORMAT(m.data,'%d%m%Y') AS dt_mov, p.codigo AS cod_item, m.quantidade AS qtd
+                        FROM estoque_movimentos m JOIN produtos p ON p.id = m.produto_id
+                        WHERE m.tipo = 'transferencia' AND MONTH(m.data)=? AND YEAR(m.data)=?
+                    `, [mes, ano]);
+                    for (const mv of movs)
+                        linhas.push(`|K220|${mv.dt_mov}|${mv.cod_item}|${mv.cod_item}|${SpedFiscalService._dec(mv.qtd)}|${SpedFiscalService._dec(mv.qtd)}|`);
+                } catch (_) {}
+            }
+
+            // K230/K235 — Ordens de produção com componentes (batch, sem N+1)
+            if (config.incluir_ordens_producao) {
+                try {
+                    const [ordens] = await pool.query(`
+                        SELECT op.numero_op, op.produto_codigo AS cod_item,
+                               DATE_FORMAT(op.data_inicio,'%d%m%Y') AS dt_ini,
+                               DATE_FORMAT(COALESCE(op.data_fim,op.data_previsao),'%d%m%Y') AS dt_fin,
+                               op.quantidade AS qtd_enc
+                        FROM ordens_producao op
+                        WHERE MONTH(COALESCE(op.data_fim,op.data_inicio))=?
+                          AND YEAR(COALESCE(op.data_fim,op.data_inicio))=?
+                          AND op.status IN ('concluida','encerrada')
+                    `, [mes, ano]);
+
+                    if (ordens.length > 0) {
+                        const ids = ordens.map(o => o.numero_op);
+                        const [todosComps] = await pool.query(`
+                            SELECT ic.ordem_producao_id, p.codigo AS cod_comp, ic.quantidade AS qtd,
+                                   DATE_FORMAT(ic.data_consumo,'%d%m%Y') AS dt_saida
+                            FROM itens_consumo_op ic JOIN produtos p ON p.id = ic.produto_id
+                            WHERE ic.ordem_producao_id IN (?)
+                        `, [ids]).catch(() => [[]]);
+
+                        const compsPorOp = {};
+                        for (const c of todosComps) {
+                            (compsPorOp[c.ordem_producao_id] = compsPorOp[c.ordem_producao_id] || []).push(c);
+                        }
+
+                        for (const op of ordens) {
+                            linhas.push(`|K230|${op.numero_op || ''}|${op.dt_ini}|${op.dt_fin}||${op.cod_item}|${SpedFiscalService._dec(op.qtd_enc)}|`);
+                            for (const c of (compsPorOp[op.numero_op] || []))
+                                linhas.push(`|K235|${c.dt_saida || dtFin}|${c.cod_comp}|${SpedFiscalService._dec(c.qtd)}||`);
+                        }
+                    }
+                } catch (_) {}
+            }
+
+            // K270 — Ajustes de inventário
+            if (config.incluir_ajustes) {
+                try {
+                    const [ajustes] = await pool.query(`
+                        SELECT p.codigo AS cod_item, ABS(m.quantidade) AS qtd,
+                               CASE WHEN m.quantidade > 0 THEN '0' ELSE '1' END AS ind_mov
+                        FROM estoque_movimentos m JOIN produtos p ON p.id = m.produto_id
+                        WHERE m.tipo IN ('ajuste','inventario') AND MONTH(m.data)=? AND YEAR(m.data)=?
+                    `, [mes, ano]);
+                    for (const aj of ajustes)
+                        linhas.push(`|K270|${dtIni}|${dtFin}|${aj.cod_item}|${SpedFiscalService._dec(aj.qtd)}|${aj.ind_mov}|`);
+                } catch (_) {}
+            }
+
+            // K280 — Perdas de estoque
+            if (config.incluir_perdas) {
+                try {
+                    const [perdas] = await pool.query(`
+                        SELECT p.codigo AS cod_item, ABS(m.quantidade) AS qtd,
+                               DATE_FORMAT(m.data,'%d%m%Y') AS dt_perd
+                        FROM estoque_movimentos m JOIN produtos p ON p.id = m.produto_id
+                        WHERE m.tipo='perda' AND MONTH(m.data)=? AND YEAR(m.data)=?
+                    `, [mes, ano]);
+                    for (const pd of perdas)
+                        linhas.push(`|K280|${pd.dt_perd}|${pd.cod_item}|${SpedFiscalService._dec(pd.qtd)}|0||`);
+                } catch (_) {}
+            }
+        }
+
+        linhas.push(`|K990|${linhas.length + 1}|`);
+        return { linhas, count: linhas.length };
     }
 
     // ==================== HELPERS ====================

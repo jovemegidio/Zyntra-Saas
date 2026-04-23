@@ -14,6 +14,16 @@ const { SpedFiscalService, SpedContribuicoesService, SintegraService } = require
 
 function createContabilFiscalRouter(pool, authenticateToken) {
 
+    // Garante tabela de config fiscal na primeira carga do router
+    pool.query(`
+        CREATE TABLE IF NOT EXISTS empresa_config_fiscal (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            config_chave VARCHAR(100) UNIQUE NOT NULL,
+            config_valor TEXT,
+            atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        )
+    `).catch(err => console.error('❌ Erro ao criar empresa_config_fiscal:', err.message));
+
     // ============================================================
     // APURAÇÃO ICMS
     // ============================================================
@@ -386,6 +396,110 @@ function createContabilFiscalRouter(pool, authenticateToken) {
         } catch (error) {
             console.error('❌ Erro dashboard contábil:', error);
             res.status(500).json({ error: 'Erro ao gerar dashboard' });
+        }
+    });
+
+    // ============================================================
+    // BLOCO K — CONFIGURAÇÃO E GERAÇÃO
+    // ============================================================
+
+    /**
+     * GET /api/contabil/bloco-k/config
+     * Retorna configuração atual do Bloco K
+     */
+    router.get('/bloco-k/config', authenticateToken, async (req, res) => {
+        try {
+            const defaults = {
+                habilitado: false,
+                perfil: 'A',
+                ind_atividade: '0',
+                incluir_ordens_producao: true,
+                incluir_ajustes: true,
+                incluir_perdas: true
+            };
+            const [rows] = await pool.query(
+                "SELECT config_valor FROM empresa_config_fiscal WHERE config_chave = 'bloco_k' LIMIT 1"
+            );
+            const config = rows.length > 0
+                ? { ...defaults, ...JSON.parse(rows[0].config_valor || '{}') }
+                : defaults;
+            res.json(config);
+        } catch (error) {
+            console.error('❌ Erro ao buscar config Bloco K:', error);
+            res.status(500).json({ error: 'Erro ao buscar configuração do Bloco K' });
+        }
+    });
+
+    /**
+     * POST /api/contabil/bloco-k/config
+     * Salva configuração do Bloco K
+     */
+    router.post('/bloco-k/config', authenticateToken, async (req, res) => {
+        try {
+            const config = {
+                habilitado: !!req.body.habilitado,
+                perfil: req.body.perfil || 'A',
+                ind_atividade: req.body.ind_atividade || '0',
+                incluir_ordens_producao: req.body.incluir_ordens_producao !== false,
+                incluir_ajustes: req.body.incluir_ajustes !== false,
+                incluir_perdas: req.body.incluir_perdas !== false
+            };
+
+            await pool.query(`
+                INSERT INTO empresa_config_fiscal (config_chave, config_valor)
+                VALUES ('bloco_k', ?)
+                ON DUPLICATE KEY UPDATE config_valor = VALUES(config_valor)
+            `, [JSON.stringify(config)]);
+
+            res.json({ success: true, config });
+        } catch (error) {
+            console.error('❌ Erro ao salvar config Bloco K:', error);
+            res.status(500).json({ error: 'Erro ao salvar configuração do Bloco K' });
+        }
+    });
+
+    /**
+     * GET /api/contabil/bloco-k/preview
+     * Pré-visualização dos dados que serão incluídos no Bloco K
+     */
+    router.get('/bloco-k/preview', authenticateToken, async (req, res) => {
+        try {
+            const mes = parseInt(req.query.mes) || (new Date().getMonth() + 1);
+            const ano = parseInt(req.query.ano) || new Date().getFullYear();
+
+            const [estoqueResult, ordensResult, movResult] = await Promise.all([
+                pool.query(`
+                    SELECT COUNT(DISTINCT p.id) AS total
+                    FROM estoque_saldos s
+                    JOIN produtos p ON p.id = s.produto_id
+                    WHERE s.quantidade > 0
+                `).catch(() => [[{ total: 0 }]]),
+                pool.query(`
+                    SELECT COUNT(*) AS total
+                    FROM ordens_producao
+                    WHERE MONTH(COALESCE(data_fim, data_inicio)) = ?
+                      AND YEAR(COALESCE(data_fim, data_inicio)) = ?
+                      AND status IN ('concluida', 'encerrada')
+                `, [mes, ano]).catch(() => [[{ total: 0 }]]),
+                pool.query(`
+                    SELECT COUNT(*) AS total
+                    FROM estoque_movimentos m
+                    WHERE m.tipo IN ('transferencia', 'ajuste', 'perda')
+                      AND MONTH(m.data) = ? AND YEAR(m.data) = ?
+                `, [mes, ano]).catch(() => [[{ total: 0 }]])
+            ]);
+
+            res.json({
+                periodo: { mes, ano },
+                resumo: {
+                    total_itens_estoque: estoqueResult[0][0].total,
+                    total_ordens_producao: ordensResult[0][0].total,
+                    total_movimentacoes: movResult[0][0].total
+                }
+            });
+        } catch (error) {
+            console.error('❌ Erro no preview Bloco K:', error);
+            res.status(500).json({ error: 'Erro ao gerar preview do Bloco K' });
         }
     });
 

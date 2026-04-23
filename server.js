@@ -1744,6 +1744,17 @@ try {
 }
 
 // =================================================================
+// 📊 CONTÁBIL-FISCAL API — SPED EFD, Bloco K, Apurações ICMS/PIS/COFINS
+// =================================================================
+try {
+    const createContabilFiscalRouter = require('./routes/api-contabil-fiscal');
+    app.use('/api/contabil', authenticateToken, createContabilFiscalRouter(pool, authenticateToken));
+    console.log('✅ Rotas Contábil-Fiscal API carregadas: /api/contabil/*');
+} catch (err) {
+    console.error('❌ Erro ao carregar rotas Contábil-Fiscal:', err.message);
+}
+
+// =================================================================
 // é FINANCEIRO API — Módulo Financeiro (contas, fluxo de caixa, etc.)
 // =================================================================
 try {

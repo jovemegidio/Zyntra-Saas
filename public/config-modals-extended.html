@@ -3635,6 +3635,251 @@
     </div>
 </div>
 
+<!-- Modal: Bloco K — SPED EFD ICMS/IPI -->
+<div class="config-detail-modal" id="modal-bloco-k">
+    <div class="config-detail-modal-content" style="max-width: 960px;">
+        <div class="config-detail-modal-header">
+            <div class="config-detail-modal-header-left">
+                <button class="config-detail-modal-back" onclick="fecharModal('modal-bloco-k')">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <div class="config-detail-modal-icon" style="background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);">
+                    <i class="fas fa-boxes"></i>
+                </div>
+                <div>
+                    <h3>Bloco K — SPED Fiscal</h3>
+                    <p>Controle de Inventário e Produção (EFD ICMS/IPI)</p>
+                </div>
+            </div>
+            <button class="config-detail-modal-close" onclick="fecharModal('modal-bloco-k')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="config-detail-modal-body">
+
+            <!-- Aviso informativo -->
+            <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-left: 4px solid #f59e0b; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: flex-start; gap: 10px;">
+                <i class="fas fa-exclamation-triangle" style="color: #d97706; font-size: 18px; margin-top: 1px;"></i>
+                <div style="color: #92400e; font-size: 13px;">
+                    <strong>Obrigatoriedade:</strong> O Bloco K é exigido para empresas industriais (Perfil A) e equiparadas com faturamento acima de R$ 300 milhões/ano. Atacadistas e distribuidores podem ser enquadrados por seus estados. Consulte seu contador antes de ativar.
+                </div>
+            </div>
+
+            <!-- Habilitar Bloco K -->
+            <div style="background: #f8f9fa; border: 2px solid #e2e8f0; border-radius: 12px; padding: 18px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 14px;">
+                    <div style="width: 42px; height: 42px; background: linear-gradient(135deg, #6c5ce7, #a29bfe); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-toggle-on" style="color: white; font-size: 18px;"></i>
+                    </div>
+                    <div>
+                        <div style="font-weight: 700; font-size: 15px; color: #1e293b;">Habilitar geração do Bloco K</div>
+                        <div style="font-size: 12px; color: #64748b;">Quando ativo, o Bloco K será incluído nos arquivos SPED EFD gerados</div>
+                    </div>
+                </div>
+                <label style="position: relative; display: inline-block; width: 52px; height: 28px;">
+                    <input type="checkbox" id="bloco-k-habilitado" style="opacity:0;width:0;height:0;">
+                    <span onclick="toggleBlocoK()" id="bloco-k-toggle-span" style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#cbd5e1;transition:.3s;border-radius:28px;">
+                        <span id="bloco-k-toggle-knob" style="position:absolute;content:'';height:20px;width:20px;left:4px;bottom:4px;background:white;transition:.3s;border-radius:50%;"></span>
+                    </span>
+                </label>
+            </div>
+
+            <!-- Configurações principais -->
+            <div id="bloco-k-config-area">
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 20px;">
+                    <!-- Perfil de apresentação -->
+                    <div class="config-form-group">
+                        <label><i class="fas fa-layer-group" style="color: #6c5ce7; margin-right: 6px;"></i>Perfil de Apresentação</label>
+                        <select id="bloco-k-perfil" class="config-input">
+                            <option value="A">Perfil A — Completo (Industriais e equiparados)</option>
+                            <option value="B">Perfil B — Simplificado (Atacadistas e distribuidores)</option>
+                            <option value="C">Perfil C — Mínimo (Demais contribuintes)</option>
+                        </select>
+                        <small style="color: #64748b; font-size: 11px; margin-top: 4px; display: block;">Define o nível de detalhamento exigido pela SEFAZ</small>
+                    </div>
+
+                    <!-- Tipo de atividade -->
+                    <div class="config-form-group">
+                        <label><i class="fas fa-industry" style="color: #6c5ce7; margin-right: 6px;"></i>Tipo de Atividade (IND_ATIVIDADE)</label>
+                        <select id="bloco-k-ind-atividade" class="config-input">
+                            <option value="0">0 — Industrial ou equiparado</option>
+                            <option value="1">1 — Outros (atacadista, distribuidor)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Registros a incluir -->
+                <h4 style="margin: 20px 0 12px; color: #2d3748; font-size: 14px; font-weight: 700;">
+                    <i class="fas fa-list-check" style="color: #6c5ce7; margin-right: 8px;"></i>Registros a incluir no Bloco K
+                </h4>
+
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px;">
+                    <label style="display: flex; align-items: center; gap: 10px; padding: 12px; background: #f8f9fa; border-radius: 8px; cursor: pointer; border: 1px solid #e2e8f0;">
+                        <input type="checkbox" id="bloco-k-ordens-producao" style="width:16px;height:16px;accent-color:#6c5ce7;" checked>
+                        <div>
+                            <div style="font-weight: 600; font-size: 13px; color: #1e293b;">K230 / K235 — Ordens de Produção</div>
+                            <div style="font-size: 11px; color: #64748b;">Registra cada OP e seus componentes consumidos</div>
+                        </div>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 10px; padding: 12px; background: #f8f9fa; border-radius: 8px; cursor: pointer; border: 1px solid #e2e8f0;">
+                        <input type="checkbox" id="bloco-k-ajustes" style="width:16px;height:16px;accent-color:#6c5ce7;" checked>
+                        <div>
+                            <div style="font-weight: 600; font-size: 13px; color: #1e293b;">K270 — Ajustes de Inventário</div>
+                            <div style="font-size: 11px; color: #64748b;">Correções e diferenças apuradas no inventário</div>
+                        </div>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 10px; padding: 12px; background: #f8f9fa; border-radius: 8px; cursor: pointer; border: 1px solid #e2e8f0;">
+                        <input type="checkbox" id="bloco-k-perdas" style="width:16px;height:16px;accent-color:#6c5ce7;" checked>
+                        <div>
+                            <div style="font-weight: 600; font-size: 13px; color: #1e293b;">K280 — Perdas de Estoque</div>
+                            <div style="font-size: 11px; color: #64748b;">Quebras, avarias e perdas apuradas no período</div>
+                        </div>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 10px; padding: 12px; background: #f8f9fa; border-radius: 8px; cursor: pointer; border: 1px solid #e2e8f0;">
+                        <input type="checkbox" id="bloco-k-transferencias" style="width:16px;height:16px;accent-color:#6c5ce7;" checked>
+                        <div>
+                            <div style="font-weight: 600; font-size: 13px; color: #1e293b;">K220 — Transferências Internas</div>
+                            <div style="font-size: 11px; color: #64748b;">Movimentações entre depósitos e estabelecimentos</div>
+                        </div>
+                    </label>
+                </div>
+
+                <!-- Preview dos dados -->
+                <div style="background: #f0f4ff; border: 1px solid #c7d2fe; border-radius: 10px; padding: 16px; margin-bottom: 16px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                        <span style="font-weight: 700; font-size: 13px; color: #3730a3;">
+                            <i class="fas fa-eye" style="margin-right: 6px;"></i>Pré-visualização dos dados do mês atual
+                        </span>
+                        <button type="button" onclick="carregarPreviewBlocoK()" style="padding: 6px 14px; background: #6c5ce7; color: white; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">
+                            <i class="fas fa-sync-alt"></i> Carregar
+                        </button>
+                    </div>
+                    <div id="bloco-k-preview-content" style="font-size: 13px; color: #4338ca;">
+                        <span style="color: #64748b; font-style: italic;">Clique em "Carregar" para visualizar os dados que serão incluídos no Bloco K.</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="config-detail-modal-footer" style="margin-top: 10px;">
+                <button type="button" class="config-btn-cancel" onclick="fecharModal('modal-bloco-k')">Cancelar</button>
+                <button type="button" class="config-btn-save" onclick="saveBlocoKConfig()">
+                    <i class="fas fa-save"></i> Salvar Configurações
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// === BLOCO K — Lógica do modal ===
+
+function toggleBlocoK() {
+    const cb = document.getElementById('bloco-k-habilitado');
+    _applyBlocoKToggle(!cb.checked);
+}
+
+function _applyBlocoKToggle(checked) {
+    const span = document.getElementById('bloco-k-toggle-span');
+    const knob = document.getElementById('bloco-k-toggle-knob');
+    const cb = document.getElementById('bloco-k-habilitado');
+    if (!span || !knob || !cb) return;
+    cb.checked = checked;
+    if (checked) {
+        span.style.background = '#6c5ce7';
+        knob.style.transform = 'translateX(24px)';
+    } else {
+        span.style.background = '#cbd5e1';
+        knob.style.transform = 'translateX(0)';
+    }
+}
+
+async function loadBlocoKData() {
+    try {
+        const res = await fetch('/api/contabil/bloco-k/config', { credentials: 'include' });
+        if (!res.ok) return;
+        const cfg = await res.json();
+        _applyBlocoKToggle(!!cfg.habilitado);
+        const el = id => document.getElementById(id);
+        if (el('bloco-k-perfil')) el('bloco-k-perfil').value = cfg.perfil || 'A';
+        if (el('bloco-k-ind-atividade')) el('bloco-k-ind-atividade').value = cfg.ind_atividade || '0';
+        if (el('bloco-k-ordens-producao')) el('bloco-k-ordens-producao').checked = cfg.incluir_ordens_producao !== false;
+        if (el('bloco-k-ajustes')) el('bloco-k-ajustes').checked = cfg.incluir_ajustes !== false;
+        if (el('bloco-k-perdas')) el('bloco-k-perdas').checked = cfg.incluir_perdas !== false;
+        if (el('bloco-k-transferencias')) el('bloco-k-transferencias').checked = cfg.incluir_transferencias !== false;
+    } catch (e) { console.warn('[BlocoK] Erro ao carregar config:', e); }
+}
+
+async function saveBlocoKConfig() {
+    const el = id => document.getElementById(id);
+    const config = {
+        habilitado: el('bloco-k-habilitado')?.checked || false,
+        perfil: el('bloco-k-perfil')?.value || 'A',
+        ind_atividade: el('bloco-k-ind-atividade')?.value || '0',
+        incluir_ordens_producao: el('bloco-k-ordens-producao')?.checked ?? true,
+        incluir_ajustes: el('bloco-k-ajustes')?.checked ?? true,
+        incluir_perdas: el('bloco-k-perdas')?.checked ?? true,
+        incluir_transferencias: el('bloco-k-transferencias')?.checked ?? true
+    };
+    try {
+        const res = await fetch('/api/contabil/bloco-k/config', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(config)
+        });
+        if (res.ok) {
+            if (typeof showNotification === 'function') showNotification('Configuração do Bloco K salva com sucesso!', 'success');
+            else alert('Configuração do Bloco K salva!');
+            fecharModal('modal-bloco-k');
+        } else {
+            if (typeof showNotification === 'function') showNotification('Erro ao salvar configuração', 'error');
+            else alert('Erro ao salvar configuração do Bloco K');
+        }
+    } catch (e) {
+        console.error('[BlocoK] Erro ao salvar:', e);
+        if (typeof showNotification === 'function') showNotification('Erro ao salvar configuração', 'error');
+    }
+}
+
+async function carregarPreviewBlocoK() {
+    const preview = document.getElementById('bloco-k-preview-content');
+    if (!preview) return;
+    preview.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Carregando...';
+    const now = new Date();
+    try {
+        const res = await fetch(`/api/contabil/bloco-k/preview?mes=${now.getMonth()+1}&ano=${now.getFullYear()}`, { credentials: 'include' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        const r = data.resumo || {};
+        preview.innerHTML = `
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px;">
+                <div style="background:white;border-radius:8px;padding:10px;text-align:center;border:1px solid #c7d2fe;">
+                    <div style="font-size:22px;font-weight:700;color:#6c5ce7;">${r.total_itens_estoque || 0}</div>
+                    <div style="font-size:11px;color:#64748b;">Itens em Estoque (K200)</div>
+                </div>
+                <div style="background:white;border-radius:8px;padding:10px;text-align:center;border:1px solid #c7d2fe;">
+                    <div style="font-size:22px;font-weight:700;color:#6c5ce7;">${r.total_ordens_producao || 0}</div>
+                    <div style="font-size:11px;color:#64748b;">Ordens de Produção (K230)</div>
+                </div>
+                <div style="background:white;border-radius:8px;padding:10px;text-align:center;border:1px solid #c7d2fe;">
+                    <div style="font-size:22px;font-weight:700;color:#6c5ce7;">${r.total_movimentacoes || 0}</div>
+                    <div style="font-size:11px;color:#64748b;">Movimentações (K220/K270/K280)</div>
+                </div>
+            </div>
+            <div style="color:#4338ca;font-size:12px;">
+                <i class="fas fa-check-circle" style="color:#10b981;margin-right:4px;"></i>
+                Referência: ${(now.getMonth()+1).toString().padStart(2,'0')}/${now.getFullYear()} —
+                ${r.total_itens_estoque + r.total_ordens_producao + r.total_movimentacoes > 0
+                    ? 'Bloco K terá dados para este período.'
+                    : 'Sem movimentações neste período — Bloco K será gerado vazio (IND_MOV=1).'}
+            </div>`;
+    } catch (e) {
+        preview.innerHTML = `<span style="color:#dc2626;"><i class="fas fa-exclamation-circle"></i> Erro ao carregar preview: ${e.message}</span>`;
+    }
+}
+</script>
+
 <!-- Modal: Custos e Precificação (PCP) - Mesmo modal do módulo PCP -->
 <div id="modal-custos-precificacao" class="modal-editar-produto-rico config-detail-modal">
     <div class="modal-produto-container">
