@@ -5,6 +5,7 @@ param(
     [switch]$SkipVPS,
     [switch]$SkipBranches,
     [switch]$SkipGit,
+    [switch]$SkipBackup,
     [string]$SinceRef = "HEAD~1",
     [string]$Password = $env:ZYNTRA_VPS_PASSWORD
 )
@@ -615,7 +616,12 @@ if (-not $SkipVPS) {
         if (-not $appsToDeploy -or $appsToDeploy.Count -eq 0) {
             Write-Warn "Nenhuma alteracao mapeada para os apps da VPS"
         } else {
-            $backupMap = Backup-RemoteApps -AppNames $appsToDeploy
+            $backupMap = @{}
+            if (-not $SkipBackup) {
+                $backupMap = Backup-RemoteApps -AppNames $appsToDeploy
+            } else {
+                Write-Warn "Backup remoto ignorado (-SkipBackup)"
+            }
             $appsNeedingInstall = [System.Collections.Generic.List[string]]::new()
 
             foreach ($appName in $appsToDeploy) {
