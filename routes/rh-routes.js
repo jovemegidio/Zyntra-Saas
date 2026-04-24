@@ -838,12 +838,12 @@ module.exports = function createRHRoutes(deps) {
 
             // Verificar e adicionar colunas que podem faltar
             const colunasExtras = [
-                "ALTER TABLE atestados ADD COLUMN IF NOT EXISTS dias_afastamento INT",
-                "ALTER TABLE atestados ADD COLUMN IF NOT EXISTS tipo VARCHAR(100) DEFAULT 'Atestado Médico'",
-                "ALTER TABLE atestados ADD COLUMN IF NOT EXISTS cid VARCHAR(20)",
-                "ALTER TABLE atestados ADD COLUMN IF NOT EXISTS motivo_recusa TEXT",
-                "ALTER TABLE atestados ADD COLUMN IF NOT EXISTS aprovado_por INT",
-                "ALTER TABLE atestados ADD COLUMN IF NOT EXISTS data_aprovacao DATETIME"
+                "ALTER TABLE atestados ADD COLUMN dias_afastamento INT",
+                "ALTER TABLE atestados ADD COLUMN tipo VARCHAR(100) DEFAULT 'Atestado Médico'",
+                "ALTER TABLE atestados ADD COLUMN cid VARCHAR(20)",
+                "ALTER TABLE atestados ADD COLUMN motivo_recusa TEXT",
+                "ALTER TABLE atestados ADD COLUMN aprovado_por INT",
+                "ALTER TABLE atestados ADD COLUMN data_aprovacao DATETIME"
             ];
 
             for (const sql of colunasExtras) {
@@ -932,10 +932,10 @@ module.exports = function createRHRoutes(deps) {
 
             // Adicionar colunas se não existirem (para tabelas já criadas)
             const colunasExtras = [
-                'ALTER TABLE atestados ADD COLUMN IF NOT EXISTS nome_medico VARCHAR(255)',
-                'ALTER TABLE atestados ADD COLUMN IF NOT EXISTS crm VARCHAR(50)',
-                'ALTER TABLE atestados ADD COLUMN IF NOT EXISTS tipo_atestado VARCHAR(100)',
-                'ALTER TABLE atestados ADD COLUMN IF NOT EXISTS cid VARCHAR(20)'
+                'ALTER TABLE atestados ADD COLUMN nome_medico VARCHAR(255)',
+                'ALTER TABLE atestados ADD COLUMN crm VARCHAR(50)',
+                'ALTER TABLE atestados ADD COLUMN tipo_atestado VARCHAR(100)',
+                'ALTER TABLE atestados ADD COLUMN cid VARCHAR(20)'
             ];
             for (const sql of colunasExtras) {
                 try { await pool.query(sql); } catch (e) { /* coluna já existe */ }
@@ -976,11 +976,9 @@ module.exports = function createRHRoutes(deps) {
             `);
 
             // Adicionar colunas se não existirem (para tabelas antigas)
-            try {
-                await pool.query(`ALTER TABLE avisos ADD COLUMN IF NOT EXISTS tipo VARCHAR(50) DEFAULT 'info'`);
-                await pool.query(`ALTER TABLE avisos ADD COLUMN IF NOT EXISTS conteudo TEXT`);
-                await pool.query(`ALTER TABLE avisos ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP`);
-            } catch (e) { /* Colunas já existem ou DB não suporta IF NOT EXISTS */ }
+            await pool.query(`ALTER TABLE avisos ADD COLUMN tipo VARCHAR(50) DEFAULT 'info'`).catch(() => {});
+            await pool.query(`ALTER TABLE avisos ADD COLUMN conteudo TEXT`).catch(() => {});
+            await pool.query(`ALTER TABLE avisos ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP`).catch(() => {});
 
             // Query segura - usando apenas colunas existentes
             const [rows] = await pool.query(`

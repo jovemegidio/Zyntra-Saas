@@ -13949,24 +13949,24 @@ td{padding:5px 8px;border-bottom:1px solid #e5e7eb;font-size:10px}
             onCancelCallback = onCancel;
 
             // Preencher lista de alterações
-            const lista = document.getElementById('alterações-itens');
-            lista.innerHTML = alteraçõesNãoSalvas.map(alt => `
+            const lista = document.getElementById('alteracoes-itens');
+            if (lista) lista.innerHTML = alteraçõesNãoSalvas.map(alt => `
                 <li><i class="fas fa-edit"></i> ${alt.label}</li>
             `).join('');
 
             // Esconder lista inicialmente
-            document.getElementById('lista-alterações').classList.remove('show');
+            document.getElementById('lista-alteracoes').classList.remove('show');
 
-            document.getElementById('modal-confirmar-alterações').classList.add('active');
+            document.getElementById('modal-confirmar-alteracoes').classList.add('active');
         }
 
         function toggleListaAlterações() {
-            document.getElementById('lista-alterações').classList.toggle('show');
+            document.getElementById('lista-alteracoes').classList.toggle('show');
         }
 
         function confirmarDesprezarAlterações() {
             // Fechar o modal de confirmação
-            document.getElementById('modal-confirmar-alterações').classList.remove('active');
+            document.getElementById('modal-confirmar-alteracoes').classList.remove('active');
             limparAlterações();
 
             // Fechar todos os modais abertos (modal principal de edição/orçamento)
@@ -13985,7 +13985,7 @@ td{padding:5px 8px;border-bottom:1px solid #e5e7eb;font-size:10px}
         }
 
         function cancelarDesprezarAlterações() {
-            document.getElementById('modal-confirmar-alterações').classList.remove('active');
+            document.getElementById('modal-confirmar-alteracoes').classList.remove('active');
             if (onCancelCallback) onCancelCallback();
             onConfirmCallback = null;
             onCancelCallback = null;
@@ -14013,7 +14013,7 @@ td{padding:5px 8px;border-bottom:1px solid #e5e7eb;font-size:10px}
 
         // Fechar modal de confirmação ao clicar fora
         document.addEventListener('DOMContentLoaded', function () {
-            const modalConfirm = document.getElementById('modal-confirmar-alterações');
+            const modalConfirm = document.getElementById('modal-confirmar-alteracoes');
             if (modalConfirm) {
                 modalConfirm.addEventListener('click', function (e) {
                     if (e.target === this) {
@@ -21741,22 +21741,22 @@ td{padding:5px 8px;border-bottom:1px solid #e5e7eb;font-size:10px}
 
         // Popup de confirmação de alterações
         function mostrarPopupAlterações(alterações, callbackSim) {
-            const lista = document.getElementById('alterações-itens');
-            lista.innerHTML = alterações.map(a => `<li>${escaparHTML(a)}</li>`).join('');
+            const lista = document.getElementById('alteracoes-itens');
+            if (lista) lista.innerHTML = alterações.map(a => `<li>${escaparHTML(a)}</li>`).join('');
 
             window.callbackDesprezarAlterações = callbackSim;
-            document.getElementById('modal-confirmar-alterações').classList.add('active');
+            document.getElementById('modal-confirmar-alteracoes').classList.add('active');
         }
 
         function toggleListaAlterações() {
-            const lista = document.getElementById('lista-alterações');
+            const lista = document.getElementById('lista-alteracoes');
             lista.classList.toggle('show');
         }
 
         function confirmarDesprezarAlterações() {
             // Fechar o modal de confirmação
-            document.getElementById('modal-confirmar-alterações').classList.remove('active');
-            document.getElementById('lista-alterações').classList.remove('show');
+            document.getElementById('modal-confirmar-alteracoes').classList.remove('active');
+            document.getElementById('lista-alteracoes').classList.remove('show');
 
             // Limpar alterações pendentes
             limparAlterações();
@@ -21770,7 +21770,7 @@ td{padding:5px 8px;border-bottom:1px solid #e5e7eb;font-size:10px}
 
             // Fechar qualquer outro modal aberto
             document.querySelectorAll('.modal-overlay.active').forEach(modal => {
-                if (modal.id !== 'modal-confirmar-alterações') {
+                if (modal.id !== 'modal-confirmar-alteracoes') {
                     modal.classList.remove('active');
                     modal.style.display = 'none';
                 }
@@ -21787,8 +21787,8 @@ td{padding:5px 8px;border-bottom:1px solid #e5e7eb;font-size:10px}
         }
 
         function cancelarDesprezarAlterações() {
-            document.getElementById('modal-confirmar-alterações').classList.remove('active');
-            document.getElementById('lista-alterações').classList.remove('show');
+            document.getElementById('modal-confirmar-alteracoes').classList.remove('active');
+            document.getElementById('lista-alteracoes').classList.remove('show');
         }
 
         function limparFormularioProduto() {

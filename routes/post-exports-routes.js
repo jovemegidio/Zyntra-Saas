@@ -421,11 +421,9 @@ let query = 'SELECT id, nome, tipo, icone, ativo, COALESCE(prazo, 0) as prazo, C
             }
 
             // Garantir que as colunas prazo, taxa e status existam
-            try {
-                await pool.query(`ALTER TABLE formas_pagamento ADD COLUMN IF NOT EXISTS prazo INT DEFAULT 0`);
-                await pool.query(`ALTER TABLE formas_pagamento ADD COLUMN IF NOT EXISTS taxa DECIMAL(5,2) DEFAULT 0`);
-                await pool.query(`ALTER TABLE formas_pagamento ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'ativo'`);
-            } catch (e) { /* colunas já existem */ }
+            await pool.query(`ALTER TABLE formas_pagamento ADD COLUMN prazo INT DEFAULT 0`).catch(() => {});
+            await pool.query(`ALTER TABLE formas_pagamento ADD COLUMN taxa DECIMAL(5,2) DEFAULT 0`).catch(() => {});
+            await pool.query(`ALTER TABLE formas_pagamento ADD COLUMN status VARCHAR(20) DEFAULT 'ativo'`).catch(() => {});
     
             const [result] = await pool.query(
                 'INSERT INTO formas_pagamento (nome, tipo, icone, prazo, taxa, ativo) VALUES (?, ?, ?, ?, ?, ?)',
