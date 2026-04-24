@@ -485,21 +485,21 @@ async function initAuditTable(pool) {
         await pool.execute(CREATE_TABLE_SQL);
         // Migrate older tables that may lack new columns
         const migrations = [
-            `ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP`,
-            `ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS action VARCHAR(50)`,
-            `ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS entity VARCHAR(100)`,
-            `ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS entity_id VARCHAR(100)`,
-            `ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS user_id INT`,
-            `ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS user_email VARCHAR(255)`,
-            `ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS method VARCHAR(10)`,
-            `ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS path VARCHAR(500)`,
-            `ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS request_body JSON`,
-            `ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS previous_data JSON`,
-            `ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS new_data JSON`,
-            `ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS status ENUM('success','failure') DEFAULT 'success'`,
-            `ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS error_message TEXT`,
-            `ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS duration INT`,
-            `ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS metadata JSON`,
+            'ALTER TABLE audit_logs ADD COLUMN `timestamp` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP',
+            'ALTER TABLE audit_logs ADD COLUMN `action` VARCHAR(50)',
+            `ALTER TABLE audit_logs ADD COLUMN entity VARCHAR(100)`,
+            `ALTER TABLE audit_logs ADD COLUMN entity_id VARCHAR(100)`,
+            `ALTER TABLE audit_logs ADD COLUMN user_id INT`,
+            `ALTER TABLE audit_logs ADD COLUMN user_email VARCHAR(255)`,
+            `ALTER TABLE audit_logs ADD COLUMN method VARCHAR(10)`,
+            'ALTER TABLE audit_logs ADD COLUMN `path` VARCHAR(500)',
+            `ALTER TABLE audit_logs ADD COLUMN request_body JSON`,
+            `ALTER TABLE audit_logs ADD COLUMN previous_data JSON`,
+            `ALTER TABLE audit_logs ADD COLUMN new_data JSON`,
+            `ALTER TABLE audit_logs ADD COLUMN status ENUM('success','failure') DEFAULT 'success'`,
+            `ALTER TABLE audit_logs ADD COLUMN error_message TEXT`,
+            `ALTER TABLE audit_logs ADD COLUMN duration INT`,
+            `ALTER TABLE audit_logs ADD COLUMN metadata JSON`,
         ];
         for (const sql of migrations) {
             await pool.execute(sql).catch(() => {});

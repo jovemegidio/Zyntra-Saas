@@ -387,12 +387,10 @@ module.exports = function createPostExportsRoutes(deps) {
         try {
             const { ativo } = req.query;
 
-            try {
-                await pool.query(`ALTER TABLE formas_pagamento ADD COLUMN IF NOT EXISTS ativo TINYINT(1) NOT NULL DEFAULT 1`);
-                await pool.query(`ALTER TABLE formas_pagamento ADD COLUMN IF NOT EXISTS prazo INT DEFAULT 0`);
-                await pool.query(`ALTER TABLE formas_pagamento ADD COLUMN IF NOT EXISTS taxa DECIMAL(5,2) DEFAULT 0`);
-                await pool.query(`ALTER TABLE formas_pagamento ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'ativo'`);
-            } catch (e) { /* colunas já existem */ }
+            await pool.query('ALTER TABLE formas_pagamento ADD COLUMN ativo TINYINT(1) NOT NULL DEFAULT 1').catch(() => {});
+            await pool.query('ALTER TABLE formas_pagamento ADD COLUMN prazo INT DEFAULT 0').catch(() => {});
+            await pool.query('ALTER TABLE formas_pagamento ADD COLUMN taxa DECIMAL(5,2) DEFAULT 0').catch(() => {});
+            await pool.query("ALTER TABLE formas_pagamento ADD COLUMN `status` VARCHAR(20) DEFAULT 'ativo'").catch(() => {});
     
 let query = 'SELECT id, nome, tipo, icone, ativo, COALESCE(prazo, 0) as prazo, COALESCE(taxa, 0) as taxa, CASE WHEN ativo = 1 THEN \'ativo\' ELSE \'inativo\' END as status FROM formas_pagamento WHERE 1=1';
             const params = [];
