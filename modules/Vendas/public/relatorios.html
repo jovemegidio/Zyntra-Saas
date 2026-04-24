@@ -2257,7 +2257,7 @@
         let dadosEmpresa = null;
         async function carregarDadosEmpresa() {
             try {
-                const resp = await fetchAutenticado('/api/configurações/empresa');
+                const resp = await fetchAutenticado('/api/configuracoes/empresa');
                 if (resp.ok) {
                     const d = await resp.json();
                     dadosEmpresa = d.empresa || d;

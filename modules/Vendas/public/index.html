@@ -14925,7 +14925,8 @@ td{padding:5px 8px;border-bottom:1px solid #e5e7eb;font-size:10px}
         async function verHistórico() {
             if (!pedidoAtual) return;
 
-            const container = document.getElementById('histórico-timeline');
+            const container = document.getElementById('historico-timeline');
+            if (!container) return;
             container.innerHTML = '<div class="histórico-empty"><i class="fas fa-spinner fa-spin"></i><p>Carregando histórico...</p></div>';
             document.getElementById('modal-histórico').classList.add('active');
 
@@ -14952,7 +14953,7 @@ td{padding:5px 8px;border-bottom:1px solid #e5e7eb;font-size:10px}
         }
 
         function renderizarHistóricoPro(histórico) {
-            const container = document.getElementById('histórico-timeline');
+            const container = document.getElementById('historico-timeline');
 
             // Garantir que histórico seja um array
             let históricoArray = histórico;

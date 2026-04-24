@@ -387,8 +387,8 @@ module.exports = function createPostExportsRoutes(deps) {
         try {
             const { ativo } = req.query;
 
-            // Garantir que as colunas prazo, taxa existam
             try {
+                await pool.query(`ALTER TABLE formas_pagamento ADD COLUMN IF NOT EXISTS ativo TINYINT(1) NOT NULL DEFAULT 1`);
                 await pool.query(`ALTER TABLE formas_pagamento ADD COLUMN IF NOT EXISTS prazo INT DEFAULT 0`);
                 await pool.query(`ALTER TABLE formas_pagamento ADD COLUMN IF NOT EXISTS taxa DECIMAL(5,2) DEFAULT 0`);
                 await pool.query(`ALTER TABLE formas_pagamento ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'ativo'`);

@@ -483,6 +483,27 @@ CREATE TABLE IF NOT EXISTS audit_logs (
 async function initAuditTable(pool) {
     try {
         await pool.execute(CREATE_TABLE_SQL);
+        // Migrate older tables that may lack new columns
+        const migrations = [
+            `ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP`,
+            `ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS action VARCHAR(50)`,
+            `ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS entity VARCHAR(100)`,
+            `ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS entity_id VARCHAR(100)`,
+            `ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS user_id INT`,
+            `ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS user_email VARCHAR(255)`,
+            `ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS method VARCHAR(10)`,
+            `ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS path VARCHAR(500)`,
+            `ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS request_body JSON`,
+            `ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS previous_data JSON`,
+            `ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS new_data JSON`,
+            `ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS status ENUM('success','failure') DEFAULT 'success'`,
+            `ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS error_message TEXT`,
+            `ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS duration INT`,
+            `ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS metadata JSON`,
+        ];
+        for (const sql of migrations) {
+            await pool.execute(sql).catch(() => {});
+        }
         console.log('[AUDIT] ✅ Tabela de auditoria inicializada');
     } catch (error) {
         console.error('[AUDIT] Erro ao criar tabela:', error.message);

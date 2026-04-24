@@ -835,16 +835,15 @@ module.exports = function createVendasRoutes(deps) {
             // Criar novo pedido (cópia) - usando nomes corretos das colunas
             const [result] = await connection.query(`
                 INSERT INTO pedidos (
-                    cliente_id, cliente, valor, status, vendedor_id, vendedor,
+                    cliente_id, cliente, valor, status, vendedor_id,
                     observacoes, data_prevista, empresa_id, frete, desconto, cenario_fiscal,
                     condicao_pagamento, parcelas, created_at
-                ) VALUES (?, ?, ?, 'orcamento', ?, ?, ?, DATE_ADD(NOW(), INTERVAL 7 DAY), ?, ?, ?, ?, ?, ?, NOW())
+                ) VALUES (?, ?, ?, 'orcamento', ?, ?, DATE_ADD(NOW(), INTERVAL 7 DAY), ?, ?, ?, ?, ?, ?, NOW())
             `, [
                 pedidoOriginal.cliente_id,
                 pedidoOriginal.cliente,
                 pedidoOriginal.valor,
                 pedidoOriginal.vendedor_id,
-                pedidoOriginal.vendedor,
                 `[CÓPIA DO PEDIDO #${id}] ${pedidoOriginal.observacoes || ''}`,
                 req.user.empresa_id,
                 pedidoOriginal.frete || 0,
