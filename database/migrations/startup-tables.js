@@ -393,6 +393,136 @@ async function runMigrations(pool) {
         }
     }
 
+    // ----------------------------------------------------------------
+    // ALTER TABLE: adicionar colunas em tabelas existentes (idempotentes)
+    // Usa IF NOT EXISTS onde disponível; ignora erro de coluna duplicada.
+    // ----------------------------------------------------------------
+    const alters = [
+        // Soft-delete em pedidos
+        `ALTER TABLE pedidos ADD COLUMN IF NOT EXISTS deleted_at DATETIME DEFAULT NULL`,
+        // estoque_movimentos: colunas exigidas pelo Bloco K / K235
+        `ALTER TABLE estoque_movimentos ADD COLUMN IF NOT EXISTS tipo_movimento VARCHAR(50) NULL`,
+        `ALTER TABLE estoque_movimentos ADD COLUMN IF NOT EXISTS documento_tipo VARCHAR(50) NULL`,
+        `ALTER TABLE estoque_movimentos ADD COLUMN IF NOT EXISTS documento_id INT NULL`,
+        `ALTER TABLE estoque_movimentos ADD COLUMN IF NOT EXISTS data_movimento DATETIME NULL DEFAULT CURRENT_TIMESTAMP`,
+    ];
+
+    for (const alter of alters) {
+        try {
+            await pool.query(alter);
+        } catch (err) {
+            // Ignorar erro de coluna já existente (código 1060)
+            if (err.code !== 'ER_DUP_FIELDNAME') {
+                console.warn(`[MIGRATION] ⚠️ Alter ignorado: ${err.message.substring(0, 120)}`);
+            }
+        }
+    }
+
+    // Compatibilidade extra: alguns MySQL/MariaDB não aceitam ADD COLUMN IF NOT EXISTS.
+    const addColumnIfMissing = async (table, column, definition) => {
+        try {
+            const [existing] = await pool.query(`SHOW COLUMNS FROM \`${table}\` LIKE ?`, [column]);
+            if (existing.length === 0) {
+                await pool.query(`ALTER TABLE \`${table}\` ADD COLUMN \`${column}\` ${definition}`);
+            }
+        } catch (err) {
+            if (err.code !== 'ER_DUP_FIELDNAME') {
+                console.warn(`[MIGRATION] ⚠️ Coluna ${table}.${column} ignorada: ${err.message.substring(0, 120)}`);
+            }
+        }
+    };
+
+    await addColumnIfMissing('pedidos', 'deleted_at', 'DATETIME DEFAULT NULL');
+    await addColumnIfMissing('estoque_movimentos', 'tipo_movimento', 'VARCHAR(50) NULL');
+    await addColumnIfMissing('estoque_movimentos', 'documento_tipo', 'VARCHAR(50) NULL');
+    await addColumnIfMissing('estoque_movimentos', 'documento_id', 'INT NULL');
+    await addColumnIfMissing('estoque_movimentos', 'data_movimento', 'DATETIME NULL DEFAULT CURRENT_TIMESTAMP');
+
+    // PCP: a tabela ordens_producao existe em instalações antigas com schema mínimo.
+    // Estes campos garantem rastreabilidade Vendas -> PCP e persistência dos dados do modal.
+    const ordensProducaoColumns = [
+        ['pedido_id', 'INT NULL'],
+        ['pedido_vinculado_id', 'INT NULL'],
+        ['codigo', 'VARCHAR(100) NULL'],
+        ['numero_ordem', 'VARCHAR(100) NULL'],
+        ['codigo_produto', 'VARCHAR(100) NULL'],
+        ['descricao_produto', 'TEXT NULL'],
+        ['produto_nome', 'VARCHAR(500) NULL'],
+        ['unidade', 'VARCHAR(20) NULL'],
+        ['data_previsao_entrega', 'DATE NULL'],
+        ['data_prevista', 'DATE NULL'],
+        ['data_conclusao', 'DATETIME NULL'],
+        ['cliente', 'VARCHAR(255) NULL'],
+        ['cliente_id', 'INT NULL'],
+        ['cliente_nome', 'VARCHAR(255) NULL'],
+        ['contato', 'VARCHAR(255) NULL'],
+        ['cliente_contato', 'VARCHAR(255) NULL'],
+        ['telefone', 'VARCHAR(50) NULL'],
+        ['cliente_telefone', 'VARCHAR(50) NULL'],
+        ['email', 'VARCHAR(255) NULL'],
+        ['cliente_email', 'VARCHAR(255) NULL'],
+        ['vendedor', 'VARCHAR(255) NULL'],
+        ['vendedor_nome', 'VARCHAR(255) NULL'],
+        ['numero_orcamento', 'VARCHAR(100) NULL'],
+        ['numero_pedido', 'VARCHAR(100) NULL'],
+        ['num_pedido', 'VARCHAR(100) NULL'],
+        ['pedido_referencia', 'VARCHAR(100) NULL'],
+        ['revisao', 'VARCHAR(20) NULL'],
+        ['data_liberacao', 'DATE NULL'],
+        ['frete', 'VARCHAR(50) NULL'],
+        ['tipo_frete', 'VARCHAR(50) NULL'],
+        ['condicoes_pagamento', 'VARCHAR(255) NULL'],
+        ['forma_pagamento', 'VARCHAR(100) NULL'],
+        ['metodo_pagamento', 'VARCHAR(100) NULL'],
+        ['valor_total', 'DECIMAL(15,2) DEFAULT 0'],
+        ['total_geral', 'DECIMAL(15,2) DEFAULT 0'],
+        ['quantidade_produtos', 'INT DEFAULT 0'],
+        ['transportadora_nome', 'VARCHAR(255) NULL'],
+        ['transportadora_fone', 'VARCHAR(50) NULL'],
+        ['transportadora_telefone', 'VARCHAR(50) NULL'],
+        ['transportadora_cep', 'VARCHAR(20) NULL'],
+        ['transportadora_endereco', 'VARCHAR(500) NULL'],
+        ['transportadora_cpf_cnpj', 'VARCHAR(30) NULL'],
+        ['transportadora_email_nfe', 'VARCHAR(255) NULL'],
+        ['observacoes', 'TEXT NULL'],
+        ['observacoes_pedido', 'TEXT NULL'],
+        ['produtos', 'LONGTEXT NULL'],
+        ['produtos_json', 'LONGTEXT NULL'],
+        ['arquivo_xlsx', 'VARCHAR(255) NULL'],
+        ['caminho_arquivo', 'VARCHAR(500) NULL'],
+        ['criado_por', 'INT NULL'],
+        ['created_by', 'INT NULL'],
+        ['created_by_name', 'VARCHAR(255) NULL'],
+        ['prioridade', "VARCHAR(50) DEFAULT 'media'"],
+        ['progresso', 'INT DEFAULT 0'],
+        ['quantidade_produzida', 'DECIMAL(15,4) DEFAULT 0'],
+        ['updated_at', 'DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP']
+    ];
+
+    for (const [column, definition] of ordensProducaoColumns) {
+        await addColumnIfMissing('ordens_producao', column, definition);
+    }
+
+    try {
+        await pool.query("ALTER TABLE ordens_producao MODIFY COLUMN status VARCHAR(50) DEFAULT 'pendente'");
+    } catch (err) {
+        console.warn(`[MIGRATION] ⚠️ Status ordens_producao ignorado: ${err.message.substring(0, 120)}`);
+    }
+
+    try {
+        await pool.query('ALTER TABLE ordens_producao MODIFY COLUMN produto_id INT NULL');
+    } catch (err) {
+        console.warn(`[MIGRATION] ⚠️ produto_id ordens_producao ignorado: ${err.message.substring(0, 120)}`);
+    }
+
+    try {
+        await pool.query('ALTER TABLE ordens_producao ADD INDEX idx_ordens_pedido_id (pedido_id)');
+    } catch (err) {
+        if (err.code !== 'ER_DUP_KEYNAME') {
+            console.warn(`[MIGRATION] ⚠️ Índice ordens_producao.pedido_id ignorado: ${err.message.substring(0, 120)}`);
+        }
+    }
+
     const elapsed = Date.now() - startTime;
     console.log(`[MIGRATION] ✅ Migrações concluídas: ${tablesCreated} tabelas verificadas em ${elapsed}ms`);
 }

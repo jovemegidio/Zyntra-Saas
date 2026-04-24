@@ -530,6 +530,8 @@ apiVendasRouter.get('/kanban/pedidos', authenticateToken, async (req, res) => {
         if (exibirCancelados !== 'true') statusExcluidos.push('cancelado');
         if (exibirDenegados !== 'true') statusExcluidos.push('denegado');
         if (exibirEncerrados !== 'true') statusExcluidos.push('encerrado', 'arquivado');
+        // Sempre excluir pedidos com soft-delete (status = 'excluido')
+        statusExcluidos.push('excluido');
 
         if (statusExcluidos.length > 0) {
             whereConditions.push(`p.status NOT IN (${statusExcluidos.map(() => '?').join(',')})`);
@@ -1992,7 +1994,7 @@ apiVendasRouter.get('/pedidos', async (req, res, next) => {
             isAdmin = verificarSeAdmin(currentUser);
         }
 
-        let where = [];
+        let where = ["p.status != 'excluido'"]; // Excluir soft-deleted
         let params = [];
 
         // FILTRO POR USUÁRIO: Vendedores só veem seus próprios pedidos + vendedores vinculados

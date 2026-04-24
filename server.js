@@ -1284,6 +1284,14 @@ function safeSendModuleHtml(req, res, next, moduleDir) {
     }
 }
 
+function authenticateModuleHtml(req, res, next) {
+    const pageName = path.basename(req.path || '').toLowerCase();
+    if (pageName === 'login.html' || pageName === 'login') {
+        return res.redirect('/login.html');
+    }
+    return authenticatePage(req, res, next);
+}
+
 // =================================================================
 // CLEAN URL ROUTING — Mascarar .html nas URLs para todos os módulos
 // /Modulo/pagina → serve /Modulo/pagina.html automaticamente
@@ -1317,50 +1325,51 @@ function serveCleanUrl(req, res, next, moduleDir) {
 }
 
 // PCP
-app.get('/PCP/*.html', (req, res, next) => {
+app.get('/PCP/*.html', authenticateModuleHtml, (req, res, next) => {
     safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'PCP'));
 });
 app.get('/PCP/*', (req, res, next) => {
     if (req.params[0].includes('.')) return next(); // skip static assets
-    serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'PCP'));
+    authenticateModuleHtml(req, res, () => serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'PCP')));
 });
-app.get('/modules/PCP/*.html', (req, res, next) => {
+app.get('/modules/PCP/*.html', authenticateModuleHtml, (req, res, next) => {
     safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'PCP'));
 });
 
 // NFe
-app.get('/NFe/*.html', (req, res, next) => {
+app.get('/NFe/*.html', authenticateModuleHtml, (req, res, next) => {
     safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'NFe'));
 });
 app.get('/NFe/*', (req, res, next) => {
     if (req.params[0].includes('.')) return next();
-    serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'NFe'));
+    authenticateModuleHtml(req, res, () => serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'NFe')));
 });
-app.get('/e-Nf-e/*.html', (req, res, next) => {
+app.get('/e-Nf-e/*.html', authenticateModuleHtml, (req, res, next) => {
     safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'NFe'));
 });
 app.get('/e-Nf-e/*', (req, res, next) => {
     if (req.params[0].includes('.')) return next();
-    serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'NFe'));
+    authenticateModuleHtml(req, res, () => serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'NFe')));
 });
 
 // Financeiro — com clean URLs e aliases root-level
 // Todas as páginas disponíveis no módulo Financeiro
 const finEnabledPages = ['index', 'contas_pagar', 'contas_receber', 'contas_bancarias', 'fluxo_caixa', 'relatorios', 'plano_contas', 'conciliacao', 'orcamentos', 'impostos'];
-app.get('/Financeiro/*.html', (req, res, next) => {
-    const page = req.params[0].split('/').pop(); // Express strip .html from wildcard
+app.get('/Financeiro/*.html', authenticateModuleHtml, (req, res, next) => {
+    const rawPage = req.params[0].split('/').pop(); // Express strip .html from wildcard
+    const page = rawPage.replace(/-/g, '_');
     if (!finEnabledPages.includes(page)) {
         return res.redirect('/Financeiro/index.html');
     }
+    req.params[0] = `${page}.html`;
     safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'Financeiro', 'public'));
 });
 app.get('/Financeiro/*', (req, res, next) => {
     if (req.params[0].includes('.')) return next();
-    const page = req.params[0].split('/').pop();
-    serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'Financeiro', 'public'));
+    authenticateModuleHtml(req, res, () => serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'Financeiro', 'public')));
 });
 // Financeiro: Dashboard alias
-app.get('/Financeiro', (req, res, next) => {
+app.get('/Financeiro', authenticateModuleHtml, (req, res, next) => {
     req.params = { 0: 'index.html' };
     safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'Financeiro', 'public'));
 });
@@ -1377,48 +1386,81 @@ const finRootAliases = {
 // Alias singular /relatorio → redireciona para /relatorios
 app.get('/relatorio', (req, res) => res.redirect(301, '/relatorios'));
 Object.entries(finRootAliases).forEach(([alias, file]) => {
-    app.get(`/${alias}`, (req, res, next) => {
+    app.get(`/${alias}`, authenticateModuleHtml, (req, res, next) => {
         req.params = { 0: `${file}.html` };
         safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'Financeiro', 'public'));
     });
 });
 
 // Vendas
-app.get('/Vendas/*.html', (req, res, next) => {
+app.get('/Vendas/*.html', authenticateModuleHtml, (req, res, next) => {
     safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'Vendas', 'public'));
 });
 app.get('/Vendas/*', (req, res, next) => {
     if (req.params[0].includes('.')) return next();
-    serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'Vendas', 'public'));
+    authenticateModuleHtml(req, res, () => serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'Vendas', 'public')));
 });
 
 // Compras
-app.get('/Compras/*.html', (req, res, next) => {
+app.get('/Compras/*.html', authenticateModuleHtml, (req, res, next) => {
     safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'Compras'));
 });
 app.get('/Compras/*', (req, res, next) => {
     if (req.params[0].includes('.')) return next();
-    serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'Compras'));
+    authenticateModuleHtml(req, res, () => serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'Compras')));
 });
 
 // RH
-app.get('/RecursosHumanos/*.html', (req, res, next) => {
+app.get('/RecursosHumanos/*.html', authenticateModuleHtml, (req, res, next) => {
     safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'RH', 'public'));
 });
 app.get('/RecursosHumanos/*', (req, res, next) => {
     if (req.params[0].includes('.')) return next();
-    serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'RH', 'public'));
+    authenticateModuleHtml(req, res, () => serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'RH', 'public')));
 });
-app.get('/RH/*.html', (req, res, next) => {
+app.get('/RH/*.html', authenticateModuleHtml, (req, res, next) => {
     safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'RH', 'public'));
 });
 app.get('/RH/*', (req, res, next) => {
     if (req.params[0].includes('.')) return next();
-    serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'RH', 'public'));
+    authenticateModuleHtml(req, res, () => serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'RH', 'public')));
+});
+
+// Logistica
+app.get('/Logistica/*.html', authenticateModuleHtml, (req, res, next) => {
+    safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'Logistica', 'public'));
+});
+app.get('/Logistica/*', (req, res, next) => {
+    if (req.params[0].includes('.')) return next();
+    authenticateModuleHtml(req, res, () => serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'Logistica', 'public')));
+});
+app.get('/Logistica', authenticateModuleHtml, (req, res, next) => {
+    req.params = { 0: 'index.html' };
+    safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'Logistica', 'public'));
+});
+
+// Faturamento
+app.get('/Faturamento/*.html', authenticateModuleHtml, (req, res, next) => {
+    safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'Faturamento', 'public'));
+});
+app.get('/Faturamento/*', (req, res, next) => {
+    if (req.params[0].includes('.')) return next();
+    authenticateModuleHtml(req, res, () => serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'Faturamento', 'public')));
+});
+app.get('/Faturamento', authenticateModuleHtml, (req, res, next) => {
+    req.params = { 0: 'dashboard.html' };
+    safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'Faturamento', 'public'));
+});
+
+app.use('/modules', (req, res, next) => {
+    if (req.path.toLowerCase().endsWith('.html')) {
+        return authenticateModuleHtml(req, res, next);
+    }
+    next();
 });
 
 // Catch-all modules
-app.get('/modules/*.html', (req, res, next) => {
+app.get('/modules/*.html', authenticateModuleHtml, (req, res, next) => {
     safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules'));
 });
 

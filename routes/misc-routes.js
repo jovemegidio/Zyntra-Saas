@@ -694,6 +694,8 @@ module.exports = function createMiscRoutes(deps) {
             if (exibirCancelados !== 'true') statusExcluir.push('cancelado');
             if (exibirDenegados !== 'true') statusExcluir.push('denegado');
             if (exibirEncerrados !== 'true') statusExcluir.push('encerrado');
+            // Sempre excluir pedidos com soft-delete (status = 'excluido')
+            statusExcluir.push('excluido');
     
             if (statusExcluir.length > 0) {
                 whereConditions.push(`p.status NOT IN (${statusExcluir.map(() => '?').join(', ')})`);

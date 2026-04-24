@@ -2220,5 +2220,128 @@ module.exports = function createFinanceiroExtendedRoutes(deps) {
         }
     });
 
+    function getBodyObservacoes(body) {
+        return body.observacoes || body['observações'] || body.obs || '';
+    }
+
+    function getTodayISO() {
+        return new Date().toISOString().split('T')[0];
+    }
+
+    router.get('/contas-bancárias', authenticateToken, (req, res) => {
+        const query = req.originalUrl.includes('?') ? '?' + req.originalUrl.split('?').slice(1).join('?') : '';
+        res.redirect(307, `/api/financeiro/contas-bancarias${query}`);
+    });
+
+    router.post('/contas-pagar/:id/baixa', checkFinanceiroPermission('contas_pagar'), async (req, res) => {
+        let connection;
+        try {
+            const { id } = req.params;
+            const valorPago = Number(req.body.valor_pago ?? req.body.valor ?? 0);
+            const dataPagamento = req.body.data_pagamento || getTodayISO();
+            const bancoId = req.body.banco_id || req.body.conta_bancaria_id || null;
+            const formaPagamento = req.body.forma_pagamento || null;
+            const observacoes = getBodyObservacoes(req.body);
+
+            if (!Number.isFinite(valorPago) || valorPago <= 0) {
+                return res.status(400).json({ message: 'Valor do pagamento inválido' });
+            }
+
+            connection = await pool.getConnection();
+            await connection.beginTransaction();
+
+            const [conta] = await connection.query('SELECT * FROM contas_pagar WHERE id = ? FOR UPDATE', [id]);
+            if (!conta || conta.length === 0) {
+                await connection.rollback();
+                return res.status(404).json({ message: 'Conta não encontrada' });
+            }
+
+            const valorTotal = Number(conta[0].valor_total || conta[0].valor || 0)
+                + Number(conta[0].valor_juros || 0)
+                + Number(conta[0].valor_multa || 0)
+                - Number(conta[0].valor_desconto || 0);
+            const status = valorPago >= valorTotal ? 'pago' : 'pendente';
+
+            await connection.query(
+                `UPDATE contas_pagar
+                 SET status = ?, valor_pago = ?, data_pagamento = ?, banco_id = ?, forma_pagamento = ?, observacoes = ?
+                 WHERE id = ?`,
+                [status, valorPago, dataPagamento, bancoId, formaPagamento, observacoes, id]
+            );
+
+            if (bancoId && status === 'pago') {
+                await connection.query(
+                    `INSERT INTO movimentacoes_bancarias (banco_id, tipo, valor, cliente_fornecedor, data, observacoes)
+                     VALUES (?, 'saida', ?, ?, ?, ?)`,
+                    [bancoId, valorPago, conta[0].descricao || 'Pagamento conta a pagar', dataPagamento, observacoes]
+                );
+            }
+
+            await connection.commit();
+            res.json({ success: true, message: 'Pagamento registrado com sucesso' });
+        } catch (err) {
+            if (connection) try { await connection.rollback(); } catch (_) {}
+            console.error('[Financeiro] Erro POST contas-pagar/:id/baixa:', err.message);
+            res.status(500).json({ message: 'Erro ao registrar pagamento' });
+        } finally {
+            if (connection) connection.release();
+        }
+    });
+
+    router.post(['/contas-receber/:id/receber', '/contas-receber/:id/baixar', '/contas-receber/:id/baixa'], checkFinanceiroPermission('contas_receber'), async (req, res) => {
+        let connection;
+        try {
+            const { id } = req.params;
+            const valorRecebido = Number(req.body.valor_recebido ?? req.body.valor_pago ?? req.body.valor ?? 0);
+            const dataRecebimento = req.body.data_recebimento || getTodayISO();
+            const bancoId = req.body.banco_id || req.body.conta_bancaria_id || null;
+            const formaRecebimento = req.body.forma_recebimento || req.body.forma_pagamento || null;
+            const observacoes = getBodyObservacoes(req.body);
+
+            if (!Number.isFinite(valorRecebido) || valorRecebido <= 0) {
+                return res.status(400).json({ message: 'Valor do recebimento inválido' });
+            }
+
+            connection = await pool.getConnection();
+            await connection.beginTransaction();
+
+            const [conta] = await connection.query('SELECT * FROM contas_receber WHERE id = ? FOR UPDATE', [id]);
+            if (!conta || conta.length === 0) {
+                await connection.rollback();
+                return res.status(404).json({ message: 'Conta não encontrada' });
+            }
+
+            const valorTotal = Number(conta[0].valor_total || conta[0].valor || 0)
+                + Number(conta[0].valor_juros || 0)
+                + Number(conta[0].valor_multa || 0)
+                - Number(conta[0].valor_desconto || 0);
+            const status = valorRecebido >= valorTotal ? 'recebido' : 'parcial';
+
+            await connection.query(
+                `UPDATE contas_receber
+                 SET status = ?, valor_recebido = ?, data_recebimento = ?, banco_id = ?, forma_recebimento = ?, observacoes = ?
+                 WHERE id = ?`,
+                [status, valorRecebido, dataRecebimento, bancoId, formaRecebimento, observacoes, id]
+            );
+
+            if (bancoId) {
+                await connection.query(
+                    `INSERT INTO movimentacoes_bancarias (banco_id, tipo, valor, cliente_fornecedor, data, observacoes)
+                     VALUES (?, 'entrada', ?, ?, ?, ?)`,
+                    [bancoId, valorRecebido, conta[0].descricao || 'Recebimento conta a receber', dataRecebimento, observacoes]
+                );
+            }
+
+            await connection.commit();
+            res.json({ success: true, message: 'Recebimento registrado com sucesso' });
+        } catch (err) {
+            if (connection) try { await connection.rollback(); } catch (_) {}
+            console.error('[Financeiro] Erro POST contas-receber/:id/baixa:', err.message);
+            res.status(500).json({ message: 'Erro ao registrar recebimento' });
+        } finally {
+            if (connection) connection.release();
+        }
+    });
+
     return router;
 };

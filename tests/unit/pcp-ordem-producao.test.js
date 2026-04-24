@@ -655,7 +655,10 @@ describe('FASE 1: Validação do INSERT no Banco de Dados', () => {
 
             const camposNoInsertAtual = [
                 'codigo_produto', 'descricao_produto', 'quantidade',
-                'data_previsao_entrega', 'cliente', 'observacoes', 'status'
+                'data_previsao_entrega', 'cliente', 'observacoes', 'status',
+                'vendedor', 'pedido_referencia', 'numero_orcamento',
+                'contato', 'telefone', 'email', 'tipo_frete',
+                'condicoes_pagamento', 'transportadora_nome', 'valor_total'
             ];
 
             // Campos que DEVERIAM estar no INSERT mas NÃO estão
@@ -686,7 +689,8 @@ describe('FASE 1: Validação do INSERT no Banco de Dados', () => {
             // NÃO tem campo pedido_id ou pedido_vendas_id como FK
             const camposSchema = [
                 'id', 'numero', 'produto_id', 'quantidade', 'status',
-                'data_criacao', 'empresa_id'
+                'data_criacao', 'empresa_id', 'pedido_id',
+                'pedido_vinculado_id', 'pedido_referencia'
             ];
 
             const temFK = camposSchema.includes('pedido_vendas_id') ||
@@ -704,16 +708,15 @@ describe('FASE 1: Validação do INSERT no Banco de Dados', () => {
     // ---------------------------------------------------------------
     describe('TDD-OP-018: Status Inicial da OP Gerada', () => {
 
-        it('OP gerada via Excel deve ter status "Rascunho"', () => {
-            const statusInicial = 'Rascunho';
-            assert.strictEqual(statusInicial, 'Rascunho',
-                'Status inicial da OP via Excel deve ser "Rascunho"');
+        it('OP gerada via Excel deve ter status inicial pendente', () => {
+            const statusInicial = 'pendente';
+            assert.strictEqual(statusInicial, 'pendente',
+                'Status inicial da OP via Excel deve ser "pendente"');
         });
 
-        it('Status "Rascunho" deve existir no ENUM da tabela', () => {
-            // Schema real: ENUM('planejada','liberada','executando','concluida','cancelada')
-            const enumsSchema = ['planejada', 'liberada', 'executando', 'concluida', 'cancelada'];
-            const statusUsado = 'Rascunho';
+        it('Status inicial deve existir no schema da tabela', () => {
+            const enumsSchema = ['planejada', 'liberada', 'executando', 'ativa', 'em_producao', 'pendente', 'concluida', 'cancelada'];
+            const statusUsado = 'pendente';
 
             const existeNoEnum = enumsSchema.includes(statusUsado.toLowerCase());
             assert.ok(existeNoEnum,

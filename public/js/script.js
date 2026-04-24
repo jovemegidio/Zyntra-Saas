@@ -208,7 +208,7 @@ function initPCPPage() {
             const response = await fetch(url, Object.assign({}, fetchOptions, {
                     credentials: 'include',
                     headers
-                })));
+                }));
             if (response.status === 401 || response.status === 403) {
                 // Clear only user-related storage and redirect to login
                 localStorage.removeItem('userData');

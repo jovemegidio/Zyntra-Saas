@@ -28,6 +28,7 @@ module.exports = function createPCPRoutes(deps) {
         const errors = validationResult(req);
         if (!errors.isEmpty()) return res.status(400).json({ message: 'Dados inválidos', errors: errors.array() });
         next();
+    };
 
     // Registra baixa de materiais em estoque_movimentos ao concluir OP
     // Alimenta K235 (via itens_ordem_producao) e K270 (ajuste de inventário)
@@ -77,7 +78,7 @@ module.exports = function createPCPRoutes(deps) {
             }
         }
     }
-    };
+
     router.use(authenticateToken);
     // PCP module serves Compras, Estoque and Produção
     // Accept users with 'pcp' OR 'compras' area permission (FIX 28/02/2026)
@@ -129,6 +130,155 @@ module.exports = function createPCPRoutes(deps) {
         _produtoColumnsCache = columns.map(col => col.COLUMN_NAME);
         _produtoColumnsCacheTime = now;
         return _produtoColumnsCache;
+    }
+
+    const getTableColumnsSet = async (tableName) => {
+        const [columns] = await pool.query(`
+            SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+            WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ?
+        `, [tableName]);
+        return new Set(columns.map(col => col.COLUMN_NAME));
+    };
+
+    function parseOrdemProducaoItems(body) {
+        if (Array.isArray(body.produtos)) return body.produtos;
+        if (Array.isArray(body.items)) return body.items;
+        if (body.items_json) {
+            try {
+                const parsed = typeof body.items_json === 'string' ? JSON.parse(body.items_json) : body.items_json;
+                if (Array.isArray(parsed)) return parsed;
+            } catch (_) {}
+        }
+        if (body.codigo_produto || body.descricao_produto || body.produto_nome) {
+            return [{
+                codigo: body.codigo_produto || body.codigo || '',
+                descricao: body.descricao_produto || body.produto_nome || body.produto || '',
+                quantidade: body.quantidade || 0,
+                valor_unitario: body.valor_unitario || body.preco_unitario || 0,
+                unidade: body.unidade || 'UN'
+            }];
+        }
+        return [];
+    }
+
+    function normalizarDadosOrdemProducao(body) {
+        const dados = Object.assign({}, body || {});
+        const transportadora = dados.transportadora && typeof dados.transportadora === 'object'
+            ? dados.transportadora
+            : {};
+
+        dados.transportadora_nome = dados.transportadora_nome || transportadora.nome || '';
+        dados.transportadora_fone = dados.transportadora_fone || dados.transportadora_telefone || transportadora.fone || '';
+        dados.transportadora_cep = dados.transportadora_cep || transportadora.cep || '';
+        dados.transportadora_endereco = dados.transportadora_endereco || transportadora.endereco || '';
+        dados.transportadora_cpf_cnpj = dados.transportadora_cpf_cnpj || transportadora.cpf_cnpj || '';
+        dados.transportadora_email_nfe = dados.transportadora_email_nfe || transportadora.email_nfe || '';
+        dados.numero_pedido = dados.numero_pedido || dados.num_pedido || dados.pedido_referencia || '';
+        dados.prazo_entrega = dados.prazo_entrega || dados.data_previsao_entrega || null;
+        dados.tipo_frete = dados.tipo_frete || dados.frete || '';
+        dados.produtos = parseOrdemProducaoItems(dados).map(item => ({
+            ...item,
+            quantidade: parseFloat(item.quantidade) || 0,
+            valor_unitario: parseFloat(item.valor_unitario || item.preco_unitario || item.preco) || 0,
+            unidade: item.unidade || item.unidade_medida || 'UN'
+        }));
+        return dados;
+    }
+
+    async function persistirOrdemProducaoGerada(dados, usuario, arquivoXlsx) {
+        const columns = await getTableColumnsSet('ordens_producao');
+        const insertColumns = [];
+        const values = [];
+        const used = new Set();
+        const add = (column, value) => {
+            if (!columns.has(column) || used.has(column)) return;
+            insertColumns.push(`\`${column}\``);
+            values.push(value === undefined ? null : value);
+            used.add(column);
+        };
+
+        const itens = dados.produtos || [];
+        const primeiroItem = itens[0] || {};
+        const quantidadeTotal = parseFloat(dados.quantidade_total)
+            || itens.reduce((sum, item) => sum + (parseFloat(item.quantidade) || 0), 0);
+        const valorTotal = parseFloat(dados.valor_total)
+            || itens.reduce((sum, item) => {
+                const qtd = parseFloat(item.quantidade) || 0;
+                const unit = parseFloat(item.valor_unitario || item.preco_unitario || item.preco) || 0;
+                return sum + (parseFloat(item.total) || qtd * unit);
+            }, 0);
+        const numeroOrdem = dados.numero_ordem || dados.codigo || `OP-${Date.now()}`;
+        const numeroPedido = dados.numero_pedido || dados.pedido_referencia || dados.num_pedido || null;
+        const pedidoId = dados.pedido_id || dados.pedido_vinculado_id || null;
+        const produtosJson = JSON.stringify(itens);
+
+        add('codigo', numeroOrdem);
+        add('numero_ordem', numeroOrdem);
+        add('codigo_produto', primeiroItem.codigo || dados.codigo_produto || dados.codigo || null);
+        add('descricao_produto', primeiroItem.descricao || primeiroItem.nome || dados.descricao_produto || dados.produto_nome || null);
+        add('produto_nome', primeiroItem.descricao || primeiroItem.nome || dados.produto || dados.produto_nome || dados.cliente || null);
+        add('quantidade', quantidadeTotal || 0);
+        add('unidade', primeiroItem.unidade || dados.unidade || 'UN');
+        add('status', dados.status || 'pendente');
+        add('prioridade', dados.prioridade || 'media');
+        add('progresso', 0);
+        add('quantidade_produzida', 0);
+        add('pedido_id', pedidoId);
+        add('pedido_vinculado_id', pedidoId);
+        add('numero_pedido', numeroPedido);
+        add('num_pedido', numeroPedido);
+        add('pedido_referencia', dados.pedido_referencia || numeroPedido);
+        add('numero_orcamento', dados.numero_orcamento || dados.num_orcamento || dados['num_orçamento'] || null);
+        add('revisao', dados.revisao || '00');
+        add('data_liberacao', dados.data_liberacao || null);
+        add('data_previsao_entrega', dados.data_previsao_entrega || null);
+        add('data_prevista', dados.data_previsao_entrega || dados.prazo_entrega || null);
+        add('cliente_id', dados.cliente_id || null);
+        add('cliente', dados.cliente || dados.cliente_nome || null);
+        add('cliente_nome', dados.cliente || dados.cliente_nome || null);
+        add('contato', dados.contato || dados.contato_cliente || null);
+        add('cliente_contato', dados.contato || dados.contato_cliente || null);
+        add('telefone', dados.telefone || dados.fone_cliente || null);
+        add('cliente_telefone', dados.telefone || dados.fone_cliente || null);
+        add('email', dados.email || dados.email_cliente || null);
+        add('cliente_email', dados.email || dados.email_cliente || null);
+        add('vendedor', dados.vendedor || dados.vendedor_nome || null);
+        add('vendedor_nome', dados.vendedor || dados.vendedor_nome || null);
+        add('frete', dados.frete || dados.tipo_frete || null);
+        add('tipo_frete', dados.tipo_frete || dados.frete || null);
+        add('condicoes_pagamento', dados.condicoes_pagamento || null);
+        add('forma_pagamento', dados.forma_pagamento || null);
+        add('metodo_pagamento', dados.metodo_pagamento || null);
+        add('valor_total', valorTotal || 0);
+        add('total_geral', valorTotal || 0);
+        add('quantidade_produtos', itens.length);
+        add('transportadora_nome', dados.transportadora_nome || null);
+        add('transportadora_fone', dados.transportadora_fone || null);
+        add('transportadora_telefone', dados.transportadora_fone || dados.transportadora_telefone || null);
+        add('transportadora_cep', dados.transportadora_cep || null);
+        add('transportadora_endereco', dados.transportadora_endereco || null);
+        add('transportadora_cpf_cnpj', dados.transportadora_cpf_cnpj || null);
+        add('transportadora_email_nfe', dados.transportadora_email_nfe || null);
+        add('observacoes', dados.observacoes || null);
+        add('observacoes_pedido', dados.observacoes_pedido || null);
+        add('produtos', produtosJson);
+        add('produtos_json', produtosJson);
+        add('arquivo_xlsx', arquivoXlsx || null);
+        add('caminho_arquivo', null);
+        add('criado_por', usuario?.id || null);
+        add('created_by', usuario?.id || null);
+        add('created_by_name', usuario?.nome || usuario?.name || usuario?.email || null);
+
+        if (!insertColumns.length) {
+            throw new Error('Schema de ordens_producao sem colunas compatíveis para gravação');
+        }
+
+        const placeholders = insertColumns.map(() => '?').join(', ');
+        const [result] = await pool.query(
+            `INSERT INTO ordens_producao (${insertColumns.join(', ')}) VALUES (${placeholders})`,
+            values
+        );
+        return result.insertId;
     }
 
     // Rota /me para o PCP retornar dados do usuário logado
@@ -466,12 +616,54 @@ module.exports = function createPCPRoutes(deps) {
         try {
             const { id } = req.params;
             const { status } = req.body;
-            const [result] = await pool.query('UPDATE ordens_producao SET status = ? WHERE id = ?', [status, id]);
-            if (result.affectedRows > 0) {
-                res.json({ message: 'Status atualizado com sucesso!' });
-            } else {
-                res.status(404).json({ message: 'Ordem não encontrada.' });
+            const updates = ['status = ?'];
+            const values = [status];
+            if (status === 'concluida') {
+                updates.push('data_conclusao = NOW()');
             }
+            updates.push('updated_at = NOW()');
+            values.push(id);
+            const [result] = await pool.query(
+                `UPDATE ordens_producao SET ${updates.join(', ')} WHERE id = ?`,
+                values
+            );
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ message: 'Ordem não encontrada.' });
+            }
+            if (status === 'concluida') {
+                // Pipeline: OP concluída → pedido para "faturar"
+                const pipeConn = await pool.getConnection();
+                try {
+                    await pipeConn.beginTransaction();
+                    const [opData] = await pipeConn.query(
+                        'SELECT COALESCE(pedido_vinculado_id, pedido_id) AS pedido_id FROM ordens_producao WHERE id = ?', [id]
+                    );
+                    if (opData.length > 0 && opData[0].pedido_id) {
+                        const pedidoId = opData[0].pedido_id;
+                        const [pedido] = await pipeConn.query(
+                            'SELECT status FROM pedidos WHERE id = ? FOR UPDATE', [pedidoId]
+                        );
+                        if (pedido.length > 0 && pedido[0].status === 'pedido-aprovado') {
+                            await pipeConn.query(
+                                'UPDATE pedidos SET status = "faturar", updated_at = NOW() WHERE id = ?',
+                                [pedidoId]
+                            );
+                            console.log(`[PIPELINE_AUTO] Pedido #${pedidoId} movido para "faturar" (OP #${id} concluída via PUT status)`);
+                        }
+                    }
+                    await pipeConn.commit();
+                } catch (pipeErr) {
+                    await pipeConn.rollback();
+                    console.error(`[PIPELINE_AUTO] Erro ao atualizar pedido após conclusão OP #${id}:`, pipeErr.message);
+                } finally {
+                    pipeConn.release();
+                }
+                // K235: registra baixa de materiais em estoque_movimentos
+                registrarBaixaEstoqueOP(pool, id, req.user?.id).catch(e =>
+                    console.error(`[BLOCO_K] Erro ao registrar baixa OP #${id}:`, e.message)
+                );
+            }
+            res.json({ message: 'Status atualizado com sucesso!' });
         } catch (error) { next(error); }
     });
 
@@ -1471,9 +1663,9 @@ module.exports = function createPCPRoutes(deps) {
                     const pipeConn = await pool.getConnection();
                     try {
                         await pipeConn.beginTransaction();
-                        const [opData] = await pipeConn.query('SELECT pedido_vinculado_id FROM ordens_producao WHERE id = ?', [id]);
-                        if (opData.length > 0 && opData[0].pedido_vinculado_id) {
-                            const pedidoId = opData[0].pedido_vinculado_id;
+                        const [opData] = await pipeConn.query('SELECT COALESCE(pedido_vinculado_id, pedido_id) AS pedido_id FROM ordens_producao WHERE id = ?', [id]);
+                        if (opData.length > 0 && opData[0].pedido_id) {
+                            const pedidoId = opData[0].pedido_id;
                             const [pedido] = await pipeConn.query('SELECT status FROM pedidos WHERE id = ? FOR UPDATE', [pedidoId]);
                             if (pedido.length > 0 && pedido[0].status === 'pedido-aprovado') {
                                 await pipeConn.query('UPDATE pedidos SET status = "faturar", updated_at = NOW() WHERE id = ?', [pedidoId]);
@@ -1566,9 +1758,9 @@ module.exports = function createPCPRoutes(deps) {
                     const pipeConn = await pool.getConnection();
                     try {
                         await pipeConn.beginTransaction();
-                        const [opDataPatch] = await pipeConn.query('SELECT pedido_vinculado_id FROM ordens_producao WHERE id = ?', [id]);
-                        if (opDataPatch.length > 0 && opDataPatch[0].pedido_vinculado_id) {
-                            const pedidoIdPatch = opDataPatch[0].pedido_vinculado_id;
+                        const [opDataPatch] = await pipeConn.query('SELECT COALESCE(pedido_vinculado_id, pedido_id) AS pedido_id FROM ordens_producao WHERE id = ?', [id]);
+                        if (opDataPatch.length > 0 && opDataPatch[0].pedido_id) {
+                            const pedidoIdPatch = opDataPatch[0].pedido_id;
                             const [pedidoPatch] = await pipeConn.query('SELECT status FROM pedidos WHERE id = ? FOR UPDATE', [pedidoIdPatch]);
                             if (pedidoPatch.length > 0 && pedidoPatch[0].status === 'pedido-aprovado') {
                                 await pipeConn.query('UPDATE pedidos SET status = "faturar", updated_at = NOW() WHERE id = ?', [pedidoIdPatch]);
@@ -1700,6 +1892,63 @@ module.exports = function createPCPRoutes(deps) {
                 data: rows
             });
         } catch (error) { next(error); }
+    });
+
+    router.post(['/ordens-producao', '/gerar-ordem-excel'], async (req, res, next) => {
+        try {
+            const dadosOrdem = normalizarDadosOrdemProducao(req.body);
+
+            if (!dadosOrdem.cliente && !dadosOrdem.cliente_nome) {
+                return res.status(400).json({ message: 'Cliente é obrigatório para gerar a ordem de produção.' });
+            }
+
+            if (!dadosOrdem.produtos.length) {
+                return res.status(400).json({ message: 'Informe ao menos um item para gerar a ordem de produção.' });
+            }
+
+            if (dadosOrdem.transportadora_email_nfe && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(dadosOrdem.transportadora_email_nfe)) {
+                return res.status(400).json({ message: 'E-mail NFe da transportadora inválido.' });
+            }
+
+            if (dadosOrdem.transportadora_cpf_cnpj) {
+                const doc = String(dadosOrdem.transportadora_cpf_cnpj).replace(/\D/g, '');
+                if (doc && !(doc.length === 11 || doc.length === 14)) {
+                    return res.status(400).json({ message: 'CPF/CNPJ da transportadora inválido.' });
+                }
+            }
+
+            const ExcelJS = require('exceljs');
+            const templatePath = path.join(__dirname, '..', 'modules', 'PCP', 'Ordem de Produção.xlsx');
+            const nomeCliente = (dadosOrdem.cliente || dadosOrdem.cliente_nome || 'Cliente').replace(/[/\\:*?"<>|]/g, '_').trim();
+            const nomeArquivo = `Ordem de Produção - ${nomeCliente || 'Cliente'} - ERP.xlsx`;
+            let fileBuffer;
+            let contentType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+            let downloadName = nomeArquivo;
+
+            try {
+                if (!fs.existsSync(templatePath)) throw new Error(`Template não encontrado: ${templatePath}`);
+                fileBuffer = await gerarExcelOrdemProducaoCompleta(dadosOrdem, ExcelJS, templatePath);
+            } catch (excelError) {
+                console.warn('[PCP/OP] Fallback CSV após falha ao gerar XLSX:', excelError.message);
+                fileBuffer = await gerarExcelOrdemProducaoFallback(dadosOrdem);
+                contentType = 'text/csv; charset=utf-8';
+                downloadName = nomeArquivo.replace(/\.xlsx$/i, '.csv');
+            }
+
+            const ordemId = await persistirOrdemProducaoGerada(dadosOrdem, req.user, downloadName);
+            res.setHeader('X-Ordem-Producao-Id', String(ordemId));
+            const encodedFilename = encodeURIComponent(downloadName).replace(/'/g, '%27');
+            const asciiFilename = downloadName.replace(/[^\x20-\x7E]/g, '_').replace(/["\\]/g, '_');
+            const buffer = Buffer.from(fileBuffer);
+
+            res.setHeader('Content-Disposition', `attachment; filename="${asciiFilename}"; filename*=UTF-8''${encodedFilename}`);
+            res.setHeader('Content-Type', contentType);
+            res.setHeader('Content-Length', buffer.length);
+            res.send(buffer);
+        } catch (error) {
+            console.error('[PCP/OP] Erro ao gerar/persistir ordem de produção:', error);
+            next(error);
+        }
     });
 
     // ÚLTIMO PEDIDO - Para gerar número sequencial

@@ -436,6 +436,11 @@ module.exports = function createVendasRoutes(deps) {
         } catch (error) { next(error); }
     });
     const cacheService = (() => { try { return require('../services/cache'); } catch(_) { return null; } })();
+    const clearPedidosCache = () => {
+        if (cacheService && cacheService.cacheClear) {
+            cacheService.cacheClear('vendas_pedidos').catch(() => {});
+        }
+    };
 
     router.post('/pedidos', authenticateToken, async (req, res, next) => {
         const connection = await pool.getConnection();
@@ -587,9 +592,7 @@ module.exports = function createVendasRoutes(deps) {
             await connection.commit();
 
             // Invalidar cache do GET /pedidos para que o kanban veja o novo pedido imediatamente
-            if (cacheService && cacheService.cacheClear) {
-                cacheService.cacheClear('vendas_pedidos').catch(() => {});
-            }
+            clearPedidosCache();
 
             // Notificação (não-bloqueante)
             try {
@@ -735,6 +738,7 @@ module.exports = function createVendasRoutes(deps) {
                 );
                 if (result.affectedRows === 0) return res.status(404).json({ message: 'Pedido não encontrado.' });
             }
+            clearPedidosCache();
             res.json({ message: 'Pedido atualizado com sucesso.' });
         } catch (error) { next(error); }
     });
@@ -808,6 +812,8 @@ module.exports = function createVendasRoutes(deps) {
 
             await connection.commit();
 
+            clearPedidosCache();
+
             console.log(`🗑️ Pedido #${id} soft-deleted por usuário ${req.user?.id}`);
             res.json({ message: 'Pedido excluído com sucesso.', soft_deleted: true });
         } catch (error) {
@@ -880,6 +886,7 @@ module.exports = function createVendasRoutes(deps) {
             await connection.commit();
 
             console.log(`📋 Pedido #${id} duplicado como #${novoPedidoId} por usuário ${req.user?.id}`);
+            clearPedidosCache();
             res.status(201).json({
                 success: true,
                 message: 'Pedido duplicado com sucesso',
@@ -1360,6 +1367,7 @@ module.exports = function createVendasRoutes(deps) {
             `, [id]);
 
             await patchConn.commit();
+            clearPedidosCache();
             res.json({
                 message: 'Pedido atualizado com sucesso.',
                 pedido: updatedRows[0] || null
@@ -1975,6 +1983,7 @@ module.exports = function createVendasRoutes(deps) {
 
             await connection.commit();
 
+            clearPedidosCache();
             console.log(`✅ Status do pedido ${id} atualizado: ${statusAtual} → ${status} por ${user.nome || user.email} (Admin: ${isAdmin})`);
             res.json({
                 message: 'Status atualizado com sucesso.',
