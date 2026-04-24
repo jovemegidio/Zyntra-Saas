@@ -399,12 +399,12 @@ async function runMigrations(pool) {
     // ----------------------------------------------------------------
     const alters = [
         // Soft-delete em pedidos
-        `ALTER TABLE pedidos ADD COLUMN IF NOT EXISTS deleted_at DATETIME DEFAULT NULL`,
+        `ALTER TABLE pedidos ADD COLUMN deleted_at DATETIME DEFAULT NULL`,
         // estoque_movimentos: colunas exigidas pelo Bloco K / K235
-        `ALTER TABLE estoque_movimentos ADD COLUMN IF NOT EXISTS tipo_movimento VARCHAR(50) NULL`,
-        `ALTER TABLE estoque_movimentos ADD COLUMN IF NOT EXISTS documento_tipo VARCHAR(50) NULL`,
-        `ALTER TABLE estoque_movimentos ADD COLUMN IF NOT EXISTS documento_id INT NULL`,
-        `ALTER TABLE estoque_movimentos ADD COLUMN IF NOT EXISTS data_movimento DATETIME NULL DEFAULT CURRENT_TIMESTAMP`,
+        `ALTER TABLE estoque_movimentos ADD COLUMN tipo_movimento VARCHAR(50) NULL`,
+        `ALTER TABLE estoque_movimentos ADD COLUMN documento_tipo VARCHAR(50) NULL`,
+        `ALTER TABLE estoque_movimentos ADD COLUMN documento_id INT NULL`,
+        `ALTER TABLE estoque_movimentos ADD COLUMN data_movimento DATETIME NULL DEFAULT CURRENT_TIMESTAMP`,
     ];
 
     for (const alter of alters) {

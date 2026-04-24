@@ -333,12 +333,12 @@ async function runInlineMigrations(pool) {
     console.log('\n🔄 Verificando integração Compras-PCP...');
 
     const comprasPcpAlters = [
-        `ALTER TABLE pedidos_compras ADD COLUMN IF NOT EXISTS origem ENUM('manual', 'pcp', 'estoque_minimo') DEFAULT 'manual' AFTER usuario_id`,
-        `ALTER TABLE pedidos_compras ADD COLUMN IF NOT EXISTS origem_id INT NULL COMMENT 'ID da ordem de produção ou outro registro de origem' AFTER origem`,
-        `ALTER TABLE pedidos_compras ADD COLUMN IF NOT EXISTS prioridade ENUM('baixa', 'media', 'alta', 'urgente') DEFAULT 'media' AFTER origem_id`,
-        `ALTER TABLE itens_pedido_compras ADD COLUMN IF NOT EXISTS produto_id INT NULL COMMENT 'Referência ao produtos (materiais PCP)' AFTER pedido_id`,
-        `ALTER TABLE ordens_producao ADD COLUMN IF NOT EXISTS pedidos_compra_vinculados JSON NULL COMMENT 'Array de IDs de pedidos de compra relacionados' AFTER arquivo_xlsx`,
-        `ALTER TABLE ordens_producao ADD COLUMN IF NOT EXISTS materiais_pendentes JSON NULL COMMENT 'Materiais aguardando compra' AFTER pedidos_compra_vinculados`
+        `ALTER TABLE pedidos_compras ADD COLUMN origem ENUM('manual', 'pcp', 'estoque_minimo') DEFAULT 'manual' AFTER usuario_id`,
+        `ALTER TABLE pedidos_compras ADD COLUMN origem_id INT NULL COMMENT 'ID da ordem de produção ou outro registro de origem' AFTER origem`,
+        `ALTER TABLE pedidos_compras ADD COLUMN prioridade ENUM('baixa', 'media', 'alta', 'urgente') DEFAULT 'media' AFTER origem_id`,
+        `ALTER TABLE itens_pedido_compras ADD COLUMN produto_id INT NULL COMMENT 'Referência ao produtos (materiais PCP)' AFTER pedido_id`,
+        `ALTER TABLE ordens_producao ADD COLUMN pedidos_compra_vinculados JSON NULL COMMENT 'Array de IDs de pedidos de compra relacionados' AFTER arquivo_xlsx`,
+        `ALTER TABLE ordens_producao ADD COLUMN materiais_pendentes JSON NULL COMMENT 'Materiais aguardando compra' AFTER pedidos_compra_vinculados`
     ];
 
     for (const sql of comprasPcpAlters) {
