@@ -565,7 +565,7 @@ class SpedFiscalService {
 
         const [config, estoqueCheck] = await Promise.all([
             SpedFiscalService._loadBlocoKConfig(pool),
-            pool.query('SELECT 1 FROM estoque_saldos WHERE quantidade > 0 LIMIT 1').catch(() => [[]])
+            pool.query('SELECT 1 FROM estoque_saldos WHERE quantidade_fisica > 0 LIMIT 1').catch(() => [[]])
         ]);
 
         const hasMovement = config.habilitado && estoqueCheck[0].length > 0;
@@ -577,62 +577,70 @@ class SpedFiscalService {
             linhas.push(`|K100|${dtIni}|${dtFin}|`);
 
             // K200 — Inventário final do período
+            // estoque_saldos PK = codigo_material (varchar), quantidade_fisica
             try {
                 const dtUltimo = SpedFiscalService._data(new Date(ano, mes, 0));
                 const [saldos] = await pool.query(`
-                    SELECT p.codigo AS cod_item, s.quantidade AS qtd
+                    SELECT s.codigo_material AS cod_item, s.quantidade_fisica AS qtd
                     FROM estoque_saldos s
-                    JOIN produtos p ON p.id = s.produto_id
-                    WHERE s.quantidade > 0 ORDER BY p.codigo
+                    WHERE s.quantidade_fisica > 0
+                    ORDER BY s.codigo_material
                 `);
                 for (const s of saldos)
                     linhas.push(`|K200|${dtUltimo}|${s.cod_item}|${SpedFiscalService._dec(s.qtd)}|0||`);
             } catch (_) {}
 
             // K220 — Transferências internas
+            // estoque_movimentos: tipo_movimento = 'transferencia', data_movimento
             if (config.incluir_transferencias) {
                 try {
                     const [movs] = await pool.query(`
-                        SELECT DATE_FORMAT(m.data,'%d%m%Y') AS dt_mov, p.codigo AS cod_item, m.quantidade AS qtd
-                        FROM estoque_movimentos m JOIN produtos p ON p.id = m.produto_id
-                        WHERE m.tipo = 'transferencia' AND MONTH(m.data)=? AND YEAR(m.data)=?
+                        SELECT DATE_FORMAT(m.data_movimento,'%d%m%Y') AS dt_mov,
+                               p.codigo AS cod_item, ABS(m.quantidade) AS qtd
+                        FROM estoque_movimentos m
+                        JOIN produtos p ON p.id = m.produto_id
+                        WHERE m.tipo_movimento = 'transferencia'
+                          AND MONTH(m.data_movimento)=? AND YEAR(m.data_movimento)=?
                     `, [mes, ano]);
                     for (const mv of movs)
                         linhas.push(`|K220|${mv.dt_mov}|${mv.cod_item}|${mv.cod_item}|${SpedFiscalService._dec(mv.qtd)}|${SpedFiscalService._dec(mv.qtd)}|`);
                 } catch (_) {}
             }
 
-            // K230/K235 — Ordens de produção com componentes (batch, sem N+1)
+            // K230/K235 — Ordens de produção concluídas com materiais consumidos
+            // ordens_producao: codigo, produto_nome, data_inicio, data_prevista, data_conclusao
+            // itens_ordem_producao: ordem_producao_id, codigo_material, quantidade_utilizada/necessaria
             if (config.incluir_ordens_producao) {
                 try {
                     const [ordens] = await pool.query(`
-                        SELECT op.numero_op, op.produto_codigo AS cod_item,
+                        SELECT op.id AS op_id, op.codigo AS num_op, op.produto_nome AS cod_item,
                                DATE_FORMAT(op.data_inicio,'%d%m%Y') AS dt_ini,
-                               DATE_FORMAT(COALESCE(op.data_fim,op.data_previsao),'%d%m%Y') AS dt_fin,
-                               op.quantidade AS qtd_enc
+                               DATE_FORMAT(COALESCE(op.data_conclusao, op.data_prevista),'%d%m%Y') AS dt_fin,
+                               COALESCE(op.quantidade_produzida, op.quantidade) AS qtd_enc
                         FROM ordens_producao op
-                        WHERE MONTH(COALESCE(op.data_fim,op.data_inicio))=?
-                          AND YEAR(COALESCE(op.data_fim,op.data_inicio))=?
-                          AND op.status IN ('concluida','encerrada')
+                        WHERE MONTH(COALESCE(op.data_conclusao, op.data_inicio))=?
+                          AND YEAR(COALESCE(op.data_conclusao, op.data_inicio))=?
+                          AND op.status = 'concluida'
                     `, [mes, ano]);
 
                     if (ordens.length > 0) {
-                        const ids = ordens.map(o => o.numero_op);
+                        const ids = ordens.map(o => o.op_id);
                         const [todosComps] = await pool.query(`
-                            SELECT ic.ordem_producao_id, p.codigo AS cod_comp, ic.quantidade AS qtd,
-                                   DATE_FORMAT(ic.data_consumo,'%d%m%Y') AS dt_saida
-                            FROM itens_consumo_op ic JOIN produtos p ON p.id = ic.produto_id
-                            WHERE ic.ordem_producao_id IN (?)
+                            SELECT io.ordem_producao_id,
+                                   io.codigo_material AS cod_comp,
+                                   COALESCE(io.quantidade_utilizada, io.quantidade_necessaria) AS qtd,
+                                   DATE_FORMAT(io.data_criacao,'%d%m%Y') AS dt_saida
+                            FROM itens_ordem_producao io
+                            WHERE io.ordem_producao_id IN (?)
                         `, [ids]).catch(() => [[]]);
 
                         const compsPorOp = {};
-                        for (const c of todosComps) {
+                        for (const c of todosComps)
                             (compsPorOp[c.ordem_producao_id] = compsPorOp[c.ordem_producao_id] || []).push(c);
-                        }
 
                         for (const op of ordens) {
-                            linhas.push(`|K230|${op.numero_op || ''}|${op.dt_ini}|${op.dt_fin}||${op.cod_item}|${SpedFiscalService._dec(op.qtd_enc)}|`);
-                            for (const c of (compsPorOp[op.numero_op] || []))
+                            linhas.push(`|K230|${op.num_op || ''}|${op.dt_ini}|${op.dt_fin}||${op.cod_item}|${SpedFiscalService._dec(op.qtd_enc)}|`);
+                            for (const c of (compsPorOp[op.op_id] || []))
                                 linhas.push(`|K235|${c.dt_saida || dtFin}|${c.cod_comp}|${SpedFiscalService._dec(c.qtd)}||`);
                         }
                     }
@@ -640,13 +648,16 @@ class SpedFiscalService {
             }
 
             // K270 — Ajustes de inventário
+            // estoque_movimentos: tipo_movimento IN ('ajuste','inventario')
             if (config.incluir_ajustes) {
                 try {
                     const [ajustes] = await pool.query(`
                         SELECT p.codigo AS cod_item, ABS(m.quantidade) AS qtd,
                                CASE WHEN m.quantidade > 0 THEN '0' ELSE '1' END AS ind_mov
-                        FROM estoque_movimentos m JOIN produtos p ON p.id = m.produto_id
-                        WHERE m.tipo IN ('ajuste','inventario') AND MONTH(m.data)=? AND YEAR(m.data)=?
+                        FROM estoque_movimentos m
+                        JOIN produtos p ON p.id = m.produto_id
+                        WHERE m.tipo_movimento IN ('ajuste','inventario')
+                          AND MONTH(m.data_movimento)=? AND YEAR(m.data_movimento)=?
                     `, [mes, ano]);
                     for (const aj of ajustes)
                         linhas.push(`|K270|${dtIni}|${dtFin}|${aj.cod_item}|${SpedFiscalService._dec(aj.qtd)}|${aj.ind_mov}|`);
@@ -654,13 +665,16 @@ class SpedFiscalService {
             }
 
             // K280 — Perdas de estoque
+            // estoque_movimentos: tipo_movimento = 'perda'
             if (config.incluir_perdas) {
                 try {
                     const [perdas] = await pool.query(`
                         SELECT p.codigo AS cod_item, ABS(m.quantidade) AS qtd,
-                               DATE_FORMAT(m.data,'%d%m%Y') AS dt_perd
-                        FROM estoque_movimentos m JOIN produtos p ON p.id = m.produto_id
-                        WHERE m.tipo='perda' AND MONTH(m.data)=? AND YEAR(m.data)=?
+                               DATE_FORMAT(m.data_movimento,'%d%m%Y') AS dt_perd
+                        FROM estoque_movimentos m
+                        JOIN produtos p ON p.id = m.produto_id
+                        WHERE m.tipo_movimento = 'perda'
+                          AND MONTH(m.data_movimento)=? AND YEAR(m.data_movimento)=?
                     `, [mes, ano]);
                     for (const pd of perdas)
                         linhas.push(`|K280|${pd.dt_perd}|${pd.cod_item}|${SpedFiscalService._dec(pd.qtd)}|0||`);

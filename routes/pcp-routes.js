@@ -28,6 +28,55 @@ module.exports = function createPCPRoutes(deps) {
         const errors = validationResult(req);
         if (!errors.isEmpty()) return res.status(400).json({ message: 'Dados inválidos', errors: errors.array() });
         next();
+
+    // Registra baixa de materiais em estoque_movimentos ao concluir OP
+    // Alimenta K235 (via itens_ordem_producao) e K270 (ajuste de inventário)
+    async function registrarBaixaEstoqueOP(pool, opId, usuarioId) {
+        const [itens] = await pool.query(
+            `SELECT io.id, io.codigo_material, io.quantidade_utilizada, io.quantidade_necessaria,
+                    p.id AS produto_id
+             FROM itens_ordem_producao io
+             LEFT JOIN produtos p ON p.codigo = io.codigo_material
+             WHERE io.ordem_producao_id = ?`,
+            [opId]
+        );
+        if (!itens.length) return;
+
+        const now = new Date();
+        const rows = itens
+            .filter(i => i.produto_id)
+            .map(i => [
+                i.produto_id,
+                'saida_producao',
+                Math.abs(parseFloat(i.quantidade_utilizada || i.quantidade_necessaria) || 0),
+                'ordem_producao',
+                opId,
+                `Baixa automática OP #${opId}`,
+                usuarioId || null,
+                now
+            ]);
+
+        if (!rows.length) return;
+
+        await pool.query(
+            `INSERT INTO estoque_movimentos
+             (produto_id, tipo_movimento, quantidade, documento_tipo, documento_id, observacoes, usuario_id, data_movimento)
+             VALUES ${rows.map(() => '(?,?,?,?,?,?,?,?)').join(',')}`,
+            rows.flat()
+        );
+
+        // Debitar saldo — ignora erros (pode não ter saldo cadastrado por codigo)
+        for (const i of itens) {
+            const qtd = parseFloat(i.quantidade_utilizada || i.quantidade_necessaria) || 0;
+            if (qtd > 0) {
+                await pool.query(
+                    `UPDATE estoque_saldos SET quantidade_fisica = GREATEST(0, quantidade_fisica - ?)
+                     WHERE codigo_material = ?`,
+                    [qtd, i.codigo_material]
+                ).catch(() => {});
+            }
+        }
+    }
     };
     router.use(authenticateToken);
     // PCP module serves Compras, Estoque and Produção
@@ -1417,8 +1466,8 @@ module.exports = function createPCPRoutes(deps) {
                     return res.status(404).json({ error: 'Ordem não encontrada' });
                 }
 
-                // Sprint E2E-S1 (E3-CRIT-04 fix): OP concluída → pedido para "faturar" COM transação + FOR UPDATE
                 if (dbStatus === 'concluida') {
+                    // Pipeline: OP concluída → pedido para "faturar"
                     const pipeConn = await pool.getConnection();
                     try {
                         await pipeConn.beginTransaction();
@@ -1438,6 +1487,11 @@ module.exports = function createPCPRoutes(deps) {
                     } finally {
                         pipeConn.release();
                     }
+
+                    // BLOCO K: registra baixa de materiais em estoque_movimentos (K235/K270)
+                    registrarBaixaEstoqueOP(pool, id, req.user?.id).catch(e =>
+                        console.error(`[BLOCO_K] Erro ao registrar baixa OP #${id}:`, e.message)
+                    );
                 }
 
                 console.log(`✅ Ordem ${id} atualizada`);
@@ -1506,7 +1560,6 @@ module.exports = function createPCPRoutes(deps) {
                 UPDATE ordens_producao SET ${updates.join(', ')} WHERE id = ?
             `, params);
 
-            // Sprint E2E-S1 (E3-CRIT-04 fix): OP concluída via PATCH → pedido para "faturar" COM transação + FOR UPDATE
             if (status) {
                 const statusDBPatch = mapKanbanToStatus(status);
                 if (statusDBPatch === 'concluida') {
@@ -1529,6 +1582,11 @@ module.exports = function createPCPRoutes(deps) {
                     } finally {
                         pipeConn.release();
                     }
+
+                    // BLOCO K: registra baixa de materiais em estoque_movimentos (K235/K270)
+                    registrarBaixaEstoqueOP(pool, id, req.user?.id).catch(e =>
+                        console.error(`[BLOCO_K] Erro ao registrar baixa OP #${id}:`, e.message)
+                    );
                 }
             }
 

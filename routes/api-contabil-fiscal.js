@@ -469,23 +469,20 @@ function createContabilFiscalRouter(pool, authenticateToken) {
 
             const [estoqueResult, ordensResult, movResult] = await Promise.all([
                 pool.query(`
-                    SELECT COUNT(DISTINCT p.id) AS total
-                    FROM estoque_saldos s
-                    JOIN produtos p ON p.id = s.produto_id
-                    WHERE s.quantidade > 0
+                    SELECT COUNT(*) AS total FROM estoque_saldos WHERE quantidade_fisica > 0
                 `).catch(() => [[{ total: 0 }]]),
                 pool.query(`
                     SELECT COUNT(*) AS total
                     FROM ordens_producao
-                    WHERE MONTH(COALESCE(data_fim, data_inicio)) = ?
-                      AND YEAR(COALESCE(data_fim, data_inicio)) = ?
-                      AND status IN ('concluida', 'encerrada')
+                    WHERE MONTH(COALESCE(data_conclusao, data_inicio)) = ?
+                      AND YEAR(COALESCE(data_conclusao, data_inicio)) = ?
+                      AND status = 'concluida'
                 `, [mes, ano]).catch(() => [[{ total: 0 }]]),
                 pool.query(`
                     SELECT COUNT(*) AS total
                     FROM estoque_movimentos m
-                    WHERE m.tipo IN ('transferencia', 'ajuste', 'perda')
-                      AND MONTH(m.data) = ? AND YEAR(m.data) = ?
+                    WHERE m.tipo_movimento IN ('transferencia', 'ajuste', 'perda', 'inventario')
+                      AND MONTH(m.data_movimento) = ? AND YEAR(m.data_movimento) = ?
                 `, [mes, ano]).catch(() => [[{ total: 0 }]])
             ]);
 
@@ -500,6 +497,98 @@ function createContabilFiscalRouter(pool, authenticateToken) {
         } catch (error) {
             console.error('❌ Erro no preview Bloco K:', error);
             res.status(500).json({ error: 'Erro ao gerar preview do Bloco K' });
+        }
+    });
+
+    // ============================================================
+    // MOVIMENTAÇÕES DE ESTOQUE PARA BLOCO K (K220 / K270 / K280)
+    // ============================================================
+
+    /**
+     * POST /api/contabil/estoque/movimentacao
+     * Registra transferência, ajuste ou perda de estoque para alimentar Bloco K
+     * Body: { produto_id, tipo_movimento, quantidade, observacoes }
+     *   tipo_movimento: 'transferencia' | 'ajuste' | 'inventario' | 'perda'
+     */
+    router.post('/estoque/movimentacao', authenticateToken, async (req, res) => {
+        try {
+            const { produto_id, tipo_movimento, quantidade, observacoes } = req.body;
+            const tiposValidos = ['transferencia', 'ajuste', 'inventario', 'perda'];
+
+            if (!produto_id || !tipo_movimento || quantidade === undefined) {
+                return res.status(400).json({ error: 'produto_id, tipo_movimento e quantidade são obrigatórios' });
+            }
+            if (!tiposValidos.includes(tipo_movimento)) {
+                return res.status(400).json({ error: `tipo_movimento deve ser: ${tiposValidos.join(', ')}` });
+            }
+
+            const qtd = parseFloat(quantidade);
+            if (isNaN(qtd) || qtd === 0) {
+                return res.status(400).json({ error: 'quantidade deve ser um número diferente de zero' });
+            }
+
+            await pool.query(
+                `INSERT INTO estoque_movimentos
+                 (produto_id, tipo_movimento, quantidade, documento_tipo, observacoes, usuario_id, data_movimento)
+                 VALUES (?, ?, ?, 'manual_bloco_k', ?, ?, NOW())`,
+                [produto_id, tipo_movimento, Math.abs(qtd), observacoes || null, req.user?.id || null]
+            );
+
+            // Atualiza saldo conforme tipo
+            if (tipo_movimento === 'ajuste' || tipo_movimento === 'inventario') {
+                const [prod] = await pool.query('SELECT codigo FROM produtos WHERE id = ?', [produto_id]);
+                if (prod.length > 0) {
+                    const sinal = qtd > 0 ? 1 : -1;
+                    await pool.query(
+                        `UPDATE estoque_saldos
+                         SET quantidade_fisica = GREATEST(0, quantidade_fisica + ?)
+                         WHERE codigo_material = ?`,
+                        [Math.abs(qtd) * sinal, prod[0].codigo]
+                    ).catch(() => {});
+                }
+            } else if (tipo_movimento === 'perda') {
+                const [prod] = await pool.query('SELECT codigo FROM produtos WHERE id = ?', [produto_id]);
+                if (prod.length > 0) {
+                    await pool.query(
+                        `UPDATE estoque_saldos
+                         SET quantidade_fisica = GREATEST(0, quantidade_fisica - ?)
+                         WHERE codigo_material = ?`,
+                        [Math.abs(qtd), prod[0].codigo]
+                    ).catch(() => {});
+                }
+            }
+
+            res.json({ success: true, tipo_movimento, quantidade: Math.abs(qtd) });
+        } catch (error) {
+            console.error('❌ Erro ao registrar movimentação:', error);
+            res.status(500).json({ error: 'Erro ao registrar movimentação de estoque' });
+        }
+    });
+
+    /**
+     * GET /api/contabil/estoque/movimentacoes
+     * Lista movimentações registradas para Bloco K do período
+     */
+    router.get('/estoque/movimentacoes', authenticateToken, async (req, res) => {
+        try {
+            const mes = parseInt(req.query.mes) || (new Date().getMonth() + 1);
+            const ano = parseInt(req.query.ano) || new Date().getFullYear();
+
+            const [rows] = await pool.query(`
+                SELECT m.id, m.tipo_movimento, m.quantidade, m.observacoes, m.data_movimento,
+                       p.codigo AS produto_codigo, p.descricao AS produto_descricao
+                FROM estoque_movimentos m
+                JOIN produtos p ON p.id = m.produto_id
+                WHERE m.tipo_movimento IN ('transferencia','ajuste','inventario','perda')
+                  AND MONTH(m.data_movimento) = ? AND YEAR(m.data_movimento) = ?
+                ORDER BY m.data_movimento DESC
+                LIMIT 500
+            `, [mes, ano]);
+
+            res.json({ periodo: { mes, ano }, movimentacoes: rows, total: rows.length });
+        } catch (error) {
+            console.error('❌ Erro ao listar movimentações:', error);
+            res.status(500).json({ error: 'Erro ao listar movimentações' });
         }
     });
 
