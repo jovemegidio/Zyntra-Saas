@@ -10,6 +10,7 @@ const { safeAddColumn, safeAddIndex } = require('../utils/safe-alter');
 module.exports = function createFinanceiroExtendedRoutes(deps) {
     const { pool, authenticateToken, authorizeArea, writeAuditLog, jwt, JWT_SECRET, cacheMiddleware, CACHE_CONFIG, checkFinanceiroPermission } = deps;
     const router = express.Router();
+    const cacheService = (() => { try { return require('../services/cache'); } catch(_) { return null; } })();
 
     // ============================================================
     // AUTO-MIGRAÇÃO: Coluna mes_referencia para organizar dados por mês
@@ -631,6 +632,7 @@ module.exports = function createFinanceiroExtendedRoutes(deps) {
                 [cliente_id, valor, descricao, vencimento, categoria, req.user.id]
             );
 
+            cacheService?.cacheClear('fin_contas_rec').catch(() => {});
             return res.json({
                 success: true,
                 message: 'Conta a receber criada com sucesso',
@@ -675,6 +677,7 @@ module.exports = function createFinanceiroExtendedRoutes(deps) {
                 [fornecedor_id || null, valor, descricao, dataVenc, catId || null, banco_id || null, forma_pagamento || null, observacoes || null]
             );
 
+            cacheService?.cacheClear('fin_contas_pag').catch(() => {});
             return res.json({
                 success: true,
                 message: 'Conta a pagar criada com sucesso',
@@ -737,6 +740,7 @@ module.exports = function createFinanceiroExtendedRoutes(deps) {
                 [valor, descricao, vencimento, status, categoria, req.user.id, id]
             );
 
+            cacheService?.cacheClear('fin_contas_rec').catch(() => {});
             return res.json({
                 success: true,
                 message: 'Conta a receber atualizada com sucesso'
@@ -763,6 +767,7 @@ module.exports = function createFinanceiroExtendedRoutes(deps) {
                 [valor, descricao, vencimento, status, categoria, req.user.id, id]
             );
 
+            cacheService?.cacheClear('fin_contas_pag').catch(() => {});
             return res.json({
                 success: true,
                 message: 'Conta a pagar atualizada com sucesso'
@@ -795,6 +800,7 @@ module.exports = function createFinanceiroExtendedRoutes(deps) {
             // AUDIT-FIX R2: Soft-delete (preserva histórico fiscal)
             await pool.query('UPDATE contas_receber SET status = "excluida", deleted_at = NOW(), deleted_by = ? WHERE id = ?', [req.user?.id, id]);
 
+            cacheService?.cacheClear('fin_contas_rec').catch(() => {});
             return res.json({
                 success: true,
                 message: 'Conta a receber excluída com sucesso'
@@ -827,6 +833,7 @@ module.exports = function createFinanceiroExtendedRoutes(deps) {
             // AUDIT-FIX R2: Soft-delete (preserva histórico fiscal)
             await pool.query('UPDATE contas_pagar SET status = "excluida", deleted_at = NOW(), deleted_by = ? WHERE id = ?', [req.user?.id, id]);
 
+            cacheService?.cacheClear('fin_contas_pag').catch(() => {});
             return res.json({
                 success: true,
                 message: 'Conta a pagar excluída com sucesso'

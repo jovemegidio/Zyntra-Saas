@@ -8,7 +8,7 @@ async function migrateProdutosTable() {
         connection = await mysql.createConnection({
             host: 'localhost',
             user: 'root',
-            password: 'aluvendas01',
+            password: process.env.DB_PASSWORD || 'FILL_IN_PASSWORD',
             database: 'aluforce_vendas',
             multipleStatements: true
         });

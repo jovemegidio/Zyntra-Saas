@@ -195,11 +195,11 @@ module.exports = function registerAllRoutes(app, deps) {
             try {
                 // Garantir que as colunas extras existam
                 try {
-                    await pool.query(`ALTER TABLE configuracoes_impostos ADD COLUMN IF NOT EXISTS regime_tributario VARCHAR(50) DEFAULT 'simples'`);
-                    await pool.query(`ALTER TABLE configuracoes_impostos ADD COLUMN IF NOT EXISTS cfop_venda_interna VARCHAR(10) DEFAULT '5102'`);
-                    await pool.query(`ALTER TABLE configuracoes_impostos ADD COLUMN IF NOT EXISTS cfop_venda_externa VARCHAR(10) DEFAULT '6102'`);
-                    await pool.query(`ALTER TABLE configuracoes_impostos ADD COLUMN IF NOT EXISTS cfop_devolucao_interna VARCHAR(10) DEFAULT '5202'`);
-                    await pool.query(`ALTER TABLE configuracoes_impostos ADD COLUMN IF NOT EXISTS cfop_devolucao_externa VARCHAR(10) DEFAULT '6202'`);
+                    await pool.query(`ALTER TABLE configuracoes_impostos ADD COLUMN regime_tributario VARCHAR(50) DEFAULT 'simples'`);
+                    await pool.query(`ALTER TABLE configuracoes_impostos ADD COLUMN cfop_venda_interna VARCHAR(10) DEFAULT '5102'`);
+                    await pool.query(`ALTER TABLE configuracoes_impostos ADD COLUMN cfop_venda_externa VARCHAR(10) DEFAULT '6102'`);
+                    await pool.query(`ALTER TABLE configuracoes_impostos ADD COLUMN cfop_devolucao_interna VARCHAR(10) DEFAULT '5202'`);
+                    await pool.query(`ALTER TABLE configuracoes_impostos ADD COLUMN cfop_devolucao_externa VARCHAR(10) DEFAULT '6202'`);
                 } catch (e) { /* colunas já existem */ }
 
                 const [rows] = await pool.query('SELECT * FROM configuracoes_impostos LIMIT 1');

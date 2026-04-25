@@ -15,10 +15,10 @@ module.exports = function createFinanceiroExtendedRoutes(deps) {
     // ============================================================
     (async () => {
         try {
-            await pool.query(`ALTER TABLE contas_pagar ADD COLUMN IF NOT EXISTS mes_referencia VARCHAR(7) NULL COMMENT 'Mês de referência YYYY-MM'`);
-            await pool.query(`ALTER TABLE contas_pagar ADD INDEX IF NOT EXISTS idx_cp_mes_referencia (mes_referencia)`);
-            await pool.query(`ALTER TABLE contas_receber ADD COLUMN IF NOT EXISTS mes_referencia VARCHAR(7) NULL COMMENT 'Mês de referência YYYY-MM'`);
-            await pool.query(`ALTER TABLE contas_receber ADD INDEX IF NOT EXISTS idx_cr_mes_referencia (mes_referencia)`);
+            await pool.query(`ALTER TABLE contas_pagar ADD COLUMN mes_referencia VARCHAR(7) NULL COMMENT 'Mês de referência YYYY-MM'`).catch(() => {});
+            await pool.query(`ALTER TABLE contas_pagar ADD INDEX idx_cp_mes_referencia (mes_referencia)`).catch(() => {});
+            await pool.query(`ALTER TABLE contas_receber ADD COLUMN mes_referencia VARCHAR(7) NULL COMMENT 'Mês de referência YYYY-MM'`).catch(() => {});
+            await pool.query(`ALTER TABLE contas_receber ADD INDEX idx_cr_mes_referencia (mes_referencia)`).catch(() => {});
             // Preencher mes_referencia para registros existentes que ainda não têm
             await pool.query(`UPDATE contas_pagar SET mes_referencia = DATE_FORMAT(COALESCE(data_vencimento, data_pagamento, data_emissao, data_criacao), '%Y-%m') WHERE mes_referencia IS NULL AND COALESCE(data_vencimento, data_pagamento, data_emissao, data_criacao) IS NOT NULL`);
             await pool.query(`UPDATE contas_receber SET mes_referencia = DATE_FORMAT(COALESCE(data_vencimento, data_recebimento, data_emissao, data_criacao), '%Y-%m') WHERE mes_referencia IS NULL AND COALESCE(data_vencimento, data_recebimento, data_emissao, data_criacao) IS NOT NULL`);

@@ -8497,6 +8497,133 @@ async function excluirCondicao(id) {
 window.editarRegiao = editarRegiao;
 window.excluirRegiao = excluirRegiao;
 window.salvarEdicaoRegiao = salvarEdicaoRegiao;
+
+// =========================
+// GRUPOS DE CLIENTES - CRUD
+// =========================
+
+async function novoGrupoCliente() {
+    const html = `
+        <div class="modal-overlay active" id="modal-novo-grupo-cliente" style="display: flex;">
+            <div class="modal-content" style="max-width: 450px; border-radius: 12px;">
+                <div class="modal-header" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                    <h2><i class="fas fa-layer-group"></i> Novo Grupo de Clientes</h2>
+                    <button class="modal-close" onclick="fecharModalConfig('modal-novo-grupo-cliente')"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="modal-body" style="padding: 24px;">
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <label style="font-size: 13px; font-weight: 500; color: #374151; display: block; margin-bottom: 6px;">Nome do Grupo *</label>
+                        <input type="text" id="gc-nome" placeholder="Ex: VIP, Revendedor" style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px;">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 16px;">
+                        <label style="font-size: 13px; font-weight: 500; color: #374151; display: block; margin-bottom: 6px;">Desconto (%)</label>
+                        <input type="number" id="gc-desconto" min="0" max="100" step="0.01" value="0" style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px;">
+                    </div>
+                    <div class="form-group">
+                        <label style="font-size: 13px; font-weight: 500; color: #374151; display: block; margin-bottom: 6px;">Prazo Padrão (dias)</label>
+                        <input type="number" id="gc-prazo" min="0" value="0" style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px;">
+                    </div>
+                </div>
+                <div class="modal-footer" style="padding: 16px 24px; background: #f9fafb; border-top: 1px solid #e5e7eb; display: flex; justify-content: flex-end; gap: 12px;">
+                    <button type="button" onclick="fecharModalConfig('modal-novo-grupo-cliente')" style="padding: 10px 20px; border: 1px solid #d1d5db; background: white; border-radius: 8px; cursor: pointer;">Cancelar</button>
+                    <button type="button" style="background: #8b5cf6; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer;" onclick="salvarGrupoCliente()">
+                        <i class="fas fa-save"></i> Salvar
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', html);
+}
+
+async function salvarGrupoCliente(id = null) {
+    const nome = document.getElementById('gc-nome')?.value?.trim();
+    const desconto = document.getElementById('gc-desconto')?.value || 0;
+    const prazo_padrao = document.getElementById('gc-prazo')?.value || 0;
+    if (!nome) { showNotification('Nome do grupo é obrigatório', 'error'); return; }
+    try {
+        const method = id ? 'PUT' : 'POST';
+        const url = id ? `/api/clientes/grupos/${id}` : '/api/clientes/grupos';
+        const response = await fetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nome, desconto, prazo_padrao })
+        });
+        if (response.ok) {
+            showNotification(id ? 'Grupo atualizado!' : 'Grupo criado!', 'success');
+            fecharModalConfig(id ? 'modal-editar-grupo-cliente' : 'modal-novo-grupo-cliente');
+            loadGruposClientesData();
+        } else {
+            throw new Error('Erro ao salvar grupo');
+        }
+    } catch (error) {
+        console.error('Erro:', error);
+        showNotification('Erro ao salvar grupo de clientes', 'error');
+    }
+}
+
+async function editarGrupoCliente(id) {
+    try {
+        const response = await fetch(`/api/clientes/grupos/${id}`);
+        const grupo = response.ok ? await response.json() : {};
+        const g = grupo.data || grupo;
+        const html = `
+            <div class="modal-overlay active" id="modal-editar-grupo-cliente" style="display: flex;">
+                <div class="modal-content" style="max-width: 450px; border-radius: 12px;">
+                    <div class="modal-header" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                        <h2><i class="fas fa-edit"></i> Editar Grupo</h2>
+                        <button class="modal-close" onclick="fecharModalConfig('modal-editar-grupo-cliente')"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="modal-body" style="padding: 24px;">
+                        <div class="form-group" style="margin-bottom: 16px;">
+                            <label style="font-size: 13px; font-weight: 500; color: #374151; display: block; margin-bottom: 6px;">Nome do Grupo *</label>
+                            <input type="text" id="gc-nome" value="${g.nome || ''}" style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px;">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 16px;">
+                            <label style="font-size: 13px; font-weight: 500; color: #374151; display: block; margin-bottom: 6px;">Desconto (%)</label>
+                            <input type="number" id="gc-desconto" min="0" max="100" step="0.01" value="${g.desconto || 0}" style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px;">
+                        </div>
+                        <div class="form-group">
+                            <label style="font-size: 13px; font-weight: 500; color: #374151; display: block; margin-bottom: 6px;">Prazo Padrão (dias)</label>
+                            <input type="number" id="gc-prazo" min="0" value="${g.prazo_padrao || 0}" style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px;">
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="padding: 16px 24px; background: #f9fafb; border-top: 1px solid #e5e7eb; display: flex; justify-content: flex-end; gap: 12px;">
+                        <button type="button" onclick="fecharModalConfig('modal-editar-grupo-cliente')" style="padding: 10px 20px; border: 1px solid #d1d5db; background: white; border-radius: 8px; cursor: pointer;">Cancelar</button>
+                        <button type="button" style="background: #8b5cf6; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer;" onclick="salvarGrupoCliente(${id})">
+                            <i class="fas fa-save"></i> Salvar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', html);
+    } catch (error) {
+        console.error('Erro ao carregar grupo:', error);
+        showNotification('Erro ao carregar grupo', 'error');
+    }
+}
+
+async function excluirGrupoCliente(id) {
+    if (!confirm('Deseja realmente excluir este grupo de clientes?')) return;
+    try {
+        const response = await fetch(`/api/clientes/grupos/${id}`, { method: 'DELETE' });
+        if (response.ok) {
+            showNotification('Grupo excluído com sucesso!', 'success');
+            loadGruposClientesData();
+        } else {
+            throw new Error('Erro ao excluir');
+        }
+    } catch (error) {
+        console.error('Erro:', error);
+        showNotification('Erro ao excluir grupo de clientes', 'error');
+    }
+}
+
+window.novoGrupoCliente = novoGrupoCliente;
+window.salvarGrupoCliente = salvarGrupoCliente;
+window.editarGrupoCliente = editarGrupoCliente;
+window.excluirGrupoCliente = excluirGrupoCliente;
 window.editarCondicao = editarCondicao;
 window.excluirCondicao = excluirCondicao;
 window.salvarEdicaoCondicao = salvarEdicaoCondicao;

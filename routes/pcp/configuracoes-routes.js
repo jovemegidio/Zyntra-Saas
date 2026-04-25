@@ -1543,6 +1543,27 @@ module.exports = function registerConfiguracoesRoutes(router, deps) {
         }
     });
 
+    router.put('/api/produtos/ncm/:id', authenticateToken, authorizeAdmin, async (req, res) => {
+        try {
+            const { codigo, descricao, aliquota_ipi } = req.body;
+            await pool.query('UPDATE ncm_codigos SET codigo = ?, descricao = ?, aliquota_ipi = ? WHERE id = ?', [codigo, descricao || null, aliquota_ipi || null, req.params.id]);
+            res.json({ success: true });
+        } catch (error) {
+            console.error('Erro ao atualizar NCM:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    });
+
+    router.delete('/api/produtos/ncm/:id', authenticateToken, authorizeAdmin, async (req, res) => {
+        try {
+            await pool.query('DELETE FROM ncm_codigos WHERE id = ?', [req.params.id]);
+            res.json({ success: true });
+        } catch (error) {
+            console.error('Erro ao excluir NCM:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    });
+
     // =========================
     // SLA DE ATENDIMENTO
     // =========================
@@ -1667,6 +1688,17 @@ module.exports = function registerConfiguracoesRoutes(router, deps) {
         }
     });
 
+    router.put('/api/configuracoes/familias-produtos/:id', authenticateToken, authorizeAdmin, async (req, res) => {
+        try {
+            const { nome, descricao } = req.body;
+            await pool.query('UPDATE familias_produtos SET nome = ?, descricao = ? WHERE id = ?', [nome, descricao || null, req.params.id]);
+            res.json({ success: true });
+        } catch (error) {
+            console.error('Erro ao atualizar família:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    });
+
     router.delete('/api/configuracoes/familias-produtos/:id', authenticateToken, authorizeAdmin, async (req, res) => {
         try {
             await pool.query('DELETE FROM familias_produtos WHERE id = ?', [req.params.id]);
@@ -1749,6 +1781,20 @@ module.exports = function registerConfiguracoesRoutes(router, deps) {
     });
 
     router.put('/api/configuracoes/caracteristicas/:id', authenticateToken, authorizeAdmin, async (req, res) => {
+        try {
+            const { nome, conteudos_possiveis, visualizar_em, preenchimento } = req.body;
+            await pool.query(
+                'UPDATE caracteristicas_produtos SET nome = ?, conteudos_possiveis = ?, visualizar_em = ?, preenchimento = ? WHERE id = ?',
+                [nome, conteudos_possiveis, visualizar_em, preenchimento, req.params.id]
+            );
+            res.json({ success: true });
+        } catch (error) {
+            console.error('Erro ao atualizar característica:', error);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    });
+
+    router.put('/api/configuracoes/caracteristicas-produtos/:id', authenticateToken, authorizeAdmin, async (req, res) => {
         try {
             const { nome, conteudos_possiveis, visualizar_em, preenchimento } = req.body;
             await pool.query(

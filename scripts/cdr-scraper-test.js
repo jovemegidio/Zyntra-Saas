@@ -7,7 +7,7 @@ const puppeteer = require('puppeteer-core');
 const CONFIG = {
     url: 'https://sip10.tsinfo.net.br',
     username: 'Labor@',
-    password: 'F.0582#9d5c?',
+    password: process.env.CDR_PASSWORD || 'FILL_IN_PASSWORD',
     chromiumPath: '/snap/bin/chromium'
 };
 

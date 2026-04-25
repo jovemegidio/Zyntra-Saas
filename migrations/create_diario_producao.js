@@ -6,11 +6,11 @@
 const mysql = require('mysql2/promise');
 
 const config = {
-    host: 'interchange.proxy.rlwy.net',
-    port: 19396,
-    user: 'root',
-    password: 'iiilOZutDOnPCwxgiTKeMuEaIzSwplcu',
-    database: 'railway'
+    host: process.env.DB_HOST || 'interchange.proxy.rlwy.net',
+    port: parseInt(process.env.DB_PORT || '19396'),
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || 'FILL_IN_PASSWORD',
+    database: process.env.DB_NAME || 'railway'
 };
 
 async function runMigration() {

@@ -2,9 +2,9 @@
 const http = require('http');
 const https = require('https');
 
-const loginData = JSON.stringify({ 
-    email: 'ti@aluforce.ind.br', 
-    password: 'Aluforce@2026' 
+const loginData = JSON.stringify({
+    email: process.env.TEST_EMAIL || 'ti@aluforce.ind.br',
+    password: process.env.TEST_PASSWORD || 'FILL_IN_PASSWORD'
 });
 
 console.log('=== STEP 1: Testing LOGIN ===');

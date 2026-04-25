@@ -1,7 +1,7 @@
 // Script de teste de login na VPS
 const http = require('http');
 
-const data = JSON.stringify({ email: 'ti@aluforce.ind.br', password: '123456' });
+const data = JSON.stringify({ email: process.env.TEST_EMAIL || 'ti@aluforce.ind.br', password: process.env.TEST_PASSWORD || 'FILL_IN_PASSWORD' });
 
 const opts = {
     hostname: 'localhost',
