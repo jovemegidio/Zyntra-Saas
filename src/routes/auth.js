@@ -274,9 +274,9 @@ router.post('/login', validate(schemas.login), async (req, res) => {
             '@aluforce.com',
             '@energy.com.br',
             '@laboreletric.com.br',
-            '@lumiereassesoria.com.br',   // Consultoria parceira (grafia alternativa)
-            '@lumiereassessoria.com.br',  // Consultoria parceira (grafia oficial com SS)
-            '@zyntra.com.br'             // Zyntra Demo
+            '@lumiereassesoria.com.br',
+            '@lumiereassessoria.com.br',
+            '@zyntra.com.br'
         ];
         const dominiosPermitidos = process.env.ALLOWED_EMAIL_DOMAINS
             ? process.env.ALLOWED_EMAIL_DOMAINS.split(',').map(d => d.trim())
@@ -287,6 +287,16 @@ router.post('/login', validate(schemas.login), async (req, res) => {
         if (!isCpfLogin && (!email || !emailValido)) {
             return res.status(401).json({ message: 'E-mail não autorizado. Domínios permitidos: ' + dominiosPermitidos.join(', ') });
         }
+
+        // Mapeamento domínio → empresa_id (multiempresa)
+        const dominioEmpresaMap = {
+            '@aluforce.ind.br': 1,
+            '@aluforce.com': 1,
+            '@laboreletric.com.br': 2,
+            '@energy.com.br': 3
+        };
+        const emailDominio = email ? ('@' + (email.split('@')[1] || '')) : '';
+        const empresaIdPorDominio = dominioEmpresaMap[emailDominio] || null;
 
         // ========================================
         // ACCOUNT LOCKOUT — verificar se conta está bloqueada
@@ -821,17 +831,19 @@ router.post('/login', validate(schemas.login), async (req, res) => {
         console.log(`[AUTH/LOGIN] 📱 DeviceId gerado: ${deviceId.substring(0, 8)}...`);
 
         // Gera PAR de tokens: access (15m) + refresh (7d) com rotação
+        const resolvedEmpresaId = empresaIdPorDominio || user.empresa_id || 1;
         const tokenPair = await refreshTokenModule.generateTokenPair(
-            { id: user.id, username: user.email, nome: user.nome, role: user.role, empresa_id: user.empresa_id, area: user.area },
+            { id: user.id, username: user.email, nome: user.nome, role: user.role, empresa_id: resolvedEmpresaId, area: user.area },
             pool,
             deviceId
         );
-        // Adicionar campos extras ao access token (deviceId, setor, email)
+        // Adicionar campos extras ao access token (deviceId, setor, email, empresa_id)
         const accessToken = jwt.sign({
             id: user.id,
             nome: user.nome,
             email: user.email,
             role: user.role,
+            empresa_id: resolvedEmpresaId,
             setor: user.setor || null,
             deviceId: deviceId,
             type: 'access'

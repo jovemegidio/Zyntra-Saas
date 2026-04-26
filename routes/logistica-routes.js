@@ -17,39 +17,44 @@ module.exports = function createLogisticaRoutes(deps) {
     // Dashboard da Logística - Contadores por status
     router.get('/dashboard', async (req, res, next) => {
         try {
-            // Sprint E2E-S2 (E4-HIGH-06): Separar pendente de aguardando_separacao no dashboard
-            // HOTFIX Pipeline E2E: Incluir status 'entregue' para que pedidos entregues não sumam do dashboard
-            // (quando status_logistica='entregue', o status principal muda para 'entregue')
+            const empresaId = req.user?.empresa_id;
+
             const [[aguardando]] = await pool.query(`
                 SELECT COUNT(*) as total FROM pedidos
                 WHERE status IN ('faturado', 'recibo', 'entregue')
                 AND (status_logistica IS NULL OR status_logistica = 'pendente' OR status_logistica = '')
-            `);
+                AND empresa_id = ?
+            `, [empresaId]);
 
             const [[aguardandoSep]] = await pool.query(`
                 SELECT COUNT(*) as total FROM pedidos
                 WHERE status IN ('faturado', 'recibo', 'entregue') AND status_logistica = 'aguardando_separacao'
-            `);
-    
+                AND empresa_id = ?
+            `, [empresaId]);
+
             const [[separacao]] = await pool.query(`
                 SELECT COUNT(*) as total FROM pedidos
                 WHERE status IN ('faturado', 'recibo', 'entregue') AND status_logistica = 'em_separacao'
-            `);
-    
+                AND empresa_id = ?
+            `, [empresaId]);
+
             const [[expedicao]] = await pool.query(`
                 SELECT COUNT(*) as total FROM pedidos
                 WHERE status IN ('faturado', 'recibo', 'entregue') AND status_logistica = 'em_expedicao'
-            `);
-    
+                AND empresa_id = ?
+            `, [empresaId]);
+
             const [[transporte]] = await pool.query(`
                 SELECT COUNT(*) as total FROM pedidos
                 WHERE status IN ('faturado', 'recibo', 'entregue') AND status_logistica = 'em_transporte'
-            `);
-    
+                AND empresa_id = ?
+            `, [empresaId]);
+
             const [[entregues]] = await pool.query(`
                 SELECT COUNT(*) as total FROM pedidos
                 WHERE status IN ('faturado', 'recibo', 'entregue') AND status_logistica = 'entregue'
-            `);
+                AND empresa_id = ?
+            `, [empresaId]);
     
             const result = {
                 pendente: aguardando?.total || 0,
@@ -73,11 +78,12 @@ module.exports = function createLogisticaRoutes(deps) {
         }
     });
     
-    // Listar pedidos em logística (sem autenticação)
+    // Listar pedidos em logística
     router.get('/pedidos', async (req, res, next) => {
         try {
             const { status, transportadora, nfe, data_inicio, data_fim, limit = 100 } = req.query;
-    
+            const empresaId = req.user?.empresa_id;
+
             let query = `
                 SELECT
                     p.id,
@@ -112,9 +118,10 @@ module.exports = function createLogisticaRoutes(deps) {
                 LEFT JOIN empresas e ON p.empresa_id = e.id
                 LEFT JOIN transportadoras t ON p.transportadora_id = t.id
                 WHERE p.status IN ('faturado', 'recibo', 'entregue')
+                AND p.empresa_id = ?
             `;
-    
-            const params = [];
+
+            const params = [empresaId];
     
             // Sprint E2E-S2 (E4-HIGH-06): Tratar filtros separadamente
             if (status && status !== '' && status !== 'todos') {
@@ -180,24 +187,34 @@ module.exports = function createLogisticaRoutes(deps) {
         try {
             const { id } = req.params;
             const { status_logistica, observacao } = req.body;
-    
+            const empresaId = req.user?.empresa_id;
+
             const validStatuses = ['pendente', 'aguardando_separacao', 'em_separacao', 'em_expedicao', 'em_transporte', 'entregue'];
-    
+
             if (!validStatuses.includes(status_logistica)) {
                 return res.status(400).json({
                     message: 'Status inválido',
                     valid: validStatuses
                 });
             }
-    
-            await pool.query(
-                'UPDATE pedidos SET status_logistica = ?, observacao = CONCAT(COALESCE(observacao, ""), ?) WHERE id = ?',
-                [status_logistica, observacao ? `\n[LOG] ${new Date().toLocaleString('pt-BR')}: ${observacao}` : '', id]
+
+            // Validar que o pedido pertence à empresa do usuário
+            const [pedCheck] = await pool.query(
+                'SELECT id FROM pedidos WHERE id = ? AND empresa_id = ?',
+                [id, empresaId]
             );
-    
+            if (!pedCheck.length) {
+                return res.status(404).json({ error: 'Pedido não encontrado.' });
+            }
+
+            await pool.query(
+                'UPDATE pedidos SET status_logistica = ?, observacao = CONCAT(COALESCE(observacao, ""), ?) WHERE id = ? AND empresa_id = ?',
+                [status_logistica, observacao ? `\n[LOG] ${new Date().toLocaleString('pt-BR')}: ${observacao}` : '', id, empresaId]
+            );
+
             // Se status for 'entregue', atualizar também o status principal
             if (status_logistica === 'entregue') {
-                await pool.query('UPDATE pedidos SET status = "entregue" WHERE id = ?', [id]);
+                await pool.query('UPDATE pedidos SET status = "entregue" WHERE id = ? AND empresa_id = ?', [id, empresaId]);
                 // INTEGRAÇÃO REATIVA: notificar financeiro da entrega
                 try {
                     await financeiroReactive.onPedidoEntregue(id, req.user?.email || 'logistica');
@@ -205,7 +222,7 @@ module.exports = function createLogisticaRoutes(deps) {
                     console.error('[LOGISTICA→FINANCEIRO] Erro ao notificar entrega:', intErr.message);
                 }
             }
-    
+
             res.json({ message: 'Status atualizado com sucesso', status: status_logistica });
         } catch (error) {
             console.error('[LOGISTICA/STATUS] Erro:', error);
@@ -218,12 +235,22 @@ module.exports = function createLogisticaRoutes(deps) {
         try {
             const { id } = req.params;
             const { transportadora_id, previsao_entrega } = req.body;
-    
-            await pool.query(
-                'UPDATE pedidos SET transportadora_id = ?, data_prevista = ? WHERE id = ?',
-                [transportadora_id, previsao_entrega, id]
+            const empresaId = req.user?.empresa_id;
+
+            // Validar que o pedido pertence à empresa do usuário
+            const [pedCheck] = await pool.query(
+                'SELECT id FROM pedidos WHERE id = ? AND empresa_id = ?',
+                [id, empresaId]
             );
-    
+            if (!pedCheck.length) {
+                return res.status(404).json({ error: 'Pedido não encontrado.' });
+            }
+
+            await pool.query(
+                'UPDATE pedidos SET transportadora_id = ?, data_prevista = ? WHERE id = ? AND empresa_id = ?',
+                [transportadora_id, previsao_entrega, id, empresaId]
+            );
+
             res.json({ message: 'Transportadora atribuída com sucesso' });
         } catch (error) {
             console.error('[LOGISTICA/TRANSPORTADORA] Erro:', error);
@@ -679,12 +706,13 @@ module.exports = function createLogisticaRoutes(deps) {
 
             // Se não houver rastreamentos dedicados, gerar a partir do histórico do pedido
             if (!eventos.length) {
+                const empresaId = req.user?.empresa_id;
                 const [[pedido]] = await pool.query(`
                     SELECT p.*, c.nome as cliente_nome, c.cidade as cliente_cidade, c.estado as cliente_uf
                     FROM pedidos p
                     LEFT JOIN clientes c ON p.cliente_id = c.id
-                    WHERE p.id = ?
-                `, [id]);
+                    WHERE p.id = ? AND p.empresa_id = ?
+                `, [id, empresaId]);
 
                 if (!pedido) {
                     return res.status(404).json({ error: 'Pedido não encontrado' });
@@ -731,8 +759,18 @@ module.exports = function createLogisticaRoutes(deps) {
         try {
             const { id } = req.params;
             const { descricao, cidade, uf, latitude, longitude, unidade_rastreio } = req.body;
+            const empresaId = req.user?.empresa_id;
 
             if (!descricao) return res.status(400).json({ error: 'Descrição é obrigatória' });
+
+            // Validar que o pedido pertence à empresa do usuário
+            const [pedCheck] = await pool.query(
+                'SELECT id FROM pedidos WHERE id = ? AND empresa_id = ?',
+                [id, empresaId]
+            );
+            if (!pedCheck.length) {
+                return res.status(404).json({ error: 'Pedido não encontrado.' });
+            }
 
             // Buscar ou criar volume vinculado ao pedido
             let volumeId;
@@ -868,13 +906,14 @@ module.exports = function createLogisticaRoutes(deps) {
     router.get('/ctes', async (req, res) => {
         try {
             const { status, transportadora_id, data_inicio, data_fim, limit = 100 } = req.query;
+            const empresaId = req.user?.empresa_id;
             let query = `
                 SELECT c.*, t.nome_fantasia as transportadora_nome, t.razao_social as transportadora_razao
                 FROM ctes c
                 LEFT JOIN transportadoras t ON c.transportadora_id = t.id
-                WHERE 1=1
+                WHERE c.empresa_id = ?
             `;
-            const params = [];
+            const params = [empresaId];
 
             if (status) { query += ' AND c.status = ?'; params.push(status); }
             if (transportadora_id) { query += ' AND c.transportadora_id = ?'; params.push(transportadora_id); }
@@ -920,24 +959,28 @@ module.exports = function createLogisticaRoutes(deps) {
                 valor_carga, valor_frete, valor_receber, produto_predominante, peso_bruto, quantidade_volumes,
                 municipio_origem, uf_origem, municipio_destino, uf_destino, modal, rntrc
             } = req.body;
+            const empresaId = req.user?.empresa_id;
 
             if (!transportadora_id || !valor_frete) {
                 return res.status(400).json({ error: 'Transportadora e valor do frete são obrigatórios' });
             }
 
-            // Gerar número sequencial
-            const [[lastCte]] = await pool.query('SELECT MAX(numero) as ultimo FROM ctes WHERE serie = 1');
+            // Gerar número sequencial por empresa
+            const [[lastCte]] = await pool.query(
+                'SELECT MAX(numero) as ultimo FROM ctes WHERE serie = 1 AND empresa_id = ?',
+                [empresaId]
+            );
             const numero = (lastCte?.ultimo || 0) + 1;
 
             const [result] = await pool.query(`
-                INSERT INTO ctes (numero, serie, transportadora_id, tipo_cte, tipo_servico, tomador_tipo, nfe_id,
+                INSERT INTO ctes (numero, serie, empresa_id, transportadora_id, tipo_cte, tipo_servico, tomador_tipo, nfe_id,
                     remetente_nome, remetente_cnpj_cpf, remetente_ie, remetente_endereco, remetente_municipio, remetente_uf,
                     destinatario_nome, destinatario_cnpj_cpf, destinatario_ie, destinatario_endereco, destinatario_municipio, destinatario_uf,
                     data_emissao, valor_carga, valor_frete, valor_receber, produto_predominante, peso_bruto, quantidade_volumes,
                     municipio_origem, uf_origem, municipio_destino, uf_destino, modal, rntrc, status, usuario_id)
-                VALUES (?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'digitacao', ?)
+                VALUES (?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'digitacao', ?)
             `, [
-                numero, transportadora_id, tipo_cte || '0', tipo_servico || '0', tomador_tipo || '3', nfe_id || null,
+                numero, empresaId, transportadora_id, tipo_cte || '0', tipo_servico || '0', tomador_tipo || '3', nfe_id || null,
                 remetente_nome || null, remetente_cnpj_cpf || null, remetente_ie || null, remetente_endereco || null, remetente_municipio || null, remetente_uf || null,
                 destinatario_nome || null, destinatario_cnpj_cpf || null, destinatario_ie || null, destinatario_endereco || null, destinatario_municipio || null, destinatario_uf || null,
                 valor_carga || 0, valor_frete, valor_receber || valor_frete, produto_predominante || null, peso_bruto || 0, quantidade_volumes || 0,
@@ -1015,14 +1058,15 @@ module.exports = function createLogisticaRoutes(deps) {
     router.get('/mdfes', async (req, res) => {
         try {
             const { status, transportadora_id, data_inicio, data_fim, limit = 100 } = req.query;
+            const empresaId = req.user?.empresa_id;
             let query = `
                 SELECT m.*, t.nome_fantasia as transportadora_nome, t.razao_social as transportadora_razao,
                        (SELECT COUNT(*) FROM mdfe_documentos md WHERE md.mdfe_id = m.id) as total_documentos
                 FROM mdfes m
                 LEFT JOIN transportadoras t ON m.transportadora_id = t.id
-                WHERE 1=1
+                WHERE m.empresa_id = ?
             `;
-            const params = [];
+            const params = [empresaId];
 
             if (status) { query += ' AND m.status = ?'; params.push(status); }
             if (transportadora_id) { query += ' AND m.transportadora_id = ?'; params.push(transportadora_id); }
@@ -1071,22 +1115,27 @@ module.exports = function createLogisticaRoutes(deps) {
                 reboque_placa, reboque_uf, peso_bruto, valor_carga,
                 documentos, percursos
             } = req.body;
+            const empresaId = req.user?.empresa_id;
 
             if (!transportadora_id || !uf_inicio || !uf_fim) {
                 return res.status(400).json({ error: 'Transportadora, UF início e UF fim são obrigatórios' });
             }
 
-            const [[lastMdfe]] = await pool.query('SELECT MAX(numero) as ultimo FROM mdfes WHERE serie = 1');
+            // Numeração sequencial por empresa
+            const [[lastMdfe]] = await pool.query(
+                'SELECT MAX(numero) as ultimo FROM mdfes WHERE serie = 1 AND empresa_id = ?',
+                [empresaId]
+            );
             const numero = (lastMdfe?.ultimo || 0) + 1;
 
             const [result] = await pool.query(`
-                INSERT INTO mdfes (numero, serie, transportadora_id, uf_inicio, uf_fim, data_emissao,
+                INSERT INTO mdfes (numero, serie, empresa_id, transportadora_id, uf_inicio, uf_fim, data_emissao,
                     condutor_nome, condutor_cpf, veiculo_placa, veiculo_uf, veiculo_rntrc,
                     veiculo_tipo_rodado, veiculo_tipo_carroceria, reboque_placa, reboque_uf,
                     peso_bruto, valor_carga, quantidade_ctes, quantidade_nfes, status, usuario_id)
-                VALUES (?, 1, ?, ?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 'digitacao', ?)
+                VALUES (?, 1, ?, ?, ?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 'digitacao', ?)
             `, [
-                numero, transportadora_id, uf_inicio, uf_fim,
+                numero, empresaId, transportadora_id, uf_inicio, uf_fim,
                 condutor_nome || null, condutor_cpf || null,
                 veiculo_placa || null, veiculo_uf || null, veiculo_rntrc || null,
                 veiculo_tipo_rodado || '01', veiculo_tipo_carroceria || '00',

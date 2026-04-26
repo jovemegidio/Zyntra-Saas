@@ -335,64 +335,89 @@ module.exports = function createNfeApiRouter({ authenticateToken, pool }) {
                 } catch (_) {}
             }
 
-            // Emitente (cascata: configuracoes_empresa → configuracoes → configuracoes_nfe → empresas)
-            let emit = { razaoSocial: 'ALUFORCE INDÚSTRIA E COMÉRCIO LTDA', nomeFantasia: 'ALUFORCE', cnpj: '', ie: '', logradouro: '', numero: '', bairro: '', cidade: '', uf: 'SP', cep: '', telefone: '', logoPath: '' };
+            // Emitente — busca por empresa_id para garantir isolamento multiempresa
+            const empresaIdEmit = req.user?.empresa_id || 1;
+            let emit = { razaoSocial: '', nomeFantasia: '', cnpj: '', ie: '', logradouro: '', numero: '', bairro: '', cidade: '', uf: 'SP', cep: '', telefone: '', logoPath: '' };
             let emitFilled = false;
-            // 1) configuracoes_empresa (Dados da Empresa no modal Configurações)
+
+            // 1) nfe_configuracoes filtrada por empresa_id (fonte primária e mais completa)
             try {
-                const [ceRows] = await pool.query("SELECT * FROM configuracoes_empresa LIMIT 1");
-                if (ceRows && ceRows[0]) {
-                    const e = ceRows[0];
-                    if (e.cnpj || e.razao_social) {
+                const [nfeConfigRows] = await pool.query(
+                    "SELECT * FROM nfe_configuracoes WHERE empresa_id = ? AND ativo = 1 ORDER BY id DESC LIMIT 1",
+                    [empresaIdEmit]
+                );
+                if (nfeConfigRows && nfeConfigRows[0]) {
+                    const c = nfeConfigRows[0];
+                    if (c.cnpj || c.emitente_cnpj) {
                         emit = {
-                            razaoSocial: e.razao_social || emit.razaoSocial,
-                            nomeFantasia: e.nome_fantasia || emit.nomeFantasia,
-                            cnpj: e.cnpj || '',
-                            ie: e.inscricao_estadual || '',
-                            logradouro: e.endereco || '',
-                            numero: e.numero || '',
-                            bairro: e.bairro || '',
-                            cidade: e.cidade || '',
-                            uf: e.estado || 'SP',
-                            cep: e.cep || '',
-                            telefone: e.telefone || '',
-                            logoPath: e.logo_path || ''
+                            razaoSocial: c.razao_social || c.emitente_razao_social || '',
+                            nomeFantasia: c.nome_fantasia || c.emitente_nome_fantasia || '',
+                            cnpj: c.cnpj || c.emitente_cnpj || '',
+                            ie: c.inscricao_estadual || c.emitente_ie || '',
+                            logradouro: c.endereco || c.emitente_logradouro || '',
+                            numero: c.numero || c.emitente_numero || '',
+                            bairro: c.bairro || c.emitente_bairro || '',
+                            cidade: c.municipio || c.emitente_municipio || '',
+                            uf: c.uf || c.emitente_uf || 'SP',
+                            cep: c.cep || c.emitente_cep || '',
+                            telefone: c.telefone || '',
+                            logoPath: c.logo_path || ''
                         };
                         emitFilled = true;
                     }
                 }
             } catch (_) {}
-            // 2) configuracoes chave empresa_emitente
-            if (!emitFilled) {
-            try {
-                const [cfgRows] = await pool.query("SELECT * FROM configuracoes WHERE chave = 'empresa_emitente' LIMIT 1");
-                if (cfgRows && cfgRows[0]) {
-                    const c = JSON.parse(cfgRows[0].valor || '{}');
-                    if (c.cnpj) {
-                        emit = { ...emit, ...c, cidade: c.cidade || c.municipio || '', logradouro: c.logradouro || c.endereco || '' };
-                        emitFilled = true;
-                    }
-                }
-            } catch (_) {}
-            }
+
+            // 2) empresas filtrada por empresa_id (fallback robusto)
             if (!emitFilled) {
                 try {
-                    const [cfgRows] = await pool.query("SELECT * FROM configuracoes_nfe WHERE ativo = 1 LIMIT 1");
-                    if (cfgRows && cfgRows[0]) {
-                        const c = cfgRows[0];
-                        if (c.cnpj) {
-                            emit = { razaoSocial: c.razao_social || emit.razaoSocial, nomeFantasia: c.nome_fantasia || emit.nomeFantasia, cnpj: c.cnpj || '', ie: c.inscricao_estadual || '', logradouro: c.endereco || '', numero: c.numero || '', bairro: c.bairro || '', cidade: c.municipio || '', uf: c.uf || 'MG', cep: c.cep || '', telefone: '' };
-                            emitFilled = true;
-                        }
+                    const [empresaRows] = await pool.query(
+                        "SELECT * FROM empresas WHERE id = ? LIMIT 1",
+                        [empresaIdEmit]
+                    );
+                    if (empresaRows && empresaRows[0]) {
+                        const e = empresaRows[0];
+                        emit = {
+                            razaoSocial: e.razao_social || e.nome || '',
+                            nomeFantasia: e.nome_fantasia || e.nome_comercial || '',
+                            cnpj: e.cnpj || '',
+                            ie: e.inscricao_estadual || '',
+                            logradouro: e.endereco || e.logradouro || '',
+                            numero: e.numero || '',
+                            bairro: e.bairro || '',
+                            cidade: e.municipio || e.cidade || '',
+                            uf: e.uf || e.estado || 'SP',
+                            cep: e.cep || '',
+                            telefone: e.telefone || '',
+                            logoPath: e.logo_url || ''
+                        };
+                        emitFilled = true;
                     }
                 } catch (_) {}
             }
+
+            // 3) configuracoes_empresa sem empresa_id (legado — último recurso)
             if (!emitFilled) {
                 try {
-                    const [empresaRows] = await pool.query("SELECT * FROM empresas LIMIT 1");
-                    if (empresaRows && empresaRows[0]) {
-                        const e = empresaRows[0];
-                        emit = { razaoSocial: e.razao_social || e.nome || emit.razaoSocial, nomeFantasia: e.nome_fantasia || e.nome_comercial || emit.nomeFantasia, cnpj: e.cnpj || '', ie: e.inscricao_estadual || '', logradouro: e.endereco || e.logradouro || '', numero: e.numero || '', bairro: e.bairro || '', cidade: e.municipio || e.cidade || '', uf: e.uf || 'MG', cep: e.cep || '', telefone: e.telefone || '' };
+                    const [ceRows] = await pool.query("SELECT * FROM configuracoes_empresa LIMIT 1");
+                    if (ceRows && ceRows[0]) {
+                        const e = ceRows[0];
+                        if (e.cnpj || e.razao_social) {
+                            emit = {
+                                razaoSocial: e.razao_social || '',
+                                nomeFantasia: e.nome_fantasia || '',
+                                cnpj: e.cnpj || '',
+                                ie: e.inscricao_estadual || '',
+                                logradouro: e.endereco || '',
+                                numero: e.numero || '',
+                                bairro: e.bairro || '',
+                                cidade: e.cidade || '',
+                                uf: e.estado || 'SP',
+                                cep: e.cep || '',
+                                telefone: e.telefone || '',
+                                logoPath: e.logo_path || ''
+                            };
+                        }
                     }
                 } catch (_) {}
             }
@@ -552,31 +577,42 @@ module.exports = function createNfeApiRouter({ authenticateToken, pool }) {
     // GET /api/nfe/configuracoes
     router.get('/configuracoes', authenticateToken, async (req, res) => {
         try {
+            const empresaId = req.user?.empresa_id || 1;
             let emitente = {};
+
+            // 1) nfe_configuracoes filtrada por empresa (fonte fiscal primária)
             try {
                 const [rows] = await pool.query(
-                    "SELECT id, cnpj, razao_social, nome_fantasia, inscricao_estadual, endereco, numero, bairro, codigo_municipio, municipio, uf, cep, crt, ativo FROM configuracoes_nfe WHERE ativo = 1 ORDER BY id DESC LIMIT 1"
+                    `SELECT id, cnpj, razao_social, nome_fantasia, inscricao_estadual,
+                            endereco, numero, bairro, codigo_municipio, municipio, uf, cep, crt, ativo,
+                            ambiente, serie, certificado_validade
+                     FROM nfe_configuracoes WHERE empresa_id = ? AND ativo = 1 ORDER BY id DESC LIMIT 1`,
+                    [empresaId]
                 );
                 if (rows && rows.length > 0) {
                     emitente = rows[0];
                 }
             } catch (dbErr) {
-                console.warn('[NFe Config] Tabela configuracoes_nfe não encontrada, usando fallback.');
+                console.warn('[NFe Config] nfe_configuracoes indisponível, usando fallback.');
             }
 
+            // 2) empresas filtrada por id (fallback)
             if (!emitente.cnpj) {
                 try {
                     const [empresaRows] = await pool.query(
-                        "SELECT id, cnpj, razao_social, nome, nome_fantasia, fantasia, inscricao_estadual, ie, endereco, logradouro, numero, bairro, codigo_municipio, municipio, uf, cep FROM empresa ORDER BY id LIMIT 1"
+                        `SELECT id, cnpj, razao_social, nome_fantasia, inscricao_estadual,
+                                endereco, numero, bairro, municipio, cidade, uf, estado, cep
+                         FROM empresas WHERE id = ? LIMIT 1`,
+                        [empresaId]
                     );
                     if (empresaRows && empresaRows.length > 0) {
                         const emp = empresaRows[0];
                         emitente = {
                             cnpj: emp.cnpj || '',
-                            razao_social: emp.razao_social || emp.nome || '',
-                            nome_fantasia: emp.nome_fantasia || emp.fantasia || '',
-                            inscricao_estadual: emp.inscricao_estadual || emp.ie || '',
-                            endereco: emp.endereco || emp.logradouro || '',
+                            razao_social: emp.razao_social || '',
+                            nome_fantasia: emp.nome_fantasia || '',
+                            inscricao_estadual: emp.inscricao_estadual || '',
+                            endereco: emp.endereco || '',
                             numero: emp.numero || '',
                             bairro: emp.bairro || '',
                             municipio: emp.municipio || emp.cidade || '',
@@ -586,11 +622,11 @@ module.exports = function createNfeApiRouter({ authenticateToken, pool }) {
                         };
                     }
                 } catch {
-                    console.warn('[NFe Config] Tabela empresa não encontrada.');
+                    console.warn('[NFe Config] Tabela empresas não encontrada.');
                 }
             }
 
-            res.json({ success: true, emitente });
+            res.json({ success: true, emitente, empresa_id: empresaId });
         } catch (err) {
             console.error('[NFe Config] Erro:', err);
             res.status(500).json({ success: false, message: 'Erro ao carregar configurações NFe.' });

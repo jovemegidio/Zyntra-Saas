@@ -438,6 +438,14 @@ async function runMigrations(pool) {
     await addColumnIfMissing('estoque_movimentos', 'documento_id', 'INT NULL');
     await addColumnIfMissing('estoque_movimentos', 'data_movimento', 'DATETIME NULL DEFAULT CURRENT_TIMESTAMP');
 
+    // Logística: isolamento multiempresa — adicionar empresa_id em ctes e mdfes
+    await addColumnIfMissing('ctes',   'empresa_id', 'INT NOT NULL DEFAULT 1');
+    await addColumnIfMissing('mdfes',  'empresa_id', 'INT NOT NULL DEFAULT 1');
+    try {
+        await pool.query('CREATE INDEX IF NOT EXISTS idx_ctes_empresa_id  ON ctes  (empresa_id)');
+        await pool.query('CREATE INDEX IF NOT EXISTS idx_mdfes_empresa_id ON mdfes (empresa_id)');
+    } catch (e) { /* índice já existe */ }
+
     // PCP: a tabela ordens_producao existe em instalações antigas com schema mínimo.
     // Estes campos garantem rastreabilidade Vendas -> PCP e persistência dos dados do modal.
     const ordensProducaoColumns = [
@@ -521,6 +529,14 @@ async function runMigrations(pool) {
         if (err.code !== 'ER_DUP_KEYNAME') {
             console.warn(`[MIGRATION] ⚠️ Índice ordens_producao.pedido_id ignorado: ${err.message.substring(0, 120)}`);
         }
+    }
+
+    // Setup multiempresa: Labor Eletric, Labor Energy, Aluforce
+    try {
+        const { runMultiempresaSetup } = require('./20260425_multiempresa_setup');
+        await runMultiempresaSetup(pool);
+    } catch (err) {
+        console.warn('[MIGRATION] ⚠️ Multiempresa setup ignorado:', err.message);
     }
 
     const elapsed = Date.now() - startTime;
