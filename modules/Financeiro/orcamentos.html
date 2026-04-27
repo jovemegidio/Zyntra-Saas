@@ -731,7 +731,7 @@
             align-items: center;
             gap: 6px;
         }
-        select#orçamento-alerta-pct option {
+        select#orcamento-alerta-pct option {
             padding: 8px;
         }
 
@@ -754,8 +754,81 @@
             color: white;
         }
 
+        #modal-orcamento .modal-padrão {
+            max-width: 720px !important;
+            border-radius: 20px !important;
+        }
+        #modal-orcamento .modal-header-padrão {
+            border-radius: 20px 20px 0 0 !important;
+        }
+        #modal-orcamento .modal-progress-padrão {
+            background: #f8fafc !important;
+            border-bottom: 1px solid #e5e7eb;
+            gap: 10px;
+        }
+        #modal-orcamento .modal-step-padrão {
+            flex: 1;
+            justify-content: center;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+            cursor: default;
+        }
+        #modal-orcamento .modal-step-padrão.active {
+            border-color: #6366f1;
+            background: #eef2ff;
+        }
+        #modal-orcamento .modal-step-padrão span {
+            color: #64748b;
+            font-weight: 700;
+        }
+        #modal-orcamento .modal-step-padrão.active span {
+            color: #4338ca;
+        }
+        #modal-orcamento .modal-step-number-padrão {
+            background: #e5e7eb;
+            color: #475569;
+        }
+        #modal-orcamento .modal-step-padrão.active .modal-step-number-padrão {
+            background: #6366f1;
+            color: #ffffff;
+        }
+        #modal-orcamento .modal-step-padrão::after {
+            display: none;
+        }
+        #modal-orcamento .form-section-padrão {
+            border-radius: 14px;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+        }
+        #modal-orcamento .form-section-title-padrão {
+            align-items: center;
+        }
+        #modal-orcamento .form-group-padrão select {
+            color: #1f2937;
+            cursor: pointer;
+        }
+        #modal-orcamento .form-group-padrão select:disabled {
+            background: #f8fafc;
+            color: #94a3b8;
+            cursor: not-allowed;
+        }
+        @media (max-width: 768px) {
+            #modal-orcamento .modal-padrão {
+                margin: 10px !important;
+                max-height: calc(100vh - 20px) !important;
+            }
+            #modal-orcamento .modal-progress-padrão,
+            #modal-orcamento .form-grid-padrão {
+                grid-template-columns: 1fr;
+            }
+            #modal-orcamento .modal-progress-padrão {
+                display: grid;
+                padding: 14px 18px;
+            }
+        }
+
         /* ====== FIX: Overlay por ID (sem depender de acentos) ====== */
-        #modal-or\e7amento,
+        #modal-orcamento,
         #modal-visualizar {
             position: fixed !important;
             top: 0 !important;
@@ -770,7 +843,7 @@
             backdrop-filter: blur(8px) !important;
             -webkit-backdrop-filter: blur(8px) !important;
         }
-        #modal-or\e7amento.active,
+        #modal-orcamento.active,
         #modal-visualizar.active {
             display: flex !important;
         }
@@ -1045,15 +1118,15 @@
                                     <span class="required">*</span>
                                 </label>
                                 <select id="orcamento-categoria" required>
-                                    <option value="">&#128204; Selecione a categoria...</option>
-                                    <option value="Marketing">&#128226; Marketing</option>
-                                    <option value="Vendas">&#128200; Vendas</option>
-                                    <option value="Produção">&#9881; Produção</option>
-                                    <option value="Administrativo">&#128188; Administrativo</option>
-                                    <option value="RH">&#128101; Recursos Humanos</option>
-                                    <option value="TI">&#128187; Tecnologia</option>
-                                    <option value="Logística">&#128666; Logística</option>
-                                    <option value="Manutenão">&#128295; Manutenão</option>
+                                    <option value="">Selecione a categoria...</option>
+                                    <option value="Marketing">Marketing</option>
+                                    <option value="Vendas">Vendas</option>
+                                    <option value="Produção">Produção</option>
+                                    <option value="Administrativo">Administrativo</option>
+                                    <option value="RH">Recursos Humanos</option>
+                                    <option value="TI">Tecnologia</option>
+                                    <option value="Logística">Logística</option>
+                                    <option value="Manutenção">Manutenção</option>
                                 </select>
                                 <span class="field-hint"><i class="fas fa-info-circle"></i> Área do orçamento</span>
                             </div>
@@ -1063,7 +1136,7 @@
                                     Centro de Custo
                                 </label>
                                 <select id="orcamento-centro">
-                                    <option value="">&#127970; Todos os centros</option>
+                                    <option value="">Todos os centros</option>
                                 </select>
                                 <span class="field-hint"><i class="fas fa-info-circle"></i> Vincule a um centro específico</span>
                             </div>
@@ -1074,7 +1147,7 @@
                     <div class="form-section-padrão">
                         <div class="form-section-title-padrão">
                             <i class="fas fa-dollar-sign"></i>
-                            <span>Limite Oramentrio</span>
+                            <span>Limite Orçamentário</span>
                             <span class="section-badge-padrão">Obrigatório</span>
                         </div>
                         <div class="form-group-padrão">
@@ -1104,11 +1177,11 @@
                                     Renovação
                                 </label>
                                 <select id="orcamento-renovacao">
-                                    <option value="mensal" selected>&#128197; Renovar Mensalmente</option>
-                                    <option value="trimestral">&#128198; Renovar Trimestralmente</option>
-                                    <option value="semestral">&#128467;&#65039; Renovar Semestralmente</option>
-                                    <option value="anual">&#128198; Renovar Anualmente</option>
-                                    <option value="nico">&#9989; Período nico</option>
+                                    <option value="mensal" selected>Renovar mensalmente</option>
+                                    <option value="trimestral">Renovar trimestralmente</option>
+                                    <option value="semestral">Renovar semestralmente</option>
+                                    <option value="anual">Renovar anualmente</option>
+                                    <option value="unico">Período único</option>
                                 </select>
                                 <span class="field-hint"><i class="fas fa-info-circle"></i> Frequência de renovação automática</span>
                             </div>
@@ -1129,10 +1202,10 @@
                                     Gatilho de Alerta
                                 </label>
                                 <select id="orcamento-alerta-pct">
-                                    <option value="70">&#128993; 70% do limite (Atenão)</option>
-                                    <option value="80" selected>&#128992; 80% do limite (Alerta)</option>
-                                    <option value="90">&#128308; 90% do limite (Crítico)</option>
-                                    <option value="95">&#128680; 95% do limite (Urgente)</option>
+                                    <option value="70">70% do limite (Atenção)</option>
+                                    <option value="80" selected>80% do limite (Alerta)</option>
+                                    <option value="90">90% do limite (Crítico)</option>
+                                    <option value="95">95% do limite (Urgente)</option>
                                 </select>
                                 <span class="field-hint"><i class="fas fa-info-circle"></i> Quando notificar sobre o consumo</span>
                             </div>
@@ -1210,7 +1283,7 @@
                     </div>
                     <div id="vis-status-msg" style="margin-top: 12px; padding: 14px 16px; border-radius: 12px; background: #f7fee7; color: #4d7c0f; display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500;">
                         <i class="fas fa-exclamation-triangle"></i>
-                        <span>Atenão: 81.7% do orçamento já foi utilizado</span>
+                        <span>Atenção: 81.7% do orçamento já foi utilizado</span>
                     </div>
                 </div>
 
@@ -1279,7 +1352,7 @@
             'RH': '#f59e0b',
             'Administrativo': '#64748b',
             'Logística': '#14b8a6',
-            'Manutenão': '#ef4444',
+            'Manutenção': '#ef4444',
             'Financeiro': '#6366f1',
             'Compras': '#ec4899'
         };
@@ -1373,23 +1446,48 @@
 
         // Carregar centros de custo
         async function carregarCentrosCusto() {
+            const select = document.getElementById('orcamento-centro');
+            if (!select) return;
+
+            const aplicarOpcaoPadrao = () => {
+                select.replaceChildren(new Option('Todos os centros', ''));
+            };
+
             try {
+                select.disabled = true;
+                aplicarOpcaoPadrao();
                 const response = await fetch('/api/financeiro/centros-custo', { headers: getAuthHeaders(), credentials: 'include' });
-                if (response.ok) {
-                    const centros = await response.json();
-                    const listaCentros = Array.isArray(centros) ? centros : (Array.isArray(centros.data) ? centros.data : []);
-                    const select = document.getElementById('orcamento-centro');
-                    select.innerHTML = '<option value="">Selecione um centro de custo</option>';
-                    listaCentros.forEach(c => {
-                        const nome = c.nome || c.descricao || '';
-                        if (nome) {
-                            select.innerHTML += `<option value="${nome}">${nome}</option>`;
-                        }
-                    });
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const payload = await response.json();
+                const listaCentros = extrairListaCentros(payload);
+                listaCentros.forEach(c => {
+                    const nome = c.nome || c.descricao || c.centro_custo || c.name || '';
+                    if (!nome) return;
+                    select.add(new Option(nome, nome));
+                });
+
+                if (listaCentros.length === 0) {
+                    const vazio = new Option('Nenhum centro cadastrado', '');
+                    vazio.disabled = true;
+                    select.add(vazio);
                 }
             } catch (e) {
                 console.error('Erro ao carregar centros de custo:', e);
+            } finally {
+                select.disabled = false;
             }
+        }
+
+        function extrairListaCentros(payload) {
+            if (Array.isArray(payload)) return payload;
+            if (!payload || typeof payload !== 'object') return [];
+            for (const campo of ['data', 'centros', 'items', 'rows', 'results']) {
+                if (Array.isArray(payload[campo])) return payload[campo];
+            }
+            return [];
         }
 
         // Setup period selector
@@ -1792,4 +1890,3 @@
     <script src="/js/user-dropdown.js?v=20260319" defer></script>
 </body>
 </html>
-

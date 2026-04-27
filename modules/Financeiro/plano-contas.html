@@ -60,15 +60,15 @@
 
         /* TREE VIEW */
         .tree-container { background: white; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); overflow: hidden; }
-        .tree-header { padding: 20px 24px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+        .tree-header { padding: 20px 24px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
         .tree-header h3 { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
         .tree-header h3 i { color: var(--teal); }
         .tree-body { padding: 20px; }
 
         .tree-item { border: 1px solid var(--border-color); border-radius: 10px; margin-bottom: 8px; overflow: hidden; }
-        .tree-item.nível-1 { background: linear-gradient(135deg, #f0fdfa, #ccfbf1); border-color: #99f6e4; }
-        .tree-item.nível-2 { margin-left: 24px; background: white; }
-        .tree-item.nível-3 { margin-left: 48px; background: #fafafa; }
+        .tree-item.nivel-1 { background: linear-gradient(135deg, #f0fdfa, #ccfbf1); border-color: #99f6e4; }
+        .tree-item.nivel-2 { margin-left: 24px; background: white; }
+        .tree-item.nivel-3 { margin-left: 48px; background: #fafafa; }
 
         .tree-row { display: flex; align-items: center; padding: 14px 16px; cursor: pointer; transition: all 0.2s; }
         .tree-row:hover { background: rgba(0,0,0,0.02); }
@@ -96,6 +96,45 @@
 
         .tree-children { display: none; padding-left: 8px; }
         .tree-children.expanded { display: block; }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            width: min(100%, 280px);
+            height: 40px;
+            background: #ffffff;
+            border: 1.5px solid #dbe4ee;
+            border-radius: 10px;
+            padding: 0 12px;
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+        }
+        .search-box:focus-within {
+            border-color: var(--teal);
+            box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.14);
+            background: #ffffff;
+        }
+        .search-box i {
+            color: var(--text-secondary);
+            font-size: 13px;
+            line-height: 1;
+            flex-shrink: 0;
+            pointer-events: none;
+        }
+        .search-box input {
+            width: 100%;
+            min-width: 0;
+            height: 100%;
+            border: 0;
+            outline: 0;
+            background: transparent;
+            padding: 0 0 0 9px;
+            color: var(--text-primary);
+            font-size: 13px;
+            font-family: inherit;
+        }
+        .search-box input::placeholder {
+            color: #94a3b8;
+        }
 
         /* MODAL - Design SaaS Empresarial */
         -webkit-backdrop-filter: blur(8px); }
@@ -815,9 +854,9 @@
                 <div class="tree-container">
                     <div class="tree-header">
                         <h3><i class="fas fa-folder-tree"></i> Estrutura do Plano de Contas</h3>
-                        <div class="search-box" style="display: flex; align-items: center; background: var(--bg-gray); border-radius: 8px; padding: 0 12px;">
-                            <i class="fas fa-search" style="color: var(--text-secondary);"></i>
-                            <input type="text" id="search-input" placeholder="Buscar conta..." style="border: none; background: transparent; padding: 10px; font-size: 14px; width: 200px; outline: none;" oninput="filtrarContas()">
+                        <div class="search-box">
+                            <i class="fas fa-search" aria-hidden="true"></i>
+                            <input type="text" id="search-input" placeholder="Buscar conta..." oninput="filtrarContas()" autocomplete="off">
                         </div>
                     </div>
                     <div class="tree-body" id="tree-contas">
@@ -953,7 +992,7 @@
                             <div class="form-group-padrão">
                                 <label>
                                     <i class="fas fa-icons"></i>
-                                    Ácone
+                                    Ícone
                                 </label>
                                 <select id="conta-icone">
                                     <option value="fa-folder">&#128193; Pasta</option>
@@ -962,7 +1001,7 @@
                                     <option value="fa-building">&#127970; Empresa</option>
                                     <option value="fa-users">&#128101; Pessoas</option>
                                     <option value="fa-truck">&#128666; Transporte</option>
-                                    <option value="fa-tools">&#128295; Manutenão</option>
+                                    <option value="fa-tools">&#128295; Manutenção</option>
                                     <option value="fa-bolt">&#9889; Energia</option>
                                     <option value="fa-shopping-cart">&#128722; Compras</option>
                                     <option value="fa-chart-line">&#128200; Vendas</option>
@@ -1023,10 +1062,13 @@
 
     <script>
         // Estado
+        const API_PLANO_CONTAS = '/api/financeiro/plano-contas';
+        let todasContas = [];
         let planoContas = [];
         let editandoId = null;
         let corSelecionada = '#22c55e';
         let filtroAtual = 'todos';
+        let termoBusca = '';
 
         // Inicialização
         // ========================================
@@ -1094,13 +1136,14 @@
         // Carregar plano de contas
         async function carregarPlanoContas() {
             try {
-                const response = await fetch('/api/financeiro/categorias', { headers: getAuthHeaders(), credentials: 'include' });
+                const response = await fetch(API_PLANO_CONTAS, { headers: getAuthHeaders(), credentials: 'include' });
                 if (response.ok) {
                     const data = await response.json();
-                    // Garantir que sempre seja um array
-                    planoContas = Array.isArray(data) ? data : (data.categorias || data.data || []);
+                    todasContas = extrairLista(data).map(normalizarConta);
+                    planoContas = todasContas.filter(isContaAtiva);
                 } else {
-                    console.error('Erro ao carregar categorias: API retornou status', response.status);
+                    console.error('Erro ao carregar plano de contas: API retornou status', response.status);
+                    todasContas = [];
                     planoContas = [];
                     showToast('Erro ao carregar plano de contas. Tente novamente.', 'error');
                 }
@@ -1109,53 +1152,133 @@
                 atualizarSelectPai();
             } catch (e) {
                 console.error('Erro ao carregar plano de contas:', e);
+                todasContas = [];
+                planoContas = [];
+                renderizarArvore();
             }
+        }
+
+        function extrairLista(payload) {
+            if (Array.isArray(payload)) return payload;
+            if (!payload || typeof payload !== 'object') return [];
+            for (const campo of ['data', 'contas', 'items', 'rows', 'results']) {
+                if (Array.isArray(payload[campo])) return payload[campo];
+            }
+            return [];
+        }
+
+        function normalizarConta(conta) {
+            const tipo = ['receita', 'despesa'].includes(conta.tipo) ? conta.tipo : 'despesa';
+            const corPadrao = tipo === 'receita' ? '#22c55e' : '#ef4444';
+            return {
+                ...conta,
+                id: Number(conta.id),
+                codigo: String(conta.codigo || conta.id || '').trim(),
+                nome: conta.nome || 'Conta sem nome',
+                tipo,
+                pai_id: conta.pai_id ? Number(conta.pai_id) : null,
+                nivel: Number(conta.nivel || 1),
+                cor: conta.cor || corPadrao,
+                icone: conta.icone || (tipo === 'receita' ? 'fa-arrow-up' : 'fa-arrow-down'),
+                ativo: isContaAtiva(conta)
+            };
+        }
+
+        function isContaAtiva(conta) {
+            return conta.ativo === undefined || conta.ativo === null || conta.ativo === true || conta.ativo == 1 || conta.ativo === '1' || conta.ativo === 'ativo';
+        }
+
+        function escaparHtml(valor) {
+            return String(valor ?? '').replace(/[&<>"']/g, ch => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            }[ch]));
         }
 
         // Renderizar árvore
         function renderizarArvore() {
             const container = document.getElementById('tree-contas');
-            const contasFiltradas = filtroAtual === 'todos'
-                ? planoContas
-                : planoContas.filter(c => c.tipo === filtroAtual);
+            const contasFiltradas = obterContasFiltradas();
+            const idsFiltrados = new Set(contasFiltradas.map(c => c.id));
 
-            const contasRaiz = contasFiltradas.filter(c => !c.pai_id);
+            const contasRaiz = contasFiltradas.filter(c => !c.pai_id || !idsFiltrados.has(c.pai_id));
 
             if (contasRaiz.length === 0) {
+                const mensagem = termoBusca ? 'Nenhuma conta encontrada para a busca' : 'Nenhuma conta encontrada';
                 container.innerHTML = `
                     <div style="text-align: center; padding: 60px; color: var(--text-secondary);">
                         <i class="fas fa-folder-open" style="font-size: 48px; margin-bottom: 16px; display: block; opacity: 0.3;"></i>
-                        <p style="font-size: 16px; margin-bottom: 8px;">Nenhuma conta encontrada</p>
-                        <p style="font-size: 13px;">Clique em "Nova Conta" para criar</p>
+                        <p style="font-size: 16px; margin-bottom: 8px;">${mensagem}</p>
+                        <p style="font-size: 13px;">${termoBusca ? 'Ajuste o termo pesquisado' : 'Clique em "Nova Conta" para criar'}</p>
                     </div>
                 `;
                 return;
             }
 
-            container.innerHTML = contasRaiz.map(conta => renderizarItem(conta, 1)).join('');
+            container.innerHTML = contasRaiz.map(conta => renderizarItem(conta, 1, contasFiltradas)).join('');
+        }
+
+        function obterContasFiltradas() {
+            const porTipo = filtroAtual === 'todos'
+                ? planoContas
+                : planoContas.filter(c => c.tipo === filtroAtual);
+
+            if (!termoBusca) return porTipo;
+
+            const contasPorId = new Map(planoContas.map(c => [c.id, c]));
+            const permitidas = new Set();
+
+            porTipo.forEach(conta => {
+                if (!contaCombinaBusca(conta)) return;
+                let atual = conta;
+                while (atual) {
+                    permitidas.add(atual.id);
+                    atual = contasPorId.get(atual.pai_id);
+                }
+            });
+
+            return porTipo.filter(c => permitidas.has(c.id));
+        }
+
+        function contaCombinaBusca(conta) {
+            const alvo = [
+                conta.codigo,
+                conta.nome,
+                conta.tipo === 'receita' ? 'Receita' : 'Despesa'
+            ].join(' ').toLowerCase();
+            return alvo.includes(termoBusca);
         }
 
         // Renderizar item da árvore
-        function renderizarItem(conta, nível) {
-            const filhos = planoContas.filter(c => c.pai_id === conta.id);
+        function renderizarItem(conta, nivel, contasBase) {
+            const filhos = contasBase.filter(c => c.pai_id === conta.id);
             const temFilhos = filhos.length > 0;
+            const codigo = escaparHtml(conta.codigo || String(conta.id).padStart(3, '0'));
+            const nome = escaparHtml(conta.nome);
+            const tipoLabel = conta.tipo === 'receita' ? 'Receita' : 'Despesa';
+            const cor = conta.cor || (conta.tipo === 'receita' ? '#22c55e' : '#ef4444');
+            const filhosClasse = termoBusca ? ' expanded' : '';
+            const toggleClasse = termoBusca ? ' expanded' : '';
 
             return `
-                <div class="tree-item nível-${nível}" data-id="${conta.id}" data-tipo="${conta.tipo}">
+                <div class="tree-item nivel-${nivel}" data-id="${conta.id}" data-tipo="${conta.tipo}">
                     <div class="tree-row">
                         ${temFilhos ? `
-                            <button class="tree-toggle" onclick="toggleFilhos(${conta.id})">
+                            <button class="tree-toggle${toggleClasse}" onclick="toggleFilhos(${conta.id})">
                                 <i class="fas fa-chevron-right"></i>
                             </button>
                         ` : '<div style="width: 32px;"></div>'}
-                        <div class="tree-icon ${conta.tipo}" style="background: ${conta.cor}20; color: ${conta.cor};">
+                        <div class="tree-icon ${conta.tipo}" style="background: ${cor}20; color: ${cor};">
                             <i class="fas ${conta.icone || 'fa-folder'}"></i>
                         </div>
                         <div class="tree-info">
-                            <div class="código">${conta.id.toString().padStart(3, '0')}</div>
-                            <div class="nome">${conta.nome}</div>
+                            <div class="codigo">${codigo}</div>
+                            <div class="nome">${nome}</div>
                         </div>
-                        <span class="tree-badge ${conta.tipo}">${conta.tipo === 'receita' ? 'Receita' : 'Despesa'}</span>
+                        <span class="tree-badge ${conta.tipo}">${tipoLabel}</span>
                         <div class="tree-actions">
                             <button title="Adicionar subconta" onclick="adicionarSubconta(${conta.id})">
                                 <i class="fas fa-plus"></i>
@@ -1169,8 +1292,8 @@
                         </div>
                     </div>
                     ${temFilhos ? `
-                        <div class="tree-children" id="children-${conta.id}">
-                            ${filhos.map(f => renderizarItem(f, Math.min(nível + 1, 3))).join('')}
+                        <div class="tree-children${filhosClasse}" id="children-${conta.id}">
+                            ${filhos.map(f => renderizarItem(f, Math.min(nivel + 1, 3), contasBase)).join('')}
                         </div>
                     ` : ''}
                 </div>
@@ -1198,17 +1321,14 @@
         function filtrarTipo(tipo) {
             filtroAtual = tipo;
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelector(`.tab[data-tipo="${tipo}"]`).classList.add('active');
+            document.querySelector(`.tab[data-tipo="${tipo}"]`)?.classList.add('active');
             renderizarArvore();
         }
 
         // Filtrar contas (busca)
         function filtrarContas() {
-            const termo = document.getElementById('search-input').value.toLowerCase();
-            document.querySelectorAll('.tree-item').forEach(item => {
-                const nome = item.querySelector('.nome')?.textContent.toLowerCase() || '';
-                item.style.display = nome.includes(termo) ? '' : 'none';
-            });
+            termoBusca = (document.getElementById('search-input')?.value || '').trim().toLowerCase();
+            renderizarArvore();
         }
 
         // Atualizar contadores
@@ -1221,11 +1341,13 @@
         }
 
         // Atualizar select de conta pai
-        function atualizarSelectPai() {
+        function atualizarSelectPai(excluirId = null) {
             const select = document.getElementById('conta-pai');
-            select.innerHTML = '<option value="">Nenhuma (Conta Principal)</option>';
-            planoContas.filter(c => !c.pai_id).forEach(c => {
-                select.innerHTML += `<option value="${c.id}">${c.nome}</option>`;
+            if (!select) return;
+            select.replaceChildren(new Option('Nenhuma (Conta Principal)', ''));
+            planoContas.filter(c => c.id !== excluirId).forEach(c => {
+                const prefixo = c.codigo ? `${c.codigo} - ` : '';
+                select.add(new Option(`${prefixo}${c.nome}`, c.id));
             });
         }
 
@@ -1250,10 +1372,11 @@
         // Abrir modal
         function abrirModal() {
             editandoId = null;
-            const título = document.getElementById('modal-titulo');
-            if (título) título.textContent = 'Nova Conta';
+            const titulo = document.getElementById('modal-titulo');
+            if (titulo) titulo.textContent = 'Nova Conta';
             const form = document.getElementById('form-conta');
             if (form) form.reset();
+            atualizarSelectPai();
             document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
             const corDefault = document.querySelector('.color-option[data-color="#22c55e"]');
             if (corDefault) corDefault.classList.add('selected');
@@ -1288,8 +1411,9 @@
 
             editandoId = id;
             const el = (sel) => document.getElementById(sel);
-            const modalTítulo = el('modal-título');
-            if (modalTítulo) modalTítulo.textContent = 'Editar Conta';
+            atualizarSelectPai(id);
+            const modalTitulo = el('modal-titulo');
+            if (modalTitulo) modalTitulo.textContent = 'Editar Conta';
             const contaId = el('conta-id');
             if (contaId) contaId.value = conta.id;
             const contaTipo = el('conta-tipo');
@@ -1298,14 +1422,14 @@
             if (contaPai) contaPai.value = conta.pai_id || '';
             const contaNome = el('conta-nome');
             if (contaNome) contaNome.value = conta.nome;
-            const contaDesc = el('conta-descrição');
+            const contaDesc = el('conta-descricao');
             if (contaDesc) contaDesc.value = conta.descricao || '';
             const contaIcone = el('conta-icone');
             if (contaIcone) contaIcone.value = conta.icone || 'fa-folder';
             const contaOrc = el('conta-orcamento');
-            if (contaOrc) contaOrc.value = conta.orçamento_mensal ? (conta.orçamento_mensal / 1).toFixed(2).replace('.', ',') : '';
+            if (contaOrc) contaOrc.value = conta.orcamento_mensal ? (conta.orcamento_mensal / 1).toFixed(2).replace('.', ',') : '';
             const contaStatus = el('conta-status');
-            if (contaStatus) contaStatus.value = conta.ativo ? '1' : '0';
+            if (contaStatus) contaStatus.value = isContaAtiva(conta) ? '1' : '0';
 
             // Selecionar cor
             document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
@@ -1317,6 +1441,20 @@
 
             const modalEl = document.getElementById('modal-conta');
             if (modalEl) modalEl.classList.add('active');
+        }
+
+        function gerarCodigoConta(tipo, paiId) {
+            const pai = paiId ? todasContas.find(c => c.id === Number(paiId)) : null;
+            if (pai) {
+                const prefixo = pai.codigo || String(pai.id);
+                const filhos = todasContas.filter(c => c.pai_id === pai.id && String(c.codigo || '').startsWith(`${prefixo}.`));
+                const proximo = Math.max(0, ...filhos.map(c => parseInt(String(c.codigo).split('.').pop(), 10)).filter(Number.isFinite)) + 1;
+                return `${prefixo}.${proximo}`;
+            }
+
+            const raizes = todasContas.filter(c => !c.pai_id);
+            const proximoRaiz = Math.max(0, ...raizes.map(c => parseInt(String(c.codigo).split('.')[0], 10)).filter(Number.isFinite)) + 1;
+            return String(proximoRaiz || (tipo === 'receita' ? 1 : 2));
         }
 
         // Salvar conta
@@ -1331,9 +1469,9 @@
             const nome = nomeEl ? nomeEl.value.trim() : '';
             const tipo = tipoEl ? tipoEl.value : '';
             const pai_id = paiEl ? (paiEl.value || null) : null;
-            const descrição = descEl ? descEl.value.trim() : '';
+            const descricao = descEl ? descEl.value.trim() : '';
             const icone = iconeEl ? iconeEl.value : 'fa-folder';
-            const orçamento = orcEl ? (parseFloat(orcEl.value.replace(',', '.')) || 0) : 0;
+            const orcamento = orcEl ? (parseFloat(orcEl.value.replace(',', '.')) || 0) : 0;
             const ativo = statusEl ? statusEl.value === '1' : true;
 
             if (!nome) {
@@ -1341,12 +1479,23 @@
                 return;
             }
 
-            const dados = { nome, tipo, pai_id: pai_id ? parseInt(pai_id) : null, descrição: descrição, icone, cor: corSelecionada, orçamento_mensal: orçamento, ativo };
+            const contaAtual = editandoId ? todasContas.find(c => c.id === editandoId) : null;
+            const dados = {
+                codigo: contaAtual?.codigo || gerarCodigoConta(tipo, pai_id),
+                nome,
+                tipo,
+                pai_id: pai_id ? parseInt(pai_id) : null,
+                descricao,
+                icone,
+                cor: corSelecionada,
+                orcamento_mensal: orcamento,
+                ativo
+            };
 
             try {
                 const url = editandoId
-                    ? `/api/financeiro/categorias/${editandoId}`
-                    : '/api/financeiro/categorias';
+                    ? `${API_PLANO_CONTAS}/${editandoId}`
+                    : API_PLANO_CONTAS;
                 const method = editandoId ? 'PUT' : 'POST';
 
                 const response = await fetch(url, {
@@ -1381,18 +1530,21 @@
             }
 
             // Modal de confirmação profissional
-            const confirmado = await showConfirmModal({
-                type: 'danger',
-                title: 'Excluir Conta',
-                message: `Deseja realmente excluir a conta "${conta?.nome}"? Esta ação não pode ser desfeita.`,
-                confirmText: 'Excluir',
-                cancelText: 'Cancelar'
-            });
+            const confirmado = typeof showConfirmModal === 'function'
+                ? await showConfirmModal({
+                    type: 'danger',
+                    title: 'Excluir Conta',
+                    message: `Deseja realmente excluir a conta "${conta?.nome}"? Esta ação não pode ser desfeita.`,
+                    confirmText: 'Excluir',
+                    cancelText: 'Cancelar'
+                })
+                : confirm(`Deseja realmente excluir a conta "${conta?.nome}"?`);
 
             if (!confirmado) return;
 
             try {
-                const response = await fetch(`/api/financeiro/categorias/${id}`, { credentials: 'include', method: 'DELETE',
+                const response = await fetch(`${API_PLANO_CONTAS}/${id}`, {
+                    method: 'DELETE',
                     headers: getAuthHeaders(),
                     credentials: 'include'
                 });
@@ -1401,11 +1553,7 @@
                     showToast('Conta excluída!', 'success');
                     await carregarPlanoContas();
                 } else {
-                    planoContas = planoContas.filter(c => c.id !== id);
-                    renderizarArvore();
-                    atualizarContadores();
-                    atualizarSelectPai();
-                    showToast('Conta excluída!', 'success');
+                    showToast('Erro ao excluir conta. Tente novamente.', 'error');
                 }
             } catch (e) {
                 console.error('Erro ao excluir:', e);
@@ -1443,7 +1591,3 @@
     <script src="/js/user-dropdown.js?v=20260319" defer></script>
 </body>
 </html>
-
-
-
-

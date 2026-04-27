@@ -1208,7 +1208,7 @@
         }
 
         async function init() {
-            await Promise.all([carregarUsuarioLogado(), carregarContas(), carregarClientes(), carregarCategorias()]);
+            await Promise.all([carregarUsuarioLogado(), carregarContas(), carregarClientes(), carregarCategorias(), carregarBancos()]);
             // Abrir modal automaticamente se URL tiver ?ação=nova
             var params = new URLSearchParams(window.location.search);
             if (params.get('ação') === 'nova') { abrirModal(); }
@@ -1506,6 +1506,21 @@
                 }
             } catch(e) { console.error('Erro categorias:', e); }
         }
+
+        async function carregarBancos() {
+            try {
+                var response = await fetch('/api/financeiro/contas-bancarias', { credentials: 'include' });
+                if (response.ok) {
+                    var rawBancos = await response.json();
+                    var bancos = Array.isArray(rawBancos) ? rawBancos : (Array.isArray(rawBancos && rawBancos.data) ? rawBancos.data : []);
+                    var opts = bancos.map(function(b) {
+                        var label = b.nome || (b.banco + (b.agencia ? ' - Ag. ' + b.agencia : '') + (b.conta ? ' C/C ' + b.conta : ''));
+                        return '<option value="' + b.id + '">' + label + '</option>';
+                    }).join('');
+                    document.getElementById('cr-conta-corrente').innerHTML = '<option value="">Selecione...</option>' + opts;
+                }
+            } catch(e) { console.error('Erro bancos:', e); }
+        }
         function formatarMoedaInput(el) {
             var v = el.value.replace(/\D/g, '');
             if (!v) { el.value = ''; return; }
@@ -1596,6 +1611,7 @@
                 document.getElementById('cr-status').value = (c.status || '').toLowerCase();
                 document.getElementById('cr-pago-no-dia').value = (c.pago_no_dia || '').split('T')[0];
                 document.getElementById('cr-aceita-troca').checked = !!c.aceita_troca_factory;
+                document.getElementById('cr-conta-corrente').value = c.conta_bancaria_id || '';
                 var comprovanteLink = document.getElementById('cr-comprovante-link');
                 if (comprovanteLink && c.comprovante_url) {
                     comprovanteLink.href = c.comprovante_url;
@@ -1649,6 +1665,8 @@
             if (statusVal) dados.status = statusVal;
             if (pagoNoDia) dados.pago_no_dia = pagoNoDia;
             dados.aceita_troca_factory = aceitaTroca;
+            var contaBancariaId = document.getElementById('cr-conta-corrente').value;
+            if (contaBancariaId) dados.conta_bancaria_id = contaBancariaId;
             // Validação: pago_no_dia não pode ser futuro
             if (pagoNoDia && new Date(pagoNoDia + 'T00:00:00') > new Date()) {
                 showToast('Data de pagamento não pode ser futura', 'warning'); return;

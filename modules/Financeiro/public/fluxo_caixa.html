@@ -519,20 +519,26 @@
         // ===== MODAL NOVA MOVIMENTACAO =====
         async function carregarContasBancariasModal() {
             try {
-                const r = await fetch('/api/financeiro/contas-bancarias', { credentials: 'include' });
-                if (!r.ok) return;
-                const data = await r.json();
-                const contas = Array.isArray(data) ? data : (data.data || []);
+                const r = await fetch('/api/financeiro/bancos-select', { credentials: 'include' });
+                if (!r.ok) {
+                    console.warn('bancos-select retornou', r.status);
+                    return;
+                }
+                const contas = await r.json();
                 const sel = document.getElementById('mov-conta-id');
                 if (!sel) return;
                 sel.innerHTML = '<option value="">Selecione...</option>';
+                if (!Array.isArray(contas) || contas.length === 0) {
+                    const opt = document.createElement('option');
+                    opt.disabled = true;
+                    opt.textContent = 'Nenhuma conta cadastrada';
+                    sel.appendChild(opt);
+                    return;
+                }
                 contas.forEach(c => {
                     const opt = document.createElement('option');
                     opt.value = c.id;
-                    const banco = c.nome_banco || c.banco || c.nome || '';
-                    const ag = c.agencia ? ' — Ag. ' + c.agencia : '';
-                    const cc = c.numero_conta || c.conta || '';
-                    opt.textContent = banco + (cc ? ' — Cc. ' + cc : '') + ag;
+                    opt.textContent = c.nome || `Conta #${c.id}`;
                     sel.appendChild(opt);
                 });
             } catch(e) { console.error('carregarContasBancariasModal:', e); }
@@ -630,9 +636,9 @@
                 const r = await fetch('/api/financeiro/movimentacoes', {
                     method: 'POST', credentials: 'include',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ conta_id: contaId, tipo, valor, data, descricao, categoria, observacoes })
+                    body: JSON.stringify({ conta_id: parseInt(contaId, 10), tipo, valor, data, descricao, categoria, observacoes })
                 });
-                if (!r.ok) { const e = await r.json().catch(() => ({})); alert(e.message || `Erro ao registrar (HTTP ${r.status})`); return; }
+                if (!r.ok) { const e = await r.json().catch(() => ({})); alert(e.error || e.message || `Erro ao registrar (HTTP ${r.status})`); return; }
                 fecharModalMovimentacao();
                 await carregarFluxo();
             } catch(e) { alert('Erro de conexão ao registrar movimentação.'); }

@@ -33,6 +33,7 @@
         .pcp-table th { padding: 10px 8px; text-align: left; font-weight: 600; font-size: 11px; text-transform: uppercase; white-space: nowrap; }
         .pcp-table td { padding: 8px; border-bottom: 1px solid var(--gray-100); }
         .pcp-table tr:hover { background: var(--gray-50); }
+        .status-badge.maquina-status-badge::before { display: none !important; }
 
         .th-color { text-align: center !important; width: 40px; }
         .th-pt { background: #374151 !important; }
@@ -1001,6 +1002,17 @@
         }
 
 
+        function obterStatusMaquina(statusAtual) {
+            const status = String(statusAtual || 'ativa').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            if (status === 'ativa') {
+                return { classe: 'concluido', label: 'Ativa' };
+            }
+            if (status === 'manutencao') {
+                return { classe: 'em-producao', label: 'Manutenção' };
+            }
+            return { classe: 'pendente', label: 'Inativa' };
+        }
+
         function renderizarMaquinas() {
             const tbody = document.getElementById('maquinas-tbody');
             if (!tbody) return;
@@ -1008,23 +1020,26 @@
                 tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px;"><p style="color: var(--gray-500);">Nenhuma máquina cadastrada</p></td></tr>';
                 return;
             }
-            tbody.innerHTML = maquinasData.map(m => `
+            tbody.innerHTML = maquinasData.map(m => {
+                const statusConfig = obterStatusMaquina(m.status);
+                return `
                 <tr>
                     <td><strong>${m.codigo}</strong></td>
                     <td>${m.nome}</td>
                     <td>${m.setor || '-'}</td>
                     <td>${m.capacidade || '-'}</td>
-                    <td><span class="status-badge ${m.status === 'ativa' ? 'concluido' : m.status === 'manutenção' ? 'em_producao' : 'pendente'}">${m.status === 'ativa' ? '? ativa' : m.status === 'manutenção' ? '? manutenção' : '? inativa'}</span></td>
+                    <td><span class="status-badge maquina-status-badge ${statusConfig.classe}">${statusConfig.label}</span></td>
                     <td class="hide-mobile">${formatarData(m.ultima_manutencao)}</td>
                     <td><button class="btn btn-sm btn-secondary" onclick="editarMaquina(${m.id})" title="Editar"><i class="fas fa-edit"></i></button></td>
                 </tr>
-            `).join('');
+                `;
+            }).join('');
         }
 
 
         // ========== MÁQUINAS ==========
         function abrirModalNovaMaquina() {
-            document.getElementById('modalMaquinaTítulo').innerHTML = '<i class="fas fa-cogs"></i> Nova Máquina';
+            document.getElementById('modalMaquinaTitulo').innerHTML = '<i class="fas fa-cogs"></i> Nova Máquina';
             document.getElementById('formMaquina').reset();
             document.getElementById('maquina-id').value = '';
             document.getElementById('fotos-preview').innerHTML = '';
@@ -1045,17 +1060,17 @@
                 return;
             }
 
-            document.getElementById('modalMaquinaTítulo').innerHTML = '<i class="fas fa-edit"></i> Editar Máquina';
+            document.getElementById('modalMaquinaTitulo').innerHTML = '<i class="fas fa-edit"></i> Editar Máquina';
             document.getElementById('maquina-id').value = maquina.id;
-            document.getElementById('maquina-código').value = maquina.codigo || '';
+            document.getElementById('maquina-codigo').value = maquina.codigo || '';
             document.getElementById('maquina-nome').value = maquina.nome || '';
             document.getElementById('maquina-setor').value = maquina.setor || '';
             document.getElementById('maquina-capacidade').value = maquina.capacidade || '';
             document.getElementById('maquina-status').value = maquina.status || 'ativa';
-            document.getElementById('maquina-descrição').value = maquina.descricao || '';
+            document.getElementById('maquina-descricao').value = maquina.descricao || '';
             document.getElementById('maquina-manutenção-data').value = (maquina.ultima_manutencao || '').substring(0, 10);
             document.getElementById('maquina-manutenção-tipo').value = maquina.tipo_manutencao || '';
-            document.getElementById('maquina-manutenção-descrição').value = maquina.descricao_manutencao || '';
+            document.getElementById('maquina-manutenção-descricao').value = maquina.descricao_manutencao || '';
             document.getElementById('maquina-manutenção-responsavel').value = maquina.responsavel_manutencao || '';
             document.getElementById('maquina-próxima-manutenção').value = (maquina.proxima_manutencao || '').substring(0, 10);
             document.getElementById('maquina-custo').value = maquina.custo_manutencao || '';
@@ -1096,15 +1111,15 @@
         async function salvarMaquina() {
             const id = document.getElementById('maquina-id').value;
             const dados = {
-                código: document.getElementById('maquina-código').value,
+                codigo: document.getElementById('maquina-codigo').value,
                 nome: document.getElementById('maquina-nome').value,
                 setor: document.getElementById('maquina-setor').value,
                 capacidade: document.getElementById('maquina-capacidade').value,
                 status: document.getElementById('maquina-status').value,
-                descrição: document.getElementById('maquina-descrição').value,
+                descricao: document.getElementById('maquina-descricao').value,
                 ultima_manutencao: document.getElementById('maquina-manutenção-data').value,
                 tipo_manutencao: document.getElementById('maquina-manutenção-tipo').value,
-                descricao_manutencao: document.getElementById('maquina-manutenção-descrição').value,
+                descricao_manutencao: document.getElementById('maquina-manutenção-descricao').value,
                 responsavel_manutencao: document.getElementById('maquina-manutenção-responsavel').value,
                 proxima_manutencao: document.getElementById('maquina-próxima-manutenção').value,
                 custo_manutencao: document.getElementById('maquina-custo').value

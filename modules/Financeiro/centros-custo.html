@@ -226,24 +226,28 @@
                         <div class="metric-header">
                             <div class="metric-icon purple"><i class="fas fa-sitemap"></i></div>
                         </div>
+                        <div class="metric-value" id="stat-total">0</div>
                         <div class="metric-label">Total de Centros</div>
                     </div>
                     <div class="metric-card green">
                         <div class="metric-header">
                             <div class="metric-icon green"><i class="fas fa-check-circle"></i></div>
                         </div>
+                        <div class="metric-value green" id="stat-ativos">0</div>
                         <div class="metric-label">Ativos</div>
                     </div>
                     <div class="metric-card blue">
                         <div class="metric-header">
                             <div class="metric-icon blue"><i class="fas fa-dollar-sign"></i></div>
                         </div>
+                        <div class="metric-value blue" id="stat-orcamento">R$ 0,00</div>
                         <div class="metric-label">Orçamento Total</div>
                     </div>
                     <div class="metric-card orange">
                         <div class="metric-header">
                             <div class="metric-icon orange"><i class="fas fa-chart-pie"></i></div>
                         </div>
+                        <div class="metric-value orange" id="stat-utilizacao">0%</div>
                         <div class="metric-label">Utilização Média</div>
                     </div>
                 </div>
@@ -419,24 +423,26 @@
                     return;
                 }
                 tbody.innerHTML = pageData.map(c => {
-                    const utilização = c.orçamento_mensal > 0 ? Math.min((c.utilizado / c.orçamento_mensal) * 100, 100) : 0;
-                    const corBarra = utilização > 90 ? 'red' : utilização > 70 ? 'yellow' : 'green';
+                    const orcamentoMensal = getCentroOrcamento(c);
+                    const utilizado = parseFloat(c.utilizado || 0) || 0;
+                    const utilizacao = orcamentoMensal > 0 ? Math.min((utilizado / orcamentoMensal) * 100, 100) : 0;
+                    const corBarra = utilizacao > 90 ? 'red' : utilizacao > 70 ? 'yellow' : 'green';
                     return `
                         <tr>
                             <td><strong>${c.codigo || 'CC' + String(c.id).padStart(3, '0')}</strong></td>
                             <td>${c.nome || c.descricao || '-'}</td>
                             <td>${c.departamento || '-'}</td>
                             <td>${c.responsavel || c.responsavel_nome || '-'}</td>
-                            <td>${formatarMoeda(c.orçamento_mensal || c.orçamento || 0)}</td>
+                            <td>${formatarMoeda(orcamentoMensal)}</td>
                             <td style="min-width: 120px;">
                                 <div style="display: flex; align-items: center; gap: 8px;">
                                     <div class="progress-bar" style="flex: 1;">
-                                        <div class="fill ${corBarra}" style="width: ${utilização}%"></div>
+                                        <div class="fill ${corBarra}" style="width: ${utilizacao}%"></div>
                                     </div>
-                                    <span style="font-size: 12px; font-weight: 600;">${utilização.toFixed(0)}%</span>
+                                    <span style="font-size: 12px; font-weight: 600;">${utilizacao.toFixed(0)}%</span>
                                 </div>
                             </td>
-                            <td><span class="badge ${(c.ativo == 1 || c.ativo === true) ? 'badge-success' : 'badge-danger'}">${(c.ativo == 1 || c.ativo === true) ? 'Ativo' : 'Inativo'}</span></td>
+                            <td><span class="badge ${isCentroAtivo(c) ? 'badge-success' : 'badge-danger'}">${isCentroAtivo(c) ? 'Ativo' : 'Inativo'}</span></td>
                             <td>
                                 <button class="btn-action view" title="Ver" onclick="verCentro(${c.id})"><i class="fas fa-eye"></i></button>
                                 <button class="btn-action edit" title="Editar" onclick="editarCentro(${c.id})"><i class="fas fa-edit"></i></button>
@@ -448,6 +454,29 @@
             }
         });
         window._finPg['fp-pg-centros'] = pgCentros;
+
+        function extrairListaCentros(payload) {
+            if (Array.isArray(payload)) return payload;
+            if (!payload || typeof payload !== 'object') return [];
+            for (const campo of ['data', 'centros', 'items', 'rows', 'results']) {
+                if (Array.isArray(payload[campo])) return payload[campo];
+            }
+            return [];
+        }
+
+        function getCentroOrcamento(centro) {
+            return parseFloat(
+                centro.orcamento_mensal ??
+                centro.orçamento_mensal ??
+                centro.orcamento ??
+                centro.orçamento ??
+                0
+            ) || 0;
+        }
+
+        function isCentroAtivo(centro) {
+            return centro.ativo == 1 || centro.ativo === true || centro.ativo === 'ativo';
+        }
 
         // Carregar usuário
         async function carregarUsuario() {
@@ -489,8 +518,7 @@
                 const response = await fetch('/api/financeiro/centros-custo', { credentials: 'include' });
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 const data = await response.json();
-                const arr = data.data || data;
-                centrosCusto = Array.isArray(arr) ? arr : [];
+                centrosCusto = extrairListaCentros(data);
                 renderizarTabela();
                 atualizarStats();
             } catch (e) {
@@ -500,35 +528,32 @@
         }
 
         function renderizarTabela() {
-            pgCentros.render();
+            if (pgCentros && typeof pgCentros.render === 'function') {
+                pgCentros.render();
+            }
         }
 
         function atualizarStats() {
             const total = centrosCusto.length;
-            const ativos = centrosCusto.filter(c => c.ativo == 1 || c.ativo === true || c.ativo === 'ativo').length;
-            const inativos = total - ativos;
-            const orçamentoTotal = centrosCusto.reduce((sum, c) => sum + parseFloat(c.orçamento_mensal || c.orçamento || 0), 0);
+            const ativos = centrosCusto.filter(isCentroAtivo).length;
+            const orcamentoTotal = centrosCusto.reduce((sum, c) => sum + getCentroOrcamento(c), 0);
             const utilizadoTotal = centrosCusto.reduce((sum, c) => sum + parseFloat(c.utilizado || 0), 0);
-            const utilizaçãoMedia = orçamentoTotal > 0 ? (utilizadoTotal / orçamentoTotal) * 100 : 0;
+            const utilizacaoMedia = orcamentoTotal > 0 ? (utilizadoTotal / orcamentoTotal) * 100 : 0;
 
             document.getElementById('stat-total').textContent = total;
             document.getElementById('stat-ativos').textContent = ativos;
-            document.getElementById('stat-orçamento').textContent = formatarMoeda(orçamentoTotal);
-            document.getElementById('stat-utilização').textContent = utilizaçãoMedia.toFixed(1) + '%';
+            document.getElementById('stat-orcamento').textContent = formatarMoeda(orcamentoTotal);
+            document.getElementById('stat-utilizacao').textContent = utilizacaoMedia.toFixed(1) + '%';
         }
 
         function filtrarCentros() {
-            const busca = document.getElementById('searchInput').value.toLowerCase();
-            const linhas = document.querySelectorAll('#tabela-centros tr');
-            linhas.forEach(linha => {
-                const texto = linha.textContent.toLowerCase();
-                linha.style.display = texto.includes(busca) ? '' : 'none';
-            });
+            const busca = document.getElementById('fp-search-centros')?.value || '';
+            pgCentros.search(busca);
         }
 
         function abrirModal() {
             editandoId = null;
-            document.getElementById('modal-título').textContent = 'Novo Centro de Custo';
+            document.getElementById('modal-titulo').textContent = 'Novo Centro de Custo';
             document.getElementById('formCentro').reset();
             document.getElementById('centro-id').value = '';
             document.getElementById('modalCentro').classList.add('active');
@@ -543,24 +568,26 @@
             if (!centro) return;
 
             editandoId = id;
-            document.getElementById('modal-título').textContent = 'Editar Centro de Custo';
+            document.getElementById('modal-titulo').textContent = 'Editar Centro de Custo';
             document.getElementById('centro-id').value = centro.id;
-            document.getElementById('centro-código').value = centro.codigo || '';
+            document.getElementById('centro-codigo').value = centro.codigo || '';
             document.getElementById('centro-nome').value = centro.nome || centro.descricao || '';
             document.getElementById('centro-departamento').value = centro.departamento || '';
             document.getElementById('centro-responsavel').value = centro.responsavel || centro.responsavel_nome || '';
-            document.getElementById('centro-orcamento').value = formatarMoeda(centro.orçamento_mensal || centro.orçamento || 0);
-            document.getElementById('centro-ativo').value = centro.ativo ? '1' : '0';
+            document.getElementById('centro-orcamento').value = formatarMoeda(getCentroOrcamento(centro));
+            document.getElementById('centro-ativo').value = isCentroAtivo(centro) ? '1' : '0';
             document.getElementById('modalCentro').classList.add('active');
         }
 
         async function salvarCentro() {
+            const orcamentoMensal = parseMoeda(document.getElementById('centro-orcamento').value);
             const dados = {
-                código: document.getElementById('centro-código').value,
+                codigo: document.getElementById('centro-codigo').value.trim(),
                 nome: document.getElementById('centro-nome').value,
                 departamento: document.getElementById('centro-departamento').value,
                 responsavel: document.getElementById('centro-responsavel').value,
-                orçamento_mensal: parseMoeda(document.getElementById('centro-orcamento').value),
+                orcamento_mensal: orcamentoMensal,
+                orcamento: orcamentoMensal,
                 ativo: document.getElementById('centro-ativo').value === '1'
             };
 
@@ -586,8 +613,8 @@
                     carregarCentros();
                     alert(editandoId ? 'Centro atualizado com sucesso!' : 'Centro criado com sucesso!');
                 } else {
-                    const error = await response.json();
-                    alert('Falha ao salvar. Tente novamente.'));
+                    const error = await response.json().catch(() => ({}));
+                    alert(error.message || error.error || 'Falha ao salvar. Tente novamente.');
                 }
             } catch (e) {
                 console.error('Erro ao salvar:', e);
@@ -606,7 +633,7 @@
 
                 if (response.ok) {
                     carregarCentros();
-                    alert('Centro excludo com sucesso!');
+                    alert('Centro excluído com sucesso!');
                 } else {
                     alert('Erro ao excluir centro de custo');
                 }
@@ -620,10 +647,12 @@
             const centro = centrosCusto.find(c => c.id === id);
             if (!centro) return;
 
-            const utilização = centro.orçamento_mensal > 0 ? ((centro.utilizado || 0) / centro.orçamento_mensal) * 100 : 0;
-            const utilizaçãoCor = utilização >= 90 ? '#dc2626' : utilização >= 70 ? '#ea580c' : '#059669';
-            const statusCor = centro.ativo ? '#059669' : '#dc2626';
-            const statusTexto = centro.ativo ? 'Ativo' : 'Inativo';
+            const orcamentoMensal = getCentroOrcamento(centro);
+            const utilizado = parseFloat(centro.utilizado || 0) || 0;
+            const utilizacao = orcamentoMensal > 0 ? (utilizado / orcamentoMensal) * 100 : 0;
+            const utilizacaoCor = utilizacao >= 90 ? '#dc2626' : utilizacao >= 70 ? '#ea580c' : '#059669';
+            const statusCor = isCentroAtivo(centro) ? '#059669' : '#dc2626';
+            const statusTexto = isCentroAtivo(centro) ? 'Ativo' : 'Inativo';
 
             const mensagem = `
                 <div style="text-align:left; font-size:14px; line-height:1.8;">
@@ -637,15 +666,15 @@
                     <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
                         <div style="text-align:center; background:#f8fafc; border-radius:8px; padding:10px;">
                             <div style="color:#9CA3AF; font-size:11px; margin-bottom:4px;">ORÇAMENTO</div>
-                            <div style="font-weight:700; color:#2563eb;">${formatarMoeda(centro.orçamento_mensal || 0)}</div>
+                            <div style="font-weight:700; color:#2563eb;">${formatarMoeda(orcamentoMensal)}</div>
                         </div>
                         <div style="text-align:center; background:#f8fafc; border-radius:8px; padding:10px;">
                             <div style="color:#9CA3AF; font-size:11px; margin-bottom:4px;">UTILIZADO</div>
-                            <div style="font-weight:700; color:#ea580c;">${formatarMoeda(centro.utilizado || 0)}</div>
+                            <div style="font-weight:700; color:#ea580c;">${formatarMoeda(utilizado)}</div>
                         </div>
                         <div style="text-align:center; background:#f8fafc; border-radius:8px; padding:10px;">
-                            <div style="color:#9CA3AF; font-size:11px; margin-bottom:4px;">UTILIZAÇÁƒO</div>
-                            <div style="font-weight:700; color:${utilizaçãoCor};">${utilização.toFixed(1)}%</div>
+                            <div style="color:#9CA3AF; font-size:11px; margin-bottom:4px;">UTILIZAÇÃO</div>
+                            <div style="font-weight:700; color:${utilizacaoCor};">${utilizacao.toFixed(1)}%</div>
                         </div>
                     </div>
                 </div>
@@ -670,7 +699,7 @@
                     showCancel: false
                 });
             } else {
-                alert(`Centro de Custo: ${centro.nome || centro.descricao}\n\nCódigo: ${centro.codigo || '-'}\nDepartamento: ${centro.departamento || '-'}\nResponsável: ${centro.responsavel || '-'}\nOrçamento: ${formatarMoeda(centro.orçamento_mensal || 0)}\nUtilizado: ${formatarMoeda(centro.utilizado || 0)}\nUtilização: ${utilização.toFixed(1)}%\nStatus: ${statusTexto}`);
+                alert(`Centro de Custo: ${centro.nome || centro.descricao}\n\nCódigo: ${centro.codigo || '-'}\nDepartamento: ${centro.departamento || '-'}\nResponsável: ${centro.responsavel || '-'}\nOrçamento: ${formatarMoeda(orcamentoMensal)}\nUtilizado: ${formatarMoeda(utilizado)}\nUtilização: ${utilizacao.toFixed(1)}%\nStatus: ${statusTexto}`);
             }
         }
 
@@ -682,7 +711,7 @@
 
             let csv = 'Código,Nome,Departamento,Responsável,Orçamento,Utilizado,Status\n';
             centrosCusto.forEach(c => {
-                csv += `"${c.codigo || ''}","${c.nome || c.descricao || ''}","${c.departamento || ''}","${c.responsavel || ''}","${c.orçamento_mensal || 0}","${c.utilizado || 0}","${c.ativo ? 'Ativo' : 'Inativo'}"\n`;
+                csv += `"${c.codigo || ''}","${c.nome || c.descricao || ''}","${c.departamento || ''}","${c.responsavel || ''}","${getCentroOrcamento(c)}","${c.utilizado || 0}","${isCentroAtivo(c) ? 'Ativo' : 'Inativo'}"\n`;
             });
 
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -730,4 +759,3 @@
     <script src="/js/user-dropdown.js?v=20260319" defer></script>
 </body>
 </html>
-

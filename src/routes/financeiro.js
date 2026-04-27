@@ -1759,6 +1759,127 @@ router.delete('/contas-bancarias/:id', authenticateToken, authorizeFinanceiro('b
 });
 
 // =====================================================
+// SELECT DE CONTAS BANCÁRIAS (uso em modais, sem restrição de seção)
+// =====================================================
+
+/**
+ * GET /api/financeiro/bancos-select
+ * Retorna lista mínima de contas bancárias para uso em dropdowns/selects.
+ * Requer apenas autenticação — sem restrição de seção financeiro.
+ */
+router.get('/bancos-select', authenticateToken, async (req, res) => {
+    try {
+        let contas = [];
+
+        // Fonte primária: contas_bancarias (tabela gerenciada pelo CRUD do módulo)
+        try {
+            const [rows] = await pool.query(
+                `SELECT id,
+                        CONCAT(
+                            COALESCE(banco, nome, ''),
+                            CASE WHEN conta IS NOT NULL AND conta != '' THEN CONCAT(' — Cc. ', conta) ELSE '' END,
+                            CASE WHEN agencia IS NOT NULL AND agencia != '' THEN CONCAT(' — Ag. ', agencia) ELSE '' END
+                        ) AS nome
+                 FROM contas_bancarias
+                 WHERE ativo = 1
+                 ORDER BY nome`
+            );
+            contas = rows || [];
+        } catch (e) { /* tabela pode não existir */ }
+
+        // Fonte secundária: tabela bancos (sistema legado de movimentações)
+        if (contas.length === 0) {
+            try {
+                const [rows] = await pool.query(
+                    `SELECT id,
+                            CONCAT(
+                                COALESCE(nome, instituicao, ''),
+                                CASE WHEN conta_corrente IS NOT NULL AND conta_corrente != '' THEN CONCAT(' — Cc. ', conta_corrente) ELSE '' END,
+                                CASE WHEN agencia IS NOT NULL AND agencia != '' THEN CONCAT(' — Ag. ', agencia) ELSE '' END
+                            ) AS nome
+                     FROM bancos
+                     WHERE status != 'inativo' OR status IS NULL
+                     ORDER BY nome`
+                );
+                contas = rows || [];
+            } catch (e) { /* tabela pode não existir */ }
+        }
+
+        res.json(contas);
+    } catch (error) {
+        console.error('[Financeiro] Erro ao buscar contas para select:', error);
+        res.json([]);
+    }
+});
+
+// =====================================================
+// MOVIMENTAÇÕES DIRETAS (lançamentos manuais no fluxo de caixa)
+// =====================================================
+
+/**
+ * POST /api/financeiro/movimentacoes
+ * Registra uma movimentação direta em conta bancária (entrada ou saída).
+ * Atualiza o saldo_atual da conta e armazena no log de movimentações.
+ */
+router.post('/movimentacoes', authenticateToken, async (req, res) => {
+    const connection = await pool.getConnection();
+    try {
+        await connection.beginTransaction();
+
+        const { conta_id, tipo, valor, data, descricao, categoria, observacoes } = req.body;
+
+        if (!conta_id) return res.status(400).json({ error: 'Conta bancária não informada.' });
+        if (!tipo || !['entrada', 'saida'].includes(tipo)) return res.status(400).json({ error: 'Tipo inválido. Use "entrada" ou "saida".' });
+        const valorNum = parseFloat(valor);
+        if (!valorNum || valorNum <= 0) return res.status(400).json({ error: 'Valor inválido.' });
+        if (!data) return res.status(400).json({ error: 'Data não informada.' });
+        if (!descricao || !descricao.trim()) return res.status(400).json({ error: 'Descrição não informada.' });
+
+        // Buscar conta em contas_bancarias
+        const [contaRows] = await connection.query(
+            'SELECT id, saldo_atual FROM contas_bancarias WHERE id = ? AND ativo = 1 LIMIT 1',
+            [conta_id]
+        );
+
+        if (contaRows.length === 0) {
+            await connection.rollback();
+            return res.status(404).json({ error: 'Conta bancária não encontrada.' });
+        }
+
+        const saldoAtual = parseFloat(contaRows[0].saldo_atual) || 0;
+        const novoSaldo = tipo === 'entrada' ? saldoAtual + valorNum : saldoAtual - valorNum;
+
+        // Atualiza saldo da conta
+        await connection.query(
+            'UPDATE contas_bancarias SET saldo_atual = ?, updated_at = NOW() WHERE id = ?',
+            [novoSaldo, conta_id]
+        );
+
+        // Registra no log de movimentações bancárias (banco_id = conta_id para rastreabilidade)
+        await connection.query(
+            `INSERT INTO movimentacoes_bancarias (banco_id, tipo, valor, saldo_apos, data, descricao, categoria, created_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, NOW())`,
+            [conta_id, tipo, valorNum, novoSaldo, data, descricao.trim(), categoria || null]
+        ).catch(() => { /* tabela movimentacoes_bancarias pode não existir — ignora */ });
+
+        await connection.commit();
+
+        res.json({
+            success: true,
+            id: null,
+            saldo: novoSaldo,
+            message: 'Movimentação registrada com sucesso'
+        });
+    } catch (error) {
+        await connection.rollback();
+        console.error('[Financeiro] Erro ao registrar movimentação:', error);
+        res.status(500).json({ error: 'Erro ao registrar movimentação' });
+    } finally {
+        connection.release();
+    }
+});
+
+// =====================================================
 // ROTAS - BAIXA DE CONTAS
 // =====================================================
 

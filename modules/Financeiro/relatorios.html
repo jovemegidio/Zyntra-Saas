@@ -535,8 +535,9 @@
         .valor-cell.positivo { color: var(--success); }
         .valor-cell.negativo { color: var(--danger); }
 
-        /* SUMMARY BOX - overridden by enhanced version above */\n\n        /* MODAL - Design SaaS Empresarial */
-        -webkit-backdrop-filter: blur(8px); }
+        /* SUMMARY BOX - overridden by enhanced version above */
+
+        /* MODAL - Design SaaS Empresarial */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
         .modal-overlay.active { display: flex; }
         .modal { background: white; border-radius: 24px; width: 100%; max-width: 950px; max-height: 90vh; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); animation: modalFadeIn 0.3s ease; }
@@ -589,7 +590,6 @@
         @media (max-width: 768px) { .relatorios-grid { grid-template-columns: 1fr; } .summary-grid { grid-template-columns: 1fr; } }
 
         /* MODAL - Classes Padrão (Padrão SaaS Empresarial) */
-        -webkit-backdrop-filter: blur(8px); }
         .modal-overlay-padrão { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15,23,42,0.7); display: none; align-items: center; justify-content: center; z-index: 99999; backdrop-filter: blur(8px); }
         .modal-overlay-padrão.active { display: flex !important; }
         .modal-padrão { display: flex !important; flex-direction: column !important; background: white !important; border-radius: 24px !important; width: 100% !important; max-width: 950px !important; max-height: 90vh !important; overflow: hidden !important; box-shadow: 0 25px 80px rgba(0,0,0,0.25), 0 10px 30px rgba(0,0,0,0.15) !important; animation: modalFadeInRelatórios 0.25s ease-out !important; position: relative !important; margin: 16px !important; }
@@ -838,12 +838,12 @@
                 </div>
 
                 <!-- ===== Abas CP / CR ===== -->
-                <div class="relatório-tabs">
-                    <button class="relatório-tab ativa" id="tab-btn-cr"
+                <div class="relatorio-tabs">
+                    <button class="relatorio-tab ativa" id="tab-btn-cr"
                         onclick="alternarAbaRelatório('cr')">
                         <i class="fas fa-hand-holding-usd"></i>&nbsp; Contas a Receber
                     </button>
-                    <button class="relatório-tab" id="tab-btn-cp"
+                    <button class="relatorio-tab" id="tab-btn-cp"
                         onclick="alternarAbaRelatório('cp')">
                         <i class="fas fa-file-invoice-dollar"></i>&nbsp; Contas a Pagar
                     </button>
@@ -855,12 +855,12 @@
                     <h2>Operação de Desconto</h2>
                     <span class="section-desc">Antecipação de recebíveis</span>
                 </div>
-                <div class="relatórios-grid" data-aba="cr" style="margin-bottom: 32px;">
-                    <div class="relatório-card" onclick="abrirModalDesconto()" style="border-left: 4px solid #8b5cf6;">
-                        <div class="relatório-icon purple"><i class="fas fa-percent"></i></div>
+                <div class="relatorios-grid" data-aba="cr" style="margin-bottom: 32px;">
+                    <div class="relatorio-card" onclick="abrirModalDesconto()" style="border-left: 4px solid #8b5cf6;">
+                        <div class="relatorio-icon purple"><i class="fas fa-percent"></i></div>
                         <h3>Nova Operação de Desconto</h3>
                         <p>Realize operações de desconto de títulos a receber, antecipando valores com cálculo automático de taxas e IOF.</p>
-                        <div class="relatório-actions">
+                        <div class="relatorio-actions">
                             <button class="btn btn-primary btn-sm" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);"><i class="fas fa-plus"></i> Nova Operação</button>
                         </div>
                     </div>
@@ -872,50 +872,73 @@
                     <h2>Relatórios de Contas a Receber</h2>
                     <span class="section-desc">Liquidados, vencidos, a vencer e por cliente</span>
                 </div>
-                <div class="relatórios-grid">
-                    <div class="relatório-card" onclick="abrirRelatório('títulos-liquidados')">
-                        <div class="relatório-icon green"><i class="fas fa-check-circle"></i></div>
+                <div class="relatorios-grid" data-aba="cr">
+                    <div class="relatorio-card" onclick="abrirRelatório('títulos-liquidados')">
+                        <div class="relatorio-icon green"><i class="fas fa-check-circle"></i></div>
                         <h3>Títulos Liquidados</h3>
                         <p>Listagem de todos os títulos que foram pagos/recebidos no período selecionado.</p>
-                        <div class="relatório-actions">
+                        <div class="relatorio-actions">
                             <button class="btn btn-secondary btn-sm"><i class="fas fa-eye"></i> Visualizar</button>
                             <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatório('títulos-liquidados', 'pdf')"><i class="fas fa-file-pdf"></i></button>
                             <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatório('títulos-liquidados', 'excel')"><i class="fas fa-file-excel"></i></button>
                         </div>
                     </div>
 
-                    <div class="relatório-card" onclick="abrirRelatório('títulos-vencidos')">
-                        <div class="relatório-icon red"><i class="fas fa-exclamation-triangle"></i></div>
+                    <div class="relatorio-card" onclick="abrirRelatório('títulos-vencidos')">
+                        <div class="relatorio-icon red"><i class="fas fa-exclamation-triangle"></i></div>
                         <h3>Títulos Vencidos</h3>
                         <p>Títulos com data de vencimento ultrapassada e ainda não liquidados.</p>
-                        <div class="relatório-actions">
+                        <div class="relatorio-actions">
                             <button class="btn btn-secondary btn-sm"><i class="fas fa-eye"></i> Visualizar</button>
                             <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatório('títulos-vencidos', 'pdf')"><i class="fas fa-file-pdf"></i></button>
                             <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatório('títulos-vencidos', 'excel')"><i class="fas fa-file-excel"></i></button>
                         </div>
                     </div>
 
-                    <div class="relatório-card" onclick="abrirRelatório('títulos-a-vencer')">
-                        <div class="relatório-icon orange"><i class="fas fa-clock"></i></div>
+                    <div class="relatorio-card" onclick="abrirRelatório('títulos-a-vencer')">
+                        <div class="relatorio-icon orange"><i class="fas fa-clock"></i></div>
                         <h3>Títulos a Vencer</h3>
                         <p>Títulos com vencimento futuro, organizados por data de vencimento.</p>
-                        <div class="relatório-actions">
+                        <div class="relatorio-actions">
                             <button class="btn btn-secondary btn-sm"><i class="fas fa-eye"></i> Visualizar</button>
                             <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatório('títulos-a-vencer', 'pdf')"><i class="fas fa-file-pdf"></i></button>
                             <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatório('títulos-a-vencer', 'excel')"><i class="fas fa-file-excel"></i></button>
                         </div>
                     </div>
 
-                    <div class="relatório-card" onclick="abrirRelatório('títulos-por-cliente')">
-                        <div class="relatório-icon blue"><i class="fas fa-user"></i></div>
+                    <div class="relatorio-card" onclick="abrirRelatório('títulos-por-cliente')">
+                        <div class="relatorio-icon blue"><i class="fas fa-user"></i></div>
                         <h3>Por Cliente</h3>
                         <p>Títulos a receber agrupados por cliente, com totais e detalhamento.</p>
-                        <div class="relatório-actions">
+                        <div class="relatorio-actions">
                             <button class="btn btn-secondary btn-sm"><i class="fas fa-eye"></i> Visualizar</button>
                             <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatório('títulos-por-cliente', 'pdf')"><i class="fas fa-file-pdf"></i></button>
                             <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatório('títulos-por-cliente', 'excel')"><i class="fas fa-file-excel"></i></button>
                         </div>
                     </div>
+
+                    <div class="relatorio-card" onclick="abrirRelatório('portador-carteira')">
+                        <div class="relatorio-icon purple"><i class="fas fa-wallet"></i></div>
+                        <h3>Portador "Carteira"</h3>
+                        <p>Títulos em carteira (não enviados para cobrança bancária).</p>
+                        <div class="relatorio-actions">
+                            <button class="btn btn-secondary btn-sm"><i class="fas fa-eye"></i> Visualizar</button>
+                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatório('portador-carteira', 'pdf')"><i class="fas fa-file-pdf"></i></button>
+                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatório('portador-carteira', 'excel')"><i class="fas fa-file-excel"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="relatorio-card" onclick="abrirRelatório('títulos-descontos')">
+                        <div class="relatorio-icon green"><i class="fas fa-percent"></i></div>
+                        <h3>Descontos</h3>
+                        <p>Histórico de operações de desconto de títulos realizadas.</p>
+                        <div class="relatorio-actions">
+                            <button class="btn btn-secondary btn-sm"><i class="fas fa-eye"></i> Visualizar</button>
+                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatório('títulos-descontos', 'pdf')"><i class="fas fa-file-pdf"></i></button>
+                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatório('títulos-descontos', 'excel')"><i class="fas fa-file-excel"></i></button>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Seção CP -->
                 <div class="section-header" data-aba="cp">
@@ -923,36 +946,15 @@
                     <h2>Relatórios de Contas a Pagar</h2>
                     <span class="section-desc">Por fornecedor e por período</span>
                 </div>
-                    <div class="relatório-card" data-aba="cp" onclick="abrirRelatório('títulos-por-fornecedor')">
-                        <div class="relatório-icon green"><i class="fas fa-truck"></i></div>
+                <div class="relatorios-grid" data-aba="cp">
+                    <div class="relatorio-card" onclick="abrirRelatório('títulos-por-fornecedor')">
+                        <div class="relatorio-icon green"><i class="fas fa-truck"></i></div>
                         <h3>Por Fornecedor</h3>
                         <p>Títulos a pagar agrupados por fornecedor, com totais e detalhamento.</p>
-                        <div class="relatório-actions">
+                        <div class="relatorio-actions">
                             <button class="btn btn-secondary btn-sm"><i class="fas fa-eye"></i> Visualizar</button>
                             <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatório('títulos-por-fornecedor', 'pdf')"><i class="fas fa-file-pdf"></i></button>
                             <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatório('títulos-por-fornecedor', 'excel')"><i class="fas fa-file-excel"></i></button>
-                        </div>
-                    </div>
-
-                    <div class="relatório-card" onclick="abrirRelatório('portador-carteira')">
-                        <div class="relatório-icon purple"><i class="fas fa-wallet"></i></div>
-                        <h3>Portador "Carteira"</h3>
-                        <p>Títulos em carteira (não enviados para cobrança bancária).</p>
-                        <div class="relatório-actions">
-                            <button class="btn btn-secondary btn-sm"><i class="fas fa-eye"></i> Visualizar</button>
-                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatório('portador-carteira', 'pdf')"><i class="fas fa-file-pdf"></i></button>
-                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatório('portador-carteira', 'excel')"><i class="fas fa-file-excel"></i></button>
-                        </div>
-                    </div>
-
-                    <div class="relatório-card" onclick="abrirRelatório('títulos-descontos')">
-                        <div class="relatório-icon green"><i class="fas fa-percent"></i></div>
-                        <h3>Descontos</h3>
-                        <p>Histórico de operações de desconto de títulos realizadas.</p>
-                        <div class="relatório-actions">
-                            <button class="btn btn-secondary btn-sm"><i class="fas fa-eye"></i> Visualizar</button>
-                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatório('títulos-descontos', 'pdf')"><i class="fas fa-file-pdf"></i></button>
-                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatório('títulos-descontos', 'excel')"><i class="fas fa-file-excel"></i></button>
                         </div>
                     </div>
                 </div>
@@ -968,23 +970,23 @@
                     <h2>Relatório de Contas a Pagar por Período</h2>
                     <span class="section-desc">Contas a pagar detalhadas por período</span>
                 </div>
-                <div class="relatórios-grid">
-                    <div class="relatório-card" data-aba="cp" onclick="abrirModalRelatórioContasPagar()" style="border-left: 4px solid #ef4444;">
-                        <div class="relatório-icon red"><i class="fas fa-file-invoice-dollar"></i></div>
+                <div class="relatorios-grid">
+                    <div class="relatorio-card" data-aba="cp" onclick="abrirModalRelatórioContasPagar()" style="border-left: 4px solid #ef4444;">
+                        <div class="relatorio-icon red"><i class="fas fa-file-invoice-dollar"></i></div>
                         <h3>Contas a Pagar por Período</h3>
                         <p>Relatório detalhado de contas a pagar com filtros por período, fornecedor e banco sacado.</p>
-                        <div class="relatório-actions">
+                        <div class="relatorio-actions">
                             <button class="btn btn-secondary btn-sm"><i class="fas fa-filter"></i> Filtrar</button>
                             <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatório('contas-pagar-período', 'pdf')"><i class="fas fa-file-pdf"></i></button>
                             <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatório('contas-pagar-período', 'excel')"><i class="fas fa-file-excel"></i></button>
                         </div>
                     </div>
 
-                    <div class="relatório-card" data-aba="cr" onclick="abrirModalRelatórioContasReceber()" style="border-left: 4px solid #22c55e;">
-                        <div class="relatório-icon green"><i class="fas fa-hand-holding-usd"></i></div>
+                    <div class="relatorio-card" data-aba="cr" onclick="abrirModalRelatórioContasReceber()" style="border-left: 4px solid #22c55e;">
+                        <div class="relatorio-icon green"><i class="fas fa-hand-holding-usd"></i></div>
                         <h3>Contas a Receber por Período</h3>
                         <p>Relatório detalhado de contas a receber com filtros por período, cliente e banco sacado.</p>
-                        <div class="relatório-actions">
+                        <div class="relatorio-actions">
                             <button class="btn btn-secondary btn-sm"><i class="fas fa-filter"></i> Filtrar</button>
                             <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatório('contas-receber-período', 'pdf')"><i class="fas fa-file-pdf"></i></button>
                             <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatório('contas-receber-período', 'excel')"><i class="fas fa-file-excel"></i></button>

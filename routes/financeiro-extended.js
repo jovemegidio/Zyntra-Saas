@@ -2050,7 +2050,13 @@ module.exports = function createFinanceiroExtendedRoutes(deps) {
     // ---- PLANO DE CONTAS: CRUD completo ----
     router.get('/plano-contas', authenticateToken, async (req, res) => {
         try {
-            const [rows] = await pool.query('SELECT * FROM plano_contas ORDER BY codigo');
+            let [rows] = await pool.query('SELECT * FROM plano_contas WHERE ativo = 1 ORDER BY codigo');
+
+            if (rows.length === 0) {
+                await inicializarPlanoContasPorCategorias(pool);
+                [rows] = await pool.query('SELECT * FROM plano_contas WHERE ativo = 1 ORDER BY codigo');
+            }
+
             res.json(rows);
         } catch (error) {
             if (error.code === 'ER_NO_SUCH_TABLE') return res.json([]);
@@ -2058,6 +2064,57 @@ module.exports = function createFinanceiroExtendedRoutes(deps) {
             res.status(500).json({ error: 'Erro ao buscar plano de contas' });
         }
     });
+
+    async function inicializarPlanoContasPorCategorias(pool) {
+        let categorias = [];
+        try {
+            const [rows] = await pool.query(`
+                SELECT nome, cor
+                FROM categorias
+                WHERE ativo = 1 AND nome IS NOT NULL AND TRIM(nome) <> ''
+                ORDER BY nome
+            `);
+            categorias = rows;
+        } catch (error) {
+            if (error.code !== 'ER_NO_SUCH_TABLE') {
+                console.warn('[Financeiro] Falha ao buscar categorias para plano de contas:', error.message);
+            }
+        }
+
+        if (categorias.length === 0) return;
+
+        await pool.query(`
+            INSERT IGNORE INTO plano_contas (codigo, nome, tipo, pai_id, nivel, cor, ativo, created_at)
+            VALUES
+                ('1', 'RECEITAS', 'receita', NULL, 1, '#22c55e', 1, NOW()),
+                ('2', 'DESPESAS', 'despesa', NULL, 1, '#ef4444', 1, NOW())
+        `);
+
+        const [roots] = await pool.query("SELECT id, codigo FROM plano_contas WHERE codigo IN ('1', '2')");
+        const receitasRoot = roots.find(r => r.codigo === '1')?.id;
+        const despesasRoot = roots.find(r => r.codigo === '2')?.id;
+        if (!receitasRoot || !despesasRoot) return;
+
+        const receitaRegex = /(venda|receita|servi|produtos? acabados?|faturamento)/i;
+        let receitasSeq = 1;
+        let despesasSeq = 1;
+
+        for (const categoria of categorias) {
+            const nome = String(categoria.nome || '').trim();
+            if (!nome) continue;
+
+            const tipo = receitaRegex.test(nome) ? 'receita' : 'despesa';
+            const parentId = tipo === 'receita' ? receitasRoot : despesasRoot;
+            const codigo = tipo === 'receita' ? `1.${receitasSeq++}` : `2.${despesasSeq++}`;
+            const cor = categoria.cor || (tipo === 'receita' ? '#22c55e' : '#ef4444');
+
+            await pool.query(
+                `INSERT IGNORE INTO plano_contas (codigo, nome, tipo, pai_id, nivel, cor, ativo, created_at)
+                 VALUES (?, ?, ?, ?, 2, ?, 1, NOW())`,
+                [codigo, nome, tipo, parentId, cor]
+            );
+        }
+    }
 
     router.post('/plano-contas', authenticateToken, async (req, res) => {
         try {
