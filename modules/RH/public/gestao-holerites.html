@@ -753,7 +753,7 @@
                         <div class="form-group">
                             <label class="form-label">Tipo de Holerite *</label>
                             <select class="form-select" id="import-tipo" required>
-                                <option value="auto">?? Auto-detectar (MENSAL/ADTO)</option>
+                                <option value="auto">Auto-detectar (MENSAL/ADTO)</option>
                                 <option value="salario">Salário</option>
                                 <option value="adiantamento">Adiantamento</option>
                             </select>
@@ -761,7 +761,7 @@
                         <div class="form-group">
                             <label class="form-label">Mês de Referência</label>
                             <select class="form-select" id="import-mes">
-                                <option value="">?? Auto-detectar do PDF</option>
+                                <option value="">Auto-detectar do PDF</option>
                                 <option value="1">Janeiro</option>
                                 <option value="2">Fevereiro</option>
                                 <option value="3">Março</option>
@@ -1307,7 +1307,7 @@
                             </div>
                             <div style="background: #f8fafc; padding: 16px 20px; border-radius: 12px; border: 1px solid #e2e8f0;">
                                 <div style="font-size:0.7rem;color:#94a3b8;text-transform:uppercase;font-weight:600;letter-spacing:0.5px;margin-bottom:4px;">CPF</div>
-                                <div style="font-weight:600;color:#1e293b;">${h.cpf || 'N/A'}</div>
+                                <div style="font-weight:600;color:#1e293b;">${(h.cpf && !h.cpf.startsWith('ENC:') && !h.cpf.includes('ENCRYPTED') && !h.cpf.startsWith('$2')) ? h.cpf : 'Não informado'}</div>
                             </div>
                             <div style="background: #f8fafc; padding: 16px 20px; border-radius: 12px; border: 1px solid #e2e8f0;">
                                 <div style="font-size:0.7rem;color:#94a3b8;text-transform:uppercase;font-weight:600;letter-spacing:0.5px;margin-bottom:4px;">Cargo</div>
@@ -1554,7 +1554,7 @@
             document.getElementById('drop-zone-content').innerHTML = `
                 <i class="fas fa-cloud-upload-alt" style="font-size: 2.5rem; color: #9ca3af; margin-bottom: 12px;"></i>
                 <p style="font-weight: 600; color: #374151; margin-bottom: 4px;">Clique ou arraste o PDF aqui</p>
-                <p style="font-size: 0.75rem; color: #9ca3af;">Formato aceito: PDF (mximo 20MB)</p>
+                <p style="font-size: 0.75rem; color: #9ca3af;">Formato aceito: PDF (máximo 20MB)</p>
             `;
             document.getElementById('modal-importar').classList.add('show');
         }

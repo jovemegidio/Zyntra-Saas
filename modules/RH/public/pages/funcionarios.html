@@ -3064,7 +3064,7 @@
                     // Verificar filtros ativos
                     const filtroDepto = document.getElementById('filtro-departamento')?.value;
                     const filtroStatus = document.getElementById('filtro-status')?.value;
-                    const searchTerm = document.getElementById('funcionários-search-input')?.value?.trim().toLowerCase();
+                    const searchTerm = document.getElementById('funcionarios-search-input')?.value?.trim().toLowerCase();
 
                     let funcionáriosExibir = funcionáriosData;
 
@@ -3108,18 +3108,18 @@
                     atualizarEstatisticas(funcionáriosExibir, null);
                 } else {
                     console.error('Erro ao carregar funcionários:', response.status);
-                    const grid = document.getElementById('funcionários-grid');
+                    const grid = document.getElementById('funcionarios-grid');
                     grid.innerHTML = '<div style="padding: 40px; text-align: center; color: #64748b;"><i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 16px; color: #f59e0b;"></i><p>Erro ao carregar funcionários. Verifique se voc tem permisso de acesso.</p></div>';
                 }
             } catch (error) {
                 console.error('Erro ao carregar funcionários:', error);
-                const grid = document.getElementById('funcionários-grid');
+                const grid = document.getElementById('funcionarios-grid');
                 grid.innerHTML = '<div style="padding: 40px; text-align: center; color: #64748b;"><i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 16px; color: #ef4444;"></i><p>Erro de Conexão. Tente novamente mais tarde.</p></div>';
             }
         }
 
         function renderizarFuncionários(funcionários) {
-            const grid = document.getElementById('funcionários-grid');
+            const grid = document.getElementById('funcionarios-grid');
             if (!funcionários || funcionários.length === 0) {
                 grid.innerHTML = '<div style="padding: 40px; text-align: center; color: #64748b;"><i class="fas fa-users-slash" style="font-size: 48px; margin-bottom: 16px;"></i><p>Nenhum funcionário encontrado.</p></div>';
                 return;
@@ -3244,7 +3244,7 @@
                 document.getElementById('viewDataAdmissao').textContent = formatarData(f.data_admissao);
                 document.getElementById('viewStatus').textContent = f.status || '-';
                 document.getElementById('viewPisPasep').textContent = f.pis_pasep || '-';
-                document.getElementById('viewCtpsNúmero').textContent = f.ctps_numero || '-';
+                document.getElementById('viewCtpsNumero').textContent = f.ctps_numero || '-';
                 document.getElementById('viewCtpsSerie').textContent = f.ctps_serie || '-';
                 document.getElementById('viewDependentes').textContent = f.dependentes || '0';
                 // Endereo - exibir campos separados com formatao Title Case
@@ -4904,7 +4904,7 @@
         }
 
         // ==== BUSCA ====
-        document.getElementById('funcionários-search-input').addEventListener('input', function(e) {
+        document.getElementById('funcionarios-search-input').addEventListener('input', function(e) {
             const searchTerm = e.target.value.toLowerCase().trim();
             const filtroDepto = document.getElementById('filtro-departamento')?.value || '';
 
