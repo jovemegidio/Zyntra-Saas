@@ -734,9 +734,9 @@
                         return;
                     }
 
-                    const saudaçãoEl = document.getElementById('saudação');
+                    const saudacaoEl = document.getElementById('saudacao');
                     const userNameEl = document.getElementById('userName');
-                    if (saudaçãoEl) saudaçãoEl.textContent = getSaudação() + ',';
+                    if (saudacaoEl) saudacaoEl.textContent = getSaudação() + ',';
                     if (userNameEl) userNameEl.textContent = primeiroNome;
 
                     const avatarEl = document.getElementById('userAvatar');
@@ -767,13 +767,13 @@
         async function carregarDados() {
             const dataInicio = document.getElementById('dataInicio').value;
             const dataFim = document.getElementById('dataFim').value;
-            const funcionário = document.getElementById('filtroFuncionário').value;
+            const funcionario = document.getElementById('filtroFuncionario').value;
             const atividade = document.getElementById('filtroAtividade').value;
             const pedido = document.getElementById('filtroPedido').value;
 
             try {
-                let url = `/api/pcp/apontamentos/relatório?dataInicio=${dataInicio}&dataFim=${dataFim}`;
-                if (funcionário) url += `&usuario=${funcionário}`;
+                let url = `/api/pcp/apontamentos/relatorio?dataInicio=${dataInicio}&dataFim=${dataFim}`;
+                if (funcionario) url += `&usuario=${funcionario}`;
                 if (atividade) url += `&atividade=${atividade}`;
                 if (pedido) url += `&pedido=${pedido}`;
 
@@ -814,27 +814,27 @@
         }
 
         function calcularTotalHoras() {
-            return Math.round(apontamentos.reduce((acc, a) => acc + (a.duração || 0), 0) / 3600 * 10) / 10;
+            return Math.round(apontamentos.reduce((acc, a) => acc + (a.duracao || 0), 0) / 3600 * 10) / 10;
         }
 
         function calcularHorasProdução() {
-            return Math.round(apontamentos.filter(a => TIPOS_PRODUTIVOS.includes(a.tipo)).reduce((acc, a) => acc + (a.duração || 0), 0) / 3600 * 10) / 10;
+            return Math.round(apontamentos.filter(a => TIPOS_PRODUTIVOS.includes(a.tipo)).reduce((acc, a) => acc + (a.duracao || 0), 0) / 3600 * 10) / 10;
         }
 
         function atualizarStats(data) {
-            document.getElementById('totalFuncionários').textContent = data.totalFuncionários || funcionários.length;
+            document.getElementById('totalFuncionarios').textContent = data.totalFuncionarios || funcionários.length;
             document.getElementById('totalHoras').textContent = (data.totalHoras || calcularTotalHoras()) + 'h';
-            document.getElementById('horasProdução').textContent = (data.horasProdução || calcularHorasProdução()) + 'h';
+            document.getElementById('horasProducao').textContent = (data.horasProducao || calcularHorasProdução()) + 'h';
             document.getElementById('totalApontamentos').textContent = data.totalApontamentos || apontamentos.length;
 
-            const totalSeg = apontamentos.reduce((acc, a) => acc + (a.duração || 0), 0);
-            const prodSeg = apontamentos.filter(a => TIPOS_PRODUTIVOS.includes(a.tipo)).reduce((acc, a) => acc + (a.duração || 0), 0);
+            const totalSeg = apontamentos.reduce((acc, a) => acc + (a.duracao || 0), 0);
+            const prodSeg = apontamentos.filter(a => TIPOS_PRODUTIVOS.includes(a.tipo)).reduce((acc, a) => acc + (a.duracao || 0), 0);
             const ef = totalSeg > 0 ? Math.round(prodSeg / totalSeg * 100) : 0;
             document.getElementById('eficienciaGeral').textContent = ef + '%';
         }
 
         function calcularEficiencia() {
-            const totalSeg = apontamentos.reduce((acc, a) => acc + (a.duração || 0), 0);
+            const totalSeg = apontamentos.reduce((acc, a) => acc + (a.duracao || 0), 0);
             if (totalSeg === 0) {
                 document.getElementById('efProdutivo').textContent = '0%';
                 document.getElementById('efParada').textContent = '0%';
@@ -843,9 +843,9 @@
                 return;
             }
 
-            const prodSeg = apontamentos.filter(a => TIPOS_PRODUTIVOS.includes(a.tipo)).reduce((acc, a) => acc + (a.duração || 0), 0);
-            const manutSeg = apontamentos.filter(a => TIPOS_MANUTENCAO.includes(a.tipo)).reduce((acc, a) => acc + (a.duração || 0), 0);
-            const paradaSeg = apontamentos.filter(a => TIPOS_PARADA.includes(a.tipo)).reduce((acc, a) => acc + (a.duração || 0), 0);
+            const prodSeg = apontamentos.filter(a => TIPOS_PRODUTIVOS.includes(a.tipo)).reduce((acc, a) => acc + (a.duracao || 0), 0);
+            const manutSeg = apontamentos.filter(a => TIPOS_MANUTENCAO.includes(a.tipo)).reduce((acc, a) => acc + (a.duracao || 0), 0);
+            const paradaSeg = apontamentos.filter(a => TIPOS_PARADA.includes(a.tipo)).reduce((acc, a) => acc + (a.duracao || 0), 0);
 
             document.getElementById('efProdutivo').textContent = Math.round(prodSeg / totalSeg * 100) + '%';
             document.getElementById('efParada').textContent = Math.round(paradaSeg / totalSeg * 100) + '%';
@@ -857,7 +857,7 @@
         }
 
         function popularSelectFuncionários(lista) {
-            const select = document.getElementById('filtroFuncionário');
+            const select = document.getElementById('filtroFuncionario');
             const valorAtual = select.value;
             select.innerHTML = '<option value="">Todos</option>';
             lista.forEach(f => {
@@ -870,20 +870,20 @@
         }
 
         function renderizarResumoFuncionários() {
-            const container = document.getElementById('resumoFuncionários');
+            const container = document.getElementById('resumoFuncionarios');
             const resumo = {};
             const fotoMap = {};
             funcionários.forEach(f => { if (f.foto) fotoMap[f.id] = f.foto; });
 
             apontamentos.forEach(a => {
-                const key = a.usuário_id || a.usuário_nome;
+                const key = a.usuario_id || a.usuario_nome;
                 if (!resumo[key]) {
-                    resumo[key] = { nome: a.usuário_nome, foto: a.usuário_foto || fotoMap[a.usuário_id] || '', totalSegundos: 0, produçãoSegundos: 0, apontamentos: 0 };
+                    resumo[key] = { nome: a.usuario_nome, foto: a.usuario_foto || fotoMap[a.usuario_id] || '', totalSegundos: 0, producaoSegundos: 0, apontamentos: 0 };
                 }
-                resumo[key].totalSegundos += a.duração || 0;
+                resumo[key].totalSegundos += a.duracao || 0;
                 resumo[key].apontamentos++;
                 if (TIPOS_PRODUTIVOS.includes(a.tipo)) {
-                    resumo[key].producaoSegundos += a.duração || 0;
+                    resumo[key].producaoSegundos += a.duracao || 0;
                 }
             });
 
@@ -901,20 +901,20 @@
                 const avatarId = 'avatar-func-' + (idx++);
 
                 return `
-                    <div class="funcionário-card">
-                        <div class="funcionário-avatar" id="${avatarId}" data-foto="${f.foto || ''}" data-nome="${primeiroNome}">${primeiraLetra}</div>
-                        <div class="funcionário-info">
-                            <div class="funcionário-nome">${f.nome || 'Desconhecido'}</div>
-                            <div class="funcionário-cargo">${f.apontamentos} apontamentos</div>
+                    <div class="funcionario-card">
+                        <div class="funcionario-avatar" id="${avatarId}" data-foto="${f.foto || ''}" data-nome="${primeiroNome}">${primeiraLetra}</div>
+                        <div class="funcionario-info">
+                            <div class="funcionario-nome">${f.nome || 'Desconhecido'}</div>
+                            <div class="funcionario-cargo">${f.apontamentos} apontamentos</div>
                         </div>
-                        <div class="funcionário-stats">
+                        <div class="funcionario-stats">
                             <div>
-                                <div class="funcionário-metric-value">${horasTotais}</div>
-                                <div class="funcionário-metric-label">Total</div>
+                                <div class="funcionario-metric-value">${horasTotais}</div>
+                                <div class="funcionario-metric-label">Total</div>
                             </div>
                             <div>
-                                <div class="funcionário-metric-value" style="color:#16a34a;">${horasProdução}</div>
-                                <div class="funcionário-metric-label">Produção</div>
+                                <div class="funcionario-metric-value" style="color:#16a34a;">${horasProdução}</div>
+                                <div class="funcionario-metric-label">Produção</div>
                             </div>
                         </div>
                     </div>
@@ -953,8 +953,8 @@
             apontamentos.forEach(a => {
                 const tipo = a.tipo || 'outros';
                 if (!resumo[tipo]) resumo[tipo] = 0;
-                resumo[tipo] += a.duração || 0;
-                total += a.duração || 0;
+                resumo[tipo] += a.duracao || 0;
+                total += a.duracao || 0;
             });
 
             const barContainer = document.getElementById('atividadesBar');
@@ -1002,9 +1002,9 @@
 
             tbody.innerHTML = apontamentos.map(a => {
                 const cores = coresAtividades[a.tipo] || coresAtividades.outros;
-                const primeiroNome = a.usuário_nome ? a.usuário_nome.split(' ')[0] : 'N/A';
+                const primeiroNome = a.usuario_nome ? a.usuario_nome.split(' ')[0] : 'N/A';
                 const primeiraLetra = primeiroNome[0]?.toUpperCase() || '?';
-                const fotoUrl = a.usuário_foto || '';
+                const fotoUrl = a.usuario_foto || '';
                 const avatarHtml = fotoUrl
                     ? `<img src="${fotoUrl}" alt="${primeiroNome}" onerror="this.parentElement.innerHTML='${primeiraLetra}'">`
                     : primeiraLetra;
@@ -1017,7 +1017,7 @@
                     ? `<span class="pedido-badge"><i class="fas fa-file-alt"></i> #${a.pedido_numero}</span>`
                     : '<span style="color:#cbd5e1;"></span>';
 
-                const obsText = a.observações || '';
+                const obsText = a.observacoes || '';
                 const obsHtml = obsText
                     ? `<span class="obs-cell" title="${obsText.replace(/"/g, '&quot;')}">${obsText}</span>`
                     : '<span style="color:#cbd5e1;"></span>';
@@ -1034,7 +1034,7 @@
                         <td>${formatarData(a.data)}</td>
                         <td>${a.hora_inicio || '-'}</td>
                         <td>${a.hora_fim || '-'}</td>
-                        <td class="duração-cell">${formatarDuração(a.duração)}</td>
+                        <td class="duracao-cell">${formatarDuração(a.duracao)}</td>
                         <td>${opHtml}</td>
                         <td>${pedidoHtml}</td>
                         <td>${obsHtml}</td>
@@ -1068,7 +1068,7 @@
             let csv = 'Funcionário,Atividade,Data,Início,Fim,Duração,OP,Pedido,Observações\n';
             apontamentos.forEach(a => {
                 const cores = coresAtividades[a.tipo] || coresAtividades.outros;
-                csv += `"${a.usuário_nome || ''}","${cores.nome || a.tipo}","${a.data || ''}","${a.hora_inicio || ''}","${a.hora_fim || ''}","${formatarDuração(a.duração)}","${a.op_codigo || ''}","${a.pedido_numero || ''}","${(a.observações || '').replace(/"/g, '""')}"\n`;
+                csv += `"${a.usuario_nome || ''}","${cores.nome || a.tipo}","${a.data || ''}","${a.hora_inicio || ''}","${a.hora_fim || ''}","${formatarDuração(a.duracao)}","${a.op_codigo || ''}","${a.pedido_numero || ''}","${(a.observacoes || '').replace(/"/g, '""')}"\n`;
             });
 
             const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
@@ -1105,11 +1105,11 @@
 
         function atualizarSaudação() {
             const hora = new Date().getHours();
-            let saudação = 'Bom dia';
-            if (hora >= 12 && hora < 18) saudação = 'Boa tarde';
-            else if (hora >= 18 || hora < 6) saudação = 'Boa noite';
-            const el = document.getElementById('saudação');
-            if (el) el.textContent = saudação + ',';
+            let saudacao = 'Bom dia';
+            if (hora >= 12 && hora < 18) saudacao = 'Boa tarde';
+            else if (hora >= 18 || hora < 6) saudacao = 'Boa noite';
+            const el = document.getElementById('saudacao');
+            if (el) el.textContent = saudacao + ',';
         }
     </script>
 
