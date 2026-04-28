@@ -252,6 +252,7 @@ async function computeAndCacheAggregates() {
              FROM pedidos p
              JOIN usuarios u ON p.vendedor_id = u.id
              WHERE p.created_at >= ?
+               AND u.role = 'comercial'
              GROUP BY u.id, u.nome
              ORDER BY valor DESC
              LIMIT 10`,

@@ -1711,9 +1711,6 @@
                 </div>
                 <span class="filter-link" id="filterInfo" onclick="abrirModalFiltros()" style="cursor: pointer;">Exibindo Ordens de Produção de todos os períodos</span>
                 <div style="margin-left: auto; display: flex; gap: 12px;">
-                    <button class="btn-novo-apontamento" onclick="window.location.href='apontamentos.html'">
-                        <i class="fas fa-stopwatch"></i> Novo Apontamento
-                    </button>
                 </div>
             </div>
 
@@ -3528,7 +3525,7 @@
             }
 
             // Preencher dados do header
-            document.getElementById('modal-ordem-título').textContent = `Ordem de Produção ${ordem.numero}`;
+            document.getElementById('modal-ordem-titulo').textContent = `Ordem de Produção ${ordem.numero}`;
 
             // Preencher dados do produto
             const código = ordem.codigo || (ordem.produto ? ordem.produto.substring(0, 6).toUpperCase() : 'N/A');

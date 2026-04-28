@@ -2440,8 +2440,8 @@
                 if (topVendRes.status === 'fulfilled' && topVendRes.value.ok) {
                     const topVend = await topVendRes.value.json();
                     console.log('? Top vendedores:', topVend);
-                    // Use topVendedores from admin dashboard if available (has more data)
-                    const vendedoresRank = statsData?.topVendedores || topVend || [];
+                    // Prefer dedicated top-vendedores API (filtered by role='comercial')
+                    const vendedoresRank = topVend || statsData?.topVendedores || [];
                     renderizarTopVendedores(vendedoresRank);
                 } else if (statsData?.topVendedores) {
                     renderizarTopVendedores(statsData.topVendedores);

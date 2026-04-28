@@ -129,7 +129,7 @@
                         Pedidos</button>
                     <button class="tab-btn" onclick="mostrarTab('transportadoras',this)"><i
                             class="fas fa-truck-moving"></i> Transportadoras</button>
-                    <button class="tab-btn" onclick="mostrarTab('cotação',this)"><i
+                    <button class="tab-btn" onclick="mostrarTab('cotacao',this)"><i
                             class="fas fa-calculator"></i> Cotação Frete</button>
                     <button class="tab-btn" onclick="mostrarTab('rastreamento',this)"><i
                             class="fas fa-map-marker-alt"></i> Rastreamento</button>
@@ -1523,7 +1523,7 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
         async function cotarFrete() {
             const uf = document.getElementById('cot-uf-destino').value;
             if (!uf) { showToast('Selecione a UF de destino', 'warning'); return; }
-            const div = document.getElementById('cotação-resultado');
+            const div = document.getElementById('cotacao-resultado');
             div.innerHTML = '<p style="color:var(--text-secondary);"><i class="fas fa-spinner fa-spin"></i> Calculando cotações...</p>';
             try {
                 const r = await fetch('/api/logistica/cotacao-frete', {
