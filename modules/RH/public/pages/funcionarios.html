@@ -1402,7 +1402,7 @@
                 <a href="folha.html" class="sidebar-btn" title="Folha de Pagamento"><i class="fas fa-money-check-alt"></i></a>
                 <a href="gestao-ponto.html" class="sidebar-btn" title="Gestão do Ponto"><i class="fas fa-clock"></i></a>
                 <a href="importar-ponto.html" class="sidebar-btn" title="Importar Ponto (Control iD)"><i class="fas fa-upload"></i></a>
-                <a href="gestao-solicitações.html" class="sidebar-btn" title="Gestão de Solicitações"><i class="fas fa-tasks"></i></a>
+                <a href="gestao-solicitacoes.html" class="sidebar-btn" title="Gestão de Solicitações"><i class="fas fa-tasks"></i></a>
                 <a href="calendario-rh.html" class="sidebar-btn" title="Calendário RH"><i class="fas fa-calendar-alt"></i></a>
             </nav>
             <div class="sidebar-bottom">
@@ -3381,11 +3381,11 @@
 
         // ==== Solicitações ====
         async function carregarSolicitaçõesFuncionário(funcionárioId) {
-            const container = document.getElementById('solicitaçõesContainer');
+            const container = document.getElementById('solicitacoesContainer');
             container.innerHTML = '<div class="loading-placeholder" style="text-align: center; padding: 40px; color: #6b7280;"><i class="fas fa-spinner fa-spin fa-2x"></i><p style="margin-top: 12px;">Carregando Solicitações...</p></div>';
 
             try {
-                const response = await fetch(`/api/rh/funcionarios/${funcionarioId}/solicitacoes`, {
+                const response = await fetch(`/api/rh/funcionarios/${funcionárioId}/solicitacoes`, {
                     credentials: 'include',
                     headers: getAuthHeaders()
                 });
@@ -3397,7 +3397,7 @@
                 }
 
                 // Atualizar badge de contagem
-                const countBadge = document.getElementById('countSolicitações');
+                const countBadge = document.getElementById('countSolicitacoes');
                 if (solicitações.length > 0) {
                     countBadge.textContent = solicitações.length;
                     countBadge.style.display = 'inline-block';
@@ -3483,7 +3483,7 @@
             container.innerHTML = '<div class="loading-placeholder" style="text-align: center; padding: 40px; color: #6b7280;"><i class="fas fa-spinner fa-spin fa-2x"></i><p style="margin-top: 12px;">Carregando atestados...</p></div>';
 
             try {
-                const response = await fetch(`/api/rh/funcionarios/${funcionarioId}/atestados`, {
+                const response = await fetch(`/api/rh/funcionarios/${funcionárioId}/atestados`, {
                     credentials: 'include',
                     headers: getAuthHeaders()
                 });
@@ -3710,7 +3710,7 @@
         // ==== Pensão Alimentícia ====
         async function carregarPensaoFuncionário(funcionárioId) {
             try {
-                const response = await fetch(`/api/rh/funcionarios/${funcionarioId}/pensao`, {
+                const response = await fetch(`/api/rh/funcionarios/${funcionárioId}/pensao`, {
                     credentials: 'include', headers: getAuthHeaders()
                 });
                 if (!response.ok) throw new Error('Erro ao carregar penses');
@@ -3851,7 +3851,7 @@
         // ==== SALRIO Família ====
         async function carregarSalarioFamilia(funcionárioId) {
             try {
-                const response = await fetch(`/api/rh/funcionarios/${funcionarioId}/salario-familia`, {
+                const response = await fetch(`/api/rh/funcionarios/${funcionárioId}/salario-familia`, {
                     credentials: 'include', headers: getAuthHeaders()
                 });
                 if (!response.ok) throw new Error('Erro ao carregar');
@@ -3964,7 +3964,7 @@
         // ==== Pensão Alimentícia - MODAL EDIO ====
         async function carregarPensaoEdit(funcionárioId) {
             try {
-                const response = await fetch(`/api/rh/funcionarios/${funcionarioId}/pensao`, { credentials: 'include', headers: getAuthHeaders() });
+                const response = await fetch(`/api/rh/funcionarios/${funcionárioId}/pensao`, { credentials: 'include', headers: getAuthHeaders() });
                 if (!response.ok) throw new Error('Erro ao carregar penses');
                 const pensãoes = await response.json();
                 renderizarPensãoesEdit(pensãoes);
@@ -4083,7 +4083,7 @@
         // ==== SALRIO Família - MODAL EDIO ====
         async function carregarSfEdit(funcionárioId) {
             try {
-                const response = await fetch(`/api/rh/funcionarios/${funcionarioId}/salario-familia`, { credentials: 'include', headers: getAuthHeaders() });
+                const response = await fetch(`/api/rh/funcionarios/${funcionárioId}/salario-familia`, { credentials: 'include', headers: getAuthHeaders() });
                 if (!response.ok) throw new Error('Erro ao carregar');
                 const data = await response.json();
                 const recebe = data.recebe === 1;
@@ -4496,8 +4496,8 @@
                 document.getElementById('editEstadoCivil').value = f.estado_civil || '';
                 document.getElementById('editNacionalidade').value = f.nacionalidade || 'Brasileira';
                 document.getElementById('editNaturalidade').value = f.naturalidade || '';
-                document.getElementById('editFiliaçãoMae').value = f.filiacao_mae || '';
-                document.getElementById('editFiliaçãoPai').value = f.filiacao_pai || '';
+                document.getElementById('editFiliacaoMae').value = f.filiacao_mae || '';
+                document.getElementById('editFiliacaoPai').value = f.filiacao_pai || '';
                 document.getElementById('editEmail').value = f.email || '';
                 document.getElementById('editCargo').value = f.cargo || '';
                 document.getElementById('editDepartamento').value = f.departamento || '';
@@ -4517,10 +4517,10 @@
 
                 document.getElementById('editPisPasep').value = f.pis_pasep || '';
                 if (f.pis_pasep) { const pisEl = document.getElementById('editPisPasep'); mascaraPIS(pisEl); }
-                document.getElementById('editCtpsNúmero').value = (f.ctps_numero || '').replace(/\D/g, '');
+                document.getElementById('editCtpsNumero').value = (f.ctps_numero || '').replace(/\D/g, '');
                 document.getElementById('editCtpsSerie').value = (f.ctps_serie || '').replace(/\D/g, '');
-                document.getElementById('editTítuloEleitor').value = f.titulo_eleitor || '';
-                if (f.titulo_eleitor) { const teEl = document.getElementById('editTítuloEleitor'); mascaraTítuloEleitor(teEl); }
+                document.getElementById('editTituloEleitor').value = f.titulo_eleitor || '';
+                if (f.titulo_eleitor) { const teEl = document.getElementById('editTituloEleitor'); mascaraTítuloEleitor(teEl); }
                 document.getElementById('editCnh').value = (f.cnh || '').replace(/\D/g, '');
                 document.getElementById('editCertificadoReservista').value = (f.certificado_reservista || '').replace(/\D/g, '');
                 // Endereo: separar logradouro, nmero e complemento
@@ -4528,11 +4528,11 @@
                 const endMatch = endRaw.match(/^(.+?),\s*(\d+)\s*(?:,\s*(.+))?$/);
                 if (endMatch) {
                     document.getElementById('editEndereco').value = endMatch[1].trim();
-                    document.getElementById('editNúmero').value = endMatch[2];
+                    document.getElementById('editNumero').value = endMatch[2];
                     document.getElementById('editComplemento').value = (endMatch[3] || '').trim();
                 } else {
                     document.getElementById('editEndereco').value = endRaw.replace(/[0-9]/g, '').replace(/,\s*$/, '').trim();
-                    document.getElementById('editNúmero').value = (endRaw.match(/(\d+)/) || ['',''])[1];
+                    document.getElementById('editNumero').value = (endRaw.match(/(\d+)/) || ['',''])[1];
                     document.getElementById('editComplemento').value = '';
                 }
                 document.getElementById('editBairro').value = f.bairro || '';
@@ -4592,8 +4592,8 @@
                 estado_civil: _v('editEstadoCivil'),
                 nacionalidade: _v('editNacionalidade'),
                 naturalidade: _v('editNaturalidade'),
-                filiacao_mae: _v('editFiliaçãoMae'),
-                filiacao_pai: _v('editFiliaçãoPai'),
+                filiacao_mae: _v('editFiliacaoMae'),
+                filiacao_pai: _v('editFiliacaoPai'),
                 email: _v('editEmail'),
                 cargo: _v('editCargo'),
                 departamento: _v('editDepartamento'),
@@ -4603,12 +4603,12 @@
                 data_demissao: status === 'Demitido' ? (_v('editDataDemissao') || null) : null,
                 motivo_demissao: status === 'Demitido' ? _v('editMotivoDemissao') : '',
                 pis_pasep: _v('editPisPasep'),
-                ctps_numero: _v('editCtpsNúmero'),
+                ctps_numero: _v('editCtpsNumero'),
                 ctps_serie: _v('editCtpsSerie'),
-                titulo_eleitor: _v('editTítuloEleitor'),
+                titulo_eleitor: _v('editTituloEleitor'),
                 cnh: _v('editCnh'),
                 certificado_reservista: _v('editCertificadoReservista'),
-                endereco: [_v('editEndereco'), _v('editNúmero')].filter(Boolean).join(', ') + (_v('editComplemento') ? ', ' + _v('editComplemento') : ''),
+                endereco: [_v('editEndereco'), _v('editNumero')].filter(Boolean).join(', ') + (_v('editComplemento') ? ', ' + _v('editComplemento') : ''),
                 bairro: _v('editBairro'),
                 cidade: _v('editCidade'),
                 estado: _v('editEstado'),

@@ -2637,6 +2637,168 @@ app.get('/api/rh/ponto/dashboard', authMiddleware, requireRHAdmin, async (req, r
   }
 });
 
+// ============================================================
+// PONTO MARCACOES - Sistema de marcações de ponto (ponto_marcacoes)
+// ============================================================
+
+// GET /api/rh/ponto/marcacoes - Listar/filtrar marcações
+app.get(['/api/rh/ponto/marcacoes', '/api/rh/ponto/marcações'], authMiddleware, requireRHAdmin, async (req, res) => {
+  try {
+    const { data_inicio, data_fim, funcionario_id, limit = 500 } = req.query;
+    let sql = `SELECT pm.*, f.nome_completo AS funcionario_nome, f.departamento, f.cargo
+      FROM ponto_marcacoes pm
+      LEFT JOIN funcionarios f ON pm.funcionario_id = f.id
+      WHERE 1=1`;
+    const params = [];
+    if (data_inicio) { sql += ' AND pm.data >= ?'; params.push(data_inicio); }
+    if (data_fim) { sql += ' AND pm.data <= ?'; params.push(data_fim); }
+    if (funcionario_id) { sql += ' AND pm.funcionario_id = ?'; params.push(parseInt(funcionario_id)); }
+    sql += ' ORDER BY pm.data DESC, pm.hora DESC LIMIT ?';
+    params.push(Math.min(parseInt(limit) || 500, 5000));
+    const marcacoes = await dbQuery(sql, params);
+    res.json({ marcacoes, marcações: marcacoes });
+  } catch (error) {
+    logger.error('Erro ao listar marcações de ponto:', error);
+    res.status(500).json({ message: 'Erro ao listar marcações' });
+  }
+});
+
+// POST /api/rh/ponto/marcacoes - Criar marcação manual
+app.post(['/api/rh/ponto/marcacoes', '/api/rh/ponto/marcações'], authMiddleware, requireRHAdmin, async (req, res) => {
+  try {
+    const { funcionario_id, data, hora, tipo, origem = 'manual' } = req.body;
+    const observacao = req.body.observacao || req.body.observação || null;
+    if (!funcionario_id || !data || !hora) {
+      return res.status(400).json({ message: 'funcionario_id, data e hora são obrigatórios' });
+    }
+    const result = await dbQuery(
+      'INSERT INTO ponto_marcacoes (funcionario_id, data, hora, tipo, origem, observacao) VALUES (?, ?, ?, ?, ?, ?)',
+      [parseInt(funcionario_id), data, hora, tipo || 'marcação', origem, observacao]
+    );
+    try {
+      await dbQuery(
+        'INSERT INTO ponto_alteracoes (marcacao_id, funcionario_id, acao, motivo, usuario_id, ip_address) VALUES (?, ?, ?, ?, ?, ?)',
+        [result.insertId, parseInt(funcionario_id), 'criação', req.body.motivo || null, req.user?.id || null, req.ip]
+      );
+    } catch (e) { /* audit log non-fatal */ }
+    const created = await dbQuery(
+      'SELECT pm.*, f.nome_completo AS funcionario_nome FROM ponto_marcacoes pm LEFT JOIN funcionarios f ON pm.funcionario_id = f.id WHERE pm.id = ?',
+      [result.insertId]
+    );
+    res.status(201).json(created[0] || { id: result.insertId });
+  } catch (error) {
+    logger.error('Erro ao criar marcação de ponto:', error);
+    res.status(500).json({ message: 'Erro ao criar marcação' });
+  }
+});
+
+// PUT /api/rh/ponto/marcacoes/:id - Editar marcação
+app.put(['/api/rh/ponto/marcacoes/:id', '/api/rh/ponto/marcações/:id'], authMiddleware, requireRHAdmin, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const { hora, tipo, origem, funcionario_id, data, motivo } = req.body;
+    const observacao = req.body.observacao || req.body.observação;
+    const old = await dbQuery('SELECT * FROM ponto_marcacoes WHERE id = ?', [id]);
+    if (!old.length) return res.status(404).json({ message: 'Marcação não encontrada' });
+    const fields = [], params = [];
+    if (funcionario_id !== undefined) { fields.push('funcionario_id = ?'); params.push(parseInt(funcionario_id)); }
+    if (data !== undefined) { fields.push('data = ?'); params.push(data); }
+    if (hora !== undefined) { fields.push('hora = ?'); params.push(hora); }
+    if (tipo !== undefined) { fields.push('tipo = ?'); params.push(tipo); }
+    if (origem !== undefined) { fields.push('origem = ?'); params.push(origem); }
+    if (observacao !== undefined) { fields.push('observacao = ?'); params.push(observacao); }
+    if (!fields.length) return res.status(400).json({ message: 'Nenhum campo para atualizar' });
+    params.push(id);
+    await dbQuery(`UPDATE ponto_marcacoes SET ${fields.join(', ')} WHERE id = ?`, params);
+    let alteracoesRegistradas = 0;
+    try {
+      const fieldMap = { hora: 'hora', tipo: 'tipo', data: 'data', funcionario_id: 'funcionario_id', observacao: 'observação', origem: 'origem' };
+      for (const [key, label] of Object.entries(fieldMap)) {
+        const newVal = req.body[key] !== undefined ? req.body[key] : (key === 'observacao' ? observacao : undefined);
+        if (newVal !== undefined && String(newVal || '') !== String(old[0][key] || '')) {
+          await dbQuery(
+            'INSERT INTO ponto_alteracoes (marcacao_id, funcionario_id, acao, campo_alterado, valor_anterior, valor_novo, motivo, usuario_id, ip_address) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [id, old[0].funcionario_id, 'edicao', label, String(old[0][key] || ''), String(newVal || ''), motivo || null, req.user?.id || null, req.ip]
+          );
+          alteracoesRegistradas++;
+        }
+      }
+    } catch (e) { /* audit log non-fatal */ }
+    res.json({ message: 'Marcação atualizada', alteracoes_registradas: alteracoesRegistradas });
+  } catch (error) {
+    logger.error('Erro ao atualizar marcação de ponto:', error);
+    res.status(500).json({ message: 'Erro ao atualizar marcação' });
+  }
+});
+
+// DELETE /api/rh/ponto/marcacoes/:id - Excluir marcação
+app.delete(['/api/rh/ponto/marcacoes/:id', '/api/rh/ponto/marcações/:id'], authMiddleware, requireRHAdmin, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const old = await dbQuery('SELECT * FROM ponto_marcacoes WHERE id = ?', [id]);
+    if (!old.length) return res.status(404).json({ message: 'Marcação não encontrada' });
+    await dbQuery('DELETE FROM ponto_marcacoes WHERE id = ?', [id]);
+    try {
+      await dbQuery(
+        'INSERT INTO ponto_alteracoes (marcacao_id, funcionario_id, acao, motivo, usuario_id, ip_address) VALUES (?, ?, ?, ?, ?, ?)',
+        [id, old[0].funcionario_id, 'exclusão', req.body?.motivo || null, req.user?.id || null, req.ip]
+      );
+    } catch (e) { /* audit log non-fatal */ }
+    res.json({ message: 'Marcação excluída com sucesso' });
+  } catch (error) {
+    logger.error('Erro ao excluir marcação de ponto:', error);
+    res.status(500).json({ message: 'Erro ao excluir marcação' });
+  }
+});
+
+// GET /api/rh/ponto/resumo - Resumo mensal por funcionário
+app.get('/api/rh/ponto/resumo', authMiddleware, requireRHAdmin, async (req, res) => {
+  try {
+    const { funcionario_id, mes, ano } = req.query;
+    if (!funcionario_id || !mes || !ano) {
+      return res.status(400).json({ message: 'funcionario_id, mes e ano são obrigatórios' });
+    }
+    const mesStr = String(mes).padStart(2, '0');
+    const dataInicio = `${ano}-${mesStr}-01`;
+    const dataFim = new Date(parseInt(ano), parseInt(mes), 0).toISOString().split('T')[0];
+    const marcacoes = await dbQuery(
+      'SELECT * FROM ponto_marcacoes WHERE funcionario_id = ? AND data >= ? AND data <= ? ORDER BY data, hora',
+      [parseInt(funcionario_id), dataInicio, dataFim]
+    );
+    const porDia = {};
+    marcacoes.forEach(m => {
+      if (!porDia[m.data]) porDia[m.data] = [];
+      porDia[m.data].push(m);
+    });
+    const dias = Object.keys(porDia).sort().map(data => ({
+      data, marcacoes: porDia[data], total_marcacoes: porDia[data].length
+    }));
+    res.json({ funcionario_id: parseInt(funcionario_id), mes: parseInt(mes), ano: parseInt(ano), dias, total_dias: dias.length, total_marcacoes: marcacoes.length });
+  } catch (error) {
+    logger.error('Erro ao carregar resumo de ponto:', error);
+    res.status(500).json({ message: 'Erro ao carregar resumo' });
+  }
+});
+
+// GET /api/rh/ponto/alteracoes - Histórico de alterações (auditoria)
+app.get(['/api/rh/ponto/alteracoes', '/api/rh/ponto/alterações'], authMiddleware, requireRHAdmin, async (req, res) => {
+  try {
+    const { funcionario_id, data_inicio, data_fim, limit = 100 } = req.query;
+    let sql = 'SELECT pa.*, u.nome AS usuario_nome FROM ponto_alteracoes pa LEFT JOIN usuarios u ON pa.usuario_id = u.id WHERE 1=1';
+    const params = [];
+    if (funcionario_id) { sql += ' AND pa.funcionario_id = ?'; params.push(parseInt(funcionario_id)); }
+    if (data_inicio) { sql += ' AND DATE(pa.criado_em) >= ?'; params.push(data_inicio); }
+    if (data_fim) { sql += ' AND DATE(pa.criado_em) <= ?'; params.push(data_fim); }
+    sql += ' ORDER BY pa.criado_em DESC LIMIT ?';
+    params.push(Math.min(parseInt(limit) || 100, 1000));
+    const alteracoes = await dbQuery(sql, params);
+    res.json({ alteracoes, alterações: alteracoes });
+  } catch (error) {
+    logger.error('Erro ao listar alterações de ponto:', error);
+    res.status(500).json({ message: 'Erro ao listar alterações' });
+  }
+});
+
 // GET /api/rh/jornadas - Listar jornadas de trabalho
 app.get('/api/rh/jornadas', authMiddleware, requireRHAdmin, async (req, res) => {
   try {
