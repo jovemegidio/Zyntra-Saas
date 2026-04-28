@@ -2193,11 +2193,23 @@ module.exports = function createFinanceiroExtendedRoutes(deps) {
 
     router.post('/bancos', authenticateToken, async (req, res) => {
         try {
-            const { nome, instituicao, agencia, conta_corrente, tipo_conta, saldo_inicial, limite_credito, status, considera_fluxo, emite_boleto } = req.body;
+            const b = req.body;
+            // Accept both old and new field names from frontend
+            const nome = b.nome || b.apelido || '';
+            const instituicao = b.instituicao || b.nome || '';
+            const agencia = b.agencia || '';
+            const conta_corrente = b.conta_corrente || b.conta || '';
+            const tipo_conta = b.tipo_conta || b.tipo || 'corrente';
+            const saldo_inicial = parseFloat(b.saldo_inicial) || 0;
+            const limite_credito = parseFloat(b.limite_credito) || 0;
+            const status = b.status || 'ativo';
+            const considera_fluxo = b.considera_fluxo !== undefined ? (b.considera_fluxo ? 1 : 0) : 1;
+            const emite_boleto = b.emite_boleto ? 1 : 0;
+            const codigo = b.codigo || b.código || '';
             const [result] = await pool.query(
                 `INSERT INTO bancos (nome, instituicao, agencia, conta_corrente, tipo_conta, saldo_inicial, saldo_atual, limite_credito, status, considera_fluxo, emite_boleto, created_at)
                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
-                [nome, instituicao || '', agencia || '', conta_corrente || '', tipo_conta || 'corrente', saldo_inicial || 0, saldo_inicial || 0, limite_credito || 0, status || 'ativo', considera_fluxo ? 1 : 0, emite_boleto ? 1 : 0]
+                [nome, instituicao, agencia, conta_corrente, tipo_conta, saldo_inicial, saldo_inicial, limite_credito, status, considera_fluxo, emite_boleto]
             );
             res.json({ success: true, id: result.insertId, message: 'Banco cadastrado com sucesso' });
         } catch (error) {
@@ -2209,10 +2221,22 @@ module.exports = function createFinanceiroExtendedRoutes(deps) {
     router.put('/bancos/:id', authenticateToken, async (req, res) => {
         try {
             const { id } = req.params;
-            const { nome, instituicao, agencia, conta_corrente, tipo_conta, saldo_inicial, saldo_atual, limite_credito, status, considera_fluxo, emite_boleto } = req.body;
+            const b = req.body;
+            // Accept both old and new field names from frontend
+            const nome = b.nome || b.apelido || '';
+            const instituicao = b.instituicao || b.nome || '';
+            const agencia = b.agencia || '';
+            const conta_corrente = b.conta_corrente || b.conta || '';
+            const tipo_conta = b.tipo_conta || b.tipo || 'corrente';
+            const saldo_inicial = parseFloat(b.saldo_inicial) || 0;
+            const saldo_atual = parseFloat(b.saldo_atual !== undefined ? b.saldo_atual : b.saldo_inicial) || 0;
+            const limite_credito = parseFloat(b.limite_credito) || 0;
+            const status = b.status || 'ativo';
+            const considera_fluxo = b.considera_fluxo !== undefined ? (b.considera_fluxo ? 1 : 0) : 1;
+            const emite_boleto = b.emite_boleto ? 1 : 0;
             await pool.query(
                 `UPDATE bancos SET nome=?, instituicao=?, agencia=?, conta_corrente=?, tipo_conta=?, saldo_inicial=?, saldo_atual=?, limite_credito=?, status=?, considera_fluxo=?, emite_boleto=?, updated_at=NOW() WHERE id=?`,
-                [nome, instituicao, agencia, conta_corrente, tipo_conta, saldo_inicial, saldo_atual, limite_credito, status || 'ativo', considera_fluxo ? 1 : 0, emite_boleto ? 1 : 0, id]
+                [nome, instituicao, agencia, conta_corrente, tipo_conta, saldo_inicial, saldo_atual, limite_credito, status, considera_fluxo, emite_boleto, id]
             );
             res.json({ success: true, message: 'Banco atualizado com sucesso' });
         } catch (error) {

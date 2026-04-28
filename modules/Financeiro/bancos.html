@@ -1203,30 +1203,51 @@
         }
 
         /* -------------------------------------------------------------------------------
-           MODAL EXTRATO - ESTILOS ESPECFICOS
+           MODAL EXTRATO - ESTILOS ESPECÍFICOS - PADRÃO POPUP-CONFIRMACAO
            ------------------------------------------------------------------------------- */
 
         .modal-header-extrato {
+            background: #ffffff !important;
             padding-bottom: 0 !important;
+            border-bottom: 1px solid #f1f5f9 !important;
         }
-        .modal-header-extrato .modal-header-content {
-            padding-bottom: 24px;
+        .modal-header-extrato .modal-header-content-padrão {
+            padding: 24px 28px;
+        }
+        .modal-header-extrato .modal-header-icon-padrão {
+            background: linear-gradient(135deg, #84cc16 0%, #65a30d 100%);
+        }
+        .modal-header-extrato .modal-header-text-padrão h2 {
+            color: #1e293b !important;
+        }
+        .modal-header-extrato .modal-header-text-padrão p {
+            color: #64748b !important;
+        }
+        .modal-header-extrato .modal-close-padrão {
+            background: #f1f5f9 !important;
+        }
+        .modal-header-extrato .modal-close-padrão i {
+            color: #64748b !important;
+        }
+        .modal-header-extrato .modal-close-padrão:hover {
+            background: #e2e8f0 !important;
         }
 
         /* Hero Card do Extrato */
         .extrato-hero {
-            background: linear-gradient(135deg, #84cc16 0%, #65a30d 50%, #4d7c0f 100%);
-            padding: 0 28px 28px 28px;
+            background: #f8fafc;
+            padding: 20px 28px;
+            border-bottom: 1px solid #e2e8f0;
         }
         .extrato-hero-content {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background: rgba(255,255,255,0.1);
-            -webkit-backdrop-filter: blur(10px);
-            backdrop-filter: blur(10px);
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
             border-radius: 16px;
             padding: 20px 24px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
         }
         .extrato-banco-info {
             display: flex;
@@ -1236,7 +1257,7 @@
         .extrato-banco-logo {
             width: 64px;
             height: 64px;
-            background: rgba(255,255,255,0.2);
+            background: linear-gradient(135deg, #84cc16 0%, #65a30d 100%);
             border-radius: 14px;
             display: flex;
             align-items: center;
@@ -1248,32 +1269,33 @@
         .extrato-banco-dados h3 {
             font-size: 18px;
             font-weight: 700;
-            color: white;
+            color: #1e293b;
             margin: 0 0 4px 0;
         }
         .extrato-banco-dados p {
             font-size: 13px;
-            color: rgba(255,255,255,0.85);
+            color: #64748b;
             margin: 0;
         }
         .extrato-saldo-card {
             text-align: right;
-            background: rgba(255,255,255,0.15);
+            background: #f0fdf4;
             padding: 16px 24px;
             border-radius: 12px;
+            border: 1px solid #bbf7d0;
         }
         .saldo-label {
             display: block;
             font-size: 11px;
             text-transform: uppercase;
-            color: rgba(255,255,255,0.8);
+            color: #64748b;
             margin-bottom: 4px;
             letter-spacing: 0.5px;
         }
         .saldo-valor {
             font-size: 28px;
             font-weight: 800;
-            color: white;
+            color: #166534;
         }
 
         /* KPIs do Extrato */
@@ -2025,7 +2047,7 @@
 
                     <!-- ABAS -->
                     <div class="mbo-tabs">
-                        <button type="button" class="mbo-tab" data-tab="integração">
+                        <button type="button" class="mbo-tab" data-tab="integracao">
                             <i class="fas fa-link"></i> Integração com o Banco
                         </button>
                         <button type="button" class="mbo-tab" data-tab="boletos">Boletos de Cobrança</button>
@@ -2868,21 +2890,28 @@
             tabs.forEach(tab => {
                 tab.addEventListener('click', function() {
                     const targetTab = this.getAttribute('data-tab');
+                    const jaAtiva = this.classList.contains('active');
 
                     // Remove active de todas as abas
                     tabs.forEach(t => t.classList.remove('active'));
                     panes.forEach(p => p.classList.remove('active'));
 
-                    // Se clicou na mesma aba, volta para default
-                    if (this.classList.contains('was-active')) {
+                    // Se clicou na aba já ativa, volta para default
+                    if (jaAtiva) {
                         document.getElementById('mbo-tab-default').classList.add('active');
-                        this.classList.remove('was-active');
                         return;
                     }
 
                     // Ativa a aba clicada
                     this.classList.add('active');
-                    document.getElementById('mbo-tab-' + targetTab).classList.add('active');
+                    const pane = document.getElementById('mbo-tab-' + targetTab);
+                    if (pane) {
+                        pane.classList.add('active');
+                    } else {
+                        // Fallback: mostrar default se pane não existe
+                        document.getElementById('mbo-tab-default').classList.add('active');
+                        console.warn('[Tabs] Pane não encontrado:', 'mbo-tab-' + targetTab);
+                    }
                 });
             });
         });
@@ -3148,7 +3177,7 @@
             </div>
 
             <!-- HERO CARD DO BANCO -->
-            <div class="extrato-hero" style="background: linear-gradient(135deg, #84cc16 0%, #65a30d 100%);">
+            <div class="extrato-hero">
                 <div class="extrato-hero-content">
                     <div class="extrato-banco-info">
                         <div id="extratoBancoLogo" class="extrato-banco-logo">BB</div>
@@ -3870,12 +3899,19 @@
             console.log('[Modal Banco] Aberto com classe active');
         }
 
-        function abrirModalTransferencia() {
+        async function abrirModalTransferencia() {
             document.getElementById('formTransferencia').reset();
 
-            const options = bancos.filter(b => b.status === 'ativo').map(b =>
-                `<option value="${b.id}">${b.apelido || bancosConfig[b.codigo]?.nome} - ${formatarMoeda(b.saldo)}</option>`
-            ).join('');
+            // Garantir que os bancos estejam carregados antes de popular os selects
+            if (!bancos || bancos.length === 0) {
+                await carregarBancos();
+            }
+
+            const bancosAtivos = bancos.filter(b => b.status === 'ativo' || b.status === undefined);
+            const options = bancosAtivos.map(b => {
+                const nomeBanco = b.apelido || b.nome || bancosConfig[b.código]?.nome || bancosConfig[b.codigo]?.nome || 'Conta';
+                return `<option value="${b.id}">${nomeBanco} - ${formatarMoeda(b.saldo)}</option>`;
+            }).join('');
 
             document.getElementById('contaOrigem').innerHTML = '<option value="">Selecione...</option>' + options;
             document.getElementById('contaDestino').innerHTML = '<option value="">Selecione...</option>' + options;
@@ -3884,12 +3920,19 @@
             document.getElementById('modalTransferencia').classList.add('active');
         }
 
-        function abrirModalMovimento() {
+        async function abrirModalMovimento() {
             document.getElementById('formMovimento').reset();
 
-            const options = bancos.filter(b => b.status === 'ativo').map(b =>
-                `<option value="${b.id}">${b.apelido || bancosConfig[b.codigo]?.nome}</option>`
-            ).join('');
+            // Garantir que os bancos estejam carregados antes de popular os selects
+            if (!bancos || bancos.length === 0) {
+                await carregarBancos();
+            }
+
+            const bancosAtivos = bancos.filter(b => b.status === 'ativo' || b.status === undefined);
+            const options = bancosAtivos.map(b => {
+                const nomeBanco = b.apelido || b.nome || bancosConfig[b.código]?.nome || bancosConfig[b.codigo]?.nome || 'Conta';
+                return `<option value="${b.id}">${nomeBanco}</option>`;
+            }).join('');
 
             document.getElementById('contaMovimento').innerHTML = '<option value="">Selecione...</option>' + options;
             document.getElementById('dataMovimento').valueAsDate = new Date();
@@ -3913,20 +3956,25 @@
             const código = códigoSelect.value;
             const nome = bancosConfig[código]?.nome || códigoSelect.options[códigoSelect.selectedIndex]?.text.split(' - ')[1] || '';
 
+            const apelidoConta = document.getElementById('apelido').value || nome || '';
             const dados = {
-                código: código,
-                nome: nome,
-                tipo: document.getElementById('tipoConta').value,
+                codigo: código,
+                nome: apelidoConta || nome,
+                instituicao: nome,
+                tipo_conta: document.getElementById('tipoConta').value,
                 categoria: document.getElementById('categoriaConta').value,
                 agencia: document.getElementById('agencia').value,
-                conta: document.getElementById('conta').value,
-                apelido: document.getElementById('apelido').value || null,
+                conta_corrente: document.getElementById('conta').value,
+                apelido: apelidoConta || null,
                 saldo_inicial: parseFloat(document.getElementById('saldoInicial').value.replace(/[^\d,-]/g, '').replace(',', '.')) || 0,
+                saldo_atual: parseFloat(document.getElementById('saldoInicial').value.replace(/[^\d,-]/g, '').replace(',', '.')) || 0,
                 data_saldo_inicial: document.getElementById('dataSaldoInicial').value || null,
                 limite_credito: parseFloat(document.getElementById('limiteCredito')?.value?.replace(/[^\d,-]/g, '').replace(',', '.')) || 0,
                 conta_vinculada: document.getElementById('contaVinculada').value || null,
                 nao_considerar_resumo: document.getElementById('naoConsiderarResumo').checked,
-                observações: document.getElementById('observacoes').value || null,
+                considera_fluxo: document.getElementById('naoConsiderarResumo').checked ? 0 : 1,
+                observacoes: document.getElementById('observacoes').value || null,
+                status: 'ativo',
                 // Dados da agência
                 gerente_conta: document.getElementById('gerenteConta')?.value || null,
                 email_gerente: document.getElementById('emailGerente')?.value || null,
@@ -3938,8 +3986,7 @@
                 complemento_agencia: document.getElementById('complementoAgencia')?.value || null,
                 estado_agencia: document.getElementById('estadoAgencia')?.value || null,
                 cidade_agencia: document.getElementById('cidadeAgencia')?.value || null,
-                cep_agencia: document.getElementById('cepAgencia')?.value || null,
-                ativo: true
+                cep_agencia: document.getElementById('cepAgencia')?.value || null
             };
 
             try {
