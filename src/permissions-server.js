@@ -469,6 +469,8 @@ const userPermissions = {
     // ============ VENDAS / RH ============
     'leidiane': { areas: ['vendas', 'rh'], rhType: 'area', isAdmin: false, profile: 'vendedor' },
     'leidiene': { areas: ['vendas', 'rh'], rhType: 'area', isAdmin: false, profile: 'vendedor' },
+    'vitor':        { areas: ['vendas', 'rh'], rhType: 'area', isAdmin: false, profile: 'vendedor' },
+    'vitor.santos': { areas: ['vendas', 'rh'], rhType: 'area', isAdmin: false, profile: 'vendedor' },
 
     // ============ PRODUÇÃO / PCP ============
     'christian': { areas: ['pcp', 'rh'], rhType: 'area', isAdmin: false, profile: 'producao_operador' },
