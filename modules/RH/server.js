@@ -4394,15 +4394,25 @@ app.get('/api/rh/holerites/consentimentos', authMiddleware, async (req, res) => 
   if (!isAdminUser(req.user)) return res.status(403).json({ message: 'Acesso negado' });
   try {
     const [rows] = await pool.query(`
-      SELECT h.id, h.funcionario_id, f.nome AS funcionario_nome, h.confirmado_recebimento,
+      SELECT h.id, h.funcionario_id,
+        f.nome AS nome_completo,
+        f.cpf,
+        CASE WHEN h.confirmado_recebimento = 1 THEN 'ativo' ELSE 'pendente' END AS status,
+        h.data_confirmacao AS data_aceite,
+        CONCAT(f.nome, ' – ', LPAD(fp.mes, 2, '0'), '/', fp.ano) AS assinatura_digital,
         fp.mes, fp.ano
       FROM rh_holerites h
       LEFT JOIN funcionarios f ON h.funcionario_id = f.id
       LEFT JOIN rh_folhas_pagamento fp ON h.folha_id = fp.id
-      WHERE h.status = 'publicado'
-      ORDER BY fp.ano DESC, fp.mes DESC, f.nome
+      WHERE h.status = 'publicado' AND h.confirmado_recebimento = 1
+      ORDER BY h.data_confirmacao DESC
     `);
-    res.json({ consentimentos: rows });
+    // Mask encrypted CPFs before returning to client
+    const consentimentos = rows.map(r => ({
+      ...r,
+      cpf: (r.cpf && !r.cpf.startsWith('ENC:') && !r.cpf.includes('ENCRYPTED') && !r.cpf.startsWith('$2')) ? r.cpf : null
+    }));
+    res.json({ consentimentos });
   } catch (error) {
     logger.error('Erro ao buscar consentimentos:', error);
     res.status(500).json({ error: 'Erro ao buscar consentimentos' });
