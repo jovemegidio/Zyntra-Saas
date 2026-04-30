@@ -435,19 +435,39 @@ router.delete('/departamentos/:id', authenticateToken, requireAdmin, async (req,
  */
 router.get('/projetos', authenticateToken, async (req, res) => {
     try {
+        const [columns] = await pool.execute('SHOW COLUMNS FROM projetos');
+        const colNames = new Set((columns || []).map((col) => col.Field));
+        const pick = (name) => colNames.has(name) ? `p.${name}` : `NULL AS ${name}`;
+        const fimExpr = colNames.has('data_previsao_fim')
+            ? 'p.data_previsao_fim'
+            : (colNames.has('data_fim') ? 'p.data_fim AS data_previsao_fim' : 'NULL AS data_previsao_fim');
+        const orderExpr = colNames.has('created_at') ? 'p.created_at DESC' : 'p.id DESC';
+
         const [rows] = await pool.execute(`
-            SELECT 
-                p.*,
-                d.nome as departamento_nome,
-                f.nome as responsavel_nome
+            SELECT
+                p.id,
+                p.nome,
+                ${pick('codigo')},
+                ${pick('descricao')},
+                ${pick('departamento_id')},
+                ${pick('responsavel_id')},
+                ${pick('status')},
+                ${pick('data_inicio')},
+                ${fimExpr},
+                ${pick('orcamento')},
+                ${pick('cor')},
+                ${pick('ativo')},
+                ${pick('created_at')},
+                ${pick('updated_at')},
+                NULL AS departamento_nome,
+                NULL AS responsavel_nome
             FROM projetos p
-            LEFT JOIN departamentos d ON p.departamento_id = d.id
-            LEFT JOIN funcionarios f ON p.responsavel_id = f.id
-            ORDER BY p.created_at DESC
+            ORDER BY ${orderExpr}
         `);
         
         res.json(rows);
     } catch (error) {
+        if (error.code === 'ER_NO_SUCH_TABLE') return res.json([]);
         console.error('Erro ao buscar projetos:', error);
         res.status(500).json({ error: 'Erro ao buscar projetos' });
     }

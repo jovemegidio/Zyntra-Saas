@@ -49,6 +49,23 @@
     '    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);' +
     '    overflow: hidden;' +
     '}' +
+    '.alu-confirm-card.danger, .alu-confirm-card.alert {' +
+    '    background:#181922; color:#f8fafc; border:1px solid #34364a;' +
+    '    border-radius:14px; box-shadow:0 18px 46px rgba(0,0,0,0.46), 0 0 0 1px rgba(255,255,255,0.04);' +
+    '    max-width:452px;' +
+    '}' +
+    '.alu-confirm-card.danger .alu-confirm-topbar, .alu-confirm-card.alert .alu-confirm-topbar { display:none; }' +
+    '.alu-confirm-card.danger .alu-confirm-header, .alu-confirm-card.alert .alu-confirm-header { padding:26px 22px 0; gap:14px; }' +
+    '.alu-confirm-card.danger .alu-confirm-title, .alu-confirm-card.alert .alu-confirm-title { color:#ffffff; letter-spacing:0; }' +
+    '.alu-confirm-card.danger .alu-confirm-message, .alu-confirm-card.alert .alu-confirm-message { color:#ffffff; line-height:1.55; }' +
+    '.alu-confirm-card.danger .alu-confirm-message strong, .alu-confirm-card.alert .alu-confirm-message strong { color:#ffffff; }' +
+    '.alu-confirm-card.danger .alu-confirm-footer, .alu-confirm-card.alert .alu-confirm-footer { padding:20px 16px 16px; }' +
+    '.alu-confirm-card.danger .alu-confirm-btn.cancel, .alu-confirm-card.alert .alu-confirm-btn.cancel { background:#232433; color:#e5e7eb; border:1px solid #404258; }' +
+    '.alu-confirm-card.alert .alu-confirm-btn.confirm {' +
+    '    background:#c9cdfb; color:#161735; border:2px solid #323454; border-radius:24px;' +
+    '    min-width:70px; justify-content:center; box-shadow:none;' +
+    '}' +
+    '.alu-confirm-card.alert .alu-confirm-btn.confirm:hover { background:#d8dbff; transform:none; box-shadow:none; }' +
     '.alu-confirm-overlay.active .alu-confirm-card { transform: scale(1) translateY(0); }' +
 
     '.alu-confirm-topbar { height: 4px; width: 100%; }' +
@@ -184,7 +201,7 @@
         el.setAttribute('role', 'dialog');
         el.setAttribute('aria-modal', 'true');
         el.innerHTML =
-            '<div class="alu-confirm-card">' +
+            '<div class="alu-confirm-card" id="alu-cf-card">' +
                 '<div class="alu-confirm-topbar" id="alu-cf-topbar"></div>' +
                 '<div class="alu-confirm-header">' +
                     '<div class="alu-confirm-icon" id="alu-cf-icon"><i class="fas"></i></div>' +
@@ -224,6 +241,12 @@
             var confirmIcon = options.confirmIcon || 'fa-check';
             var danger      = options.danger      || false;
             var showCancel  = options.showCancel !== undefined ? options.showCancel : true;
+            var alertMode   = options.alert      || false;
+
+            var card = document.getElementById('alu-cf-card');
+            if (card) {
+                card.className = 'alu-confirm-card ' + type + (alertMode ? ' alert' : '');
+            }
 
             // Topbar
             var topbar = document.getElementById('alu-cf-topbar');
@@ -321,6 +344,23 @@
         });
     }
 
+    function showAlertDialog(message, options) {
+        options = options || {};
+        var text = String(message == null ? '' : message);
+        var type = options.type || (/erro|falha|inv[aá]lido|negado/i.test(text) ? 'danger' : 'info');
+
+        return showConfirmDialog({
+            title: options.title || ((window.location.host || 'Sistema') + ' diz'),
+            message: _escapeHtml(text).replace(/\n/g, '<br>'),
+            type: type,
+            confirmText: options.confirmText || 'OK',
+            confirmIcon: options.confirmIcon || 'fa-check',
+            showCancel: false,
+            danger: type === 'danger',
+            alert: true
+        });
+    }
+
     // ═══════════════════════════════════════════════════════════
     // AUTO-INTERCEPT — Substitui window.confirm automaticamente
     // ═══════════════════════════════════════════════════════════
@@ -336,8 +376,9 @@
             e.target;
     }, true);
 
-    // Salvar o confirm nativo
+    // Salvar dialogos nativos
     var _nativeConfirm = window.confirm;
+    var _nativeAlert = window.alert;
 
     /**
      * Detecta automaticamente o tipo/contexto a partir da mensagem.
@@ -456,6 +497,10 @@
         return false;
     };
 
+    window.alert = function (message) {
+        showAlertDialog(message);
+    };
+
     // ═══════════════════════════════════════════════════════════
     // Exportar API pública
     // ═══════════════════════════════════════════════════════════
@@ -463,12 +508,17 @@
         show:    showConfirmDialog,
         delete:  confirmDelete,
         action:  confirmAction,
+        alert:   showAlertDialog,
         /** Restaurar confirm nativo (para debug) */
-        restoreNative: function () { window.confirm = _nativeConfirm; }
+        restoreNative: function () {
+            window.confirm = _nativeConfirm;
+            window.alert = _nativeAlert;
+        }
     };
 
     // Aliases globais para compatibilidade
     window.showConfirmDialog = showConfirmDialog;
+    window.showAlertDialog   = showAlertDialog;
     window.confirmDelete     = confirmDelete;
     window.confirmAction     = confirmAction;
 

@@ -1534,7 +1534,8 @@
                     var primeiroNome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usuario');
                     var greetingTextEl = document.getElementById('greeting-text');
                     if (greetingTextEl) { var h = new Date().getHours(); greetingTextEl.textContent = h >= 18 || h < 5 ? 'Boa noite' : h >= 12 ? 'Boa tarde' : 'Bom dia'; }
-                    document.getElementById('user-name').textContent = primeiroNome;
+                    var userNameEl = document.getElementById('user-name');
+                    if (userNameEl) userNameEl.textContent = primeiroNome;
                     var avatarNameMap = {'clemerson':'/avatars/Clemerson.png','isabela':'/avatars/Isabela.png','isabella':'/avatars/Isabela.png','thaina':'/avatars/Thaina.webp','thiago':'/avatars/Thiago.png','nicolas':'/avatars/NicolasDaniel.webp','nicolasdaniel':'/avatars/NicolasDaniel.webp','rh':'/avatars/Rh.webp','admin':'/avatars/admin.webp','ti':'/avatars/TI.webp','tialuforce':'/avatars/TI.webp','antonio':'/avatars/Antonio.webp','antônio':'/avatars/Antonio.webp','andreia':'/avatars/Andreia.webp','andréia':'/avatars/Andreia.webp','guilherme':'/avatars/GuilhermeBastos.png','marcelo':'/avatars/Marcelo.webp','financeiro':'/avatars/Financeiro.webp','douglas':'/avatars/Douglas.webp','hellen':'/avatars/Hellen.webp','helen':'/avatars/Hellen.webp','augusto':'/avatars/Augusto.png','renata':'/avatars/Renata.png','fabiano':'/avatars/Fabiano.png','fabiola':'/avatars/Fabiola.webp','marcia':'/avatars/Marcia.png','márcia':'/avatars/Marcia.png','ronaldo':'/avatars/Ronaldo.png','joao':'/avatars/JoaoVitor.png','joão':'/avatars/JoaoVitor.png','fernando':'/avatars/Fernando.png','robson':'/avatars/Robson.png','junior':'/avatars/Junior.png','bruno':'/avatars/Bruno.png','tatiane':'/avatars/Tatiane.png','felipesimoes':'/avatars/FelipeSimoes.png','felipe':'/avatars/FelipeSimoes.png','sergio':'/avatars/Sergio.png','lucas':'/avatars/Lucas.png','miqueias':'/avatars/Miqueias.png','lucio':'/avatars/Lucio.png','lúcio':'/avatars/Lucio.png','jamesson':'/avatars/jamerson.svg'};
                     var avatarUrl = null;
                     if (user.avatar && user.avatar !== '/avatars/default.webp') avatarUrl = user.avatar;
@@ -3021,7 +3022,7 @@
     <script src="/js/inactivity-manager.js?v=20260324" defer></script>
     <script src="/js/mobile-auto-enhance.js?v=20260319" defer></script>
     <script src="/Financeiro/js/financeiro-sidebar.js?v=20260410"></script>
-    <script src="/_shared/confirm-dialog.js?v=20260319"></script>
+    <script src="/_shared/confirm-dialog.js?v=20260429"></script>
     <script src="/_shared/accessibility-widget.js?v=20260319"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="/chat-teams/chat-widget.js?v=20260319" defer></script>

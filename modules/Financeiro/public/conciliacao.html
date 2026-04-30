@@ -148,7 +148,7 @@
     <script src="/js/inactivity-manager.js?v=20260324" defer></script>
     <script src="/js/mobile-auto-enhance.js?v=20260408" defer></script>
     <script src="/Financeiro/js/financeiro-sidebar.js?v=20260408"></script>
-    <script src="/_shared/confirm-dialog.js?v=20260408"></script>
+    <script src="/_shared/confirm-dialog.js?v=20260429"></script>
     <script src="/_shared/accessibility-widget.js?v=20260408"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="/chat-teams/chat-widget.js?v=20260408" defer></script>
@@ -201,16 +201,19 @@
                     set('total-itens-conciliar', data.totalItensParaConciliar || 0);
                     renderizarMovimentações(data.movimentações || []);
                 } else {
-                    document.getElementById('lista-conciliação').innerHTML = '<p style="color:var(--gray-400);text-align:center;padding:40px;"><i class="fas fa-info-circle"></i> Nenhum dado de conciliação disponível.</p>';
+                    const lista = document.getElementById('lista-conciliacao');
+                    if (lista) lista.innerHTML = '<p style="color:var(--gray-400);text-align:center;padding:40px;"><i class="fas fa-info-circle"></i> Nenhum dado de conciliação disponível.</p>';
                 }
             } catch (e) {
                 console.warn('Erro:', e);
-                document.getElementById('lista-conciliação').innerHTML = '<p style="color:var(--gray-400);text-align:center;padding:40px;"><i class="fas fa-info-circle"></i> Erro ao carregar dados de conciliação.</p>';
+                const lista = document.getElementById('lista-conciliacao');
+                if (lista) lista.innerHTML = '<p style="color:var(--gray-400);text-align:center;padding:40px;"><i class="fas fa-info-circle"></i> Erro ao carregar dados de conciliação.</p>';
             }
         }
 
         function renderizarMovimentações(movs) {
-            const container = document.getElementById('lista-conciliação');
+            const container = document.getElementById('lista-conciliacao');
+            if (!container) return;
             if (!movs.length) {
                 container.innerHTML = '<p style="color:var(--gray-400);text-align:center;padding:40px;"><i class="fas fa-info-circle"></i> Nenhuma movimentação pendente para conciliação.</p>';
                 return;
@@ -287,7 +290,8 @@
             document.getElementById('extrato-info').textContent = `Arquivo: ${filename} — ${rows.length} linhas importadas`;
             if (typeof showToast === 'function') showToast(`${rows.length} registros importados de "${filename}"`, 'success');
 
-            const container = document.getElementById('lista-conciliação');
+            const container = document.getElementById('lista-conciliacao');
+            if (!container) return;
             // Detect columns
             const keys = Object.keys(rows[0] || {});
             const findCol = (...names) => keys.find(k => names.some(n => k.includes(n))) || null;

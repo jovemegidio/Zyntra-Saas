@@ -1397,7 +1397,7 @@
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel de Controle"><i class="fas fa-home"></i></a>
             <nav class="sidebar-nav">
                 <a href="../areaadm.html" class="sidebar-btn" title="Dashboard RH"><i class="fas fa-chart-pie"></i></a>
-                <a href="funcionários.html" class="sidebar-btn active" title="Funcionários"><i class="fas fa-users"></i></a>
+                <a href="funcionarios.html" class="sidebar-btn active" title="Funcionários"><i class="fas fa-users"></i></a>
                 <a href="../gestao-holerites.html" class="sidebar-btn" title="Gestão de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="folha.html" class="sidebar-btn" title="Folha de Pagamento"><i class="fas fa-money-check-alt"></i></a>
                 <a href="gestao-ponto.html" class="sidebar-btn" title="Gestão do Ponto"><i class="fas fa-clock"></i></a>
@@ -3718,12 +3718,14 @@
                 renderizarPensãoes(pensãoes);
             } catch (error) {
                 console.error('Erro ao carregar penses:', error);
-                document.getElementById('listaPensãoes').innerHTML = '<div style="text-align: center; padding: 20px; color: #94a3b8;"><p>Erro ao carregar dados</p></div>';
+                const lista = document.getElementById('listaPensãoes');
+                if (lista) lista.innerHTML = '<div style="text-align: center; padding: 20px; color: #94a3b8;"><p>Erro ao carregar dados</p></div>';
             }
         }
 
         function renderizarPensãoes(pensãoes) {
             const container = document.getElementById('listaPensãoes');
+            if (!container) return;
             if (!pensãoes || pensãoes.length === 0) {
                 container.innerHTML = '<div style="text-align: center; padding: 30px; color: #94a3b8;"><i class="fas fa-gavel fa-2x" style="opacity: 0.3;"></i><p style="margin-top: 8px;">Nenhuma pensão alimentícia cadastrada</p></div>';
                 return;
@@ -3741,7 +3743,7 @@
                         </div>
                     </div>
                     ${p.banco_recebedor ? `<div style="font-size: 12px; color: #64748b; margin-top: 8px;"><i class="fas fa-university"></i> ${p.banco_recebedor} ${p.agencia_recebedor ? '| Ag: ' + p.agencia_recebedor : ''} ${p.conta_recebedor ? '| Conta: ' + p.conta_recebedor : ''}</div>` : ''}
-                    ${p.observações ? `<div style="font-size: 12px; color: #64748b; margin-top: 4px;"><i class="fas fa-sticky-note"></i> ${p.observações}</div>` : ''}
+                    ${p.observacoes ? `<div style="font-size: 12px; color: #64748b; margin-top: 4px;"><i class="fas fa-sticky-note"></i> ${p.observacoes}</div>` : ''}
                     ${p.documentos && p.documentos.length > 0 ? `<div style="margin-top: 8px; display: flex; flex-wrap: wrap; gap: 4px;">${p.documentos.map(d => `<span style="font-size: 11px; background: #eff6ff; color: #3b82f6; padding: 2px 8px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;"><i class="fas fa-paperclip"></i> ${d.nome_arquivo}</span>`).join('')}</div>` : ''}
                 </div>
             `).join('');
@@ -3777,7 +3779,7 @@
                 document.getElementById('pensaoBanco').value = p.banco_recebedor || '';
                 document.getElementById('pensaoAgencia').value = p.agencia_recebedor || '';
                 document.getElementById('pensaoConta').value = p.conta_recebedor || '';
-                document.getElementById('pensaoObservações').value = p.observações || '';
+                document.getElementById('pensaoObservacoes').value = p.observacoes || '';
                 document.getElementById('formPensaoWrapper').style.display = 'block';
             } catch (error) { console.error('Erro:', error); }
         }
@@ -3793,10 +3795,10 @@
                 banco_recebedor: document.getElementById('pensaoBanco').value,
                 agencia_recebedor: document.getElementById('pensaoAgencia').value,
                 conta_recebedor: document.getElementById('pensaoConta').value,
-                observações: document.getElementById('pensaoObservações').value
+                observacoes: document.getElementById('pensaoObservacoes').value
             };
             try {
-                const url = editId ? `/api/rh/funcionários/${fid}/pensao/${editId}` : `/api/rh/funcionários/${fid}/pensao`;
+                const url = editId ? `/api/rh/funcionarios/${fid}/pensao/${editId}` : `/api/rh/funcionarios/${fid}/pensao`;
                 const method = editId ? 'PUT' : 'POST';
                 const response = await fetch(url, { method, credentials: 'include', headers: getAuthHeaders(), body: JSON.stringify(dados) });
                 if (response.ok) {
@@ -3856,17 +3858,21 @@
                 });
                 if (!response.ok) throw new Error('Erro ao carregar');
                 const data = await response.json();
-                const recebe = data.recebe === 1;
+                const recebe = data.recebe === 1 || data.recebe === true || data.recebe === '1';
                 const displayEl = document.getElementById('sfRecebeDisplay');
+                if (!displayEl) return;
                 displayEl.textContent = recebe ? 'Sim' : 'No';
                 displayEl.style.background = recebe ? '#dcfce7' : '#fee2e2';
                 displayEl.style.color = recebe ? '#166534' : '#991b1b';
-                document.getElementById('sfDependentesSection').style.display = recebe ? 'block' : 'none';
-                const obsView = document.getElementById('sfObservaçõesView');
-                if (data.observações) {
+                const dependentesSection = document.getElementById('sfDependentesSection');
+                if (dependentesSection) dependentesSection.style.display = recebe ? 'block' : 'none';
+                const obsView = document.getElementById('sfObservacoesView');
+                const observacoes = data.observacoes || data.observações || '';
+                if (obsView && observacoes) {
                     obsView.style.display = 'block';
-                    document.getElementById('sfObservaçõesDisplay').textContent = data.observações;
-                } else {
+                    const obsDisplay = document.getElementById('sfObservacoesDisplay');
+                    if (obsDisplay) obsDisplay.textContent = observacoes;
+                } else if (obsView) {
                     obsView.style.display = 'none';
                 }
                 renderizarDependentes(data.dependentes || []);
@@ -3881,7 +3887,9 @@
 
         function renderizarDependentes(dependentes) {
             const container = document.getElementById('listaDependentes');
-            document.getElementById('sfCountDependentes').textContent = dependentes.length;
+            if (!container) return;
+            const countEl = document.getElementById('sfCountDependentes');
+            if (countEl) countEl.textContent = dependentes.length;
             if (!dependentes || dependentes.length === 0) {
                 container.innerHTML = '<div style="text-align: center; padding: 20px; color: #94a3b8;"><p style="margin: 0;">Nenhum dependente cadastrado</p></div>';
                 return;
@@ -3948,9 +3956,9 @@
             try {
                 const response = await fetch(`/api/rh/funcionarios/${fid}/salario-familia`, { credentials: 'include', method: 'PUT', headers: getAuthHeaders(),
                     body: JSON.stringify({
-                        recebe: document.getElementById('sfRecebe').checked,
+                        recebe: document.getElementById('sfRecebe')?.checked,
                         quantidade_dependentes: document.querySelectorAll('#listaDependentes > div[style*="border"]').length,
-                        observações: document.getElementById('sfObservações').value
+                        observacoes: document.getElementById('sfObservacoes')?.value || ''
                     })
                 });
                 if (response.ok) {
@@ -3970,12 +3978,14 @@
                 renderizarPensãoesEdit(pensãoes);
             } catch (error) {
                 console.error('Erro ao carregar penses (edit):', error);
-                document.getElementById('listaPensãoesEdit').innerHTML = '<div style="text-align: center; padding: 20px; color: #94a3b8;"><p>Erro ao carregar dados</p></div>';
+                const lista = document.getElementById('listaPensãoesEdit');
+                if (lista) lista.innerHTML = '<div style="text-align: center; padding: 20px; color: #94a3b8;"><p>Erro ao carregar dados</p></div>';
             }
         }
 
         function renderizarPensãoesEdit(pensãoes) {
             const container = document.getElementById('listaPensãoesEdit');
+            if (!container) return;
             if (!pensãoes || pensãoes.length === 0) {
                 container.innerHTML = '<div style="text-align: center; padding: 20px; color: #94a3b8;"><i class="fas fa-gavel fa-2x" style="opacity: 0.3;"></i><p style="margin-top: 8px;">Nenhuma pensão alimentícia cadastrada</p></div>';
                 return;
@@ -3993,7 +4003,7 @@
                         </div>
                     </div>
                     ${p.banco_recebedor ? `<div style="font-size: 12px; color: #64748b; margin-top: 8px;"><i class="fas fa-university"></i> ${p.banco_recebedor} ${p.agencia_recebedor ? '| Ag: ' + p.agencia_recebedor : ''} ${p.conta_recebedor ? '| Conta: ' + p.conta_recebedor : ''}</div>` : ''}
-                    ${p.observações ? `<div style="font-size: 12px; color: #64748b; margin-top: 4px;"><i class="fas fa-sticky-note"></i> ${p.observações}</div>` : ''}
+                    ${p.observacoes ? `<div style="font-size: 12px; color: #64748b; margin-top: 4px;"><i class="fas fa-sticky-note"></i> ${p.observacoes}</div>` : ''}
                     ${p.documentos && p.documentos.length > 0 ? `<div style="margin-top: 8px; display: flex; flex-wrap: wrap; gap: 4px;">${p.documentos.map(d => `<span style="font-size: 11px; background: #eff6ff; color: #3b82f6; padding: 2px 8px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;"><i class="fas fa-paperclip"></i> ${d.nome_arquivo} <button onclick="removerDocPensao(${p.id}, ${d.id})" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 10px;"><i class="fas fa-times"></i></button></span>`).join('')}</div>` : ''}
                     <div style="display: flex; gap: 6px; margin-top: 10px; justify-content: flex-end;">
                         <label style="font-size: 11px; padding: 4px 10px; border-radius: 6px; background: #eff6ff; color: #3b82f6; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
@@ -4015,7 +4025,7 @@
             document.getElementById('pensaoBancoEdit').value = '';
             document.getElementById('pensaoAgenciaEdit').value = '';
             document.getElementById('pensaoContaEdit').value = '';
-            document.getElementById('pensaoObservaçõesEdit').value = '';
+            document.getElementById('pensaoObservacoesEdit').value = '';
             document.getElementById('formPensaoWrapperEdit').style.display = 'block';
         }
 
@@ -4038,7 +4048,7 @@
                 document.getElementById('pensaoBancoEdit').value = p.banco_recebedor || '';
                 document.getElementById('pensaoAgenciaEdit').value = p.agencia_recebedor || '';
                 document.getElementById('pensaoContaEdit').value = p.conta_recebedor || '';
-                document.getElementById('pensaoObservaçõesEdit').value = p.observações || '';
+                document.getElementById('pensaoObservacoesEdit').value = p.observacoes || '';
                 document.getElementById('formPensaoWrapperEdit').style.display = 'block';
             } catch (error) { showToast('error', 'Erro', 'Erro ao carregar pensão', 3000); }
         }
@@ -4054,10 +4064,10 @@
                 banco_recebedor: document.getElementById('pensaoBancoEdit').value,
                 agencia_recebedor: document.getElementById('pensaoAgenciaEdit').value,
                 conta_recebedor: document.getElementById('pensaoContaEdit').value,
-                observações: document.getElementById('pensaoObservaçõesEdit').value
+                observacoes: document.getElementById('pensaoObservacoesEdit').value
             };
             try {
-                const url = editId ? `/api/rh/funcionários/${fid}/pensao/${editId}` : `/api/rh/funcionários/${fid}/pensao`;
+                const url = editId ? `/api/rh/funcionarios/${fid}/pensao/${editId}` : `/api/rh/funcionarios/${fid}/pensao`;
                 const method = editId ? 'PUT' : 'POST';
                 const response = await fetch(url, { method, credentials: 'include', headers: getAuthHeaders(), body: JSON.stringify(data) });
                 if (response.ok) {
@@ -4086,11 +4096,15 @@
                 const response = await fetch(`/api/rh/funcionarios/${funcionárioId}/salario-familia`, { credentials: 'include', headers: getAuthHeaders() });
                 if (!response.ok) throw new Error('Erro ao carregar');
                 const data = await response.json();
-                const recebe = data.recebe === 1;
-                document.getElementById('editSfRecebe').checked = recebe;
-                document.getElementById('editSfRecebeLabel').textContent = recebe ? 'Sim' : 'No';
-                document.getElementById('editSfObservações').value = data.observações || '';
-                document.getElementById('editSfDependentesSection').style.display = recebe ? 'block' : 'none';
+                const recebe = data.recebe === 1 || data.recebe === true || data.recebe === '1';
+                const recebeEl = document.getElementById('editSfRecebe');
+                const recebeLabel = document.getElementById('editSfRecebeLabel');
+                const observacoesEl = document.getElementById('editSfObservacoes');
+                const dependentesSection = document.getElementById('editSfDependentesSection');
+                if (recebeEl) recebeEl.checked = recebe;
+                if (recebeLabel) recebeLabel.textContent = recebe ? 'Sim' : 'No';
+                if (observacoesEl) observacoesEl.value = data.observacoes || data.observações || '';
+                if (dependentesSection) dependentesSection.style.display = recebe ? 'block' : 'none';
                 renderizarDependentesEdit(data.dependentes || []);
             } catch (error) {
                 console.error('Erro ao carregar salário família (edit):', error);
@@ -4098,14 +4112,18 @@
         }
 
         function toggleSfEdit() {
-            const recebe = document.getElementById('editSfRecebe').checked;
-            document.getElementById('editSfRecebeLabel').textContent = recebe ? 'Sim' : 'No';
-            document.getElementById('editSfDependentesSection').style.display = recebe ? 'block' : 'none';
+            const recebe = document.getElementById('editSfRecebe')?.checked;
+            const recebeLabel = document.getElementById('editSfRecebeLabel');
+            const dependentesSection = document.getElementById('editSfDependentesSection');
+            if (recebeLabel) recebeLabel.textContent = recebe ? 'Sim' : 'No';
+            if (dependentesSection) dependentesSection.style.display = recebe ? 'block' : 'none';
         }
 
         function renderizarDependentesEdit(dependentes) {
             const container = document.getElementById('listaDependentesEdit');
-            document.getElementById('editSfCountDep').textContent = dependentes.length;
+            if (!container) return;
+            const countEl = document.getElementById('editSfCountDep');
+            if (countEl) countEl.textContent = dependentes.length;
             if (!dependentes || dependentes.length === 0) {
                 container.innerHTML = '<div style="text-align: center; padding: 20px; color: #94a3b8;"><p style="margin: 0;">Nenhum dependente cadastrado</p></div>';
                 return;
@@ -4173,9 +4191,9 @@
             try {
                 const response = await fetch(`/api/rh/funcionarios/${fid}/salario-familia`, { credentials: 'include', method: 'PUT', headers: getAuthHeaders(),
                     body: JSON.stringify({
-                        recebe: document.getElementById('editSfRecebe').checked,
+                        recebe: document.getElementById('editSfRecebe')?.checked,
                         quantidade_dependentes: document.querySelectorAll('#listaDependentesEdit > div[style*="border"]').length,
-                        observações: document.getElementById('editSfObservações').value
+                        observacoes: document.getElementById('editSfObservacoes')?.value || ''
                     })
                 });
                 if (response.ok) {
@@ -5023,7 +5041,7 @@
     <script src="/modules/RH/public/js/controle-acesso-rh.js?v=20260319" defer></script>
     <script src="/modules/RH/public/js/rh-ui-common.js" defer></script>
 
-<!-- Zyntra: Confirm Dialog Profissional v2.0 --><script src="/_shared/confirm-dialog.js?v=20260217" defer></script>
+<!-- Zyntra: Confirm Dialog Profissional v2.0 --><script src="/_shared/confirm-dialog.js?v=20260429" defer></script>
     <!-- Chat Widget BOB AI -->
     <script src="/chat/widget.js?v=20260419" defer></script>
     <script src="/_shared/accessibility-widget.js?v=20260226" defer></script>

@@ -826,7 +826,7 @@ app.get('/favicon.ico', (req, res) => {
 // ========================================
 const GLOBAL_INJECT_SCRIPTS = [
     '\n<!-- ALUFORCE: Confirm Dialog Profissional v2.0 -->',
-    '<script src="/_shared/confirm-dialog.js?v=20260301"></script>',
+    '<script src="/_shared/confirm-dialog.js?v=20260429"></script>',
     '<!-- ALUFORCE: Accessibility Widget v1.0 - Acessibilidade global -->',
     '<script src="/_shared/accessibility-widget.js?v=20260615"></script>',
     '<!-- ALUFORCE: Offline Sync Manager v4.0 - Sistema completo offline -->',
@@ -861,7 +861,7 @@ app.use((req, res, next) => {
                     if (isLoginPage) {
                         // Login: só confirm-dialog, sem offline
                         if (!html.includes('confirm-dialog.js')) {
-                            injectTag = '\n<script src="/_shared/confirm-dialog.js?v=20260301"></script>\n';
+                            injectTag = '\n<script src="/_shared/confirm-dialog.js?v=20260429"></script>\n';
                         }
                     } else {
                         // Todas as outras páginas: inject completo (confirm + offline + report-viewer + pwa + chat)
@@ -871,7 +871,7 @@ app.use((req, res, next) => {
                             // Já tem offline-sync, verificar componentes faltantes
                             let missing = '';
                             if (!html.includes('confirm-dialog.js')) {
-                                missing += '\n<script src="/_shared/confirm-dialog.js?v=20260301"></script>';
+                                missing += '\n<script src="/_shared/confirm-dialog.js?v=20260429"></script>';
                             }
                             if (!html.includes('report-viewer.js')) {
                                 missing += '\n<script src="/js/report-viewer.js?v=20260301"></script>';
@@ -1291,6 +1291,24 @@ function authenticateModuleHtml(req, res, next) {
     }
     return authenticatePage(req, res, next);
 }
+
+function normalizeLegacyUrlPath(urlPath) {
+    if (!urlPath || !urlPath.includes('.html')) return urlPath;
+    return urlPath.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+app.use((req, res, next) => {
+    if (req.method !== 'GET' && req.method !== 'HEAD') return next();
+    if (!String(req.path || '').toLowerCase().endsWith('.html')) return next();
+
+    const normalizedPath = normalizeLegacyUrlPath(req.path);
+    if (normalizedPath && normalizedPath !== req.path) {
+        const query = req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
+        return res.redirect(302, normalizedPath + query);
+    }
+
+    next();
+});
 
 // =================================================================
 // CLEAN URL ROUTING — Mascarar .html nas URLs para todos os módulos
@@ -2500,10 +2518,34 @@ pool.query(`CREATE TABLE IF NOT EXISTS rh_pensao_alimenticia (
     if (e && !String(e.message || '').includes('already exists')) logger.warn('rh_pensao_alimenticia:', e.message);
 });
 
+[
+    "ALTER TABLE rh_pensao_alimenticia ADD COLUMN IF NOT EXISTS valor DECIMAL(10,2) DEFAULT 0",
+    "ALTER TABLE rh_pensao_alimenticia ADD COLUMN IF NOT EXISTS nome_recebedor VARCHAR(255)",
+    "ALTER TABLE rh_pensao_alimenticia ADD COLUMN IF NOT EXISTS cpf_recebedor VARCHAR(14)",
+    "ALTER TABLE rh_pensao_alimenticia ADD COLUMN IF NOT EXISTS banco_recebedor VARCHAR(100)",
+    "ALTER TABLE rh_pensao_alimenticia ADD COLUMN IF NOT EXISTS agencia_recebedor VARCHAR(20)",
+    "ALTER TABLE rh_pensao_alimenticia ADD COLUMN IF NOT EXISTS conta_recebedor VARCHAR(30)",
+    "ALTER TABLE rh_pensao_alimenticia ADD COLUMN IF NOT EXISTS observacoes TEXT",
+    "ALTER TABLE rh_pensao_alimenticia ADD COLUMN IF NOT EXISTS criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+    "ALTER TABLE rh_pensao_alimenticia ADD COLUMN IF NOT EXISTS atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"
+].forEach((sql) => pool.query(sql).catch(e => logger.warn('rh_pensao_alimenticia alter:', e.message)));
+
+const normalizePensaoRows = (rows) => (rows || []).map((row) => ({
+    ...row,
+    observacoes: row.observacoes || row['observações'] || '',
+    ativo: row.ativo === undefined ? 1 : row.ativo
+}));
+
 app.get('/api/rh/funcionarios/:id/pensao', authenticateToken, authorizeArea('rh'), asyncHandler(async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT * FROM rh_pensao_alimenticia WHERE funcionario_id = ? ORDER BY criado_em DESC', [req.params.id]);
-        res.json(rows);
+        let rows;
+        try {
+            [rows] = await pool.query('SELECT * FROM rh_pensao_alimenticia WHERE funcionario_id = ? ORDER BY criado_em DESC', [req.params.id]);
+        } catch (error) {
+            if (error.code !== 'ER_BAD_FIELD_ERROR') throw error;
+            [rows] = await pool.query('SELECT * FROM rh_pensao_alimenticia WHERE funcionario_id = ? ORDER BY id DESC', [req.params.id]);
+        }
+        res.json(normalizePensaoRows(rows));
     } catch (error) {
         logger.error('Erro ao listar pensões:', error);
         res.status(500).json({ error: 'Erro ao listar pensões' });
@@ -2511,7 +2553,8 @@ app.get('/api/rh/funcionarios/:id/pensao', authenticateToken, authorizeArea('rh'
 }));
 
 app.post('/api/rh/funcionarios/:id/pensao', authenticateToken, authorizeArea('rh'), asyncHandler(async (req, res) => {
-    const { valor, nome_recebedor, cpf_recebedor, banco_recebedor, agencia_recebedor, conta_recebedor, observacoes } = req.body;
+    const { valor, nome_recebedor, cpf_recebedor, banco_recebedor, agencia_recebedor, conta_recebedor } = req.body;
+    const observacoes = req.body.observacoes || req.body['observa\u00e7\u00f5es'] || null;
     try {
         const [result] = await pool.query(
             `INSERT INTO rh_pensao_alimenticia (funcionario_id, valor, nome_recebedor, cpf_recebedor, banco_recebedor, agencia_recebedor, conta_recebedor, observacoes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -2521,6 +2564,35 @@ app.post('/api/rh/funcionarios/:id/pensao', authenticateToken, authorizeArea('rh
     } catch (error) {
         logger.error('Erro ao criar pensão:', error);
         res.status(500).json({ error: 'Erro ao criar pensão' });
+    }
+}));
+
+app.put('/api/rh/funcionarios/:id/pensao/:pensaoId', authenticateToken, authorizeArea('rh'), asyncHandler(async (req, res) => {
+    const { valor, nome_recebedor, cpf_recebedor, banco_recebedor, agencia_recebedor, conta_recebedor } = req.body;
+    const observacoes = req.body.observacoes || req.body['observa\u00e7\u00f5es'] || null;
+    try {
+        const [result] = await pool.query(
+            `UPDATE rh_pensao_alimenticia
+             SET valor = ?, nome_recebedor = ?, cpf_recebedor = ?, banco_recebedor = ?,
+                 agencia_recebedor = ?, conta_recebedor = ?, observacoes = ?
+             WHERE id = ? AND funcionario_id = ?`,
+            [
+                valor || 0,
+                nome_recebedor || null,
+                cpf_recebedor || null,
+                banco_recebedor || null,
+                agencia_recebedor || null,
+                conta_recebedor || null,
+                observacoes || null,
+                req.params.pensaoId,
+                req.params.id
+            ]
+        );
+        if (result.affectedRows === 0) return res.status(404).json({ error: 'Pensao nao encontrada' });
+        res.json({ success: true });
+    } catch (error) {
+        logger.error('Erro ao atualizar pensÃ£o:', error);
+        res.status(500).json({ error: 'Erro ao atualizar pensÃ£o' });
     }
 }));
 
@@ -2565,7 +2637,13 @@ pool.query(`CREATE TABLE IF NOT EXISTS rh_sf_dependentes (
 app.get('/api/rh/funcionarios/:id/salario-familia', authenticateToken, authorizeArea('rh'), asyncHandler(async (req, res) => {
     try {
         const [sfRows] = await pool.query('SELECT * FROM rh_salario_familia WHERE funcionario_id = ?', [req.params.id]);
-        const [depRows] = await pool.query('SELECT * FROM rh_sf_dependentes WHERE funcionario_id = ? ORDER BY criado_em DESC', [req.params.id]);
+        let depRows;
+        try {
+            [depRows] = await pool.query('SELECT * FROM rh_sf_dependentes WHERE funcionario_id = ? ORDER BY criado_em DESC', [req.params.id]);
+        } catch (error) {
+            if (error.code !== 'ER_BAD_FIELD_ERROR') throw error;
+            [depRows] = await pool.query('SELECT * FROM rh_sf_dependentes WHERE funcionario_id = ? ORDER BY id DESC', [req.params.id]);
+        }
         const sf = sfRows[0] || { recebe: 0, observacoes: '' };
         res.json({ recebe: sf.recebe, observacoes: sf.observacoes || '', dependentes: depRows });
     } catch (error) {
@@ -2574,8 +2652,9 @@ app.get('/api/rh/funcionarios/:id/salario-familia', authenticateToken, authorize
     }
 }));
 
-app.post('/api/rh/funcionarios/:id/salario-familia', authenticateToken, authorizeArea('rh'), asyncHandler(async (req, res) => {
-    const { recebe, observacoes, dependentes } = req.body;
+const salvarSalarioFamiliaRh = async (req, res) => {
+    const { recebe, dependentes } = req.body;
+    const observacoes = req.body.observacoes || req.body['observa\u00e7\u00f5es'] || null;
     try {
         await pool.query(
             `INSERT INTO rh_salario_familia (funcionario_id, recebe, observacoes) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE recebe=VALUES(recebe), observacoes=VALUES(observacoes)`,
@@ -2594,6 +2673,35 @@ app.post('/api/rh/funcionarios/:id/salario-familia', authenticateToken, authoriz
     } catch (error) {
         logger.error('Erro ao salvar salário família:', error);
         res.status(500).json({ error: 'Erro ao salvar salário família' });
+    }
+};
+
+app.post('/api/rh/funcionarios/:id/salario-familia', authenticateToken, authorizeArea('rh'), asyncHandler(salvarSalarioFamiliaRh));
+app.put('/api/rh/funcionarios/:id/salario-familia', authenticateToken, authorizeArea('rh'), asyncHandler(salvarSalarioFamiliaRh));
+
+app.post('/api/rh/funcionarios/:id/salario-familia/dependente', authenticateToken, authorizeArea('rh'), asyncHandler(async (req, res) => {
+    const { nome, parentesco, data_nascimento, cpf } = req.body;
+    if (!nome) return res.status(400).json({ error: 'Nome do dependente e obrigatorio' });
+
+    try {
+        const [result] = await pool.query(
+            'INSERT INTO rh_sf_dependentes (funcionario_id, nome, parentesco, data_nascimento, cpf) VALUES (?, ?, ?, ?, ?)',
+            [req.params.id, nome, parentesco || null, data_nascimento || null, cpf || null]
+        );
+        res.json({ success: true, id: result.insertId });
+    } catch (error) {
+        logger.error('Erro ao salvar dependente salÃ¡rio famÃ­lia:', error);
+        res.status(500).json({ error: 'Erro ao salvar dependente' });
+    }
+}));
+
+app.delete('/api/rh/funcionarios/:id/salario-familia/dependente/:depId', authenticateToken, authorizeArea('rh'), asyncHandler(async (req, res) => {
+    try {
+        await pool.query('DELETE FROM rh_sf_dependentes WHERE id = ? AND funcionario_id = ?', [req.params.depId, req.params.id]);
+        res.json({ success: true });
+    } catch (error) {
+        logger.error('Erro ao remover dependente salÃ¡rio famÃ­lia:', error);
+        res.status(500).json({ error: 'Erro ao remover dependente' });
     }
 }));
 

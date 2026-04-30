@@ -106,7 +106,7 @@
                 <a href="inutilizacao.html" class="sidebar-btn" title="Inutilização"><i class="fas fa-ban"></i></a>
             </nav>
             <div class="sidebar-bottom">
-                <a href="relatórios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
+                <a href="relatorios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
             </div>
         </aside>
 
@@ -596,7 +596,7 @@
                 const nfe = resp.data || resp;
 
                 document.getElementById('edit-nfe-id').value = nfe.id || '';
-                document.getElementById('edit-nfe-número').value = nfe.numero || '';
+                document.getElementById('edit-nfe-numero').value = nfe.numero || '';
                 document.getElementById('edit-nfe-serie').value = nfe.serie || '1';
                 document.getElementById('edit-nfe-cliente-nome').value = nfe.cliente_nome || nfe.destinatario || '';
                 document.getElementById('edit-nfe-cliente-id').value = nfe.cliente_id || '';
@@ -606,11 +606,11 @@
                 document.getElementById('edit-nfe-natureza').value = nfe.natureza_operacao || '';
                 document.getElementById('edit-nfe-chave').value = nfe.chave_acesso || '';
                 document.getElementById('edit-nfe-protocolo').value = nfe.protocolo || nfe.protocolo_autorizacao || '';
-                document.getElementById('edit-nfe-observações').value = nfe.observações || '';
+                document.getElementById('edit-nfe-observacoes').value = nfe.observacoes || nfe.observacao || '';
 
                 // Controle read-only para NF-e originadas de pedidos
                 const isReadOnly = (origem === 'pedido');
-                const editFields = ['edit-nfe-número', 'edit-nfe-serie', 'edit-nfe-cliente-nome', 'edit-nfe-valor', 'edit-nfe-status', 'edit-nfe-data-emissao', 'edit-nfe-natureza', 'edit-nfe-chave', 'edit-nfe-protocolo', 'edit-nfe-observações'];
+                const editFields = ['edit-nfe-numero', 'edit-nfe-serie', 'edit-nfe-cliente-nome', 'edit-nfe-valor', 'edit-nfe-status', 'edit-nfe-data-emissao', 'edit-nfe-natureza', 'edit-nfe-chave', 'edit-nfe-protocolo', 'edit-nfe-observacoes'];
                 editFields.forEach(fid => {
                     const el = document.getElementById(fid);
                     if (el) { el.readOnly = isReadOnly; el.disabled = isReadOnly; }
@@ -623,15 +623,16 @@
                 if (btnExcluir) btnExcluir.style.display = isReadOnly ? 'none' : '';
 
                 // Título do modal
-                const títuloEl = document.getElementById('modalEditarTítulo');
-                if (títuloEl) {
-                    títuloEl.innerHTML = isReadOnly
+                const tituloEl = document.getElementById('modalEditarTitulo');
+                if (tituloEl) {
+                    tituloEl.innerHTML = isReadOnly
                         ? '<i class="fas fa-eye"></i> Detalhes da NF-e (Pedido Faturado)'
                         : '<i class="fas fa-edit"></i> Editar NF-e';
                 }
 
                 // Itens
                 const itensBody = document.getElementById('edit-nfe-itens-body');
+                if (!itensBody) throw new Error('Tabela de itens da NF-e nao encontrada');
                 const itens = nfe.itens || [];
                 if (itens.length > 0) {
                     itensBody.innerHTML = itens.map((item, i) => `
@@ -669,9 +670,9 @@
 
             try {
                 const body = {
-                    número: document.getElementById('edit-nfe-número').value,
+                    numero: document.getElementById('edit-nfe-numero').value,
                     serie: document.getElementById('edit-nfe-serie').value,
-                    cliente_nome: document.getElementById('edit-nfe-cliente-nome').value,
+                    destinatario_nome: document.getElementById('edit-nfe-cliente-nome').value,
                     cliente_id: parseInt(document.getElementById('edit-nfe-cliente-id').value) || null,
                     valor_total: parseFloat(document.getElementById('edit-nfe-valor').value) || 0,
                     status: document.getElementById('edit-nfe-status').value,
@@ -679,7 +680,7 @@
                     natureza_operacao: document.getElementById('edit-nfe-natureza').value,
                     chave_acesso: document.getElementById('edit-nfe-chave').value,
                     protocolo: document.getElementById('edit-nfe-protocolo').value,
-                    observações: document.getElementById('edit-nfe-observações').value
+                    observacoes: document.getElementById('edit-nfe-observacoes').value
                 };
 
                 const r = await fetch('/api/faturamento/nfes/' + id, {
@@ -811,7 +812,7 @@
     <script src="/js/mobile-auto-enhance.js?v=20260202" defer></script>
 
     <!-- Zyntra: Confirm Dialog Profissional v2.0 -->
-    <script src="/_shared/confirm-dialog.js?v=20260217"></script>
+    <script src="/_shared/confirm-dialog.js?v=20260429"></script>
     <!-- Chat Widget BOB AI - DESATIVADO 23/02/2026 -->
     <!-- <script src="/chat/widget.js?v=20260218" defer></script> -->
     <script src="/_shared/accessibility-widget.js?v=20260226"></script>

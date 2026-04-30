@@ -114,6 +114,100 @@ module.exports = (pool, authenticateToken) => {
         }
     }
 
+    async function montarDanfePedidoFaturado(pedidoId) {
+        const [[pedido]] = await pool.query(`
+            SELECT p.*, p.valor as valor_total,
+                   COALESCE(c.nome_fantasia, c.razao_social, c.nome, p.cliente_nome, p.cliente) AS cliente_nome,
+                   COALESCE(c.razao_social, c.nome, p.cliente_nome, p.cliente) AS cliente_razao_social,
+                   COALESCE(c.cnpj, c.cnpj_cpf) AS cliente_cnpj,
+                   COALESCE(c.cpf) AS cliente_cpf,
+                   c.inscricao_estadual AS cliente_ie,
+                   COALESCE(c.email, p.email_cliente) AS cliente_email,
+                   c.telefone AS cliente_telefone,
+                   c.endereco AS cliente_endereco, c.bairro AS cliente_bairro,
+                   c.cidade AS cliente_cidade, c.estado AS cliente_estado,
+                   c.cep AS cliente_cep,
+                   e.nome_fantasia AS empresa_nome, e.razao_social AS empresa_razao_social,
+                   e.cnpj AS empresa_cnpj, e.inscricao_estadual AS empresa_ie,
+                   e.endereco AS empresa_endereco, e.bairro AS empresa_bairro,
+                   e.cidade AS empresa_cidade, e.estado AS empresa_uf, e.cep AS empresa_cep,
+                   e.telefone AS empresa_telefone,
+                   t.razao_social AS transportadora_razao_social,
+                   t.nome_fantasia AS transportadora_nome_fantasia,
+                   t.cnpj_cpf AS transportadora_cnpj_cpf,
+                   t.inscricao_estadual AS transportadora_inscricao_estadual,
+                   t.endereco AS transportadora_endereco,
+                   t.cidade AS transportadora_cidade,
+                   t.estado AS transportadora_estado
+            FROM pedidos p
+            LEFT JOIN clientes c ON p.cliente_id = c.id
+            LEFT JOIN empresas e ON p.empresa_id = e.id
+            LEFT JOIN transportadoras t ON p.transportadora_id = t.id
+            WHERE p.id = ? AND p.status = 'faturado'
+        `, [pedidoId]);
+
+        if (!pedido) return null;
+
+        try {
+            const [[cfgEmpresa]] = await pool.query('SELECT * FROM configuracoes_empresa LIMIT 1');
+            if (cfgEmpresa) {
+                pedido.empresa_razao_social = cfgEmpresa.razao_social;
+                pedido.empresa_nome = cfgEmpresa.nome_fantasia;
+                pedido.empresa_cnpj = cfgEmpresa.cnpj;
+                pedido.empresa_ie = cfgEmpresa.inscricao_estadual;
+                pedido.empresa_endereco = cfgEmpresa.endereco + (cfgEmpresa.numero ? ', ' + cfgEmpresa.numero : '');
+                pedido.empresa_bairro = cfgEmpresa.bairro;
+                pedido.empresa_cidade = cfgEmpresa.cidade;
+                pedido.empresa_uf = cfgEmpresa.estado;
+                pedido.empresa_cep = cfgEmpresa.cep;
+                pedido.empresa_telefone = cfgEmpresa.telefone;
+            }
+        } catch (_) {}
+
+        const [[cfgFiscal]] = await pool.query('SELECT * FROM config_fiscal_empresa LIMIT 1').catch(() => [[]]);
+
+        let itens = [];
+        try {
+            const [rows] = await pool.query(`
+                SELECT pi.codigo, pi.descricao, pi.quantidade, pi.unidade, pi.preco_unitario,
+                       pi.desconto, pi.subtotal, pi.produto_id,
+                       pi.icms_percent, pi.icms_value, pi.aliquota_icms, pi.aliquota_ipi,
+                       pi.valor_ipi, pi.valor_icms_st, pi.cfop,
+                       COALESCE(pr_id.ncm, pr_cod.ncm) AS ncm,
+                       COALESCE(pr_id.cfop_saida_interna, pr_cod.cfop_saida_interna) AS produto_cfop,
+                       COALESCE(pr_id.cst_icms, pr_cod.cst_icms) AS produto_cst_icms,
+                       COALESCE(pr_id.csosn_icms, pr_cod.csosn_icms) AS produto_csosn_icms,
+                       COALESCE(pr_id.aliquota_icms, pr_cod.aliquota_icms) AS produto_aliquota_icms,
+                       COALESCE(pr_id.aliquota_ipi, pr_cod.aliquota_ipi) AS produto_aliquota_ipi
+                FROM pedido_itens pi
+                LEFT JOIN produtos pr_id ON pi.produto_id = pr_id.id
+                LEFT JOIN produtos pr_cod ON pi.produto_id IS NULL AND pr_cod.codigo = pi.codigo
+                WHERE pi.pedido_id = ? ORDER BY pi.id ASC
+            `, [pedidoId]);
+            itens = rows;
+        } catch (_) {}
+
+        if (itens.length === 0) {
+            try {
+                itens = JSON.parse(pedido.produtos_preview || '[]').map(item => ({
+                    codigo: item.codigo || '-',
+                    descricao: item.descricao || item.nome || '-',
+                    quantidade: parseFloat(item.quantidade) || 1,
+                    unidade: item.unidade || 'UN',
+                    preco_unitario: parseFloat(item.preco_unitario || item.valor_unitario || item.preco) || 0,
+                    desconto: parseFloat(item.desconto) || 0,
+                    subtotal: parseFloat(item.subtotal || item.total) || 0
+                }));
+            } catch (_) {
+                itens = [];
+            }
+        }
+
+        const { renderDanfe, buildDanfeCtx } = require(path.resolve(__dirname, '../../../routes/danfe-renderer'));
+        const preview = !pedido.nfe_chave && !pedido.chave_acesso;
+        return renderDanfe(buildDanfeCtx(pedido, itens, { preview, cfgFiscal }));
+    }
+
     // ============================================================
     // LISTAR PEDIDOS APROVADOS (para selector no modal "Nova NF-e")
     // ============================================================
@@ -903,7 +997,8 @@ module.exports = (pool, authenticateToken) => {
             const {
                 numero, serie, cliente_id,
                 valor_total, status, data_emissao,
-                natureza_operacao, chave_acesso, destinatario_nome
+                natureza_operacao, chave_acesso, destinatario_nome,
+                observacoes, protocolo
             } = req.body;
 
             const campos = [];
@@ -918,6 +1013,8 @@ module.exports = (pool, authenticateToken) => {
             if (data_emissao !== undefined) { campos.push('data_emissao = ?'); valores.push(data_emissao); }
             if (natureza_operacao !== undefined) { campos.push('natureza_operacao = ?'); valores.push(natureza_operacao); }
             if (chave_acesso !== undefined) { campos.push('chave_acesso = ?'); valores.push(chave_acesso); }
+            if (observacoes !== undefined) { campos.push('observacoes = ?'); valores.push(observacoes); }
+            if (protocolo !== undefined) { campos.push('protocolo_autorizacao = ?'); valores.push(protocolo); }
 
             if (campos.length === 0) {
                 return res.status(400).json({ success: false, message: 'Nenhum campo para atualizar' });
@@ -1053,7 +1150,11 @@ module.exports = (pool, authenticateToken) => {
 
             // Pedidos faturados não possuem XML formal
             if (origem === 'pedido') {
-                return res.status(404).json({ success: false, message: 'XML não disponível — este registro é um pedido faturado sem NF-e formal emitida.' });
+                return res.json({
+                    success: false,
+                    available: false,
+                    message: 'XML não disponível: este registro é um pedido faturado sem NF-e formal emitida.'
+                });
             }
 
             const [[nfe]] = await pool.query('SELECT numero, xml_nfe FROM nfes WHERE id = ?', [id]);
@@ -1458,6 +1559,15 @@ module.exports = (pool, authenticateToken) => {
     router.get('/nfes/:id/espelho', authenticateToken, async (req, res) => {
         try {
             const { id } = req.params;
+            if (req.query.origem === 'pedido') {
+                const htmlPedido = await montarDanfePedidoFaturado(id);
+                if (!htmlPedido) {
+                    return res.status(404).json({ success: false, message: 'Pedido faturado não encontrado' });
+                }
+                res.setHeader('Content-Type', 'text/html; charset=utf-8');
+                return res.send(htmlPedido);
+            }
+
             const { renderDanfe } = require(path.resolve(__dirname, '../../../routes/danfe-renderer'));
 
             // Buscar NF-e completa com dados do cliente
@@ -1680,6 +1790,15 @@ module.exports = (pool, authenticateToken) => {
     router.get('/nfes/:id/danfe', authenticateToken, async (req, res) => {
         try {
             const { id } = req.params;
+            if (req.query.origem === 'pedido') {
+                const htmlPedido = await montarDanfePedidoFaturado(id);
+                if (!htmlPedido) {
+                    return res.status(404).json({ success: false, message: 'Pedido faturado não encontrado' });
+                }
+                res.setHeader('Content-Type', 'text/html; charset=utf-8');
+                res.setHeader('Content-Disposition', `inline; filename="danfe-pedido-${id}.html"`);
+                return res.send(htmlPedido);
+            }
 
             const [nfes] = await pool.query(`
                 SELECT n.*,
