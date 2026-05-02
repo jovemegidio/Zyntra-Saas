@@ -2477,9 +2477,9 @@
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 30;
                 
                 // Usar API dashboard/admin que já existe
-                const url = `/api/vendas/dashboard/admin?período=${diffDays}`;
+                const url = `/api/vendas/dashboard/admin?periodo=${diffDays}`;
                 const res = await fetchAutenticado(url);
-                
+
                 if (res.ok) {
                     const data = await res.json();
                     console.log('Dashboard Admin dados:', data);
@@ -2640,9 +2640,9 @@
                 const diffTime = Math.abs(fim - inicio);
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 30;
                 
-                const url = `/api/vendas/dashboard/admin?período=${diffDays}`;
+                const url = `/api/vendas/dashboard/admin?periodo=${diffDays}`;
                 const res = await fetchAutenticado(url);
-                
+
                 if (res.ok) {
                     const data = await res.json();
                     console.log('Dados dashboard para categorias:', data);

@@ -604,7 +604,7 @@
         function abrirModalExtrato(contaId) {
             const c = contasBancarias.find(x => x.id === contaId); if (!c) return;
             contaVisualizando = c;
-            document.getElementById('extrato-título').textContent = `Extrato — ${c.nome}`;
+            document.getElementById('extrato-titulo').textContent = `Extrato — ${c.nome}`;
             const hoje = new Date();
             const inicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
             document.getElementById('extrato-data-inicio').value = inicio.toISOString().split('T')[0];
@@ -705,7 +705,7 @@
             document.getElementById('view-banco').textContent = bankNames[c.banco_codigo || c.codigo_banco] || c.banco_nome || '-';
             document.getElementById('view-tipo').textContent = tipoNames[c.tipo] || c.tipo || '-';
             document.getElementById('view-agencia').textContent = c.agencia || '-';
-            document.getElementById('view-número').textContent = c.numero_conta || '-';
+            document.getElementById('view-numero').textContent = c.numero_conta || '-';
             document.getElementById('view-status').textContent = c.status === 'inativa' ? 'Inativa' : 'Ativa';
             document.getElementById('view-obs').textContent = c.observações || 'Nenhuma observação';
             document.getElementById('modal-visualizar').classList.add('active');

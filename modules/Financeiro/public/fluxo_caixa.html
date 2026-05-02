@@ -463,7 +463,7 @@
                 const rowClass = saldoAcum < 0 ? ' class="saldo-negativo"' : '';
                 return `<tr${rowClass}>
                     <td>${m.data ? new Date(m.data).toLocaleDateString('pt-BR') : '-'}</td>
-                    <td><strong>${escHtml(m.descricao || m.descricao || '-')}</strong></td>
+                    <td><strong>${escHtml(m.descricao || '-')}</strong></td>
                     <td>${escHtml(m.categoria || m.categoria_nome || '-')}</td>
                     <td><span class="${isEntrada ? 'badge-entrada' : 'badge-saida'}">${isEntrada ? 'Entrada' : 'Saída'}</span></td>
                     <td style="color:${isEntrada ? '#059669' : '#ef4444'};font-weight:700;">${isEntrada ? '+' : '-'} R$ ${valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
@@ -488,7 +488,7 @@
                 saldoAcum += isE ? v : -v;
                 return [
                     m.data ? new Date(m.data).toLocaleDateString('pt-BR') : '-',
-                    `"${(m.descricao || m.descricao || '').replace(/"/g, '""')}"`,
+                    `"${(m.descricao || '').replace(/"/g, '""')}"`,
                     `"${(m.categoria || m.categoria_nome || '-').replace(/"/g, '""')}"`,
                     isE ? 'Entrada' : 'Saída',
                     (isE ? '' : '-') + v.toFixed(2).replace('.', ','),

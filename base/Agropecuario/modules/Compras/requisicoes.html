@@ -570,7 +570,7 @@
                 const data = await r.json();
                 requisicoesData = data.requisicoes || data || [];
             }
-        } catch (e) { console.log('Erro requisições:', e); requisicoesData = gerarDadosExemplo(); }
+        } catch (e) { console.log('Erro requisições:', e); requisicoesData = []; }
         atualizarContadores();
         filtrarRequisicoes(filtroAtual);
     }

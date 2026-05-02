@@ -1063,7 +1063,7 @@
         // Carregar resumo por vendedor
         async function carregarResumo(período, vendedor) {
             try {
-                let url = `/api/vendas/comissoes/resumo?período=${período}`;
+                let url = `/api/vendas/comissoes/resumo?periodo=${período}`;
                 if (vendedor) url += `&vendedor_id=${vendedor}`;
                 
                 const response = await fetch(url, { credentials: 'include' });
@@ -1129,7 +1129,7 @@
         // Carregar detalhes por venda
         async function carregarDetalhes(período, vendedor) {
             try {
-                let url = `/api/vendas/comissoes?período=${período}`;
+                let url = `/api/vendas/comissoes?periodo=${período}`;
                 if (vendedor) url += `&vendedor_id=${vendedor}`;
                 
                 const response = await fetch(url, { credentials: 'include' });
@@ -1187,7 +1187,7 @@
                 }
                 
                 tbody.innerHTML = histórico.map(h => {
-                    const periodo_val = h.periodo || h.periodo || '';
+                    const periodo_val = h.periodo || '';
                     const [ano, mes] = periodo_val.split('-');
                     const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
                     
