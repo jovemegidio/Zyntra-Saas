@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="../css/rh-pages.css?v=1.0">
 
     <style>
-        /* ===== ESTILOS ESPECÍFICOS  BENEFCIOS ===== */
+        /* ===== ESTILOS ESPECÍFICOS — BENEFÍCIOS ===== */
 
         /* Content Area */
         .content-area { flex: 1; overflow-y: auto; padding: 32px; background: #f8fafc; }
@@ -283,7 +283,7 @@
                             <i class="fas fa-plus-circle"></i>
                         </div>
                         <div class="summary-content">
-                            <h4>Disponveis</h4>
+                            <h4>Disponíveis</h4>
                             <div class="value" id="count-disponiveis">0</div>
                         </div>
                     </div>
@@ -311,7 +311,7 @@
             <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <p style="color: #64748b; font-size: 0.9rem; margin: 0;">
-                        Configure os benefícios disponveis para os funcionários.
+                        Configure os benefícios disponíveis para os funcionários.
                     </p>
                     <button class="btn btn-success btn-sm" onclick="abrirModalNovoBeneficio()">
                         <i class="fas fa-plus"></i> Novo Benefício
@@ -351,12 +351,12 @@
                             <select id="benefício-tipo" class="form-input" required>
                                 <option value="">Selecione...</option>
                                 <option value="health">Plano de Saúde</option>
-                                <option value="dental">Plano Odontolgico</option>
-                                <option value="food">Vale Alimentao/Refeição</option>
+                                <option value="dental">Plano Odontológico</option>
+                                <option value="food">Vale Alimentação/Refeição</option>
                                 <option value="telemedicine">CS Saúde (Telemedicina)</option>
                                 <option value="gym">Academia/Bem-estar</option>
                                 <option value="life">Seguro de Vida</option>
-                                <option value="education">Educao</option>
+                                <option value="education">Educação</option>
                                 <option value="other">Outro</option>
                             </select>
                         </div>
@@ -450,7 +450,7 @@
                 tipo: 'food',
                 status: 'active',
                 valor: 'Mensal',
-                info: 'Condicionado  pontualidade',
+                info: 'Condicionado à pontualidade',
                 descrição: 'Cesta básica mensal concedida aos colaboradores que não possuem atrasos ou saídas antecipadas acima de 20 minutos no mês, com base nos registros de ponto importados do RHiD Cloud.',
                 condicional: true,
                 condiçãoTipo: 'pontualidade'
@@ -609,7 +609,7 @@
                                 ${b.status === 'inactive' ? `
                                 <button class="btn btn-success btn-sm" onclick="solicitarAdesao(${b.id})">
                                     <i class="fas fa-plus"></i>
-                                    Solicitar Adeso
+                                    Solicitar Adesão
                                 </button>
                                 ` : b.status === 'pending' ? `
                                 <button class="btn btn-primary btn-sm" onclick="ativarBeneficio(${b.id})">
@@ -871,21 +871,21 @@
                     }
                     renderizarBeneficios();
                     renderizarListaAdmin();
-                    showToast('Benefício excludo com sucesso!', 'success');
+                    showToast('Benefício excluído com sucesso!', 'success');
                 }
             });
         }
 
         // Ações do funcionário
         function solicitarAdesao(id) {
-            showToast('solicitação de adeso enviada ao RH!', 'success');
+            showToast('Solicitação de adesão enviada ao RH!', 'success');
         }
 
         function ativarBeneficio(id) {
             const index = benefícios.findIndex(b => b.id === id);
             if (index !== -1) {
                 benefícios[index].status = 'active';
-                salvarBeneficios();
+                salvarBeneficiosLocal();
                 renderizarBeneficios();
                 showToast('Benefício ativado com sucesso!', 'success');
             }
@@ -1125,14 +1125,14 @@
                 const cestaIndex = benefícios.findIndex(b => b.condicional && b.condiçãoTipo === 'pontualidade');
                 if (cestaIndex >= 0) {
                     if (possuiIrregularidade) {
-                        // No elegvel: remover da lista visvel para o colaborador (admin continua vendo)
+                        // Não elegível: remover da lista visível para o colaborador (admin continua vendo)
                         if (!isAdmin) {
                             benefícios[cestaIndex].status = 'inactive';
-                            benefícios[cestaIndex].info = 'Indisponível  verificar pontualidade';
+                            benefícios[cestaIndex].info = 'Indisponível — verificar pontualidade';
                         }
                     } else {
                         benefícios[cestaIndex].status = 'active';
-                        benefícios[cestaIndex].info = '? Voc est elegvel este ms!';
+                        benefícios[cestaIndex].info = '✓ Você está elegível este mês!';
                     }
                     renderizarBeneficios();
                 }

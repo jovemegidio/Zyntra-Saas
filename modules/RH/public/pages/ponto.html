@@ -289,7 +289,7 @@
                         <div class="batida-card registrada" id="batida-1">
                             <i class="fas fa-sign-in-alt"></i>
                             <div class="batida-label">Entrada</div>
-                            <div class="batida-hora" id="hora-entrada">08:00</div>
+                            <div class="batida-hora" id="hora-entrada">--:--</div>
                         </div>
                         <div class="batida-card" id="batida-2">
                             <i class="fas fa-utensils"></i>
@@ -364,44 +364,7 @@
                                     <th>Status</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <tr>
-                                    <td><strong>17/12/2025</strong></td>
-                                    <td>08:00</td>
-                                    <td>12:00</td>
-                                    <td>13:00</td>
-                                    <td>17:30</td>
-                                    <td>8h 30min</td>
-                                    <td><span class="badge badge-success">OK</span></td>
-                                </tr>
-                                <tr>
-                                    <td><strong>16/12/2025</strong></td>
-                                    <td>08:15</td>
-                                    <td>12:00</td>
-                                    <td>13:00</td>
-                                    <td>18:00</td>
-                                    <td>8h 45min</td>
-                                    <td><span class="badge badge-warning">Atraso</span></td>
-                                </tr>
-                                <tr>
-                                    <td><strong>15/12/2025</strong></td>
-                                    <td>08:00</td>
-                                    <td>12:00</td>
-                                    <td>13:00</td>
-                                    <td>17:00</td>
-                                    <td>8h 00min</td>
-                                    <td><span class="badge badge-success">OK</span></td>
-                                </tr>
-                                <tr>
-                                    <td><strong>14/12/2025</strong></td>
-                                    <td>--:--</td>
-                                    <td>--:--</td>
-                                    <td>--:--</td>
-                                    <td>--:--</td>
-                                    <td>0h 00min</td>
-                                    <td><span class="badge badge-danger">Falta</span></td>
-                                </tr>
-                            </tbody>
+                            <tbody id="tbody-espelho"></tbody>
                         </table>
                     </div>
                 </div>
@@ -449,7 +412,7 @@
 
         function atualizarData() {
             const agora = new Date();
-            const diasSemana = ['Domingo', 'Segunda-feira', 'Tera-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sbado'];
+            const diasSemana = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
             const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
             const diaSemana = diasSemana[agora.getDay()];
             const dia = agora.getDate();
@@ -481,7 +444,8 @@
             if (batidaAtual <= 4) {
                 // Primeiro, enviar para a API
                 try {
-                    const response = await fetch('/api/rh/ponto/marcacoes', { credentials: 'include', method: 'POST',
+                    const response = await fetch('/api/rh/ponto/marcacoes', {
+                        method: 'POST',
                         headers: getAuthHeaders(),
                         credentials: 'include',
                         body: JSON.stringify({
@@ -498,7 +462,7 @@
                         console.error('Erro ao registrar ponto:', err);
                         // Continuar com a atualização visual mesmo se a API falhar,
                         // mas informar o Usuário
-                        showToast(labels[batidaAtual - 1] + ' registrada localmente s ' + hora + ', mas houve erro ao salvar no servidor. Tente novamente ou contate o RH.', 'warning');
+                        showToast(labels[batidaAtual - 1] + ' registrada localmente às ' + hora + ', mas houve erro ao salvar no servidor. Tente novamente ou contate o RH.', 'warning');
                     }
                 } catch (fetchError) {
                     console.error('Erro de rede ao bater ponto:', fetchError);
@@ -523,7 +487,7 @@
                     statusEl.className = 'status-ponto';
                 }
                 
-                showToast(labels[batidaAtual - 1] + ' registrada s ' + hora, 'success');
+                showToast(labels[batidaAtual - 1] + ' registrada às ' + hora, 'success');
                 batidaAtual++;
             }
             

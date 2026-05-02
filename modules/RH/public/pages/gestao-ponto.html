@@ -316,7 +316,7 @@
                                             <th>Tipo</th>
                                             <th>Origem</th>
                                             <th>Observação</th>
-                                            <th>Aes</th>
+                                            <th>Ações</th>
                                         </tr>
                                     </thead>
                                     <tbody id="tbody-registros"></tbody>
@@ -341,7 +341,7 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Data Incio</label>
+                            <label class="form-label">Data Início</label>
                             <input type="date" class="form-input" id="filter-inicio">
                         </div>
                         <div class="form-group">
@@ -365,7 +365,7 @@
                                             <th>Hora</th>
                                             <th>Tipo</th>
                                             <th>Origem</th>
-                                            <th>Aes</th>
+                                            <th>Ações</th>
                                         </tr>
                                     </thead>
                                     <tbody id="tbody-historico"></tbody>
@@ -373,8 +373,8 @@
                             </div>
                             <div class="empty-state" id="empty-historico" style="display:none">
                                 <i class="fas fa-history"></i>
-                                <h3>Nenhum registro no perodo</h3>
-                                <p>Selecione um perodo e clique em Buscar.</p>
+                                <h3>Nenhum registro no período</h3>
+                                <p>Selecione um período e clique em Buscar.</p>
                             </div>
                         </div>
                     </div>
@@ -390,7 +390,7 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Tipo de Ao</label>
+                            <label class="form-label">Tipo de Ação</label>
                             <select class="form-select" id="filter-acao-alteracoes">
                                 <option value="">Todas</option>
                                 <option value="criação">Criação</option>
@@ -399,7 +399,7 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Data Incio</label>
+                            <label class="form-label">Data Início</label>
                             <input type="date" class="form-input" id="filter-alteracoes-inicio">
                         </div>
                         <div class="form-group">
@@ -418,7 +418,7 @@
                             <div class="empty-state" id="empty-alteracoes">
                                 <i class="fas fa-clipboard-check"></i>
                                 <h3>Nenhuma alteração registrada</h3>
-                                <p>As edições e excluses de marcações aparecero aqui com detalhes completos.</p>
+                                <p>As edições e exclusões de marcações aparecerão aqui com detalhes completos.</p>
                             </div>
                         </div>
                     </div>
@@ -434,7 +434,7 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Ms</label>
+                            <label class="form-label">Mês</label>
                             <select class="form-select" id="filter-mes-resumo"></select>
                         </div>
                         <div class="form-group">
@@ -547,7 +547,7 @@
                 <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; padding: 16px 20px; margin-bottom: 24px; display: flex; align-items: flex-start; gap: 12px;">
                     <i class="fas fa-exclamation-triangle" style="color: #ef4444; font-size: 18px; margin-top: 2px;"></i>
                     <div>
-                        <p style="margin: 0; font-size: 14px; font-weight: 600; color: #991b1b;">Confirmao de exclusão</p>
+                        <p style="margin: 0; font-size: 14px; font-weight: 600; color: #991b1b;">Confirmação de exclusão</p>
                         <p style="margin: 6px 0 0 0; font-size: 14px; color: #b91c1c;" id="excluir-info"></p>
                     </div>
                 </div>
@@ -557,7 +557,7 @@
                     </label>
                     <textarea id="excluir-motivo" placeholder="Descreva o motivo da exclusão (obrigatório para auditoria)..." style="width: 100%; padding: 14px 16px; border: 2px solid #e5e7eb; border-radius: 12px; font-size: 15px; min-height: 80px; resize: vertical; background: #fef2f2; box-sizing: border-box; font-family: inherit; transition: border-color 0.2s;"></textarea>
                     <p style="margin: 8px 0 0 0; font-size: 12px; color: #9ca3af; display: flex; align-items: center; gap: 6px;">
-                        <i class="fas fa-shield-alt"></i> O motivo ser registrado na auditoria do sistema
+                        <i class="fas fa-shield-alt"></i> O motivo será registrado na auditoria do sistema
                     </p>
                 </div>
             </div>
@@ -851,10 +851,10 @@
             var inicio = document.getElementById('filter-inicio').value;
             var fim = document.getElementById('filter-fim').value;
 
-            if (!inicio || !fim) { showToast('Selecione data incio e fim', 'error'); return; }
+            if (!inicio || !fim) { showToast('Selecione data início e fim', 'error'); return; }
 
             try {
-                var url = '/api/rh/ponto/marcações?data_inicio=' + inicio + '&data_fim=' + fim;
+                var url = '/api/rh/ponto/marcacoes?data_inicio=' + inicio + '&data_fim=' + fim;
                 if (funcId) url += '&funcionario_id=' + funcId;
 
                 var resp = await fetch(url, {
