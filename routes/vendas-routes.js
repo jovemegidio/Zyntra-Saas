@@ -2772,7 +2772,14 @@ module.exports = function createVendasRoutes(deps) {
         try {
             const [tables] = await pool.query("SHOW TABLES LIKE 'metas_vendas'");
             if (tables.length === 0) return res.json([]);
-            const [rows] = await pool.query(`SELECT m.*, u.nome AS vendedor_nome FROM metas_vendas m LEFT JOIN usuarios u ON m.vendedor_id = u.id ORDER BY m.periodo DESC, m.vendedor_id`);
+            const periodo = req.query.periodo;
+            const params = [];
+            let where = 'WHERE (m.ativo = 1 OR m.ativo IS NULL)';
+            if (periodo) { where += ' AND m.periodo = ?'; params.push(periodo); }
+            const [rows] = await pool.query(
+                `SELECT m.*, u.nome AS vendedor_nome FROM metas_vendas m LEFT JOIN usuarios u ON m.vendedor_id = u.id ${where} ORDER BY m.periodo DESC, m.vendedor_id`,
+                params
+            );
             res.json(rows);
         } catch (error) { next(error); }
     });
@@ -2815,7 +2822,7 @@ module.exports = function createVendasRoutes(deps) {
     });
     router.get('/metas/progresso', authorizeAdminOrComercial, async (req, res, next) => {
         try {
-            // Optimized: Single query with LEFT JOIN instead of N+1 loop
+            const periodo = req.query.periodo || new Date().toISOString().substring(0, 7);
             const [progresso] = await pool.query(`
                 SELECT m.id AS meta_id, m.periodo, m.tipo, m.vendedor_id, m.valor_meta,
                        COALESCE(SUM(p.valor), 0) AS totalVendido
@@ -2823,8 +2830,10 @@ module.exports = function createVendasRoutes(deps) {
                 LEFT JOIN pedidos p ON p.status IN ('faturado', 'recibo')
                     AND DATE_FORMAT(p.created_at, '%Y-%m') = m.periodo
                     AND (m.vendedor_id IS NULL OR p.vendedor_id = m.vendedor_id)
+                WHERE m.periodo = ?
+                  AND (m.ativo = 1 OR m.ativo IS NULL)
                 GROUP BY m.id, m.periodo, m.tipo, m.vendedor_id, m.valor_meta
-            `);
+            `, [periodo]);
             res.json(progresso);
         } catch (error) { next(error); }
     });

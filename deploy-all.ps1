@@ -81,6 +81,14 @@ $REMOTE_APPS = @(
         RemoteRoot = "/var/www/labor-eletric"
         Pm2Name = "labor-eletric-demo"
         HealthPath = "/labor-eletric/api/health"
+    },
+    [pscustomobject]@{
+        Name = "zyntra-ramos"
+        LocalPrefix = "Base/Ramos/"
+        RemoteRoot = "/var/www/zyntra-ramos"
+        Pm2Name = "zyntra-ramos"
+        Pm2Config = "ecosystem.ramos.config.js"
+        HealthPath = "/ramos/api/health"
     }
 )
 
@@ -173,7 +181,7 @@ function Invoke-Remote {
     )
 
     $output = if ($script:UsePasswordAuth) {
-        & $script:PLINK_EXE -ssh -batch -pw $script:Password $script:VPS_HOST $Command
+        & $script:PLINK_EXE -ssh -batch -pw $script:Password -hostkey "SHA256:Vx3srqWWuA4yoXk/UytkTZp/aR210QKKF2BxYpgZZww" $script:VPS_HOST $Command
     } else {
         & $script:SSH_EXE -i $script:SSH_KEY -o StrictHostKeyChecking=no $script:VPS_HOST $Command
     }
@@ -193,7 +201,7 @@ function Copy-ToRemote {
     )
 
     if ($script:UsePasswordAuth) {
-        & $script:PSCP_EXE -batch -pw $script:Password $LocalPath "$($script:VPS_HOST):$RemotePath" | Out-Null
+        & $script:PSCP_EXE -batch -pw $script:Password -hostkey "SHA256:Vx3srqWWuA4yoXk/UytkTZp/aR210QKKF2BxYpgZZww" $LocalPath "$($script:VPS_HOST):$RemotePath" | Out-Null
     } else {
         & $script:SCP_EXE -i $script:SSH_KEY -o StrictHostKeyChecking=no $LocalPath "$($script:VPS_HOST):$RemotePath" | Out-Null
     }
@@ -260,7 +268,7 @@ function Get-ChangedFiles {
     Add-FilesToSet -Set $files -Values (& git diff --name-only --cached -- 2>$null)
     Add-FilesToSet -Set $files -Values (& git ls-files --others --exclude-standard 2>$null)
 
-    if ($files.Count -eq 0 -and (Test-GitRef -Ref $SinceRef)) {
+    if (Test-GitRef -Ref $SinceRef) {
         Add-FilesToSet -Set $files -Values (& git diff --name-only $SinceRef -- 2>$null)
     }
 
@@ -292,6 +300,7 @@ function Test-DeployablePath {
     if ($normalized -match '\.(py|pyc|sh)$') { return $false }
     if ($normalized -match '^_') { return $false }
     if ($normalized -match '^(AUDITORIA|__pycache__)') { return $false }
+    if ($normalized -match '(^|/)(node_modules|\.git|logs|uploads|backups|test-results|storage)(/|$)') { return $false }
     return ($normalized -notmatch '^(node_modules|\.git|logs/|uploads/|backups/|backup-|_Zyntra_Legacy/|test-results/|storage/)')
 }
 
@@ -299,6 +308,14 @@ function Resolve-AppTarget {
     param([Parameter(Mandatory)][string]$RelativePath)
 
     $normalized = $RelativePath.Replace("\", "/")
+
+    if ($normalized -match '^Base/Ramos/(.+)$') {
+        return [pscustomobject]@{
+            AppName = "zyntra-ramos"
+            RelativeRemotePath = $Matches[1]
+            LocalPath = $normalized
+        }
+    }
 
     if ($normalized -match '^Base/Labor Energy/Sistema/(.+)$') {
         return [pscustomobject]@{
@@ -465,7 +482,7 @@ function Backup-RemoteApps {
         $backupPath = "$REMOTE_BACKUP_DIR/$appName-predeploy-$timestamp.tar.gz"
         $backupMap[$appName] = $backupPath
         # Exclui node_modules, uploads, logs e backups para backup leve (só código)
-        $commands += "tar -czf '$backupPath' -C '$($app.RemoteRoot)' --exclude='./node_modules' --exclude='./uploads' --exclude='./logs' --exclude='./storage' --exclude='./.git' ."
+        $commands += "if [ -d '$($app.RemoteRoot)' ]; then tar -czf '$backupPath' -C '$($app.RemoteRoot)' --exclude='./node_modules' --exclude='./uploads' --exclude='./logs' --exclude='./storage' --exclude='./.git' .; else mkdir -p '$($app.RemoteRoot)' && tar -czf '$backupPath' --files-from /dev/null; fi"
     }
 
     Invoke-Remote -Command ($commands -join " && ") | Out-Null
@@ -521,12 +538,18 @@ function Restart-RemoteApps {
         return
     }
 
-    $pm2Targets = $AppNames | ForEach-Object { $REMOTE_APP_INDEX[$_].Pm2Name }
-    $targetList = $pm2Targets -join " "
-
     Write-Step "Reiniciando PM2"
-    Invoke-Remote -Command "pm2 restart $targetList --update-env && pm2 save" | Out-Null
-    Write-OK "PM2 reiniciado: $targetList"
+
+    foreach ($appName in $AppNames) {
+        $app = $REMOTE_APP_INDEX[$appName]
+        $pm2Name = $app.Pm2Name
+        $pm2Config = if ($app.PSObject.Properties.Name -contains "Pm2Config") { $app.Pm2Config } else { "ecosystem.config.js" }
+        $command = "if pm2 describe '$pm2Name' >/dev/null 2>&1; then pm2 restart '$pm2Name' --update-env; else cd '$($app.RemoteRoot)' && pm2 start '$pm2Config'; fi"
+        Invoke-Remote -Command $command | Out-Null
+        Write-OK "PM2 ativo: $pm2Name"
+    }
+
+    Invoke-Remote -Command "pm2 save" | Out-Null
 }
 
 function Install-RemoteDependencies {

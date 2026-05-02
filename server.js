@@ -2494,8 +2494,43 @@ const isAdminRHUser = (user) => {
 };
 
 const getUserFuncionarioId = (user) => {
-    const id = Number(user?.funcionario_id || user?.id);
+    const id = Number(user?.funcionario_id);
     return Number.isFinite(id) && id > 0 ? id : null;
+};
+
+const resolveUserFuncionarioId = async (user) => {
+    const explicitId = getUserFuncionarioId(user);
+    if (explicitId) return explicitId;
+
+    const userId = Number(user?.id);
+    const userEmail = String(user?.email || '').trim();
+
+    try {
+        if (Number.isFinite(userId) && userId > 0) {
+            const [rows] = await pool.query(`
+                SELECT f.id
+                FROM usuarios u
+                INNER JOIN funcionarios f
+                    ON LOWER(f.email) = LOWER(u.email)
+                    OR LOWER(f.email) = LOWER(u.login)
+                WHERE u.id = ?
+                LIMIT 1
+            `, [userId]);
+            if (rows.length > 0) return Number(rows[0].id);
+        }
+
+        if (userEmail) {
+            const [rows] = await pool.query(
+                'SELECT id FROM funcionarios WHERE LOWER(email) = LOWER(?) LIMIT 1',
+                [userEmail]
+            );
+            if (rows.length > 0) return Number(rows[0].id);
+        }
+    } catch (error) {
+        logger.warn('Aviso ao resolver funcionario do usuario logado:', error.message);
+    }
+
+    return Number.isFinite(userId) && userId > 0 ? userId : null;
 };
 
 // ─── PENSÃO ALIMENTÍCIA (RH) ───────────────────────────────────────────
@@ -2745,7 +2780,7 @@ app.get('/api/rh/holerites/consentimento', authenticateToken, asyncHandler(async
             return res.json({ consentimento: true, admin: true });
         }
 
-        const funcionarioId = getUserFuncionarioId(req.user);
+        const funcionarioId = await resolveUserFuncionarioId(req.user);
         if (!funcionarioId) {
             return res.status(400).json({ message: 'Funcionário não identificado para o usuário logado.' });
         }
@@ -2779,7 +2814,7 @@ app.post('/api/rh/holerites/consentimento', authenticateToken, asyncHandler(asyn
             return res.status(400).json({ message: 'assinatura_digital é obrigatória e deve ter ao menos 3 caracteres.' });
         }
 
-        const funcionarioId = getUserFuncionarioId(req.user);
+        const funcionarioId = await resolveUserFuncionarioId(req.user);
         if (!funcionarioId) {
             return res.status(400).json({ message: 'Funcionário não identificado para o usuário logado.' });
         }
@@ -2810,7 +2845,7 @@ app.post('/api/rh/holerites/consentimento', authenticateToken, asyncHandler(asyn
 // GET /api/rh/holerites/meus - Listar holerites publicados do funcionário logado
 app.get('/api/rh/holerites/meus', authenticateToken, asyncHandler(async (req, res) => {
     try {
-        const funcionarioId = getUserFuncionarioId(req.user);
+        const funcionarioId = await resolveUserFuncionarioId(req.user);
         if (!funcionarioId) {
             return res.status(400).json({ error: 'Funcionário não identificado para o usuário logado.' });
         }
@@ -2854,7 +2889,7 @@ app.get('/api/rh/holerites/:id', authenticateToken, asyncHandler(async (req, res
         `, [req.params.id]);
         if (holerite.length === 0) return res.status(404).json({ error: 'Holerite não encontrado' });
 
-        const userFuncId = getUserFuncionarioId(req.user);
+        const userFuncId = await resolveUserFuncionarioId(req.user);
         if (userFuncId && Number(holerite[0].funcionario_id) !== userFuncId && !isAdminRHUser(req.user)) {
             return res.status(403).json({ message: 'Acesso negado. Você só pode visualizar seus próprios holerites.' });
         }
@@ -2874,7 +2909,7 @@ app.get('/api/rh/holerites/:id', authenticateToken, asyncHandler(async (req, res
 app.post('/api/rh/holerites/:id/visualizar', authenticateToken, asyncHandler(async (req, res) => {
     try {
         const holeriteId = req.params.id;
-        const userFuncId = getUserFuncionarioId(req.user);
+        const userFuncId = await resolveUserFuncionarioId(req.user);
 
         if (userFuncId && !isAdminRHUser(req.user)) {
             const [rows] = await pool.query('SELECT funcionario_id FROM rh_holerites WHERE id = ? LIMIT 1', [holeriteId]);
@@ -2898,7 +2933,7 @@ app.post('/api/rh/holerites/:id/visualizar', authenticateToken, asyncHandler(asy
 app.post('/api/rh/holerites/:id/confirmar', authenticateToken, asyncHandler(async (req, res) => {
     try {
         const holeriteId = req.params.id;
-        const userFuncId = getUserFuncionarioId(req.user);
+        const userFuncId = await resolveUserFuncionarioId(req.user);
 
         if (userFuncId && !isAdminRHUser(req.user)) {
             const [rows] = await pool.query('SELECT funcionario_id FROM rh_holerites WHERE id = ? LIMIT 1', [holeriteId]);

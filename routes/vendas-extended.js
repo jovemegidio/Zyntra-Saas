@@ -70,7 +70,9 @@ module.exports = function createVendasExtendedRoutes(deps) {
                     SUM(CASE WHEN status = 'analise' THEN valor ELSE 0 END) as valor_analise,
                     COUNT(CASE WHEN status = 'cancelado' THEN 1 END) as total_cancelado,
                     COUNT(*) as total_pedidos,
-                    AVG(valor) as ticket_medio
+                    CASE WHEN COUNT(CASE WHEN status IN ('faturado', 'recibo') THEN 1 END) > 0
+                         THEN SUM(CASE WHEN status IN ('faturado', 'recibo') THEN valor ELSE 0 END) / COUNT(CASE WHEN status IN ('faturado', 'recibo') THEN 1 END)
+                         ELSE 0 END as ticket_medio
                 FROM pedidos
                 WHERE created_at >= CURDATE() - INTERVAL ? DAY
             `, [dias]);
@@ -86,6 +88,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
                 LEFT JOIN pedidos p ON u.id = p.vendedor_id AND p.created_at >= CURDATE() - INTERVAL ? DAY
                 WHERE u.role = 'comercial'
                 GROUP BY u.id, u.nome, u.email
+                HAVING valor_faturado > 0
                 ORDER BY valor_faturado DESC
                 LIMIT 10
             `, [dias]);
@@ -161,7 +164,9 @@ module.exports = function createVendasExtendedRoutes(deps) {
                     COUNT(CASE WHEN status = 'analise' THEN 1 END) as total_analise,
                     COUNT(CASE WHEN status = 'cancelado' THEN 1 END) as total_cancelado,
                     COUNT(*) as total_pedidos,
-                    AVG(valor) as ticket_medio
+                    CASE WHEN COUNT(CASE WHEN status IN ('faturado', 'recibo') THEN 1 END) > 0
+                         THEN SUM(CASE WHEN status IN ('faturado', 'recibo') THEN valor ELSE 0 END) / COUNT(CASE WHEN status IN ('faturado', 'recibo') THEN 1 END)
+                         ELSE 0 END as ticket_medio
                 FROM pedidos
                 WHERE vendedor_id = ? AND created_at >= CURDATE() - INTERVAL ? DAY
             `, [vendedorId, parseInt(período)]);
@@ -263,6 +268,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
                  LEFT JOIN pedidos p ON p.vendedor_id = u.id AND p.created_at >= CURDATE() - INTERVAL ? DAY
                  WHERE JSON_CONTAINS(COALESCE(u.areas, '[]'), '"vendas"') OR u.role = 'vendedor'
                  GROUP BY u.id, u.nome, f.foto_perfil_url, u.foto, u.avatar
+                 HAVING valor > 0
                  ORDER BY valor DESC
                  LIMIT ?`,
                  [periodDays, limit]
@@ -1510,19 +1516,37 @@ module.exports = function createVendasExtendedRoutes(deps) {
     // ========================================
     router.get('/dashboard/monthly', authorizeArea('vendas'), async (req, res, next) => {
         try {
-            const months = Math.max(parseInt(req.query.months || '12'), 1);
-            const now = new Date();
-            const start = new Date(now.getFullYear(), now.getMonth() - (months - 1), 1);
-            const startStr = `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}-01`;
+            let startStr, endStr, months;
+
+            if (req.query.data_inicio && req.query.data_fim) {
+                // Use explicit date range from filter
+                startStr = req.query.data_inicio;
+                endStr = req.query.data_fim;
+                const startDate = new Date(startStr);
+                const endDate = new Date(endStr);
+                const diffMonths = (endDate.getFullYear() - startDate.getFullYear()) * 12 + (endDate.getMonth() - startDate.getMonth()) + 1;
+                months = Math.max(1, diffMonths);
+            } else {
+                months = Math.max(parseInt(req.query.months || '12'), 1);
+                const now = new Date();
+                const start = new Date(now.getFullYear(), now.getMonth() - (months - 1), 1);
+                startStr = `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}-01`;
+                endStr = null;
+            }
+
+            const queryParams = endStr ? [startStr, endStr] : [startStr];
+            const whereClause = endStr
+                ? `WHERE created_at >= ? AND created_at <= ?`
+                : `WHERE created_at >= ?`;
 
             const [rows] = await vendasPool.query(
                 `SELECT DATE_FORMAT(created_at, '%Y-%m') AS ym,
                  COALESCE(SUM(CASE WHEN status IN ('faturado', 'recibo') THEN valor ELSE 0 END), 0) AS total
                  FROM pedidos
-                 WHERE created_at >= ?
+                 ${whereClause}
                  GROUP BY ym
                  ORDER BY ym ASC`,
-                [startStr]
+                queryParams
             );
 
             const map = new Map();
@@ -1530,8 +1554,9 @@ module.exports = function createVendasExtendedRoutes(deps) {
 
             const labels = [];
             const values = [];
+            const iterStart = new Date(startStr);
             for (let i = 0; i < months; i++) {
-                const d = new Date(start.getFullYear(), start.getMonth() + i, 1);
+                const d = new Date(iterStart.getFullYear(), iterStart.getMonth() + i, 1);
                 const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
                 labels.push(d.toLocaleString('pt-BR', { month: 'short', year: 'numeric' }));
                 values.push(map.has(ym) ? map.get(ym) : 0);

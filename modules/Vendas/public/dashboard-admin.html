@@ -1142,7 +1142,7 @@
                             <div class="metric-icon blue"><i class="fas fa-users"></i></div>
                         </div>
                         <div class="metric-value" id="totalVendedores">--</div>
-                        <div class="metric-label">Vendedores Ativos</div>
+                        <div class="metric-label">Vendedores Ativos <span id="vendedoresComVendas" style="font-size:0.7em;opacity:0.7;display:block;"></span></div>
                     </div>
 
                     <div class="metric-card purple">
@@ -1932,14 +1932,16 @@
                     <span>${formatarMoeda(metaTotal)} objetivo</span>
                 `;
 
-                // 3. VENDEDORES ATIVOS (que fizeram pelo menos 1 venda no mês)
+                // 3. VENDEDORES ATIVOS — total cadastrado (fonte: /api/vendas/vendedores)
+                document.getElementById('totalVendedores').textContent = totalVendedores;
+                // Subtítulo: quantos venderam no mês atual
                 const vendedoresAtivos = new Set();
                 pedidosAtual.forEach(p => {
                     const vendedorId = p.vendedor_id || p.created_by;
                     if (vendedorId) vendedoresAtivos.add(vendedorId);
                 });
-                
-                document.getElementById('totalVendedores').textContent = vendedoresAtivos.size || totalVendedores;
+                const subVend = document.getElementById('vendedoresComVendas');
+                if (subVend && vendedoresAtivos.size > 0) subVend.textContent = `${vendedoresAtivos.size} venderam no mês`;
 
                 // 4. PEDIDOS NO M²S
                 const totalPedidosAtual = pedidosAtual.length;

@@ -3788,7 +3788,7 @@ let query = 'SELECT id, nome, tipo, icone, ativo, COALESCE(prazo, 0) as prazo, C
                 FROM pedidos p
                 LEFT JOIN clientes c ON p.cliente_id = c.id
                 WHERE DATE(p.created_at) BETWEEN ? AND ?
-                GROUP BY c.estado
+                GROUP BY COALESCE(c.estado, 'SP')
                 ORDER BY valor_total DESC
             `, [inicio, fim]);
     
