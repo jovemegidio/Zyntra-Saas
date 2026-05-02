@@ -100,6 +100,7 @@
     <link rel="stylesheet" href="/chat/widget.css?v=20260319">
     <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260320">
     <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260614">
+    <link rel="stylesheet" href="/css/design-system.css?v=20260502">
 </head>
 <body>
     <div class="app-container">
@@ -384,7 +385,8 @@
             const sorted = [...fluxoData].sort((a, b) => new Date(a.data) - new Date(b.data));
             // FIX BUG-21: escape HTML para prevenir XSS em document.write
             const esc = s => String(s||'-').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-            w.document.write(`<html><head><title>Fluxo de Caixa</title><style>body{font-family:Arial;padding:20px;}table{width:100%;border-collapse:collapse;margin-top:16px;}th,td{padding:8px 12px;border:1px solid #ddd;text-align:left;font-size:12px;}th{background:#f3f4f6;}.entrada{color:#059669;}.saida{color:#ef4444;}</style></head><body><h2>Fluxo de Caixa</h2><p>Período: ${esc(inicio)} a ${esc(fim)}</p><table><thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Tipo</th><th>Valor</th><th>Saldo Acumulado</th></tr></thead><tbody>${sorted.map(m => { const v = parseFloat(m.valor)||0; const isE = m.tipo==='entrada'||m.tipo==='receita'; saldoAcum += isE?v:-v; return `<tr><td>${m.data?new Date(m.data).toLocaleDateString('pt-BR'):'-'}</td><td>${esc(m.descricao||m.descrição)}</td><td>${esc(m.categoria)}</td><td class="${isE?'entrada':'saida'}">${isE?'Entrada':'Saída'}</td><td class="${isE?'entrada':'saida'}">${isE?'+':'-'} R$ ${v.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td><td style="color:${saldoAcum>=0?'#059669':'#ef4444'}">R$ ${saldoAcum.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td></tr>`; }).join('')}</tbody></table>    <!-- Chat Widget BOB AI -->
+            w.document.write(`<html><head><title>Fluxo de Caixa</title><style>body{font-family:Arial;padding:20px;}table{width:100%;border-collapse:collapse;margin-top:16px;}th,td{padding:8px 12px;border:1px solid #ddd;text-align:left;font-size:12px;}th{background:#f3f4f6;}.entrada{color:#059669;}.saida{color:#ef4444;}</style>
+    <link rel="stylesheet" href="/css/design-system.css?v=20260502"></head><body><h2>Fluxo de Caixa</h2><p>Período: ${esc(inicio)} a ${esc(fim)}</p><table><thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Tipo</th><th>Valor</th><th>Saldo Acumulado</th></tr></thead><tbody>${sorted.map(m => { const v = parseFloat(m.valor)||0; const isE = m.tipo==='entrada'||m.tipo==='receita'; saldoAcum += isE?v:-v; return `<tr><td>${m.data?new Date(m.data).toLocaleDateString('pt-BR'):'-'}</td><td>${esc(m.descricao||m.descrição)}</td><td>${esc(m.categoria)}</td><td class="${isE?'entrada':'saida'}">${isE?'Entrada':'Saída'}</td><td class="${isE?'entrada':'saida'}">${isE?'+':'-'} R$ ${v.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td><td style="color:${saldoAcum>=0?'#059669':'#ef4444'}">R$ ${saldoAcum.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td></tr>`; }).join('')}</tbody></table>    <!-- Chat Widget BOB AI -->
     <script src="/chat/widget.js?v=20260319" defer></script>
 
     <!-- Chat Corporativo (Teams) -->

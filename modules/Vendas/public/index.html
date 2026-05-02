@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
@@ -2542,7 +2542,7 @@
         /* Grid de Valores - Design SaaS Premium */
         .valores-grid {
             display: grid;
-            grid-template-columns: repeat(7, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
             gap: 10px;
             margin-bottom: 24px;
         }
@@ -2567,9 +2567,8 @@
             display: flex;
             align-items: center;
             gap: 4px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            white-space: normal;
+            word-break: break-word;
         }
 
         .valor-input {
@@ -5732,6 +5731,7 @@
 
     <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260324">
     <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260414">
+    <link rel="stylesheet" href="/css/design-system.css?v=20260502">
 </head>
 
 <body>
@@ -11729,7 +11729,16 @@
                 condicao_pagamento: condicaoFinal,
                 desconto_pct: 0,
                 desconto: descontoItensTotal,
-                valor: pedidoAtual ? (pedidoAtual.valor || 0) : 0
+                valor: (() => {
+                    const el = document.getElementById('edit-valor-total');
+                    if (el) {
+                        let raw = el.value.replace(/[^\d,.-]/g, '');
+                        if (raw.includes(',')) raw = raw.replace(/\./g, '').replace(',', '.');
+                        const parsed = parseFloat(raw);
+                        if (!isNaN(parsed) && parsed > 0) return parsed;
+                    }
+                    return pedidoAtual ? (pedidoAtual.valor || 0) : 0;
+                })()
             };
 
             console.log('?? Enviando atualização para API:', dadosAtualização);
@@ -12308,6 +12317,7 @@
     ${isMeiaNota ? '.parcial-badge{display:inline-block;background:#f59e0b;color:white;padding:3px 10px;border-radius:999px;font-size:8px;font-weight:800;letter-spacing:.06em;margin-top:4px}' : ''}
     @media print{body,.a4{background:white}.shell{box-shadow:none;border-color:transparent}}
   </style>
+    <link rel="stylesheet" href="/css/design-system.css?v=20260502">
 </head>
 <body>
 <main class="a4">
@@ -12664,6 +12674,7 @@ td{padding:5px 8px;border-bottom:1px solid #e5e7eb;font-size:10px}
 .signatures div{text-align:center;border-top:1px solid #000;padding-top:8px;font-size:10px}
 .footer{text-align:center;margin-top:16px;font-size:8px;color:#999;line-height:1.6}
 </style>
+    <link rel="stylesheet" href="/css/design-system.css?v=20260502">
 </head>
 <body>
 <div class="doc">
@@ -12801,10 +12812,19 @@ td{padding:5px 8px;border-bottom:1px solid #e5e7eb;font-size:10px}
         function conferirPedido() {
             if (!pedidoAtual) return;
 
-            // Simular conferência - verificar campos obrigatórios
             const erros = [];
             if (!pedidoAtual.cliente) erros.push('Cliente não informado');
             if (!pedidoAtual.valor || pedidoAtual.valor <= 0) erros.push('Valor inválido');
+
+            const tipoFrete = document.getElementById('edit-tipo-frete')?.value || pedidoAtual.tipo_frete || '';
+            const valorFrete = parseFloat(document.getElementById('edit-valor-frete')?.value || pedidoAtual.frete || 0);
+            if (!tipoFrete || tipoFrete === '') erros.push('Tipo de frete não selecionado');
+
+            const tipoVenda = document.getElementById('edit-tipo-venda')?.value || pedidoAtual.tipo_venda || '';
+            if (!tipoVenda) erros.push('Tipo de venda não informado (Revenda/Consumidor)');
+
+            const itensPedido = itensPedidoAtual || [];
+            if (itensPedido.length === 0) erros.push('Pedido sem itens');
 
             if (erros.length > 0) {
                 showNotification('Problemas encontrados: ' + erros.join(', '), 'error');
@@ -16537,6 +16557,8 @@ td{padding:5px 8px;border-bottom:1px solid #e5e7eb;font-size:10px}
 
             // Atualizar totais do modal após carregar os itens
             atualizarTotalModalEditar();
+            // Recalcular parcelas com o total correto (inclui DIFAL/IPI/ST calculados nos itens)
+            recalcularParcelasAutomatico();
         }
 
         // Renderizar itens locais (para pedido novo ainda não salvo)
@@ -23387,6 +23409,7 @@ td{padding:5px 8px;border-bottom:1px solid #e5e7eb;font-size:10px}
                         .totals-row.total label{color:#fff;font-size:11px;font-weight:800}.totals-row.total span{color:#fff;font-size:12px;font-weight:900}
                         .footer{margin-top:20px;padding-top:10px;border-top:1px dashed var(--line);font-size:8px;color:var(--muted);text-align:center}
                     </style>
+    <link rel="stylesheet" href="/css/design-system.css?v=20260502">
                 </head>
                 <body>
                     <div class="shell">
@@ -23721,6 +23744,7 @@ td{padding:5px 8px;border-bottom:1px solid #e5e7eb;font-size:10px}
                         .btn-imprimir{position:fixed;top:20px;right:20px;padding:10px 20px;background:linear-gradient(135deg,var(--brand) 0%,var(--accent) 100%);color:#fff;border:none;border-radius:12px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:0 8px 20px rgba(11,40,66,.2);z-index:1000}
                         .btn-imprimir:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(11,40,66,.3)}
                     </style>
+    <link rel="stylesheet" href="/css/design-system.css?v=20260502">
                 </head>
                 <body>
                     <button class="btn-imprimir no-print" onclick="window.print()">

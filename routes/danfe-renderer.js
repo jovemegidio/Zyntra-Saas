@@ -895,7 +895,7 @@ function buildDanfeCtx(pedido, itens, opts = {}) {
     const resolvedLogo = opts.logoDataUri || pedido.emitenteLogoUrl || '';
 
     return {
-        marcaAguaClasse: opts.preview ? 'watermark-logo' : '',
+        marcaAguaClasse: opts.preview ? 'watermark-logo' : 'hidden',
         marcaAguaTexto: opts.preview && resolvedLogo ? '<img src="' + resolvedLogo + '" alt="Zyntra">' : '',
         avisoTopo: opts.preview ? 'DOCUMENTO DE PRÉVIA — NÃO POSSUI VALOR FISCAL' : '',
         _isPreview: opts.preview || false,

@@ -1004,6 +1004,7 @@
     <!-- <link rel="stylesheet" href="/chat/widget.css?v=20260218"> -->
     <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260324">
     <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260326">
+    <link rel="stylesheet" href="/css/design-system.css?v=20260502">
 </head>
 <body>
     <div class="app-container">
@@ -1106,9 +1107,6 @@
                     <div class="page-header-actions">
                         <button class="btn-secondary" onclick="exportarRelatório()">
                             <i class="fas fa-file-export"></i> Exportar
-                        </button>
-                        <button class="btn-primary" onclick="abrirModalMeta()">
-                            <i class="fas fa-bullseye"></i> Definir Meta
                         </button>
                     </div>
                 </div>
@@ -1701,11 +1699,11 @@
             const diffDias = Math.floor(diffMs / 86400000);
 
             if (diffMin < 1) return 'agora';
-            if (diffMin < 60) return `${diffMin} min`;
-            if (diffHoras < 24) return `${diffHoras}h`;
-            if (diffDias === 1) return '1 dia';
-            if (diffDias < 7) return `${diffDias} dias`;
-            return dataVenda.toLocaleDateString('pt-BR');
+            if (diffMin < 60) return `há ${diffMin} min`;
+            if (diffHoras < 24) return `há ${diffHoras}h`;
+            if (diffDias === 1) return 'ontem';
+            if (diffDias < 7) return `há ${diffDias} dias`;
+            return `em ${dataVenda.toLocaleDateString('pt-BR')}`;
         }
 
         // Carregar Metas do Mês
@@ -1840,7 +1838,7 @@
                         <div class="venda-item">
                             <div class="venda-info">
                                 <span class="venda-cliente">${cliente}</span>
-                                <span class="venda-vendedor">${vendedor.split(' ')[0]} \u2022 h\u00e1 ${tempo}</span>
+                                <span class="venda-vendedor">${vendedor.split(' ')[0]} \u2022 ${tempo}</span>
                             </div>
                             <span class="venda-valor">${formatarMoeda(valor)}</span>
                         </div>
@@ -1912,10 +1910,11 @@
                 document.getElementById('totalVendasMes').textContent = formatarMoeda(totalVendasAtual);
                 
                 const trendVendas = document.getElementById('trendVendasMes');
-                const isUpVendas = parseFloat(variaçãoVendas) >= 0;
-                trendVendas.className = `metric-trend ${isUpVendas ? 'up' : 'down'}`;
+                const isUpVendas = parseFloat(variaçãoVendas) > 0;
+                const isNeutralVendas = parseFloat(variaçãoVendas) === 0;
+                trendVendas.className = `metric-trend ${isNeutralVendas ? '' : isUpVendas ? 'up' : 'down'}`;
                 trendVendas.innerHTML = `
-                    <i class="fas fa-arrow-${isUpVendas ? 'up' : 'down'}"></i>
+                    <i class="fas fa-arrow-${isNeutralVendas ? 'right' : isUpVendas ? 'up' : 'down'}"></i>
                     <span>${Math.abs(variaçãoVendas)}% vs mês anterior</span>
                 `;
 
@@ -1953,10 +1952,11 @@
                 document.getElementById('pedidosMes').textContent = totalPedidosAtual;
                 
                 const trendPedidos = document.getElementById('trendPedidosMes');
-                const isUpPedidos = parseFloat(variaçãoPedidos) >= 0;
-                trendPedidos.className = `metric-trend ${isUpPedidos ? 'up' : 'down'}`;
+                const isUpPedidos = parseFloat(variaçãoPedidos) > 0;
+                const isNeutralPedidos = parseFloat(variaçãoPedidos) === 0;
+                trendPedidos.className = `metric-trend ${isNeutralPedidos ? '' : isUpPedidos ? 'up' : 'down'}`;
                 trendPedidos.innerHTML = `
-                    <i class="fas fa-arrow-${isUpPedidos ? 'up' : 'down'}"></i>
+                    <i class="fas fa-arrow-${isNeutralPedidos ? 'right' : isUpPedidos ? 'up' : 'down'}"></i>
                     <span>${Math.abs(variaçãoPedidos)}% vs mês anterior</span>
                 `;
 
@@ -2046,8 +2046,9 @@
                            <div class="vendedor-avatar" style="display:none;">${iniciais}</div>`
                         : `<div class="vendedor-avatar">${iniciais}</div>`;
                     
-                    const badgeClass = v.posicao === 1 ? 'gold' : v.posicao === 2 ? 'silver' : v.posicao === 3 ? 'bronze' : '';
-                    const badgeStyle = v.posicao > 3 ? 'background: #f3f4f6; color: #6b7280;' : '';
+                    const temVendas = (v.valor_realizado || 0) > 0;
+                    const badgeClass = temVendas && v.posicao === 1 ? 'gold' : temVendas && v.posicao === 2 ? 'silver' : temVendas && v.posicao === 3 ? 'bronze' : '';
+                    const badgeStyle = !temVendas || v.posicao > 3 ? 'background: #f3f4f6; color: #6b7280;' : '';
                     
                     const progresso = parseFloat(v.percentual_atingido) || 0;
                     const progressColor = progresso >= 100 ? '#22c55e' : progresso >= 80 ? '#f97316' : '#ef4444';

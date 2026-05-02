@@ -495,7 +495,7 @@ class XmlNFeService {
         // Obter offset real da timezone do servidor
         const offsetMinutes = d.getTimezoneOffset();
         const offsetHours = -Math.floor(offsetMinutes / 60);
-        const sign = offsetHours >= 0 ? '+' : '';
+        const sign = offsetHours >= 0 ? '+' : '-';
         return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}${sign}${pad(Math.abs(offsetHours))}:00`;
     }
 

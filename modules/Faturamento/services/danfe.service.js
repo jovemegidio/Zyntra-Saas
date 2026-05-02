@@ -16,7 +16,7 @@ try {
 }
 
 /**
- * SERVIÇO DE GERAÇÍO DE DANFE
+ * SERVIÇO DE GERAÇÃO DE DANFE
  * Gera DANFE (Documento Auxiliar da Nota Fiscal Eletrônica) em PDF
  */
 
@@ -85,7 +85,7 @@ class DanfeService {
                 telefone: dados?.telefone || ''
             };
 
-        // Retngulo principal
+        // Retângulo principal
         doc.rect(10, 10, 575, 140).stroke();
 
         // Logo da empresa - Priorizar logo das configurações
@@ -302,7 +302,7 @@ class DanfeService {
         // Nome/Razão Social
         doc.rect(10, y, 385, 18).stroke();
         doc.fontSize(7).font('Helvetica');
-        doc.text('NOME / RAZÍO SOCIAL', 15, y + 2);
+        doc.text('NOME / RAZÃO SOCIAL', 15, y + 2);
         doc.fontSize(9).font('Helvetica-Bold');
         doc.text(destinatario.nome || 'Destinatário não informado', 15, y + 10);
 
@@ -317,7 +317,7 @@ class DanfeService {
         // Data de emissão
         doc.rect(505, y, 80, 18).stroke();
         doc.fontSize(7).font('Helvetica');
-        doc.text('DATA DE EMISSÍO', 510, y + 2);
+        doc.text('DATA DE EMISSÃO', 510, y + 2);
         doc.fontSize(9);
         doc.text(this.formatarData(dados.dataEmissao), 510, y + 10);
 
@@ -386,7 +386,7 @@ class DanfeService {
         doc.fontSize(7).font('Helvetica-Bold');
 
         doc.text('CÓDIGO', 12, y + 4, { width: 50 });
-        doc.text('DESCRIÇÍO', 65, y + 4, { width: 180 });
+        doc.text('DESCRIÇÃO', 65, y + 4, { width: 180 });
         doc.text('NCM', 250, y + 4, { width: 50 });
         doc.text('CFOP', 305, y + 4, { width: 30 });
         doc.text('UN', 340, y + 4, { width: 25 });
@@ -548,7 +548,7 @@ class DanfeService {
         if (transporte && transporte.transportadora) {
             doc.fontSize(8).font('Helvetica');
             doc.rect(10, y, 300, 18).stroke();
-            doc.text('RAZÍO SOCIAL', 12, y + 2);
+            doc.text('RAZÃO SOCIAL', 12, y + 2);
             doc.fontSize(9);
             doc.text(transporte.transportadora.nome, 12, y + 10);
 

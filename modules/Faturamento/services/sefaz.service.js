@@ -404,7 +404,10 @@ class SefazService {
     }
 
     criarSOAPEnvelope(metodo, xmlDados) {
-        return `<?xml version="1.0" encoding="utf-8"?><soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope"><soap12:Body><nfeDadosMsg xmlns="http://www.portalfiscal.inf.br/nfe/wsdl/${metodo}">${xmlDados}</nfeDadosMsg></soap12:Body></soap12:Envelope>`;
+        // [FIX] SEFAZ rejeita por schema quando o XML interno traz prólogo <?xml ...?>
+        // dentro de <nfeDadosMsg>. Removemos qualquer prólogo antes de embutir.
+        const xmlSemProlog = String(xmlDados || '').replace(/^\s*<\?xml[^>]*\?>\s*/i, '');
+        return `<?xml version="1.0" encoding="utf-8"?><soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope"><soap12:Body><nfeDadosMsg xmlns="http://www.portalfiscal.inf.br/nfe/wsdl/${metodo}">${xmlSemProlog}</nfeDadosMsg></soap12:Body></soap12:Envelope>`;
     }
 
     // ============================================================
@@ -418,9 +421,25 @@ class SefazService {
     async enviarRequisicaoSOAP(url, soapEnvelope) {
         const isProduction = process.env.NODE_ENV === 'production';
 
-        // [BUG-011 FIX] Converter forge cert/key para PEM strings
-        const certPem = certificadoService.getCertificadoPEM();
-        const keyPem = certificadoService.getChavePrivadaPEM();
+        // Validar certificado antes de tentar usar
+        if (!certificadoService.certificadoCarregado) {
+            throw new Error('Certificado digital não configurado. Acesse Configurações → Fiscal e envie o arquivo .pfx antes de transmitir à SEFAZ.');
+        }
+
+        let certPem, keyPem;
+        try {
+            certPem = certificadoService.getCertificadoPEM();
+            keyPem  = certificadoService.getChavePrivadaPEM();
+        } catch (e) {
+            throw new Error(`Falha ao ler certificado: ${e.message}`);
+        }
+
+        // Validar validade do certificado
+        try {
+            certificadoService.verificarValidade();
+        } catch (valErr) {
+            throw new Error(`Certificado expirado ou fora do período de validade: ${valErr.message}`);
+        }
 
         const httpsAgent = new https.Agent({
             rejectUnauthorized: isProduction,
@@ -556,7 +575,7 @@ class SefazService {
         const pad = (n) => String(n).padStart(2, '0');
         const offsetMinutes = d.getTimezoneOffset();
         const offsetHours = -Math.floor(offsetMinutes / 60);
-        const sign = offsetHours >= 0 ? '+' : '';
+        const sign = offsetHours >= 0 ? '+' : '-';
         return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}${sign}${pad(Math.abs(offsetHours))}:00`;
     }
 }

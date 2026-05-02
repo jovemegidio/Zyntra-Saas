@@ -197,6 +197,7 @@
     <link rel="stylesheet" href="/chat/widget.css?v=20260319">
     <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260614">
     <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260320">
+    <link rel="stylesheet" href="/css/design-system.css?v=20260502">
 </head>
 <body>
     <div class="app-container">
@@ -658,7 +659,8 @@
                 const valor = (parseFloat(m.valor) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
                 return `<tr><td>${new Date(m.data).toLocaleDateString('pt-BR')}</td><td>${escHtml(m.descricao || '-')}</td><td>${tipo}</td><td class="${tipo}">${sinal} R$ ${valor}</td></tr>`;
             }).join('');
-            w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Extrato - ${nome}</title><style>body{font-family:Arial;padding:20px;}table{width:100%;border-collapse:collapse;}th,td{padding:8px 12px;border:1px solid #ddd;text-align:left;}th{background:#f3f4f6;}.entrada{color:#059669;}.saida{color:#ef4444;}</style></head><body><h2>Extrato Bancário — ${nome}</h2><p>Período: ${inicio} a ${fim}</p><table><thead><tr><th>Data</th><th>Descrição</th><th>Tipo</th><th>Valor</th></tr></thead><tbody>${rows}</tbody></table></body></html>`);
+            w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Extrato - ${nome}</title><style>body{font-family:Arial;padding:20px;}table{width:100%;border-collapse:collapse;}th,td{padding:8px 12px;border:1px solid #ddd;text-align:left;}th{background:#f3f4f6;}.entrada{color:#059669;}.saida{color:#ef4444;}</style>
+    <link rel="stylesheet" href="/css/design-system.css?v=20260502"></head><body><h2>Extrato Bancário — ${nome}</h2><p>Período: ${inicio} a ${fim}</p><table><thead><tr><th>Data</th><th>Descrição</th><th>Tipo</th><th>Valor</th></tr></thead><tbody>${rows}</tbody></table></body></html>`);
             w.document.close(); w.print();
         }
 

@@ -1399,16 +1399,25 @@ module.exports = (pool, authenticateToken) => {
             }
 
             // Assinar XML com certificado digital antes de enviar
-            let xmlAssinado = nfe.xml_nfe;
+            // [FIX] Nunca enviar XML sem assinatura — falha de assinatura = abortar envio
+            let xmlAssinado;
             try {
                 xmlAssinado = await certificadoService.assinarXML(nfe.xml_nfe, 'infNFe');
-                // Salvar XML assinado
                 await connection.query(
                     `UPDATE nfes SET xml_assinado = ? WHERE id = ?`,
                     [xmlAssinado, id]
                 );
             } catch (certError) {
-                console.warn(`[FATURAMENTO] ⚠ Erro ao assinar XML: ${certError.message}. Enviando XML original.`);
+                console.error(`[FATURAMENTO] ✗ Assinatura falhou: ${certError.message}`);
+                connection.release();
+                return res.status(401).json({
+                    success: false,
+                    errorCode: 'CERTIFICADO_INVALIDO',
+                    message: 'Não foi possível assinar o XML com o certificado digital. '
+                        + (certError.message.includes('não carregado')
+                            ? 'Nenhum certificado foi configurado. Acesse Configurações → Fiscal para enviar o arquivo .pfx.'
+                            : 'Verifique se o certificado está válido e a senha está correta. Detalhe: ' + certError.message)
+                });
             }
 
             // Enviar para SEFAZ
@@ -1787,18 +1796,23 @@ module.exports = (pool, authenticateToken) => {
     // GERAR E BAIXAR DANFE
     // ============================================================
 
+    // [FIX] DANFE usa o mesmo template HTML do espelho (danfe-renderer.js / danfe.html)
+    // O PDFKit gerava layout diferente do modelo oficial definido em danfe.html.
+    // Solução: retornar HTML do template oficial — usuário imprime via browser (Ctrl+P).
     router.get('/nfes/:id/danfe', authenticateToken, async (req, res) => {
         try {
             const { id } = req.params;
+
+            // Origem = pedido faturado
             if (req.query.origem === 'pedido') {
                 const htmlPedido = await montarDanfePedidoFaturado(id);
-                if (!htmlPedido) {
-                    return res.status(404).json({ success: false, message: 'Pedido faturado não encontrado' });
-                }
+                if (!htmlPedido) return res.status(404).json({ success: false, message: 'Pedido faturado não encontrado' });
                 res.setHeader('Content-Type', 'text/html; charset=utf-8');
                 res.setHeader('Content-Disposition', `inline; filename="danfe-pedido-${id}.html"`);
                 return res.send(htmlPedido);
             }
+
+            const { renderDanfe, buildDanfeCtx } = require(path.resolve(__dirname, '../../../routes/danfe-renderer'));
 
             const [nfes] = await pool.query(`
                 SELECT n.*,
@@ -1806,47 +1820,86 @@ module.exports = (pool, authenticateToken) => {
                        COALESCE(c.cnpj, c.cnpj_cpf) AS cli_cnpj, c.inscricao_estadual AS cli_ie,
                        c.endereco AS cli_endereco, c.bairro AS cli_bairro,
                        c.cidade AS cli_cidade, c.estado AS cli_uf, c.cep AS cli_cep,
-                       c.telefone AS cli_telefone
-                FROM nfes n
-                LEFT JOIN clientes c ON c.id = n.cliente_id
+                       c.telefone AS cli_telefone, c.email AS cli_email
+                FROM nfes n LEFT JOIN clientes c ON c.id = n.cliente_id
                 WHERE n.id = ?
             `, [id]);
 
-            if (nfes.length === 0) {
-                return res.status(404).json({ success: false, message: 'NFe não encontrada' });
-            }
+            if (!nfes.length) return res.status(404).json({ success: false, message: 'NFe não encontrada' });
 
             const nfe = nfes[0];
-
-            // Buscar itens da NF-e
             const [itens] = await pool.query('SELECT * FROM nfe_itens WHERE nfe_id = ?', [id]);
-            nfe.itens = itens;
 
-            // Buscar dados do emitente
+            // Dados do emitente
+            let emit = { razaoSocial: 'ALUFORCE', nomeFantasia: 'ALUFORCE', cnpj: process.env.EMITENTE_CNPJ || '',
+                ie: process.env.EMITENTE_IE || '', logradouro: '', numero: '', bairro: '', cidade: '',
+                uf: process.env.EMITENTE_UF || 'SP', cep: '', telefone: '', email: '', logoPath: '' };
             try {
                 const [ceRows] = await pool.query('SELECT * FROM configuracoes_empresa LIMIT 1');
                 if (ceRows && ceRows[0] && (ceRows[0].cnpj || ceRows[0].razao_social)) {
                     const e = ceRows[0];
-                    nfe.emitente = {
-                        razaoSocial: e.razao_social || 'ALUFORCE INDÚSTRIA E COMÉRCIO LTDA',
-                        nomeFantasia: e.nome_fantasia || 'ALUFORCE',
-                        cnpj: e.cnpj || '', ie: e.inscricao_estadual || '',
-                        logradouro: e.endereco || '', numero: e.numero || '',
-                        bairro: e.bairro || '', municipio: e.cidade || '',
-                        uf: e.estado || 'SP', cep: e.cep || '',
-                        telefone: e.telefone || '',
-                        logo_url: e.logo_path || ''
-                    };
+                    emit = { razaoSocial: e.razao_social || emit.razaoSocial, nomeFantasia: e.nome_fantasia || emit.nomeFantasia,
+                        cnpj: e.cnpj || '', ie: e.inscricao_estadual || '', logradouro: e.endereco || '',
+                        numero: e.numero || '', bairro: e.bairro || '', cidade: e.cidade || '',
+                        uf: e.estado || 'SP', cep: e.cep || '', telefone: e.telefone || '',
+                        email: e.email || '', logoPath: e.logo_path || '' };
                 }
             } catch (_) {}
 
-            const caminhoDANFE = path.join(__dirname, '../storage/nfe/danfes', `danfe_${nfe.numero}.pdf`);
+            const fmtMoney = v => (parseFloat(v) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const fmtDate  = d => { if (!d) return ''; const dt = new Date(d); return isNaN(dt.getTime()) ? '' : dt.toLocaleDateString('pt-BR'); };
+            const chave    = nfe.chave_acesso || '';
 
-            // Gerar DANFE
-            await danfeService.gerarDANFE(nfe, caminhoDANFE);
+            const pedidoCtx = {
+                id: nfe.id, nf: nfe.numero, serie_nf: nfe.serie || '1',
+                nfe_chave: chave, nfe_protocolo: nfe.numero_protocolo || '',
+                natureza_operacao: nfe.natureza_operacao || 'Venda de Mercadoria',
+                data_emissao: nfe.data_emissao || nfe.created_at,
+                data_faturamento: nfe.data_emissao || nfe.data_autorizacao,
+                valor_total: nfe.valor_total || nfe.valor || 0,
+                frete: nfe.valor_frete || 0, desconto: nfe.valor_desconto || 0,
+                valor_seguro: nfe.valor_seguro || 0, outras_despesas: nfe.outras_despesas || 0,
+                tipo_frete: nfe.modalidade_frete || '1',
+                condicao_pagamento: nfe.condicao_pagamento || '',
+                observacao: nfe.observacoes || '',
+                empresa_razao_social: emit.razaoSocial, empresa_nome: emit.nomeFantasia,
+                empresa_cnpj: emit.cnpj, empresa_ie: emit.ie,
+                empresa_endereco: `${emit.logradouro}, ${emit.numero}`.trim().replace(/,\s*$/, ''),
+                empresa_bairro: emit.bairro, empresa_cidade: emit.cidade,
+                empresa_uf: emit.uf, empresa_cep: emit.cep, empresa_telefone: emit.telefone,
+                emitenteLogoUrl: emit.logoPath || '/images/Logo Monocromatico - Azul - Aluforce.png',
+                cliente_razao_social: nfe.destinatario_razao_social || nfe.cli_razao_social || nfe.cli_nome || '',
+                cliente_nome: nfe.destinatario_nome || nfe.cli_nome || '',
+                cliente_cnpj: nfe.destinatario_cnpj || nfe.cli_cnpj || '',
+                cliente_cpf: nfe.destinatario_cpf || '',
+                cliente_ie: nfe.destinatario_ie || nfe.cli_ie || '',
+                cliente_endereco: nfe.cli_endereco || '', cliente_bairro: nfe.cli_bairro || '',
+                cliente_cidade: nfe.cli_cidade || '', cliente_estado: nfe.cli_uf || '',
+                cliente_cep: nfe.cli_cep || '', cliente_telefone: nfe.cli_telefone || ''
+            };
 
-            // Enviar arquivo
-            res.download(caminhoDANFE, `DANFE_${nfe.numero}.pdf`);
+            const itensCtx = (itens || []).map(i => ({
+                codigo: i.codigo_produto || i.codigo || '',
+                descricao: i.descricao || i.produto_nome || '',
+                quantidade: i.quantidade || 0,
+                preco_unitario: i.valor_unitario || i.preco_unitario || 0,
+                subtotal: i.valor_total || ((i.quantidade || 0) * (i.valor_unitario || i.preco_unitario || 0)),
+                unidade: i.unidade || 'UN',
+                ncm: i.ncm || '', cfop: i.cfop || '5102',
+                cst: i.cst || '', csosn: i.csosn || '',
+                aliquota_icms: i.aliquota_icms || 0, icms_value: i.valor_icms || 0,
+                aliquota_ipi: i.aliquota_ipi || 0, valor_ipi: i.valor_ipi || 0
+            }));
+
+            const ctx = buildDanfeCtx(pedidoCtx, itensCtx, {
+                preview: !chave,
+                logoDataUri: emit.logoPath ? emit.logoPath : null
+            });
+
+            const html = renderDanfe(ctx);
+            res.setHeader('Content-Type', 'text/html; charset=utf-8');
+            res.setHeader('Content-Disposition', `inline; filename="DANFE-NF${nfe.numero || id}.html"`);
+            res.send(html);
 
         } catch (error) {
             console.error('[FATURAMENTO] Erro ao gerar DANFE:', error);

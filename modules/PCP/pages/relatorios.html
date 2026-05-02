@@ -195,6 +195,7 @@
     <link rel="stylesheet" href="../css/pcp-header-sidebar.css?v=20260224">
     <!-- Chat Widget BOB AI --><!-- Chat Widget REMOVIDO --><!--
     <link rel="stylesheet" href="/chat/widget.css?v=20260218"> -->
+    <link rel="stylesheet" href="/css/design-system.css?v=20260502">
 </head>
 <body>
     <div class="app-container">
@@ -210,7 +211,7 @@
                 <a href="faturamento.html" class="sidebar-btn" title="Programação de Faturamento"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="../apontamentos.html" class="sidebar-btn" title="Apontamentos"><i class="fas fa-stopwatch"></i></a>
                 <a href="qualidade.html" class="sidebar-btn" title="Qualidade"><i class="fas fa-award"></i></a>
-                <a href="relatórios.html" class="sidebar-btn active" title="Central de Relatórios"><i class="fas fa-chart-pie"></i></a>
+                <a href="relatorios.html" class="sidebar-btn active" title="Central de Relatórios"><i class="fas fa-chart-pie"></i></a>
             </nav>
             <div class="sidebar-bottom">
                 <button class="sidebar-btn" title="Configurações" id="btn-config"><i class="fas fa-cog"></i></button>
@@ -763,7 +764,7 @@
         p.append('limit', lim);
         showLoading('Gerando relatório de cabos mais vendidos...');
         try {
-            var r = await fetch(API + '/api/pcp/relatórios/cabos-mais-vendidos?' + p.toString(), { credentials: 'include', headers: hdrs() });
+            var r = await fetch(API + '/api/pcp/relatorios/cabos-mais-vendidos?' + p.toString(), { credentials: 'include', headers: hdrs() });
             if (!r.ok) throw new Error('HTTP ' + r.status);
             var data = await r.json();
             hideLoading();
@@ -856,7 +857,7 @@
         if (df) p.append('data_fim', df);
         showLoading('Gerando ranking de vendas...');
         try {
-            var r = await fetch(API + '/api/pcp/relatórios/ranking-vendas?' + p.toString(), { credentials: 'include', headers: hdrs() });
+            var r = await fetch(API + '/api/pcp/relatorios/ranking-vendas?' + p.toString(), { credentials: 'include', headers: hdrs() });
             if (!r.ok) throw new Error('HTTP ' + r.status);
             var data = await r.json();
             hideLoading();
@@ -933,7 +934,7 @@
         if (df) p.append('data_fim', df);
         showLoading('Gerando relatório de produção...');
         try {
-            var r = await fetch(API + '/api/pcp/relatórios/metros-produzidos?' + p.toString(), { credentials: 'include', headers: hdrs() });
+            var r = await fetch(API + '/api/pcp/relatorios/metros-produzidos?' + p.toString(), { credentials: 'include', headers: hdrs() });
             if (!r.ok) throw new Error('HTTP ' + r.status);
             var data = await r.json();
             hideLoading();
@@ -1003,7 +1004,7 @@
         var p = new URLSearchParams(); p.append('ano', ano);
         showLoading('Gerando relatório de faturamento...');
         try {
-            var r = await fetch(API + '/api/pcp/relatórios/faturamento-mensal?' + p.toString(), { credentials: 'include', headers: hdrs() });
+            var r = await fetch(API + '/api/pcp/relatorios/faturamento-mensal?' + p.toString(), { credentials: 'include', headers: hdrs() });
             if (!r.ok) throw new Error('HTTP ' + r.status);
             var data = await r.json();
             hideLoading();
@@ -1120,10 +1121,10 @@
     async function carregarApontamentos(silent) {
         var di = document.getElementById('apt-data-inicio').value;
         var df = document.getElementById('apt-data-fim').value;
-        var func = document.getElementById('apt-funcionário').value;
+        var func = document.getElementById('apt-funcionario').value;
         var ativ = document.getElementById('apt-atividade').value;
         var ped = document.getElementById('apt-pedido').value;
-        var url = API + '/api/pcp/apontamentos/relatório?dataInicio=' + di + '&dataFim=' + df;
+        var url = API + '/api/pcp/apontamentos/relatorio?dataInicio=' + di + '&dataFim=' + df;
         if (func) url += '&usuario=' + encodeURIComponent(func);
         if (ativ) url += '&atividade=' + encodeURIComponent(ativ);
         if (ped) url += '&pedido=' + encodeURIComponent(ped);
@@ -1163,7 +1164,7 @@
         document.getElementById('apt-ef-media-dia').textContent = (diasUn.size > 0 ? Math.round(totalSeg/3600/diasUn.size*10)/10 : 0) + 'h';
 
         /* Populate funcionário select */
-        var sel = document.getElementById('apt-funcionário');
+        var sel = document.getElementById('apt-funcionario');
         var curVal = sel.value;
         sel.innerHTML = '<option value="">Todos</option>';
         aptFuncionários.forEach(function(f) {

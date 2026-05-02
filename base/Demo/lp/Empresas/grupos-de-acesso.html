@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ï»¿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="css/pages-app.css">
     <link rel="stylesheet" href="css/app-settings.css">
     <link rel="icon" type="image/png" href="Favicon - Zyntra.png">
+    <link rel="stylesheet" href="/css/design-system.css?v=20260502">
 </head>
 <body>
 
@@ -28,7 +29,7 @@
             </div>
             <div class="dash-nav__right">
                 <div style="position:relative;">
-                    <button class="dash-nav__user" id="userBtn"><div class="dash-nav__avatar" id="userAvatar">U</div><span class="dash-nav__user-name" id="userName">Usuário</span></button>
+                    <button class="dash-nav__user" id="userBtn"><div class="dash-nav__avatar" id="userAvatar">U</div><span class="dash-nav__user-name" id="userName">Usuï¿½rio</span></button>
                 </div>
             </div>
         </div>
@@ -71,15 +72,15 @@
     document.addEventListener('DOMContentLoaded', () => {
         const container = document.getElementById('groupsContainer');
         const groups = [
-            { name: 'Administração', permissions: ['Configurações','Exportação de Dados','Acessar o Cadastro de Produtos','Acessar o Estoque','Acessar Todos os Vendedores','Acessar os Relatórios de Vendas','Alterar e Excluir Pedidos de Vendas','Alterar e Excluir Contas a Pagar','Alterar e Excluir Contas a Receber','Gerenciar Notas Fiscais','Incluir Produtos e Serviços','Excluir Produtos e Serviços','Acessar o Módulo Financeiro','Acessar Relatórios Financeiros','Emitir Boletos','Emitir Notas Fiscais','Acessar DRE','Conciliação Bancária','Dashboard Completo','Acessar Configurações de Impostos'] },
-            { name: 'Vendas', permissions: ['Exportação de Dados','Acessar o Cadastro de Produtos','Acessar Todos os Vendedores','Acessar os Relatórios de Vendas','Incluir Pedidos de Vendas','Alterar Pedidos de Vendas'] },
-            { name: 'Financeiro', permissions: ['Exportação de Dados','Acessar o Módulo Financeiro','Acessar Relatórios Financeiros','Acessar Contas a Pagar','Acessar Contas a Receber','Conciliação Bancária','Emitir Boletos','Acessar DRE'] },
-            { name: 'Estoque e Produção', permissions: ['Exportação de Dados','Acessar o Cadastro de Produtos','Acessar o Estoque','Incluir Produtos e Serviços','Movimentação de Estoque','Inventário'] },
-            { name: 'Fiscal', permissions: ['Exportação de Dados','Emitir Notas Fiscais','Gerenciar Notas Fiscais','Acessar Configurações de Impostos','Relatórios Fiscais'] },
-            { name: 'Portal do Contador', permissions: ['Exportação de Dados','Acessar Relatórios Financeiros','Relatórios Fiscais','Acessar DRE'] },
-            { name: 'Compras e Faturamento', permissions: ['Exportação de Dados','Acessar o Cadastro de Produtos','Acessar Contas a Pagar','Incluir Pedidos de Compra','Gerenciar Notas Fiscais de Entrada'] },
-            { name: 'Consultoria', permissions: ['Configurações','Exportação de Dados','Dashboard Completo','Acessar Relatórios Financeiros','Acessar os Relatórios de Vendas','Acessar DRE','Conciliação Bancária'] },
-            { name: 'Treinamento', permissions: ['Exportação de Dados','Acessar o Cadastro de Produtos','Acessar o Estoque','Incluir Pedidos de Vendas','Acessar o Módulo Financeiro'] }
+            { name: 'Administraï¿½ï¿½o', permissions: ['Configuraï¿½ï¿½es','Exportaï¿½ï¿½o de Dados','Acessar o Cadastro de Produtos','Acessar o Estoque','Acessar Todos os Vendedores','Acessar os Relatï¿½rios de Vendas','Alterar e Excluir Pedidos de Vendas','Alterar e Excluir Contas a Pagar','Alterar e Excluir Contas a Receber','Gerenciar Notas Fiscais','Incluir Produtos e Serviï¿½os','Excluir Produtos e Serviï¿½os','Acessar o Mï¿½dulo Financeiro','Acessar Relatï¿½rios Financeiros','Emitir Boletos','Emitir Notas Fiscais','Acessar DRE','Conciliaï¿½ï¿½o Bancï¿½ria','Dashboard Completo','Acessar Configuraï¿½ï¿½es de Impostos'] },
+            { name: 'Vendas', permissions: ['Exportaï¿½ï¿½o de Dados','Acessar o Cadastro de Produtos','Acessar Todos os Vendedores','Acessar os Relatï¿½rios de Vendas','Incluir Pedidos de Vendas','Alterar Pedidos de Vendas'] },
+            { name: 'Financeiro', permissions: ['Exportaï¿½ï¿½o de Dados','Acessar o Mï¿½dulo Financeiro','Acessar Relatï¿½rios Financeiros','Acessar Contas a Pagar','Acessar Contas a Receber','Conciliaï¿½ï¿½o Bancï¿½ria','Emitir Boletos','Acessar DRE'] },
+            { name: 'Estoque e Produï¿½ï¿½o', permissions: ['Exportaï¿½ï¿½o de Dados','Acessar o Cadastro de Produtos','Acessar o Estoque','Incluir Produtos e Serviï¿½os','Movimentaï¿½ï¿½o de Estoque','Inventï¿½rio'] },
+            { name: 'Fiscal', permissions: ['Exportaï¿½ï¿½o de Dados','Emitir Notas Fiscais','Gerenciar Notas Fiscais','Acessar Configuraï¿½ï¿½es de Impostos','Relatï¿½rios Fiscais'] },
+            { name: 'Portal do Contador', permissions: ['Exportaï¿½ï¿½o de Dados','Acessar Relatï¿½rios Financeiros','Relatï¿½rios Fiscais','Acessar DRE'] },
+            { name: 'Compras e Faturamento', permissions: ['Exportaï¿½ï¿½o de Dados','Acessar o Cadastro de Produtos','Acessar Contas a Pagar','Incluir Pedidos de Compra','Gerenciar Notas Fiscais de Entrada'] },
+            { name: 'Consultoria', permissions: ['Configuraï¿½ï¿½es','Exportaï¿½ï¿½o de Dados','Dashboard Completo','Acessar Relatï¿½rios Financeiros','Acessar os Relatï¿½rios de Vendas','Acessar DRE','Conciliaï¿½ï¿½o Bancï¿½ria'] },
+            { name: 'Treinamento', permissions: ['Exportaï¿½ï¿½o de Dados','Acessar o Cadastro de Produtos','Acessar o Estoque','Incluir Pedidos de Vendas','Acessar o Mï¿½dulo Financeiro'] }
         ];
 
         groups.forEach((g, i) => {

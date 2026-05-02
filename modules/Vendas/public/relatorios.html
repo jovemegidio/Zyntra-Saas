@@ -797,6 +797,7 @@
     <!-- <link rel="stylesheet" href="/chat/widget.css?v=20260218"> -->
     <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260324">
     <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260326">
+    <link rel="stylesheet" href="/css/design-system.css?v=20260502">
 </head>
 <body>
     <div class="app-container">
@@ -1059,7 +1060,7 @@
                     <div class="report-card" onclick="abrirModalRelatório('comissoes')">
                         <div class="report-icon green"><i class="fas fa-coins"></i></div>
                         <h4>Relatório de Comissões</h4>
-                        <p>Comissões por vendedor é Power 2% é Multiplex 1%</p>
+                        <p>Comissões por vendedor: Power 2% e Multiplex 1%</p>
                         <span class="report-arrow"><i class="fas fa-arrow-right"></i></span>
                     </div>
                     <div class="report-card" onclick="abrirModalRelatório('clientes')">
@@ -1919,14 +1920,14 @@
                     if (vendedor) params.append('vendedor_id', vendedor);
                     const status = document.getElementById('modalVpStatus').value;
                     if (status) params.append('status', status);
-                    url = `/api/vendas/relatórios/vendas-período/pdf?${params}`;
+                    url = `/api/vendas/relatorios/vendas-periodo/pdf?${params}`;
                     
                 } else if (tipo === 'comissoes') {
                     params.append('data_inicio', document.getElementById('modalComDataInicio').value);
                     params.append('data_fim', document.getElementById('modalComDataFim').value);
                     const vendedor = document.getElementById('modalComVendedor').value;
                     if (vendedor) params.append('vendedor_id', vendedor);
-                    url = `/api/vendas/relatórios/comissoes/pdf?${params}`;
+                    url = `/api/vendas/relatorios/comissoes/pdf?${params}`;
                     
                 } else if (tipo === 'clientes') {
                     const cliente = document.getElementById('modalCliCliente').value;
@@ -1938,13 +1939,13 @@
                     const estado = document.getElementById('modalCliEstado').value;
                     if (estado) params.append('estado', estado);
                     params.append('ordenar_por', document.getElementById('modalCliOrdenar').value);
-                    url = `/api/vendas/relatórios/clientes/pdf?${params}`;
+                    url = `/api/vendas/relatorios/clientes/pdf?${params}`;
                     
                 } else if (tipo === 'produtos') {
                     params.append('data_inicio', document.getElementById('modalProdDataInicio').value);
                     params.append('data_fim', document.getElementById('modalProdDataFim').value);
                     params.append('ordenar_por', document.getElementById('modalProdOrdenar').value);
-                    url = `/api/vendas/relatórios/produtos/pdf?${params}`;
+                    url = `/api/vendas/relatorios/produtos/pdf?${params}`;
                 }
                 
                 // Abrir PDF em nova aba
@@ -2039,13 +2040,13 @@
                     if (vendedor) params.append('vendedor_id', vendedor);
                     const status = document.getElementById('modalVpStatus').value;
                     if (status && status !== 'todos') params.append('status', status);
-                    url = `/api/vendas/relatórios/vendas-período/pdf?${params}`;
+                    url = `/api/vendas/relatorios/vendas-periodo/pdf?${params}`;
                 } else if (tipo === 'comissoes') {
                     params.append('data_inicio', document.getElementById('modalComDataInicio').value);
                     params.append('data_fim', document.getElementById('modalComDataFim').value);
                     const vendedor = document.getElementById('modalComVendedor').value;
                     if (vendedor) params.append('vendedor_id', vendedor);
-                    url = `/api/vendas/relatórios/comissoes/pdf?${params}`;
+                    url = `/api/vendas/relatorios/comissoes/pdf?${params}`;
                 } else if (tipo === 'clientes') {
                     const cliente = document.getElementById('modalCliCliente').value;
                     if (cliente) params.append('cliente_id', cliente);
@@ -2056,12 +2057,12 @@
                     const estado = document.getElementById('modalCliEstado').value;
                     if (estado) params.append('estado', estado);
                     params.append('ordenar_por', document.getElementById('modalCliOrdenar').value);
-                    url = `/api/vendas/relatórios/clientes/pdf?${params}`;
+                    url = `/api/vendas/relatorios/clientes/pdf?${params}`;
                 } else if (tipo === 'produtos') {
                     params.append('data_inicio', document.getElementById('modalProdDataInicio').value);
                     params.append('data_fim', document.getElementById('modalProdDataFim').value);
                     params.append('ordenar_por', document.getElementById('modalProdOrdenar').value);
-                    url = `/api/vendas/relatórios/produtos/pdf?${params}`;
+                    url = `/api/vendas/relatorios/produtos/pdf?${params}`;
                 }
 
                 const response = await fetch(url, { credentials: 'include' });
@@ -2362,7 +2363,7 @@
                     fetchAutenticado('/api/vendas/vendedores'),
                     fetchAutenticado(`/api/vendas/dashboard/top-vendedores?data_inicio=${dataInicio}&data_fim=${dataFim}&limit=10${vendedorParam}`),
                     fetchAutenticado(`/api/vendas/dashboard/top-produtos?data_inicio=${dataInicio}&data_fim=${dataFim}&limit=10${vendedorParam}`),
-                    fetchAutenticado(`/api/vendas/dashboard/monthly?months=6${vendedorParam}`)
+                    fetchAutenticado(`/api/vendas/dashboard/monthly?months=6&data_inicio=${dataInicio}&data_fim=${dataFim}${vendedorParam}`)
                 ]);
 
                 console.timeEnd('Carregamento Relatório');
@@ -2371,25 +2372,22 @@
                 let statsData = null;
                 let vendedoresCount = 0;
                 if (adminRes.status === 'fulfilled' && adminRes.value.ok) {
-                    statsData = await adminRes.value.json();
-                    console.log('? Dashboard admin dados:', statsData);
-                } else {
-                    // Fallback: tentar dashboard-stats
-                    console.warn('?? dashboard/admin falhou, tentando fallback...');
-                    try {
-                        const fallback = await fetchAutenticado(`/api/vendas/dashboard-stats${vendedorParam ? '?' + vendedorParam.substring(1) : ''}`);
-                        if (fallback.ok) {
-                            const fb = await fallback.json();
-                            statsData = {
-                                metricas: {
-                                    total_pedidos: (fb.pedidosPendentes || 0) + (fb.orcamentosAberto || 0),
-                                    valor_faturado: fb.totalFaturadoMes || 0,
-                                    ticket_medio: 0
-                                },
-                                taxaConversao: 0
-                            };
-                        }
-                    } catch(e) { console.warn('Fallback stats falhou:', e); }
+                    const rawStats = await adminRes.value.json();
+                    console.log('? Dashboard stats dados:', rawStats);
+                    // Normalizar: dashboard-stats retorna campos planos; dashboard/admin retorna {metricas:{}}
+                    if (rawStats.metricas) {
+                        statsData = rawStats;
+                    } else {
+                        statsData = {
+                            metricas: {
+                                total_pedidos: (rawStats.pedidosPendentes || 0) + (rawStats.orcamentosAberto || 0),
+                                valor_faturado: rawStats.totalFaturadoMes || 0,
+                                ticket_medio: 0
+                            },
+                            taxaConversao: 0,
+                            conversaoPorStatus: rawStats.conversaoPorStatus || []
+                        };
+                    }
                 }
 
                 // ---- CONTAGEM VENDEDORES ----
@@ -2427,7 +2425,7 @@
 
                 // ---- GRÁFICO CATEGORIAS (conversão por status) ----
                 if (statsData && statsData.conversaoPorStatus && statsData.conversaoPorStatus.length > 0) {
-                    const statusLabels = { 'faturado': 'Faturado', 'orcamento': 'Orçamento', 'análise': 'Em Análise', 'aprovado': 'Aprovado', 'cancelado': 'Cancelado', 'recibo': 'Recibo' };
+                    const statusLabels = { 'faturado': 'Faturado', 'orcamento': 'Orçamento', 'orçamento': 'Orçamento', 'analise': 'Em Análise', 'análise': 'Em Análise', 'aprovado': 'Aprovado', 'cancelado': 'Cancelado', 'recibo': 'Recibo' };
                     renderizarGraficoCategorias({
                         labels: statsData.conversaoPorStatus.map(s => statusLabels[s.status] || s.status),
                         valores: statsData.conversaoPorStatus.map(s => s.quantidade)
@@ -2621,7 +2619,11 @@
                             grid: { color: '#f1f5f9' }
                         },
                         x: {
-                            grid: { display: false }
+                            grid: { display: false },
+                            ticks: {
+                                maxRotation: 0,
+                                autoSkip: false
+                            }
                         }
                     }
                 }
@@ -2649,7 +2651,9 @@
                     if (data.conversaoPorStatus && data.conversaoPorStatus.length > 0) {
                         const statusLabels = {
                             'faturado': 'Faturado',
-                            'orçamento': 'Orçamento', 
+                            'orcamento': 'Orçamento',
+                            'orçamento': 'Orçamento',
+                            'analise': 'Em Análise',
                             'análise': 'Em Análise',
                             'aprovado': 'Aprovado',
                             'cancelado': 'Cancelado',
@@ -2681,14 +2685,20 @@
             
             if (categoriasChart) categoriasChart.destroy();
             
-            // Cores por status
+            // Cores por status (normalizado para as labels amigáveis)
             const coresPorStatus = {
                 'Faturado': '#10b981',
                 'Orçamento': '#6366f1',
                 'Em Análise': '#f59e0b',
                 'Aprovado': '#3b82f6',
                 'Cancelado': '#ef4444',
-                'Recibo': '#8b5cf6'
+                'Recibo': '#8b5cf6',
+                'faturado': '#10b981',
+                'orcamento': '#6366f1',
+                'analise': '#f59e0b',
+                'aprovado': '#3b82f6',
+                'cancelado': '#ef4444',
+                'recibo': '#8b5cf6'
             };
             
             const labels = dados.labels || ['Faturado', 'Orçamento', 'Em Análise', 'Aprovado'];
@@ -2990,6 +3000,7 @@ tbody tr:nth-child(even) { background: #f8fafc; }
 .rpt-footer span { font-size: 9px; color: #94a3b8; }
 .confidential { font-size: 8px; color: #cbd5e1; text-align: center; margin-top: 10px; letter-spacing: 1px; text-transform: uppercase; }
 </style>
+    <link rel="stylesheet" href="/css/design-system.css?v=20260502">
 </head>
 <body>
 <div class="print-bar">

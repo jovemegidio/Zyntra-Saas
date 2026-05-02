@@ -370,6 +370,7 @@
     <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260414">
     <link rel="stylesheet" href="css/fin-pagination.css?v=20260715">
     <script src="js/fin-pagination.js?v=20260715" defer></script>
+    <link rel="stylesheet" href="/css/design-system.css?v=20260502">
 </head>
 <body>
     <div class="toast-container" id="toast-container"></div>
@@ -1509,12 +1510,14 @@
 
         async function carregarBancos() {
             try {
-                var response = await fetch('/api/financeiro/contas-bancarias', { credentials: 'include' });
+                var response = await fetch('/api/financeiro/bancos', { credentials: 'include' });
                 if (response.ok) {
                     var rawBancos = await response.json();
                     var bancos = Array.isArray(rawBancos) ? rawBancos : (Array.isArray(rawBancos && rawBancos.data) ? rawBancos.data : []);
                     var opts = bancos.map(function(b) {
-                        var label = b.nome || (b.banco + (b.agencia ? ' - Ag. ' + b.agencia : '') + (b.conta ? ' C/C ' + b.conta : ''));
+                        var agencia = b.agencia ? ' - Ag. ' + b.agencia : '';
+                        var conta = b.conta_corrente ? ' C/C ' + b.conta_corrente : (b.conta ? ' C/C ' + b.conta : '');
+                        var label = b.nome || (b.banco + agencia + conta);
                         return '<option value="' + b.id + '">' + label + '</option>';
                     }).join('');
                     document.getElementById('cr-conta-corrente').innerHTML = '<option value="">Selecione...</option>' + opts;

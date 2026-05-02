@@ -540,6 +540,7 @@
     <link rel="stylesheet" href="/chat/widget.css?v=20260218">
     <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260324">
     <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260320">
+    <link rel="stylesheet" href="/css/design-system.css?v=20260502">
 </head>
 <body>
     <div class="app-container">
@@ -549,13 +550,13 @@
         <aside class="sidebar" id="mobile-sidebar">
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel de Controle"><i class="fas fa-home"></i></a>
             <nav class="sidebar-nav">
-                <a href="../funcionário.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-home"></i></a>
+                <a href="../funcionario.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-home"></i></a>
                 <a href="meus-holerites.html" class="sidebar-btn" title="Meus Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="dados-cadastrais.html" class="sidebar-btn active" title="Dados Cadastrais"><i class="fas fa-id-card"></i></a>
                 <a href="beneficios.html" class="sidebar-btn" title="Meus Benefícios"><i class="fas fa-gift"></i></a>
                 <a href="espelho-ponto.html" class="sidebar-btn" title="Espelho de Ponto"><i class="fas fa-list-check"></i></a>
                 <a href="enviar-atestado.html" class="sidebar-btn" title="Enviar Atestado"><i class="fas fa-file-medical"></i></a>
-                <a href="../solicitações.html" class="sidebar-btn" title="Minhas Solicitações"><i class="fas fa-clipboard-list"></i></a>
+                <a href="../solicitacoes.html" class="sidebar-btn" title="Minhas Solicitações"><i class="fas fa-clipboard-list"></i></a>
                 <a href="manual-colaborador.html" class="sidebar-btn" title="Manual do Colaborador"><i class="fas fa-book"></i></a>
             </nav>
             <div class="sidebar-bottom">
@@ -1164,12 +1165,12 @@
                         </div>
                     </div>
                     ${p.banco_recebedor ? `<div style="font-size:12px; color:#64748b; margin-top:8px;"><i class="fas fa-university"></i> ${p.banco_recebedor}${p.agencia_recebedor ? ' | Ag: ' + p.agencia_recebedor : ''}${p.conta_recebedor ? ' | Conta: ' + p.conta_recebedor : ''}</div>` : ''}
-                    ${p.observações ? `<div style="font-size:12px; color:#64748b; margin-top:4px;"><i class="fas fa-sticky-note"></i> ${p.observações}</div>` : ''}
+                    ${(p.observacoes || p.observações) ? `<div style="font-size:12px; color:#64748b; margin-top:4px;"><i class="fas fa-sticky-note"></i> ${p.observacoes || p.observações}</div>` : ''}
                 </div>
             `).join('');
         }
 
-        async function carregarPensaoMeusDados(funcionárioId) {
+        async function carregarPensaoMeusDados(funcionarioId) {
             try {
                 const response = await fetch(`/api/rh/funcionarios/${funcionarioId}/pensao`, { credentials: 'include' });
                 if (!response.ok) throw new Error('Erro ao carregar Pensão');
@@ -1205,7 +1206,7 @@
             `).join('');
         }
 
-        async function carregarSalarioFamiliaMeusDados(funcionárioId) {
+        async function carregarSalarioFamiliaMeusDados(funcionarioId) {
             try {
                 const response = await fetch(`/api/rh/funcionarios/${funcionarioId}/salario-familia`, { credentials: 'include' });
                 if (!response.ok) throw new Error('Erro ao carregar salário-Família');
@@ -1213,8 +1214,9 @@
                 const recebe = data.recebe === 1 || data.recebe === true;
                 const displayEl = document.getElementById('sf-recebe-display-meus-dados');
                 const depsSection = document.getElementById('sf-dependentes-section-meus-dados');
-                const obsView = document.getElementById('sf-observações-view-meus-dados');
-                const obsDisplay = document.getElementById('sf-observações-display-meus-dados');
+                const obsView = document.getElementById('sf-observacoes-view-meus-dados');
+                const obsDisplay = document.getElementById('sf-observacoes-display-meus-dados');
+                const observacoes = data.observacoes || data.observações || '';
 
                 if (displayEl) {
                     displayEl.textContent = recebe ? 'Sim' : 'No';
@@ -1222,8 +1224,8 @@
                     displayEl.style.color = recebe ? '#166534' : '#991b1b';
                 }
                 if (depsSection) depsSection.style.display = recebe ? 'block' : 'none';
-                if (obsView) obsView.style.display = data.observações ? 'block' : 'none';
-                if (obsDisplay) obsDisplay.textContent = data.observações || '-';
+                if (obsView) obsView.style.display = observacoes ? 'block' : 'none';
+                if (obsDisplay) obsDisplay.textContent = observacoes || '-';
 
                 renderizarDependentesMeusDados(data.dependentes || []);
             } catch (error) {
