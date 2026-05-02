@@ -276,7 +276,7 @@
             .then(function(r) { return r.json(); })
             .then(function(data) {
                 var list = Array.isArray(data) ? data : (data.funcionarios || []);
-                var sel = document.getElementById('filter-funcionário');
+                var sel = document.getElementById('filter-funcionario');
                 if (!sel) return;
                 sel.innerHTML = '<option value="">Selecione...</option>';
                 list.forEach(function(f) {
@@ -287,7 +287,7 @@
                 });
             })
             .catch(function() {
-                var sel = document.getElementById('filter-funcionário');
+                var sel = document.getElementById('filter-funcionario');
                 if (sel) sel.innerHTML = '<option value="">Erro ao carregar</option>';
             });
         }
@@ -322,7 +322,7 @@
                     title = 'Custos de Benefícios';
                     break;
                 case 'histórico-salarial':
-                    var funcId = document.getElementById('filter-funcionário');
+                    var funcId = document.getElementById('filter-funcionario');
                     if (!funcId || !funcId.value) {
                         output.innerHTML = '<div style="text-align:center;padding:30px;color:#ef4444;"><i class="fas fa-exclamation-triangle"></i> Selecione um funcionário.</div>';
                         return;
@@ -331,7 +331,7 @@
                     title = 'Histórico Salarial';
                     break;
                 case 'histórico-cargos':
-                    var funcId2 = document.getElementById('filter-funcionário');
+                    var funcId2 = document.getElementById('filter-funcionario');
                     if (!funcId2 || !funcId2.value) {
                         output.innerHTML = '<div style="text-align:center;padding:30px;color:#ef4444;"><i class="fas fa-exclamation-triangle"></i> Selecione um funcionário.</div>';
                         return;

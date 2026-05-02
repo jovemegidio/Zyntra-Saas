@@ -341,9 +341,9 @@
             document.getElementById('stat-liquido').textContent = fmtShort(totalLiq);
         }
 
-        // Cálculos INSS/IRRF (tabelas 2024)
-        function calcularINSS(s) { return s <= 1412 ? s*0.075 : s <= 2666.68 ? s*0.09 : s <= 4000.03 ? s*0.12 : s*0.14; }
-        function calcularIRRF(s, inss) { const b = s - inss; return b <= 2259.20 ? 0 : b <= 2826.65 ? b*0.075-169.44 : b <= 3751.05 ? b*0.15-381.44 : b <= 4664.68 ? b*0.225-662.77 : b*0.275-896; }
+        // Cálculos INSS/IRRF (tabelas 2025)
+        function calcularINSS(s) { return s <= 1518 ? s*0.075 : s <= 2793.88 ? s*0.09 : s <= 4190.83 ? s*0.12 : s*0.14; }
+        function calcularIRRF(s, inss) { const b = s - inss; return b <= 2428.80 ? 0 : b <= 3042.00 ? b*0.075-182.16 : b <= 4053.44 ? b*0.15-410.88 : b <= 5066.80 ? b*0.225-714.87 : b*0.275-1668.27; }
 
         // Visualizar holerite por ID
         async function visualizarHolerite(id) {

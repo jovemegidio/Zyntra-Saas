@@ -329,7 +329,7 @@
                     </div>
                 </div>
                 
-                <!-- Prximos Treinamentos -->
+                <!-- Próximos Treinamentos -->
                 <div class="calendar-preview" id="proximosContainer">
                     <h4><i class="fas fa-calendar-check"></i> Próximos Treinamentos</h4>
                     <div id="proximosLista"></div>
@@ -728,8 +728,8 @@
                     const t = await response.json();
                     
                     document.getElementById('treinamentoId').value = t.id;
-                    document.getElementById('título').value = t.titulo;
-                    document.getElementById('descrição').value = t.descricao || t.descricao || '';
+                    document.getElementById('titulo').value = t.titulo;
+                    document.getElementById('descricao').value = t.descricao || t.descricao || '';
                     document.getElementById('tipo').value = t.tipo;
                     document.getElementById('categoria').value = t.categoria || '';
                     document.getElementById('cargaHoraria').value = t.carga_horaria || 0;
@@ -758,8 +758,8 @@
             const id = document.getElementById('treinamentoId').value;
             
             const dados = {
-                título: document.getElementById('título').value,
-                descrição: document.getElementById('descrição').value,
+                título: document.getElementById('titulo').value,
+                descrição: document.getElementById('descricao').value,
                 tipo: document.getElementById('tipo').value,
                 categoria: document.getElementById('categoria').value,
                 carga_horaria: parseInt(document.getElementById('cargaHoraria').value) || 0,
@@ -804,7 +804,7 @@
                 if (response.ok) {
                     const t = await response.json();
                     
-                    document.getElementById('detalhesTítulo').textContent = t.titulo;
+                    document.getElementById('detalhesTitulo').textContent = t.titulo;
                     
                     const dataInicio = t.data_inicio ? new Date(t.data_inicio).toLocaleDateString('pt-BR') : '-';
                     const dataFim = t.data_fim ? new Date(t.data_fim).toLocaleDateString('pt-BR') : '-';

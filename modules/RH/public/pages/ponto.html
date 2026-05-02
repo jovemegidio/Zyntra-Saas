@@ -286,7 +286,7 @@
                     <div class="status-ponto" id="status-ponto">Aguardando entrada</div>
 
                     <div class="batidas-hoje">
-                        <div class="batida-card registrada" id="batida-1">
+                        <div class="batida-card" id="batida-1">
                             <i class="fas fa-sign-in-alt"></i>
                             <div class="batida-label">Entrada</div>
                             <div class="batida-hora" id="hora-entrada">--:--</div>
@@ -344,11 +344,7 @@
                     </div>
                     <div class="card-body">
                         <div class="filtros-espelho">
-                            <select id="filtro-mes">
-                                <option value="12">Dezembro 2025</option>
-                                <option value="11">Novembro 2025</option>
-                                <option value="10">Outubro 2025</option>
-                            </select>
+                            <select id="filtro-mes"></select>
                             <input type="text" placeholder="Buscar por data..." id="busca-ponto">
                         </div>
 
@@ -497,11 +493,77 @@
             }
         }
 
+        function popularFiltroMes() {
+            const sel = document.getElementById('filtro-mes');
+            if (!sel) return;
+            sel.innerHTML = '';
+            const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+            const now = new Date();
+            for (let i = 0; i < 6; i++) {
+                const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                const val = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+                const opt = document.createElement('option');
+                opt.value = val;
+                opt.textContent = meses[d.getMonth()] + ' ' + d.getFullYear();
+                sel.appendChild(opt);
+            }
+            sel.addEventListener('change', carregarEspelho);
+        }
+
+        async function carregarEspelho() {
+            const sel = document.getElementById('filtro-mes');
+            const anoMes = sel ? sel.value : '';
+            const tbody = document.getElementById('tbody-espelho');
+            if (!anoMes || !tbody) return;
+            const [ano, mes] = anoMes.split('-');
+            const dataInicio = `${ano}-${mes}-01`;
+            const lastDay = new Date(parseInt(ano), parseInt(mes), 0).getDate();
+            const dataFim = `${ano}-${mes}-${String(lastDay).padStart(2, '0')}`;
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#94a3b8;padding:24px"><i class="fas fa-spinner fa-spin"></i></td></tr>';
+            try {
+                let url = `/api/rh/ponto/marcacoes?data_inicio=${dataInicio}&data_fim=${dataFim}`;
+                if (currentUserId) url += `&funcionario_id=${currentUserId}`;
+                const resp = await fetch(url, { credentials: 'include', headers: getAuthHeaders() });
+                if (!resp.ok) throw new Error('HTTP ' + resp.status);
+                const result = await resp.json();
+                const marcacoes = result.marcações || result.marcacoes || [];
+                if (!marcacoes.length) {
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#94a3b8;padding:24px">Nenhum registro encontrado</td></tr>';
+                    return;
+                }
+                const porData = {};
+                marcacoes.forEach(m => {
+                    if (!porData[m.data]) porData[m.data] = {};
+                    porData[m.data][m.tipo] = (m.hora || '').substring(0, 5);
+                });
+                const toMin = t => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+                tbody.innerHTML = Object.keys(porData).sort().map(data => {
+                    const d = porData[data];
+                    const e = d.entrada || '--:--', sa = d.saida_almoco || '--:--';
+                    const ra = d.retorno_almoco || '--:--', s = d.saida || '--:--';
+                    let total = '--';
+                    if (e !== '--:--' && s !== '--:--') {
+                        let mins = toMin(s) - toMin(e);
+                        if (sa !== '--:--' && ra !== '--:--') mins -= (toMin(ra) - toMin(sa));
+                        total = Math.floor(mins / 60) + 'h ' + String(mins % 60).padStart(2, '0') + 'min';
+                    }
+                    const [year, month, day] = data.split('-');
+                    const badge = s !== '--:--' ? 'badge-success">OK' : e !== '--:--' ? 'badge-warning">Incompleto' : 'badge-danger">Falta';
+                    return `<tr><td><strong>${day}/${month}/${year}</strong></td><td>${e}</td><td>${sa}</td><td>${ra}</td><td>${s}</td><td>${total}</td><td><span class="badge ${badge}</span></td></tr>`;
+                }).join('');
+            } catch (err) {
+                console.error('Erro ao carregar espelho:', err);
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#ef4444;padding:24px">Erro ao carregar registros</td></tr>';
+            }
+        }
+
         setInterval(atualizarRelogio, 1000);
         document.addEventListener('DOMContentLoaded', () => {
+            popularFiltroMes();
             carregarUsuarioLogado();
             atualizarRelogio();
             atualizarData();
+            setTimeout(carregarEspelho, 1500);
         });
 
         function showToast(message, type) {
