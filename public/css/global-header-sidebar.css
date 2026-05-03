@@ -32,11 +32,11 @@ pre code, code, .monospace, .code, kbd, samp {
    1. DESIGN TOKENS
    ============================================================ */
 :root {
-    /* Sidebar — PRETO */
-    --sidebar-w: 48px;
-    --sidebar-bg: #000000;
-    --sidebar-hover: rgba(255,255,255,0.10);
-    --sidebar-active-bg: rgba(255,255,255,0.15);
+    /* Sidebar — Vzero (slate-900 + blue-600 active) */
+    --sidebar-w: 64px;
+    --sidebar-bg: #0f172a;
+    --sidebar-hover: #1e293b;
+    --sidebar-active-bg: #2563eb;
     --sidebar-active-text: #ffffff;
     --sidebar-icon-color: #94a3b8;
     --sidebar-icon-hover: #ffffff;
@@ -61,7 +61,7 @@ pre code, code, .monospace, .code, kbd, samp {
     --tooltip-border: 1px solid rgba(255,255,255,0.1);
 
     /* Override legacy variables */
-    --sidebar-width: 48px !important;
+    --sidebar-width: 64px !important;
     --header-height: 42px !important;
     --primary-dark: #ffffff !important;
 }
@@ -70,9 +70,9 @@ pre code, code, .monospace, .code, kbd, samp {
    DARK MODE — body.dark-mode
    ============================================================ */
 body.dark-mode {
-    --sidebar-bg: #1e1e1e;
-    --sidebar-hover: rgba(255,255,255,0.08);
-    --sidebar-active-bg: #3b3b3b;
+    --sidebar-bg: #0f172a;
+    --sidebar-hover: #1e293b;
+    --sidebar-active-bg: #1d4ed8;
     --sidebar-active-text: #fff;
     --sidebar-icon-color: #8b8b8b;
     --sidebar-icon-hover: #d4d4d4;
@@ -109,10 +109,10 @@ body.dark-mode {
 }
 
 .sidebar-logo {
-    width: 30px !important;
-    height: 30px !important;
-    background: #3b3b3b !important;
-    border-radius: 7px !important;
+    width: 40px !important;
+    height: 40px !important;
+    background: rgba(255,255,255,0.06) !important;
+    border-radius: 10px !important;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -137,28 +137,28 @@ body.dark-mode {
 .sidebar-nav {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 4px;
     flex: 1;
     width: 100%;
-    padding: 0 6px;
+    padding: 0 10px;
     overflow: visible !important;
     scrollbar-width: none;
 }
 .sidebar-nav::-webkit-scrollbar { display: none; }
 
 .sidebar-btn {
-    width: 34px !important;
-    height: 34px !important;
-    min-height: 34px !important;
+    width: 44px !important;
+    height: 44px !important;
+    min-height: 44px !important;
     border: none;
     background: transparent;
     color: var(--sidebar-icon-color);
-    border-radius: 8px !important;
+    border-radius: 12px !important;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 14px !important;
+    font-size: 16px !important;
     transition: all 0.15s ease;
     position: relative;
     margin: 0 auto;
@@ -179,22 +179,14 @@ body.dark-mode {
 }
 
 .sidebar-btn.active {
-    background: var(--accent-soft);
-    color: var(--accent);
+    background: var(--sidebar-active-bg);
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
 }
 
-/* Transição animada do indicador ativo */
+/* Vzero: solid bg replaces left indicator bar — hide it entirely */
 .sidebar-btn.active::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 3px;
-    height: 60%;
-    background: var(--accent);
-    border-radius: 0 3px 3px 0;
-    animation: sidebarIndicatorIn 0.2s ease forwards;
+    display: none !important;
 }
 
 @keyframes sidebarIndicatorIn {
@@ -212,39 +204,32 @@ body.dark-mode {
     animation: sidebarClickPulse 0.35s ease-out;
 }
 
-/* Override: no botão ativo, ::before mostra o indicador (barra lateral), NÃO a seta do tooltip.
-   No hover, a seta do tooltip aparece normalmente via as regras de hover abaixo. */
+/* Vzero: also hide indicator bar for active buttons with tooltips */
 .sidebar-btn.active[data-title]::before,
 .sidebar-btn.active[title]::before {
-    content: '' !important;
-    position: absolute !important;
-    left: 0 !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
-    width: 3px !important;
-    height: 60% !important;
-    background: var(--accent) !important;
-    border-radius: 0 3px 3px 0 !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    border: none !important;
-    filter: none !important;
-    border-color: transparent !important;
-    pointer-events: none !important;
-    z-index: 1 !important;
+    display: none !important;
 }
 
-/* No hover do botão ativo, ::before vira a seta do tooltip (restaura comportamento de tooltip) */
+/* Restore tooltip arrow on hover for active buttons */
 .sidebar-btn.active[data-title]:hover::before,
 .sidebar-btn.active[title]:hover::before {
+    display: block !important;
+    content: '' !important;
+    position: absolute !important;
     left: calc(100% + 5px) !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
     width: auto !important;
     height: auto !important;
-    background: none !important;
     border: 6px solid transparent !important;
     border-right-color: var(--tooltip-bg-solid, #1e293b) !important;
+    background: none !important;
     border-radius: 0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: none !important;
     z-index: 10001 !important;
+    animation: none !important;
 }
 
 /* ============================================================
@@ -339,8 +324,8 @@ body.dark-mode {
     margin-top: auto;
     display: flex;
     flex-direction: column;
-    gap: 2px;
-    padding: 0 6px;
+    gap: 4px;
+    padding: 0 10px;
     padding-top: 8px;
     border-top: 1px solid rgba(255,255,255,0.06);
 }
