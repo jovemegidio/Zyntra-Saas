@@ -384,7 +384,7 @@ class CotacoesManager {
     atualizarPaginacao() {
         const total = this.cotacoesFiltradas.length;
         const totalPaginas = Math.ceil(total / this.itensPorPagina);
-        const inicio = (this.paginaAtual - 1) * this.itensPorPagina + 1;
+        const inicio = total === 0 ? 0 : (this.paginaAtual - 1) * this.itensPorPagina + 1;
         const fim = Math.min(inicio + this.itensPorPagina - 1, total);
 
         document.getElementById('paginacaoInicio').textContent = inicio;

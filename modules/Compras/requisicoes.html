@@ -629,7 +629,7 @@
                 <td>${r.solicitante || '-'}</td>
                 <td>${formatarData(r.data_solicitacao)}</td>
                 <td>${r.centro_custo || '-'}</td>
-                <td><span class="badge badge-${r.prioridade === 'urgente' ? 'urgent' : r.prioridade === 'alta' ? 'pending' : r.prioridade === 'normal' ? 'in-progress' : 'approved'}">${r.prioridade || 'normal'}</span></td>
+                <td><span class="badge badge-${r.prioridade === 'urgente' ? 'urgent' : r.prioridade === 'alta' ? 'pending' : r.prioridade === 'normal' ? 'in-progress' : 'approved'}">${{urgente:'Urgente',alta:'Alta',media:'Média',normal:'Normal',baixa:'Baixa'}[r.prioridade] || 'Normal'}</span></td>
                 <td>${formatarMoeda(r.valor_estimado)}</td>
                 <td><span class="badge badge-${getStatusClass(r.status)}">${getStatusLabel(r.status)}</span></td>
                 <td>
@@ -872,7 +872,7 @@
                 '<div class="view-item"><label>Solicitante</label><p>' + (req.solicitante || '-') + '</p></div>' +
                 '<div class="view-item"><label>Data</label><p>' + formatarData(req.data_solicitacao) + '</p></div>' +
                 '<div class="view-item"><label>Centro de Custo</label><p>' + (req.centro_custo || '-') + '</p></div>' +
-                '<div class="view-item"><label>Prioridade</label><p><span class="badge badge-' + (req.prioridade === 'urgente' ? 'urgent' : 'pending') + '">' + (req.prioridade || 'normal') + '</span></p></div>' +
+                '<div class="view-item"><label>Prioridade</label><p><span class="badge badge-' + (req.prioridade === 'urgente' ? 'urgent' : req.prioridade === 'alta' ? 'pending' : req.prioridade === 'normal' ? 'in-progress' : 'approved') + '">' + ({urgente:'Urgente',alta:'Alta',media:'Média',normal:'Normal',baixa:'Baixa'}[req.prioridade] || 'Normal') + '</span></p></div>' +
                 '<div class="view-item"><label>Status</label><p><span class="badge badge-' + getStatusClass(req.status) + '">' + getStatusLabel(req.status) + '</span></p></div>' +
                 '</div></div>' +
                 '<div class="view-section"><h4>Justificativa</h4><p style="font-size:0.85rem; color:var(--gray-700);">' + (req.justificativa || '-') + '</p></div>' +

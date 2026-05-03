@@ -923,6 +923,9 @@ function atualizarSelecao() {
         selectAllCb.checked = totalSelected === allCheckboxes.length && totalSelected > 0;
         selectAllCb.indeterminate = totalSelected > 0 && totalSelected < allCheckboxes.length;
     }
+
+    const btnExcluir = document.getElementById('btn-excluir-selecionados');
+    if (btnExcluir) btnExcluir.style.display = totalSelected > 0 ? '' : 'none';
 }
 
 async function excluirSelecionados() {

@@ -883,7 +883,7 @@
     /* ========== Helpers ========== */
     function formatarData(d) { if (!d) return '-'; try { return new Date(d).toLocaleDateString('pt-BR'); } catch (e) { return d; } }
     function formatarDataHora(d) { if (!d) return '-'; try { return new Date(d).toLocaleString('pt-BR'); } catch (e) { return d; } }
-    function formatarMoeda(v) { return (v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
+    function formatarMoeda(v) { return (parseFloat(v) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
     function formatarCNPJ(c) { if (!c) return '-'; const n = c.replace(/\D/g, ''); if (n.length !== 14) return c; return n.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5'); }
     function traduzirStatus(s, atrasado) {
         const map = {

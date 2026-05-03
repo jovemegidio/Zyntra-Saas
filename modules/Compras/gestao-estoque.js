@@ -143,9 +143,12 @@ async function carregarEstoque() {
 // ============================================
 function atualizarStats() {
     const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-    set('stat-total', EST.stats.total || 0);
-    set('stat-ativos', EST.stats.ativos || 0);
-    set('stat-inativos', EST.stats.inativos || 0);
+    const total = EST.stats.total || EST.total || 0;
+    const ativos = EST.stats.ativos || 0;
+    const inativos = Math.max(0, EST.stats.inativos !== undefined ? EST.stats.inativos : total - ativos);
+    set('stat-total', total);
+    set('stat-ativos', ativos);
+    set('stat-inativos', inativos);
 
     // Count vinculados from current page
     const vinculados = EST.materiais.filter(m => m.vinculado_estoque).length;

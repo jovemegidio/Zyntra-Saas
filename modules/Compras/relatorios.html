@@ -332,7 +332,8 @@
                 const r = await fetch('/api/pcp/materias-primas', { headers: this.getAuthHeaders() });
                 if (!r.ok) return;
                 const d = await r.json();
-                const materiais = (d.materiais || d || []).filter(m => {
+                const arr = Array.isArray(d.materiais) ? d.materiais : Array.isArray(d) ? d : [];
+                const materiais = arr.filter(m => {
                     const atual = m.estoque_atual || m.quantidade || 0;
                     const min = m.estoque_minimo || m.minimo || 0;
                     return min > 0 && atual <= min;
