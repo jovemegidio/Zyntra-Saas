@@ -733,40 +733,40 @@
             }
         }
 
-        /* Module Colors - glassmorphism colorido */
+        /* Module Colors - Vzero design system */
         .module-card.compras {
-            --card-bg: linear-gradient(135deg, #5b7cf7 0%, #4a6cf7 100%);
-            background: linear-gradient(135deg, #5b7cf7 0%, #4a6cf7 100%);
+            --card-bg: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
         }
 
         .module-card.vendas {
-            --card-bg: linear-gradient(135deg, #1a3ab5 0%, #2545c9 100%);
-            background: linear-gradient(135deg, #1a3ab5 0%, #2545c9 100%);
+            --card-bg: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+            background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
         }
 
         .module-card.nfe {
-            --card-bg: linear-gradient(135deg, #18b87e 0%, #21cc8e 100%);
-            background: linear-gradient(135deg, #18b87e 0%, #21cc8e 100%);
+            --card-bg: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
+            background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
         }
 
         .module-card.logistica {
-            --card-bg: linear-gradient(135deg, #18b87e 0%, #21cc8e 100%);
-            background: linear-gradient(135deg, #18b87e 0%, #21cc8e 100%);
+            --card-bg: linear-gradient(135deg, #059669 0%, #047857 100%);
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
         }
 
         .module-card.pcp {
-            --card-bg: linear-gradient(135deg, #ef4444 0%, #f25f5f 100%);
-            background: linear-gradient(135deg, #ef4444 0%, #f25f5f 100%);
+            --card-bg: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
+            background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
         }
 
         .module-card.financeiro {
-            --card-bg: linear-gradient(135deg, #7ccf00 0%, #8ed616 100%);
-            background: linear-gradient(135deg, #7ccf00 0%, #8ed616 100%);
+            --card-bg: linear-gradient(135deg, #65a30d 0%, #4d7c0f 100%);
+            background: linear-gradient(135deg, #65a30d 0%, #4d7c0f 100%);
         }
 
         .module-card.rh {
-            --card-bg: linear-gradient(135deg, #9b59b6 0%, #a76bc8 100%);
-            background: linear-gradient(135deg, #9b59b6 0%, #a76bc8 100%);
+            --card-bg: linear-gradient(135deg, #c026d3 0%, #a21caf 100%);
+            background: linear-gradient(135deg, #c026d3 0%, #a21caf 100%);
         }
 
 
@@ -1658,38 +1658,38 @@
         }
 
         body.dark-mode .module-card.compras .module-icon {
-            background: rgba(249, 115, 22, 0.15) !important;
-            color: #fb923c !important;
-        }
-
-        body.dark-mode .module-card.vendas .module-icon {
             background: rgba(59, 130, 246, 0.15) !important;
             color: #60a5fa !important;
         }
 
+        body.dark-mode .module-card.vendas .module-icon {
+            background: rgba(99, 102, 241, 0.15) !important;
+            color: #a5b4fc !important;
+        }
+
         body.dark-mode .module-card.nfe .module-icon {
-            background: rgba(37, 99, 235, 0.15) !important;
-            color: #93c5fd !important;
+            background: rgba(20, 184, 166, 0.15) !important;
+            color: #2dd4bf !important;
         }
 
         body.dark-mode .module-card.logistica .module-icon {
-            background: rgba(14, 165, 233, 0.15) !important;
-            color: #7dd3fc !important;
-        }
-
-        body.dark-mode .module-card.pcp .module-icon {
-            background: rgba(100, 116, 139, 0.2) !important;
-            color: #94a3b8 !important;
-        }
-
-        body.dark-mode .module-card.financeiro .module-icon {
             background: rgba(16, 185, 129, 0.15) !important;
             color: #34d399 !important;
         }
 
+        body.dark-mode .module-card.pcp .module-icon {
+            background: rgba(225, 29, 72, 0.15) !important;
+            color: #fb7185 !important;
+        }
+
+        body.dark-mode .module-card.financeiro .module-icon {
+            background: rgba(101, 163, 13, 0.15) !important;
+            color: #bef264 !important;
+        }
+
         body.dark-mode .module-card.rh .module-icon {
-            background: rgba(236, 72, 153, 0.15) !important;
-            color: #f472b6 !important;
+            background: rgba(192, 38, 211, 0.15) !important;
+            color: #e879f9 !important;
         }
 
         body.dark-mode .header-search-container,
@@ -1922,7 +1922,7 @@
                 </div>
             </div>
             <h1 class="greeting-title">Olá, <span id="greeting-name">Usuário</span></h1>
-            <p class="greeting-quote">Grandes conquistas exigem grandes esforços.</p>
+            <p class="greeting-quote" id="greeting-quote">Grandes conquistas exigem grandes esforços.</p>
         </section>
 
         <section class="modules-grid">
@@ -2017,6 +2017,18 @@
         }
         updateDateTime();
         setInterval(updateDateTime, 60000);
+
+        // Frases motivacionais rotativas (Vzero design)
+        (function () {
+            const quotes = [
+                'Grandes conquistas exigem grandes esforços.',
+                'O sucesso é a soma de pequenos esforços repetidos dia após dia.',
+                'Transforme seus sonhos em metas e suas metas em conquistas.',
+                'A excelência não é um ato, mas um hábito.',
+            ];
+            const el = document.getElementById('greeting-quote');
+            if (el) el.textContent = quotes[Math.floor(Math.random() * quotes.length)];
+        })();
 
         // Função para obter usuário logado (usa 'userData' - chave do sistema)
         function getUsuarioLogado() {
