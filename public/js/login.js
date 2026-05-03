@@ -388,7 +388,8 @@ document.addEventListener('DOMContentLoaded', () => {
       passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
       if (eyeOpen) eyeOpen.style.display = isPassword ? 'none' : 'block';
       if (eyeOff) eyeOff.style.display = isPassword ? 'block' : 'none';
-      passwordToggle.setAttribute('title', isPassword ? 'Ocultar senha' : 'Mostrar senha');
+      passwordToggle.setAttribute('aria-label', isPassword ? 'Ocultar senha' : 'Mostrar senha');
+      passwordToggle.setAttribute('aria-pressed', isPassword ? 'true' : 'false');
     });
   }
 
@@ -933,13 +934,24 @@ document.addEventListener('DOMContentLoaded', () => {
   function startCountdown(seconds) {
     if (twoFA_countdownInterval) clearInterval(twoFA_countdownInterval);
     let remaining = seconds;
+    const total = seconds;
     const countdownEl = document.getElementById('twofa-countdown');
     const timerEl = document.getElementById('twofa-timer');
+    const progressBar = document.getElementById('twofa-progress-bar');
 
     function update() {
       const m = Math.floor(remaining / 60);
       const s = remaining % 60;
       if (countdownEl) countdownEl.textContent = `${m}:${s.toString().padStart(2, '0')}`;
+      if (progressBar) {
+        const pct = Math.max(0, (remaining / total) * 100);
+        progressBar.style.width = pct + '%';
+        progressBar.style.background = remaining <= 60
+          ? 'linear-gradient(90deg,#dc2626,#ef4444)'
+          : remaining <= 120
+            ? 'linear-gradient(90deg,hsl(38,92%,50%),hsl(25,95%,53%))'
+            : 'linear-gradient(90deg,hsl(234,89%,64%),hsl(199,89%,48%))';
+      }
       if (remaining <= 0) {
         clearInterval(twoFA_countdownInterval);
         if (timerEl) timerEl.innerHTML = '<span style="color:#dc2626;">⚠️ Código expirado. Clique em "Reenviar código".</span>';
@@ -1323,6 +1335,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     addInputStyle(newPwInput);
     addInputStyle(confirmPwInput);
+
+    // Real-time confirm-password match feedback
+    if (confirmPwInput) {
+      const newConfirmInput = confirmPwInput.cloneNode(true);
+      confirmPwInput.parentNode.replaceChild(newConfirmInput, confirmPwInput);
+      addInputStyle(newConfirmInput);
+      newConfirmInput.addEventListener('input', () => {
+        const newVal = document.getElementById('force-new-password')?.value || '';
+        if (!newConfirmInput.value) {
+          newConfirmInput.style.borderColor = 'hsl(210,40%,98%,0.12)';
+          return;
+        }
+        if (newConfirmInput.value === newVal) {
+          newConfirmInput.style.borderColor = 'hsl(142,76%,45%)';
+          newConfirmInput.style.boxShadow = '0 0 0 3px hsla(142,76%,45%,0.2)';
+        } else {
+          newConfirmInput.style.borderColor = 'hsl(0,84%,60%)';
+          newConfirmInput.style.boxShadow = '0 0 0 3px hsla(0,84%,60%,0.2)';
+        }
+      });
+    }
 
     // Password strength on input
     if (newPwInput) {

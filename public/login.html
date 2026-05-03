@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#0d1117">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -15,6 +15,15 @@
     <meta name="format-detection" content="telephone=no">
     
     <title>Zyntra: Login</title>
+    <meta name="description" content="Login Zyntra - Plataforma ERP Completa. Acesse sua conta com segurança.">
+    <meta property="og:title" content="Zyntra ERP - Login">
+    <meta property="og:description" content="Plataforma ERP Completa. Acesse sua conta com segurança.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://aluforce.api.br/login.html">
+    <meta property="og:image" content="/images/zyntra-branco.png">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Zyntra ERP - Login">
+    <meta name="twitter:description" content="Plataforma ERP Completa. Acesse sua conta com segurança.">
     
     <!-- Favicon e ícones -->
     <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
@@ -133,7 +142,7 @@
                                 name="email" 
                                 class="form-input" 
                                 placeholder="seu@email.com" 
-                                autocomplete="email" 
+                                autocomplete="username"
                                 required
                             >
                         </div>
@@ -198,7 +207,7 @@
                                 required
                             >
                             <!-- Eye toggle -->
-                            <button type="button" class="password-toggle-btn" id="password-toggle" tabindex="-1" title="Mostrar/Ocultar senha">
+                            <button type="button" class="password-toggle-btn" id="password-toggle" tabindex="-1" aria-label="Mostrar senha" aria-pressed="false">
                                 <!-- Eye open (default) -->
                                 <svg id="eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
@@ -232,7 +241,7 @@
                     </div>
 
                     <!-- Error/Success Message -->
-                    <div id="error-message" class="login-message" role="alert"></div>
+                    <div id="error-message" class="login-message" role="alert" aria-live="assertive"></div>
 
                     <!-- Submit Button -->
                     <button type="submit" id="login-submit-btn" class="login-submit-btn">
@@ -315,6 +324,7 @@
         <div class="twofa-card" style="max-width:440px;">
             <!-- Header -->
             <div class="twofa-header">
+                <button type="button" onclick="document.getElementById('modal-force-password').style.display='none'" style="position:absolute;top:16px;right:16px;background:none;border:none;color:hsl(215,20%,50%);font-size:22px;cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:background 0.2s;" aria-label="Fechar" onmouseover="this.style.background='hsla(0,0%,100%,0.1)'" onmouseout="this.style.background='none'">&times;</button>
                 <div class="twofa-icon-box" style="background:linear-gradient(135deg, hsl(38,92%,50%), hsl(25,95%,53%));">
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
@@ -401,13 +411,13 @@
 
                 <!-- Code Input -->
                 <div class="twofa-code-container" id="twofa-code-container">
-                    <input type="text" maxlength="1" class="twofa-digit" data-index="0" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code">
-                    <input type="text" maxlength="1" class="twofa-digit" data-index="1" inputmode="numeric" pattern="[0-9]">
-                    <input type="text" maxlength="1" class="twofa-digit" data-index="2" inputmode="numeric" pattern="[0-9]">
+                    <input type="text" maxlength="1" class="twofa-digit" data-index="0" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code" aria-label="Dígito 1 do código de verificação">
+                    <input type="text" maxlength="1" class="twofa-digit" data-index="1" inputmode="numeric" pattern="[0-9]" aria-label="Dígito 2 do código de verificação">
+                    <input type="text" maxlength="1" class="twofa-digit" data-index="2" inputmode="numeric" pattern="[0-9]" aria-label="Dígito 3 do código de verificação">
                     <span class="twofa-separator">—</span>
-                    <input type="text" maxlength="1" class="twofa-digit" data-index="3" inputmode="numeric" pattern="[0-9]">
-                    <input type="text" maxlength="1" class="twofa-digit" data-index="4" inputmode="numeric" pattern="[0-9]">
-                    <input type="text" maxlength="1" class="twofa-digit" data-index="5" inputmode="numeric" pattern="[0-9]">
+                    <input type="text" maxlength="1" class="twofa-digit" data-index="3" inputmode="numeric" pattern="[0-9]" aria-label="Dígito 4 do código de verificação">
+                    <input type="text" maxlength="1" class="twofa-digit" data-index="4" inputmode="numeric" pattern="[0-9]" aria-label="Dígito 5 do código de verificação">
+                    <input type="text" maxlength="1" class="twofa-digit" data-index="5" inputmode="numeric" pattern="[0-9]" aria-label="Dígito 6 do código de verificação">
                 </div>
 
                 <!-- Error message -->
@@ -417,9 +427,14 @@
                 <div id="twofa-success" class="twofa-msg twofa-msg-success" style="display:none;"></div>
 
                 <!-- Timer -->
-                <p id="twofa-timer" class="twofa-timer">
-                    ⏱️ Código expira em <strong id="twofa-countdown">5:00</strong>
-                </p>
+                <div style="margin-bottom:16px;">
+                    <div style="height:3px;background:hsl(222,30%,20%);border-radius:2px;overflow:hidden;margin-bottom:6px;">
+                        <div id="twofa-progress-bar" style="height:100%;width:100%;border-radius:2px;background:linear-gradient(90deg,hsl(234,89%,64%),hsl(199,89%,48%));transition:width 1s linear,background 0.5s ease;"></div>
+                    </div>
+                    <p id="twofa-timer" class="twofa-timer" style="margin-bottom:0;">
+                        ⏱️ Código expira em <strong id="twofa-countdown">5:00</strong>
+                    </p>
+                </div>
 
                 <!-- Remember Device -->
                 <label class="twofa-remember-label" for="twofa-remember-device">
