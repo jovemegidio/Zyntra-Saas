@@ -66,11 +66,13 @@ router.get('/:id', async (req, res) => {
 router.post('/', async (req, res) => {
     try {
         const {
-            razao_social, nome_fantasia, cnpj, ie,
-            endereco, cidade, estado, cep,
-            telefone, email, contato_principal,
-            condicoes_pagamento, prazo_entrega_padrao,
-            observacoes, ativo = 1
+            razao_social, nome_fantasia, cnpj,
+            ie, inscricao_estadual,
+            endereco, bairro, cidade, estado, cep,
+            telefone, email, contato_principal, contato,
+            condicoes_pagamento, prazo_entrega_padrao, prazo_entrega,
+            observacoes, ativo = 1,
+            categoria, avaliacao, chave_pix, nome
         } = req.body;
         
         if (!razao_social || !cnpj) {
@@ -86,17 +88,17 @@ router.post('/', async (req, res) => {
         const result = await run(`
             INSERT INTO fornecedores (
                 razao_social, nome_fantasia, cnpj, ie,
-                endereco, cidade, estado, cep,
-                telefone, email, contato_principal,
+                endereco, bairro, cidade, estado, cep,
+                telefone, email, contato_principal, contato, nome,
                 condicoes_pagamento, prazo_entrega_padrao,
-                observacoes, ativo
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                observacoes, ativo, categoria, avaliacao, chave_pix
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `, [
-            razao_social, nome_fantasia, cnpj, ie,
-            endereco, cidade, estado, cep,
-            telefone, email, contato_principal,
-            condicoes_pagamento, prazo_entrega_padrao || 0,
-            observacoes, ativo
+            razao_social, nome_fantasia, cnpj, ie || inscricao_estadual || null,
+            endereco, bairro || null, cidade, estado, cep,
+            telefone, email, contato_principal, contato || contato_principal || null, nome || razao_social,
+            condicoes_pagamento, prazo_entrega_padrao || prazo_entrega || 0,
+            observacoes, ativo, categoria || 'Geral', avaliacao || 0, chave_pix || null
         ]);
         
         res.status(201).json({
@@ -113,28 +115,32 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
     try {
         const {
-            razao_social, nome_fantasia, cnpj, ie,
-            endereco, cidade, estado, cep,
-            telefone, email, contato_principal,
-            condicoes_pagamento, prazo_entrega_padrao,
-            observacoes, ativo
+            razao_social, nome_fantasia, cnpj,
+            ie, inscricao_estadual,
+            endereco, bairro, cidade, estado, cep,
+            telefone, email, contato_principal, contato,
+            condicoes_pagamento, prazo_entrega_padrao, prazo_entrega,
+            observacoes, ativo,
+            categoria, avaliacao, chave_pix, nome
         } = req.body;
         
         const result = await run(`
             UPDATE fornecedores SET
                 razao_social = ?, nome_fantasia = ?, cnpj = ?, ie = ?,
-                endereco = ?, cidade = ?, estado = ?, cep = ?,
-                telefone = ?, email = ?, contato_principal = ?,
+                endereco = ?, bairro = ?, cidade = ?, estado = ?, cep = ?,
+                telefone = ?, email = ?, contato_principal = ?, contato = ?, nome = ?,
                 condicoes_pagamento = ?, prazo_entrega_padrao = ?,
                 observacoes = ?, ativo = ?,
+                categoria = ?, avaliacao = ?, chave_pix = ?,
                 updated_at = CURRENT_TIMESTAMP
             WHERE id = ?
         `, [
-            razao_social, nome_fantasia, cnpj, ie,
-            endereco, cidade, estado, cep,
-            telefone, email, contato_principal,
-            condicoes_pagamento, prazo_entrega_padrao,
+            razao_social, nome_fantasia, cnpj, ie || inscricao_estadual || null,
+            endereco, bairro || null, cidade, estado, cep,
+            telefone, email, contato_principal, contato || contato_principal || null, nome || razao_social,
+            condicoes_pagamento, prazo_entrega_padrao || prazo_entrega || 0,
             observacoes, ativo,
+            categoria || 'Geral', avaliacao || 0, chave_pix || null,
             req.params.id
         ]);
         

@@ -765,17 +765,15 @@
             if (restUsers.length > 0) {
                 if (showAllUsers) {
                     html += '<div class="ct-dm-divider">Todos os Usuários</div>';
-                    html += restUsers.map(u => renderDMItem(u)).join('');
                     html += `<div class="ct-dm-toggle" id="ct-toggle-users"><button>▲ Ocultar</button></div>`;
+                    html += restUsers.map(u => renderDMItem(u)).join('');
+                } else if (!contacts.length && !onlineNonContacts.length) {
+                    // Nenhum contato nem online — mostrar "Iniciar conversa"
+                    html += `<div class="ct-dm-empty">Nenhuma conversa ainda</div>`;
+                    html += `<div class="ct-dm-toggle" id="ct-toggle-users"><button>＋ Iniciar conversa (${restUsers.length})</button></div>`;
                 } else {
                     html += `<div class="ct-dm-toggle" id="ct-toggle-users"><button>＋ Ver todos (${restUsers.length})</button></div>`;
                 }
-            }
-
-            // Se nenhum contato e ninguém online
-            if (!contacts.length && !onlineNonContacts.length && !showAllUsers) {
-                html += `<div class="ct-dm-empty">Nenhuma conversa ainda</div>`;
-                html += `<div class="ct-dm-toggle" id="ct-toggle-users"><button>＋ Iniciar conversa (${restUsers.length})</button></div>`;
             }
 
             list.innerHTML = html;

@@ -1,8 +1,7 @@
 ﻿/**
- * LABOR ENERGY - Login Page v2.0
- * Served via nginx reverse proxy with sub_filter path rewriting.
- * getCompanyBasePath returns '' — nginx handles all path prefixing.
- * Uses location.assign() for redirects (patched by nginx injected script).
+ * ALUFORCE - Login Page v2.0
+ * Modern glassmorphism login with animated backgrounds
+ * All backend integration preserved from v1
  */
 document.addEventListener('DOMContentLoaded', () => {
   // ==================== DOM ELEMENTS ====================
@@ -152,13 +151,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ==================== MULTI-COMPANY ROUTING ====================
   // Mapeia domínios de email para o base path de cada empresa
-  // Standalone instance: sem path prefix (corre em porta dedicada)
-  const COMPANY_DOMAINS = {};
+  const COMPANY_DOMAINS = {
+    '@energy.com.br': '/labor-energy',
+    '@laboreletric.com.br': '/labor-eletric'
+  };
 
   function getCompanyBasePath(email) {
-    // Always return '' — nginx sub_filter and injected base-path script
-    // handle all path prefixing. Returning a value here would cause double-prefix.
-    return '';
+    if (!email) return window.__BASE_PATH || '';
+    const emailLower = email.toLowerCase();
+    for (const [domain, basePath] of Object.entries(COMPANY_DOMAINS)) {
+      if (emailLower.endsWith(domain)) return basePath;
+    }
+    return window.__BASE_PATH || '';
   }
 
   // ==================== AVATAR SYSTEM ====================
@@ -566,7 +570,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('remember-continue').addEventListener('click', () => {
       // Multi-company: redirecionar para o dashboard correto baseado no email do usuário
       const _rememberCompanyPath = getCompanyBasePath(userEmail);
-      window.location.assign('/dashboard');
+      window.location.href = _rememberCompanyPath ? _rememberCompanyPath + '/dashboard' : '/dashboard';
     });
 
     document.getElementById('remember-switch').addEventListener('click', async () => {
@@ -813,7 +817,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
               }
             }
-            window.location.assign(finalRedirect);
+            window.location.href = finalRedirect;
             return;
           } else {
             throw new Error('Sess\u00e3o n\u00e3o confirmada.');
@@ -847,14 +851,17 @@ document.addEventListener('DOMContentLoaded', () => {
           localStorage.setItem('userData', freshJson);
           sessionStorage.setItem('tabUserData', freshJson);
 
-          let finalRedirect = '/dashboard';
+          let finalRedirect = _companyPath ? _companyPath + '/dashboard' : '/dashboard';
           if (returnTo) {
             const decodedReturn = decodeURIComponent(returnTo);
             if (decodedReturn.startsWith('/') && !decodedReturn.startsWith('//')) {
               finalRedirect = decodedReturn;
+              if (_companyPath && !finalRedirect.startsWith(_companyPath)) {
+                finalRedirect = _companyPath + finalRedirect;
+              }
             }
           }
-          window.location.assign(finalRedirect);
+          window.location.href = finalRedirect;
         } else {
           throw new Error('Falha ao autenticar sess\u00e3o.');
         }
@@ -1138,9 +1145,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const decoded = decodeURIComponent(returnTo);
             if (decoded.startsWith('/') && !decoded.startsWith('//')) finalRedirect = decoded;
           }
-          window.location.assign(finalRedirect);
+          window.location.href = finalRedirect;
         }).catch(() => {
-          window.location.assign(redirectTo);
+          window.location.href = redirectTo;
         });
       }, 800);
 
@@ -1399,7 +1406,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 finalRedirect = parsed.pathname + parsed.search + parsed.hash;
               } catch (e) {}
               if (finalRedirect === '/index.html' || finalRedirect === '/index.html/') finalRedirect = '/dashboard';
-              window.location.assign(finalRedirect);
+              window.location.href = finalRedirect;
             }, 1500);
 
           } else {

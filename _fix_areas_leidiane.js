@@ -7,11 +7,11 @@ const mysql = require('mysql2/promise');
   const areas = JSON.stringify(['vendas', 'rh']);
   const [r] = await c.query(
     'UPDATE usuarios SET areas = ? WHERE email = ?',
-    [areas, 'leidiane.oliveira@aluforce.ind.br']
+    [areas, 'representantes@aluforce.ind.br']
   );
   const [rows] = await c.query(
     'SELECT id, nome, email, areas FROM usuarios WHERE email = ?',
-    ['leidiane.oliveira@aluforce.ind.br']
+    ['representantes@aluforce.ind.br']
   );
   console.log('Updated rows:', r.affectedRows);
   console.log('Record:', JSON.stringify(rows[0]));

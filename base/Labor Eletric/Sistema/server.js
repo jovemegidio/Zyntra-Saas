@@ -447,6 +447,13 @@ try {
         } catch (adminErr) {
             console.warn('[ADMIN-MIGRATION] ⚠️ Migration não executada:', adminErr.message);
         }
+        // FIX: Restore missing CNPJ data for transportadoras (one-time, idempotent)
+        try {
+            const { fixTransportadorasCnpj } = require('./database/migrations/fix-transportadoras-cnpj');
+            await fixTransportadorasCnpj(pool);
+        } catch (cnpjErr) {
+            console.warn('[FIX-CNPJ] ⚠️ Migration não executada:', cnpjErr.message);
+        }
     }).catch((err) => {
         console.error('⚠️  Aviso: Pool criado mas teste de conexão falhou:', err.message);
         console.log('➡️  Sistema continuará e tentará reconectar automaticamente');
@@ -819,7 +826,7 @@ app.get('/favicon.ico', (req, res) => {
 // ========================================
 const GLOBAL_INJECT_SCRIPTS = [
     '\n<!-- ALUFORCE: Confirm Dialog Profissional v2.0 -->',
-    '<script src="/_shared/confirm-dialog.js?v=20260301"></script>',
+    '<script src="/_shared/confirm-dialog.js?v=20260429"></script>',
     '<!-- ALUFORCE: Accessibility Widget v1.0 - Acessibilidade global -->',
     '<script src="/_shared/accessibility-widget.js?v=20260615"></script>',
     '<!-- ALUFORCE: Offline Sync Manager v4.0 - Sistema completo offline -->',
@@ -854,7 +861,7 @@ app.use((req, res, next) => {
                     if (isLoginPage) {
                         // Login: só confirm-dialog, sem offline
                         if (!html.includes('confirm-dialog.js')) {
-                            injectTag = '\n<script src="/_shared/confirm-dialog.js?v=20260301"></script>\n';
+                            injectTag = '\n<script src="/_shared/confirm-dialog.js?v=20260429"></script>\n';
                         }
                     } else {
                         // Todas as outras páginas: inject completo (confirm + offline + report-viewer + pwa + chat)
@@ -864,7 +871,7 @@ app.use((req, res, next) => {
                             // Já tem offline-sync, verificar componentes faltantes
                             let missing = '';
                             if (!html.includes('confirm-dialog.js')) {
-                                missing += '\n<script src="/_shared/confirm-dialog.js?v=20260301"></script>';
+                                missing += '\n<script src="/_shared/confirm-dialog.js?v=20260429"></script>';
                             }
                             if (!html.includes('report-viewer.js')) {
                                 missing += '\n<script src="/js/report-viewer.js?v=20260301"></script>';
@@ -1268,11 +1275,40 @@ function safeSendModuleHtml(req, res, next, moduleDir) {
             }
         }
         res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
         res.send(html);
     } else {
         next();
     }
 }
+
+function authenticateModuleHtml(req, res, next) {
+    const pageName = path.basename(req.path || '').toLowerCase();
+    if (pageName === 'login.html' || pageName === 'login') {
+        return res.redirect('/login.html');
+    }
+    return authenticatePage(req, res, next);
+}
+
+function normalizeLegacyUrlPath(urlPath) {
+    if (!urlPath || !urlPath.includes('.html')) return urlPath;
+    return urlPath.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+app.use((req, res, next) => {
+    if (req.method !== 'GET' && req.method !== 'HEAD') return next();
+    if (!String(req.path || '').toLowerCase().endsWith('.html')) return next();
+
+    const normalizedPath = normalizeLegacyUrlPath(req.path);
+    if (normalizedPath && normalizedPath !== req.path) {
+        const query = req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
+        return res.redirect(302, normalizedPath + query);
+    }
+
+    next();
+});
 
 // =================================================================
 // CLEAN URL ROUTING — Mascarar .html nas URLs para todos os módulos
@@ -1307,88 +1343,142 @@ function serveCleanUrl(req, res, next, moduleDir) {
 }
 
 // PCP
-app.get('/PCP/*.html', (req, res, next) => {
+app.get('/PCP/*.html', authenticateModuleHtml, (req, res, next) => {
     safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'PCP'));
 });
 app.get('/PCP/*', (req, res, next) => {
     if (req.params[0].includes('.')) return next(); // skip static assets
-    serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'PCP'));
+    authenticateModuleHtml(req, res, () => serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'PCP')));
 });
-app.get('/modules/PCP/*.html', (req, res, next) => {
+app.get('/modules/PCP/*.html', authenticateModuleHtml, (req, res, next) => {
     safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'PCP'));
 });
 
 // NFe
-app.get('/NFe/*.html', (req, res, next) => {
+app.get('/NFe/*.html', authenticateModuleHtml, (req, res, next) => {
     safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'NFe'));
 });
 app.get('/NFe/*', (req, res, next) => {
     if (req.params[0].includes('.')) return next();
-    serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'NFe'));
+    authenticateModuleHtml(req, res, () => serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'NFe')));
 });
-app.get('/e-Nf-e/*.html', (req, res, next) => {
+app.get('/e-Nf-e/*.html', authenticateModuleHtml, (req, res, next) => {
     safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'NFe'));
 });
 app.get('/e-Nf-e/*', (req, res, next) => {
     if (req.params[0].includes('.')) return next();
-    serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'NFe'));
+    authenticateModuleHtml(req, res, () => serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'NFe')));
 });
 
 // Financeiro — com clean URLs e aliases root-level
-app.get('/Financeiro/*.html', (req, res, next) => {
+// Todas as páginas disponíveis no módulo Financeiro
+const finEnabledPages = ['index', 'contas_pagar', 'contas_receber', 'contas_bancarias', 'fluxo_caixa', 'relatorios', 'plano_contas', 'conciliacao', 'orcamentos', 'impostos'];
+app.get('/Financeiro/*.html', authenticateModuleHtml, (req, res, next) => {
+    const rawPage = req.params[0].split('/').pop(); // Express strip .html from wildcard
+    const page = rawPage.replace(/-/g, '_');
+    if (!finEnabledPages.includes(page)) {
+        return res.redirect('/Financeiro/index.html');
+    }
+    req.params[0] = `${page}.html`;
     safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'Financeiro', 'public'));
 });
 app.get('/Financeiro/*', (req, res, next) => {
     if (req.params[0].includes('.')) return next();
-    serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'Financeiro', 'public'));
+    authenticateModuleHtml(req, res, () => serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'Financeiro', 'public')));
 });
 // Financeiro: Dashboard alias
-app.get('/Financeiro', (req, res, next) => {
+app.get('/Financeiro', authenticateModuleHtml, (req, res, next) => {
     req.params = { 0: 'index.html' };
     safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'Financeiro', 'public'));
 });
 
-// Aliases root-level para páginas do Financeiro (fix 404s)
+// Aliases root-level para páginas do Financeiro (apenas habilitadas)
 const finRootAliases = {
-    'contas-pagar': 'contas_pagar', 'contas-receber': 'contas_receber',
-    'fluxo-caixa': 'fluxo_caixa', 'bancos': 'contas_bancarias',
-    'plano-contas': 'plano_contas', 'orcamentos': 'orcamentos',
-    'conciliacao': 'conciliacao', 'relatorios': 'relatorios', 'impostos': 'impostos'
+    'contas-pagar': 'contas_pagar',
+    'contas-receber': 'contas_receber',
+    'contas-bancarias': 'contas_bancarias',
+    'fluxo-caixa': 'fluxo_caixa',
+    'plano-contas': 'plano_contas',
+    'relatorios': 'relatorios'
 };
+// Alias singular /relatorio → redireciona para /relatorios
+app.get('/relatorio', (req, res) => res.redirect(301, '/relatorios'));
 Object.entries(finRootAliases).forEach(([alias, file]) => {
-    app.get(`/${alias}`, (req, res, next) => {
+    app.get(`/${alias}`, authenticateModuleHtml, (req, res, next) => {
         req.params = { 0: `${file}.html` };
         safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'Financeiro', 'public'));
     });
 });
 
+// Vendas
+app.get('/Vendas/*.html', authenticateModuleHtml, (req, res, next) => {
+    safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'Vendas', 'public'));
+});
+app.get('/Vendas/*', (req, res, next) => {
+    if (req.params[0].includes('.')) return next();
+    authenticateModuleHtml(req, res, () => serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'Vendas', 'public')));
+});
+
 // Compras
-app.get('/Compras/*.html', (req, res, next) => {
+app.get('/Compras/*.html', authenticateModuleHtml, (req, res, next) => {
     safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'Compras'));
 });
 app.get('/Compras/*', (req, res, next) => {
     if (req.params[0].includes('.')) return next();
-    serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'Compras'));
+    authenticateModuleHtml(req, res, () => serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'Compras')));
 });
 
 // RH
-app.get('/RecursosHumanos/*.html', (req, res, next) => {
+app.get('/RecursosHumanos/*.html', authenticateModuleHtml, (req, res, next) => {
     safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'RH', 'public'));
 });
 app.get('/RecursosHumanos/*', (req, res, next) => {
     if (req.params[0].includes('.')) return next();
-    serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'RH', 'public'));
+    authenticateModuleHtml(req, res, () => serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'RH', 'public')));
 });
-app.get('/RH/*.html', (req, res, next) => {
+app.get('/RH/*.html', authenticateModuleHtml, (req, res, next) => {
     safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'RH', 'public'));
 });
 app.get('/RH/*', (req, res, next) => {
     if (req.params[0].includes('.')) return next();
-    serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'RH', 'public'));
+    authenticateModuleHtml(req, res, () => serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'RH', 'public')));
+});
+
+// Logistica
+app.get('/Logistica/*.html', authenticateModuleHtml, (req, res, next) => {
+    safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'Logistica', 'public'));
+});
+app.get('/Logistica/*', (req, res, next) => {
+    if (req.params[0].includes('.')) return next();
+    authenticateModuleHtml(req, res, () => serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'Logistica', 'public')));
+});
+app.get('/Logistica', authenticateModuleHtml, (req, res, next) => {
+    req.params = { 0: 'index.html' };
+    safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'Logistica', 'public'));
+});
+
+// Faturamento
+app.get('/Faturamento/*.html', authenticateModuleHtml, (req, res, next) => {
+    safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'Faturamento', 'public'));
+});
+app.get('/Faturamento/*', (req, res, next) => {
+    if (req.params[0].includes('.')) return next();
+    authenticateModuleHtml(req, res, () => serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'Faturamento', 'public')));
+});
+app.get('/Faturamento', authenticateModuleHtml, (req, res, next) => {
+    req.params = { 0: 'dashboard.html' };
+    safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'Faturamento', 'public'));
+});
+
+app.use('/modules', (req, res, next) => {
+    if (req.path.toLowerCase().endsWith('.html')) {
+        return authenticateModuleHtml(req, res, next);
+    }
+    next();
 });
 
 // Catch-all modules
-app.get('/modules/*.html', (req, res, next) => {
+app.get('/modules/*.html', authenticateModuleHtml, (req, res, next) => {
     safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules'));
 });
 
@@ -1519,7 +1609,7 @@ app.use('/Financeiro/css', express.static(path.join(__dirname, 'modules', 'Finan
 app.use('/Financeiro', express.static(path.join(__dirname, 'modules', 'Financeiro', 'public'), mso));
 app.use('/Compras', express.static(path.join(__dirname, 'modules', 'Compras'), mso));
 app.use('/Logistica/css', express.static(path.join(__dirname, 'modules', 'Faturamento', 'css'), mso));
-app.use('/Logistica', express.static(path.join(__dirname, 'modules', 'Faturamento', 'public'), mso));
+app.use('/Logistica', express.static(path.join(__dirname, 'modules', 'Logistica', 'public'), mso));
 app.use('/RecursosHumanos', express.static(path.join(__dirname, 'modules', 'RH', 'public'), mso));
 app.use('/RH', express.static(path.join(__dirname, 'modules', 'RH', 'public'), mso));
 
@@ -1531,6 +1621,7 @@ app.use('/modules', express.static(path.join(__dirname, 'modules'), {
     dotfiles: 'deny',
     index: false,
     setHeaders: (res, filePath) => {
+        moduleStaticOpts(res, filePath);
         if (filePath.endsWith('.html')) {
             res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
             res.setHeader('Pragma', 'no-cache');
@@ -1599,7 +1690,7 @@ try {
 // =================================================================
 const authenticateToken = authCentral.authenticateToken;
 
-// Middleware para autorizar admin ou comercial para Vendas/CRM
+// Middleware para autorizar admin, comercial ou financeiro para Vendas/CRM
 const authorizeAdminOrComercial = (req, res, next) => {
     const role = String(req.user?.role || '').toLowerCase().trim();
     const isAdm = role === 'admin' || role === 'administrador' ||
@@ -1710,6 +1801,17 @@ try {
     console.log('✅ Rotas Faturamento API carregadas: /api/faturamento/*');
 } catch (err) {
     console.error('❌ Erro ao carregar rotas Faturamento:', err.message);
+}
+
+// =================================================================
+// 📊 CONTÁBIL-FISCAL API — SPED EFD, Bloco K, Apurações ICMS/PIS/COFINS
+// =================================================================
+try {
+    const createContabilFiscalRouter = require('./routes/api-contabil-fiscal');
+    app.use('/api/contabil', authenticateToken, createContabilFiscalRouter(pool, authenticateToken));
+    console.log('✅ Rotas Contábil-Fiscal API carregadas: /api/contabil/*');
+} catch (err) {
+    console.error('❌ Erro ao carregar rotas Contábil-Fiscal:', err.message);
 }
 
 // =================================================================
@@ -1859,7 +1961,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'modules', 'RH', 'public
 // ============================================================
 // AUDIT-FIX R2: REFRESH_SECRET não deve derivar do JWT_SECRET
 const crypto = require('crypto');
-const REFRESH_SECRET = process.env.REFRESH_SECRET || crypto.createHash('sha256').update(JWT_SECRET + 'refresh_salt_zyntra_2026').digest('hex');
+const REFRESH_SECRET = process.env.REFRESH_SECRET || crypto.createHmac('sha256', JWT_SECRET).update('refresh-token-secret').digest('hex');
 
 function authenticatePage(req, res, next) {
     // SECURITY FIX: Exige token válido para servir páginas protegidas
@@ -2392,8 +2494,43 @@ const isAdminRHUser = (user) => {
 };
 
 const getUserFuncionarioId = (user) => {
-    const id = Number(user?.funcionario_id || user?.id);
+    const id = Number(user?.funcionario_id);
     return Number.isFinite(id) && id > 0 ? id : null;
+};
+
+const resolveUserFuncionarioId = async (user) => {
+    const explicitId = getUserFuncionarioId(user);
+    if (explicitId) return explicitId;
+
+    const userId = Number(user?.id);
+    const userEmail = String(user?.email || '').trim();
+
+    try {
+        if (Number.isFinite(userId) && userId > 0) {
+            const [rows] = await pool.query(`
+                SELECT f.id
+                FROM usuarios u
+                INNER JOIN funcionarios f
+                    ON LOWER(f.email) = LOWER(u.email)
+                    OR LOWER(f.email) = LOWER(u.login)
+                WHERE u.id = ?
+                LIMIT 1
+            `, [userId]);
+            if (rows.length > 0) return Number(rows[0].id);
+        }
+
+        if (userEmail) {
+            const [rows] = await pool.query(
+                'SELECT id FROM funcionarios WHERE LOWER(email) = LOWER(?) LIMIT 1',
+                [userEmail]
+            );
+            if (rows.length > 0) return Number(rows[0].id);
+        }
+    } catch (error) {
+        logger.warn('Aviso ao resolver funcionario do usuario logado:', error.message);
+    }
+
+    return Number.isFinite(userId) && userId > 0 ? userId : null;
 };
 
 // ─── PENSÃO ALIMENTÍCIA (RH) ───────────────────────────────────────────
@@ -2416,10 +2553,34 @@ pool.query(`CREATE TABLE IF NOT EXISTS rh_pensao_alimenticia (
     if (e && !String(e.message || '').includes('already exists')) logger.warn('rh_pensao_alimenticia:', e.message);
 });
 
+[
+    "ALTER TABLE rh_pensao_alimenticia ADD COLUMN IF NOT EXISTS valor DECIMAL(10,2) DEFAULT 0",
+    "ALTER TABLE rh_pensao_alimenticia ADD COLUMN IF NOT EXISTS nome_recebedor VARCHAR(255)",
+    "ALTER TABLE rh_pensao_alimenticia ADD COLUMN IF NOT EXISTS cpf_recebedor VARCHAR(14)",
+    "ALTER TABLE rh_pensao_alimenticia ADD COLUMN IF NOT EXISTS banco_recebedor VARCHAR(100)",
+    "ALTER TABLE rh_pensao_alimenticia ADD COLUMN IF NOT EXISTS agencia_recebedor VARCHAR(20)",
+    "ALTER TABLE rh_pensao_alimenticia ADD COLUMN IF NOT EXISTS conta_recebedor VARCHAR(30)",
+    "ALTER TABLE rh_pensao_alimenticia ADD COLUMN IF NOT EXISTS observacoes TEXT",
+    "ALTER TABLE rh_pensao_alimenticia ADD COLUMN IF NOT EXISTS criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+    "ALTER TABLE rh_pensao_alimenticia ADD COLUMN IF NOT EXISTS atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"
+].forEach((sql) => pool.query(sql).catch(e => logger.warn('rh_pensao_alimenticia alter:', e.message)));
+
+const normalizePensaoRows = (rows) => (rows || []).map((row) => ({
+    ...row,
+    observacoes: row.observacoes || row['observações'] || '',
+    ativo: row.ativo === undefined ? 1 : row.ativo
+}));
+
 app.get('/api/rh/funcionarios/:id/pensao', authenticateToken, authorizeArea('rh'), asyncHandler(async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT * FROM rh_pensao_alimenticia WHERE funcionario_id = ? ORDER BY criado_em DESC', [req.params.id]);
-        res.json(rows);
+        let rows;
+        try {
+            [rows] = await pool.query('SELECT * FROM rh_pensao_alimenticia WHERE funcionario_id = ? ORDER BY criado_em DESC', [req.params.id]);
+        } catch (error) {
+            if (error.code !== 'ER_BAD_FIELD_ERROR') throw error;
+            [rows] = await pool.query('SELECT * FROM rh_pensao_alimenticia WHERE funcionario_id = ? ORDER BY id DESC', [req.params.id]);
+        }
+        res.json(normalizePensaoRows(rows));
     } catch (error) {
         logger.error('Erro ao listar pensões:', error);
         res.status(500).json({ error: 'Erro ao listar pensões' });
@@ -2427,7 +2588,8 @@ app.get('/api/rh/funcionarios/:id/pensao', authenticateToken, authorizeArea('rh'
 }));
 
 app.post('/api/rh/funcionarios/:id/pensao', authenticateToken, authorizeArea('rh'), asyncHandler(async (req, res) => {
-    const { valor, nome_recebedor, cpf_recebedor, banco_recebedor, agencia_recebedor, conta_recebedor, observacoes } = req.body;
+    const { valor, nome_recebedor, cpf_recebedor, banco_recebedor, agencia_recebedor, conta_recebedor } = req.body;
+    const observacoes = req.body.observacoes || req.body['observa\u00e7\u00f5es'] || null;
     try {
         const [result] = await pool.query(
             `INSERT INTO rh_pensao_alimenticia (funcionario_id, valor, nome_recebedor, cpf_recebedor, banco_recebedor, agencia_recebedor, conta_recebedor, observacoes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -2437,6 +2599,35 @@ app.post('/api/rh/funcionarios/:id/pensao', authenticateToken, authorizeArea('rh
     } catch (error) {
         logger.error('Erro ao criar pensão:', error);
         res.status(500).json({ error: 'Erro ao criar pensão' });
+    }
+}));
+
+app.put('/api/rh/funcionarios/:id/pensao/:pensaoId', authenticateToken, authorizeArea('rh'), asyncHandler(async (req, res) => {
+    const { valor, nome_recebedor, cpf_recebedor, banco_recebedor, agencia_recebedor, conta_recebedor } = req.body;
+    const observacoes = req.body.observacoes || req.body['observa\u00e7\u00f5es'] || null;
+    try {
+        const [result] = await pool.query(
+            `UPDATE rh_pensao_alimenticia
+             SET valor = ?, nome_recebedor = ?, cpf_recebedor = ?, banco_recebedor = ?,
+                 agencia_recebedor = ?, conta_recebedor = ?, observacoes = ?
+             WHERE id = ? AND funcionario_id = ?`,
+            [
+                valor || 0,
+                nome_recebedor || null,
+                cpf_recebedor || null,
+                banco_recebedor || null,
+                agencia_recebedor || null,
+                conta_recebedor || null,
+                observacoes || null,
+                req.params.pensaoId,
+                req.params.id
+            ]
+        );
+        if (result.affectedRows === 0) return res.status(404).json({ error: 'Pensao nao encontrada' });
+        res.json({ success: true });
+    } catch (error) {
+        logger.error('Erro ao atualizar pensÃ£o:', error);
+        res.status(500).json({ error: 'Erro ao atualizar pensÃ£o' });
     }
 }));
 
@@ -2481,7 +2672,13 @@ pool.query(`CREATE TABLE IF NOT EXISTS rh_sf_dependentes (
 app.get('/api/rh/funcionarios/:id/salario-familia', authenticateToken, authorizeArea('rh'), asyncHandler(async (req, res) => {
     try {
         const [sfRows] = await pool.query('SELECT * FROM rh_salario_familia WHERE funcionario_id = ?', [req.params.id]);
-        const [depRows] = await pool.query('SELECT * FROM rh_sf_dependentes WHERE funcionario_id = ? ORDER BY criado_em DESC', [req.params.id]);
+        let depRows;
+        try {
+            [depRows] = await pool.query('SELECT * FROM rh_sf_dependentes WHERE funcionario_id = ? ORDER BY criado_em DESC', [req.params.id]);
+        } catch (error) {
+            if (error.code !== 'ER_BAD_FIELD_ERROR') throw error;
+            [depRows] = await pool.query('SELECT * FROM rh_sf_dependentes WHERE funcionario_id = ? ORDER BY id DESC', [req.params.id]);
+        }
         const sf = sfRows[0] || { recebe: 0, observacoes: '' };
         res.json({ recebe: sf.recebe, observacoes: sf.observacoes || '', dependentes: depRows });
     } catch (error) {
@@ -2490,8 +2687,9 @@ app.get('/api/rh/funcionarios/:id/salario-familia', authenticateToken, authorize
     }
 }));
 
-app.post('/api/rh/funcionarios/:id/salario-familia', authenticateToken, authorizeArea('rh'), asyncHandler(async (req, res) => {
-    const { recebe, observacoes, dependentes } = req.body;
+const salvarSalarioFamiliaRh = async (req, res) => {
+    const { recebe, dependentes } = req.body;
+    const observacoes = req.body.observacoes || req.body['observa\u00e7\u00f5es'] || null;
     try {
         await pool.query(
             `INSERT INTO rh_salario_familia (funcionario_id, recebe, observacoes) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE recebe=VALUES(recebe), observacoes=VALUES(observacoes)`,
@@ -2510,6 +2708,35 @@ app.post('/api/rh/funcionarios/:id/salario-familia', authenticateToken, authoriz
     } catch (error) {
         logger.error('Erro ao salvar salário família:', error);
         res.status(500).json({ error: 'Erro ao salvar salário família' });
+    }
+};
+
+app.post('/api/rh/funcionarios/:id/salario-familia', authenticateToken, authorizeArea('rh'), asyncHandler(salvarSalarioFamiliaRh));
+app.put('/api/rh/funcionarios/:id/salario-familia', authenticateToken, authorizeArea('rh'), asyncHandler(salvarSalarioFamiliaRh));
+
+app.post('/api/rh/funcionarios/:id/salario-familia/dependente', authenticateToken, authorizeArea('rh'), asyncHandler(async (req, res) => {
+    const { nome, parentesco, data_nascimento, cpf } = req.body;
+    if (!nome) return res.status(400).json({ error: 'Nome do dependente e obrigatorio' });
+
+    try {
+        const [result] = await pool.query(
+            'INSERT INTO rh_sf_dependentes (funcionario_id, nome, parentesco, data_nascimento, cpf) VALUES (?, ?, ?, ?, ?)',
+            [req.params.id, nome, parentesco || null, data_nascimento || null, cpf || null]
+        );
+        res.json({ success: true, id: result.insertId });
+    } catch (error) {
+        logger.error('Erro ao salvar dependente salÃ¡rio famÃ­lia:', error);
+        res.status(500).json({ error: 'Erro ao salvar dependente' });
+    }
+}));
+
+app.delete('/api/rh/funcionarios/:id/salario-familia/dependente/:depId', authenticateToken, authorizeArea('rh'), asyncHandler(async (req, res) => {
+    try {
+        await pool.query('DELETE FROM rh_sf_dependentes WHERE id = ? AND funcionario_id = ?', [req.params.depId, req.params.id]);
+        res.json({ success: true });
+    } catch (error) {
+        logger.error('Erro ao remover dependente salÃ¡rio famÃ­lia:', error);
+        res.status(500).json({ error: 'Erro ao remover dependente' });
     }
 }));
 
@@ -2553,7 +2780,7 @@ app.get('/api/rh/holerites/consentimento', authenticateToken, asyncHandler(async
             return res.json({ consentimento: true, admin: true });
         }
 
-        const funcionarioId = getUserFuncionarioId(req.user);
+        const funcionarioId = await resolveUserFuncionarioId(req.user);
         if (!funcionarioId) {
             return res.status(400).json({ message: 'Funcionário não identificado para o usuário logado.' });
         }
@@ -2587,7 +2814,7 @@ app.post('/api/rh/holerites/consentimento', authenticateToken, asyncHandler(asyn
             return res.status(400).json({ message: 'assinatura_digital é obrigatória e deve ter ao menos 3 caracteres.' });
         }
 
-        const funcionarioId = getUserFuncionarioId(req.user);
+        const funcionarioId = await resolveUserFuncionarioId(req.user);
         if (!funcionarioId) {
             return res.status(400).json({ message: 'Funcionário não identificado para o usuário logado.' });
         }
@@ -2618,7 +2845,7 @@ app.post('/api/rh/holerites/consentimento', authenticateToken, asyncHandler(asyn
 // GET /api/rh/holerites/meus - Listar holerites publicados do funcionário logado
 app.get('/api/rh/holerites/meus', authenticateToken, asyncHandler(async (req, res) => {
     try {
-        const funcionarioId = getUserFuncionarioId(req.user);
+        const funcionarioId = await resolveUserFuncionarioId(req.user);
         if (!funcionarioId) {
             return res.status(400).json({ error: 'Funcionário não identificado para o usuário logado.' });
         }
@@ -2662,7 +2889,7 @@ app.get('/api/rh/holerites/:id', authenticateToken, asyncHandler(async (req, res
         `, [req.params.id]);
         if (holerite.length === 0) return res.status(404).json({ error: 'Holerite não encontrado' });
 
-        const userFuncId = getUserFuncionarioId(req.user);
+        const userFuncId = await resolveUserFuncionarioId(req.user);
         if (userFuncId && Number(holerite[0].funcionario_id) !== userFuncId && !isAdminRHUser(req.user)) {
             return res.status(403).json({ message: 'Acesso negado. Você só pode visualizar seus próprios holerites.' });
         }
@@ -2682,7 +2909,7 @@ app.get('/api/rh/holerites/:id', authenticateToken, asyncHandler(async (req, res
 app.post('/api/rh/holerites/:id/visualizar', authenticateToken, asyncHandler(async (req, res) => {
     try {
         const holeriteId = req.params.id;
-        const userFuncId = getUserFuncionarioId(req.user);
+        const userFuncId = await resolveUserFuncionarioId(req.user);
 
         if (userFuncId && !isAdminRHUser(req.user)) {
             const [rows] = await pool.query('SELECT funcionario_id FROM rh_holerites WHERE id = ? LIMIT 1', [holeriteId]);
@@ -2706,7 +2933,7 @@ app.post('/api/rh/holerites/:id/visualizar', authenticateToken, asyncHandler(asy
 app.post('/api/rh/holerites/:id/confirmar', authenticateToken, asyncHandler(async (req, res) => {
     try {
         const holeriteId = req.params.id;
-        const userFuncId = getUserFuncionarioId(req.user);
+        const userFuncId = await resolveUserFuncionarioId(req.user);
 
         if (userFuncId && !isAdminRHUser(req.user)) {
             const [rows] = await pool.query('SELECT funcionario_id FROM rh_holerites WHERE id = ? LIMIT 1', [holeriteId]);

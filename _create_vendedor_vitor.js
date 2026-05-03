@@ -5,8 +5,8 @@ const bcrypt = require('bcryptjs');
 const mysql = require('mysql2/promise');
 
 const NOME  = 'Vitor Santos';
-const EMAIL = 'vitor.santos@aluforce.ind.br';
-const LOGIN = 'vitor.santos';
+const EMAIL = 'vendas7@aluforce.ind.br';
+const LOGIN = 'vendas7@aluforce.ind.br';
 const SENHA = 'alu0103';      // senha temporária — pedir troca no primeiro login
 const AREAS = JSON.stringify(['rh', 'vendas']);
 const ROLE  = 'comercial';

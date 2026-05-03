@@ -49,6 +49,9 @@
   }
 
   function init() {
+    // Se o HTML do widget não existe na página, não inicializar
+    if (!$('afw-fab')) return;
+
     // Detectar usuário logado
     detectLoggedUser();
 
@@ -126,12 +129,12 @@
 
     W.socket.on('typing:update', (data) => {
       const t = $('afw-typing');
-      data.isTyping ? t.classList.remove('hidden') : t.classList.add('hidden');
+      if (t) { data.isTyping ? t.classList.remove('hidden') : t.classList.add('hidden'); }
       scrollBottom();
     });
 
     W.socket.on('support:suggest', () => {
-      $('afw-support-bar').classList.remove('hidden');
+      const sb = $('afw-support-bar'); if (sb) sb.classList.remove('hidden');
       scrollBottom();
     });
 
@@ -181,14 +184,14 @@
 
       const panel = $('afw-support-panel');
       if (panel) panel.classList.add('hidden');
-      $('afw-chat').classList.remove('hidden');
+      const chatEl = $('afw-chat'); if (chatEl) chatEl.classList.remove('hidden');
 
       $('afw-header-name').textContent = data.ticket.userName || 'Usuário';
       $('afw-header-status').innerHTML = '<i class="fas fa-circle" style="color:#4caf50"></i> Suporte Ativo';
 
       // Renderizar histórico
       const inner = $('afw-messages-inner');
-      inner.innerHTML = '<div class="afw-date-divider"><span>Hoje</span></div>';
+      if (inner) inner.innerHTML = '<div class="afw-date-divider"><span>Hoje</span></div>';
       if (data.conversationHistory) {
         data.conversationHistory.forEach(msg => renderMessage(msg));
       }
@@ -242,6 +245,7 @@
 
   function updateBadge() {
     const badge = $('afw-fab-badge');
+    if (!badge) return;
     if (W.unreadCount > 0) {
       badge.textContent = W.unreadCount > 9 ? '9+' : W.unreadCount;
       badge.classList.remove('hidden');
@@ -252,9 +256,12 @@
 
   // ==================== TOOLTIP ====================
   function initTooltip() {
-    $('afw-tooltip-close').addEventListener('click', (e) => {
+    const closeBtn = $('afw-tooltip-close');
+    if (!closeBtn) return;
+    closeBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      $('afw-tooltip').classList.add('hidden');
+      const tip = $('afw-tooltip');
+      if (tip) tip.classList.add('hidden');
     });
   }
 
@@ -303,8 +310,8 @@
     W.socket.emit('user:register', { name, email });
     W.isLoggedIn = true;
 
-    $('afw-welcome').classList.add('hidden');
-    $('afw-chat').classList.remove('hidden');
+    const welcome = $('afw-welcome'); if (welcome) welcome.classList.add('hidden');
+    const chatEl2 = $('afw-chat'); if (chatEl2) chatEl2.classList.remove('hidden');
 
     setTimeout(() => {
       scrollBottom();
@@ -412,7 +419,7 @@
     const btnBack = $('afw-support-back-btn');
     if (btnBack) {
       btnBack.addEventListener('click', () => {
-        $('afw-chat').classList.add('hidden');
+        const chatBk = $('afw-chat'); if (chatBk) chatBk.classList.add('hidden');
         panel.classList.remove('hidden');
         btnBack.classList.add('hidden');
         W.isSupportMode = false;
@@ -530,12 +537,12 @@
 
     if (!customText) input.value = '';
     autoResize(input);
-    $('afw-btn-send').classList.add('hidden');
-    $('afw-btn-mic').classList.remove('hidden');
+    const sendBtn = $('afw-btn-send'); if (sendBtn) sendBtn.classList.add('hidden');
+    const micBtn = $('afw-btn-mic'); if (micBtn) micBtn.classList.remove('hidden');
     scrollBottom();
 
     W.socket.emit('typing:stop', { conversationId: W.conversationId });
-    $('afw-support-bar').classList.add('hidden');
+    const supBar = $('afw-support-bar'); if (supBar) supBar.classList.add('hidden');
   }
 
   // ==================== RENDERIZAR MENSAGEM ====================
@@ -619,8 +626,8 @@
       W.mediaRecorder.start();
       W.isRecording = true;
       W.recStartTime = Date.now();
-      $('afw-input-bar').classList.add('hidden');
-      $('afw-audio-bar').classList.remove('hidden');
+      const iBar = $('afw-input-bar'); if (iBar) iBar.classList.add('hidden');
+      const aBar = $('afw-audio-bar'); if (aBar) aBar.classList.remove('hidden');
       W.recTimer = setInterval(updateRecTime, 500);
     } catch (e) { showNotif('❌ Microfone não disponível'); }
   }
@@ -632,8 +639,8 @@
     }
     W.isRecording = false;
     clearInterval(W.recTimer);
-    $('afw-input-bar').classList.remove('hidden');
-    $('afw-audio-bar').classList.add('hidden');
+    const iBar2 = $('afw-input-bar'); if (iBar2) iBar2.classList.remove('hidden');
+    const aBar2 = $('afw-audio-bar'); if (aBar2) aBar2.classList.add('hidden');
   }
 
   function stopAndSendRec() {
@@ -657,8 +664,8 @@
     W.mediaRecorder.stop();
     W.isRecording = false;
     clearInterval(W.recTimer);
-    $('afw-input-bar').classList.remove('hidden');
-    $('afw-audio-bar').classList.add('hidden');
+    const iBar3 = $('afw-input-bar'); if (iBar3) iBar3.classList.remove('hidden');
+    const aBar3 = $('afw-audio-bar'); if (aBar3) aBar3.classList.add('hidden');
   }
 
   function updateRecTime() {
@@ -734,16 +741,21 @@
   function initAttachMenu() {
     const btn = $('afw-btn-attach');
     const menu = $('afw-attach-menu');
+    if (!btn || !menu) return;
+
 
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       menu.classList.toggle('hidden');
-      $('afw-emoji-picker').classList.add('hidden');
+      const ep = $('afw-emoji-picker'); if (ep) ep.classList.add('hidden');
     });
 
-    $('afw-attach-file').addEventListener('click', () => { menu.classList.add('hidden'); $('afw-file-input').click(); });
-    $('afw-attach-photo').addEventListener('click', () => { menu.classList.add('hidden'); $('afw-photo-input').click(); });
-    $('afw-attach-screenshot').addEventListener('click', () => { menu.classList.add('hidden'); captureScreenshot(); });
+    const af = $('afw-attach-file');
+    if (af) af.addEventListener('click', () => { menu.classList.add('hidden'); const fi = $('afw-file-input'); if (fi) fi.click(); });
+    const ap = $('afw-attach-photo');
+    if (ap) ap.addEventListener('click', () => { menu.classList.add('hidden'); const pi = $('afw-photo-input'); if (pi) pi.click(); });
+    const as2 = $('afw-attach-screenshot');
+    if (as2) as2.addEventListener('click', () => { menu.classList.add('hidden'); captureScreenshot(); });
 
     document.addEventListener('click', (e) => {
       if (!menu.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
@@ -825,10 +837,10 @@
     if (btnSupport) btnSupport.addEventListener('click', requestSupport);
 
     const btnYes = $('afw-btn-yes-support');
-    if (btnYes) btnYes.addEventListener('click', () => { $('afw-support-bar').classList.add('hidden'); requestSupport(); });
+    if (btnYes) btnYes.addEventListener('click', () => { const sbY = $('afw-support-bar'); if (sbY) sbY.classList.add('hidden'); requestSupport(); });
 
     const btnNo = $('afw-btn-no-support');
-    if (btnNo) btnNo.addEventListener('click', () => { $('afw-support-bar').classList.add('hidden'); sendText('Não, obrigado. Vou tentar reformular minha pergunta.'); });
+    if (btnNo) btnNo.addEventListener('click', () => { const sbN = $('afw-support-bar'); if (sbN) sbN.classList.add('hidden'); sendText('Não, obrigado. Vou tentar reformular minha pergunta.'); });
   }
 
   function requestSupport() {
@@ -852,10 +864,11 @@
       grid.appendChild(s);
     });
 
-    const btnEmoji = $('afw-btn-emoji');
-    if (btnEmoji) btnEmoji.addEventListener('click', (e) => {
+    const emojiBtn = $('afw-btn-emoji');
+    if (emojiBtn) emojiBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      $('afw-emoji-picker').classList.toggle('hidden');
+      const picker = $('afw-emoji-picker');
+      if (picker) picker.classList.toggle('hidden');
     });
 
     document.addEventListener('click', (e) => {
@@ -870,20 +883,26 @@
   let modalZoom = 1;
 
   function initModal() {
-    $('afw-modal-bg').addEventListener('click', closeModal);
-    $('afw-modal-close').addEventListener('click', closeModal);
+    const modalBg = $('afw-modal-bg');
+    const modalClose = $('afw-modal-close');
+    const modalZoomIn = $('afw-modal-zoom-in');
+    const modalZoomOut = $('afw-modal-zoom-out');
+    const modalContent = $('afw-modal-content');
+    if (!modalBg) return; // Modal elements not present on this page
+    modalBg.addEventListener('click', closeModal);
+    if (modalClose) modalClose.addEventListener('click', closeModal);
 
-    $('afw-modal-zoom-in').addEventListener('click', () => {
+    if (modalZoomIn) modalZoomIn.addEventListener('click', () => {
       modalZoom = Math.min(modalZoom + 0.25, 3);
       applyModalZoom();
     });
 
-    $('afw-modal-zoom-out').addEventListener('click', () => {
+    if (modalZoomOut) modalZoomOut.addEventListener('click', () => {
       modalZoom = Math.max(modalZoom - 0.25, 0.25);
       applyModalZoom();
     });
 
-    $('afw-modal-content').addEventListener('wheel', (e) => {
+    if (modalContent) modalContent.addEventListener('wheel', (e) => {
       e.preventDefault();
       modalZoom = Math.max(0.25, Math.min(3, modalZoom + (e.deltaY > 0 ? -0.1 : 0.1)));
       applyModalZoom();
@@ -916,11 +935,11 @@
       img.classList.remove('hidden'); img.src = src; img.style.transform = '';
       dl.href = src;
     }
-    $('afw-modal').classList.remove('hidden');
+    const modal = $('afw-modal'); if (modal) modal.classList.remove('hidden');
   };
 
   function closeModal() {
-    $('afw-modal').classList.add('hidden');
+    const modal2 = $('afw-modal'); if (modal2) modal2.classList.add('hidden');
     $('afw-modal-img').style.transform = '';
     $('afw-modal-pdf').src = '';
     $('afw-modal-pdf').style.transform = '';
@@ -965,12 +984,14 @@
 
   function toggleTheme() {
     const widget = $('aluforce-widget');
+    if (!widget) return;
     const isDark = widget.classList.contains('afw-dark');
     applyTheme(isDark ? 'light' : 'dark');
   }
 
   function applyTheme(theme) {
     const widget = $('aluforce-widget');
+    if (!widget) return;
     const iconBrand = $('afw-theme-icon');
     const iconChat = $('afw-theme-icon-chat');
     const iconSupport = $('afw-support-theme-icon');

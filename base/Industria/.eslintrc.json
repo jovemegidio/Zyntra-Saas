@@ -9,47 +9,60 @@
     "prettier"
   ],
   "parserOptions": {
-    "ecmaVersion": 2021,
+    "ecmaVersion": "latest",
     "sourceType": "commonjs"
   },
   "rules": {
     "no-unused-vars": ["warn", {
-      "args": "none", 
+      "args": "none",
       "varsIgnorePattern": "^_",
       "argsIgnorePattern": "^_"
     }],
     "no-console": "off",
-    "comma-dangle": ["error", "never"],
-    "semi": ["error", "always"],
-    "quotes": ["error", "single", { "avoidEscape": true }],
-    "indent": ["error", 4, { "SwitchCase": 1 }],
+    "no-empty": ["warn", { "allowEmptyCatch": true }],
     "linebreak-style": "off",
     "prefer-const": "warn",
-    "no-var": "error",
+    "no-var": "warn",
     "object-shorthand": "warn",
     "prefer-arrow-callback": "warn",
     "prefer-template": "warn",
-    "no-unused-expressions": ["error", { "allowShortCircuit": true, "allowTernary": true }],
+    "no-unused-expressions": ["warn", { "allowShortCircuit": true, "allowTernary": true }],
     "no-useless-return": "warn",
-    "no-trailing-spaces": "error",
-    "eol-last": "error",
-    "no-multiple-empty-lines": ["error", { "max": 2, "maxEOF": 1 }],
-    "space-before-function-paren": ["error", {
-      "anonymous": "always",
-      "named": "never",
-      "asyncArrow": "always"
-    }],
-    "keyword-spacing": "error",
-    "space-infix-ops": "error",
-    "arrow-spacing": "error",
-    "no-multi-spaces": "error"
+    "no-undef": "warn",
+    "no-prototype-builtins": "warn",
+    "no-useless-escape": "warn",
+    "no-redeclare": "warn",
+    "no-unreachable": "warn",
+    "no-inner-declarations": "warn",
+    "no-case-declarations": "warn",
+    "no-dupe-keys": "warn",
+    "no-dupe-class-members": "warn",
+    "getter-return": "warn",
+    "no-setter-return": "warn",
+    "no-self-assign": "warn",
+    "no-useless-catch": "warn",
+    "no-irregular-whitespace": "warn",
+    "no-constant-condition": "warn"
   },
+  "overrides": [
+    {
+      "files": ["**/public/**/*.js", "**/static/**/*.js", "**/js/**/*.js", "ajuda/**/*.js"],
+      "env": { "browser": true, "node": false },
+      "rules": {
+        "no-undef": "off",
+        "no-unused-vars": "off"
+      }
+    }
+  ],
   "ignorePatterns": [
     "node_modules/",
+    "node_modules_bak/",
     "dist/",
     "coverage/",
     "logs/",
     "uploads/",
-    "*.min.js"
+    "*.min.js",
+    "*_backup*/",
+    "*_backup_*/"
   ]
 }

@@ -34,7 +34,6 @@ module.exports = function createFinanceiroCoreRoutes(deps) {
             }
 
             try {
-
                 // Busca por email primeiro (evita colisão de IDs entre tabelas)
                 const [users] = await pool.query(
                     'SELECT permissoes_financeiro, role, nome_completo FROM funcionarios WHERE email = ?',
@@ -51,7 +50,21 @@ module.exports = function createFinanceiroCoreRoutes(deps) {
                         userData = usuarios[0];
                     }
                 }
-                // Se email não encontrou, negar acesso (não fazer fallback por ID cross-table)
+                // Fallback: busca por ID se email não encontrado
+                if (!userData && user.id) {
+                    const [byId] = await pool.query(
+                        'SELECT permissoes_financeiro, role, nome_completo FROM funcionarios WHERE id = ?',
+                        [user.id]
+                    );
+                    if (byId && byId[0]) { userData = byId[0]; }
+                    else {
+                        const [byId2] = await pool.query(
+                            'SELECT permissoes_financeiro, role, nome as nome_completo FROM usuarios WHERE id = ?',
+                            [user.id]
+                        );
+                        if (byId2 && byId2[0]) userData = byId2[0];
+                    }
+                }
                 if (!userData) {
                     return res.status(403).json({ message: 'Usuário não encontrado' });
                 }
@@ -125,15 +138,15 @@ module.exports = function createFinanceiroCoreRoutes(deps) {
 
         try {
             const [users] = await pool.query(
-                'SELECT id, nome_completo as nome, nome_completo as apelido, email, role, permissoes_financeiro FROM funcionarios WHERE email = ?',
-                [user.email]
+                'SELECT id, nome_completo as nome, nome_completo as apelido, email, role, permissoes_financeiro FROM funcionarios WHERE id = ? OR email = ?',
+                [user.id, user.email]
             );
             let userData = users[0];
             if (!userData) {
                 try {
                     const [usuarios] = await pool.query(
-                        'SELECT id, nome, email, role, is_admin FROM usuarios WHERE email = ?',
-                        [user.email]
+                        'SELECT id, nome, email, role, is_admin FROM usuarios WHERE id = ? OR email = ?',
+                        [user.id, user.email]
                     );
                     if (usuarios && usuarios.length > 0) userData = usuarios[0];
                 } catch (e) { /* tabela pode não existir */ }
@@ -156,11 +169,11 @@ module.exports = function createFinanceiroCoreRoutes(deps) {
                 try { permissoes = JSON.parse(userData.permissoes_financeiro); } catch (e) { permissoes = {}; }
             }
 
-            // AUDIT-FIX R4+R7: Defaults least-privilege — sem acesso por padrão
+            // Defaults para quem tem acesso ao financeiro mas sem permissoes_financeiro configurado
             const defaults = {
-                contas_receber: false, contas_pagar: false, fluxo_caixa: false,
-                bancos: false, relatorios: false, conciliacao: false,
-                visualizar: false, criar: false, editar: false, excluir: false, aprovar: false
+                contas_receber: true, contas_pagar: true, fluxo_caixa: true,
+                bancos: true, relatorios: true, conciliacao: true,
+                visualizar: true, criar: true, editar: true, excluir: false, aprovar: false
             };
             permissoes = Object.assign({}, defaults, permissoes);
 
@@ -285,11 +298,9 @@ module.exports = function createFinanceiroCoreRoutes(deps) {
         try {
             const { descricao, valor, vencimento, fornecedor_id, categoria_id, observacoes } = req.body;
             if (!descricao || !valor || !vencimento) return res.status(400).json({ message: 'Campos obrigatórios: descricao, valor, vencimento' });
-            const valorNum = parseFloat(valor);
-            if (isNaN(valorNum) || valorNum <= 0) return res.status(400).json({ message: 'Valor deve ser um número positivo' });
             const [result] = await pool.query(
                 'INSERT INTO contas_pagar (descricao, valor, vencimento, fornecedor_id, categoria_id, observacoes, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
-                [descricao, valorNum, vencimento, fornecedor_id || null, categoria_id || null, observacoes || '', 'pendente']
+                [descricao, valor, vencimento, fornecedor_id || null, categoria_id || null, observacoes || '', 'pendente']
             );
             res.status(201).json({ success: true, id: result.insertId });
         } catch (err) {
@@ -382,11 +393,9 @@ module.exports = function createFinanceiroCoreRoutes(deps) {
         try {
             const { descricao, valor, vencimento, cliente_id, categoria_id, observacoes } = req.body;
             if (!descricao || !valor || !vencimento) return res.status(400).json({ message: 'Campos obrigatórios: descricao, valor, vencimento' });
-            const valorNum = parseFloat(valor);
-            if (isNaN(valorNum) || valorNum <= 0) return res.status(400).json({ message: 'Valor deve ser um número positivo' });
             const [result] = await pool.query(
                 'INSERT INTO contas_receber (descricao, valor, vencimento, cliente_id, categoria_id, observacoes, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
-                [descricao, valorNum, vencimento, cliente_id || null, categoria_id || null, observacoes || '', 'pendente']
+                [descricao, valor, vencimento, cliente_id || null, categoria_id || null, observacoes || '', 'pendente']
             );
             res.status(201).json({ success: true, id: result.insertId });
         } catch (err) {
@@ -449,12 +458,6 @@ module.exports = function createFinanceiroCoreRoutes(deps) {
                 await connection.rollback();
                 connection.release();
                 return res.status(404).json({ message: 'Conta não encontrada' });
-            }
-            // AUDIT-FIX 2026-04-03: Idempotência — bloquear pagamento duplicado
-            if (conta[0].status === 'pago') {
-                await connection.rollback();
-                connection.release();
-                return res.status(400).json({ message: 'Esta conta já foi paga', code: 'ALREADY_PAID' });
             }
             const valorTotal = conta[0].valor + (conta[0].valor_juros || 0) + (conta[0].valor_multa || 0) - (conta[0].valor_desconto || 0);
             const status = valor_pago >= valorTotal ? 'pago' : 'pendente';
@@ -569,12 +572,6 @@ module.exports = function createFinanceiroCoreRoutes(deps) {
                 await connection.rollback();
                 connection.release();
                 return res.status(404).json({ message: 'Conta não encontrada' });
-            }
-            // AUDIT-FIX 2026-04-03: Idempotência — bloquear recebimento duplicado
-            if (conta[0].status === 'recebido') {
-                await connection.rollback();
-                connection.release();
-                return res.status(400).json({ message: 'Esta conta já foi recebida', code: 'ALREADY_RECEIVED' });
             }
             const status = valor_recebido >= conta[0].valor ? 'recebido' : 'parcial';
             await connection.query(

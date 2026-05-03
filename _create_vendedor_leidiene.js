@@ -1,4 +1,4 @@
-// Criar usuário leidiene.oliveira como vendedor
+// Criar usuário representantes@aluforce.ind.br como vendedor
 const bcrypt = require('bcryptjs');
 const mysql = require('mysql2/promise');
 
@@ -11,11 +11,11 @@ const mysql = require('mysql2/promise');
         database: 'aluforce_vendas'
     });
 
-    const EMAIL = 'leidiene.oliveira@aluforce.ind.br';
+    const EMAIL = 'representantes@aluforce.ind.br';
     const NOME  = 'Leidiene Oliveira';
     const SENHA = 'alu0103';
     const AREAS = JSON.stringify(['vendas', 'rh']);
-    const LOGIN = 'leidiene.oliveira';
+    const LOGIN = 'representantes@aluforce.ind.br';
 
     // Hash da senha com bcrypt
     const hash = await bcrypt.hash(SENHA, 12);

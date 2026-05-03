@@ -14,7 +14,7 @@ const mysql = require('mysql2/promise');
   });
 
   try {
-    const email = 'leidiane.oliveira@aluforce.ind.br';
+    const email = 'representantes@aluforce.ind.br';
     const nome = 'Leidiane Oliveira';
     const senha = 'alu0103';
 

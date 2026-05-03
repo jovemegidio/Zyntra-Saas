@@ -76,17 +76,9 @@ const {
 } = require('./src/middleware/security-integration');
 
 // AUDIT-FIX R-01: Sistema de autenticação unificado
-const authUnified = require('./middleware/auth-unified');
 
 // Zyntra Branding Middleware (ativado via env BRAND=zyntra)
 const { zyntraBrandingMiddleware, zyntraBrandInfo } = require('./middleware/zyntra-branding');
-
-// 🏢 SECTOR: Configuração de ramo de atuação (industria, comercio, servicos, agropecuario)
-const { sectorMiddleware, getSectorConfig, getSectorConfigAPI, isModuleEnabled } = require('./config/sector');
-
-// 🏢 MULTI-EMPRESAS: Sistema multi-tenant
-const { empresaMiddleware } = require('./middleware/empresa');
-const createEmpresaRouter = require('./routes/empresas');
 
 // AUDIT-FIX R-17/R-18/R-19/R-20: Módulo LGPD compliance
 const { createLGPDRouter } = require('./routes/lgpd');
@@ -99,9 +91,6 @@ const { v4: uuidv4 } = require('uuid');
 
 // Request-ID tracing middleware (observability)
 const { requestIdMiddleware } = require('./middleware/request-id');
-
-// ☁️ CLOUDFLARE: Integração com proxy Cloudflare (IP real, cache, segurança)
-const { cloudflareMiddleware, configureCloudflareProxy, cloudflareCacheHeaders, cloudflareSecurityHeaders } = require('./middleware/cloudflare');
 
 // ⚡ ENTERPRISE: Cache distribuído (Redis/Map) e Resiliência
 const cacheService = require('./services/cache');
@@ -176,22 +165,16 @@ const asyncHandler = fn => (req, res, next) => {
 // =================================================================
 const app = express();
 
-// ☁️ CLOUDFLARE: Configurar trust proxy inteligente
-// Se CLOUDFLARE_ENABLED=true, usa validação de IPs do CF; senão, trust proxy padrão
-if (process.env.CLOUDFLARE_ENABLED === 'true') {
-    configureCloudflareProxy(app);
-    console.log('☁️  Cloudflare proxy trust configurado (validação de IPs CF)');
-} else {
-    // Trust proxy padrão - necessário quando atrás de Nginx/reverse proxy
-    app.set('trust proxy', 1);
-}
+// Trust proxy - necessário quando atrás de Nginx/reverse proxy
+// Isso permite que express-rate-limit e outros middlewares identifiquem corretamente o IP real do cliente
+app.set('trust proxy', 1);
 
 const PORT = parseInt(process.env.SERVER_PORT || process.env.PORT) || 3000;
 const HOST = process.env.HOST || '0.0.0.0';
 
 // reference to the running http.Server (set when app.listen is called)
 let serverInstance = null;
-let DB_AVAILABLE = false; // Starts false — flipped to true after DB connection test in startServer()
+let DB_AVAILABLE = true;
 
 // AUDIT-FIX: JWT secret MUST come from env. Dev gets ephemeral random secret (tokens won't survive restart).
 const JWT_SECRET = process.env.JWT_SECRET || (() => {
@@ -222,16 +205,20 @@ let emailTransporter = null;
 // Função para inicializar o transporter de email
 function initEmailTransporter() {
     try {
+        if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+            logger.warn('[EMAIL] ⚠️  SMTP_USER/SMTP_PASS não definidos — emails desabilitados');
+            return;
+        }
         emailTransporter = nodemailer.createTransport({
             host: process.env.SMTP_HOST || 'smtp.gmail.com',
             port: parseInt(process.env.SMTP_PORT || '587'),
-            secure: process.env.SMTP_SECURE === 'true', // true para 465, false para outras portas
+            secure: process.env.SMTP_SECURE === 'true',
             auth: {
-                user: process.env.SMTP_USER || 'sistema@aluforce.ind.br',
-                pass: process.env.SMTP_PASS || '' // Deixe vazio se não configurado
+                user: process.env.SMTP_USER,
+                pass: process.env.SMTP_PASS
             },
             tls: {
-                rejectUnauthorized: process.env.NODE_ENV === 'production' // Validar certificado em produção
+                rejectUnauthorized: process.env.NODE_ENV === 'production'
             }
         });
 
@@ -282,7 +269,7 @@ async function sendEmail(to, subject, html, text) {
 }
 
 // =================================================================
-// 3. MIDDLEWARES DE AUTORIZAÇÁO (declarados antes de serem usados)
+// 3. MIDDLEWARES DE AUTORIZAÇÃO (declarados antes de serem usados)
 // =================================================================
 
 // Middleware para validar resultado das validações
@@ -359,9 +346,9 @@ if (!process.env.DB_PASSWORD) {
 
 if (process.env.NODE_ENV === 'production') {
     const dbPass = process.env.DB_PASSWORD || '';
-    if (dbPass === 'aluvendas01' || dbPass.length < 8) {
+    if (dbPass.length < 12 || !/[A-Z]/.test(dbPass) || !/[a-z]/.test(dbPass) || !/[0-9]/.test(dbPass)) {
         logger.error('❌ ERRO CRÍTICO: Senha do banco insegura para produção');
-        logger.error('💡 Use uma senha forte com pelo menos 12 caracteres');
+        logger.error('💡 Use uma senha forte com pelo menos 12 caracteres, incluindo maiúsculas, minúsculas e números');
         process.exit(1);
     }
 }
@@ -373,13 +360,13 @@ const DB_CONFIG = {
     database: process.env.DB_NAME || 'aluforce_vendas',
     port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 3306,
     waitForConnections: true,
-    connectionLimit: parseInt(process.env.DB_CONN_LIMIT) || 20, // Per-instance limit (×4 cluster = 80 total)
-    queueLimit: parseInt(process.env.DB_QUEUE_LIMIT) || 100,
+    connectionLimit: parseInt(process.env.DB_CONN_LIMIT) || 25, // Limite seguro abaixo do max_connections padrão do MySQL (151)
+    queueLimit: parseInt(process.env.DB_QUEUE_LIMIT) || 500, // ENTERPRISE: Fila ampla para picos
     // ⚡ ENTERPRISE: Otimizações de performance
     enableKeepAlive: true,
     keepAliveInitialDelay: 10000,
-    connectTimeout: 15000,
-    maxIdle: Math.min(parseInt(process.env.DB_CONN_LIMIT) || 20, 10), // Must be <= connectionLimit
+    connectTimeout: 10000,
+    maxIdle: 50, // Manter 50 conexões idle para resposta rápida
     idleTimeout: 60000, // Liberar conexões idle após 60s
     timezone: '+00:00',
     multipleStatements: false,
@@ -423,16 +410,8 @@ try {
     });
 
     // Testar conexão imediatamente
-    const instanceId = parseInt(process.env.NODE_APP_INSTANCE || process.env.pm_id || '0', 10);
     pool.query('SELECT 1').then(async () => {
         console.log('✅ Pool de conexões MySQL criado e testado com sucesso');
-        DB_AVAILABLE = true; // DB is reachable — enable API routes
-
-        // Only run DDL migrations on cluster instance 0 to avoid 4× concurrent DDLs
-        if (instanceId !== 0) {
-            console.log(`⚡ Worker #${instanceId}: pulando migrações (só worker 0 executa)`);
-            return;
-        }
         // AUDIT-FIX R-13: Executar migrações de estrutura na inicialização
         try {
             const { runMigrations } = require('./database/migrations/startup-tables');
@@ -467,6 +446,13 @@ try {
             await adminPanelMigration(pool);
         } catch (adminErr) {
             console.warn('[ADMIN-MIGRATION] ⚠️ Migration não executada:', adminErr.message);
+        }
+        // FIX: Restore missing CNPJ data for transportadoras (one-time, idempotent)
+        try {
+            const { fixTransportadorasCnpj } = require('./database/migrations/fix-transportadoras-cnpj');
+            await fixTransportadorasCnpj(pool);
+        } catch (cnpjErr) {
+            console.warn('[FIX-CNPJ] ⚠️ Migration não executada:', cnpjErr.message);
         }
     }).catch((err) => {
         console.error('⚠️  Aviso: Pool criado mas teste de conexão falhou:', err.message);
@@ -605,18 +591,6 @@ async function enviarEmail(to, subject, text, html) {
 // 3. MIDDLEWARES GERAIS
 // =================================================================
 
-// ☁️ CLOUDFLARE: Middleware de integração (deve ser o PRIMEIRO middleware)
-// Extrai IP real, geo-localização, Ray ID para tracking
-if (process.env.CLOUDFLARE_ENABLED === 'true') {
-    app.use(cloudflareMiddleware({
-        enforceCloudflare: process.env.CF_ENFORCE === 'true',
-        debug: process.env.NODE_ENV !== 'production'
-    }));
-    app.use(cloudflareSecurityHeaders());
-    app.use(cloudflareCacheHeaders());
-    console.log('☁️  Cloudflare middlewares ativos (IP real, cache, security headers)');
-}
-
 // ⚡ PERFORMANCE: Compressão gzip/deflate para reduzir tamanho das respostas em ~70%
 app.use(compression({
     filter: (req, res) => {
@@ -680,17 +654,20 @@ if (reportInterceptorMiddleware) {
 // CORS configurado para permitir cookies e acesso do app mobile/desktop
 // AUDITORIA 02/02/2026: Restrito a origens autorizadas para segurança
 const allowedOrigins = [
-    'http://localhost:3000',
-    'http://localhost:5000',
-    'http://127.0.0.1:3000',
-    'http://127.0.0.1:5000',
+    // Origens de desenvolvimento (apenas em dev)
+    ...(process.env.NODE_ENV !== 'production' ? [
+        'http://localhost:3000',
+        'http://localhost:5000',
+        'http://127.0.0.1:3000',
+        'http://127.0.0.1:5000',
+    ] : []),
     'https://aluforce.api.br',      // Domínio principal de produção
     'https://www.aluforce.api.br',  // WWW do domínio principal
     'https://aluforce.ind.br',
     'https://erp.aluforce.ind.br',
     'https://www.aluforce.ind.br',
-    'http://31.97.64.102:3000',     // VPS IP (HTTP — only for internal/dev access)
-    'http://31.97.64.102',            // VPS IP (HTTP — only for internal/dev access)
+    // AUDIT-FIX R2: VPS IP movido para env var (não expor IP no código-fonte)
+    process.env.VPS_CORS_ORIGIN,     // Ex: 'https://31.97.64.102'
     'http://tauri.localhost',        // App Desktop Tauri (ALUFORCE ERP Desktop)
     'https://tauri.localhost',       // App Desktop Tauri (HTTPS variant)
     'tauri://localhost',             // App Desktop Tauri (custom scheme)
@@ -731,17 +708,6 @@ app.use(csrfProtection);
 app.use(zyntraBrandInfo);
 app.use(zyntraBrandingMiddleware);
 
-// 🏢 SECTOR: Injeta configuração do setor em cada request
-app.use(sectorMiddleware);
-
-// 🏢 MULTI-EMPRESAS: Injeta contexto da empresa no request (após auth)
-app.use(empresaMiddleware(pool));
-
-// 🏢 SECTOR: API pública para frontend consultar configuração do setor
-app.get('/api/sector/config', (req, res) => {
-    res.json(getSectorConfigAPI());
-});
-
 // Aplicar middlewares de segurança avançados (Auditoria 30/01/2026)
 // FIX: CSRF desabilitado aqui pois já é aplicado acima via security-middleware.js (csrfProtection)
 // O segundo CSRF (src/middleware/csrf.js) usa tokens one-time em server-side store + cookie _csrf,
@@ -753,6 +719,10 @@ applySecurityMiddlewares(app, {
     enableRateLimit: true,
     enableAudit: true
 });
+
+// ⚡ ENTERPRISE: Request timeout middleware (30s default)
+// AUDIT-FIX: Movido para ANTES das rotas — estava depois e era ineficaz
+app.use('/api', requestTimeout(parseInt(process.env.REQUEST_TIMEOUT) || 30000));
 
 // DEBUG: Log de todos os cookies recebidos
 app.use((req, res, next) => {
@@ -856,7 +826,7 @@ app.get('/favicon.ico', (req, res) => {
 // ========================================
 const GLOBAL_INJECT_SCRIPTS = [
     '\n<!-- ALUFORCE: Confirm Dialog Profissional v2.0 -->',
-    '<script src="/_shared/confirm-dialog.js?v=20260301"></script>',
+    '<script src="/_shared/confirm-dialog.js?v=20260429"></script>',
     '<!-- ALUFORCE: Accessibility Widget v1.0 - Acessibilidade global -->',
     '<script src="/_shared/accessibility-widget.js?v=20260615"></script>',
     '<!-- ALUFORCE: Offline Sync Manager v4.0 - Sistema completo offline -->',
@@ -891,7 +861,7 @@ app.use((req, res, next) => {
                     if (isLoginPage) {
                         // Login: só confirm-dialog, sem offline
                         if (!html.includes('confirm-dialog.js')) {
-                            injectTag = '\n<script src="/_shared/confirm-dialog.js?v=20260301"></script>\n';
+                            injectTag = '\n<script src="/_shared/confirm-dialog.js?v=20260429"></script>\n';
                         }
                     } else {
                         // Todas as outras páginas: inject completo (confirm + offline + report-viewer + pwa + chat)
@@ -901,7 +871,7 @@ app.use((req, res, next) => {
                             // Já tem offline-sync, verificar componentes faltantes
                             let missing = '';
                             if (!html.includes('confirm-dialog.js')) {
-                                missing += '\n<script src="/_shared/confirm-dialog.js?v=20260301"></script>';
+                                missing += '\n<script src="/_shared/confirm-dialog.js?v=20260429"></script>';
                             }
                             if (!html.includes('report-viewer.js')) {
                                 missing += '\n<script src="/js/report-viewer.js?v=20260301"></script>';
@@ -962,32 +932,9 @@ app.use((req, res, next) => {
     next();
 });
 
-// ========================================
-// LANDING PAGE (LP) - Zyntra-SGE
-// ========================================
-const lpPath = path.join(__dirname, 'lp');
-app.use('/lp', express.static(lpPath, {
-    dotfiles: 'deny',
-    index: 'index.html',
-    maxAge: '1d',
-    etag: true,
-    lastModified: true,
-    setHeaders: (res, filePath) => {
-        if (filePath.endsWith('.html')) {
-            res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-            res.setHeader('Pragma', 'no-cache');
-            res.setHeader('Expires', '0');
-        }
-    }
-}));
-
-// Rota raiz
+// Rota raiz: redirecionar para página de login
 app.get('/', (req, res) => {
-    if (process.env.LP_ONLY === 'true') {
-        res.sendFile(path.join(lpPath, 'index.html'));
-    } else {
-        res.redirect('/login.html');
-    }
+    res.redirect('/login.html');
 });
 
 // Dashboard principal (Painel de Controle) — requer autenticação
@@ -1133,6 +1080,13 @@ app.get('/chat/suporte', (req, res) => {
 
 console.log('💬 Chat BOB AI: Rotas de upload e arquivos estáticos configuradas');
 
+// ============================================================
+// AI PROXY — /api/ai (OPENAI_API_KEY nunca exposta ao frontend)
+// ============================================================
+const aiProxyRouter = require('./routes/ai-proxy');
+app.use('/api/ai', (req, res, next) => authenticateToken(req, res, next), aiProxyRouter);
+console.log('🤖 AI Proxy: Rota /api/ai/chat montada');
+
 // 🔄 CHAT WIDGET: No-cache para widget.css e widget.js (mudanças frequentes)
 app.use('/chat', (req, res, next) => {
     const lp = req.path.toLowerCase();
@@ -1207,25 +1161,51 @@ app.use((req, res, next) => {
 
 // Servir arquivos estáticos dos módulos (APENAS JS, CSS e imagens - NÃO HTML)
 app.use('/Vendas/js', express.static(path.join(__dirname, 'modules', 'Vendas', 'public', 'js'), {
-    setHeaders: (res, path) => {
+    dotfiles: 'deny',
+    index: false,
+    etag: true,
+    lastModified: true,
+    setHeaders: (res, filePath) => {
         res.setHeader('Content-Type', 'application/javascript');
+        res.setHeader('Cache-Control', 'no-cache, must-revalidate');
     }
 }));
 
 app.use('/Vendas/css', express.static(path.join(__dirname, 'modules', 'Vendas', 'public', 'css'), {
-    setHeaders: (res, path) => {
+    dotfiles: 'deny',
+    index: false,
+    etag: true,
+    lastModified: true,
+    setHeaders: (res, filePath) => {
         res.setHeader('Content-Type', 'text/css');
+        res.setHeader('Cache-Control', 'no-cache, must-revalidate');
     }
 }));
 
-app.use('/Vendas/images', express.static(path.join(__dirname, 'modules', 'Vendas', 'public', 'images'), { dotfiles: 'deny', index: false }));
-app.use('/Vendas/assets', express.static(path.join(__dirname, 'modules', 'Vendas', 'public', 'assets'), { dotfiles: 'deny', index: false }));
+app.use('/Vendas/images', express.static(path.join(__dirname, 'modules', 'Vendas', 'public', 'images'), {
+    dotfiles: 'deny',
+    index: false,
+    etag: true,
+    lastModified: true,
+    setHeaders: (res) => { res.setHeader('Cache-Control', 'no-cache, must-revalidate'); }
+}));
+app.use('/Vendas/assets', express.static(path.join(__dirname, 'modules', 'Vendas', 'public', 'assets'), {
+    dotfiles: 'deny',
+    index: false,
+    etag: true,
+    lastModified: true,
+    setHeaders: (res) => { res.setHeader('Cache-Control', 'no-cache, must-revalidate'); }
+}));
 
 // Servir uploads específicos do Vendas
 app.use('/uploads', express.static(path.join(__dirname, 'modules', 'Vendas', 'public', 'uploads'), {
     dotfiles: 'deny',
     index: false,
+    etag: true,
+    lastModified: true,
     setHeaders: (res, filePath) => {
+        // Fotos e uploads sempre revalidam para mostrar versão mais recente
+        res.setHeader('Cache-Control', 'no-cache, must-revalidate');
         if (filePath.endsWith('.png') || filePath.endsWith('.jpg') || filePath.endsWith('.jpeg')) {
             res.setHeader('Content-Type', 'image/' + filePath.split('.').pop().replace('jpg', 'jpeg'));
         }
@@ -1256,7 +1236,9 @@ function safeSendModuleHtml(req, res, next, moduleDir) {
     }
     // Extrair apenas o basename (nome do arquivo sem diretório)
     const safeName = path.basename(rawParam);
-    const htmlPath = path.join(moduleDir, safeName + '.html');
+    // Evitar duplicação de .html (route wildcard já captura .html)
+    const htmlFile = safeName.endsWith('.html') ? safeName : safeName + '.html';
+    const htmlPath = path.join(moduleDir, htmlFile);
     // Verificar se o caminho resolvido está dentro do diretório do módulo
     const resolvedPath = path.resolve(htmlPath);
     const resolvedDir = path.resolve(moduleDir);
@@ -1293,37 +1275,210 @@ function safeSendModuleHtml(req, res, next, moduleDir) {
             }
         }
         res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
         res.send(html);
     } else {
         next();
     }
 }
 
-app.get('/PCP/*.html', (req, res, next) => {
+function authenticateModuleHtml(req, res, next) {
+    const pageName = path.basename(req.path || '').toLowerCase();
+    if (pageName === 'login.html' || pageName === 'login') {
+        return res.redirect('/login.html');
+    }
+    return authenticatePage(req, res, next);
+}
+
+function normalizeLegacyUrlPath(urlPath) {
+    if (!urlPath || !urlPath.includes('.html')) return urlPath;
+    return urlPath.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+app.use((req, res, next) => {
+    if (req.method !== 'GET' && req.method !== 'HEAD') return next();
+    if (!String(req.path || '').toLowerCase().endsWith('.html')) return next();
+
+    const normalizedPath = normalizeLegacyUrlPath(req.path);
+    if (normalizedPath && normalizedPath !== req.path) {
+        const query = req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
+        return res.redirect(302, normalizedPath + query);
+    }
+
+    next();
+});
+
+// =================================================================
+// CLEAN URL ROUTING — Mascarar .html nas URLs para todos os módulos
+// /Modulo/pagina → serve /Modulo/pagina.html automaticamente
+// =================================================================
+
+// Helper: serve HTML sem extensão (clean URLs)
+function serveCleanUrl(req, res, next, moduleDir) {
+    const rawParam = req.params[0];
+    if (!rawParam || rawParam.includes('..') || rawParam.includes('\\') || /^[/\\]/.test(rawParam)) {
+        return res.status(400).json({ error: 'Caminho inválido' });
+    }
+    const safeName = path.basename(rawParam);
+    // Tentar com underscore e com hyphen (contas-pagar → contas_pagar.html)
+    const variations = [
+        safeName + '.html',
+        safeName.replace(/-/g, '_') + '.html',
+        safeName.replace(/_/g, '-') + '.html'
+    ];
+    for (const htmlFile of variations) {
+        const htmlPath = path.join(moduleDir, htmlFile);
+        const resolvedPath = path.resolve(htmlPath);
+        const resolvedDir = path.resolve(moduleDir);
+        if (!resolvedPath.startsWith(resolvedDir + path.sep) && resolvedPath !== resolvedDir) continue;
+        if (fs.existsSync(htmlPath)) {
+            // Reutilizar a lógica de injeção de scripts
+            req.params[0] = htmlFile;
+            return safeSendModuleHtml(req, res, next, moduleDir);
+        }
+    }
+    next();
+}
+
+// PCP
+app.get('/PCP/*.html', authenticateModuleHtml, (req, res, next) => {
     safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'PCP'));
 });
-app.get('/modules/PCP/*.html', (req, res, next) => {
+app.get('/PCP/*', (req, res, next) => {
+    if (req.params[0].includes('.')) return next(); // skip static assets
+    authenticateModuleHtml(req, res, () => serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'PCP')));
+});
+app.get('/modules/PCP/*.html', authenticateModuleHtml, (req, res, next) => {
     safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'PCP'));
 });
-app.get('/NFe/*.html', (req, res, next) => {
+
+// NFe
+app.get('/NFe/*.html', authenticateModuleHtml, (req, res, next) => {
     safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'NFe'));
 });
-app.get('/e-Nf-e/*.html', (req, res, next) => {
+app.get('/NFe/*', (req, res, next) => {
+    if (req.params[0].includes('.')) return next();
+    authenticateModuleHtml(req, res, () => serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'NFe')));
+});
+app.get('/e-Nf-e/*.html', authenticateModuleHtml, (req, res, next) => {
     safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'NFe'));
 });
-app.get('/Financeiro/*.html', (req, res, next) => {
+app.get('/e-Nf-e/*', (req, res, next) => {
+    if (req.params[0].includes('.')) return next();
+    authenticateModuleHtml(req, res, () => serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'NFe')));
+});
+
+// Financeiro — com clean URLs e aliases root-level
+// Todas as páginas disponíveis no módulo Financeiro
+const finEnabledPages = ['index', 'contas_pagar', 'contas_receber', 'contas_bancarias', 'fluxo_caixa', 'relatorios', 'plano_contas', 'conciliacao', 'orcamentos', 'impostos'];
+app.get('/Financeiro/*.html', authenticateModuleHtml, (req, res, next) => {
+    const rawPage = req.params[0].split('/').pop(); // Express strip .html from wildcard
+    const page = rawPage.replace(/-/g, '_');
+    if (!finEnabledPages.includes(page)) {
+        return res.redirect('/Financeiro/index.html');
+    }
+    req.params[0] = `${page}.html`;
     safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'Financeiro', 'public'));
 });
-app.get('/Compras/*.html', (req, res, next) => {
+app.get('/Financeiro/*', (req, res, next) => {
+    if (req.params[0].includes('.')) return next();
+    authenticateModuleHtml(req, res, () => serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'Financeiro', 'public')));
+});
+// Financeiro: Dashboard alias
+app.get('/Financeiro', authenticateModuleHtml, (req, res, next) => {
+    req.params = { 0: 'index.html' };
+    safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'Financeiro', 'public'));
+});
+
+// Aliases root-level para páginas do Financeiro (apenas habilitadas)
+const finRootAliases = {
+    'contas-pagar': 'contas_pagar',
+    'contas-receber': 'contas_receber',
+    'contas-bancarias': 'contas_bancarias',
+    'fluxo-caixa': 'fluxo_caixa',
+    'plano-contas': 'plano_contas',
+    'relatorios': 'relatorios'
+};
+// Alias singular /relatorio → redireciona para /relatorios
+app.get('/relatorio', (req, res) => res.redirect(301, '/relatorios'));
+Object.entries(finRootAliases).forEach(([alias, file]) => {
+    app.get(`/${alias}`, authenticateModuleHtml, (req, res, next) => {
+        req.params = { 0: `${file}.html` };
+        safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'Financeiro', 'public'));
+    });
+});
+
+// Vendas
+app.get('/Vendas/*.html', authenticateModuleHtml, (req, res, next) => {
+    safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'Vendas', 'public'));
+});
+app.get('/Vendas/*', (req, res, next) => {
+    if (req.params[0].includes('.')) return next();
+    authenticateModuleHtml(req, res, () => serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'Vendas', 'public')));
+});
+
+// Compras
+app.get('/Compras/*.html', authenticateModuleHtml, (req, res, next) => {
     safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'Compras'));
 });
-app.get('/RecursosHumanos/*.html', (req, res, next) => {
+app.get('/Compras/*', (req, res, next) => {
+    if (req.params[0].includes('.')) return next();
+    authenticateModuleHtml(req, res, () => serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'Compras')));
+});
+
+// RH
+app.get('/RecursosHumanos/*.html', authenticateModuleHtml, (req, res, next) => {
     safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'RH', 'public'));
 });
-app.get('/RH/*.html', (req, res, next) => {
+app.get('/RecursosHumanos/*', (req, res, next) => {
+    if (req.params[0].includes('.')) return next();
+    authenticateModuleHtml(req, res, () => serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'RH', 'public')));
+});
+app.get('/RH/*.html', authenticateModuleHtml, (req, res, next) => {
     safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'RH', 'public'));
 });
-app.get('/modules/*.html', (req, res, next) => {
+app.get('/RH/*', (req, res, next) => {
+    if (req.params[0].includes('.')) return next();
+    authenticateModuleHtml(req, res, () => serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'RH', 'public')));
+});
+
+// Logistica
+app.get('/Logistica/*.html', authenticateModuleHtml, (req, res, next) => {
+    safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'Logistica', 'public'));
+});
+app.get('/Logistica/*', (req, res, next) => {
+    if (req.params[0].includes('.')) return next();
+    authenticateModuleHtml(req, res, () => serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'Logistica', 'public')));
+});
+app.get('/Logistica', authenticateModuleHtml, (req, res, next) => {
+    req.params = { 0: 'index.html' };
+    safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'Logistica', 'public'));
+});
+
+// Faturamento
+app.get('/Faturamento/*.html', authenticateModuleHtml, (req, res, next) => {
+    safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'Faturamento', 'public'));
+});
+app.get('/Faturamento/*', (req, res, next) => {
+    if (req.params[0].includes('.')) return next();
+    authenticateModuleHtml(req, res, () => serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'Faturamento', 'public')));
+});
+app.get('/Faturamento', authenticateModuleHtml, (req, res, next) => {
+    req.params = { 0: 'dashboard.html' };
+    safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'Faturamento', 'public'));
+});
+
+app.use('/modules', (req, res, next) => {
+    if (req.path.toLowerCase().endsWith('.html')) {
+        return authenticateModuleHtml(req, res, next);
+    }
+    next();
+});
+
+// Catch-all modules
+app.get('/modules/*.html', authenticateModuleHtml, (req, res, next) => {
     safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules'));
 });
 
@@ -1373,10 +1528,24 @@ app.use('/modules/PCP', express.static(path.join(__dirname, 'modules', 'PCP'), {
     }
 }));
 
+// FRENTE-4 FIX: setHeaders para MIME types explícitos em todos os módulos
+const moduleStaticOpts = (res, filePath) => {
+    if (filePath.endsWith('.css'))       res.setHeader('Content-Type', 'text/css; charset=utf-8');
+    else if (filePath.endsWith('.js'))   res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+    else if (filePath.endsWith('.html')) res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    else if (filePath.endsWith('.png'))  res.setHeader('Content-Type', 'image/png');
+    else if (filePath.endsWith('.jpg') || filePath.endsWith('.jpeg')) res.setHeader('Content-Type', 'image/jpeg');
+    else if (filePath.endsWith('.svg'))  res.setHeader('Content-Type', 'image/svg+xml');
+    else if (filePath.endsWith('.woff2')) res.setHeader('Content-Type', 'font/woff2');
+    else if (filePath.endsWith('.woff')) res.setHeader('Content-Type', 'font/woff');
+};
+const mso = { dotfiles: 'deny', index: false, setHeaders: moduleStaticOpts };
+
 const nfeStaticOptions = {
     dotfiles: 'deny',
     index: false,
     setHeaders: (res, filePath) => {
+        moduleStaticOpts(res, filePath);
         if (filePath.endsWith('.html')) {
             res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
             res.setHeader('Pragma', 'no-cache');
@@ -1435,10 +1604,14 @@ app.get('/templates/:file', (req, res) => {
     });
 });
 
-app.use('/Financeiro', express.static(path.join(__dirname, 'modules', 'Financeiro', 'public'), { dotfiles: 'deny', index: false }));
-app.use('/Compras', express.static(path.join(__dirname, 'modules', 'Compras'), { dotfiles: 'deny', index: false }));
-app.use('/RecursosHumanos', express.static(path.join(__dirname, 'modules', 'RH', 'public'), { dotfiles: 'deny', index: false }));
-app.use('/RH', express.static(path.join(__dirname, 'modules', 'RH', 'public'), { dotfiles: 'deny', index: false }));
+app.use('/Financeiro/js', express.static(path.join(__dirname, 'modules', 'Financeiro', 'js'), mso));
+app.use('/Financeiro/css', express.static(path.join(__dirname, 'modules', 'Financeiro', 'css'), mso));
+app.use('/Financeiro', express.static(path.join(__dirname, 'modules', 'Financeiro', 'public'), mso));
+app.use('/Compras', express.static(path.join(__dirname, 'modules', 'Compras'), mso));
+app.use('/Logistica/css', express.static(path.join(__dirname, 'modules', 'Faturamento', 'css'), mso));
+app.use('/Logistica', express.static(path.join(__dirname, 'modules', 'Logistica', 'public'), mso));
+app.use('/RecursosHumanos', express.static(path.join(__dirname, 'modules', 'RH', 'public'), mso));
+app.use('/RH', express.static(path.join(__dirname, 'modules', 'RH', 'public'), mso));
 
 // Servir arquivos compartilhados dos módulos
 app.use('/_shared', express.static(path.join(__dirname, 'modules', '_shared'), { dotfiles: 'deny', index: false }));
@@ -1448,6 +1621,7 @@ app.use('/modules', express.static(path.join(__dirname, 'modules'), {
     dotfiles: 'deny',
     index: false,
     setHeaders: (res, filePath) => {
+        moduleStaticOpts(res, filePath);
         if (filePath.endsWith('.html')) {
             res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
             res.setHeader('Pragma', 'no-cache');
@@ -1535,19 +1709,62 @@ const authorizeAdminOrComercial = (req, res, next) => {
 // =================================================================
 const axios = require('axios');
 
-app.get('/api/proxy/cnpj/:cnpj', authenticateToken, async (req, res) => {
+app.get('/api/proxy/cnpj/:cnpj', authenticateToken, asyncHandler(async (req, res) => {
     const cnpj = req.params.cnpj.replace(/\D/g, '');
     if (cnpj.length !== 14) return res.status(400).json({ error: 'CNPJ inválido' });
     try {
         const { data } = await axios.get(`https://brasilapi.com.br/api/cnpj/v1/${cnpj}`, { timeout: 15000 });
         res.json(data);
     } catch (err) {
-        const status = err.response?.status || 502;
-        res.status(status).json({ error: 'Erro ao consultar CNPJ' });
+        // Fallback para ReceitaWS
+        try {
+            const { data: data2 } = await axios.get(`https://receitaws.com.br/v1/cnpj/${cnpj}`, { timeout: 15000 });
+            if (data2 && data2.status !== 'ERROR') {
+                res.json({ ...data2, _fonte: 'receitaws' });
+            } else {
+                res.status(404).json({ error: 'CNPJ não encontrado' });
+            }
+        } catch (err2) {
+            const status = err.response?.status || 502;
+            res.status(status).json({ error: 'Erro ao consultar CNPJ' });
+        }
     }
-});
+}));
 
-app.get('/api/proxy/cep/:cep', authenticateToken, async (req, res) => {
+// Proxy IBGE Municípios
+app.get('/api/proxy/ibge/municipios/:uf', authenticateToken, asyncHandler(async (req, res) => {
+    const uf = req.params.uf;
+    try {
+        const { data } = await axios.get(`https://brasilapi.com.br/api/ibge/municipios/v1/${uf}?providers=dados-abertos-br,gov,wikipedia`, { timeout: 10000 });
+        res.json(data);
+    } catch (err) {
+        res.status(err.response?.status || 502).json({ error: 'Erro ao consultar IBGE' });
+    }
+}));
+
+// Proxy CNAE
+app.get('/api/proxy/cnae/:codigo', authenticateToken, asyncHandler(async (req, res) => {
+    const codigo = req.params.codigo;
+    try {
+        const { data } = await axios.get(`https://brasilapi.com.br/api/cnae/v2/${codigo}`, { timeout: 10000 });
+        res.json(data);
+    } catch (err) {
+        res.status(err.response?.status || 502).json({ error: 'Erro ao consultar CNAE' });
+    }
+}));
+
+// Proxy DDD
+app.get('/api/proxy/ddd/:ddd', authenticateToken, asyncHandler(async (req, res) => {
+    const ddd = req.params.ddd;
+    try {
+        const { data } = await axios.get(`https://brasilapi.com.br/api/ddd/v1/${ddd}`, { timeout: 10000 });
+        res.json(data);
+    } catch (err) {
+        res.status(err.response?.status || 502).json({ error: 'Erro ao consultar DDD' });
+    }
+}));
+
+app.get('/api/proxy/cep/:cep', authenticateToken, asyncHandler(async (req, res) => {
     const cep = req.params.cep.replace(/\D/g, '');
     if (cep.length !== 8) return res.status(400).json({ error: 'CEP inválido' });
     try {
@@ -1557,25 +1774,21 @@ app.get('/api/proxy/cep/:cep', authenticateToken, async (req, res) => {
         const status = err.response?.status || 502;
         res.status(status).json({ error: 'Erro ao consultar CEP' });
     }
-});
+}));
 
 // =================================================================
 // 📄 NFe API — Extracted to routes/nfe-api.js
 // =================================================================
 const nfeApiRouter = require('./routes/nfe-api')({ authenticateToken, pool });
-app.use('/api/nfe', nfeApiRouter);
+// AUDIT-FIX: Adicionado authorizeArea('nfe') — antes qualquer usuário autenticado acessava
+app.use('/api/nfe', authenticateToken, authorizeArea('nfe'), nfeApiRouter);
 console.log('✅ Rotas NFe API carregadas (modular): /api/nfe/*');
 
 // =================================================================
-// 🚚 LOGÍSTICA API — Extracted to routes/logistica-routes.js
+// 🚚 LOGÍSTICA API — AUDIT-FIX: Removido mount duplicado
+// Já montado via routes/index.js → registerAllRoutes()
 // =================================================================
-try {
-    const logisticaRouter = require('./routes/logistica-routes')({ pool, authenticateToken, authorizeArea });
-    app.use('/api/logistica', logisticaRouter);
-    console.log('✅ Rotas Logística API carregadas: /api/logistica/*');
-} catch (err) {
-    console.error('❌ Erro ao carregar rotas Logística:', err.message);
-}
+// (logistica-routes agora carregado apenas em routes/index.js)
 
 // =================================================================
 // 📄 FATURAMENTO API — Módulo de Faturamento/NFe (SEFAZ, certificado)
@@ -1588,6 +1801,17 @@ try {
     console.log('✅ Rotas Faturamento API carregadas: /api/faturamento/*');
 } catch (err) {
     console.error('❌ Erro ao carregar rotas Faturamento:', err.message);
+}
+
+// =================================================================
+// 📊 CONTÁBIL-FISCAL API — SPED EFD, Bloco K, Apurações ICMS/PIS/COFINS
+// =================================================================
+try {
+    const createContabilFiscalRouter = require('./routes/api-contabil-fiscal');
+    app.use('/api/contabil', authenticateToken, createContabilFiscalRouter(pool, authenticateToken));
+    console.log('✅ Rotas Contábil-Fiscal API carregadas: /api/contabil/*');
+} catch (err) {
+    console.error('❌ Erro ao carregar rotas Contábil-Fiscal:', err.message);
 }
 
 // =================================================================
@@ -1649,8 +1873,7 @@ app.get('/metrics', (req, res, next) => {
     next();
 }, createMetricsEndpoint(pool, cacheService));
 
-// ⚡ ENTERPRISE: Request timeout middleware (30s default)
-app.use('/api', requestTimeout(parseInt(process.env.REQUEST_TIMEOUT) || 30000));
+// AUDIT-FIX: requestTimeout movido para antes das rotas (agora após applySecurityMiddlewares)
 
 // =================================================================
 // ENDPOINT DE FOTO DO USUÁRIO - Busca foto pelo email (autenticado)
@@ -1736,7 +1959,9 @@ app.use('/uploads', express.static(path.join(__dirname, 'modules', 'RH', 'public
 // ============================================================
 // PAGE AUTHENTICATION MIDDLEWARE
 // ============================================================
-const REFRESH_SECRET = process.env.REFRESH_SECRET || JWT_SECRET + '_refresh';
+// AUDIT-FIX R2: REFRESH_SECRET não deve derivar do JWT_SECRET
+const crypto = require('crypto');
+const REFRESH_SECRET = process.env.REFRESH_SECRET || crypto.createHmac('sha256', JWT_SECRET).update('refresh-token-secret').digest('hex');
 
 function authenticatePage(req, res, next) {
     // SECURITY FIX: Exige token válido para servir páginas protegidas
@@ -1839,7 +2064,7 @@ const initCronJobs = () => {
 // ENDPOINT PÚBLICO DE FOTO/AVATAR - Usado na tela de login (sem auth)
 // Retorna apenas foto, nome e apelido — dados não sensíveis
 // =================================================================
-app.get('/api/public/usuarios/foto/:email', async (req, res) => {
+app.get('/api/public/usuarios/foto/:email', asyncHandler(async (req, res) => {
     try {
         const email = decodeURIComponent(req.params.email).toLowerCase();
         if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
@@ -1883,13 +2108,13 @@ app.get('/api/public/usuarios/foto/:email', async (req, res) => {
     } catch (error) {
         return res.status(500).json({ success: false, error: 'Erro interno' });
     }
-});
+}));
 
 // =================================================================
 // ENDPOINT DE FOTO DO USUÁRIO - Busca foto pelo email (autenticado)
 // [REFACTORED 10/03/2026] Extraído de dentro do authorizeACL para evitar side-effect
 // =================================================================
-app.get('/api/usuarios/foto/:email', authenticateToken, async (req, res) => {
+app.get('/api/usuarios/foto/:email', authenticateToken, asyncHandler(async (req, res) => {
     try {
         const email = decodeURIComponent(req.params.email).toLowerCase();
         let nome = null, apelido = null, foto = null;
@@ -1932,7 +2157,7 @@ app.get('/api/usuarios/foto/:email', authenticateToken, async (req, res) => {
         console.error('Erro ao buscar foto do usuário:', error);
         return res.status(500).json({ success: false, error: 'Erro interno ao buscar foto' });
     }
-});
+}));
 
 // ACL: Controle de acesso detalhado por nível de usuário
 // [REFACTORED 10/03/2026] Simplificado — usa permission.service para verificação
@@ -2021,10 +2246,6 @@ const companySettingsRouter = companySettingsFactory({
     requireAdmin: reqAdmin
 });
 app.use('/api', companySettingsRouter);
-
-// 🏢 MULTI-EMPRESAS: Rotas de gestão multi-tenant
-const empresaRouter = createEmpresaRouter(pool, authToken);
-app.use('/api', empresaRouter);
 // =================================================================
 
 
@@ -2049,9 +2270,9 @@ registerAllRoutes(app, {
     cacheMiddleware,
     CACHE_CONFIG,
     // AUDIT-FIX SEC-001: Pass checkOwnership for IDOR protection on data endpoints
-    checkOwnership: authUnified.checkOwnership,
+    checkOwnership: authCentral.checkOwnership,
     // AUDIT-FIX PERM-004: Write-guard blocks consultoria/restricted roles from mutations
-    writeGuard: authUnified.writeGuard,
+    writeGuard: authCentral.writeGuard,
     VENDAS_DB_CONFIG: {
         host: process.env.DB_HOST || 'localhost',
         port: parseInt(process.env.DB_PORT) || 3306,
@@ -2089,7 +2310,7 @@ console.log('✅ Health/Status endpoints carregados (modular)');
 // ─── FOLHA DE PAGAMENTO MANUAL (RH) ───────────────────────────────
 
 // GET /api/rh/folha-manual/competencia - Buscar folhas por mês/ano
-app.get('/api/rh/folha-manual/competencia', authenticateToken, authorizeArea('rh'), async (req, res) => {
+app.get('/api/rh/folha-manual/competencia', authenticateToken, authorizeArea('rh'), asyncHandler(async (req, res) => {
     const mes = parseInt(req.query.mes);
     const ano = parseInt(req.query.ano);
     if (!mes || !ano) return res.status(400).json({ error: 'mes e ano são obrigatórios' });
@@ -2107,10 +2328,10 @@ app.get('/api/rh/folha-manual/competencia', authenticateToken, authorizeArea('rh
         logger.error('Erro ao buscar folha manual:', error);
         res.status(500).json({ error: 'Erro interno no servidor.' });
     }
-});
+}));
 
 // GET /api/rh/folha-manual/listar - Listar todas as folhas manuais
-app.get('/api/rh/folha-manual/listar', authenticateToken, authorizeArea('rh'), async (req, res) => {
+app.get('/api/rh/folha-manual/listar', authenticateToken, authorizeArea('rh'), asyncHandler(async (req, res) => {
     const { ano } = req.query;
     try {
         let sql = 'SELECT fm.*, (SELECT COUNT(*) FROM rh_folha_manual_itens WHERE folha_id = fm.id) as qtd_itens FROM rh_folha_manual fm';
@@ -2123,10 +2344,10 @@ app.get('/api/rh/folha-manual/listar', authenticateToken, authorizeArea('rh'), a
         logger.error('Erro ao listar folhas manuais:', error);
         res.status(500).json({ error: 'Erro ao listar folhas' });
     }
-});
+}));
 
 // POST /api/rh/folha-manual/salvar - Criar ou atualizar folha com todos os itens
-app.post('/api/rh/folha-manual/salvar', authenticateToken, authorizeAdmin, async (req, res) => {
+app.post('/api/rh/folha-manual/salvar', authenticateToken, authorizeAdmin, asyncHandler(async (req, res) => {
     const mes = parseInt(req.body.mes);
     const ano = parseInt(req.body.ano);
     const tipo = req.body.tipo;
@@ -2190,10 +2411,10 @@ app.post('/api/rh/folha-manual/salvar', authenticateToken, authorizeAdmin, async
     } finally {
         conn.release();
     }
-});
+}));
 
 // PUT /api/rh/folha-manual/:id/fechar - Fechar folha manual e enviar ao Contas a Pagar
-app.put('/api/rh/folha-manual/:id/fechar', authenticateToken, authorizeAdmin, async (req, res) => {
+app.put('/api/rh/folha-manual/:id/fechar', authenticateToken, authorizeAdmin, asyncHandler(async (req, res) => {
     const folhaId = parseInt(req.params.id);
     try {
         const [folhaRows] = await pool.query('SELECT * FROM rh_folha_manual WHERE id = ?', [folhaId]);
@@ -2231,10 +2452,10 @@ app.put('/api/rh/folha-manual/:id/fechar', authenticateToken, authorizeAdmin, as
         logger.error('Erro ao fechar folha manual:', error);
         res.status(500).json({ error: 'Erro ao fechar folha manual' });
     }
-});
+}));
 
 // PUT /api/rh/folha-manual/:id/reabrir - Reabrir folha fechada
-app.put('/api/rh/folha-manual/:id/reabrir', authenticateToken, authorizeAdmin, async (req, res) => {
+app.put('/api/rh/folha-manual/:id/reabrir', authenticateToken, authorizeAdmin, asyncHandler(async (req, res) => {
     try {
         const [result] = await pool.query("UPDATE rh_folha_manual SET status = 'rascunho', fechado_em = NULL WHERE id = ? AND status = 'fechada'", [parseInt(req.params.id)]);
         if (result.affectedRows === 0) {
@@ -2245,10 +2466,10 @@ app.put('/api/rh/folha-manual/:id/reabrir', authenticateToken, authorizeAdmin, a
         logger.error('Erro ao reabrir folha:', error);
         res.status(500).json({ error: 'Erro ao reabrir folha' });
     }
-});
+}));
 
 // GET /api/rh/funcionarios-empresas - Listar funcionários agrupados por empresa
-app.get('/api/rh/funcionarios-empresas', authenticateToken, authorizeArea('rh'), async (req, res) => {
+app.get('/api/rh/funcionarios-empresas', authenticateToken, authorizeArea('rh'), asyncHandler(async (req, res) => {
     try {
         const [rows] = await pool.query(`
       SELECT f.id, f.nome_completo as nome, f.cargo, f.departamento, f.salario,
@@ -2262,7 +2483,7 @@ app.get('/api/rh/funcionarios-empresas', authenticateToken, authorizeArea('rh'),
         logger.error('Erro ao buscar funcionários:', error);
         res.status(500).json({ error: 'Erro ao buscar funcionários' });
     }
-});
+}));
 
 // =====================================================
 // HOLERITES (COLABORADOR) - CONSENTIMENTO E VISUALIZAÇÃO
@@ -2273,9 +2494,251 @@ const isAdminRHUser = (user) => {
 };
 
 const getUserFuncionarioId = (user) => {
-    const id = Number(user?.funcionario_id || user?.id);
+    const id = Number(user?.funcionario_id);
     return Number.isFinite(id) && id > 0 ? id : null;
 };
+
+const resolveUserFuncionarioId = async (user) => {
+    const explicitId = getUserFuncionarioId(user);
+    if (explicitId) return explicitId;
+
+    const userId = Number(user?.id);
+    const userEmail = String(user?.email || '').trim();
+
+    try {
+        if (Number.isFinite(userId) && userId > 0) {
+            const [rows] = await pool.query(`
+                SELECT f.id
+                FROM usuarios u
+                INNER JOIN funcionarios f
+                    ON LOWER(f.email) = LOWER(u.email)
+                    OR LOWER(f.email) = LOWER(u.login)
+                WHERE u.id = ?
+                LIMIT 1
+            `, [userId]);
+            if (rows.length > 0) return Number(rows[0].id);
+        }
+
+        if (userEmail) {
+            const [rows] = await pool.query(
+                'SELECT id FROM funcionarios WHERE LOWER(email) = LOWER(?) LIMIT 1',
+                [userEmail]
+            );
+            if (rows.length > 0) return Number(rows[0].id);
+        }
+    } catch (error) {
+        logger.warn('Aviso ao resolver funcionario do usuario logado:', error.message);
+    }
+
+    return Number.isFinite(userId) && userId > 0 ? userId : null;
+};
+
+// ─── PENSÃO ALIMENTÍCIA (RH) ───────────────────────────────────────────
+
+// Ensure table exists
+pool.query(`CREATE TABLE IF NOT EXISTS rh_pensao_alimenticia (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  funcionario_id INT NOT NULL,
+  valor DECIMAL(10,2) DEFAULT 0,
+  nome_recebedor VARCHAR(255),
+  cpf_recebedor VARCHAR(14),
+  banco_recebedor VARCHAR(100),
+  agencia_recebedor VARCHAR(20),
+  conta_recebedor VARCHAR(30),
+  observacoes TEXT,
+  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_func_pensao (funcionario_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`).catch(e => {
+    if (e && !String(e.message || '').includes('already exists')) logger.warn('rh_pensao_alimenticia:', e.message);
+});
+
+[
+    "ALTER TABLE rh_pensao_alimenticia ADD COLUMN IF NOT EXISTS valor DECIMAL(10,2) DEFAULT 0",
+    "ALTER TABLE rh_pensao_alimenticia ADD COLUMN IF NOT EXISTS nome_recebedor VARCHAR(255)",
+    "ALTER TABLE rh_pensao_alimenticia ADD COLUMN IF NOT EXISTS cpf_recebedor VARCHAR(14)",
+    "ALTER TABLE rh_pensao_alimenticia ADD COLUMN IF NOT EXISTS banco_recebedor VARCHAR(100)",
+    "ALTER TABLE rh_pensao_alimenticia ADD COLUMN IF NOT EXISTS agencia_recebedor VARCHAR(20)",
+    "ALTER TABLE rh_pensao_alimenticia ADD COLUMN IF NOT EXISTS conta_recebedor VARCHAR(30)",
+    "ALTER TABLE rh_pensao_alimenticia ADD COLUMN IF NOT EXISTS observacoes TEXT",
+    "ALTER TABLE rh_pensao_alimenticia ADD COLUMN IF NOT EXISTS criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+    "ALTER TABLE rh_pensao_alimenticia ADD COLUMN IF NOT EXISTS atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"
+].forEach((sql) => pool.query(sql).catch(e => logger.warn('rh_pensao_alimenticia alter:', e.message)));
+
+const normalizePensaoRows = (rows) => (rows || []).map((row) => ({
+    ...row,
+    observacoes: row.observacoes || row['observações'] || '',
+    ativo: row.ativo === undefined ? 1 : row.ativo
+}));
+
+app.get('/api/rh/funcionarios/:id/pensao', authenticateToken, authorizeArea('rh'), asyncHandler(async (req, res) => {
+    try {
+        let rows;
+        try {
+            [rows] = await pool.query('SELECT * FROM rh_pensao_alimenticia WHERE funcionario_id = ? ORDER BY criado_em DESC', [req.params.id]);
+        } catch (error) {
+            if (error.code !== 'ER_BAD_FIELD_ERROR') throw error;
+            [rows] = await pool.query('SELECT * FROM rh_pensao_alimenticia WHERE funcionario_id = ? ORDER BY id DESC', [req.params.id]);
+        }
+        res.json(normalizePensaoRows(rows));
+    } catch (error) {
+        logger.error('Erro ao listar pensões:', error);
+        res.status(500).json({ error: 'Erro ao listar pensões' });
+    }
+}));
+
+app.post('/api/rh/funcionarios/:id/pensao', authenticateToken, authorizeArea('rh'), asyncHandler(async (req, res) => {
+    const { valor, nome_recebedor, cpf_recebedor, banco_recebedor, agencia_recebedor, conta_recebedor } = req.body;
+    const observacoes = req.body.observacoes || req.body['observa\u00e7\u00f5es'] || null;
+    try {
+        const [result] = await pool.query(
+            `INSERT INTO rh_pensao_alimenticia (funcionario_id, valor, nome_recebedor, cpf_recebedor, banco_recebedor, agencia_recebedor, conta_recebedor, observacoes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+            [req.params.id, valor || 0, nome_recebedor || null, cpf_recebedor || null, banco_recebedor || null, agencia_recebedor || null, conta_recebedor || null, observacoes || null]
+        );
+        res.json({ success: true, id: result.insertId });
+    } catch (error) {
+        logger.error('Erro ao criar pensão:', error);
+        res.status(500).json({ error: 'Erro ao criar pensão' });
+    }
+}));
+
+app.put('/api/rh/funcionarios/:id/pensao/:pensaoId', authenticateToken, authorizeArea('rh'), asyncHandler(async (req, res) => {
+    const { valor, nome_recebedor, cpf_recebedor, banco_recebedor, agencia_recebedor, conta_recebedor } = req.body;
+    const observacoes = req.body.observacoes || req.body['observa\u00e7\u00f5es'] || null;
+    try {
+        const [result] = await pool.query(
+            `UPDATE rh_pensao_alimenticia
+             SET valor = ?, nome_recebedor = ?, cpf_recebedor = ?, banco_recebedor = ?,
+                 agencia_recebedor = ?, conta_recebedor = ?, observacoes = ?
+             WHERE id = ? AND funcionario_id = ?`,
+            [
+                valor || 0,
+                nome_recebedor || null,
+                cpf_recebedor || null,
+                banco_recebedor || null,
+                agencia_recebedor || null,
+                conta_recebedor || null,
+                observacoes || null,
+                req.params.pensaoId,
+                req.params.id
+            ]
+        );
+        if (result.affectedRows === 0) return res.status(404).json({ error: 'Pensao nao encontrada' });
+        res.json({ success: true });
+    } catch (error) {
+        logger.error('Erro ao atualizar pensÃ£o:', error);
+        res.status(500).json({ error: 'Erro ao atualizar pensÃ£o' });
+    }
+}));
+
+app.delete('/api/rh/funcionarios/:id/pensao/:pensaoId', authenticateToken, authorizeArea('rh'), asyncHandler(async (req, res) => {
+    try {
+        await pool.query('DELETE FROM rh_pensao_alimenticia WHERE id=? AND funcionario_id=?', [req.params.pensaoId, req.params.id]);
+        res.json({ success: true });
+    } catch (error) {
+        logger.error('Erro ao remover pensão:', error);
+        res.status(500).json({ error: 'Erro ao remover pensão' });
+    }
+}));
+
+// ─── SALÁRIO FAMÍLIA (RH) ──────────────────────────────────────────────
+
+pool.query(`CREATE TABLE IF NOT EXISTS rh_salario_familia (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  funcionario_id INT NOT NULL UNIQUE,
+  recebe TINYINT(1) DEFAULT 0,
+  quantidade_dependentes INT DEFAULT 0,
+  observacoes TEXT,
+  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_func_sf (funcionario_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`).catch(e => {
+    if (e && !String(e.message || '').includes('already exists')) logger.warn('rh_salario_familia:', e.message);
+});
+
+pool.query(`CREATE TABLE IF NOT EXISTS rh_sf_dependentes (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  funcionario_id INT NOT NULL,
+  nome VARCHAR(255) NOT NULL,
+  parentesco VARCHAR(50),
+  data_nascimento DATE,
+  cpf VARCHAR(14),
+  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_func_sf_dep (funcionario_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`).catch(e => {
+    if (e && !String(e.message || '').includes('already exists')) logger.warn('rh_sf_dependentes:', e.message);
+});
+
+app.get('/api/rh/funcionarios/:id/salario-familia', authenticateToken, authorizeArea('rh'), asyncHandler(async (req, res) => {
+    try {
+        const [sfRows] = await pool.query('SELECT * FROM rh_salario_familia WHERE funcionario_id = ?', [req.params.id]);
+        let depRows;
+        try {
+            [depRows] = await pool.query('SELECT * FROM rh_sf_dependentes WHERE funcionario_id = ? ORDER BY criado_em DESC', [req.params.id]);
+        } catch (error) {
+            if (error.code !== 'ER_BAD_FIELD_ERROR') throw error;
+            [depRows] = await pool.query('SELECT * FROM rh_sf_dependentes WHERE funcionario_id = ? ORDER BY id DESC', [req.params.id]);
+        }
+        const sf = sfRows[0] || { recebe: 0, observacoes: '' };
+        res.json({ recebe: sf.recebe, observacoes: sf.observacoes || '', dependentes: depRows });
+    } catch (error) {
+        logger.error('Erro ao carregar salário família:', error);
+        res.status(500).json({ error: 'Erro ao carregar salário família' });
+    }
+}));
+
+const salvarSalarioFamiliaRh = async (req, res) => {
+    const { recebe, dependentes } = req.body;
+    const observacoes = req.body.observacoes || req.body['observa\u00e7\u00f5es'] || null;
+    try {
+        await pool.query(
+            `INSERT INTO rh_salario_familia (funcionario_id, recebe, observacoes) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE recebe=VALUES(recebe), observacoes=VALUES(observacoes)`,
+            [req.params.id, recebe ? 1 : 0, observacoes || null]
+        );
+        if (Array.isArray(dependentes)) {
+            await pool.query('DELETE FROM rh_sf_dependentes WHERE funcionario_id = ?', [req.params.id]);
+            for (const dep of dependentes) {
+                await pool.query(
+                    'INSERT INTO rh_sf_dependentes (funcionario_id, nome, parentesco, data_nascimento, cpf) VALUES (?, ?, ?, ?, ?)',
+                    [req.params.id, dep.nome, dep.parentesco || null, dep.data_nascimento || null, dep.cpf || null]
+                );
+            }
+        }
+        res.json({ success: true });
+    } catch (error) {
+        logger.error('Erro ao salvar salário família:', error);
+        res.status(500).json({ error: 'Erro ao salvar salário família' });
+    }
+};
+
+app.post('/api/rh/funcionarios/:id/salario-familia', authenticateToken, authorizeArea('rh'), asyncHandler(salvarSalarioFamiliaRh));
+app.put('/api/rh/funcionarios/:id/salario-familia', authenticateToken, authorizeArea('rh'), asyncHandler(salvarSalarioFamiliaRh));
+
+app.post('/api/rh/funcionarios/:id/salario-familia/dependente', authenticateToken, authorizeArea('rh'), asyncHandler(async (req, res) => {
+    const { nome, parentesco, data_nascimento, cpf } = req.body;
+    if (!nome) return res.status(400).json({ error: 'Nome do dependente e obrigatorio' });
+
+    try {
+        const [result] = await pool.query(
+            'INSERT INTO rh_sf_dependentes (funcionario_id, nome, parentesco, data_nascimento, cpf) VALUES (?, ?, ?, ?, ?)',
+            [req.params.id, nome, parentesco || null, data_nascimento || null, cpf || null]
+        );
+        res.json({ success: true, id: result.insertId });
+    } catch (error) {
+        logger.error('Erro ao salvar dependente salÃ¡rio famÃ­lia:', error);
+        res.status(500).json({ error: 'Erro ao salvar dependente' });
+    }
+}));
+
+app.delete('/api/rh/funcionarios/:id/salario-familia/dependente/:depId', authenticateToken, authorizeArea('rh'), asyncHandler(async (req, res) => {
+    try {
+        await pool.query('DELETE FROM rh_sf_dependentes WHERE id = ? AND funcionario_id = ?', [req.params.depId, req.params.id]);
+        res.json({ success: true });
+    } catch (error) {
+        logger.error('Erro ao remover dependente salÃ¡rio famÃ­lia:', error);
+        res.status(500).json({ error: 'Erro ao remover dependente' });
+    }
+}));
 
 const ensureHoleritesColumns = `
     ALTER TABLE rh_holerites
@@ -2311,13 +2774,13 @@ pool.query(ensureHoleritesConsentTable).catch((e) => {
 });
 
 // GET /api/rh/holerites/consentimento - Verificar consentimento digital do usuário logado
-app.get('/api/rh/holerites/consentimento', authenticateToken, async (req, res) => {
+app.get('/api/rh/holerites/consentimento', authenticateToken, asyncHandler(async (req, res) => {
     try {
         if (isAdminRHUser(req.user)) {
             return res.json({ consentimento: true, admin: true });
         }
 
-        const funcionarioId = getUserFuncionarioId(req.user);
+        const funcionarioId = await resolveUserFuncionarioId(req.user);
         if (!funcionarioId) {
             return res.status(400).json({ message: 'Funcionário não identificado para o usuário logado.' });
         }
@@ -2337,10 +2800,10 @@ app.get('/api/rh/holerites/consentimento', authenticateToken, async (req, res) =
         logger.error('Erro ao verificar consentimento digital de holerites:', error);
         res.status(500).json({ error: 'Erro ao verificar consentimento digital' });
     }
-});
+}));
 
 // POST /api/rh/holerites/consentimento - Registrar/atualizar consentimento digital
-app.post('/api/rh/holerites/consentimento', authenticateToken, async (req, res) => {
+app.post('/api/rh/holerites/consentimento', authenticateToken, asyncHandler(async (req, res) => {
     try {
         if (isAdminRHUser(req.user)) {
             return res.json({ success: true, admin: true, message: 'Usuário admin não precisa de consentimento.' });
@@ -2351,7 +2814,7 @@ app.post('/api/rh/holerites/consentimento', authenticateToken, async (req, res) 
             return res.status(400).json({ message: 'assinatura_digital é obrigatória e deve ter ao menos 3 caracteres.' });
         }
 
-        const funcionarioId = getUserFuncionarioId(req.user);
+        const funcionarioId = await resolveUserFuncionarioId(req.user);
         if (!funcionarioId) {
             return res.status(400).json({ message: 'Funcionário não identificado para o usuário logado.' });
         }
@@ -2377,12 +2840,12 @@ app.post('/api/rh/holerites/consentimento', authenticateToken, async (req, res) 
         logger.error('Erro ao registrar consentimento digital de holerites:', error);
         res.status(500).json({ error: 'Erro ao registrar consentimento digital' });
     }
-});
+}));
 
 // GET /api/rh/holerites/meus - Listar holerites publicados do funcionário logado
-app.get('/api/rh/holerites/meus', authenticateToken, async (req, res) => {
+app.get('/api/rh/holerites/meus', authenticateToken, asyncHandler(async (req, res) => {
     try {
-        const funcionarioId = getUserFuncionarioId(req.user);
+        const funcionarioId = await resolveUserFuncionarioId(req.user);
         if (!funcionarioId) {
             return res.status(400).json({ error: 'Funcionário não identificado para o usuário logado.' });
         }
@@ -2409,10 +2872,10 @@ app.get('/api/rh/holerites/meus', authenticateToken, async (req, res) => {
         logger.error('Erro ao listar holerites do funcionário:', error);
         res.status(500).json({ error: 'Erro ao listar holerites' });
     }
-});
+}));
 
 // GET /api/rh/holerites/:id - Buscar holerite por id (restrito ao dono/admin)
-app.get('/api/rh/holerites/:id', authenticateToken, async (req, res, next) => {
+app.get('/api/rh/holerites/:id', authenticateToken, asyncHandler(async (req, res, next) => {
     if (!/^\d+$/.test(req.params.id)) return next();
     try {
         const [holerite] = await pool.query(`
@@ -2426,7 +2889,7 @@ app.get('/api/rh/holerites/:id', authenticateToken, async (req, res, next) => {
         `, [req.params.id]);
         if (holerite.length === 0) return res.status(404).json({ error: 'Holerite não encontrado' });
 
-        const userFuncId = getUserFuncionarioId(req.user);
+        const userFuncId = await resolveUserFuncionarioId(req.user);
         if (userFuncId && Number(holerite[0].funcionario_id) !== userFuncId && !isAdminRHUser(req.user)) {
             return res.status(403).json({ message: 'Acesso negado. Você só pode visualizar seus próprios holerites.' });
         }
@@ -2440,13 +2903,13 @@ app.get('/api/rh/holerites/:id', authenticateToken, async (req, res, next) => {
         logger.error('Erro ao buscar holerite:', error);
         res.status(500).json({ error: 'Erro ao buscar holerite' });
     }
-});
+}));
 
 // POST /api/rh/holerites/:id/visualizar - Registrar visualização
-app.post('/api/rh/holerites/:id/visualizar', authenticateToken, async (req, res) => {
+app.post('/api/rh/holerites/:id/visualizar', authenticateToken, asyncHandler(async (req, res) => {
     try {
         const holeriteId = req.params.id;
-        const userFuncId = getUserFuncionarioId(req.user);
+        const userFuncId = await resolveUserFuncionarioId(req.user);
 
         if (userFuncId && !isAdminRHUser(req.user)) {
             const [rows] = await pool.query('SELECT funcionario_id FROM rh_holerites WHERE id = ? LIMIT 1', [holeriteId]);
@@ -2464,13 +2927,13 @@ app.post('/api/rh/holerites/:id/visualizar', authenticateToken, async (req, res)
         logger.error('Erro ao registrar visualização:', error);
         res.status(500).json({ error: 'Erro ao registrar visualização' });
     }
-});
+}));
 
 // POST /api/rh/holerites/:id/confirmar - Confirmar recebimento
-app.post('/api/rh/holerites/:id/confirmar', authenticateToken, async (req, res) => {
+app.post('/api/rh/holerites/:id/confirmar', authenticateToken, asyncHandler(async (req, res) => {
     try {
         const holeriteId = req.params.id;
-        const userFuncId = getUserFuncionarioId(req.user);
+        const userFuncId = await resolveUserFuncionarioId(req.user);
 
         if (userFuncId && !isAdminRHUser(req.user)) {
             const [rows] = await pool.query('SELECT funcionario_id FROM rh_holerites WHERE id = ? LIMIT 1', [holeriteId]);
@@ -2488,254 +2951,18 @@ app.post('/api/rh/holerites/:id/confirmar', authenticateToken, async (req, res) 
         logger.error('Erro ao confirmar recebimento:', error);
         res.status(500).json({ error: 'Erro ao confirmar recebimento' });
     }
-});
+}));
 
 console.log('✅ Rotas Folha de Pagamento Manual (RH) carregadas');
 
-// ─── PENSÃO ALIMENTÍCIA (RH) ──────────────────────────────────────
-// GET - Listar pensões de um funcionário
-app.get('/api/rh/funcionarios/:id/pensao', authenticateToken, async (req, res) => {
-    try {
-        const [rows] = await pool.query(
-            'SELECT * FROM rh_pensao_alimenticia WHERE funcionario_id = ? ORDER BY criado_em DESC',
-            [req.params.id]
-        );
-        res.json(rows);
-    } catch (error) {
-        logger.error('Erro ao listar pensões:', error);
-        res.status(500).json({ error: 'Erro ao listar pensões' });
-    }
-});
-
-// POST - Criar pensão
-app.post('/api/rh/funcionarios/:id/pensao', authenticateToken, authorizeAdmin, async (req, res) => {
-    const { valor, nome_recebedor, cpf_recebedor, banco_recebedor, agencia_recebedor, conta_recebedor, observacoes } = req.body;
-    try {
-        const [result] = await pool.query(
-            `INSERT INTO rh_pensao_alimenticia (funcionario_id, valor, nome_recebedor, cpf_recebedor, banco_recebedor, agencia_recebedor, conta_recebedor, observacoes)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-            [req.params.id, valor || 0, nome_recebedor || null, cpf_recebedor || null, banco_recebedor || null, agencia_recebedor || null, conta_recebedor || null, observacoes || null]
-        );
-        res.json({ success: true, id: result.insertId });
-    } catch (error) {
-        logger.error('Erro ao criar pensão:', error);
-        res.status(500).json({ error: 'Erro ao criar pensão' });
-    }
-});
-
-// PUT - Atualizar pensão
-app.put('/api/rh/funcionarios/:id/pensao/:pensaoId', authenticateToken, authorizeAdmin, async (req, res) => {
-    const { valor, nome_recebedor, cpf_recebedor, banco_recebedor, agencia_recebedor, conta_recebedor, observacoes } = req.body;
-    try {
-        await pool.query(
-            `UPDATE rh_pensao_alimenticia SET valor=?, nome_recebedor=?, cpf_recebedor=?, banco_recebedor=?, agencia_recebedor=?, conta_recebedor=?, observacoes=?
-             WHERE id=? AND funcionario_id=?`,
-            [valor || 0, nome_recebedor || null, cpf_recebedor || null, banco_recebedor || null, agencia_recebedor || null, conta_recebedor || null, observacoes || null, req.params.pensaoId, req.params.id]
-        );
-        res.json({ success: true });
-    } catch (error) {
-        logger.error('Erro ao atualizar pensão:', error);
-        res.status(500).json({ error: 'Erro ao atualizar pensão' });
-    }
-});
-
-// DELETE - Remover pensão
-app.delete('/api/rh/funcionarios/:id/pensao/:pensaoId', authenticateToken, authorizeAdmin, async (req, res) => {
-    try {
-        await pool.query('DELETE FROM rh_pensao_alimenticia WHERE id=? AND funcionario_id=?', [req.params.pensaoId, req.params.id]);
-        res.json({ success: true });
-    } catch (error) {
-        logger.error('Erro ao remover pensão:', error);
-        res.status(500).json({ error: 'Erro ao remover pensão' });
-    }
-});
-
-// ─── SALÁRIO FAMÍLIA (RH) ─────────────────────────────────────────
-// GET - Dados de salário família do funcionário
-app.get('/api/rh/funcionarios/:id/salario-familia', authenticateToken, async (req, res) => {
-    try {
-        const [sfRows] = await pool.query('SELECT * FROM rh_salario_familia WHERE funcionario_id = ?', [req.params.id]);
-        const [depRows] = await pool.query('SELECT * FROM rh_salario_familia_dependentes WHERE funcionario_id = ? ORDER BY criado_em DESC', [req.params.id]);
-        const sf = sfRows[0] || { recebe: 0, observacoes: '' };
-        res.json({ recebe: sf.recebe, observacoes: sf.observacoes || '', dependentes: depRows });
-    } catch (error) {
-        logger.error('Erro ao carregar salário família:', error);
-        res.status(500).json({ error: 'Erro ao carregar salário família' });
-    }
-});
-
-// PUT - Atualizar dados de salário família
-app.put('/api/rh/funcionarios/:id/salario-familia', authenticateToken, authorizeAdmin, async (req, res) => {
-    const { recebe, quantidade_dependentes, observacoes } = req.body;
-    try {
-        await pool.query(
-            `INSERT INTO rh_salario_familia (funcionario_id, recebe, quantidade_dependentes, observacoes)
-             VALUES (?, ?, ?, ?)
-             ON DUPLICATE KEY UPDATE recebe=VALUES(recebe), quantidade_dependentes=VALUES(quantidade_dependentes), observacoes=VALUES(observacoes)`,
-            [req.params.id, recebe ? 1 : 0, quantidade_dependentes || 0, observacoes || null]
-        );
-        res.json({ success: true });
-    } catch (error) {
-        logger.error('Erro ao salvar salário família:', error);
-        res.status(500).json({ error: 'Erro ao salvar salário família' });
-    }
-});
-
-// POST - Adicionar dependente SF
-app.post('/api/rh/funcionarios/:id/salario-familia/dependente', authenticateToken, authorizeAdmin, async (req, res) => {
-    const { nome, parentesco, data_nascimento, cpf } = req.body;
-    if (!nome) return res.status(400).json({ error: 'Nome é obrigatório' });
-    try {
-        const [result] = await pool.query(
-            'INSERT INTO rh_salario_familia_dependentes (funcionario_id, nome, parentesco, data_nascimento, cpf) VALUES (?, ?, ?, ?, ?)',
-            [req.params.id, nome, parentesco || null, data_nascimento || null, cpf || null]
-        );
-        res.json({ success: true, id: result.insertId });
-    } catch (error) {
-        logger.error('Erro ao adicionar dependente SF:', error);
-        res.status(500).json({ error: 'Erro ao adicionar dependente' });
-    }
-});
-
-// DELETE - Remover dependente SF
-app.delete('/api/rh/funcionarios/:id/salario-familia/dependente/:depId', authenticateToken, authorizeAdmin, async (req, res) => {
-    try {
-        await pool.query('DELETE FROM rh_salario_familia_dependentes WHERE id=? AND funcionario_id=?', [req.params.depId, req.params.id]);
-        res.json({ success: true });
-    } catch (error) {
-        logger.error('Erro ao remover dependente SF:', error);
-        res.status(500).json({ error: 'Erro ao remover dependente' });
-    }
-});
-
-// ─── AVALIAÇÕES DE DESEMPENHO (RH) ───────────────────────────────
-// GET - Avaliações do funcionário
-app.get('/api/rh/avaliacoes/funcionario/:id', authenticateToken, async (req, res) => {
-    try {
-        const userFuncId = Number(req.user?.funcionario_id || req.user?.id);
-        if (Number(req.params.id) !== userFuncId && !isAdminRHUser(req.user)) {
-            return res.status(403).json({ message: 'Acesso negado.' });
-        }
-        const [avaliacoes] = await pool.query(`
-            SELECT a.*, p.nome AS periodo_nome, av.nome_completo AS avaliador_nome
-            FROM rh_avaliacoes_desempenho a
-            LEFT JOIN rh_periodos_avaliacao p ON a.periodo_id = p.id
-            LEFT JOIN funcionarios av ON a.avaliador_id = av.id
-            WHERE a.funcionario_id = ?
-            ORDER BY a.data_avaliacao DESC
-        `, [req.params.id]);
-        res.json(avaliacoes);
-    } catch (error) {
-        logger.error('Erro ao buscar avaliações:', error);
-        res.status(500).json({ error: 'Erro ao buscar avaliações' });
-    }
-});
-
-// GET - Dashboard de avaliações
-app.get('/api/rh/avaliacoes/dashboard', authenticateToken, authorizeAdmin, async (req, res) => {
-    try {
-        const [stats] = await pool.query(`
-            SELECT
-                (SELECT COUNT(*) FROM rh_avaliacoes_desempenho WHERE status = 'CONCLUIDA') AS avaliacoes_concluidas,
-                (SELECT COUNT(DISTINCT funcionario_id) FROM rh_avaliacoes_desempenho) AS funcionarios_avaliados,
-                (SELECT ROUND(AVG(nota_final), 2) FROM rh_avaliacoes_desempenho WHERE nota_final IS NOT NULL) AS nota_media,
-                (SELECT COUNT(*) FROM rh_metas WHERE status = 'ATINGIDA') AS metas_atingidas,
-                (SELECT COUNT(*) FROM rh_metas) AS total_metas
-        `);
-        const [classificacoes] = await pool.query(`
-            SELECT classificacao, COUNT(*) AS total
-            FROM rh_avaliacoes_desempenho
-            WHERE classificacao IS NOT NULL
-            GROUP BY classificacao
-        `);
-        res.json({ resumo: stats[0], classificacoes });
-    } catch (error) {
-        logger.error('Erro ao gerar dashboard avaliações:', error);
-        res.status(500).json({ error: 'Erro ao gerar dashboard de avaliações' });
-    }
-});
-
-// GET - Solicitações (todas, para gestão)
-app.get('/api/rh/solicitacoes/todas', authenticateToken, authorizeAdmin, async (req, res) => {
-    try {
-        const { status, tipo, page = 1, limit = 50 } = req.query;
-        let where = '1=1';
-        const params = [];
-        if (status) { where += ' AND s.status = ?'; params.push(status); }
-        if (tipo) { where += ' AND s.tipo = ?'; params.push(tipo); }
-        params.push(Number(limit), (Number(page) - 1) * Number(limit));
-        const [rows] = await pool.query(`
-            SELECT s.*, f.nome_completo AS funcionario_nome, f.cargo, f.departamento
-            FROM rh_solicitacoes s
-            LEFT JOIN funcionarios f ON s.funcionario_id = f.id
-            WHERE ${where}
-            ORDER BY s.criado_em DESC
-            LIMIT ? OFFSET ?
-        `, params);
-        const [[{ total }]] = await pool.query(`SELECT COUNT(*) AS total FROM rh_solicitacoes s WHERE ${where}`, params.slice(0, -2));
-        res.json({ data: rows, total, page: Number(page), limit: Number(limit) });
-    } catch (error) {
-        logger.error('Erro ao listar solicitações:', error);
-        res.status(500).json({ error: 'Erro ao listar solicitações' });
-    }
-});
-
-// POST - Criar solicitação
-app.post('/api/rh/solicitacoes', authenticateToken, async (req, res) => {
-    const funcId = getUserFuncionarioId(req.user);
-    if (!funcId) return res.status(400).json({ error: 'Funcionário não identificado' });
-    const { tipo, descricao, data_inicio, data_fim } = req.body;
-    try {
-        const [result] = await pool.query(
-            'INSERT INTO rh_solicitacoes (funcionario_id, tipo, descricao, data_inicio, data_fim) VALUES (?, ?, ?, ?, ?)',
-            [funcId, tipo, descricao || null, data_inicio || null, data_fim || null]
-        );
-        res.json({ success: true, id: result.insertId });
-    } catch (error) {
-        logger.error('Erro ao criar solicitação:', error);
-        res.status(500).json({ error: 'Erro ao criar solicitação' });
-    }
-});
-
-// PUT - Atualizar status da solicitação
-app.put('/api/rh/solicitacoes/:id/status', authenticateToken, authorizeAdmin, async (req, res) => {
-    const { status, observacao_admin } = req.body;
-    try {
-        await pool.query(
-            'UPDATE rh_solicitacoes SET status = ?, observacao_admin = ?, atualizado_em = NOW() WHERE id = ?',
-            [status, observacao_admin || null, req.params.id]
-        );
-        res.json({ success: true });
-    } catch (error) {
-        logger.error('Erro ao atualizar solicitação:', error);
-        res.status(500).json({ error: 'Erro ao atualizar solicitação' });
-    }
-});
-
-// GET - Solicitações do funcionário logado
-app.get('/api/rh/funcionarios/:id/solicitacoes', authenticateToken, async (req, res) => {
-    try {
-        const [rows] = await pool.query(
-            'SELECT * FROM rh_solicitacoes WHERE funcionario_id = ? ORDER BY criado_em DESC',
-            [req.params.id]
-        );
-        res.json(rows);
-    } catch (error) {
-        logger.error('Erro ao listar solicitações:', error);
-        res.status(500).json({ error: 'Erro ao listar solicitações' });
-    }
-});
-
-console.log('✅ Rotas Pensão, Salário Família, Avaliações e Solicitações (RH) carregadas');
-
-// 7. TRATAMENTO DE ERROS E INICIALIZAÇÁO DO SERVIDOR
+// 7. TRATAMENTO DE ERROS E INICIALIZAÇÃO DO SERVIDOR
 // =================================================================
 
 // 404 handler — rota não encontrada (deve vir antes do error handler)
 app.use((req, res, next) => {
     // API routes return JSON
     if (req.path.startsWith('/api/')) {
-        return res.status(404).json({ error: 'Rota não encontrada', path: req.path });
+        return res.status(404).json({ error: 'Rota não encontrada' }); // AUDIT-FIX: removido path leak
     }
     // All others: serve branded 404 page
     const page404 = path.join(__dirname, 'public', '404.html');
@@ -2749,10 +2976,7 @@ app.use((req, res, next) => {
 // AUDIT-FIX ARCH-003: Centralized error handler with structured logging
 app.use((err, req, res, next) => {
     // Determine error type and severity
-    // Circuit breaker / DB unavailable / connection errors → 503
-    const isCircuitBreaker = err.message?.includes('circuit breaker') || err.message?.includes('temporariamente indisponível');
-    const isDbConnError = err.code === 'ETIMEDOUT' || err.code === 'ECONNREFUSED' || err.code === 'PROTOCOL_CONNECTION_LOST' || err.code === 'ER_CON_COUNT_ERROR';
-    const statusCode = (isCircuitBreaker || isDbConnError) ? 503 : (err.statusCode || err.status || 500);
+    const statusCode = err.statusCode || err.status || 500;
     const isServerError = statusCode >= 500;
 
     // Structured error logging via logger
@@ -2825,20 +3049,27 @@ const startServer = async () => {
             console.log('⚠️  Iniciando em modo DEV_MOCK — pulando checagem/criação de tabelas no MySQL.');
         } else {
             try {
-                await pool.query('SELECT 1');
-                DB_AVAILABLE = true; // DB confirmed reachable
+                // Retry DB connection up to 5x (30s total) to survive slow MySQL startup
+                let dbReady = false;
+                for (let attempt = 1; attempt <= 5 && !dbReady; attempt++) {
+                    try {
+                        await pool.query('SELECT 1');
+                        dbReady = true;
+                    } catch (e) {
+                        if (attempt < 5) {
+                            console.warn(`⏳ DB not ready (attempt ${attempt}/5): ${e.message} — retrying in 6s...`);
+                            await new Promise(r => setTimeout(r, 6000));
+                        }
+                    }
+                }
+                if (!dbReady) throw new Error('MySQL não respondeu após 5 tentativas');
                 console.log('✅ Conexão com o banco de dados estabelecida com sucesso.');
                 console.log(`⚡ Conexão DB em ${Date.now() - startupTime}ms`);
 
-                // Only run DDL migrations on cluster instance 0
-                const _inst = parseInt(process.env.NODE_APP_INSTANCE || process.env.pm_id || '0', 10);
-                // ⚡ OTIMIZAÇÃO: Pular migrações se SKIP_MIGRATIONS=1 ou worker != 0
-                if (SKIP_MIGRATIONS || _inst !== 0) {
-                    if (_inst !== 0) console.log(`⚡ Worker #${_inst}: pulando migrações startServer()`);
-                    else {
-                        console.log('⚡ SKIP_MIGRATIONS ativo - pulando verificações de schema');
-                        console.log('💡 Use "npm run db:migrate" para executar migrações quando necessário\n');
-                    }
+                // ⚡ OTIMIZAÇÃO: Pular migrações se SKIP_MIGRATIONS=1
+                if (SKIP_MIGRATIONS) {
+                    console.log('⚡ SKIP_MIGRATIONS ativo - pulando verificações de schema');
+                    console.log('💡 Use "npm run db:migrate" para executar migrações quando necessário\n');
                 } else {
                     console.log('🔄 Executando verificações de schema...');
                     console.log('💡 Defina SKIP_MIGRATIONS=1 no .env para inicialização mais rápida\n');
