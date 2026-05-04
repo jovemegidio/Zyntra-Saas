@@ -1029,24 +1029,28 @@
                         }
                         
                         // Nome do usuário
-                        document.getElementById('user-name').textContent = primeiroNome;
-                        
+                        const userNameEl = document.getElementById('user-name');
+                        if (userNameEl) userNameEl.textContent = primeiroNome;
+
                         // Iniciais
                         const initials = (user.nome || userName).split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-                        document.getElementById('user-initials').textContent = initials;
-                        
+                        const userInitialsEl = document.getElementById('user-initials');
+                        if (userInitialsEl) userInitialsEl.textContent = initials;
+
                         // Foto do usuário - verificar múltiplos campos
                         let userAvatar = (user.avatar || user.foto || user.foto_perfil_url);
                         if (userAvatar === '/avatars/default.webp') userAvatar = null;
                         if (!userAvatar) {
                             userAvatar = getAvatarFromEmail(user.email, user.nome);
                         }
-                        
+
                         if (userAvatar) {
                             const photoEl = document.getElementById('user-photo');
-                            photoEl.src = userAvatar;
-                            photoEl.classList.add('visible');
-                            document.getElementById('user-initials').style.display = 'none';
+                            if (photoEl) {
+                                photoEl.src = userAvatar;
+                                photoEl.classList.add('visible');
+                                if (userInitialsEl) userInitialsEl.style.display = 'none';
+                            }
                         }
                     }
                 }
