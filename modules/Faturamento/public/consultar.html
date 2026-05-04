@@ -289,14 +289,20 @@
 
         function carregarUsuarioLogado() {
             const h = new Date().getHours();
-            document.getElementById('greeting-text').textContent = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
+            const _set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+            _set('greeting-text', h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite');
             fetch('/api/me', { credentials: 'include' })
                 .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
                 .then(u => {
                     const nome = u.nome || u.name || 'Usuário';
-                    document.getElementById('user-name').textContent = nome.split(' ')[0];
-                    document.getElementById('user-initials').textContent = nome.substring(0, 2).toUpperCase();
-                    if (u.foto || u.avatar) { document.getElementById('user-photo').src = u.foto || u.avatar; document.getElementById('user-photo').style.display = 'block'; document.getElementById('user-initials').style.display = 'none'; }
+                    _set('user-name', nome.split(' ')[0]);
+                    _set('user-initials', nome.substring(0, 2).toUpperCase());
+                    if (u.foto || u.avatar) {
+                        const photo = document.getElementById('user-photo');
+                        const initials = document.getElementById('user-initials');
+                        if (photo) { photo.src = u.foto || u.avatar; photo.style.display = 'block'; }
+                        if (initials) initials.style.display = 'none';
+                    }
                 }).catch(() => { });
         }
 

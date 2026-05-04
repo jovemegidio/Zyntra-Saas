@@ -1084,7 +1084,7 @@
                     todosProdutos = [];
                     atualizarEstatisticas({});
                     filtrarProdutos();
-                    document.getElementById('last-update').textContent = new Date().toLocaleTimeString('pt-BR');
+                    { const _lu = document.getElementById('last-update'); if (_lu) _lu.textContent = new Date().toLocaleTimeString('pt-BR'); }
                     return;
                 }
                 
@@ -1129,7 +1129,7 @@
                 filtrarProdutos();
                 
                 // Atualiza timestamp
-                document.getElementById('last-update').textContent = new Date().toLocaleTimeString('pt-BR');
+                { const _lu = document.getElementById('last-update'); if (_lu) _lu.textContent = new Date().toLocaleTimeString('pt-BR'); }
 
             } catch (error) {
                 console.error('Erro:', error);
@@ -1206,11 +1206,12 @@
                 .map(([cat, qtd]) => `${cat}: ${qtd}`)
                 .join(' | ');
 
-            document.getElementById('stat-total').textContent = total;
-            document.getElementById('stat-disponivel').textContent = estoqueNormal;
-            document.getElementById('stat-baixo').textContent = estoqueBaixo;
-            document.getElementById('stat-zerado').textContent = estoqueCritico;
-            document.getElementById('stat-categorias').textContent = totalCategorias;
+            const _setStat = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+            _setStat('stat-total', total);
+            _setStat('stat-disponivel', estoqueNormal);
+            _setStat('stat-baixo', estoqueBaixo);
+            _setStat('stat-zerado', estoqueCritico);
+            _setStat('stat-categorias', totalCategorias);
             
             // Mostrar detalhe das categorias
             const detailEl = document.getElementById('stat-categorias-detail');
@@ -1333,17 +1334,18 @@
             const emptyState = document.getElementById('empty-state');
             const tableWrapper = document.querySelector('.table-wrapper');
 
+            const _setItems = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
             if (produtosFiltrados.length === 0) {
-                tbody.innerHTML = '';
-                emptyState.style.display = 'block';
-                tableWrapper.style.display = 'none';
-                document.getElementById('items-showing').textContent = '0';
-                document.getElementById('items-total').textContent = '0';
+                if (tbody) tbody.innerHTML = '';
+                if (emptyState) emptyState.style.display = 'block';
+                if (tableWrapper) tableWrapper.style.display = 'none';
+                _setItems('items-showing', '0');
+                _setItems('items-total', '0');
                 return;
             }
 
-            emptyState.style.display = 'none';
-            tableWrapper.style.display = 'block';
+            if (emptyState) emptyState.style.display = 'none';
+            if (tableWrapper) tableWrapper.style.display = 'block';
 
             // PaginAção
             const inicio = (paginaAtual - 1) * itensPorPagina;
@@ -1376,8 +1378,8 @@
             }).join('');
 
             // Atualizar info
-            document.getElementById('items-showing').textContent = produtosPagina.length;
-            document.getElementById('items-total').textContent = produtosFiltrados.length;
+            _setItems('items-showing', produtosPagina.length);
+            _setItems('items-total', produtosFiltrados.length);
 
             // Renderizar paginAção
             renderizarPaginação();

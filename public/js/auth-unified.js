@@ -260,6 +260,8 @@
 // Retorna valores do sessionStorage (isolado por aba) quando disponíveis
 // =============================================================================
 (function StorageIsolator() {
+    if (window.__storageIsolatorInitialized) return;
+    window.__storageIsolatorInitialized = true;
     try {
         var _origGet = Storage.prototype.getItem;
         var _authKeyMap = {
@@ -309,6 +311,9 @@
 
 (function () {
     'use strict';
+
+    if (window.__authUnifiedInitialized) return;
+    window.__authUnifiedInitialized = true;
 
     console.log('🔐 Sistema de Autenticação Unificado ALUFORCE v7.5 (Tab-Isolated + Server Validation + Token Refresh)');
 
