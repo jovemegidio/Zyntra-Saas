@@ -156,6 +156,10 @@
             background: #94a3b8;
         }
 
+        .dash-status-dot.orange {
+            background: #f97316;
+        }
+
         .dash-status-name {
             flex: 1;
             font-size: 13px;
@@ -531,9 +535,9 @@
                                     <i class="fas fa-search"></i>
                                     <span>Consultar NF-e</span>
                                 </a>
-                                <a href="logistica.html" class="dash-action-btn">
+                                <a href="logistica.html" class="dash-action-btn" title="Abre o módulo de Logística">
                                     <i class="fas fa-truck"></i>
-                                    <span>Logística</span>
+                                    <span>Logística <i class="fas fa-external-link-alt" style="font-size:9px;opacity:0.65;margin-left:2px;vertical-align:middle;"></i></span>
                                 </a>
                                 <a href="eventos.html" class="dash-action-btn">
                                     <i class="fas fa-calendar-check"></i>
@@ -820,7 +824,7 @@
             tbody.innerHTML = pedidos.map(p => {
                 const número = p.numero_nf || p.nf || p.nfe_faturamento_numero || ('PED-' + p.id);
                 const cliente = escapeHtml(p.cliente_nome || p.empresa_nome || 'Não informado');
-                const data = formatarData(p.data_faturamento || p.updated_at);
+                const data = formatarData(p.data_faturamento || p.updated_at || p.created_at);
                 const valor = Number(p.valor) || Number(p.valor_total) || 0;
                 const status = (p.status || '').toLowerCase();
                 const tipo = (p.tipo_faturamento || 'normal').toLowerCase();
@@ -945,8 +949,7 @@
                         <span>${escapeHtml(a.usuario)}</span>
                         <span>•</span>
                         <span>${formatarMoeda(a.valor)}</span>
-                        <span>•</span>
-                        <span>${dataStr}</span>
+                        ${dataStr ? `<span>•</span><span>${dataStr}</span>` : ''}
                     </div>
                 </div>
             </div>`;
@@ -975,8 +978,8 @@
                 if (!r.ok) return;
                 const data = await r.json();
                 const stats = data.stats || data;
-                document.getElementById('log-aguardando').textContent = stats.aguardando_separação || stats.aguardando || 0;
-                document.getElementById('log-separação').textContent = stats.em_separação || 0;
+                document.getElementById('log-aguardando').textContent = stats.aguardando_separacao || stats.aguardando || 0;
+                document.getElementById('log-separacao').textContent = stats.em_separacao || 0;
                 document.getElementById('log-expedicao').textContent = stats.em_expedicao || 0;
                 document.getElementById('log-transporte').textContent = stats.em_transporte || 0;
                 document.getElementById('log-entregues').textContent = stats.entregue || stats.entregues || 0;

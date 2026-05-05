@@ -144,6 +144,16 @@ router.post('/', async (req, res) => {
             await connection.rollback();
             return res.status(400).json({ error: 'Solicitante e itens são obrigatórios' });
         }
+        const itemInvalido = itens.find(i => !i.descricao || String(i.descricao).trim() === '');
+        if (itemInvalido) {
+            await connection.rollback();
+            return res.status(400).json({ error: 'Todos os itens devem ter descrição' });
+        }
+        const itemSemQtd = itens.find(i => !i.quantidade || parseFloat(i.quantidade) <= 0);
+        if (itemSemQtd) {
+            await connection.rollback();
+            return res.status(400).json({ error: 'Todos os itens devem ter quantidade maior que zero' });
+        }
         
         // Gerar número da requisição se não informado
         let numeroRequisicao = numero;
@@ -203,8 +213,8 @@ router.post('/', async (req, res) => {
         });
     } catch (error) {
         await connection.rollback();
-        console.error('Erro ao criar requisição:', error);
-        res.status(500).json({ error: 'Erro ao criar requisição' });
+        console.error('Erro ao criar requisição:', error.message || error);
+        res.status(500).json({ error: 'Erro ao criar requisição', detalhe: error.message || 'Falha interna' });
     } finally {
         connection.release();
     }

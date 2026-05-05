@@ -356,6 +356,11 @@ function handleDrop(e) {
         const novaColuna = this.id.replace('col-', '');
         const statusAnterior = draggedCard.dataset.status;
 
+        if (statusAnterior === novaColuna) {
+            this.style.background = '';
+            return false;
+        }
+
         // Verificar permissão de movimentação
         if (typeof VendasAuth.podeMoverPedido === 'function' && !VendasAuth.podeMoverPedido(usuarioLogado, statusAnterior, novaColuna)) {
             mostrarNotificacao('Você não tem permissão para mover este pedido para esta etapa.', 'error');

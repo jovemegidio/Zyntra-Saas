@@ -1052,6 +1052,9 @@ const upload = multer({
 
 // Listar todas as metas (Admin)
 apiVendasRouter.get('/metas', async (req, res, next) => {
+    if (!dbAvailable || !pool) {
+        return res.status(503).json({ error: 'db_unavailable', message: 'Banco de dados indisponível.' });
+    }
     try {
         const { periodo, vendedor_id } = req.query;
         let query = `
@@ -2922,6 +2925,10 @@ apiVendasRouter.put('/pedidos/:id/status', async (req, res, next) => {
             'cancelado':       ['orcamento', 'orçamento'] // Apenas admin pode ressuscitar → orçamento
         };
 
+        if (statusAtual === status) {
+            return res.status(200).json({ message: 'Status já definido.', status });
+        }
+
         const transicoesPermitidas = TRANSICOES_PERMITIDAS[statusAtual] || [];
         if (!transicoesPermitidas.includes(status)) {
             return res.status(400).json({
@@ -3233,6 +3240,10 @@ apiVendasRouter.patch('/pedidos/:id', async (req, res, next) => {
                 'recibo':          [],
                 'cancelado':       ['orcamento', 'orçamento']
             };
+
+            if (statusAtual === updates.status) {
+                return res.status(200).json({ message: 'Status já definido.', status: updates.status });
+            }
 
             const permitidas = TRANSICOES_PERMITIDAS[statusAtual] || [];
             if (!permitidas.includes(updates.status)) {

@@ -803,6 +803,10 @@
         });
 
         if (items.length === 0) { showToast('Adicione pelo menos 1 item', 'warning'); return; }
+        const itemSemDescricao = items.find(i => !i.descricao || !i.descricao.trim());
+        if (itemSemDescricao) { showToast('Preencha a descrição de todos os itens', 'warning'); return; }
+        const itemSemQtd = items.find(i => !i.quantidade || i.quantidade <= 0);
+        if (itemSemQtd) { showToast('Informe a quantidade de todos os itens (maior que zero)', 'warning'); return; }
 
         const prioridade = document.querySelector('input[name="prioridade"]:checked')?.value || 'normal';
         const solicitante = document.getElementById('reqSolicitante')?.value || (usuarioLogado ? (usuarioLogado.nome || usuarioLogado.name) : 'Usuário');

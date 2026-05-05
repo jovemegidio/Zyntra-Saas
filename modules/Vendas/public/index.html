@@ -17996,10 +17996,17 @@ td{padding:5px 8px;border-bottom:1px solid #e5e7eb;font-size:10px}
                 return;
             }
 
+            const cnpjRaw = (document.getElementById('nova-transp-cnpj')?.value || '').replace(/\D/g, '');
+            if (cnpjRaw && cnpjRaw.length !== 14) {
+                showNotification('CNPJ inválido — informe 14 dígitos', 'error');
+                document.getElementById('nova-transp-cnpj')?.focus();
+                return;
+            }
+
             const dados = {
                 razao_social: razao,
                 nome_fantasia: document.getElementById('nova-transp-fantasia')?.value?.trim() || '',
-                cnpj_cpf: (document.getElementById('nova-transp-cnpj')?.value || '').replace(/\D/g, ''),
+                cnpj_cpf: cnpjRaw,
                 inscricao_estadual: document.getElementById('nova-transp-ie')?.value?.trim() || '',
                 telefone: document.getElementById('nova-transp-telefone')?.value?.trim() || '',
                 email: document.getElementById('nova-transp-email')?.value?.trim() || '',

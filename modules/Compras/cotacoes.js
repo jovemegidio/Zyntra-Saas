@@ -553,6 +553,10 @@ class CotacoesManager {
 
         // Carregar materiais
         const tbody = document.getElementById('materiaisCotacaoBody');
+        if (!tbody) {
+            document.getElementById('modalNovaCotacao').classList.add('active');
+            return;
+        }
         tbody.innerHTML = '';
 
         cotacao.materiais.forEach(mat => {
@@ -867,7 +871,8 @@ class CotacoesManager {
             return;
         }
 
-        document.getElementById('comparacaoNumero').textContent = cotacao.numero;
+        const comparacaoNumeroEl = document.getElementById('comparacaoNumero');
+        if (comparacaoNumeroEl) comparacaoNumeroEl.textContent = cotacao.numero;
 
         let html = `
             <div class="comparacao-header">
@@ -927,13 +932,16 @@ class CotacoesManager {
             </div>
         `;
 
-        document.getElementById('comparacaoConteudo').innerHTML = html;
-        document.getElementById('modalComparacao').style.display = 'flex';
+        const comparacaoConteudo = document.getElementById('comparacaoConteudo');
+        if (comparacaoConteudo) comparacaoConteudo.innerHTML = html;
+        const modalComparacao = document.getElementById('modalComparacao');
+        if (modalComparacao) { modalComparacao.style.display = 'flex'; modalComparacao.classList.add('active'); }
     }
 
     async aprovarMelhorProposta() {
         // Buscar a cotação atual do modal
-        const cotacaoNumero = document.getElementById('comparacaoNumero').textContent;
+        const comparacaoNumeroEl = document.getElementById('comparacaoNumero');
+        const cotacaoNumero = comparacaoNumeroEl ? comparacaoNumeroEl.textContent : '';
         const cotacao = this.cotacoes.find(c => c.numero === cotacaoNumero);
 
         if (!cotacao) {

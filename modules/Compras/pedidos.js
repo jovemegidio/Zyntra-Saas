@@ -276,7 +276,8 @@ async function abrirModalEditarPedido(pedidoId) {
     const forn = fornecedores.find(f => f.id == pedido.fornecedor_id);
     const fornBusca = document.getElementById('fornecedorBusca');
     if (fornBusca) fornBusca.value = forn ? (forn.razao_social || forn.nome) : (pedido.fornecedor || pedido.fornecedor_nome || '');
-    document.getElementById('compradorId').value = pedido.comprador_id || '';
+    const compradorEl = document.getElementById('compradorId');
+    if (compradorEl) compradorEl.value = pedido.comprador_id || '';
     document.getElementById('dataEntregaPrevista').value = pedido.data_entrega_prevista ? pedido.data_entrega_prevista.split('T')[0] : '';
     document.getElementById('statusPedido').value = pedido.status || 'pendente';
     document.getElementById('condicoesPagamento').value = pedido.condicoes_pagamento || '';
@@ -846,16 +847,14 @@ async function excluirPedido(pedidoId) {
             await carregarPedidos();
             return;
         }
+        // Tratar erros HTTP (ex: 409 Conflict)
+        const errData = await response.json().catch(() => ({}));
+        mostrarToast(errData.message || errData.error || `Erro ao excluir pedido (${response.status})`, 'error');
+        await carregarPedidos();
     } catch (error) {
         console.error('Erro ao excluir pedido:', error);
+        mostrarToast('Erro de conexão ao excluir pedido', 'error');
     }
-
-    // Fallback local
-    pedidos = pedidos.filter(p => p.id !== pedidoId);
-    salvarPedidosLocal();
-    renderizarTabelaPedidos();
-    atualizarCards();
-    mostrarNotificacao('Pedido removido localmente', 'warning');
 }
 
 function imprimirPedido() {

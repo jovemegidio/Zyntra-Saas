@@ -2978,16 +2978,23 @@ Aceita com ou sem formatação"></textarea>
                 return;
             }
 
+            this._importAbortado = false;
+
             // Mostrar progresso
             document.getElementById('import-progress-container').style.display = 'block';
             document.getElementById('btn-start-import').disabled = true;
             document.getElementById('btn-start-import').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Importando...';
-            document.getElementById('btn-cancel-import').style.display = 'none';
+
+            const btnCancel = document.getElementById('btn-cancel-import');
+            btnCancel.style.display = 'inline-flex';
+            btnCancel.textContent = 'Cancelar';
+            btnCancel.onclick = () => { this._importAbortado = true; this.fecharModal('modal-importar'); };
 
             let sucesso = 0;
             let erros = 0;
 
             for (let i = 0; i < cnpjs.length; i++) {
+                if (this._importAbortado) break;
                 const cnpj = cnpjs[i];
                 const progresso = Math.round(((i + 1) / cnpjs.length) * 100);
                 
@@ -3038,14 +3045,19 @@ Aceita com ou sem formatação"></textarea>
             document.getElementById('import-success-count').textContent = sucesso;
             document.getElementById('import-errors-text').textContent = erros > 0 ? `${erros} CNPJs não encontrados.` : '';
             
-            document.getElementById('btn-cancel-import').style.display = 'inline-flex';
-            document.getElementById('btn-cancel-import').textContent = 'Fechar';
+            const btnCancelFim = document.getElementById('btn-cancel-import');
+            btnCancelFim.style.display = 'inline-flex';
+            btnCancelFim.textContent = 'Fechar';
+            btnCancelFim.onclick = () => this.fecharModal('modal-importar');
             document.getElementById('btn-start-import').style.display = 'none';
 
             // Atualizar interface
             this.atualizarMetricas();
             this.renderizarKanban();
             this.renderizarTabela();
+
+            // Fechar automaticamente após 3s
+            setTimeout(() => this.fecharModal('modal-importar'), 3000);
         }
     };
 

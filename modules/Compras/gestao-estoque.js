@@ -23,7 +23,10 @@ const EST = {
 };
 
 function getAuthHeaders() {
-    return { 'Content-Type': 'application/json' };
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    return headers;
 }
 
 // ============================================
@@ -930,7 +933,15 @@ function abrirModal(id) {
     if (modal) {
         modal.style.display = '';
         modal.classList.add('active');
+        modal.removeAttribute('aria-hidden');
+        modal.setAttribute('role', 'dialog');
+        modal.setAttribute('aria-modal', 'true');
         document.body.style.overflow = 'hidden';
+        // Mover foco para o primeiro elemento focável dentro do modal
+        requestAnimationFrame(() => {
+            const focusable = modal.querySelector('button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])');
+            if (focusable) focusable.focus();
+        });
     }
 }
 
@@ -939,6 +950,7 @@ function fecharModal(id) {
     if (modal) {
         modal.classList.remove('active');
         modal.style.display = 'none';
+        modal.setAttribute('aria-hidden', 'true');
         document.body.style.overflow = '';
     }
 }

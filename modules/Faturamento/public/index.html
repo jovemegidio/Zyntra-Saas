@@ -10,7 +10,7 @@
     <script>if(location.hostname!=='localhost'&&location.hostname!=='127.0.0.1'){console.log=function(){}}</script>
     <script src="/js/auth-unified.js?v=20260326" defer></script>
     <script src="/js/inactivity-manager.js?v=20260324" defer></script>
-    <script src="/js/user-greeting-avatar.js?v=20260402" defer></script>
+    <!-- user-greeting-avatar.js removido: saudação gerenciada por carregarUsuarioLogado() nesta página -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -617,8 +617,8 @@
                 document.getElementById('edit-nfe-status').value = (nfe.status || 'pendente').toLowerCase();
                 document.getElementById('edit-nfe-data-emissao').value = nfe.data_emissao ? String(nfe.data_emissao).slice(0,10) : '';
                 document.getElementById('edit-nfe-natureza').value = nfe.natureza_operacao || '';
-                document.getElementById('edit-nfe-chave').value = nfe.chave_acesso || '';
-                document.getElementById('edit-nfe-protocolo').value = nfe.protocolo || nfe.protocolo_autorizacao || '';
+                document.getElementById('edit-nfe-chave').value = nfe.chave_acesso || nfe.chave || nfe.chave_nfe || nfe.chNFe || '';
+                document.getElementById('edit-nfe-protocolo').value = nfe.protocolo || nfe.protocolo_autorizacao || nfe.numero_protocolo || nfe.nProt || '';
                 document.getElementById('edit-nfe-observacoes').value = nfe.observacoes || nfe.observacao || '';
 
                 // Controle read-only para NF-e originadas de pedidos
@@ -628,6 +628,12 @@
                     const el = document.getElementById(fid);
                     if (el) { el.readOnly = isReadOnly; el.disabled = isReadOnly; }
                 });
+
+                // Formatar valor monetário quando somente leitura
+                if (isReadOnly) {
+                    const valorEl = document.getElementById('edit-nfe-valor');
+                    if (valorEl) valorEl.value = formatarMoeda(nfe.valor_total || nfe.valor || 0);
+                }
 
                 // Botões de ação do modal
                 const btnSalvar = document.querySelector('[onclick="salvarEdicaoNFe()"]');

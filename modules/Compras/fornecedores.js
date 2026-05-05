@@ -79,10 +79,12 @@ class FornecedoresManager {
             console.log('[Fornecedores] Fornecedores mapeados:', this.fornecedores.length);
             
             this.atualizarEstatisticas();
+            this.renderizarTabela();
         } catch (error) {
             console.error('Erro ao carregar fornecedores:', error);
             this.fornecedores = [];
             this.atualizarEstatisticas();
+            this.renderizarTabela();
         }
     }
     
