@@ -40,6 +40,7 @@ const BRAND_CONFIG = {
         nameFull: 'Labor Energy',
         nameLower: 'labor-energy',
         logoFile: 'labor-energy-logo.png',
+        logoFileWhite: 'labor-energy-logo-branco.png',
         email: '@laborenergy.com.br',
         primaryColor: '#27AE60',
         primaryHover: '#1E8449',
@@ -153,6 +154,8 @@ const MOUNT_SCRIPT = MOUNT_PATH ? `<script id="zyntra-mount-intercept">
  * Aplica substituições de branding em uma string HTML
  */
 function applyBrandReplacements(body, cfg) {
+    const logoColor = cfg.logoFile;
+    const logoWhite = cfg.logoFileWhite || cfg.logoFile;
     return body
         // Nomes em maiúsculas
         .replace(/ALUFORCE/g, cfg.name)
@@ -160,14 +163,15 @@ function applyBrandReplacements(body, cfg) {
         .replace(/Aluforce/g, cfg.nameFull)
         // Nome minúsculas (evitando substituir caminhos internos de API)
         .replace(/\baluforce\b(?!\.api\.br|\.ind\.br|_vendas|_db)/g, cfg.nameLower)
-        // Logos — todos os formatos de logo Aluforce
-        .replace(/Logo Monocromatico - Branco - Aluforce copy\.webp/g, cfg.logoFile)
-        .replace(/Logo Monocromatico - Azul - Aluforce\.png/g, cfg.logoFile)
-        .replace(/Logo Monocromatico - Branco - Aluforce\.png/g, cfg.logoFile)
-        .replace(/Logo Monocromatico - Branco - Aluforce\.webp/g, cfg.logoFile)
-        .replace(/Logo Monocromatico - Azul - Aluforce\.webp/g, cfg.logoFile)
-        .replace(/Interativo-Aluforce\.png/g, cfg.logoFile)
-        .replace(/Interativo-Aluforce\.webp/g, cfg.logoFile)
+        // Logos BRANCAS (dark mode / fundo escuro)
+        .replace(/Logo Monocromatico - Branco - Aluforce copy\.webp/g, logoWhite)
+        .replace(/Logo Monocromatico - Branco - Aluforce\.png/g, logoWhite)
+        .replace(/Logo Monocromatico - Branco - Aluforce\.webp/g, logoWhite)
+        // Logos COLORIDAS (light mode / fundo claro)
+        .replace(/Logo Monocromatico - Azul - Aluforce\.png/g, logoColor)
+        .replace(/Logo Monocromatico - Azul - Aluforce\.webp/g, logoColor)
+        .replace(/Interativo-Aluforce\.png/g, logoColor)
+        .replace(/Interativo-Aluforce\.webp/g, logoColor)
         // Emails
         .replace(/@aluforce\.ind\.br/g, cfg.email)
         .replace(/@aluforce\.com\.br/g, cfg.email);
