@@ -97,7 +97,7 @@ if ($ok -gt 0) {
     }
     if ($restart -eq "s" -or $restart -eq "S") {
         Write-Host "Reiniciando PM2..." -ForegroundColor Cyan
-        ssh @SSH_OPTS $VPS_HOST "pm2 restart aluforce-dashboard --update-env && pm2 save"
+        ssh @SSH_OPTS $VPS_HOST "pm2 restart aluforce-v2-production --update-env && pm2 save"
         Write-Host "PM2 reiniciado!" -ForegroundColor Green
     }
 }

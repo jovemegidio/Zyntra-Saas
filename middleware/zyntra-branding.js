@@ -81,15 +81,13 @@ header, .header, .top-bar, [class*="header"] { top: 36px !important; }
 // CSS de override de cores por marca
 function buildBrandCSS(cfg) {
     if (!cfg) return '';
-    const hideZyntraLogos = cfg.nameLower !== 'zyntra' ? `
-.logo-zyntra-azul, .logo-zyntra-branca, .logo-separator { display: none !important; }` : '';
     return `
 <style id="brand-override">
 :root {
     --primary: ${cfg.primaryColor} !important;
     --primary-hover: ${cfg.primaryHover} !important;
     --accent: ${cfg.accent} !important;
-}${hideZyntraLogos}
+}
 </style>
 `;
 }
