@@ -236,10 +236,22 @@ router.post('/login', async (req, res) => {
         console.log('[RBAC LOGIN] Tentativa de login:', email);
 
         if (!email || !password) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Email e senha são obrigatórios' 
+            return res.status(400).json({
+                success: false,
+                message: 'Email e senha são obrigatórios'
             });
+        }
+
+        // Filtro por domínio de email quando ALLOWED_EMAIL_DOMAINS está configurado (isolamento multi-tenant)
+        const allowedDomains = process.env.ALLOWED_EMAIL_DOMAINS;
+        if (allowedDomains) {
+            const domains = allowedDomains.split(',').map(d => d.trim().toLowerCase());
+            const emailLower = email.toLowerCase().trim();
+            const isAllowed = domains.some(domain => emailLower.endsWith(domain));
+            if (!isAllowed) {
+                await logAccess(pool, null, 'login_falha', null, req, { email, motivo: 'dominio_nao_permitido' });
+                return res.status(401).json({ success: false, message: 'Credenciais inválidas' });
+            }
         }
 
         // Bloqueio de contas agora utiliza o campo status='bloqueado' no banco de dados

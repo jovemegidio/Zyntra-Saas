@@ -86,6 +86,17 @@ module.exports = function createAuthSectionRoutes(deps) {
                 return res.status(400).json({ message: 'Email e senha são obrigatórios.' });
             }
 
+            // Filtro por domínio de email (isolamento multi-tenant)
+            const allowedDomains = process.env.ALLOWED_EMAIL_DOMAINS;
+            if (allowedDomains) {
+                const domains = allowedDomains.split(',').map(d => d.trim().toLowerCase());
+                const emailLower = email.toLowerCase().trim();
+                const isAllowed = domains.some(domain => emailLower.endsWith(domain));
+                if (!isAllowed) {
+                    return res.status(401).json({ message: 'Credenciais inválidas' });
+                }
+            }
+
             // Buscar usuário na tabela usuarios primeiro
             const [rows] = await pool.query('SELECT * FROM usuarios WHERE email = ? LIMIT 1', [email]);
             let user = (rows && rows.length) ? rows[0] : null;
