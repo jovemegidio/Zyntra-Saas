@@ -5170,17 +5170,28 @@ apiVendasRouter.get('/clientes', async (req, res, next) => {
     try {
         const { page = 1, limit = 2000 } = req.query;
         const offset = (parseInt(page) - 1) * parseInt(limit);
-        const [rows] = await pool.query(`
+        const isComercial = req.user && (req.user.role === 'comercial' || req.user.role === 'vendedor');
+        const vendedorNome = req.user ? req.user.nome : null;
+
+        let sql = `
             SELECT c.id, c.nome, c.razao_social, c.nome_fantasia, c.email, c.telefone,
                    c.cnpj, c.cpf, c.cnpj_cpf, c.cidade, c.estado, c.ativo,
                    c.vendedor_responsavel, c.vendedor_proprietario,
                    c.created_at, c.data_cadastro,
                    e.nome_fantasia AS empresa_nome
             FROM clientes c
-            LEFT JOIN empresas e ON c.empresa_id = e.id
-            ORDER BY c.nome ASC
-            LIMIT ? OFFSET ?
-        `, [parseInt(limit), offset]);
+            LEFT JOIN empresas e ON c.empresa_id = e.id`;
+        const params = [];
+
+        if (isComercial && vendedorNome) {
+            sql += ` WHERE (c.vendedor_proprietario = ? OR c.vendedor_responsavel = ?)`;
+            params.push(vendedorNome, vendedorNome);
+        }
+
+        sql += ` ORDER BY c.nome ASC LIMIT ? OFFSET ?`;
+        params.push(parseInt(limit), offset);
+
+        const [rows] = await pool.query(sql, params);
         res.json(rows);
     } catch (error) {
         next(error);
@@ -5227,6 +5238,7 @@ apiVendasRouter.post('/clientes', async (req, res, next) => {
         const b = req.body;
         if (!b.nome) return res.status(400).json({ message: 'Nome é obrigatório.' });
 
+        const vendedorNome = req.user ? req.user.nome : null;
         const [result] = await pool.query(
             `INSERT INTO clientes (nome, nome_fantasia, razao_social, cnpj, contato, telefone, celular, email, website,
              endereco, numero, complemento, bairro, cidade, estado, cep,
@@ -5236,6 +5248,7 @@ apiVendasRouter.post('/clientes', async (req, res, next) => {
              suframa, simples_nacional, produtor_rural, tipo_atividade, cnae, obs_internas, obs_detalhadas,
              parcelas_padrao, vendedor_padrao, email_nfe, transportadora, codigo_receita,
              bloquear_faturamento, tags,
+             vendedor_responsavel, vendedor_proprietario, data_cadastro_vendedor,
              data_cadastro, incluido_por)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?,
                      ?, ?, ?, ?, ?, ?, ?,
@@ -5245,6 +5258,7 @@ apiVendasRouter.post('/clientes', async (req, res, next) => {
                      ?, ?, ?, ?, ?, ?, ?,
                      ?, ?, ?, ?, ?,
                      ?, ?,
+                     ?, ?, NOW(),
                      NOW(), ?)`,
             [b.nome, b.nome_fantasia || null, b.nome || null, b.cnpj || null, b.contato || null,
              b.telefone || null, b.celular || null, b.email || null, b.website || null,
@@ -5262,7 +5276,8 @@ apiVendasRouter.post('/clientes', async (req, res, next) => {
              b.parcelas_padrao || null, b.vendedor_padrao || null, b.email_nfe || null,
              b.transportadora || null, b.codigo_receita || null,
              b.bloquear_faturamento ? 1 : 0, b.tags || null,
-             req.user ? req.user.nome : 'Sistema']
+             vendedorNome, vendedorNome,
+             vendedorNome ? req.user.nome : 'Sistema']
         );
         res.status(201).json({ message: 'Cliente cadastrado com sucesso!', id: result.insertId });
     } catch (error) {

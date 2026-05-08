@@ -10160,12 +10160,18 @@
                 // Buscar token de múltiplas fontes possóveis
 
                 const headers = { 'Content-Type': 'application/json' };
+
+                // Admin pode forçar transições inválidas (ex.: pedido-aprovado → analise-credito)
+                const isAdmin = window.isUserAdmin === true;
+                const payload = { status: statusAPI };
+                if (isAdmin) payload.forceTransition = true;
+
                 // SÉ adicionar Authorization se tiver token válido
                 const resp = await fetch(`/api/vendas/pedidos/${pedidoId}/status`, {
                     method: 'PUT',
                     credentials: 'include',
                     headers: headers,
-                    body: JSON.stringify({ status: statusAPI })
+                    body: JSON.stringify(payload)
                 });
 
                 if (!resp.ok) {

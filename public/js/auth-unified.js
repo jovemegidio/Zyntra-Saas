@@ -967,7 +967,10 @@
             }
 
             // Buscar do servidor caso não tenha no localStorage (primeira visita)
-            if (!faviconUrl && !logoUrl) {
+            // Pular requisição quando o usuário ainda não está autenticado (login page ou sem cookie)
+            // — isso evita o 401 "Unauthorized" na rota /api/configuracoes/empresa antes do login.
+            const hasAuthCookie = !!getCookie('authToken') || !!getCookie('token');
+            if (!faviconUrl && !logoUrl && !isLoginPage() && hasAuthCookie) {
                 fetch('/api/configuracoes/empresa', { credentials: 'include' })
                     .then(r => r.ok ? r.json() : null)
                     .then(data => {

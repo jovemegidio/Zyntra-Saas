@@ -1,0 +1,37 @@
+// PM2 — Labor Eletric (porta 3001)
+module.exports = {
+    apps: [{
+        name: 'labor-eletric-production',
+        script: 'server.js',
+        instances: 1,
+        exec_mode: 'fork',
+        node_args: '--max-old-space-size=2048',
+        env_production: {
+            NODE_ENV: 'production',
+            PORT: 3001,
+            BRAND: 'labor-eletric',
+            MOUNT_PATH: '/labor-eletric',
+            DB_HOST: 'localhost',
+            DB_PORT: 3306,
+            DB_NAME: 'labor_eletric_vendas',
+            DB_USER: 'aluforce',
+            BACKUP_DIR: '/var/backups/labor-eletric',
+            LOGS_DIR: '/var/log/labor-eletric',
+            TEMP_DIR: '/tmp/labor_eletric_excel',
+            UV_THREADPOOL_SIZE: 8,
+        },
+        error_file: './logs/err.log',
+        out_file: './logs/out.log',
+        log_file: './logs/combined.log',
+        log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+        time: true,
+        autorestart: true,
+        max_restarts: 10,
+        min_uptime: '10s',
+        max_memory_restart: '1200M',
+        watch: false,
+        kill_timeout: 5000,
+        listen_timeout: 15000,
+        merge_logs: true,
+    }]
+};

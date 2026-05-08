@@ -762,7 +762,7 @@
            MODALS
            ======================================== */
         .modal {
-            display: none;
+            display: none !important;
             position: fixed;
             top: 0;
             left: 0;
@@ -775,8 +775,14 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
+            max-width: none;
+            max-height: none;
+            width: auto;
+            border-radius: 0;
+            box-shadow: none;
+            animation: none;
         }
-        .modal.active { display: flex; }
+        .modal.active { display: flex !important; }
         .modal-content {
             background: white;
             border-radius: 20px;

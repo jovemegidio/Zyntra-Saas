@@ -1,0 +1,37 @@
+// PM2 — Labor Energy (porta 3002)
+module.exports = {
+    apps: [{
+        name: 'labor-energy-production',
+        script: 'server.js',
+        instances: 1,
+        exec_mode: 'fork',
+        node_args: '--max-old-space-size=2048',
+        env_production: {
+            NODE_ENV: 'production',
+            PORT: 3002,
+            BRAND: 'labor-energy',
+            MOUNT_PATH: '/labor-energy',
+            DB_HOST: 'localhost',
+            DB_PORT: 3306,
+            DB_NAME: 'labor_energy_vendas',
+            DB_USER: 'aluforce',
+            BACKUP_DIR: '/var/backups/labor-energy',
+            LOGS_DIR: '/var/log/labor-energy',
+            TEMP_DIR: '/tmp/labor_energy_excel',
+            UV_THREADPOOL_SIZE: 8,
+        },
+        error_file: './logs/err.log',
+        out_file: './logs/out.log',
+        log_file: './logs/combined.log',
+        log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+        time: true,
+        autorestart: true,
+        max_restarts: 10,
+        min_uptime: '10s',
+        max_memory_restart: '1200M',
+        watch: false,
+        kill_timeout: 5000,
+        listen_timeout: 15000,
+        merge_logs: true,
+    }]
+};
