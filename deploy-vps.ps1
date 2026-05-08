@@ -15,6 +15,10 @@ $LOCAL     = if ($PSScriptRoot) { $PSScriptRoot } else { "G:\Outros computadores
 $SSH_KEY   = "$env:USERPROFILE\.ssh\id_ed25519_vps"
 $SSH_OPTS  = @("-i", $SSH_KEY, "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=no", "-o", "ConnectTimeout=15")
 
+# Garante que ssh/scp do Git estejam no PATH
+$gitSsh = "C:\Program Files\Git\usr\bin"
+if (Test-Path $gitSsh) { $env:PATH = "$gitSsh;$env:PATH" }
+
 Write-Host ""
 Write-Host "==========================================" -ForegroundColor Cyan
 Write-Host "   ALUFORCE - Deploy VPS (chave SSH)      " -ForegroundColor Cyan
@@ -86,7 +90,11 @@ Write-Host "Resultado: $ok enviados, $err erros" -ForegroundColor $(if ($err -eq
 
 if ($ok -gt 0) {
     Write-Host ""
-    $restart = Read-Host "Reiniciar PM2? (s/N)"
+    if ([Environment]::UserInteractive -and -not [Console]::IsInputRedirected) {
+        $restart = Read-Host "Reiniciar PM2? (s/N)"
+    } else {
+        $restart = "s"
+    }
     if ($restart -eq "s" -or $restart -eq "S") {
         Write-Host "Reiniciando PM2..." -ForegroundColor Cyan
         ssh @SSH_OPTS $VPS_HOST "pm2 restart aluforce-dashboard --update-env && pm2 save"
