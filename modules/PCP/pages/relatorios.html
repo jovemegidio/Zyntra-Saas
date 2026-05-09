@@ -1023,8 +1023,8 @@
         document.getElementById('fat-ticket-medio').textContent = formatarMoeda(tPed > 0 ? tAno / tPed : 0);
 
         var variação = parseFloat(res.variacao_percentual) || 0;
-        document.getElementById('fat-variação').textContent = formatarMoeda(res.valor_ano_anterior || 0);
-        var badge = document.getElementById('fat-variação-badge');
+        document.getElementById('fat-variacao').textContent = formatarMoeda(res.valor_ano_anterior || 0);
+        var badge = document.getElementById('fat-variacao-badge');
         if (variação !== 0) {
             badge.style.display = 'inline-flex';
             badge.className = 'kpi-badge ' + (variação >= 0 ? 'up' : 'down');
@@ -1149,7 +1149,7 @@
         var manutSeg = aptDados.filter(function(a){return APT_MANUTENCAO.includes(a.tipo);}).reduce(function(a,b){return a+(b.duração||0);},0);
         var paradaSeg = aptDados.filter(function(a){return APT_PARADA.includes(a.tipo);}).reduce(function(a,b){return a+(b.duração||0);},0);
 
-        document.getElementById('apt-total-funcionários').textContent = data.totalFuncionários || aptFuncionários.length || '0';
+        document.getElementById('apt-total-funcionarios').textContent = data.totalFuncionários || aptFuncionários.length || '0';
         document.getElementById('apt-total-horas').textContent = Math.round(totalSeg/3600*10)/10 + 'h';
         document.getElementById('apt-horas-producao').textContent = Math.round(prodSeg/3600*10)/10 + 'h';
         document.getElementById('apt-total-apontamentos').textContent = data.totalApontamentos || aptDados.length;
@@ -1213,7 +1213,7 @@
             resumoF[key].count++;
             if (APT_PRODUTIVOS.includes(a.tipo)) resumoF[key].prodSeg += a.duração||0;
         });
-        var contF = document.getElementById('apt-resumo-funcionários');
+        var contF = document.getElementById('apt-resumo-funcionarios');
         var funcs = Object.values(resumoF);
         if (!funcs.length) {
             contF.innerHTML = '<div class="empty-state-pro" style="padding:20px"><div class="empty-icon" style="width:48px;height:48px;font-size:20px"><i class="fas fa-users"></i></div><p>Nenhum dado</p></div>';

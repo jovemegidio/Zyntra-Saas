@@ -277,7 +277,7 @@
                 <a href="impostos.html" class="sidebar-btn" title="Impostos">
                     <i class="fas fa-percent"></i>
                 </a>
-                <button class="sidebar-btn" title="Configurações" id="btn-config" onclick="toggleConfigurações()">
+                <button class="sidebar-btn" title="Configurações" id="btn-config" onclick="toggleConfiguracoes()">
                     <i class="fas fa-cog"></i>
                 </button>
             </div>
@@ -2095,10 +2095,10 @@
         }
         function abrirModalCódigoBarras() {
             fecharModalEscolha();
-            document.getElementById('modalCódigoBarras').classList.add('active');
+            document.getElementById('modalCodigoBarras').classList.add('active');
         }
         function fecharModalCódigoBarras() {
-            document.getElementById('modalCódigoBarras').classList.remove('active');
+            document.getElementById('modalCodigoBarras').classList.remove('active');
         }
         function abrirModalManual() {
             fecharModalEscolha();
@@ -2170,14 +2170,14 @@
             input.value = ''; // Reset input
         }
         function processarCódigoBarras() {
-            const código = document.getElementById('códigoBarrasInput').value;
+            const código = document.getElementById('codigoBarrasInput').value;
             if (!código) {
                 alert('Digite o código de barras');
                 return;
             }
             fecharModalCódigoBarras();
             abrirModal();
-            document.getElementById('conta-código-barras').value = código;
+            document.getElementById('conta-codigo-barras').value = código;
         }
         function abrirModalPagamentoInterno() {
             if (!editandoId) {
@@ -2411,7 +2411,7 @@
 
         // Popula o filtro de período com meses detectados dos dados
         function populateMesesFiltro() {
-            const select = document.getElementById('filter-período');
+            const select = document.getElementById('filter-periodo');
             if (!select) return;
 
             // Remover opções de mês anteriores (padrão YYYY-MM)
@@ -2512,7 +2512,7 @@
             const status = document.getElementById('filter-status').value;
             const categoria = document.getElementById('filter-categoria').value;
             const fornecedor = document.getElementById('filter-fornecedor').value.toLowerCase();
-            const período = document.getElementById('filter-período').value;
+            const período = document.getElementById('filter-periodo').value;
 
             // Calcular intervalo de datas baseado no período
             let dataInicio = null;
@@ -2580,7 +2580,7 @@
 
         function abrirModal() {
             editandoId = null;
-            document.getElementById('modal-título').textContent = 'Nova Conta a Pagar';
+            document.getElementById('modal-titulo').textContent = 'Nova Conta a Pagar';
             document.getElementById('formConta').reset();
             document.getElementById('conta-id').value = '';
             document.getElementById('conta-emissão').value = new Date().toISOString().split('T')[0];
@@ -2758,7 +2758,7 @@
                 valor_total: parseMoeda(document.getElementById('conta-valor').value),
                 data_emissao: document.getElementById('conta-emissão').value || null,
                 conta_bancaria_id: document.getElementById('conta-banco').value || null,
-                observações: document.getElementById('conta-observações').value
+                observações: document.getElementById('conta-observacoes').value
             };
 
             let criadas = 0, erros = 0;
@@ -2816,20 +2816,20 @@
             if (!conta) return;
 
             editandoId = id;
-            document.getElementById('modal-título').textContent = 'Editar Conta a Pagar';
+            document.getElementById('modal-titulo').textContent = 'Editar Conta a Pagar';
 
             document.getElementById('conta-id').value = conta.id;
             document.getElementById('conta-fornecedor').value = conta.fornecedor || conta.fornecedor_nome || '';
             document.getElementById('conta-categoria').value = conta.categoria || '';
             document.getElementById('conta-documento').value = conta.numero_documento || conta.documento || '';
-            document.getElementById('conta-código-barras').value = conta.codigo_barras || '';
+            document.getElementById('conta-codigo-barras').value = conta.codigo_barras || '';
             document.getElementById('conta-valor').value = formatarMoedaInput2(conta.valor_total || conta.valor || 0);
             document.getElementById('conta-emissão').value = conta.data_emissao || '';
             document.getElementById('conta-vencimento-original').value = conta.data_vencimento_original || conta.vencimento_original || conta.data_vencimento || conta.vencimento || '';
             document.getElementById('conta-vencimento').value = conta.data_vencimento || conta.data_vencimento_atualizado || conta.vencimento || '';
             document.getElementById('conta-banco').value = conta.conta_bancaria_id || '';
             document.getElementById('conta-forma-pagamento').value = conta.forma_pagamento || '';
-            document.getElementById('conta-observações').value = conta.observações || '';
+            document.getElementById('conta-observacoes').value = conta.observações || '';
 
             // Resetar para primeira aba
             document.querySelectorAll('.tab-conta').forEach(t => t.classList.remove('active'));
@@ -2846,7 +2846,7 @@
                 fornecedor_id: document.getElementById('conta-fornecedor').dataset.id || document.getElementById('conta-fornecedor').value,
                 categoria: document.getElementById('conta-categoria').value,
                 numero_documento: document.getElementById('conta-documento').value,
-                codigo_barras: document.getElementById('conta-código-barras').value,
+                codigo_barras: document.getElementById('conta-codigo-barras').value,
                 valor_total: parseMoeda(document.getElementById('conta-valor').value),
                 data_emissao: document.getElementById('conta-emissão').value || null,
                 data_vencimento_original: document.getElementById('conta-vencimento-original').value,
@@ -2854,7 +2854,7 @@
                 conta_bancaria_id: document.getElementById('conta-banco').value || null,
                 forma_pagamento: document.getElementById('conta-forma-pagamento').value || null,
                 descrição: document.getElementById('conta-documento').value || document.getElementById('conta-fornecedor').value,
-                observações: document.getElementById('conta-observações').value
+                observações: document.getElementById('conta-observacoes').value
             };
 
             if (!dados.fornecedor || !dados.valor_total || !dados.data_vencimento_original) {
@@ -2921,7 +2921,7 @@
 
             document.getElementById('pagamento-conta-id').value = id;
             document.getElementById('pagamento-fornecedor').textContent = conta.fornecedor || conta.fornecedor_nome || 'Fornecedor';
-            document.getElementById('pagamento-descrição').textContent = conta.descricao || `Valor: ${formatarMoeda(saldo)}`;
+            document.getElementById('pagamento-descricao').textContent = conta.descricao || `Valor: ${formatarMoeda(saldo)}`;
             document.getElementById('pagamento-valor').value = formatarMoedaInput2(saldo);
             document.getElementById('pagamento-data').value = new Date().toISOString().split('T')[0];
             document.getElementById('pagamento-banco').value = conta.conta_bancaria_id || '';
@@ -3032,19 +3032,19 @@
             const doc = conta.numero_documento || conta.documento || '-';
             const fornecedor = conta.fornecedor || conta.fornecedor_nome || '-';
 
-            document.getElementById('view-título').textContent = 'Detalhes da Conta a Pagar';
+            document.getElementById('view-titulo').textContent = 'Detalhes da Conta a Pagar';
             document.getElementById('view-documento-sub').textContent = doc !== '-' ? `Documento: ${doc}` : '';
             document.getElementById('view-fornecedor').textContent = fornecedor;
             document.getElementById('view-documento').textContent = doc;
             document.getElementById('view-categoria').textContent = categoriaLabels[conta.categoria] || conta.categoria || '-';
-            document.getElementById('view-código-barras').textContent = conta.codigo_barras || '-';
+            document.getElementById('view-codigo-barras').textContent = conta.codigo_barras || '-';
             document.getElementById('view-valor-total').textContent = formatarMoeda(valorTotal);
             document.getElementById('view-valor-pago').textContent = formatarMoeda(valorPago);
             document.getElementById('view-saldo').textContent = formatarMoeda(saldo);
             document.getElementById('view-emissão').textContent = formatarData(conta.data_emissao) || '-';
             document.getElementById('view-vencimento-original').textContent = formatarData(conta.data_vencimento_original || conta.vencimento_original || vencimento);
             document.getElementById('view-vencimento-atualizado').textContent = formatarData(conta.data_vencimento_atualizado || conta.vencimento_atualizado || vencimento);
-            document.getElementById('view-observações').textContent = conta.observações || 'Nenhuma observação registrada.';
+            document.getElementById('view-observacoes').textContent = conta.observações || 'Nenhuma observação registrada.';
 
             const badge = document.getElementById('view-status-badge');
             badge.className = 'view-status-badge status-' + status;
@@ -3211,7 +3211,7 @@
         // Função para mostrar todas as contas (limpar filtro)
         function mostrarTodasContas() {
             contasPagar = [...todasContas];
-            document.getElementById('filter-período').value = 'all';
+            document.getElementById('filter-periodo').value = 'all';
             document.getElementById('filter-status').value = '';
             document.getElementById('filter-categoria').value = '';
             document.getElementById('filter-fornecedor').value = '';
@@ -3229,8 +3229,8 @@
     </script>
 
     <!-- Sistema de Importação XLSX -->
-    <script src="public/js/importar-xlsx.js?v=20260131"></script>
-    <script src="public/js/financeiro-shared.js?v=20260217"></script>
+    <script src="js/importar-xlsx.js?v=20260131"></script>
+    <script src="js/financeiro-shared.js?v=20260217"></script>
     <script src="/js/mobile-auto-enhance.js?v=20260202" defer></script>
 
 <!-- Zyntra: Confirm Dialog Profissional v2.0 --><script src="/_shared/confirm-dialog.js?v=20260217"></script>

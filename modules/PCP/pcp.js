@@ -65,13 +65,15 @@
             return;
         }
         todosFaturadosBody.innerHTML = list.map(p => `
-                <div class="list-row">
+                <div class="list-row faturado-item" data-id="${escapeHtml(String(p.id ?? ''))}">
                     <div class="list-row-thumb">${p.icon || ''}</div>
                     <div class="list-row-body">
                         <div class="list-row-title">${escapeHtml(p.cliente || 'Cliente')}</div>
                         <div class="list-row-sub">${escapeHtml(String(p.quantidade ?? ''))} x ${escapeHtml(p.produto_nome || p.produto_id || '')}</div>
                     </div>
                     <div class="list-row-value">${escapeHtml(String(p.value ?? ''))}</div>
+                </div>
+            `).join('');
         todosFaturadosBody.querySelectorAll('.faturado-item').forEach(el => {
             el.addEventListener('click', () => {
                 const id = el.dataset.id;

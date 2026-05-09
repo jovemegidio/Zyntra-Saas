@@ -153,23 +153,30 @@
             }
         }
 
-        /* Header - Efeito Vidro (Glassmorphism) */
+        /* Header V0 — sticky glassmorphism */
         .main-header,
         #dashboard-area .main-header,
         #dashboard-area.bg-contrast-light .main-header,
         #dashboard-area.bg-contrast-dark .main-header {
-            position: fixed;
+            position: sticky !important;
             top: 0;
             left: 0;
             right: 0;
             height: 64px;
-            background: rgba(255, 255, 255, 0.45) !important;
-            -webkit-backdrop-filter: blur(24px) saturate(1.8) !important;
-            backdrop-filter: blur(24px) saturate(1.8) !important;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.3) !important;
+            background: rgba(255, 255, 255, 0.75) !important;
+            -webkit-backdrop-filter: blur(20px) saturate(1.8) !important;
+            backdrop-filter: blur(20px) saturate(1.8) !important;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.6) !important;
             z-index: 100;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.08) !important;
+            box-shadow: 0 1px 8px rgba(0, 0, 0, 0.06) !important;
         }
+
+        /* Acessibilidade: alto contraste */
+        body.a11y-high-contrast {
+            filter: contrast(1.25);
+        }
+        body.a11y-high-contrast a,
+        body.a11y-high-contrast button { text-decoration-thickness: 2px; }
 
         /* Logos brancas em fundo escuro */
         #dashboard-area.bg-contrast-light .header-logo .logo-azul,
@@ -200,76 +207,113 @@
         }
 
         .header-logo img {
-            height: 32px;
+            height: 36px;
             width: auto;
         }
 
         .header-right {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 4px;
         }
 
+        /* Inline search — visível apenas em telas grandes */
+        .header-search-inline-wrap {
+            display: none;
+            align-items: center;
+            position: relative;
+            margin-right: 4px;
+        }
+        @media (min-width: 1024px) {
+            .header-search-inline-wrap { display: flex; }
+            #search-btn { display: none !important; }
+        }
+        .header-search-inline-icon {
+            position: absolute; left: 10px;
+            color: #94a3b8; font-size: 13px;
+            pointer-events: none; transition: color 0.2s;
+        }
+        .header-search-inline-input {
+            width: 224px; height: 36px;
+            padding: 0 12px 0 32px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: rgba(248,250,252,0.8);
+            font-size: 13px; color: #334155;
+            font-family: inherit;
+            transition: all 0.2s; outline: none;
+        }
+        .header-search-inline-input:focus {
+            background: white;
+            border-color: #93c5fd;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+        }
+        .header-search-inline-input:focus + .header-search-inline-icon,
+        .header-search-inline-wrap:focus-within .header-search-inline-icon { color: #3b82f6; }
+        /* Results dropdown for inline search */
+        .header-search-inline-wrap #header-search-results {
+            position: absolute; top: calc(100% + 6px); left: 0;
+            width: 380px; background: white;
+            border: 1px solid #e2e8f0; border-radius: 12px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.14);
+            padding: 8px; z-index: 300;
+            margin-top: 0;
+            max-height: 400px;
+        }
+        .header-search-inline-wrap #header-search-results:empty { display: none; }
+
+        /* Icon buttons V0 style */
         .header-icon-btn,
         #dashboard-area .header-icon-btn,
         #dashboard-area.bg-contrast-light .header-icon-btn {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             border: none;
             background: transparent !important;
-            border-radius: 10px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--slate-600) !important;
+            color: #64748b !important;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.15s ease;
             position: relative;
+            font-size: 16px;
         }
-
         .header-icon-btn:hover {
-            background: var(--slate-100) !important;
-            color: var(--slate-900) !important;
-            transform: scale(1.05);
+            background: #f1f5f9 !important;
+            color: #334155 !important;
+            transform: none;
         }
 
+        /* Notification dot V0 style */
         .notification-dot {
             position: absolute;
-            top: 6px;
-            right: 6px;
-            min-width: 18px;
-            height: 18px;
+            top: 7px; right: 7px;
+            width: 8px; height: 8px;
             background: #ef4444;
-            border-radius: 9px;
-            font-size: 10px;
-            font-weight: 600;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0 5px;
+            border-radius: 50%;
             border: 2px solid white;
+            padding: 0; min-width: unset;
+            font-size: 0;
         }
-
-        .notification-dot:empty {
-            display: none;
-        }
+        .notification-dot:empty { display: flex; }
 
         .header-divider {
-            width: 1px;
-            height: 24px;
-            background: var(--slate-200);
-            margin: 0 8px;
+            width: 1px; height: 24px;
+            background: #e2e8f0;
+            margin: 0 4px;
         }
 
+        /* User profile button V0 style */
         .user-profile-header {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 6px 12px 6px 6px;
-            border-radius: 50px;
+            gap: 8px;
+            padding: 5px 8px 5px 5px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: background 0.15s ease;
             position: relative;
         }
 
@@ -291,18 +335,52 @@
             overflow: hidden;
         }
 
+        .user-avatar-header {
+            ring: 2px solid #f1f5f9;
+        }
+
         .user-avatar-header img {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
 
+        /* User info block (name + email) in header */
+        .user-info-header {
+            display: none;
+            flex-direction: column;
+            gap: 1px;
+        }
+        @media (min-width: 640px) {
+            .user-info-header { display: flex; }
+        }
+
         .user-name,
         #dashboard-area .user-name,
         #dashboard-area.bg-contrast-light .user-name {
             font-weight: 500;
-            font-size: 14px;
-            color: var(--slate-900) !important;
+            font-size: 13px;
+            color: #1e293b !important;
+            line-height: 1.3;
+        }
+
+        .user-email-header {
+            font-size: 11px;
+            color: #64748b;
+            line-height: 1.2;
+            max-width: 140px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .user-chevron {
+            color: #94a3b8;
+            font-size: 12px;
+            display: none;
+        }
+        @media (min-width: 640px) {
+            .user-chevron { display: block; }
         }
 
         /* User Dropdown */
@@ -433,7 +511,7 @@
             min-height: 100vh;
             max-width: 1280px;
             margin: 0 auto;
-            padding: 80px 24px 40px;
+            padding: 32px 24px 40px;
             position: relative;
             z-index: 10;
             display: flex;
@@ -2172,38 +2250,52 @@
 
     <header class="main-header">
         <div class="header-content">
-            <div class="header-logo" style="display:flex;align-items:center;gap:12px;">
-                <img src="/images/zyntra-sem-fundo.png" alt="Zyntra" class="logo-zyntra-azul" style="height:28px;object-fit:contain;">
-                <img src="/images/zyntra-branco.png" alt="Zyntra" class="logo-zyntra-branca" id="logo-zyntra-branca" style="height:28px;object-fit:contain;display:none;">
-                <span class="logo-separator" style="color:rgba(0,0,0,0.15);font-weight:200;font-size:20px;user-select:none;">×</span>
-                <img src="/images/Logo Monocromatico - Azul - Aluforce.png" alt="ALUFORCE" class="logo-azul" id="logo-azul" style="height:26px;object-fit:contain;">
-                <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" class="logo-branca" id="logo-branca" style="height:26px;object-fit:contain;display:none;">
+            <div class="header-logo" style="display:flex;align-items:center;gap:14px;">
+                <img src="/images/zyntra-sem-fundo.png" alt="Zyntra" class="logo-zyntra-azul" style="height:36px;object-fit:contain;">
+                <img src="/images/zyntra-branco.png" alt="Zyntra" class="logo-zyntra-branca" id="logo-zyntra-branca" style="height:36px;object-fit:contain;display:none;">
+                <span class="logo-separator" style="color:rgba(0,0,0,0.18);font-weight:200;font-size:22px;user-select:none;line-height:1;">×</span>
+                <img src="/images/Logo Monocromatico - Azul - Aluforce.png" alt="ALUFORCE" class="logo-azul" id="logo-azul" style="height:36px;object-fit:contain;">
+                <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" class="logo-branca" id="logo-branca" style="height:36px;object-fit:contain;display:none;">
             </div>
 
             <div class="header-right">
-                <div class="header-search-wrapper">
-                    <button class="header-icon-btn" id="search-btn" title="Buscar">
+                <!-- Inline search (visible on large screens) -->
+                <div class="header-search-inline-wrap">
+                    <i class="fas fa-search" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:13px;pointer-events:none;"></i>
+                    <input type="search" id="header-search-input" class="header-search-inline-input" placeholder="Pesquisar..." autocomplete="off">
+                    <div id="header-search-results" class="header-search-results"></div>
+                </div>
+
+                <!-- Mobile search toggle -->
+                <div class="header-search-wrapper" style="display:flex;">
+                    <button class="header-icon-btn lg-hidden" id="search-btn" title="Buscar">
                         <i class="fas fa-search"></i>
                     </button>
                     <div id="header-search-container" class="header-search-container">
-                        <input type="search" id="header-search-input" placeholder="O que você deseja pesquisar?" autocomplete="off">
-                        <div id="header-search-results" class="header-search-results"></div>
+                        <input type="search" id="header-search-input-mobile" placeholder="O que você deseja pesquisar?" autocomplete="off">
                     </div>
                 </div>
 
-                <button class="header-icon-btn" id="settings-btn" title="Configurações" data-admin-only="true" style="display:none;">
-                    <i class="fas fa-cog"></i>
-                </button>
-
                 <button class="header-icon-btn" id="help-btn" title="Ajuda">
                     <i class="fas fa-question-circle"></i>
+                </button>
+
+                <button class="header-icon-btn" id="accessibility-btn" title="Acessibilidade">
+                    <i class="fas fa-universal-access"></i>
+                </button>
+
+                <button class="header-icon-btn" id="settings-btn" title="Configurações" data-admin-only="true" style="display:none;">
+                    <i class="fas fa-cog"></i>
                 </button>
 
                 <div class="header-divider"></div>
 
                 <div class="user-profile-header" id="user-profile">
                     <div class="user-avatar-header" id="user-avatar">U</div>
-                    <span class="user-name" id="user-name-display">Usuário</span>
+                    <div class="user-info-header">
+                        <span class="user-name" id="user-name-display">Usuário</span>
+                    </div>
+                    <i class="fas fa-chevron-down user-chevron"></i>
 
                     <div class="user-dropdown-menu" id="user-dropdown">
                         <div class="dropdown-header">
@@ -2628,9 +2720,11 @@
                 const greetingName = document.getElementById('greeting-name');
                 if (greetingName) greetingName.textContent = displayName;
 
-                // Atualizar nome no header
+                // Atualizar nome e email no header
                 const userName = document.getElementById('user-name-display');
                 if (userName) userName.textContent = displayName;
+                const userEmailDisplay = document.getElementById('user-email-display');
+                if (userEmailDisplay) userEmailDisplay.textContent = userEmail;
 
                 // Atualizar avatares
                 const userAvatar = document.getElementById('user-avatar');
@@ -2848,7 +2942,7 @@
             const container = document.getElementById('header-search-container');
             container.classList.toggle('active');
             if (container.classList.contains('active')) {
-                document.getElementById('header-search-input').focus();
+                document.getElementById('header-search-input-mobile').focus();
             }
         });
 
@@ -2914,29 +3008,73 @@
             }
         });
 
-        // Botão de notificações no header (sino)
-        document.getElementById('notifications-btn')?.addEventListener('click', function () {
-            if (typeof abrirCentralNotificacoes === 'function') {
-                abrirCentralNotificacoes();
-            } else if (typeof toggleNotificationPanel === 'function') {
-                toggleNotificationPanel();
-            } else {
-                // Fallback - verificar se existe o painel de notificações
-                const notifPanel = document.getElementById('notification-panel') ||
-                    document.getElementById('notifications-panel') ||
-                    document.querySelector('.notification-panel');
-                if (notifPanel) {
-                    notifPanel.classList.toggle('active');
-                    notifPanel.classList.toggle('show');
-                } else {
-                    console.log('Central de notificações não disponível');
-                }
-            }
-        });
-
         // Botão de ajuda no header (interrogação)
         document.getElementById('help-btn')?.addEventListener('click', function () {
             window.open('/ajuda/index.html', '_blank');
+        });
+
+        // ========== ACESSIBILIDADE ==========
+        // Aplicar preferências persistidas
+        (function applyA11yPrefs() {
+            try {
+                const fontStep = parseInt(localStorage.getItem('a11yFontStep') || '0', 10);
+                if (fontStep) {
+                    document.documentElement.style.setProperty('font-size', (16 + fontStep * 2) + 'px');
+                }
+                if (localStorage.getItem('a11yHighContrast') === '1') {
+                    document.body.classList.add('a11y-high-contrast');
+                }
+            } catch (e) { /* noop */ }
+        })();
+
+        document.getElementById('accessibility-btn')?.addEventListener('click', function (e) {
+            e.stopPropagation();
+            let panel = document.getElementById('accessibility-panel');
+            if (!panel) {
+                panel = document.createElement('div');
+                panel.id = 'accessibility-panel';
+                panel.style.cssText = 'position:fixed;top:64px;right:20px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,0.14);padding:12px;z-index:99999;min-width:240px;font-family:Inter,system-ui,sans-serif;';
+                panel.innerHTML = `
+                    <div style="font-size:13px;font-weight:600;color:#0f172a;margin-bottom:10px;display:flex;align-items:center;gap:8px;">
+                        <i class="fas fa-universal-access" style="color:var(--primary,#6C5CE7);"></i> Acessibilidade
+                    </div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                        <span style="font-size:12px;color:#475569;">Tamanho do texto</span>
+                        <div style="display:flex;gap:6px;">
+                            <button id="a11y-font-dec" style="width:28px;height:28px;border:1px solid #e2e8f0;background:#f8fafc;border-radius:6px;cursor:pointer;font-weight:700;">A-</button>
+                            <button id="a11y-font-rst" style="width:28px;height:28px;border:1px solid #e2e8f0;background:#f8fafc;border-radius:6px;cursor:pointer;font-size:11px;">A</button>
+                            <button id="a11y-font-inc" style="width:28px;height:28px;border:1px solid #e2e8f0;background:#f8fafc;border-radius:6px;cursor:pointer;font-weight:700;">A+</button>
+                        </div>
+                    </div>
+                    <label style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#475569;cursor:pointer;">
+                        <span>Alto contraste</span>
+                        <input type="checkbox" id="a11y-contrast" style="cursor:pointer;">
+                    </label>
+                `;
+                document.body.appendChild(panel);
+
+                const setStep = (step) => {
+                    const clamped = Math.max(-1, Math.min(3, step));
+                    localStorage.setItem('a11yFontStep', String(clamped));
+                    document.documentElement.style.setProperty('font-size', (16 + clamped * 2) + 'px');
+                };
+                panel.querySelector('#a11y-font-dec').addEventListener('click', () => setStep((parseInt(localStorage.getItem('a11yFontStep') || '0', 10)) - 1));
+                panel.querySelector('#a11y-font-inc').addEventListener('click', () => setStep((parseInt(localStorage.getItem('a11yFontStep') || '0', 10)) + 1));
+                panel.querySelector('#a11y-font-rst').addEventListener('click', () => setStep(0));
+                const contrast = panel.querySelector('#a11y-contrast');
+                contrast.checked = localStorage.getItem('a11yHighContrast') === '1';
+                contrast.addEventListener('change', (ev) => {
+                    document.body.classList.toggle('a11y-high-contrast', ev.target.checked);
+                    localStorage.setItem('a11yHighContrast', ev.target.checked ? '1' : '0');
+                });
+                document.addEventListener('click', function close(ev) {
+                    if (!panel.contains(ev.target) && ev.target.id !== 'accessibility-btn' && !ev.target.closest('#accessibility-btn')) {
+                        panel.style.display = 'none';
+                    }
+                });
+            }
+            panel.style.display = panel.style.display === 'none' ? 'block' : (panel.dataset.open === '1' ? 'none' : 'block');
+            panel.dataset.open = panel.style.display === 'block' ? '1' : '0';
         });
 
         // Função abrirModalConfig para abrir modal de configurações

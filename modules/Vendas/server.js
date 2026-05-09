@@ -1092,6 +1092,11 @@ apiVendasRouter.get('/metas', async (req, res, next) => {
 
         res.json(metas);
     } catch (error) {
+        // Em instâncias novas (ex: labor-energy) onde metas_vendas ainda não foi criada,
+        // devolve lista vazia em vez de 500 — o módulo de metas é opcional.
+        if (error && (error.code === 'ER_NO_SUCH_TABLE' || /metas_vendas.*doesn'?t exist/i.test(error.message || ''))) {
+            return res.json([]);
+        }
         next(error);
     }
 });
@@ -1131,6 +1136,14 @@ apiVendasRouter.get('/metas/minha', async (req, res, next) => {
                          meta.valor_realizado >= meta.valor_meta * 0.8 ? 'proxima' : 'pendente'
         });
     } catch (error) {
+        if (error && (error.code === 'ER_NO_SUCH_TABLE' || /metas_vendas.*doesn'?t exist/i.test(error.message || ''))) {
+            return res.json({
+                vendedor_id: req.user?.id,
+                periodo: req.query.periodo || new Date().toISOString().substring(0, 7),
+                valor_meta: 0, valor_realizado: 0, percentual_atingido: 0,
+                message: 'Módulo de metas não habilitado nesta instância.'
+            });
+        }
         next(error);
     }
 });
@@ -1168,6 +1181,13 @@ apiVendasRouter.get('/metas/vendedor/:vendedorId', async (req, res, next) => {
             percentual_atingido: meta.valor_meta > 0 ? ((meta.valor_realizado / meta.valor_meta) * 100).toFixed(2) : 0
         });
     } catch (error) {
+        if (error && (error.code === 'ER_NO_SUCH_TABLE' || /metas_vendas.*doesn'?t exist/i.test(error.message || ''))) {
+            return res.json({
+                vendedor_id: parseInt(req.params.vendedorId),
+                periodo: req.query.periodo || new Date().toISOString().substring(0, 7),
+                valor_meta: 0, valor_realizado: 0, percentual_atingido: 0
+            });
+        }
         next(error);
     }
 });
@@ -1364,6 +1384,9 @@ apiVendasRouter.get('/metas/ranking', async (req, res, next) => {
 
         res.json({ periodo, ranking });
     } catch (error) {
+        if (error && (error.code === 'ER_NO_SUCH_TABLE' || /metas_vendas.*doesn'?t exist/i.test(error.message || ''))) {
+            return res.json({ periodo: req.query.periodo || new Date().toISOString().substring(0, 7), ranking: [] });
+        }
         next(error);
     }
 });

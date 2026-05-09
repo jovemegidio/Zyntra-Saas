@@ -41,7 +41,7 @@ const BRAND_CONFIG = {
         nameLower: 'labor-energy',
         logoFile: 'labor-energy-logo.png',
         logoFileWhite: 'labor-energy-logo-branco.png',
-        email: '@laborenergy.com.br',
+        email: '@energy.com.br',
         primaryColor: '#27AE60',
         primaryHover: '#1E8449',
         accent: '#58D68D',
@@ -157,12 +157,8 @@ function applyBrandReplacements(body, cfg) {
     const logoColor = cfg.logoFile;
     const logoWhite = cfg.logoFileWhite || cfg.logoFile;
     return body
-        // Nomes em maiúsculas
-        .replace(/ALUFORCE/g, cfg.name)
-        // Nome capitalizado
-        .replace(/Aluforce/g, cfg.nameFull)
-        // Nome minúsculas (evitando substituir caminhos internos de API)
-        .replace(/\baluforce\b(?!\.api\.br|\.ind\.br|_vendas|_db)/g, cfg.nameLower)
+        // Logos PRIMEIRO — antes das substituições de texto, para que os caminhos
+        // de imagem ainda contenham "Aluforce" quando os padrões forem avaliados.
         // Logos BRANCAS (dark mode / fundo escuro)
         .replace(/Logo Monocromatico - Branco - Aluforce copy\.webp/g, logoWhite)
         .replace(/Logo Monocromatico - Branco - Aluforce\.png/g, logoWhite)
@@ -172,6 +168,13 @@ function applyBrandReplacements(body, cfg) {
         .replace(/Logo Monocromatico - Azul - Aluforce\.webp/g, logoColor)
         .replace(/Interativo-Aluforce\.png/g, logoColor)
         .replace(/Interativo-Aluforce\.webp/g, logoColor)
+        // Nomes em maiúsculas — usa \b para não quebrar identificadores JS como ALUFORCE_PREFS
+        .replace(/\bALUFORCE\b/g, cfg.name)
+        // Nome capitalizado — não substitui dentro de identificadores camelCase (AluforceAuth, AluforceUtils, etc.)
+        // pois cfg.nameFull contém espaço (ex: "Labor Energy") e quebraria o JS
+        .replace(/\bAluforce\b(?![A-Za-z_])/g, cfg.nameFull)
+        // Nome minúsculas (evitando substituir caminhos internos de API e identificadores como _aluforceSocket)
+        .replace(/\baluforce\b(?!\.api\.br|\.ind\.br|_vendas|_db|[A-Za-z_])/g, cfg.nameLower)
         // Emails
         .replace(/@aluforce\.ind\.br/g, cfg.email)
         .replace(/@aluforce\.com\.br/g, cfg.email);

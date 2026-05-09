@@ -263,7 +263,7 @@
             const preview = document.getElementById('report-preview');
             const content = document.getElementById('preview-content');
             const título = relatórioNomes[tipo] || tipo;
-            document.getElementById('preview-título').textContent = título;
+            document.getElementById('preview-titulo').textContent = título;
 
             const dataInicio = document.getElementById('filtro-data-inicio').value || '-';
             const dataFim = document.getElementById('filtro-data-fim').value || '-';
@@ -487,7 +487,7 @@
             const content = document.getElementById('preview-content');
             const tables = content.querySelectorAll('table');
             if (!tables.length) { alert('Nenhuma tabela para exportar'); return; }
-            const título = (document.getElementById('preview-título') || document.getElementById('preview-t\u00EDtulo') || {}).textContent || 'Relatório';
+            const título = (document.getElementById('preview-titulo') || document.getElementById('preview-t\u00EDtulo') || {}).textContent || 'Relatório';
             const wb = XLSX.utils.book_new();
             tables.forEach((table, i) => {
                 const ws = XLSX.utils.table_to_sheet(table, { raw: false });
@@ -597,7 +597,7 @@ document.getElementById('greeting-text').textContent = h < 12 ? 'Bom dia' : h < 
             };
 
             function títuloPreview() {
-                return document.getElementById('preview-título') || document.getElementById('preview-título');
+                return document.getElementById('preview-titulo') || document.getElementById('preview-titulo');
             }
 
             function formatarMoedaSeguro(valor) {
