@@ -103,6 +103,7 @@ const MOUNT_SCRIPT = MOUNT_PATH ? `<script id="zyntra-mount-intercept">
 (function(){
   var B="${MOUNT_PATH}";
   window.__MOUNT_PATH__=B;
+  window.__BASE_PATH=window.__BASE_PATH||B;
   function addBase(u){
     return(typeof u==="string"&&u[0]==="/"&&u.slice(0,B.length)!==B)?B+u:u;
   }

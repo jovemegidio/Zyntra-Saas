@@ -317,12 +317,20 @@
 
     console.log('🔐 Sistema de Autenticação Unificado ALUFORCE v7.5 (Tab-Isolated + Server Validation + Token Refresh)');
 
+    const AUTH_BASE_PATH = window.__BASE_PATH || window.__MOUNT_PATH__ || '';
+    function withAuthBase(path) {
+        if (AUTH_BASE_PATH && typeof path === 'string' && path.charAt(0) === '/' && path.indexOf(AUTH_BASE_PATH) !== 0) {
+            return AUTH_BASE_PATH + path;
+        }
+        return path;
+    }
+
     // Configurações
     const AUTH_CONFIG = {
-        loginUrl: '/login.html',
-        apiMeEndpoint: '/api/me',
-        refreshEndpoint: '/api/auth/refresh',
-        dashboardUrl: '/index.html',
+        loginUrl: withAuthBase('/login.html'),
+        apiMeEndpoint: withAuthBase('/api/me'),
+        refreshEndpoint: withAuthBase('/api/auth/refresh'),
+        dashboardUrl: withAuthBase('/index.html'),
         timeout: 5000,
         accessTokenLifetimeMs: 15 * 60 * 1000, // 15 min
         refreshBeforeExpiryMs: 2 * 60 * 1000,  // Refresh 2 min antes de expirar
