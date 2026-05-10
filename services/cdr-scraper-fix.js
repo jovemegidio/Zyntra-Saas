@@ -11,8 +11,8 @@ const https = require('https');
 // Configurações
 const CDR_CONFIG = {
     url: process.env.CDR_PABX_URL || 'https://sip10.tsinfo.net.br',
-    username: process.env.CDR_PABX_USER || 'Labor@',
-    password: process.env.CDR_PABX_PASS || 'F.0582#9d5c?',
+    username: process.env.CDR_PABX_USER || '',
+    password: process.env.CDR_PABX_PASS || '',
     chromiumPath: process.env.CHROMIUM_PATH || '/snap/bin/chromium'
 };
 
@@ -88,6 +88,10 @@ async function getBrowser() {
  * Obtém uma página logada no sistema (com mutex para evitar login concorrente)
  */
 async function getLoggedInPage() {
+    if (!CDR_CONFIG.username || !CDR_CONFIG.password) {
+        throw new Error('CDR_PABX_USER/CDR_PABX_PASS não configurados');
+    }
+
     // Se já há um login em andamento, esperar
     if (loginPromise) {
         console.log('[CDR-Scraper] Login já em andamento, aguardando...');

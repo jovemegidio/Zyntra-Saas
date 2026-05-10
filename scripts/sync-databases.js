@@ -13,7 +13,7 @@ async function syncRailwayToLocal() {
     host: 'interchange.proxy.rlwy.net', 
     port: 19396,
     user: 'root', 
-    password: 'iiilOZutDOnPCwxgiTKeMuEaIzSwplcu', 
+    password: process.env.RAILWAY_DB_PASSWORD || process.env.DB_PASSWORD || '',
     database: 'railway'
   });
   

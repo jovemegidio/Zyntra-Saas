@@ -34,7 +34,7 @@ async function main() {
             if (match) secret = match[1].trim();
         }
     } catch(e) {}
-    if (!secret) secret = 'aluforce-secret-key-2024';
+    if (!secret) throw new Error('JWT_SECRET não configurado');
     
     const token = jwt.sign(
         { id: 25, email: 'ti@aluforce.ind.br', role: 'admin', nome: 'TI', is_admin: 1 },

@@ -5,13 +5,17 @@
 const puppeteer = require('puppeteer-core');
 
 const CONFIG = {
-    url: 'https://sip10.tsinfo.net.br',
-    username: 'Labor@',
-    password: process.env.CDR_PASSWORD || 'FILL_IN_PASSWORD',
+    url: process.env.CDR_PABX_URL || 'https://sip10.tsinfo.net.br',
+    username: process.env.CDR_PABX_USER || '',
+    password: process.env.CDR_PABX_PASS || process.env.CDR_PASSWORD || '',
     chromiumPath: '/snap/bin/chromium'
 };
 
 async function scrapeTest() {
+    if (!CONFIG.username || !CONFIG.password) {
+        throw new Error('CDR_PABX_USER/CDR_PABX_PASS não configurados');
+    }
+
     console.log('[CDR Scraper] Starting test...');
     
     const browser = await puppeteer.launch({

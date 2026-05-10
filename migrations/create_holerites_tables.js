@@ -11,15 +11,15 @@ async function migrate() {
         host: process.env.DB_HOST || 'interchange.proxy.rlwy.net',
         port: parseInt(process.env.DB_PORT || '19396'),
         user: process.env.DB_USER || 'root',
-        password: process.env.DB_PASSWORD || 'iiilOZutDOnPCwxgiTKeMuEaIzSwplcu',
+        password: process.env.RAILWAY_DB_PASSWORD || process.env.DB_PASSWORD || '',
         database: process.env.DB_NAME || 'railway',
         waitForConnections: true,
         connectionLimit: 5
     });
-    
+
     try {
         console.log('🔄 Iniciando migration: Tabelas de Holerites...\n');
-        
+
         // Tabela principal de holerites
         console.log('📋 Criando tabela holerites...');
         await pool.query(`
@@ -29,13 +29,13 @@ async function migrate() {
                 mes INT NOT NULL COMMENT 'Mês de referência (1-12)',
                 ano INT NOT NULL COMMENT 'Ano de referência',
                 competencia VARCHAR(7) AS (CONCAT(ano, '-', LPAD(mes, 2, '0'))) STORED,
-                
+
                 -- Valores principais
                 salario_base DECIMAL(10,2) DEFAULT 0.00,
                 total_proventos DECIMAL(10,2) DEFAULT 0.00,
                 total_descontos DECIMAL(10,2) DEFAULT 0.00,
                 salario_liquido DECIMAL(10,2) DEFAULT 0.00,
-                
+
                 -- Detalhes INSS/IRRF/FGTS
                 inss_base DECIMAL(10,2) DEFAULT 0.00,
                 inss_valor DECIMAL(10,2) DEFAULT 0.00,
@@ -44,15 +44,15 @@ async function migrate() {
                 irrf_valor DECIMAL(10,2) DEFAULT 0.00,
                 irrf_aliquota DECIMAL(5,2) DEFAULT 0.00,
                 fgts_valor DECIMAL(10,2) DEFAULT 0.00,
-                
+
                 -- Arquivo PDF (opcional)
                 arquivo_pdf VARCHAR(500) NULL COMMENT 'Caminho do arquivo PDF',
-                
+
                 -- Status e controle
                 status ENUM('rascunho', 'publicado', 'cancelado') DEFAULT 'rascunho',
                 data_publicacao DATETIME NULL,
                 publicado_por INT NULL COMMENT 'ID do admin que publicou',
-                
+
                 -- Rastreamento de visualização
                 visualizado TINYINT(1) DEFAULT 0,
                 data_primeira_visualizacao DATETIME NULL,
@@ -60,15 +60,15 @@ async function migrate() {
                 total_visualizacoes INT DEFAULT 0,
                 ip_visualizacao VARCHAR(45) NULL,
                 user_agent_visualizacao TEXT NULL,
-                
+
                 -- Confirmação de recebimento
                 confirmado_recebimento TINYINT(1) DEFAULT 0,
                 data_confirmacao DATETIME NULL,
-                
+
                 -- Timestamps
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                
+
                 -- Índices
                 INDEX idx_funcionario (funcionario_id),
                 INDEX idx_competencia (competencia),
@@ -76,12 +76,12 @@ async function migrate() {
                 INDEX idx_status (status),
                 INDEX idx_visualizado (visualizado),
                 UNIQUE KEY unique_holerite (funcionario_id, mes, ano),
-                
+
                 FOREIGN KEY (funcionario_id) REFERENCES funcionarios(id) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         `);
         console.log('✅ Tabela holerites criada!');
-        
+
         // Tabela de itens do holerite (proventos e descontos detalhados)
         console.log('📋 Criando tabela holerite_itens...');
         await pool.query(`
@@ -95,15 +95,15 @@ async function migrate() {
                 valor DECIMAL(10,2) NOT NULL DEFAULT 0.00,
                 ordem INT DEFAULT 0 COMMENT 'Ordem de exibição',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                
+
                 INDEX idx_holerite (holerite_id),
                 INDEX idx_tipo (tipo),
-                
+
                 FOREIGN KEY (holerite_id) REFERENCES holerites(id) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         `);
         console.log('✅ Tabela holerite_itens criada!');
-        
+
         // Tabela de log de visualizações (histórico completo)
         console.log('📋 Criando tabela holerite_visualizacoes_log...');
         await pool.query(`
@@ -115,17 +115,17 @@ async function migrate() {
                 ip_address VARCHAR(45) NULL,
                 user_agent TEXT NULL,
                 acao ENUM('visualizou', 'baixou_pdf', 'confirmou') NOT NULL DEFAULT 'visualizou',
-                
+
                 INDEX idx_holerite (holerite_id),
                 INDEX idx_funcionario (funcionario_id),
                 INDEX idx_data (data_visualizacao),
-                
+
                 FOREIGN KEY (holerite_id) REFERENCES holerites(id) ON DELETE CASCADE,
                 FOREIGN KEY (funcionario_id) REFERENCES funcionarios(id) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         `);
         console.log('✅ Tabela holerite_visualizacoes_log criada!');
-        
+
         // Tabela de configurações de proventos/descontos padrão
         console.log('📋 Criando tabela holerite_eventos_padrao...');
         await pool.query(`
@@ -138,12 +138,12 @@ async function migrate() {
                 ativo TINYINT(1) DEFAULT 1,
                 ordem INT DEFAULT 0,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                
+
                 UNIQUE KEY unique_codigo (codigo)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         `);
         console.log('✅ Tabela holerite_eventos_padrao criada!');
-        
+
         // Inserir eventos padrão
         console.log('📋 Inserindo eventos padrão...');
         await pool.query(`
@@ -172,9 +172,9 @@ async function migrate() {
             ('112', 'desconto', 'Pensão Alimentícia', '', 12)
         `);
         console.log('✅ Eventos padrão inseridos!');
-        
+
         console.log('\n✅ Migration de Holerites concluída com sucesso!');
-        
+
     } catch (error) {
         console.error('❌ Erro na migration:', error.message);
         throw error;

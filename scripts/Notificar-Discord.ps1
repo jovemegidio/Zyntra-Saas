@@ -10,7 +10,7 @@
 #   Notificar-Discord -Titulo "Hotfix Vendas" -Tipo "fix" -Descricao "Corrigido bug" -Modulo "Vendas"
 # ============================================
 
-$global:DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1465740298243018793/fjkXYSN7Vv06YRyimpqneNVOhADqDACpVTXQxRbyUJnsk-cWpJvnpZzD9JntRVFyhfVt"
+$global:DISCORD_WEBHOOK = $env:DISCORD_WEBHOOK_URL
 
 # Emojis via surrogate pairs (compativel PS 5.1)
 function _Emoji([int]$code) {
@@ -115,6 +115,11 @@ function Notificar-Discord {
 
     # Enviar
     try {
+        if (-not $global:DISCORD_WEBHOOK) {
+            Write-Host "[AVISO] DISCORD_WEBHOOK_URL nao configurado; notificacao pulada." -ForegroundColor Yellow
+            return $false
+        }
+
         Write-Host ""
         Write-Host ">>> Notificando Discord..." -ForegroundColor Magenta
         $bytes = [System.Text.Encoding]::UTF8.GetBytes($payload)

@@ -2,16 +2,16 @@ const mysql = require('mysql2/promise');
 
 async function createNotificacoesRH() {
     const conn = await mysql.createConnection({
-        host: 'interchange.proxy.rlwy.net', 
-        port: 19396, 
-        user: 'root', 
-        password: 'iiilOZutDOnPCwxgiTKeMuEaIzSwplcu', 
+        host: 'interchange.proxy.rlwy.net',
+        port: 19396,
+        user: 'root',
+        password: process.env.RAILWAY_DB_PASSWORD || process.env.DB_PASSWORD || '',
         database: 'railway'
     });
-    
+
     try {
         console.log('🔧 Criando tabela de notificações RH...');
-        
+
         // Criar tabela de notificações RH
         await conn.execute(`
             CREATE TABLE IF NOT EXISTS notificacoes_rh (
@@ -32,7 +32,7 @@ async function createNotificacoesRH() {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         `);
         console.log('✅ Tabela notificacoes_rh criada!');
-        
+
         // Inserir algumas notificações de exemplo
         await conn.execute(`
             INSERT INTO notificacoes_rh (funcionario_id, tipo, titulo, mensagem, created_at) VALUES
@@ -40,14 +40,14 @@ async function createNotificacoesRH() {
             (NULL, 'aviso', 'Recadastramento 2026', 'Favor atualizar seus dados cadastrais até o final do mês.', DATE_SUB(NOW(), INTERVAL 7 DAY))
             ON DUPLICATE KEY UPDATE titulo = VALUES(titulo)
         `);
-        
+
         console.log('✅ Notificações de exemplo inseridas!');
-        
+
         // Verificar estrutura
         const [cols] = await conn.execute('DESCRIBE notificacoes_rh');
         console.log('\n📋 Estrutura da tabela:');
         cols.forEach(c => console.log(`  - ${c.Field}: ${c.Type}`));
-        
+
     } finally {
         await conn.end();
         console.log('\n🔌 Conexão encerrada.');

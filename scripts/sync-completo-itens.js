@@ -4,15 +4,15 @@
  */
 
 require('dotenv').config();
-const XLSX = require('xlsx');
+const XLSX = require('../src/utils/spreadsheet-reader');
 const mysql = require('mysql2/promise');
 
 const railwayConfig = {
-    host: 'interchange.proxy.rlwy.net',
-    port: 19396,
-    user: 'root',
-    password: 'iiilOZutDOnPCwxgiTKeMuEaIzSwplcu',
-    database: 'railway',
+    host: process.env.RAILWAY_DB_HOST || process.env.DB_HOST || 'localhost',
+    port: process.env.RAILWAY_DB_PORT ? parseInt(process.env.RAILWAY_DB_PORT, 10) : parseInt(process.env.DB_PORT || '3306', 10),
+    user: process.env.RAILWAY_DB_USER || process.env.DB_USER || 'root',
+    password: process.env.RAILWAY_DB_PASSWORD || '',
+    database: process.env.RAILWAY_DB_NAME || process.env.DB_NAME || 'aluforce_vendas',
     charset: 'utf8mb4'
 };
 
@@ -193,7 +193,7 @@ async function importarItens() {
         
         // Ler arquivo Excel
         const filePath = 'ordens-emitidas/Pedidos/1316 Pedidos2.xlsx';
-        const workbook = XLSX.readFile(filePath);
+        const workbook = await XLSX.readFile(filePath);
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
         const data = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
         
