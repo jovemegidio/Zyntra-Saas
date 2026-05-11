@@ -149,13 +149,13 @@
                     <input type="text" id="busca-funcionário" class="config-input" placeholder="Buscar funcionário..." oninput="buscarFuncionarios(this.value)">
                 </div>
                 <div class="config-form-group" style="margin: 0;">
-                    <select id="filtro-departamento-funcionário" class="config-input" onchange="filtrarFuncionariosPorDepartamento(this.value)">
+                    <select id="filtro-departamento-funcionario" class="config-input" onchange="filtrarFuncionariosPorDepartamento(this.value)">
                         <option value="">Todos Departamentos</option>
                         <!-- Será preenchido via JavaScript -->
                     </select>
                 </div>
                 <div class="config-form-group" style="margin: 0;">
-                    <select id="filtro-status-funcionário" class="config-input" onchange="filtrarFuncionariosPorStatus(this.value)">
+                    <select id="filtro-status-funcionario" class="config-input" onchange="filtrarFuncionariosPorStatus(this.value)">
                         <option value="">Todos os Status</option>
                         <option value="ativo">Ativos</option>
                         <option value="inativo">Inativos</option>
@@ -177,7 +177,7 @@
                             <th style="padding: 12px; text-align: center; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #475569; border-bottom: 2px solid #cbd5e1;">Ações</th>
                         </tr>
                     </thead>
-                    <tbody id="funcionários-list">
+                    <tbody id="funcionarios-list">
                         <tr>
                             <td colspan="6" class="text-center" style="padding: 40px; color: #6c757d;">
                                 <i class="fas fa-spinner fa-spin"></i> Carregando funcionários...
@@ -189,8 +189,8 @@
             
             <!-- Paginação -->
             <div style="margin-top: 15px; display: flex; justify-content: space-between; align-items: center;">
-                <span id="funcionários-info" style="color: #6c757d; font-size: 14px;">Carregando...</span>
-                <div id="funcionários-paginacao" style="display: flex; gap: 5px;">
+                <span id="funcionarios-info" style="color: #6c757d; font-size: 14px;">Carregando...</span>
+                <div id="funcionarios-paginacao" style="display: flex; gap: 5px;">
                 </div>
             </div>
         </div>
@@ -209,7 +209,7 @@
                     <i class="fas fa-user-plus"></i>
                 </div>
                 <div>
-                    <h3 id="título-form-funcionário">Novo Funcionário</h3>
+                    <h3 id="titulo-form-funcionario">Novo Funcionário</h3>
                     <p>Preencha os dados do colaborador</p>
                 </div>
             </div>
@@ -219,7 +219,7 @@
         </div>
         
         <div class="config-detail-modal-body">
-            <form id="form-funcionário" onsubmit="salvarFuncionario(event)">
+            <form id="form-funcionario" onsubmit="salvarFuncionario(event)">
                 <input type="hidden" id="func-id" name="id">
                 
                 <div class="config-form-section">
@@ -280,7 +280,7 @@
                         </div>
                         <div class="config-form-group">
                             <label>Salário</label>
-                            <input type="text" id="func-salário" name="salário" class="config-input" placeholder="R$ 0,00">
+                            <input type="text" id="func-salario" name="salário" class="config-input" placeholder="R$ 0,00">
                         </div>
                         <div class="config-form-group">
                             <label>Status</label>
@@ -303,11 +303,11 @@
                     <div class="config-form-grid">
                         <div class="config-form-group" style="flex: 2;">
                             <label>Endereço</label>
-                            <input type="text" id="func-endereço" name="endereço" class="config-input">
+                            <input type="text" id="func-endereco" name="endereço" class="config-input">
                         </div>
                         <div class="config-form-group">
                             <label>Número</label>
-                            <input type="text" id="func-número" name="número" class="config-input">
+                            <input type="text" id="func-numero" name="número" class="config-input">
                         </div>
                         <div class="config-form-group">
                             <label>Bairro</label>
@@ -405,11 +405,11 @@
                     </div>
                     <div class="config-info-item">
                         <span class="config-info-label">Salário</span>
-                        <span class="config-info-value" id="detalhe-func-salário">-</span>
+                        <span class="config-info-value" id="detalhe-func-salario">-</span>
                     </div>
                     <div class="config-info-item" style="grid-column: span 2;">
                         <span class="config-info-label">Endereço</span>
-                        <span class="config-info-value" id="detalhe-func-endereço">-</span>
+                        <span class="config-info-value" id="detalhe-func-endereco">-</span>
                     </div>
                 </div>
             </div>
@@ -1040,7 +1040,7 @@
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                         <h4 style="margin: 0; color: #0d9488; display: flex; align-items: center; gap: 8px;">
                             <i class="fas fa-dollar-sign"></i>
-                            <span id="form-tabela-preco-título">Nova Tabela de Preço</span>
+                            <span id="form-tabela-preco-titulo">Nova Tabela de Preço</span>
                         </h4>
                         <button type="button" onclick="fecharFormTabelaPreco()" style="background: none; border: none; cursor: pointer; font-size: 18px; color: #64748b;">
                             <i class="fas fa-times"></i>
@@ -1076,7 +1076,7 @@
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px;">
                             <div class="config-form-group">
                                 <label><i class="fas fa-file-alt" style="color: #14b8a6; margin-right: 6px;"></i>Descrição</label>
-                                <textarea id="tabela-preco-descrição" class="config-form-input" placeholder="Descrição opcional..." rows="2"></textarea>
+                                <textarea id="tabela-preco-descricao" class="config-form-input" placeholder="Descrição opcional..." rows="2"></textarea>
                             </div>
                             
                             <div class="config-form-group">
@@ -1196,7 +1196,7 @@
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                         <h4 style="margin: 0; color: #0d9488; display: flex; align-items: center; gap: 8px;">
                             <i class="fas fa-ruler"></i>
-                            <span id="form-unidade-título">Nova Unidade de Medida</span>
+                            <span id="form-unidade-titulo">Nova Unidade de Medida</span>
                         </h4>
                         <button type="button" onclick="fecharFormUnidade()" style="background: none; border: none; cursor: pointer; font-size: 18px; color: #64748b;">
                             <i class="fas fa-times"></i>
@@ -1416,7 +1416,7 @@
                     </div>
                     <div class="form-group" style="margin: 0;">
                         <label style="font-weight: 600; margin-bottom: 5px; display: block;">Código LC 116</label>
-                        <input type="text" id="tipo-servico-código-lc" class="form-control" placeholder="Ex: 14.01" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                        <input type="text" id="tipo-servico-codigo-lc" class="form-control" placeholder="Ex: 14.01" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
                     </div>
                     <div class="form-group" style="margin: 0;">
                         <label style="font-weight: 600; margin-bottom: 5px; display: block;">ISS (%)</label>
@@ -1503,7 +1503,7 @@
                 </div>
                 <div class="form-group" style="margin: 0 0 15px 0;">
                     <label style="font-weight: 600; margin-bottom: 5px; display: block;">Descrição</label>
-                    <input type="text" id="modelo-contrato-descrição" class="form-control" placeholder="Breve descrição do modelo" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                    <input type="text" id="modelo-contrato-descricao" class="form-control" placeholder="Breve descrição do modelo" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
                 </div>
                 <div class="form-group" style="margin: 0 0 15px 0;">
                     <label style="font-weight: 600; margin-bottom: 5px; display: block;">Conteúdo do Contrato</label>
@@ -1654,7 +1654,7 @@
                     </div>
                     <div class="form-group" style="margin: 0;">
                         <label style="font-weight: 500; margin-bottom: 5px; display: block; color: #dc3545; font-size: 12px;">Código do Município</label>
-                        <input type="text" id="nfse-código-municipio" class="form-control" placeholder="Código IBGE" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                        <input type="text" id="nfse-codigo-municipio" class="form-control" placeholder="Código IBGE" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
                     </div>
                 </div>
             </div>
@@ -1678,7 +1678,7 @@
                     </div>
                     <div class="form-group" style="margin: 0;">
                         <label style="font-weight: 500; margin-bottom: 5px; display: block; color: #333; font-size: 12px;">Regime de Tributação</label>
-                        <select id="nfse-regime-tributação" class="form-control" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                        <select id="nfse-regime-tributacao" class="form-control" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
                             <option value="1">Microempresa Municipal</option>
                             <option value="2">Estimativa</option>
                             <option value="3">Sociedade de Profissionais</option>
@@ -1696,7 +1696,7 @@
                         <p style="margin: 3px 0 0 0; font-size: 12px; color: #666;">Enviar NFS-e automaticamente ao tomador</p>
                     </div>
                     <label style="position: relative; display: inline-block; width: 50px; height: 26px;">
-                        <input type="checkbox" id="nfse-envio-automático" checked style="opacity: 0; width: 0; height: 0;">
+                        <input type="checkbox" id="nfse-envio-automatico" checked style="opacity: 0; width: 0; height: 0;">
                         <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .3s; border-radius: 26px;" class="nfse-slider" onclick="toggleNfseCheckbox('nfse-envio-automático', this)"></span>
                     </label>
                 </div>
@@ -1823,12 +1823,12 @@
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                         <div class="config-form-group">
                             <label style="display: block; font-size: 12px; color: #6b7280; margin-bottom: 6px;">Próximo número de Pedido</label>
-                            <input type="number" name="proximo_numero_pedido" id="próximo-número-pedido" value="1001" min="1" 
+                            <input type="number" name="proximo_numero_pedido" id="proximo-numero-pedido" value="1001" min="1" 
                                    style="width: 100%; padding: 10px 12px; border: 2px solid #10b981; border-radius: 8px; font-size: 14px; background: #f0fdf4;">
                         </div>
                         <div class="config-form-group">
                             <label style="display: block; font-size: 12px; color: #6b7280; margin-bottom: 6px;">Próxima Remessa</label>
-                            <input type="number" name="proxima_remessa" id="próxima-remessa" value="5001" min="1" 
+                            <input type="number" name="proxima_remessa" id="proxima-remessa" value="5001" min="1" 
                                    style="width: 100%; padding: 10px 12px; border: 2px solid #10b981; border-radius: 8px; font-size: 14px; background: #f0fdf4;">
                         </div>
                     </div>
@@ -1928,7 +1928,7 @@
             <div id="form-tipo-entrega" style="display: none; margin-bottom: 20px;">
                 <div style="background: #fef2f2; border: 2px solid #ef4444; border-radius: 12px; padding: 20px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                        <h4 style="margin: 0; color: #ef4444;"><i class="fas fa-truck"></i> <span id="form-tipo-entrega-título">Novo Tipo de Entrega</span></h4>
+                        <h4 style="margin: 0; color: #ef4444;"><i class="fas fa-truck"></i> <span id="form-tipo-entrega-titulo">Novo Tipo de Entrega</span></h4>
                         <button type="button" onclick="fecharFormTipoEntrega()" style="background: none; border: none; cursor: pointer; font-size: 18px; color: #64748b;"><i class="fas fa-times"></i></button>
                     </div>
                     <form id="form-tipo-entrega-config">
@@ -1950,7 +1950,7 @@
                             </div>
                             <div class="config-form-group">
                                 <label>Situação</label>
-                                <select id="tipo-entrega-situação" class="config-form-input">
+                                <select id="tipo-entrega-situacao" class="config-form-input">
                                     <option value="ativo">Ativo</option>
                                     <option value="inativo">Inativo</option>
                                 </select>
@@ -2021,7 +2021,7 @@
                         </div>
                         <div class="config-form-group">
                             <label>Frete Mínimo (R$)</label>
-                            <input type="text" id="frete-mínimo" class="config-form-input" placeholder="0,00" oninput="formatarMoedaConfig(this)">
+                            <input type="text" id="frete-minimo" class="config-form-input" placeholder="0,00" oninput="formatarMoedaConfig(this)">
                         </div>
                     </div>
                 </div>
@@ -2153,7 +2153,7 @@
                             Próximo número de Ordem de Serviço
                         </label>
                         <input type="number" 
-                               id="próximo-os" 
+                               id="proximo-os" 
                                value="1001" 
                                min="1"
                                style="width: 100%; padding: 12px 16px; border: 2px solid #14b8a6; border-radius: 8px; font-size: 14px; outline: none; transition: border-color 0.2s;"
@@ -2209,7 +2209,7 @@
                     </div>
                     <div class="config-toggle" style="margin-top: 16px;">
                         <label class="config-toggle-switch">
-                            <input type="checkbox" id="obrigar-endereço" checked>
+                            <input type="checkbox" id="obrigar-endereco" checked>
                             <span class="config-toggle-slider"></span>
                         </label>
                         <div class="config-toggle-label">
@@ -2452,7 +2452,7 @@
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                         <h4 style="margin: 0; color: #6c5ce7; display: flex; align-items: center; gap: 8px;">
                             <i class="fas fa-boxes"></i>
-                            <span id="form-familia-título">Nova Família</span>
+                            <span id="form-familia-titulo">Nova Família</span>
                         </h4>
                         <button type="button" onclick="fecharFormFamilia()" style="background: none; border: none; cursor: pointer; font-size: 18px; color: #64748b;">
                             <i class="fas fa-times"></i>
@@ -2470,12 +2470,12 @@
                             
                             <div class="config-form-group">
                                 <label><i class="fas fa-barcode" style="color: #6c5ce7; margin-right: 6px;"></i>Código</label>
-                                <input type="text" id="familia-código" class="config-form-input" placeholder="Ex: FAM001">
+                                <input type="text" id="familia-codigo" class="config-form-input" placeholder="Ex: FAM001">
                             </div>
                             
                             <div class="config-form-group" style="grid-column: span 2;">
                                 <label><i class="fas fa-sticky-note" style="color: #6c5ce7; margin-right: 6px;"></i>Descrição</label>
-                                <textarea id="familia-descrição" class="config-form-input" placeholder="Descrição da família..." rows="2" style="resize: vertical;"></textarea>
+                                <textarea id="familia-descricao" class="config-form-input" placeholder="Descrição da família..." rows="2" style="resize: vertical;"></textarea>
                             </div>
                         </div>
                         
@@ -2628,7 +2628,7 @@
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                         <h4 style="margin: 0; color: #6c5ce7; display: flex; align-items: center; gap: 8px;">
                             <i class="fas fa-tags"></i>
-                            <span id="form-caracteristica-título">Nova Característica</span>
+                            <span id="form-caracteristica-titulo">Nova Característica</span>
                         </h4>
                         <button type="button" onclick="fecharFormCaracteristica()" style="background: none; border: none; cursor: pointer; font-size: 18px; color: #64748b;">
                             <i class="fas fa-times"></i>
@@ -2672,7 +2672,7 @@
                             
                             <div class="config-form-group">
                                 <label><i class="fas fa-check-circle" style="color: #6c5ce7; margin-right: 6px;"></i>Preenchimento</label>
-                                <select id="caracteristica-obrigatório" class="config-form-input">
+                                <select id="caracteristica-obrigatorio" class="config-form-input">
                                     <option value="opcional">Opcional</option>
                                     <option value="obrigatório">Obrigatório</option>
                                 </select>
@@ -2780,7 +2780,7 @@
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                         <h4 style="margin: 0; color: #00b894; display: flex; align-items: center; gap: 8px;">
                             <i class="fas fa-user-plus"></i>
-                            <span id="form-vendedor-título">Novo Vendedor</span>
+                            <span id="form-vendedor-titulo">Novo Vendedor</span>
                         </h4>
                         <button type="button" onclick="fecharFormVendedor()" style="background: none; border: none; cursor: pointer; font-size: 18px; color: #64748b;">
                             <i class="fas fa-times"></i>
@@ -2813,7 +2813,7 @@
                             
                             <div class="config-form-group">
                                 <label><i class="fas fa-shield-alt" style="color: #00b894; margin-right: 6px;"></i>Permissões</label>
-                                <select id="vendedor-permissões" class="config-form-input">
+                                <select id="vendedor-permissoes" class="config-form-input">
                                     <option value="vendas">Apenas Vendas</option>
                                     <option value="orcamentos">Orçamentos e Vendas</option>
                                     <option value="completo">Acesso Completo</option>
@@ -2822,7 +2822,7 @@
                             
                             <div class="config-form-group">
                                 <label><i class="fas fa-toggle-on" style="color: #00b894; margin-right: 6px;"></i>Situação</label>
-                                <select id="vendedor-situação" class="config-form-input">
+                                <select id="vendedor-situacao" class="config-form-input">
                                     <option value="ativo">Ativo</option>
                                     <option value="inativo">Inativo</option>
                                 </select>
@@ -2936,7 +2936,7 @@
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                         <h4 style="margin: 0; color: #0984e3; display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 600;">
                             <i class="fas fa-user-plus"></i>
-                            <span id="form-comprador-título">Novo Comprador</span>
+                            <span id="form-comprador-titulo">Novo Comprador</span>
                         </h4>
                         <button type="button" onclick="fecharFormComprador()" style="background: none; border: none; cursor: pointer; font-size: 18px; color: #94a3b8; transition: color 0.2s;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#94a3b8'">
                             <i class="fas fa-times"></i>
@@ -2987,7 +2987,7 @@
                             
                             <div class="config-form-group">
                                 <label><i class="fas fa-toggle-on" style="color: #0984e3; margin-right: 6px;"></i>Situação</label>
-                                <select id="comprador-situação" class="config-form-input">
+                                <select id="comprador-situacao" class="config-form-input">
                                     <option value="ativo">Ativo</option>
                                     <option value="inativo">Inativo</option>
                                 </select>
@@ -2996,7 +2996,7 @@
                         
                         <div class="config-form-group" style="margin-top: 16px;">
                             <label><i class="fas fa-sticky-note" style="color: #0984e3; margin-right: 6px;"></i>Observações</label>
-                            <textarea id="comprador-observações" class="config-form-input" placeholder="Observações adicionais..." rows="2" style="resize: vertical;"></textarea>
+                            <textarea id="comprador-observacoes" class="config-form-input" placeholder="Observações adicionais..." rows="2" style="resize: vertical;"></textarea>
                         </div>
                         
                         <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; padding-top: 16px; border-top: 1px solid #e5e7eb;">
@@ -3076,7 +3076,7 @@
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                         <h4 style="margin: 0; color: #c27803; display: flex; align-items: center; gap: 8px;">
                             <i class="fas fa-sitemap"></i>
-                            <span id="form-conta-título">Nova Conta Contábil</span>
+                            <span id="form-conta-titulo">Nova Conta Contábil</span>
                         </h4>
                         <button type="button" onclick="fecharFormNovaConta()" style="background: none; border: none; cursor: pointer; font-size: 18px; color: #64748b;">
                             <i class="fas fa-times"></i>
@@ -3140,7 +3140,7 @@
                         
                         <div class="config-form-group">
                             <label><i class="fas fa-align-left" style="color: #f39c12; margin-right: 6px;"></i>Descrição</label>
-                            <textarea id="conta-config-descrição" class="config-form-input" placeholder="Descrição opcional da conta..." rows="2" style="resize: vertical;"></textarea>
+                            <textarea id="conta-config-descricao" class="config-form-input" placeholder="Descrição opcional da conta..." rows="2" style="resize: vertical;"></textarea>
                         </div>
                         
                         <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; padding-top: 16px; border-top: 1px solid #e5e7eb;">
@@ -3198,25 +3198,25 @@
             </div>
 
             <!-- Formulário Nova Conta (oculto inicialmente) -->
-            <div id="form-nova-conta-bancária" style="display: none; margin-bottom: 20px;">
+            <div id="form-nova-conta-bancaria" style="display: none; margin-bottom: 20px;">
                 <div class="config-form-card" style="background: #f8fafc; border: 2px solid #3b82f6; border-radius: 12px; padding: 24px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                         <h4 style="margin: 0; color: #1e40af; display: flex; align-items: center; gap: 8px;">
                             <i class="fas fa-plus-circle"></i>
-                            <span id="form-conta-título">Nova Conta Bancária</span>
+                            <span id="form-conta-bancaria-titulo">Nova Conta Bancária</span>
                         </h4>
                         <button type="button" onclick="fecharFormContaBancaria()" style="background: none; border: none; cursor: pointer; font-size: 18px; color: #64748b;">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
                     
-                    <form id="form-conta-bancária-config">
-                        <input type="hidden" id="conta-bancária-id">
+                    <form id="form-conta-bancaria-config">
+                        <input type="hidden" id="conta-bancaria-id">
                         
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                             <div class="config-form-group">
                                 <label><i class="fas fa-university" style="color: #f39c12; margin-right: 6px;"></i>Banco *</label>
-                                <select id="conta-banco-código" class="config-form-input" required>
+                                <select id="conta-banco-codigo" class="config-form-input" required>
                                     <option value="">Selecione o banco...</option>
                                     <optgroup label="Bancos Tradicionais">
                                         <option value="001">001 - Banco do Brasil</option>
@@ -3260,7 +3260,7 @@
                             
                             <div class="config-form-group">
                                 <label><i class="fas fa-hashtag" style="color: #f39c12; margin-right: 6px;"></i>Número da Conta</label>
-                                <input type="text" id="conta-número" class="config-form-input" placeholder="00000-0" maxlength="20">
+                                <input type="text" id="conta-numero" class="config-form-input" placeholder="00000-0" maxlength="20">
                             </div>
                             
                             <div class="config-form-group">
@@ -3276,7 +3276,7 @@
                         
                         <div class="config-form-group" style="margin-top: 16px;">
                             <label><i class="fas fa-sticky-note" style="color: #f39c12; margin-right: 6px;"></i>Observações</label>
-                            <textarea id="conta-observações" class="config-form-input" rows="2" placeholder="Anotações sobre esta conta..."></textarea>
+                            <textarea id="conta-observacoes" class="config-form-input" rows="2" placeholder="Anotações sobre esta conta..."></textarea>
                         </div>
                         
                         <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; padding-top: 16px; border-top: 1px solid #e5e7eb;">
@@ -3319,7 +3319,7 @@
             <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <span style="font-weight: 600; color: #495057;">Saldo Total:</span>
-                    <span id="saldo-total-bancário" style="font-size: 1.25rem; font-weight: 700; color: #28a745;">R$ 0,00</span>
+                    <span id="saldo-total-bancario" style="font-size: 1.25rem; font-weight: 700; color: #28a745;">R$ 0,00</span>
                 </div>
             </div>
         </div>
@@ -3435,7 +3435,7 @@
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                         <h4 style="margin: 0; color: #c27803; display: flex; align-items: center; gap: 8px;">
                             <i class="fas fa-plus-circle"></i>
-                            <span id="form-forma-título">Nova Forma de Pagamento</span>
+                            <span id="form-forma-titulo">Nova Forma de Pagamento</span>
                         </h4>
                         <button type="button" onclick="fecharFormFormaPagamento()" style="background: none; border: none; cursor: pointer; font-size: 18px; color: #64748b;">
                             <i class="fas fa-times"></i>
@@ -3962,7 +3962,7 @@ async function carregarPreviewBlocoK() {
                                 Margem Padrão (%)
                                 <span class="required">*</span>
                             </label>
-                            <input type="number" id="config-margem-padrão" class="produto-form-input" value="30" min="0" max="100" step="0.5" oninput="calcularExemploCusto()">
+                            <input type="number" id="config-margem-padrao" class="produto-form-input" value="30" min="0" max="100" step="0.5" oninput="calcularExemploCusto()">
                             <span class="produto-form-help">
                                 <i class="fas fa-tag"></i>
                                 Margem aplicada automaticamente aos novos produtos
@@ -4000,7 +4000,7 @@ async function carregarPreviewBlocoK() {
                                 <i class="fas fa-shopping-cart"></i>
                                 Preço Unitário de Venda Padrão
                             </label>
-                            <input type="number" id="config-preco-venda-padrão" class="produto-form-input" step="0.01" min="0" value="0" oninput="calcularMargemConfig()">
+                            <input type="number" id="config-preco-venda-padrao" class="produto-form-input" step="0.01" min="0" value="0" oninput="calcularMargemConfig()">
                             <span class="produto-form-help">
                                 <i class="fas fa-tag"></i>
                                 Valor de venda padrão para novos produtos
@@ -4012,7 +4012,7 @@ async function carregarPreviewBlocoK() {
                                 <i class="fas fa-industry"></i>
                                 Custo Unitário Padrão
                             </label>
-                            <input type="number" id="config-custo-unitario-padrão" class="produto-form-input" step="0.01" min="0" value="0" oninput="calcularMargemConfig()">
+                            <input type="number" id="config-custo-unitario-padrao" class="produto-form-input" step="0.01" min="0" value="0" oninput="calcularMargemConfig()">
                             <span class="produto-form-help">
                                 <i class="fas fa-calculator"></i>
                                 Custo de aquisição ou produção padrão
@@ -4158,7 +4158,7 @@ async function carregarPreviewBlocoK() {
                                 <i class="fas fa-list-ol"></i>
                                 NCM Padrão (Nomenclatura Comum do Mercosul)
                             </label>
-                            <input type="text" id="config-ncm-padrão" class="produto-form-input" maxlength="10" placeholder="00000000">
+                            <input type="text" id="config-ncm-padrao" class="produto-form-input" maxlength="10" placeholder="00000000">
                             <span class="produto-form-help">
                                 <i class="fas fa-globe"></i>
                                 Código NCM padrão para novos produtos
@@ -4170,7 +4170,7 @@ async function carregarPreviewBlocoK() {
                                 <i class="fas fa-percentage"></i>
                                 Alíquota de ICMS Padrão (%)
                             </label>
-                            <input type="number" id="config-icms-padrão" class="produto-form-input" step="0.01" min="0" max="100" placeholder="18.00">
+                            <input type="number" id="config-icms-padrao" class="produto-form-input" step="0.01" min="0" max="100" placeholder="18.00">
                             <span class="produto-form-help">
                                 <i class="fas fa-calculator"></i>
                                 Alíquota ICMS aplicada automaticamente
@@ -4659,7 +4659,7 @@ async function carregarPreviewBlocoK() {
             <!-- Filtros Enterprise -->
             <div class="histórico-filters-bar">
                 <div class="histórico-filter-group">
-                    <select id="filtro-módulo" class="histórico-filter-select" onchange="filtrarHistorico()">
+                    <select id="filtro-modulo" class="histórico-filter-select" onchange="filtrarHistorico()">
                         <option value="">Todos os Módulos</option>
                         <option value="vendas">Vendas</option>
                         <option value="compras">Compras</option>
@@ -4677,7 +4677,7 @@ async function carregarPreviewBlocoK() {
                     </select>
                 </div>
                 <div class="histórico-filter-group">
-                    <select id="filtro-ação" class="histórico-filter-select" onchange="filtrarHistorico()">
+                    <select id="filtro-acao" class="histórico-filter-select" onchange="filtrarHistorico()">
                         <option value="">Todas as Ações</option>
                         <option value="criar">Criar</option>
                         <option value="editar">Editar</option>
@@ -4702,7 +4702,7 @@ async function carregarPreviewBlocoK() {
             </div>
 
             <!-- Lista de Histórico -->
-            <div class="histórico-list-container" id="histórico-container">
+            <div class="histórico-list-container" id="historico-container">
                 <!-- Conteúdo carregado dinamicamente via API -->
                 <div class="histórico-loading">
                     <i class="fas fa-spinner fa-spin"></i>

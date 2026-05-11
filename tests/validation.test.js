@@ -53,11 +53,9 @@ describe('validateId', () => {
     });
 
     it('deve rejeitar números decimais', () => {
-        // parseInt(1.5, 10) = 1, que é um inteiro válido
-        // O comportamento esperado é que decimais sejam truncados e aceitos
         const result = validateId(1.5);
-        assert.strictEqual(result.valid, true);
-        assert.strictEqual(result.value, 1);
+        assert.strictEqual(result.valid, false);
+        assert.strictEqual(result.value, null);
     });
 });
 

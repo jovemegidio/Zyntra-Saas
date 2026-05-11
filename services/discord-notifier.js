@@ -20,9 +20,9 @@ try {
 
 class DiscordNotifier {
     constructor() {
-        this.webhookUrl = process.env.DISCORD_WEBHOOK_URL 
-            || process.env.DISCORD_WEBHOOK_ATUALIZACOES 
-            || 'https://discord.com/api/webhooks/1465740298243018793/fjkXYSN7Vv06YRyimpqneNVOhADqDACpVTXQxRbyUJnsk-cWpJvnpZzD9JntRVFyhfVt';
+        this.webhookUrl = process.env.DISCORD_WEBHOOK_URL
+            || process.env.DISCORD_WEBHOOK_ATUALIZACOES
+            || null;
         this.enabled = process.env.DISCORD_NOTIFICATIONS_ENABLED !== 'false'; // Habilitado por padrão
         this.changelog = [];
         this.queue = [];
@@ -314,11 +314,11 @@ class DiscordNotifier {
         const versao = this._getVersion();
         const uptime = process.uptime ? process.uptime() : 0;
         const isRestart = uptime < 10; // Se uptime < 10s, é um restart (deploy provável)
-        
+
         const embed = {
             title: isRestart ? '🚀 Deploy Realizado — ALUFORCE' : '🟢 Sistema ALUFORCE Online',
             color: isRestart ? 0x3498db : 0x00e676,
-            description: isRestart 
+            description: isRestart
                 ? `O servidor foi reiniciado com sucesso após deploy.\n**Versão:** v${versao}\n**Ambiente:** ${(process.env.NODE_ENV || 'development').toUpperCase()}`
                 : `O servidor iniciou com sucesso.\n**Versão:** v${versao}\n**Ambiente:** ${(process.env.NODE_ENV || 'development').toUpperCase()}`,
             timestamp: new Date().toISOString(),
@@ -339,7 +339,7 @@ class DiscordNotifier {
                 const agora = Date.now();
                 const limiteMs = 5 * 60 * 1000; // últimos 5 minutos
                 const arquivosRecentes = [];
-                
+
                 const pastas = ['routes', 'services', 'modules', 'public/js'];
                 for (const pasta of pastas) {
                     const dir = path.join(baseDir, pasta);
@@ -361,7 +361,7 @@ class DiscordNotifier {
                         scan(dir);
                     }
                 }
-                
+
                 if (arquivosRecentes.length > 0) {
                     const lista = arquivosRecentes.slice(0, 10).map(f => `\`${f}\``).join('\n');
                     const extra = arquivosRecentes.length > 10 ? `\n... +${arquivosRecentes.length - 10} mais` : '';

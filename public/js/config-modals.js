@@ -4348,7 +4348,7 @@ function displayContasBancarias(contas) {
  */
 function abrirFormContaBancaria(id = null) {
     const form = document.getElementById('form-nova-conta-bancaria');
-    const titulo = document.getElementById('form-conta-titulo');
+    const titulo = document.getElementById('form-conta-bancaria-titulo');
     
     // Resetar formulário
     document.getElementById('form-conta-bancaria-config').reset();

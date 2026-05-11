@@ -8,6 +8,7 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
+const SpreadsheetReader = require('../utils/spreadsheet-reader');
 
 // Multer para upload de comprovantes (memoryStorage → buffer)
 const comprovanteUpload = multer({
@@ -26,10 +27,9 @@ const excelUpload = multer({
     fileFilter: (_req, file, cb) => {
         const excelTypes = [
             'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'application/vnd.ms-excel',
             'application/octet-stream'
         ];
-        cb(null, excelTypes.includes(file.mimetype) || /\.(xlsx|xls)$/i.test(file.originalname));
+        cb(null, (excelTypes.includes(file.mimetype) || !file.mimetype) && /\.xlsx$/i.test(file.originalname));
     }
 });
 
@@ -3260,8 +3260,7 @@ router.post('/contas-receber/importar-excel', authenticateToken, authorizeFinanc
             return res.status(400).json({ error: 'Nenhum arquivo enviado' });
         }
 
-        const XLSX = require('xlsx');
-        const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
+        const workbook = await SpreadsheetReader.read(req.file.buffer);
 
         // Auto-detect best sheet: prefer FATURAMENTO, then first sheet
         const preferredSheets = ['FATURAMENTO', 'A RECEBER', 'CONTAS A RECEBER'];
@@ -3272,7 +3271,7 @@ router.post('/contas-receber/importar-excel', authenticateToken, authorizeFinanc
         const sheet = workbook.Sheets[sheetName];
         console.log('[IMPORTAR-CR] Usando aba:', sheetName, '| Abas disponíveis:', workbook.SheetNames.join(', '));
 
-        const rawData = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: true });
+        const rawData = SpreadsheetReader.utils.sheet_to_json(sheet, { header: 1, raw: true });
         if (!rawData || rawData.length < 2) {
             throw new Error('Arquivo vazio ou sem dados');
         }
@@ -3339,7 +3338,7 @@ router.post('/contas-receber/importar-excel', authenticateToken, authorizeFinanc
             if (!d) return null;
             if (d instanceof Date) return d.toISOString().slice(0, 10);
             if (typeof d === 'number') {
-                const dt = XLSX.SSF.parse_date_code(d);
+                const dt = SpreadsheetReader.SSF.parse_date_code(d);
                 if (dt) return `${dt.y}-${String(dt.m).padStart(2,'0')}-${String(dt.d).padStart(2,'0')}`;
             }
             const s = String(d).trim();

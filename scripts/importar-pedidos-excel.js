@@ -4,24 +4,24 @@
  */
 
 require('dotenv').config();
-const XLSX = require('xlsx');
+const XLSX = require('../src/utils/spreadsheet-reader');
 const mysql = require('mysql2/promise');
 const path = require('path');
 
 // Configuração do banco
 const dbConfig = {
-    host: process.env.DB_HOST || 'interchange.proxy.rlwy.net',
+    host: process.env.DB_HOST || 'localhost',
     port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 19396,
     user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || 'iiilOZutDOnPCwxgiTKeMuEaIzSwplcu',
-    database: process.env.DB_NAME || 'railway',
+    password: process.env.DB_PASSWORD || '',
+    database: process.env.DB_NAME || 'aluforce_vendas',
     charset: 'utf8mb4'
 };
 
 async function analisarExcel(filePath) {
     console.log('\n📊 Analisando arquivo:', filePath);
     
-    const workbook = XLSX.readFile(filePath);
+    const workbook = await XLSX.readFile(filePath);
     console.log('📑 Planilhas encontradas:', workbook.SheetNames);
     
     // Analisar cada planilha
@@ -49,7 +49,7 @@ async function importarPedidos(filePath) {
     try {
         console.log('\n🔄 Iniciando importação de pedidos...');
         
-        const workbook = XLSX.readFile(filePath);
+        const workbook = await XLSX.readFile(filePath);
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
         const dados = XLSX.utils.sheet_to_json(sheet);

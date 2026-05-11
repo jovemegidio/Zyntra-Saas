@@ -41,9 +41,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // ========== SEARCH GLOBAL INTELIGENTE ==========
     const searchBtn = document.getElementById('search-btn');
-    if (searchBtn) {
+    const headerSearchInput = document.getElementById('header-search-input');
+    if (searchBtn || headerSearchInput) {
         const headerSearchContainer = document.getElementById('header-search-container');
-        const headerSearchInput = document.getElementById('header-search-input');
         const headerSearchResults = document.getElementById('header-search-results');
         let searchOpen = false;
         let searchTimeout = null;
@@ -318,10 +318,12 @@ document.addEventListener('DOMContentLoaded', function() {
             return Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
 
-        searchBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            if (!searchOpen) openHeaderSearch(); else closeHeaderSearch();
-        });
+        if (searchBtn) {
+            searchBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (!searchOpen) openHeaderSearch(); else closeHeaderSearch();
+            });
+        }
 
         // Removido: não fecha mais ao clicar fora - sugestões e barra são integrados
 

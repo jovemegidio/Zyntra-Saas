@@ -1008,7 +1008,7 @@
                         <label for="anexoAlteração">Anexo Comprobatório</label>
                         <span class="field-note">Opcional, mas recomendado para documentos, endereço, dados Bancários e dependentes.</span>
                         <div class="file-upload-wrapper">
-                            <div id="fileUploadArea" class="file-upload-area" onclick="document.getElementById('anexoAlteração').click()">
+                            <div id="fileUploadArea" class="file-upload-area" onclick="document.getElementById('anexoAlteracao').click()">
                                 <div class="file-upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
                                 <div class="file-upload-text">
                                     <div class="main-text">Clique para selecionar um arquivo</div>
@@ -1551,7 +1551,7 @@
 
         function removeFile(e) {
             e.stopPropagation();
-            const input = document.getElementById('anexoAlteração');
+            const input = document.getElementById('anexoAlteracao');
             input.value = '';
             const area = document.getElementById('fileUploadArea');
             area.classList.remove('has-file');
@@ -1565,19 +1565,19 @@
         }
 
         function abrirModalSolicitação() {
-            document.getElementById('modalSolicitação').classList.add('show');
+            document.getElementById('modalSolicitacao').classList.add('show');
         }
 
         function fecharModal() {
-            document.getElementById('modalSolicitação').classList.remove('show');
-            document.getElementById('formSolicitação').reset();
+            document.getElementById('modalSolicitacao').classList.remove('show');
+            document.getElementById('formSolicitacao').reset();
             removeFile(new Event('click'));
         }
 
         async function enviarSolicitação() {
-            const tipo = document.getElementById('tipoAlteração').value;
-            const descrição = document.getElementById('descriçãoAlteração').value;
-            const anexo = document.getElementById('anexoAlteração').files[0];
+            const tipo = document.getElementById('tipoAlteracao').value;
+            const descrição = document.getElementById('descricaoAlteracao').value;
+            const anexo = document.getElementById('anexoAlteracao').files[0];
 
             if (!tipo || !descrição) {
                 showToast('Preencha todos os campos obrigatórios', 'error');

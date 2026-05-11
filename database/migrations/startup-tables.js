@@ -451,6 +451,7 @@ async function runMigrations(pool) {
     const ordensProducaoColumns = [
         ['pedido_id', 'INT NULL'],
         ['pedido_vinculado_id', 'INT NULL'],
+        ['produto_id', 'INT NULL'],
         ['codigo', 'VARCHAR(100) NULL'],
         ['numero_ordem', 'VARCHAR(100) NULL'],
         ['codigo_produto', 'VARCHAR(100) NULL'],

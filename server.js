@@ -1998,7 +1998,7 @@ async function _tryRefreshOrRedirect(req, res, next) {
 
     try {
         const refreshTokenModule = require('./src/auth/refresh-token');
-        const decoded = jwt.verify(refreshToken, REFRESH_SECRET);
+        const decoded = jwt.verify(refreshToken, REFRESH_SECRET, { algorithms: ['HS256'] });
         if (decoded.type !== 'refresh') throw new Error('Not a refresh token');
 
         const result = await refreshTokenModule.refreshTokens(refreshToken, pool);

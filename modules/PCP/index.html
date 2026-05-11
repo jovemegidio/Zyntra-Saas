@@ -7023,7 +7023,7 @@
                     <div id="pcp-sidebar-items" style="display: none; width: 100%; flex-direction: column; gap: 2px;">
                         <!-- Incluir -->
                         <button
-                            onclick="limparFormProdutoPCP(true); document.getElementById('modal-novo-produto-título').textContent='Incluir Produto';"
+                            onclick="limparFormProdutoPCP(true); document.getElementById('modal-novo-produto-titulo').textContent='Incluir Produto';"
                             style="display: flex; align-items: center; gap: 10px; padding: 10px 8px; background: none; border: none; cursor: pointer; color: #16a34a; font-size: 13px; width: 100%; text-align: left; border-radius: 6px; transition: background 0.2s; white-space: nowrap;"
                             onmouseover="this.style.background='#f0fdf4';" onmouseout="this.style.background='none';">
                             <i class="fas fa-plus-circle" style="font-size: 16px; flex-shrink: 0;"></i>
@@ -10563,7 +10563,7 @@
             console.log('?? Produtos:', dados.produtos?.length || 0);
 
             // ========== PREPARAR PAYLOAD ENTERPRISE UNIFICADO ==========
-            const númeroOP = document.getElementById('op-número')?.value || `OP Nº ${new Date().getFullYear()}/${String(Date.now()).slice(-5).padStart(5, '0')}`;
+            const númeroOP = document.getElementById('op-numero')?.value || `OP Nº ${new Date().getFullYear()}/${String(Date.now()).slice(-5).padStart(5, '0')}`;
             const produção = dados.producao || {};
 
             const payload = {
@@ -10739,11 +10739,11 @@
             const transpCep = document.getElementById('op-transportadora-cep')?.value || '';
             const transpEmail = document.getElementById('op-transportadora-email')?.value || '';
             const transpEndereco = document.getElementById('op-transportadora-endereço')?.value || '';
-            const observações = document.getElementById('op-observações')?.value || '';
+            const observações = document.getElementById('op-observacoes')?.value || '';
 
             return {
                 // Dados da OP
-                numero_sequencial: document.getElementById('op-número')?.value?.replace(/\D/g, '') || '',
+                numero_sequencial: document.getElementById('op-numero')?.value?.replace(/\D/g, '') || '',
                 revisao: document.getElementById('op-revisao')?.value || '01',
                 numero_orçamento: document.getElementById('op-orçamento')?.value || '',
                 num_orçamento: document.getElementById('op-orçamento')?.value || '',
@@ -10814,8 +10814,8 @@
                 forma_pagamento: document.getElementById('op-forma-pagamento-1')?.value || 'A_VISTA',
                 metodo_pagamento: document.getElementById('op-metodo-pagamento-1')?.value || 'BOLETO',
                 percentual_pagamento: parseFloat(document.getElementById('op-percent-1')?.value) || 100,
-                condições_pagamento: document.getElementById('op-condições-pagamento')?.value || '',
-                condicoes_pagamento: document.getElementById('op-condições-pagamento')?.value || '',
+                condições_pagamento: document.getElementById('op-condicoes-pagamento')?.value || '',
+                condicoes_pagamento: document.getElementById('op-condicoes-pagamento')?.value || '',
 
                 // Entrega
                 data_previsao_entrega: document.getElementById('op-data-entrega')?.value || '',
@@ -10950,7 +10950,7 @@
         let debounceTimerProduto = null;
 
         async function buscarProdutoCatalogo(termo) {
-            const dropdown = document.getElementById('prod-código-autocomplete');
+            const dropdown = document.getElementById('prod-codigo-autocomplete');
             if (!termo || termo.length < 2) {
                 if (dropdown) dropdown.style.display = 'none';
                 return;
@@ -11026,9 +11026,9 @@
 
         // Selecionar produto do catálogo
         function selecionarProdutoCatalogo(código, descrição) {
-            document.getElementById('prod-código').value = código;
-            document.getElementById('prod-descrição').value = descrição;
-            document.getElementById('prod-código-autocomplete').style.display = 'none';
+            document.getElementById('prod-codigo').value = código;
+            document.getElementById('prod-descricao').value = descrição;
+            document.getElementById('prod-codigo-autocomplete').style.display = 'none';
             document.getElementById('prod-quantidade').focus();
         }
 
@@ -11040,30 +11040,30 @@
         function adicionarProdutoOP() {
             produtoEditandoIndex = -1;
             document.getElementById('modal-produto-titulo').textContent = 'Adicionar Produto';
-            document.getElementById('prod-código').value = '';
-            document.getElementById('prod-descrição').value = '';
+            document.getElementById('prod-codigo').value = '';
+            document.getElementById('prod-descricao').value = '';
             document.getElementById('prod-embalagem').value = '';
-            document.getElementById('prod-código-cores').value = '';
+            document.getElementById('prod-codigo-cores').value = '';
             document.getElementById('prod-lances').value = '1x100';
             document.getElementById('prod-peso-líquido').value = '';
             document.getElementById('prod-lote').value = '';
             document.getElementById('prod-quantidade').value = '1';
             document.getElementById('prod-valor').value = '';
             document.getElementById('prod-total-preview').textContent = 'R$ 0,00';
-            document.getElementById('prod-código-autocomplete').style.display = 'none';
+            document.getElementById('prod-codigo-autocomplete').style.display = 'none';
             // Reset novos campos enterprise
             if (document.getElementById('prod-peso-bruto')) document.getElementById('prod-peso-bruto').value = '';
             if (document.getElementById('prod-unidade-medida')) document.getElementById('prod-unidade-medida').value = 'M';
             document.getElementById('modal-produto-op').classList.add('active');
-            document.getElementById('prod-código').focus();
+            document.getElementById('prod-codigo').focus();
         }
 
         // Salvar produto do modal
         function salvarProdutoModal() {
-            const código = document.getElementById('prod-código').value.trim().toUpperCase();
-            const descrição = document.getElementById('prod-descrição').value.trim();
+            const código = document.getElementById('prod-codigo').value.trim().toUpperCase();
+            const descrição = document.getElementById('prod-descricao').value.trim();
             const embalagem = document.getElementById('prod-embalagem').value.trim();
-            const códigoCores = document.getElementById('prod-código-cores').value.trim();
+            const códigoCores = document.getElementById('prod-codigo-cores').value.trim();
             const lances = document.getElementById('prod-lances').value.trim();
             const pesoLiquido = document.getElementById('prod-peso-líquido').value.trim();
             const pesoBruto = document.getElementById('prod-peso-bruto')?.value?.trim() || '';
@@ -11074,7 +11074,7 @@
 
             if (!código) {
                 showNotification('Informe o código do produto', 'error');
-                document.getElementById('prod-código').focus();
+                document.getElementById('prod-codigo').focus();
                 return;
             }
 
@@ -11414,10 +11414,10 @@
 
             produtoEditandoIndex = index;
             document.getElementById('modal-produto-titulo').textContent = 'Editar Produto';
-            document.getElementById('prod-código').value = prod.codigo;
-            document.getElementById('prod-descrição').value = prod.descricao || '';
+            document.getElementById('prod-codigo').value = prod.codigo;
+            document.getElementById('prod-descricao').value = prod.descricao || '';
             document.getElementById('prod-embalagem').value = prod.embalagem || '';
-            document.getElementById('prod-código-cores').value = prod.codigo_cores || '';
+            document.getElementById('prod-codigo-cores').value = prod.codigo_cores || '';
             document.getElementById('prod-lances').value = prod.lances || '1x100';
             document.getElementById('prod-peso-líquido').value = prod.peso_liquido || '';
             document.getElementById('prod-lote').value = prod.lote || '';
@@ -11525,7 +11525,7 @@
             }
 
             const nomeCliente = dados.cliente || 'Cliente';
-            const numOP = document.getElementById('op-número')?.value || ('OP ' + new Date().getFullYear());
+            const numOP = document.getElementById('op-numero')?.value || ('OP ' + new Date().getFullYear());
             const dataFormatada = new Date().toLocaleString('pt-BR');
 
             const prodsRows = (dados.produtos || []).map(function(p, i) {
@@ -11580,8 +11580,7 @@
                 + 'table{width:100%;border-collapse:collapse;}'
                 + 'th{padding:5px 8px;text-align:left;font-size:9px;font-weight:700;text-transform:uppercase;color:#374151;background:#f1f5f9;border-bottom:2px solid #cbd5e1;}'
                 + '.footer{margin-top:16px;border-top:1px solid #e2e8f0;padding:6px 0;display:flex;justify-content:space-between;font-size:8px;color:#64748b;}'
-                + '</style>
-    <link rel="stylesheet" href="/css/design-system.css?v=20260502"></head><body>'
+                + '</style><link rel="stylesheet" href="/css/design-system.css?v=20260502"></head><body>'
                 + '<button class="print-btn no-print" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>'
                 + '<div class="header">'
                 + '<div style="display:flex;align-items:center;gap:12px;">'
@@ -11635,7 +11634,7 @@
 
         // Salvar ordem silenciosamente (para uso interno)
         async function salvarOrdemProduçãoSilencioso(dados) {
-            const númeroOP = document.getElementById('op-número')?.value || `OP Nº ${new Date().getFullYear()}/${Date.now()}`;
+            const númeroOP = document.getElementById('op-numero')?.value || `OP Nº ${new Date().getFullYear()}/${Date.now()}`;
             const primeirosProdutos = dados.produtos && dados.produtos.length > 0
                 ? dados.produtos.map(p => p.descricao || p.codigo).filter(Boolean).join(', ').substring(0, 200)
                 : dados.cliente;
@@ -12564,7 +12563,7 @@
                 return;
             }
 
-            const númeroAtual = document.getElementById('op-número')?.value || '';
+            const númeroAtual = document.getElementById('op-numero')?.value || '';
 
             const confirmado = await showConfirmModal({
                 type: 'info',
@@ -13022,7 +13021,7 @@
         // Abrir modal para novo material
         function abrirNovoMaterial() {
             limparFormMaterial();
-            document.getElementById('modal-material-título').innerHTML = '<i class="fas fa-cogs" style="color: #9333ea;"></i> Incluir Material';
+            document.getElementById('modal-material-titulo').innerHTML = '<i class="fas fa-cogs" style="color: #9333ea;"></i> Incluir Material';
             document.getElementById('material-id').value = '';
             showModal('modal-novo-material');
         }
@@ -13036,8 +13035,8 @@
         // Limpar formulário de material
         function limparFormMaterial() {
             document.getElementById('material-id').value = '';
-            document.getElementById('material-código').value = '';
-            document.getElementById('material-descrição').value = '';
+            document.getElementById('material-codigo').value = '';
+            document.getElementById('material-descricao').value = '';
             document.getElementById('material-tipo').value = '';
             document.getElementById('material-unidade').value = 'UN';
             document.getElementById('material-ncm').value = '';
@@ -13047,7 +13046,7 @@
             document.getElementById('material-gtin').value = '';
             document.getElementById('material-cor').value = '';
             document.getElementById('material-bitola').value = '';
-            document.getElementById('material-observações').value = '';
+            document.getElementById('material-observacoes').value = '';
             const ativoCheckbox = document.getElementById('material-ativo');
             if (ativoCheckbox) ativoCheckbox.checked = true;
 
@@ -13137,12 +13136,12 @@
                 limparFormMaterial();
 
                 // Alterar título
-                document.getElementById('modal-material-título').innerHTML = '<i class="fas fa-edit" style="color: #9333ea;"></i> Editar Material';
+                document.getElementById('modal-material-titulo').innerHTML = '<i class="fas fa-edit" style="color: #9333ea;"></i> Editar Material';
 
                 // Preencher campos principais
                 document.getElementById('material-id').value = material.id || '';
-                document.getElementById('material-código').value = material.codigo_material || material.codigo || '';
-                document.getElementById('material-descrição').value = material.descricao || material.nome || '';
+                document.getElementById('material-codigo').value = material.codigo_material || material.codigo || '';
+                document.getElementById('material-descricao').value = material.descricao || material.nome || '';
 
                 // Tipo
                 const tipoSelect = document.getElementById('material-tipo');
@@ -13177,7 +13176,7 @@
                 document.getElementById('material-gtin').value = material.gtin || '';
                 document.getElementById('material-cor').value = material.cor || '';
                 document.getElementById('material-bitola').value = material.bitola || material.espessura || '';
-                document.getElementById('material-observações').value = material.observações || '';
+                document.getElementById('material-observacoes').value = material.observações || '';
                 const ativoCheckbox = document.getElementById('material-ativo');
                 if (ativoCheckbox) ativoCheckbox.checked = material.ativo !== false && material.ativo !== 0;
 
@@ -13273,8 +13272,8 @@
         // Salvar material (novo ou edição)
         async function salvarMaterial() {
             const materialId = document.getElementById('material-id').value;
-            const código = document.getElementById('material-código').value.trim();
-            const descrição = document.getElementById('material-descrição').value.trim();
+            const código = document.getElementById('material-codigo').value.trim();
+            const descrição = document.getElementById('material-descricao').value.trim();
             const tipo = document.getElementById('material-tipo').value;
 
             // Validação básica
@@ -13303,7 +13302,7 @@
                 estoque_minimo: parseFloat(document.getElementById('material-estoque-mínimo').value) || 0,
                 custo_unitario: parseFloat(custoStr) || 0,
                 preco_venda: parseFloat(precoStr) || 0,
-                observações: document.getElementById('material-observações').value.trim()
+                observações: document.getElementById('material-observacoes').value.trim()
             };
 
             try {
@@ -13449,8 +13448,8 @@
         function abrirModalMovimentaçãoMaterial(tipo) {
             // Para entrada, abrir modal com múltiplos lances
             if (tipo === 'entrada') {
-                const materialNome = document.getElementById('material-descrição')?.value || 'Material não selecionado';
-                const materialCódigo = document.getElementById('material-código')?.value || '---';
+                const materialNome = document.getElementById('material-descricao')?.value || 'Material não selecionado';
+                const materialCódigo = document.getElementById('material-codigo')?.value || '---';
                 const materialId = document.getElementById('material-id')?.value;
                 const estoqueAtual = document.getElementById('material-estoque')?.value || '0';
 
@@ -13465,8 +13464,8 @@
 
             // Para saída, abrir modal com múltiplos recortes
             if (tipo === 'saida') {
-                const materialNome = document.getElementById('material-descrição')?.value || 'Material não selecionado';
-                const materialCódigo = document.getElementById('material-código')?.value || '---';
+                const materialNome = document.getElementById('material-descricao')?.value || 'Material não selecionado';
+                const materialCódigo = document.getElementById('material-codigo')?.value || '---';
                 const materialId = document.getElementById('material-id')?.value;
                 const estoqueAtual = document.getElementById('material-estoque')?.value || '0';
 
@@ -13484,8 +13483,8 @@
             const modal = document.getElementById('modal-movimentacao-material');
             const header = document.getElementById('modal-mov-mat-header');
             const icon = document.getElementById('modal-mov-mat-icon');
-            const título = document.getElementById('modal-mov-mat-título');
-            const subtítulo = document.getElementById('modal-mov-mat-subtítulo');
+            const título = document.getElementById('modal-mov-mat-titulo');
+            const subtítulo = document.getElementById('modal-mov-mat-subtitulo');
             const btnConfirmar = document.getElementById('modal-mov-mat-btn-confirmar');
 
             header.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
@@ -13496,17 +13495,17 @@
             btnConfirmar.innerHTML = '<i class="fas fa-check"></i> Confirmar Ajuste';
 
             // Preencher dados do material atual
-            const materialNome = document.getElementById('material-descrição')?.value || 'Material não selecionado';
-            const materialCódigo = document.getElementById('material-código')?.value || '---';
+            const materialNome = document.getElementById('material-descricao')?.value || 'Material não selecionado';
+            const materialCódigo = document.getElementById('material-codigo')?.value || '---';
             const estoqueAtual = document.getElementById('material-estoque')?.value || '0';
 
             document.getElementById('modal-mov-mat-nome').textContent = materialNome;
-            document.getElementById('modal-mov-mat-código').textContent = 'Código: ' + materialCódigo;
+            document.getElementById('modal-mov-mat-codigo').textContent = 'Código: ' + materialCódigo;
             document.getElementById('modal-mov-mat-estoque-atual').textContent = parseFloat(estoqueAtual).toFixed(2);
 
             // Limpar campos
             document.getElementById('modal-mov-mat-quantidade').value = '';
-            document.getElementById('modal-mov-mat-observação').value = '';
+            document.getElementById('modal-mov-mat-observacao').value = '';
             document.getElementById('modal-mov-mat-documento').value = '';
             document.getElementById('modal-mov-mat-motivo-preset').value = '';
 
@@ -13519,7 +13518,7 @@
 
         function selecionarMotivoPresetMaterial() {
             const preset = document.getElementById('modal-mov-mat-motivo-preset').value;
-            const textarea = document.getElementById('modal-mov-mat-observação');
+            const textarea = document.getElementById('modal-mov-mat-observacao');
 
             if (preset && preset !== 'outro') {
                 textarea.value = preset;
@@ -13533,7 +13532,7 @@
             const materialId = document.getElementById('material-id')?.value;
             const quantidade = parseFloat(document.getElementById('modal-mov-mat-quantidade').value);
             const local = document.getElementById('modal-mov-mat-local').value;
-            const observação = document.getElementById('modal-mov-mat-observação').value;
+            const observação = document.getElementById('modal-mov-mat-observacao').value;
             const documento = document.getElementById('modal-mov-mat-documento').value;
 
             // Validações
@@ -13550,7 +13549,7 @@
 
             if (!observação.trim()) {
                 showNotification('Por favor, informe o motivo da movimentação', 'error');
-                document.getElementById('modal-mov-mat-observação').focus();
+                document.getElementById('modal-mov-mat-observacao').focus();
                 return;
             }
 
@@ -13577,7 +13576,7 @@
             // Preparar dados
             const movimentação = {
                 material_id: materialId,
-                codigo_material: document.getElementById('material-código')?.value || '',
+                codigo_material: document.getElementById('material-codigo')?.value || '',
                 tipo: tipoMovimentaçãoMaterialAtual,
                 quantidade: quantidade,
                 quantidade_anterior: estoqueAtual,
@@ -14243,11 +14242,11 @@
         // Mostrar modal de confirmação customizado
         function mostrarConfirmaçãoPCP(título, mensagem, tipo = 'warning') {
             return new Promise((resolve) => {
-                const modal = document.getElementById('modal-confirmação-pcp');
-                const iconDiv = document.getElementById('confirmação-icon');
-                const títuloEl = document.getElementById('confirmação-título');
-                const mensagemEl = document.getElementById('confirmação-mensagem');
-                const btnConfirmar = document.getElementById('confirmação-btn-confirmar');
+                const modal = document.getElementById('modal-confirmacao-pcp');
+                const iconDiv = document.getElementById('confirmacao-icon');
+                const títuloEl = document.getElementById('confirmacao-titulo');
+                const mensagemEl = document.getElementById('confirmacao-mensagem');
+                const btnConfirmar = document.getElementById('confirmacao-btn-confirmar');
 
                 títuloEl.textContent = título;
                 mensagemEl.textContent = mensagem;
@@ -14272,7 +14271,7 @@
 
         // Fechar modal de confirmação
         function fecharConfirmaçãoPCP(resultado) {
-            const modal = document.getElementById('modal-confirmação-pcp');
+            const modal = document.getElementById('modal-confirmacao-pcp');
             modal.classList.remove('active');
             if (confirmaçãoCallback) {
                 confirmaçãoCallback(resultado);
@@ -14291,7 +14290,7 @@
                 const modal = document.getElementById('modal-alerta-pcp');
                 const iconContainer = document.getElementById('alerta-icon-container');
                 const icon = document.getElementById('alerta-icon');
-                const títuloEl = document.getElementById('alerta-título');
+                const títuloEl = document.getElementById('alerta-titulo');
                 const mensagemEl = document.getElementById('alerta-mensagem');
                 const btnOk = document.getElementById('alerta-btn-ok');
 
@@ -14360,8 +14359,8 @@
         function mostrarInputPCP(título, subtítulo, label = 'Valor', placeholder = 'Digite aqui...', valorInicial = '') {
             return new Promise((resolve) => {
                 const modal = document.getElementById('modal-input-pcp');
-                const títuloEl = document.getElementById('input-título');
-                const subtítuloEl = document.getElementById('input-subtítulo');
+                const títuloEl = document.getElementById('input-titulo');
+                const subtítuloEl = document.getElementById('input-subtitulo');
                 const labelEl = document.getElementById('input-label');
                 const campoEl = document.getElementById('input-campo');
 
@@ -14404,7 +14403,7 @@
         // Abrir modal para novo produto
         function abrirNovoProdutoPCP() {
             limparFormProdutoPCP(true); // Limpar sem confirmação
-            document.getElementById('modal-novo-produto-título').textContent = 'Incluir Produto';
+            document.getElementById('modal-novo-produto-titulo').textContent = 'Incluir Produto';
             document.getElementById('pcp-produto-id').value = '';
             showModal('modal-novo-produto');
         }
@@ -14424,12 +14423,12 @@
                 limparFormProdutoPCP(true);
 
                 // Alterar título
-                document.getElementById('modal-novo-produto-título').textContent = 'Editar Produto';
+                document.getElementById('modal-novo-produto-titulo').textContent = 'Editar Produto';
 
                 // Preencher campos
                 document.getElementById('pcp-produto-id').value = produto.id || '';
-                document.getElementById('pcp-produto-código').value = produto.codigo || '';
-                document.getElementById('pcp-produto-descrição').value = produto.nome || produto.descricao || '';
+                document.getElementById('pcp-produto-codigo').value = produto.codigo || '';
+                document.getElementById('pcp-produto-descricao').value = produto.nome || produto.descricao || '';
                 document.getElementById('pcp-produto-sku').value = produto.sku || '';
                 document.getElementById('pcp-produto-ean').value = produto.gtin || produto.ean || '';
                 document.getElementById('pcp-produto-ncm').value = produto.ncm || '';
@@ -14527,8 +14526,8 @@
         // Salvar produto (novo ou edição)
         async function salvarProdutoPCP() {
             const produtoId = document.getElementById('pcp-produto-id').value;
-            const código = document.getElementById('pcp-produto-código').value.trim();
-            const descrição = document.getElementById('pcp-produto-descrição').value.trim();
+            const código = document.getElementById('pcp-produto-codigo').value.trim();
+            const descrição = document.getElementById('pcp-produto-descricao').value.trim();
 
             if (!código || !descrição) {
                 showNotification('Código e descrição são obrigatórios!', 'warning');
@@ -14604,7 +14603,7 @@
 
         // Toggle sidebar expandir/colapsar (Estilo Omie)
         function toggleSidebarProdutoPCP() {
-            const sidebar = document.getElementById('pcp-sidebar-ações');
+            const sidebar = document.getElementById('pcp-sidebar-acoes');
             const items = document.getElementById('pcp-sidebar-items');
             const toggleBtn = document.getElementById('pcp-sidebar-toggle');
             const icon = toggleBtn.querySelector('i');
@@ -14641,12 +14640,12 @@
                 showNotification('Salve o produto antes de duplicar', 'warning');
                 return;
             }
-            const descrição = document.getElementById('pcp-produto-descrição');
-            const código = document.getElementById('pcp-produto-código');
+            const descrição = document.getElementById('pcp-produto-descricao');
+            const código = document.getElementById('pcp-produto-codigo');
             if (descrição) descrição.value = descrição.value + ' (Cópia)';
             if (código) código.value = código.value + '-COPIA';
             document.getElementById('pcp-produto-id').value = '';
-            document.getElementById('modal-novo-produto-título').textContent = 'Incluir Produto';
+            document.getElementById('modal-novo-produto-titulo').textContent = 'Incluir Produto';
             showNotification('Produto duplicado! Edite os dados e salve.', 'info');
         }
 
@@ -14763,7 +14762,7 @@
         // Abrir edição do produto a partir da ficha de visualização
         function abrirEdicaoProduto() {
             fecharModalVisualização();
-            const viewCódigo = document.getElementById('view-produto-código');
+            const viewCódigo = document.getElementById('view-produto-codigo');
             if (viewCódigo && viewCódigo.textContent !== '-') {
                 if (typeof editarProdutoForm === 'function') {
                     editarProdutoForm(viewCódigo.dataset.produtoId);
@@ -14778,7 +14777,7 @@
         // Registrar entrada de estoque a partir da ficha
         function registrarEntradaView() {
             fecharModalVisualização();
-            const código = document.getElementById('view-produto-código');
+            const código = document.getElementById('view-produto-codigo');
             if (código && typeof abrirModalMovimentação === 'function') {
                 abrirModalMovimentação('entrada');
             }
@@ -14787,7 +14786,7 @@
         // Registrar saída/baixa de estoque a partir da ficha
         function registrarSaidaView() {
             fecharModalVisualização();
-            const código = document.getElementById('view-produto-código');
+            const código = document.getElementById('view-produto-codigo');
             if (código && typeof abrirModalMovimentação === 'function') {
                 abrirModalMovimentação('saida');
             }
@@ -14796,7 +14795,7 @@
         // Imprimir etiqueta do produto da ficha de visualização
         function imprimirEtiquetaView() {
             const nome = document.getElementById('view-produto-nome')?.textContent || 'Produto';
-            const código = document.getElementById('view-produto-código')?.textContent || '-';
+            const código = document.getElementById('view-produto-codigo')?.textContent || '-';
             const sku = document.getElementById('view-produto-sku')?.textContent || '-';
             const preco = document.getElementById('view-preco')?.textContent || 'R$ 0,00';
             const unidade = document.getElementById('view-produto-unidade')?.textContent || 'UN';
@@ -14897,7 +14896,7 @@
         // Carregar histórico do produto
         async function carregarHistoricoProduto() {
             const produtoId = document.getElementById('pcp-produto-id')?.value;
-            const tbody = document.getElementById('pcp-histórico-tbody');
+            const tbody = document.getElementById('pcp-historico-tbody');
 
             if (!produtoId || !tbody) {
                 tbody.innerHTML = `
@@ -14943,7 +14942,7 @@
         }
 
         function renderizarHistórico(movimentações) {
-            const tbody = document.getElementById('pcp-histórico-tbody');
+            const tbody = document.getElementById('pcp-historico-tbody');
             if (!tbody) return;
 
             if (!movimentações || movimentações.length === 0) {
@@ -15024,8 +15023,8 @@
         function abrirModalMovimentação(tipo) {
             // Para entrada de produto, abrir modal com múltiplos lances
             if (tipo === 'entrada') {
-                const produtoNome = document.getElementById('pcp-produto-descrição')?.value || document.getElementById('pcp-produto-nome')?.value || 'Produto não selecionado';
-                const produtoCódigo = document.getElementById('pcp-produto-código')?.value || '---';
+                const produtoNome = document.getElementById('pcp-produto-descricao')?.value || document.getElementById('pcp-produto-nome')?.value || 'Produto não selecionado';
+                const produtoCódigo = document.getElementById('pcp-produto-codigo')?.value || '---';
                 const produtoId = document.getElementById('pcp-produto-id')?.value;
                 const estoqueAtual = document.getElementById('pcp-produto-estoque')?.value || '0';
 
@@ -15040,8 +15039,8 @@
 
             // Para saída de produto, abrir modal com múltiplos recortes
             if (tipo === 'saida') {
-                const produtoNome = document.getElementById('pcp-produto-descrição')?.value || document.getElementById('pcp-produto-nome')?.value || 'Produto não selecionado';
-                const produtoCódigo = document.getElementById('pcp-produto-código')?.value || '---';
+                const produtoNome = document.getElementById('pcp-produto-descricao')?.value || document.getElementById('pcp-produto-nome')?.value || 'Produto não selecionado';
+                const produtoCódigo = document.getElementById('pcp-produto-codigo')?.value || '---';
                 const produtoId = document.getElementById('pcp-produto-id')?.value;
                 const estoqueAtual = document.getElementById('pcp-produto-estoque')?.value || '0';
 
@@ -15059,8 +15058,8 @@
             const modal = document.getElementById('modal-movimentacao-estoque');
             const header = document.getElementById('modal-mov-header');
             const icon = document.getElementById('modal-mov-icon');
-            const título = document.getElementById('modal-mov-título');
-            const subtítulo = document.getElementById('modal-mov-subtítulo');
+            const título = document.getElementById('modal-mov-titulo');
+            const subtítulo = document.getElementById('modal-mov-subtitulo');
             const btnConfirmar = document.getElementById('modal-mov-btn-confirmar');
 
             header.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
@@ -15072,16 +15071,16 @@
 
             // Preencher dados do produto atual
             const produtoNome = document.getElementById('pcp-produto-nome')?.value || 'Produto não selecionado';
-            const produtoCódigo = document.getElementById('pcp-produto-código')?.value || '---';
+            const produtoCódigo = document.getElementById('pcp-produto-codigo')?.value || '---';
             const estoqueAtual = document.getElementById('pcp-produto-estoque')?.value || '0';
 
             document.getElementById('modal-mov-produto-nome').textContent = produtoNome;
-            document.getElementById('modal-mov-produto-código').textContent = 'Código: ' + produtoCódigo;
+            document.getElementById('modal-mov-produto-codigo').textContent = 'Código: ' + produtoCódigo;
             document.getElementById('modal-mov-estoque-atual').textContent = parseFloat(estoqueAtual).toFixed(2);
 
             // Limpar campos
             document.getElementById('modal-mov-quantidade').value = '';
-            document.getElementById('modal-mov-observação').value = '';
+            document.getElementById('modal-mov-observacao').value = '';
             document.getElementById('modal-mov-documento').value = '';
             document.getElementById('modal-mov-motivo-preset').value = '';
 
@@ -15094,7 +15093,7 @@
 
         function selecionarMotivoPreset() {
             const preset = document.getElementById('modal-mov-motivo-preset').value;
-            const textarea = document.getElementById('modal-mov-observação');
+            const textarea = document.getElementById('modal-mov-observacao');
 
             if (preset && preset !== 'outro') {
                 textarea.value = preset;
@@ -15108,7 +15107,7 @@
             const produtoId = document.getElementById('pcp-produto-id')?.value;
             const quantidade = parseFloat(document.getElementById('modal-mov-quantidade').value);
             const local = document.getElementById('modal-mov-local').value;
-            const observação = document.getElementById('modal-mov-observação').value;
+            const observação = document.getElementById('modal-mov-observacao').value;
             const documento = document.getElementById('modal-mov-documento').value;
 
             // Validações com modal profissional
@@ -15125,7 +15124,7 @@
 
             if (!observação.trim()) {
                 await mostrarAlertaPCP('Motivo Obrigatório', 'Por favor, informe o motivo da movimentação. Este campo é obrigatório para rastreabilidade.', 'warning');
-                document.getElementById('modal-mov-observação').focus();
+                document.getElementById('modal-mov-observacao').focus();
                 return;
             }
 
@@ -15305,7 +15304,7 @@
             // Verificar se há produto selecionado
             const produtoId = document.getElementById('pcp-produto-id')?.value;
             const produtoNome = document.getElementById('pcp-produto-nome')?.value || 'Produto não selecionado';
-            const produtoCódigo = document.getElementById('pcp-produto-código')?.value || '---';
+            const produtoCódigo = document.getElementById('pcp-produto-codigo')?.value || '---';
             const estoqueAtual = document.getElementById('pcp-produto-estoque')?.value || '0';
 
             if (!produtoId) {
@@ -15674,7 +15673,7 @@
             // Esconder todos os conteúdos
             document.getElementById('conteudo-aba-produto').style.display = 'none';
             document.getElementById('conteudo-aba-movimentacao').style.display = 'none';
-            document.getElementById('conteudo-aba-histórico').style.display = 'none';
+            document.getElementById('conteudo-aba-historico').style.display = 'none';
 
             // Resetar estilos das abas
             document.querySelectorAll('.modal-estoque-tab').forEach(tab => {
@@ -15692,9 +15691,9 @@
                 document.getElementById('tab-movimentacao').style.borderBottom = '2px solid #64748b';
                 document.getElementById('tab-movimentacao').style.color = '#64748b';
             } else if (aba === 'histórico') {
-                document.getElementById('conteudo-aba-histórico').style.display = 'block';
-                document.getElementById('tab-histórico-mov').style.borderBottom = '2px solid #64748b';
-                document.getElementById('tab-histórico-mov').style.color = '#64748b';
+                document.getElementById('conteudo-aba-historico').style.display = 'block';
+                document.getElementById('tab-historico-mov').style.borderBottom = '2px solid #64748b';
+                document.getElementById('tab-historico-mov').style.color = '#64748b';
             }
         }
 
@@ -15704,7 +15703,7 @@
         }
 
         async function carregarHistoricoMovimentações() {
-            const tbody = document.getElementById('lista-histórico-movimentações');
+            const tbody = document.getElementById('lista-historico-movimentacoes');
             try {
                 const resp = await fetch('/api/pcp/movimentacoes?limit=20', { credentials: 'include' });
                 const movs = resp.ok ? await resp.json() : [];
@@ -15782,15 +15781,15 @@
             document.getElementById('mov-quantidade').value = '';
             document.getElementById('mov-motivo').value = '';
             document.getElementById('mov-documento').value = '';
-            document.getElementById('mov-observação').value = '';
+            document.getElementById('mov-observacao').value = '';
             document.getElementById('mov-preview').style.display = 'none';
         }
 
         function onMotivoChange() {
             const motivo = document.getElementById('mov-motivo').value;
             if (motivo === 'outro') {
-                document.getElementById('mov-observação').focus();
-                document.getElementById('mov-observação').placeholder = 'Especifique o motivo da movimentação...';
+                document.getElementById('mov-observacao').focus();
+                document.getElementById('mov-observacao').placeholder = 'Especifique o motivo da movimentação...';
             }
         }
 
@@ -15802,7 +15801,7 @@
             const quantidade = parseFloat(document.getElementById('mov-quantidade').value);
             const motivo = document.getElementById('mov-motivo').value;
             const documento = document.getElementById('mov-documento').value;
-            const observação = document.getElementById('mov-observação').value;
+            const observação = document.getElementById('mov-observacao').value;
             const local = document.getElementById('mov-local').value;
 
             if (!quantidade || quantidade <= 0) {
@@ -15970,7 +15969,7 @@
 
             // Preencher dados na aba de movimentação
             document.getElementById('mov-produto-nome').textContent = nome || 'Produto Selecionado';
-            document.getElementById('mov-produto-código').textContent = `Código: ${código || 'N/A'}`;
+            document.getElementById('mov-produto-codigo').textContent = `Código: ${código || 'N/A'}`;
             document.getElementById('mov-estoque-atual').textContent = parseFloat(estoque).toFixed(2);
 
             // Habilitar aba de movimentação
@@ -16041,8 +16040,8 @@
             // Configurar visual
             const header = document.getElementById('modal-qtd-header');
             const icon = document.getElementById('modal-qtd-icon');
-            const título = document.getElementById('modal-qtd-título');
-            const subtítulo = document.getElementById('modal-qtd-subtítulo');
+            const título = document.getElementById('modal-qtd-titulo');
+            const subtítulo = document.getElementById('modal-qtd-subtitulo');
             const btn = document.getElementById('btn-confirmar-qtd-rápida');
 
             if (tipo === 'entrada') {
@@ -16084,7 +16083,7 @@
             }
 
             document.getElementById('modal-qtd-item-nome').textContent = item.nome;
-            document.getElementById('modal-qtd-item-código').textContent = 'Código: ' + item.codigo;
+            document.getElementById('modal-qtd-item-codigo').textContent = 'Código: ' + item.codigo;
             document.getElementById('modal-qtd-estoque').textContent = item.estoque.toFixed(2);
             document.getElementById('input-quantidade-rápida').value = '';
             document.getElementById('input-obs-rápida').value = '';
@@ -16173,7 +16172,7 @@
         }
 
         function abrirModalHistóricoGeral(tipoItem) {
-            let modal = document.getElementById('modal-histórico-geral');
+            let modal = document.getElementById('modal-historico-geral');
             if (!modal) {
                 modal = document.createElement('div');
                 modal.id = 'modal-historico-geral';
@@ -16218,7 +16217,7 @@
                 document.body.appendChild(modal);
             }
 
-            document.getElementById('modal-hist-subtítulo').textContent = tipoItem === 'material' ? 'Movimentações de materiais' : 'Movimentações de produtos';
+            document.getElementById('modal-hist-subtitulo').textContent = tipoItem === 'material' ? 'Movimentações de materiais' : 'Movimentações de produtos';
             modal.setAttribute('data-tipo-item', tipoItem);
             modal.style.display = 'flex';
 
@@ -16226,12 +16225,12 @@
         }
 
         function fecharModalHistóricoGeral() {
-            const modal = document.getElementById('modal-histórico-geral');
+            const modal = document.getElementById('modal-historico-geral');
             if (modal) modal.style.display = 'none';
         }
 
         async function carregarHistoricoGeral(tipoItem) {
-            const lista = document.getElementById('lista-histórico-geral');
+            const lista = document.getElementById('lista-historico-geral');
 
             try {
                 const endpoint = tipoItem === 'material' ? '/api/pcp/materiais' : '/api/pcp/produtos';
@@ -18514,7 +18513,7 @@
         function filtrarPedidosModal() {
             const busca = document.getElementById('filtro-busca-pedidos')?.value.toLowerCase() || '';
             const status = document.getElementById('filtro-status-pedidos')?.value || '';
-            const período = document.getElementById('filtro-período-pedidos')?.value || '';
+            const período = document.getElementById('filtro-periodo-pedidos')?.value || '';
 
             // Limpar destaque dos pills
             document.querySelectorAll('.status-pill').forEach(p => p.classList.remove('active'));
@@ -18589,7 +18588,7 @@
         function limparFiltrosPedidos() {
             document.getElementById('filtro-busca-pedidos').value = '';
             document.getElementById('filtro-status-pedidos').value = '';
-            document.getElementById('filtro-período-pedidos').value = '';
+            document.getElementById('filtro-periodo-pedidos').value = '';
             document.querySelectorAll('.status-pill').forEach(p => p.classList.remove('active'));
             pedidosFiltrados = [...todosPedidosCache];
             paginaAtualPedidos = 1;
@@ -18946,13 +18945,13 @@
 
                 // Preencher condições de pagamento (se houver no pedido)
                 if (pedido.condições_pagamento) {
-                    const opCondicoesPagamento = document.getElementById('op-condições-pagamento');
+                    const opCondicoesPagamento = document.getElementById('op-condicoes-pagamento');
                     if (opCondicoesPagamento) opCondicoesPagamento.value = pedido.condições_pagamento;
                 }
 
                 // Preencher observações (descrição do pedido + observações internas)
                 {
-                    const opObservações = document.getElementById('op-observações');
+                    const opObservações = document.getElementById('op-observacoes');
                     if (opObservações) {
                         const partes = [];
                         if (pedido.descricao || pedido.descricao) partes.push(pedido.descricao || pedido.descricao);
@@ -19340,8 +19339,8 @@
             const modal = document.getElementById('modal-alerta-estoque');
             const header = document.getElementById('modal-estoque-header');
             const icone = document.getElementById('modal-estoque-icone');
-            const título = document.getElementById('modal-estoque-título');
-            const subtítulo = document.getElementById('modal-estoque-subtítulo');
+            const título = document.getElementById('modal-estoque-titulo');
+            const subtítulo = document.getElementById('modal-estoque-subtitulo');
             const busca = document.getElementById('filtro-busca-estoque-alerta');
 
             if (!modal) return;
@@ -19431,7 +19430,7 @@
         // Gerar número da OP
         async function gerarNúmeroOP() {
             const ano = new Date().getFullYear();
-            const inputNúmero = document.getElementById('op-número');
+            const inputNúmero = document.getElementById('op-numero');
             if (!inputNúmero) return;
 
             try {
@@ -19468,7 +19467,7 @@
             window._guardCriarOP = true;
 
             const dados = {
-                número: document.getElementById('op-número')?.value,
+                número: document.getElementById('op-numero')?.value,
                 dataConclusao: document.getElementById('op-data-conclusao')?.value,
                 códigoProduto: document.getElementById('op-código-produto')?.value,
                 nomeProduto: document.getElementById('op-nome-produto')?.value,
@@ -19477,7 +19476,7 @@
                 unidade: document.getElementById('op-unidade')?.value,
                 prioridade: document.getElementById('op-prioridade')?.value,
                 responsavel: document.getElementById('op-responsavel')?.value,
-                observações: document.getElementById('op-observações')?.value,
+                observações: document.getElementById('op-observacoes')?.value,
                 status: 'a_produzir'
             };
 
@@ -19728,7 +19727,7 @@
             }
 
             try {
-                const alterarNumeração = document.getElementById('checkbox-alterar-numeração-pcp')?.checked || false;
+                const alterarNumeração = document.getElementById('checkbox-alterar-numeracao-pcp')?.checked || false;
 
                 const response = await fetch('/api/pcp/etapas', {
                     credentials: 'include', method: 'POST',
@@ -21538,7 +21537,7 @@
             const dados = {
                 data_manutencao: document.getElementById('manut-data').value,
                 tipo: document.getElementById('manut-tipo').value,
-                descrição: document.getElementById('manut-descrição').value,
+                descrição: document.getElementById('manut-descricao').value,
                 pecas_trocadas: document.getElementById('manut-pecas').value,
                 custo: parseFloat(document.getElementById('manut-custo').value) || 0,
                 tempo_parada_horas: parseFloat(document.getElementById('manut-tempo').value) || 0,
@@ -21636,13 +21635,13 @@
         async function salvarMaquina() {
             const id = document.getElementById('maq-id').value;
             const dados = {
-                código: document.getElementById('maq-código').value,
+                código: document.getElementById('maq-codigo').value,
                 nome: document.getElementById('maq-nome').value,
                 setor: document.getElementById('maq-setor').value,
                 status: document.getElementById('maq-status').value,
                 ultima_manutencao: document.getElementById('maq-Última-manutencao').value || null,
                 proxima_manutencao: document.getElementById('maq-próxima-manutencao').value || null,
-                observações: document.getElementById('maq-observações').value
+                observações: document.getElementById('maq-observacoes').value
             };
 
             if (!dados.nome) {
@@ -22969,7 +22968,7 @@
 
             // Gerar número automático (FAT-ANO-SEQUENCIAL)
             const seq = String(Date.now()).slice(-6);
-            document.getElementById('fat-número').value = `FAT-${new Date().getFullYear()}-${seq}`;
+            document.getElementById('fat-numero').value = `FAT-${new Date().getFullYear()}-${seq}`;
 
             // Data Padrão: hoje
             document.getElementById('fat-data-programada').value = new Date().toISOString().split('T')[0];
@@ -23074,7 +23073,7 @@
 
             // Calcular data de vencimento baseado nas condições se não preenchida
             let dataVencimento = document.getElementById('fat-data-vencimento').value;
-            const condições = document.getElementById('fat-condições').value;
+            const condições = document.getElementById('fat-condicoes').value;
 
             if (!dataVencimento && condições) {
                 const dias = parseInt(condições) || 30;
@@ -23093,7 +23092,7 @@
             }
 
             const dados = {
-                número: document.getElementById('fat-número').value,
+                número: document.getElementById('fat-numero').value,
                 cliente_id: document.getElementById('fat-cliente-id').value || null,
                 cliente_nome: clienteNome,
                 valor: valor,
@@ -23102,7 +23101,7 @@
                 data_programada: dataProgramada,
                 data_vencimento: dataVencimento || null,
                 condições_pagamento: condições || null,
-                observações: document.getElementById('fat-observações').value || null
+                observações: document.getElementById('fat-observacoes').value || null
             };
 
             try {
@@ -23816,7 +23815,7 @@
             const id = document.getElementById('edit-oc-id').value;
             const quantidade = document.getElementById('edit-oc-quantidade').value;
             const previsão = document.getElementById('edit-oc-previsão').value;
-            const observações = document.getElementById('edit-oc-observações').value;
+            const observações = document.getElementById('edit-oc-observacoes').value;
 
             if (!quantidade || !previsão) {
                 showNotification('Preencha todos os campos obrigatórios', 'error');
@@ -24658,7 +24657,7 @@
                         console.log('?? PCP: Estoque atualizado em tempo real:', data);
 
                         // Atualizar histórico se modal estiver aberto
-                        const modalHistórico = document.getElementById('pcp-histórico-tbody');
+                        const modalHistórico = document.getElementById('pcp-historico-tbody');
                         if (modalHistórico && document.getElementById('pcp-produto-id')?.value == data.item_id) {
                             if (typeof carregarHistoricoProduto === 'function') {
                                 carregarHistoricoProduto();

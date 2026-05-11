@@ -1840,7 +1840,7 @@
                 <a href="impostos.html" class="sidebar-btn" title="Impostos">
                     <i class="fas fa-percent"></i>
                 </a>
-                <button class="sidebar-btn" title="Configurações" id="btn-config" onclick="toggleConfigurações()">
+                <button class="sidebar-btn" title="Configurações" id="btn-config" onclick="toggleConfiguracoes()">
                     <i class="fas fa-cog"></i>
                 </button>
             </div>
@@ -2126,7 +2126,7 @@
                                     <h4 id="integracaoStatusTitulo">Integração não configurada</h4>
                                     <p id="integracaoStatusDesc">Configure as credenciais da API bancária para habilitar a integração automática</p>
                                 </div>
-                                <button class="integracao-test-btn" id="btnTestarIntegracao" onclick="testarIntegraçãoBancaria()" disabled>
+                                <button class="integracao-test-btn" id="btnTestarIntegracao" onclick="testarIntegracaoBancaria()" disabled>
                                     <i class="fas fa-vial"></i> Testar Conexão
                                 </button>
                             </div>
@@ -3272,7 +3272,7 @@
                     <button class="btn-padrão-ghost" type="button" onclick="fecharModal('modalExtrato')">
                         <i class="fas fa-times"></i> Fechar
                     </button>
-                    <button class="btn-padrão-primary" type="button" id="btnEditarExtrato" onclick="editarDaVisualizacação()">
+                    <button class="btn-padrão-primary" type="button" id="btnEditarExtrato" onclick="editarDaVisualizacao()">
                         <i class="fas fa-edit"></i> Editar Conta
                     </button>
                 </div>
@@ -3864,7 +3864,7 @@
             }
         }
 
-        function editarDaVisualizacação() {
+        function editarDaVisualizacao() {
             if (bancoVisualizando) {
                 fecharModal('modalExtrato');
                 editarBanco(bancoVisualizando.id);
@@ -4125,7 +4125,7 @@
         }
 
         // Sistema de Notificações
-        function toggleNotificações() {
+        function toggleNotificacoes() {
             const panel = document.getElementById('notification-panel');
             panel.classList.toggle('active');
         }
@@ -4242,7 +4242,7 @@
         }
 
         // Testar conexão com API bancária
-        async function testarIntegraçãoBancaria() {
+        async function testarIntegracaoBancaria() {
             const btn = document.getElementById('btnTestarIntegracao');
             const statusCard = document.getElementById('integracaoStatusCard');
             const statusIcon = document.getElementById('integracaoStatusIcon');

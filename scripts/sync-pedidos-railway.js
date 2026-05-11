@@ -8,7 +8,7 @@ const railwayConfig = {
     host: 'interchange.proxy.rlwy.net',
     port: 19396,
     user: 'root',
-    password: 'iiilOZutDOnPCwxgiTKeMuEaIzSwplcu',
+    password: process.env.DB_PASSWORD || '',
     database: 'railway',
     charset: 'utf8mb4'
 };

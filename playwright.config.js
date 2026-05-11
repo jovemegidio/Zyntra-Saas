@@ -1,5 +1,25 @@
 // @ts-check
-const { defineConfig, devices } = require('@playwright/test');
+let playwrightTest = {};
+
+try {
+  playwrightTest = require('@playwright/test');
+} catch (error) {
+  playwrightTest = {};
+}
+const defineConfig = typeof playwrightTest.defineConfig === 'function'
+  ? playwrightTest.defineConfig
+  : (config) => config;
+let { devices } = playwrightTest;
+
+if (!devices) {
+  try {
+    devices = require('playwright').devices;
+  } catch (error) {
+    devices = {};
+  }
+}
+
+const desktopChrome = devices['Desktop Chrome'] || {};
 
 /**
  * ALUFORCE ERP - Playwright E2E Test Configuration
@@ -30,7 +50,7 @@ module.exports = defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: { ...desktopChrome },
     },
   ],
   webServer: {

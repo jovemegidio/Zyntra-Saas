@@ -4,8 +4,43 @@
  */
 'use strict';
 
+async function ensureColumn(pool, table, column, definition) {
+    try {
+        const [rows] = await pool.query(
+            `SELECT COLUMN_NAME
+             FROM INFORMATION_SCHEMA.COLUMNS
+             WHERE TABLE_SCHEMA = DATABASE()
+               AND TABLE_NAME = ?
+               AND COLUMN_NAME = ?
+             LIMIT 1`,
+            [table, column]
+        );
+        if (!rows.length) {
+            await pool.query(`ALTER TABLE \`${table}\` ADD COLUMN \`${column}\` ${definition}`);
+            console.log(`[MULTIEMPRESA] Coluna criada: ${table}.${column}`);
+        }
+    } catch (err) {
+        console.warn(`[MULTIEMPRESA] Coluna ${table}.${column}: ${err.message}`);
+    }
+}
+
 async function runMultiempresaSetup(pool) {
     console.log('[MULTIEMPRESA] Iniciando setup multiempresa...');
+
+    await ensureColumn(pool, 'usuarios', 'empresa_id', 'INT NULL DEFAULT 1');
+    await ensureColumn(pool, 'usuarios', 'empresa_default_id', 'INT NULL DEFAULT NULL');
+    await ensureColumn(pool, 'nfe_configuracoes', 'empresa_id', 'INT NOT NULL DEFAULT 1');
+    await ensureColumn(pool, 'nfe_configuracoes', 'serie', 'INT NOT NULL DEFAULT 1');
+    await ensureColumn(pool, 'nfe_configuracoes', 'ultimo_numero', 'INT NOT NULL DEFAULT 0');
+    await ensureColumn(pool, 'nfe_configuracoes', 'ambiente', "VARCHAR(20) NOT NULL DEFAULT 'homologacao'");
+    await ensureColumn(pool, 'nfe_configuracoes', 'regime_tributario', "VARCHAR(10) NOT NULL DEFAULT '1'");
+    await ensureColumn(pool, 'nfe_configuracoes', 'ativo', 'TINYINT(1) NOT NULL DEFAULT 1');
+
+    try {
+        await pool.query('UPDATE usuarios SET empresa_default_id = COALESCE(empresa_default_id, empresa_id, 1) WHERE empresa_default_id IS NULL');
+    } catch (err) {
+        console.warn('[MULTIEMPRESA] empresa_default_id sync: ' + err.message);
+    }
 
     // 1. Garantir que as 3 empresas existam em `empresas`
     const empresasDef = [

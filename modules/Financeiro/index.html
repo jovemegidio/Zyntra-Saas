@@ -1513,7 +1513,7 @@
                 <a href="impostos.html" class="sidebar-btn" title="Impostos">
                     <i class="fas fa-percent"></i>
                 </a>
-                <button class="sidebar-btn" title="Configurações" id="btn-config" onclick="toggleConfigurações()">
+                <button class="sidebar-btn" title="Configurações" id="btn-config" onclick="toggleConfiguracoes()">
                     <i class="fas fa-cog"></i>
                 </button>
             </div>
@@ -1707,7 +1707,7 @@
             overlay.classList.toggle('active');
         }
 
-        function toggleNotificações(event) {
+        function toggleNotificacoes(event) {
             if (event) event.stopPropagation();
             const panel = document.getElementById('notification-panel');
             if (panel) panel.classList.toggle('active');
@@ -1716,7 +1716,7 @@
         // Notificações removidas — funções stub para compatibilidade
         function marcarTodasLidas() {}
         function limparNotificações() {}
-        function toggleConfigurações() {}
+        function toggleConfiguracoes() {}
 
         // ======== Carregar usuário ========
         async function carregarUsuario() {
@@ -2931,7 +2931,7 @@
             document.getElementById('dddInput').value = data.ddd_telefone_1 ? data.ddd_telefone_1.substring(0, 2) : '';
             document.getElementById('telefoneInput').value = data.ddd_telefone_1 ? data.ddd_telefone_1.substring(2) : '';
             document.getElementById('enderecoInput').value = data.logradouro || '';
-            document.getElementById('númeroInput').value = data.numero || '';
+            document.getElementById('numeroInput').value = data.numero || '';
             document.getElementById('bairroInput').value = data.bairro || '';
             document.getElementById('complementoInput').value = data.complemento || '';
             document.getElementById('cidadeInput').value = data.municipio || '';
@@ -2953,7 +2953,7 @@
                         document.getElementById('cidadeInput').value = data.localidade || '';
                         document.getElementById('estadoSelect').value = data.uf || '';
                         document.getElementById('cepCadastroInput').value = cep;
-                        document.getElementById('númeroInput').value = document.getElementById('númeroEnderecoInput').value || '';
+                        document.getElementById('numeroInput').value = document.getElementById('numeroEnderecoInput').value || '';
                         abrirCadastroCompleto(); return;
                     }
                 }
@@ -3027,7 +3027,7 @@
                 document.getElementById('nomeFantasiaInput').value = d.nome_fantasia || '';
                 document.getElementById('cnpjInput').value = d.cnpj_cpf || d.cnpj || '';
                 document.getElementById('enderecoInput').value = d.endereço || d.logradouro || '';
-                document.getElementById('númeroInput').value = d.numero || '';
+                document.getElementById('numeroInput').value = d.numero || '';
                 document.getElementById('bairroInput').value = d.bairro || '';
                 document.getElementById('complementoInput').value = d.complemento || '';
                 document.getElementById('cidadeInput').value = d.cidade || d.municipio || '';
@@ -3040,7 +3040,7 @@
 
         async function salvarClienteFornecedor() {
             if (window._guardSalvarCliFor) return;
-            const dados = { razao_social: document.getElementById('razaoSocialInput').value, nome_fantasia: document.getElementById('nomeFantasiaInput').value, cnpj_cpf: document.getElementById('cnpjInput').value, ddd: document.getElementById('dddInput').value, telefone: document.getElementById('telefoneInput').value, contato: document.getElementById('contatoInput').value, endereço: document.getElementById('enderecoInput').value, número: document.getElementById('númeroInput').value, bairro: document.getElementById('bairroInput').value, complemento: document.getElementById('complementoInput').value, cidade: document.getElementById('cidadeInput').value, estado: document.getElementById('estadoSelect').value, cep: document.getElementById('cepCadastroInput').value };
+            const dados = { razao_social: document.getElementById('razaoSocialInput').value, nome_fantasia: document.getElementById('nomeFantasiaInput').value, cnpj_cpf: document.getElementById('cnpjInput').value, ddd: document.getElementById('dddInput').value, telefone: document.getElementById('telefoneInput').value, contato: document.getElementById('contatoInput').value, endereço: document.getElementById('enderecoInput').value, número: document.getElementById('numeroInput').value, bairro: document.getElementById('bairroInput').value, complemento: document.getElementById('complementoInput').value, cidade: document.getElementById('cidadeInput').value, estado: document.getElementById('estadoSelect').value, cep: document.getElementById('cepCadastroInput').value };
             if (!dados.razao_social) { showToast('Informe a Razão Social / Nome', 'warning'); return; }
             window._guardSalvarCliFor = true;
             try {
