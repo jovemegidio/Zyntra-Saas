@@ -9,11 +9,57 @@ param(
     [string[]]$Arquivos
 )
 
-$VPS_HOST  = "root@31.97.64.102"
-$VPS_PATH  = "/var/www/aluforce"
-$LOCAL     = if ($PSScriptRoot) { $PSScriptRoot } else { "G:\Outros computadores\Meu laptop (2)\Zyntra" }
-$SSH_KEY   = "$env:USERPROFILE\.ssh\id_ed25519_vps"
-$SSH_OPTS  = @("-i", $SSH_KEY, "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=no", "-o", "ConnectTimeout=15")
+# Configurar via variável de ambiente ou arquivo deploy-secrets.env (não versionado)
+# Exemplo: $env:VPS_HOST = "root@<ip>"; $env:VPS_DISCORD = "<webhook_url>"
+$VPS_HOST        = if ($env:VPS_HOST)    { $env:VPS_HOST }    else { "root@<VPS_IP>" }
+$VPS_PATH        = if ($env:VPS_PATH)    { $env:VPS_PATH }    else { "/var/www/aluforce" }
+$LOCAL           = if ($PSScriptRoot)    { $PSScriptRoot }    else { Split-Path $MyInvocation.MyCommand.Path }
+$SSH_KEY         = if ($env:VPS_SSH_KEY) { $env:VPS_SSH_KEY } else { "$env:USERPROFILE\.ssh\id_ed25519_vps" }
+$SSH_OPTS        = @("-i", $SSH_KEY, "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=no", "-o", "ConnectTimeout=15")
+$DISCORD_WEBHOOK = if ($env:VPS_DISCORD) { $env:VPS_DISCORD } else { "" }
+
+function Send-DiscordDeploy {
+    param([string[]]$Arquivos)
+    if (-not $DISCORD_WEBHOOK) { return }
+
+    $filesText = if ($Arquivos.Count -gt 0) {
+        $list = ($Arquivos | Select-Object -First 15 | ForEach-Object { "``$_``" }) -join "`n"
+        if ($Arquivos.Count -gt 15) { $list += "`n... +$($Arquivos.Count - 15) arquivo(s)" }
+        $list
+    } else { "Nenhum arquivo" }
+
+    $rawCommits = git log --oneline -8 --format="%s" 2>$null
+    $commitsText = if ($rawCommits) {
+        ($rawCommits | ForEach-Object { "- $_" }) -join "`n"
+    } else { "Sem commits recentes" }
+
+    $gitAuthor = git config user.name 2>$null
+    $author = if ($gitAuthor) { $gitAuthor } else { "ALUFORCE TI" }
+    $hora   = Get-Date -Format "dd/MM/yyyy HH:mm"
+
+    $payload = @{
+        embeds = @(@{
+            title       = "[Deploy] ALUFORCE ERP"
+            color       = 3447003
+            description = "$($Arquivos.Count) arquivo(s) enviado(s) para producao com sucesso."
+            timestamp   = (Get-Date).ToUniversalTime().ToString("o")
+            footer      = @{ text = "ALUFORCE ERP | deploy-vps.ps1" }
+            fields      = @(
+                @{ name = "Arquivos ($($Arquivos.Count))"; value = $filesText.Substring(0, [Math]::Min($filesText.Length, 1024)); inline = $false },
+                @{ name = "Commits Recentes";              value = $commitsText.Substring(0, [Math]::Min($commitsText.Length, 1024)); inline = $false },
+                @{ name = "Autor";                         value = $author; inline = $true },
+                @{ name = "Horario";                       value = $hora;   inline = $true }
+            )
+        })
+    } | ConvertTo-Json -Depth 10 -Compress
+
+    try {
+        Invoke-RestMethod -Uri $DISCORD_WEBHOOK -Method Post -ContentType "application/json; charset=utf-8" -Body ([System.Text.Encoding]::UTF8.GetBytes($payload)) | Out-Null
+        Write-Host "Discord notificado!" -ForegroundColor Green
+    } catch {
+        Write-Host "Aviso: Discord nao notificado: $($_.Exception.Message)" -ForegroundColor Yellow
+    }
+}
 
 # Garante que ssh/scp do Git estejam no PATH
 $gitSsh = "C:\Program Files\Git\usr\bin"
@@ -45,6 +91,7 @@ function Deploy-File {
 
     if ($LASTEXITCODE -eq 0) {
         Write-Host " [OK]" -ForegroundColor Green
+        $script:deployedFiles += $rel
         return $true
     } else {
         Write-Host " [ERRO]" -ForegroundColor Red
@@ -52,8 +99,9 @@ function Deploy-File {
     }
 }
 
-$ok  = 0
-$err = 0
+$ok            = 0
+$err           = 0
+$deployedFiles = @()
 
 if ($Arquivos -and $Arquivos.Count -gt 0) {
     foreach ($f in $Arquivos) {
@@ -97,7 +145,11 @@ if ($ok -gt 0) {
     }
     if ($restart -eq "s" -or $restart -eq "S") {
         Write-Host "Reiniciando PM2..." -ForegroundColor Cyan
-        ssh @SSH_OPTS $VPS_HOST "pm2 restart aluforce-v2-production --update-env && pm2 save"
+        ssh @SSH_OPTS $VPS_HOST "pm2 restart aluforce-v2-production --update-env; pm2 save"
         Write-Host "PM2 reiniciado!" -ForegroundColor Green
     }
+
+    Write-Host ""
+    Write-Host "Notificando Discord..." -ForegroundColor Cyan
+    Send-DiscordDeploy -Arquivos $deployedFiles
 }
