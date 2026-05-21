@@ -5372,19 +5372,16 @@ module.exports = function createVendasRoutes(deps) {
             try { nodemailer = require('nodemailer'); } catch(e) {
                 return res.status(500).json({ message: 'Serviço de e-mail não disponível' });
             }
-            if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-                return res.status(503).json({ message: 'SMTP não configurado para envio de e-mail' });
-            }
 
             const transporter = nodemailer.createTransport({
-                host: process.env.SMTP_HOST || 'mail.aluforce.ind.br',
-                port: parseInt(process.env.SMTP_PORT || '465', 10),
-                secure: process.env.SMTP_SECURE !== 'false',
+                host: 'mail.aluforce.ind.br',
+                port: 465,
+                secure: true,
                 auth: {
-                    user: process.env.SMTP_USER,
-                    pass: process.env.SMTP_PASS
+                    user: process.env.SMTP_USER || 'noreply@aluforce.ind.br',
+                    pass: process.env.SMTP_PASS || 'noreplyalu'
                 },
-                tls: { rejectUnauthorized: process.env.NODE_ENV === 'production' }
+                tls: { rejectUnauthorized: false }
             });
 
             const pedidoNum = String(pedido.id).padStart(5, '0');
@@ -5404,7 +5401,7 @@ module.exports = function createVendasRoutes(deps) {
             `;
 
             await transporter.sendMail({
-                from: `"Aluforce ERP" <${process.env.SMTP_USER}>`,
+                from: `"Aluforce ERP" <${process.env.SMTP_USER || 'noreply@aluforce.ind.br'}>`,
                 to: destinatario,
                 subject: assunto,
                 html: htmlBody

@@ -1675,7 +1675,7 @@
             if (document.getElementById('clienteVendedorPadrao')) document.getElementById('clienteVendedorPadrao').value = cliente.vendedor_padrao || '';
             if (document.getElementById('clienteEmailNFe')) document.getElementById('clienteEmailNFe').value = cliente.email_nfe || '';
             if (document.getElementById('clienteTransportadora')) document.getElementById('clienteTransportadora').value = cliente.transportadora || '';
-            if (document.getElementById('clienteCodigoReceita')) document.getElementById('clienteCodigoReceita').value = cliente.codigo_receita || '';
+            if (document.getElementById('clienteCódigoReceita')) document.getElementById('clienteCódigoReceita').value = cliente.codigo_receita || '';
             
             // Faturamento
             if (document.getElementById('clienteBloquearFaturamento')) document.getElementById('clienteBloquearFaturamento').checked = !!cliente.bloquear_faturamento;
@@ -1817,7 +1817,7 @@
                 vendedor_padrao: (document.getElementById('clienteVendedorPadrao') || {}).value || '',
                 email_nfe: (document.getElementById('clienteEmailNFe') || {}).value || '',
                 transportadora: (document.getElementById('clienteTransportadora') || {}).value || '',
-                codigo_receita: (document.getElementById('clienteCodigoReceita') || {}).value || '',
+                codigo_receita: (document.getElementById('clienteCódigoReceita') || {}).value || '',
                 // Faturamento
                 bloquear_faturamento: (document.getElementById('clienteBloquearFaturamento') || {}).checked ? 1 : 0,
                 // Tags
@@ -2320,7 +2320,7 @@
             const id = document.getElementById('clienteId').value;
             if (!id) { mostrarToast('Salve o cliente antes de ver o histórico', 'error'); return; }
             
-            const panel = document.getElementById('panelHistoricoFinanceiro');
+            const panel = document.getElementById('panelHistóricoFinanceiro');
             const body = document.getElementById('panelFinanceiroBody');
             const nome = document.getElementById('clienteNome').value || 'Cliente';
             document.getElementById('panelFinanceiroSubtitle').textContent = nome;
@@ -2446,8 +2446,8 @@
             const id = document.getElementById('clienteId').value;
             if (!id) { mostrarToast('Salve o cliente primeiro', 'error'); return; }
             
-            const panel = document.getElementById('panelHistoricoAlteracoes');
-            const body = document.getElementById('panelHistoricoBody');
+            const panel = document.getElementById('panelHistóricoAlterações');
+            const body = document.getElementById('panelHistóricoBody');
             panel.classList.add('active');
             body.innerHTML = `<div class="resumo-loading"><div class="loading-spinner"></div><div class="resumo-loading-text">Carregando histórico...</div></div>`;
             

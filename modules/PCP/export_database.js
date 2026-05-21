@@ -91,12 +91,7 @@ async function exportDatabase() {
                         const values = Object.values(row).map(value => {
                             if (value === null) return 'NULL';
                             if (typeof value === 'string') {
-                                const escapedValue = value
-                                    .replace(/\\/g, '\\\\')
-                                    .replace(/'/g, "\\'")
-                                    .replace(/\r/g, '\\r')
-                                    .replace(/\n/g, '\\n');
-                                return `'${escapedValue}'`;
+                                return `'${value.replace(/'/g, "\\'").replace(/\/g, '\\\').replace(/\\r/g, '\\\\r')}'`;
                             }
                             if (value instanceof Date) {
                                 return `'${value.toISOString().slice(0, 19).replace('T', ' ')}'`;

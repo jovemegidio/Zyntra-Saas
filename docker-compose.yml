@@ -40,8 +40,8 @@ services:
       PII_ENCRYPTION_KEY: ${PII_ENCRYPTION_KEY}
       REDIS_URL: redis://redis:6379
       MINIO_ENDPOINT: http://minio:9000
-      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:?MINIO_ACCESS_KEY required}
-      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:?MINIO_SECRET_KEY required}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-aluforce}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-aluforce2024secret}
       MINIO_BUCKET: ${MINIO_BUCKET:-aluforce-uploads}
       SKIP_MIGRATIONS: ${SKIP_MIGRATIONS:-0}
       SMTP_HOST: ${SMTP_HOST:-}
@@ -149,7 +149,7 @@ services:
       - "3001:3000"
     environment:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
-      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:?GRAFANA_PASSWORD required}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-aluforce2024}
       GF_INSTALL_PLUGINS: grafana-piechart-panel
       GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/aluforce-overview.json
     volumes:
@@ -174,8 +174,8 @@ services:
       - "9000:9000"
       - "9001:9001"
     environment:
-      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:?MINIO_ACCESS_KEY required}
-      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:?MINIO_SECRET_KEY required}
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-aluforce}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-aluforce2024secret}
     volumes:
       - minio-data:/data
     healthcheck:

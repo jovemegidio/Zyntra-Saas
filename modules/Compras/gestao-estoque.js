@@ -178,7 +178,7 @@ function renderizarTabela(materiais) {
         const selectedClass = EST.selecionados.has(m.id) ? 'row-selected' : '';
         const tipoLabel = m.tipo || '—';
         const tipoClass = m.tipo ? `tipo-${m.tipo.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/-+$/,'')}` : 'tipo-default';
-        const custo = m.custo_unitario ? `R$ ${parseFloat(m.custo_unitario).toFixed(2)}` : '<span style="color:#94a3b8;">—</span>';
+        const custo = m.custo_unitario ? `R$ ${parseFloat(m.custo_unitario).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : '<span style="color:#94a3b8;">—</span>';
         const codigo = m.codigo || m.codigo_material || m.id;
         const desc = (m.descricao || '—').replace(/"/g, '&quot;');
 

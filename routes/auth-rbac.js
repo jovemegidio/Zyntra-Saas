@@ -14,15 +14,13 @@ const crypto = require('crypto');
 const fs = require('fs');
 const twoFactorService = require('../services/two-factor.service');
 
-// Helper de log. File logging is opt-in because this middleware can run on every request.
-const AUTH_RBAC_DEBUG = process.env.AUTH_RBAC_DEBUG === '1' || process.env.AUTH_RBAC_DEBUG === 'true';
+// Helper de log que também escreve em arquivo
 const logToFile = (msg) => {
-    if (!AUTH_RBAC_DEBUG) return;
     const line = `${new Date().toISOString()} ${msg}`;
     console.log(msg);
     try {
         const logPath = require('path').join(__dirname, '..', 'auth-rbac.log');
-        fs.appendFile(logPath, line + '\n', () => {});
+        fs.appendFileSync(logPath, line + '\n');
     } catch(e) {}
 };
 
@@ -53,7 +51,7 @@ const authMiddleware = async (req, res, next) => {
             req.cookies?.authToken ||
             req.headers['authorization']?.replace('Bearer ', '');
 
-        logToFile('[AUTH-RBAC] Token encontrado: ' + (token ? 'PRESENTE' : 'NENHUM'));
+        logToFile('[AUTH-RBAC] Token encontrado: ' + (token ? token.substring(0, 30) + '...' : 'NENHUM'));
 
         if (!token) {
             logToFile('[AUTH-RBAC] ERRO: Token não fornecido');
@@ -65,7 +63,7 @@ const authMiddleware = async (req, res, next) => {
         }
 
         logToFile('[AUTH-RBAC] Verificando token com JWT_SECRET...');
-        const decoded = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
+        const decoded = jwt.verify(token, JWT_SECRET);
         logToFile('[AUTH-RBAC] Token decodificado - ID: ' + decoded.id);
         
         // Buscar usuário atualizado do banco
@@ -143,7 +141,7 @@ const checkModuleAccess = (moduloCodigo, tipoPermissao = 'visualizar') => {
                 return next();
             }
 
-            const pool = req.app.locals.pool || require('../database/pool');
+            const pool = req.app.locals.pool || require('./database').getPool();
             
             // Verificar permissão via procedure ou query direta
             const [result] = await pool.query(`

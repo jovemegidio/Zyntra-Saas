@@ -5,7 +5,7 @@ const mysql = require('mysql2/promise');
         host: 'interchange.proxy.rlwy.net',
         port: 19396,
         user: 'root',
-        password: process.env.DB_PASSWORD || '',
+        password: 'iiilOZutDOnPCwxgiTKeMuEaIzSwplcu',
         database: 'railway'
     });
     

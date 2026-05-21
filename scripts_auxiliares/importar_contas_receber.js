@@ -6,7 +6,7 @@ const dbConfig = {
     host: 'interchange.proxy.rlwy.net',
     port: 19396,
     user: 'root',
-    password: process.env.RAILWAY_DB_PASSWORD || process.env.DB_PASSWORD || '',
+    password: 'iiilOZutDOnPCwxgiTKeMuEaIzSwplcu',
     database: 'railway',
     charset: 'utf8mb4'
 };
@@ -45,12 +45,12 @@ function mapFormaRecebimento(tipo) {
 
 async function importar() {
     console.log('📂 Lendo arquivo Excel...');
-
+    
     const workbook = xlsx.readFile('./ordens-emitidas/Contas a Receber/Contas a Receber.xlsx');
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
     const data = xlsx.utils.sheet_to_json(worksheet, { header: 1 });
-
+    
     // Encontrar linha de cabeçalho (linha com "Situação")
     let headerRow = -1;
     for (let i = 0; i < data.length; i++) {
@@ -59,15 +59,15 @@ async function importar() {
             break;
         }
     }
-
+    
     if (headerRow === -1) {
         console.log('❌ Cabeçalho não encontrado');
         return;
     }
-
+    
     const headers = data[headerRow];
     const rows = data.slice(headerRow + 1).filter(row => row && row.length > 0 && row[0]);
-
+    
     // Mapeamento dinâmico de colunas avançadas pelo nome do cabeçalho
     const colIndexMap = {};
     if (headers) {
@@ -80,12 +80,12 @@ async function importar() {
         });
     }
     console.log('📋 Colunas avançadas encontradas:', colIndexMap);
-
+    
     console.log(`📊 Encontradas ${rows.length} contas a receber`);
-
+    
     const conn = await mysql.createConnection(dbConfig);
     console.log('🔌 Conectando ao banco de dados Railway...');
-
+    
     // Criar tabela de clientes financeiro se não existir
     await conn.query(`
         CREATE TABLE IF NOT EXISTS clientes_financeiro (
@@ -97,21 +97,21 @@ async function importar() {
             UNIQUE KEY unique_cnpj (cnpj_cpf)
         )
     `);
-
+    
     let inserted = 0;
     let duplicates = 0;
     let errors = 0;
-
+    
     for (let i = 0; i < rows.length; i++) {
         const row = rows[i];
-
+        
         try {
             // Mapear colunas do Excel (baseado na análise)
             // 0: Situação, 2: Parcela, 3: NF, 4: Cliente (Nome Fantasia)
             // 5: Previsão Recebimento, 7: Valor da Conta, 12: Valor Recebido
             // 14: Categoria, 20: Tipo Documento, 22: Vencimento
             // 25: Cliente (Razão Social), 26: Cliente (CNPJ/CPF)
-
+            
             const status = mapStatus(row[0]);
             const parcela = row[2] ? row[2].toString() : '001/001';
             const notaFiscal = row[3] ? row[3].toString() : '';
@@ -134,9 +134,9 @@ async function importar() {
                 ? excelDateToJS(row[colIndexMap.data_para_cartorio]) : null;
             const dataProtestado = colIndexMap.data_protestado !== undefined
                 ? excelDateToJS(row[colIndexMap.data_protestado]) : null;
-
+            
             if (valor <= 0) continue;
-
+            
             // Inserir ou obter cliente
             let clienteId = null;
             if (cnpjCpf) {
@@ -145,7 +145,7 @@ async function importar() {
                     VALUES (?, ?, ?)
                     ON DUPLICATE KEY UPDATE nome_fantasia = VALUES(nome_fantasia)
                 `, [clienteNome, razaoSocial, cnpjCpf]);
-
+                
                 const [clienteResult] = await conn.query(
                     'SELECT id FROM clientes_financeiro WHERE cnpj_cpf = ?',
                     [cnpjCpf]
@@ -154,7 +154,7 @@ async function importar() {
                     clienteId = clienteResult[0].id;
                 }
             }
-
+            
             // Inserir ou obter categoria
             let categoriaId = null;
             if (categoria) {
@@ -163,7 +163,7 @@ async function importar() {
                     VALUES (?, 'receber')
                     ON DUPLICATE KEY UPDATE nome = nome
                 `, [categoria]);
-
+                
                 const [catResult] = await conn.query(
                     'SELECT id FROM categorias_financeiro WHERE nome = ?',
                     [categoria]
@@ -172,15 +172,15 @@ async function importar() {
                     categoriaId = catResult[0].id;
                 }
             }
-
+            
             // Extrair número da parcela
             const parcelaParts = parcela.split('/');
             const parcelaNumero = parseInt(parcelaParts[0]) || 1;
             const totalParcelas = parseInt(parcelaParts[1]) || 1;
-
+            
             // Construir descrição
             const descricao = `NF: ${notaFiscal} - ${clienteNome}${vendedor ? ' - Vendedor: ' + vendedor : ''}`;
-
+            
             // Inserir conta a receber (com colunas avançadas ETL)
             await conn.query(`
                 INSERT INTO contas_receber (
@@ -221,10 +221,10 @@ async function importar() {
                 dataParaCartorio,
                 dataProtestado
             ]);
-
+            
             inserted++;
             console.log(`✅ ${i + 1}. ${clienteNome} - R$ ${valor.toFixed(2)} - ${parcela} - Venc: ${vencimento || previsao}`);
-
+            
         } catch (err) {
             if (err.code === 'ER_DUP_ENTRY') {
                 duplicates++;
@@ -234,10 +234,10 @@ async function importar() {
             }
         }
     }
-
+    
     // Estatísticas finais
     const [stats] = await conn.query(`
-        SELECT
+        SELECT 
             COUNT(*) as total,
             SUM(valor) as valor_total,
             SUM(valor_recebido) as valor_recebido,
@@ -247,7 +247,7 @@ async function importar() {
             SUM(CASE WHEN status = 'vencida' THEN valor ELSE 0 END) as vencida_valor
         FROM contas_receber
     `);
-
+    
     console.log('' + '='.repeat(60));
     console.log('📊 RESUMO DA IMPORTAÇÍO');
     console.log('='.repeat(60));
@@ -260,7 +260,7 @@ async function importar() {
     console.log(`⏳ Pendentes: ${stats[0].pendente_qtd} - R$ ${parseFloat(stats[0].pendente_valor || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}`);
     console.log(`🔴 Vencidas: ${stats[0].vencida_qtd} - R$ ${parseFloat(stats[0].vencida_valor || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}`);
     console.log('='.repeat(60));
-
+    
     await conn.end();
 }
 

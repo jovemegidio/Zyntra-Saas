@@ -183,7 +183,7 @@
     <!-- Tooltips Profissionais -->
     <link rel="stylesheet" href="/css/tooltips-professional.css?v=20260209">
     <script src="/js/tooltips-professional.js?v=20260209" defer></script>
-    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260216">
+    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260418">
     <!-- Chat Widget BOB AI -->
     <link rel="stylesheet" href="/chat/widget.css?v=20260218">
     <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260324">
@@ -1143,6 +1143,12 @@
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
+            // CRIT-04: Garantir que todos os modais estão fechados ao iniciar a página
+            const elBenef = document.getElementById('modalBeneficio');
+            if (elBenef) elBenef.classList.remove('show', 'active');
+            const elGer = document.getElementById('modalGerenciar');
+            if (elGer) elGer.classList.remove('show', 'active');
+
             await carregarBeneficios();
             renderizarBeneficios();
             carregarUsuarioLogado();
@@ -1176,5 +1182,6 @@
     <script src="/js/user-dropdown.js?v=20260319" defer></script>
 </body>
 </html>
+
 
 

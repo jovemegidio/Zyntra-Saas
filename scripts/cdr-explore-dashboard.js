@@ -4,17 +4,13 @@
 const puppeteer = require('puppeteer-core');
 
 const CONFIG = {
-    url: process.env.CDR_PABX_URL || 'https://sip10.tsinfo.net.br',
-    username: process.env.CDR_PABX_USER || '',
-    password: process.env.CDR_PABX_PASS || '',
+    url: 'https://sip10.tsinfo.net.br',
+    username: 'Labor@',
+    password: 'F.0582#9d5c?',
     chromiumPath: '/snap/bin/chromium'
 };
 
 async function exploreAfterLogin() {
-    if (!CONFIG.username || !CONFIG.password) {
-        throw new Error('CDR_PABX_USER/CDR_PABX_PASS não configurados');
-    }
-
     const browser = await puppeteer.launch({
         executablePath: CONFIG.chromiumPath,
         headless: 'new',

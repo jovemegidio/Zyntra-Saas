@@ -43,26 +43,18 @@ function createS3Client() {
     const provider = detectProvider();
 
     if (provider === 'minio') {
-        if (!process.env.MINIO_ACCESS_KEY || !process.env.MINIO_SECRET_KEY) {
-            console.warn('[upload-storage] MINIO_ACCESS_KEY/MINIO_SECRET_KEY não configurados — MinIO desabilitado');
-            return null;
-        }
         return new S3Client({
             endpoint: process.env.MINIO_ENDPOINT || 'http://minio:9000',
             region: process.env.MINIO_REGION || 'us-east-1',
             credentials: {
-                accessKeyId: process.env.MINIO_ACCESS_KEY,
-                secretAccessKey: process.env.MINIO_SECRET_KEY,
+                accessKeyId: process.env.MINIO_ACCESS_KEY || 'aluforce',
+                secretAccessKey: process.env.MINIO_SECRET_KEY || 'aluforce2024secret',
             },
             forcePathStyle: true, // Required for MinIO
         });
     }
 
     if (provider === 's3') {
-        if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
-            console.warn('[upload-storage] AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY não configurados — S3 desabilitado');
-            return null;
-        }
         return new S3Client({
             region: process.env.AWS_REGION || 'sa-east-1',
             credentials: {

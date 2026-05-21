@@ -140,7 +140,7 @@ if ($enviados -gt 0) {
       # Montar lista de arquivos enviados automaticamente
       $listaArquivosEnviados = @()
       if ($Arquivos -and $Arquivos.Count -gt 0) {
-         $listaArquivosEnviados = $Arquivos | ForEach-Object {
+         $listaArquivosEnviados = $Arquivos | ForEach-Object { 
             $_ -replace '.*\\Sistema - ALUFORCE - V\.2\\', '' -replace '\\', '/'
          }
       } else {
@@ -160,12 +160,8 @@ if ($enviados -gt 0) {
       $descAuto = "Deploy de $enviados arquivo(s) — Módulos: $moduloStr"
 
       # Webhook direto — não depende de helper
-      $webhookUrl = $env:DISCORD_WEBHOOK_URL
-      if (-not $webhookUrl) {
-         Write-Host "Aviso: DISCORD_WEBHOOK_URL nao configurado; notificacao pulada." -ForegroundColor Yellow
-         return
-      }
-
+      $webhookUrl = "https://discord.com/api/webhooks/1465740298243018793/fjkXYSN7Vv06YRyimpqneNVOhADqDACpVTXQxRbyUJnsk-cWpJvnpZzD9JntRVFyhfVt"
+      
       $arquivosField = ($listaArquivosEnviados | Select-Object -First 15 | ForEach-Object { "``$_``" }) -join "`n"
       if ($listaArquivosEnviados.Count -gt 15) {
          $arquivosField += "`n... +$($listaArquivosEnviados.Count - 15) arquivo(s)"

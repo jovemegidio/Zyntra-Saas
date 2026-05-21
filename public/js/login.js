@@ -157,20 +157,12 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   function getCompanyBasePath(email) {
-    const mountedBasePath = window.__BASE_PATH || window.__MOUNT_PATH__ || '';
-    if (!email) return mountedBasePath;
+    if (!email) return window.__BASE_PATH || '';
     const emailLower = email.toLowerCase();
     for (const [domain, basePath] of Object.entries(COMPANY_DOMAINS)) {
       if (emailLower.endsWith(domain)) return basePath;
     }
-    return mountedBasePath;
-  }
-
-  function withCompanyBasePath(path, basePath) {
-    if (basePath && typeof path === 'string' && path.charAt(0) === '/' && path.indexOf(basePath) !== 0) {
-      return basePath + path;
-    }
-    return path;
+    return window.__BASE_PATH || '';
   }
 
   // ==================== AVATAR SYSTEM ====================
@@ -205,7 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       // Multi-company: buscar foto no backend correto
       const _photoBasePath = getCompanyBasePath(email);
-      const _photoPrefix = (_photoBasePath && !window.__BASE_PATH && !window.__MOUNT_PATH__) ? _photoBasePath : '';
+      const _photoPrefix = (_photoBasePath && !window.__BASE_PATH) ? _photoBasePath : '';
       const response = await fetch(`${_photoPrefix}/api/public/usuarios/foto/${encodeURIComponent(email)}`);
       if (!response.ok) return null;
       const data = await response.json();
@@ -700,7 +692,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       // Multi-company: detectar empresa pelo domínio do email
       const _companyPath = getCompanyBasePath(username);
-      const _needsPrefix = _companyPath && !window.__BASE_PATH && !window.__MOUNT_PATH__;
+      const _needsPrefix = _companyPath && !window.__BASE_PATH;
       const _loginUrl = _needsPrefix ? _companyPath + '/api/login' : '/api/login';
       const response = await apiFetch(_loginUrl, {
         method: 'POST',
@@ -726,7 +718,6 @@ document.addEventListener('DOMContentLoaded', () => {
       // 🔐 2FA - Se o servidor pedir verificação de dois fatores
       // ═══════════════════════════════════════════════════════════
       if (data && data.requires2FA) {
-        twoFA_companyPath = _companyPath || window.__BASE_PATH || window.__MOUNT_PATH__ || '';
         setLoading(false);
         show2FAModal(data.pendingToken, data.maskedEmail);
         return; // Para aqui - o modal 2FA continua o fluxo
@@ -776,6 +767,7 @@ document.addEventListener('DOMContentLoaded', () => {
           redirectTo = parsed.pathname + parsed.search + parsed.hash;
         } catch (e) {}
         if (redirectTo === '/index.html' || redirectTo === '/index.html/') redirectTo = '/dashboard';
+
         // Multi-company: garantir que o redirect inclui o base path correto
         if (_companyPath && !redirectTo.startsWith(_companyPath)) {
           redirectTo = _companyPath + redirectTo;
@@ -893,7 +885,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // ═══════════════════════════════════════════════════════════════════════════
 
   let twoFA_pendingToken = null;
-  let twoFA_companyPath = '';
   let twoFA_countdownInterval = null;
 
   function show2FAModal(pendingToken, maskedEmail) {
@@ -937,7 +928,6 @@ document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => { if (modal) modal.style.display = 'none'; }, 300);
     }
     twoFA_pendingToken = null;
-    twoFA_companyPath = '';
     if (twoFA_countdownInterval) { clearInterval(twoFA_countdownInterval); twoFA_countdownInterval = null; }
   }
 
@@ -1067,8 +1057,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       const rememberDevice = document.getElementById('twofa-remember-device');
-      const _twoFAPath = twoFA_companyPath || window.__BASE_PATH || window.__MOUNT_PATH__ || '';
-      const response = await apiFetch(withCompanyBasePath('/api/verify-2fa', _twoFAPath), {
+      const response = await apiFetch('/api/verify-2fa', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -1142,12 +1131,11 @@ document.addEventListener('DOMContentLoaded', () => {
           redirectTo = parsed.pathname + parsed.search + parsed.hash;
         } catch (e) {}
         if (redirectTo === '/index.html' || redirectTo === '/index.html/') redirectTo = '/dashboard';
-        redirectTo = withCompanyBasePath(redirectTo, _twoFAPath);
 
         // Remember me
         const rememberCheckbox = document.getElementById('remember-me');
         if (rememberCheckbox && rememberCheckbox.checked && data.user) {
-          apiFetch(withCompanyBasePath('/api/auth/create-remember-token', _twoFAPath), {
+          apiFetch('/api/auth/create-remember-token', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
@@ -1156,7 +1144,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Fetch /api/me for fresh data
-        apiFetch(withCompanyBasePath('/api/me', _twoFAPath), {
+        apiFetch('/api/me', {
           credentials: 'include'
         }).then(r => r.ok ? r.json() : Promise.reject()).then(userData => {
           const freshJson = JSON.stringify(userData);
@@ -1167,9 +1155,7 @@ document.addEventListener('DOMContentLoaded', () => {
           let finalRedirect = redirectTo;
           if (returnTo) {
             const decoded = decodeURIComponent(returnTo);
-            if (decoded.startsWith('/') && !decoded.startsWith('//')) {
-              finalRedirect = withCompanyBasePath(decoded, _twoFAPath);
-            }
+            if (decoded.startsWith('/') && !decoded.startsWith('//')) finalRedirect = decoded;
           }
           window.location.href = finalRedirect;
         }).catch(() => {
@@ -1208,8 +1194,7 @@ document.addEventListener('DOMContentLoaded', () => {
       resendBtn.textContent = 'Enviando...';
 
       try {
-        const _twoFAPath = twoFA_companyPath || window.__BASE_PATH || window.__MOUNT_PATH__ || '';
-        const response = await apiFetch(withCompanyBasePath('/api/resend-2fa', _twoFAPath), {
+        const response = await apiFetch('/api/resend-2fa', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',

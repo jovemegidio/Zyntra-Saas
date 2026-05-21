@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+﻿#!/usr/bin/env node
 // Worker que processa jobs de agregação usando BullMQ
 const { Worker, Queue } = require('bullmq');
 const IORedis = (() => { try { return require('ioredis'); } catch (e) { return null; }})();

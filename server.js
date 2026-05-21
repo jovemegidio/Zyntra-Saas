@@ -454,6 +454,20 @@ try {
         } catch (cnpjErr) {
             console.warn('[FIX-CNPJ] ⚠️ Migration não executada:', cnpjErr.message);
         }
+        // Dados cadastrais oficiais — Labor Eletric e Energy Comercio
+        try {
+            const { runMigration: dadosLaborEmpresas } = require('./database/migrations/20260517_dados_labor_empresas');
+            await dadosLaborEmpresas(pool);
+        } catch (laborErr) {
+            console.warn('[DADOS-LABOR] ⚠️ Migration não executada:', laborErr.message);
+        }
+        // Colunas de vídeo para treinamentos
+        try {
+            const { runMigration: treinaVideos } = require('./database/migrations/20260518_treinamentos_videos');
+            await treinaVideos(pool);
+        } catch (tvErr) {
+            console.warn('[TREINA-VIDEO] ⚠️ Migration não executada:', tvErr.message);
+        }
     }).catch((err) => {
         console.error('⚠️  Aviso: Pool criado mas teste de conexão falhou:', err.message);
         console.log('➡️  Sistema continuará e tentará reconectar automaticamente');
@@ -837,6 +851,8 @@ const GLOBAL_INJECT_SCRIPTS = [
     '<script src="/js/pwa-manager.js?v=20260301"></script>',
     '<!-- ALUFORCE: Inactivity Manager v1.0 - Detecção de inatividade -->',
     '<script src="/js/inactivity-manager.js?v=20260324" defer></script>',
+    '<!-- ALUFORCE: Layout Component v1.0 - Sidebar e Header padronizados -->',
+    '<script src="/js/layout-component.js?v=20260518" defer></script>',
     '<!-- ALUFORCE: Zyntra Chat Teams Widget v2.0 -->',
     '<link rel="stylesheet" href="/chat-teams/chat-widget.css?v=20260615">',
     '<script src="/chat-teams/chat-widget.js?v=20260615" defer></script>\n'
@@ -844,6 +860,28 @@ const GLOBAL_INJECT_SCRIPTS = [
 
 // Paginas que NAO devem receber offline-sync (login precisa de rede)
 const SKIP_OFFLINE_INJECT = ['login.html', 'forgot-password.html', 'reset-password.html', 'register.html'];
+const GLOBAL_HEADER_SIDEBAR_CSS_HREF = '/css/global-header-sidebar.css?v=20260511-pcp-standard';
+const GLOBAL_HEADER_SIDEBAR_CSS_TAG = `<link rel="stylesheet" href="${GLOBAL_HEADER_SIDEBAR_CSS_HREF}">`;
+
+function shouldUseGlobalHeaderSidebar(filePath, html, isLoginPage) {
+    if (isLoginPage || !html) return false;
+    const normalizedPath = String(filePath || '').replace(/\\/g, '/').toLowerCase();
+    if (normalizedPath.includes('/ajuda/') || normalizedPath.includes('/zyntra-sge/')) return false;
+    return normalizedPath.includes('/modules/') &&
+        /\b(sidebar|main-area|app-container|content-area|page-content|dashboard-content)\b/i.test(html);
+}
+
+function applyGlobalHeaderSidebarCss(html, filePath, isLoginPage = false) {
+    if (!shouldUseGlobalHeaderSidebar(filePath, html, isLoginPage)) return html;
+    if (html.includes('global-header-sidebar.css')) {
+        return html.replace(/\/css\/global-header-sidebar\.css(?:\?v=[^"']*)?/g, GLOBAL_HEADER_SIDEBAR_CSS_HREF);
+    }
+    const headMatch = html.match(/<\/head>/i);
+    if (headMatch && typeof headMatch.index === 'number') {
+        return html.slice(0, headMatch.index) + `    ${GLOBAL_HEADER_SIDEBAR_CSS_TAG}\n` + html.slice(headMatch.index);
+    }
+    return `${GLOBAL_HEADER_SIDEBAR_CSS_TAG}\n${html}`;
+}
 
 app.use((req, res, next) => {
     const _origSendFile = res.sendFile.bind(res);
@@ -855,6 +893,7 @@ app.use((req, res, next) => {
 
                     const fileName = path.basename(filePath);
                     const isLoginPage = SKIP_OFFLINE_INJECT.includes(fileName);
+                    html = applyGlobalHeaderSidebarCss(html, filePath, isLoginPage);
 
                     // Montar scripts a injetar
                     let injectTag = '';
@@ -878,6 +917,9 @@ app.use((req, res, next) => {
                             }
                             if (!html.includes('inactivity-manager.js')) {
                                 missing += '\n<script src="/js/inactivity-manager.js?v=20260324" defer></script>';
+                            }
+                            if (!html.includes('layout-component.js')) {
+                                missing += '\n<script src="/js/layout-component.js?v=20260518" defer></script>';
                             }
                             if (!html.includes('chat-widget.css')) {
                                 missing += '\n<link rel="stylesheet" href="/chat-teams/chat-widget.css?v=20260615">';
@@ -932,34 +974,261 @@ app.use((req, res, next) => {
     next();
 });
 
+// Zyntra SGE landing/app shell. In path-based deployments, Nginx strips
+// /labor-energy before forwarding, so the Node process receives /Zyntra-SGE.
+const zyntraSgeRoot = path.join(__dirname, 'Zyntra-SGE');
+const zyntraSgeBaseHref = `${process.env.MOUNT_PATH || ''}/Zyntra-SGE/`;
+const zyntraSgeStaticOptions = {
+    dotfiles: 'deny',
+    index: false,
+    maxAge: '1d',
+    etag: true,
+    lastModified: true,
+    setHeaders: (res, filePath) => {
+        if (filePath.endsWith('.html')) {
+            res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+            res.setHeader('Pragma', 'no-cache');
+            res.setHeader('Expires', '0');
+        }
+    }
+};
+
+function sendZyntraSgeHtml(req, res, next) {
+    const requestedPath = req.params[0] || 'index.html';
+    const htmlPath = path.resolve(zyntraSgeRoot, requestedPath);
+
+    if (!htmlPath.startsWith(zyntraSgeRoot + path.sep)) {
+        return res.status(400).send('Caminho invalido');
+    }
+
+    fs.readFile(htmlPath, 'utf8', (err, html) => {
+        if (err) return next();
+
+        html = html.replace(
+            /<base\s+href=(["'])\/(?:Zyntra-LandingPage|Zyntra-SGE)\/\1\s*>/i,
+            `<base href="${zyntraSgeBaseHref}">`
+        );
+
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
+        res.send(html);
+    });
+}
+
+app.get(['/Zyntra-SGE', '/Zyntra-SGE/'], (req, res, next) => {
+    req.params[0] = 'index.html';
+    sendZyntraSgeHtml(req, res, next);
+});
+app.get(/^\/Zyntra-SGE\/Empresas\/(?:aluforce|energy|labor-energy|labor-eletric)\/painel\.html$/i, authenticatePage, (req, res) => {
+    res.redirect(302, '/dashboard');
+});
+app.get(/^\/Zyntra-SGE\/(.+\.html)$/i, (req, res, next) => {
+    const requestedPath = String(req.params[0] || '').toLowerCase();
+    if (requestedPath.startsWith('empresas/')) {
+        return authenticatePage(req, res, () => sendZyntraSgeHtml(req, res, next));
+    }
+    return sendZyntraSgeHtml(req, res, next);
+});
+app.use('/Zyntra-SGE', express.static(zyntraSgeRoot, zyntraSgeStaticOptions));
+
+// ── Vídeos de treinamento (streaming com Range requests) ─────────────────────
+{
+    const videoBase = process.env.NODE_ENV === 'production'
+        ? '/var/www/uploads/videos'
+        : path.join(__dirname, 'uploads', 'videos');
+    app.use('/videos', express.static(videoBase, {
+        acceptRanges: true,
+        setHeaders: (res) => { res.setHeader('Accept-Ranges', 'bytes'); }
+    }));
+}
+
 // Rota raiz: redirecionar para página de login
 app.get('/', (req, res) => {
     res.redirect('/login.html');
 });
 
-// Dashboard principal (Painel de Controle) — requer autenticação
-app.get('/dashboard', authenticatePage, (req, res) => {
-    res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-    res.setHeader('Pragma', 'no-cache');
-    res.setHeader('Expires', '0');
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+app.get('/login', (req, res) => {
+    const query = req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
+    res.redirect(302, '/login.html' + query);
 });
 
-// Compatibilidade: /index.html também serve o dashboard
-app.get('/index.html', authenticatePage, (req, res) => {
+app.get('/logout', (req, res) => {
+    res.clearCookie('authToken', { httpOnly: true, path: '/' });
+    res.clearCookie('refreshToken', { httpOnly: true, path: '/' });
+    res.clearCookie('rememberToken', { httpOnly: true, path: '/' });
+    res.redirect('/login.html');
+});
+
+// Dashboard principal (Painel de Controle) — requer autenticação
+// Serve o dashboard V2 (Next.js static export) com brand e usuário injetados
+const dashboardV2Path = path.join(__dirname, 'public', 'dashboard-v2', 'index.html');
+
+function _buildMountScript(mountPath) {
+    if (!mountPath) return '';
+    return `<script id="zyntra-mount-intercept">(function(){var B="${mountPath}";window.__MOUNT_PATH__=B;window.__BASE_PATH=window.__BASE_PATH||B;function addBase(u){return(typeof u==="string"&&u[0]==="/"&&u.slice(0,B.length)!==B)?B+u:u;}var _f=window.fetch;window.fetch=function(u,o){return _f.call(this,addBase(u),o);};var _x=XMLHttpRequest.prototype.open;XMLHttpRequest.prototype.open=function(m,u){if(typeof u==="string"&&u[0]==="/"&&u.slice(0,B.length)!==B)arguments[1]=B+u;return _x.apply(this,arguments);};["pushState","replaceState"].forEach(function(k){var o=history[k].bind(history);history[k]=function(s,t,u){return o(s,t,addBase(u));};});try{var _a=window.location.assign.bind(window.location);window.location.assign=function(u){return _a(addBase(u));};var _r=window.location.replace.bind(window.location);window.location.replace=function(u){return _r(addBase(u));};}catch(e){}function fixLinks(r){(r||document).querySelectorAll('a[href^="/"]').forEach(function(a){var h=a.getAttribute("href");if(h&&h.slice(0,B.length)!==B)a.setAttribute("href",B+h);});}function attachObserver(){fixLinks(document);new MutationObserver(function(ml){ml.forEach(function(m){m.addedNodes.forEach(function(n){if(n.nodeType===1)fixLinks(n);});});}).observe(document.body,{childList:true,subtree:true});}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",attachObserver);}else{attachObserver();}})();</script>`;
+}
+
+async function _buildDashboardHtml(req, brandOverride, mountPathOverride) {
+    const brand = brandOverride || process.env.BRAND || 'aluforce';
+    const mountPath = mountPathOverride !== undefined ? mountPathOverride : (process.env.MOUNT_PATH || '');
+    let html = fs.readFileSync(dashboardV2Path, 'utf8');
+
+    // Dados do usuário do JWT
+    const u = req.user || {};
+    let avatar = '';
+    try {
+        if (pool && u.id) {
+            const [rows] = await pool.query(
+                'SELECT foto, avatar FROM usuarios WHERE id = ? LIMIT 1', [u.id]
+            );
+            if (rows.length > 0) {
+                avatar = rows[0].foto || rows[0].avatar || '';
+                // Garante URL relativa se for apenas filename
+                if (avatar && !avatar.startsWith('/') && !avatar.startsWith('http')) {
+                    avatar = '/avatars/' + avatar;
+                }
+            }
+        }
+    } catch (e) { /* silencioso — avatar fica vazio, fallback usa iniciais */ }
+
+    const userObj = {
+        name: u.nome || u.name || 'Usuário',
+        email: u.email || '',
+        role: u.role || 'Usuário',
+        isAdmin: u.role === 'admin' || u.is_admin === true,
+        avatar: avatar
+    };
+
+    const mountScript = _buildMountScript(mountPath);
+    const injectScript = `${mountScript}<script>window.__ZYNTRA_BRAND="${brand}";window.__ZYNTRA_USER=${JSON.stringify(userObj)};</script>`;
+
+    // Patch script: after React hydrates, replace mock KPI values with real API data
+    const patchScript = `<script>
+(function() {
+    var MOCK_VALUES = ['R$ 1.240.000','R$ 312.480','R$ 248.300','R$ 842.300','R$ 175.836','R$ 45.800','R$ 128.350','R$ 18.600','R$ 5.268','R$ 75.836','R$ 8.200','R$ 12.450','R$ 84.320','R$ 12.800','R$ 5.430','R$ 7.350','R$ 64.550','R$ 183.750'];
+    function patchDashboard(kpis) {
+        if (!kpis) return;
+        var vendasValor = (kpis.vendas && kpis.vendas.valor) ? kpis.vendas.valor : null;
+        var aReceberValor = kpis.aReceber || null;
+        if (!vendasValor && !aReceberValor) return;
+        var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+        var node, replaced = 0;
+        while (node = walker.nextNode()) {
+            var text = node.textContent.trim();
+            if (MOCK_VALUES.indexOf(text) !== -1) {
+                if (vendasValor && replaced === 0) { node.textContent = vendasValor; replaced++; }
+                else if (aReceberValor) { node.textContent = aReceberValor; }
+            }
+        }
+    }
+    function loadRealStats() {
+        fetch('/api/dashboard/kpis', {credentials: 'include'})
+            .then(function(r) { return r.ok ? r.json() : null; })
+            .then(function(data) { if (data) patchDashboard(data); })
+            .catch(function() {});
+    }
+    if (document.readyState === 'complete') {
+        setTimeout(loadRealStats, 800);
+    } else {
+        window.addEventListener('load', function() { setTimeout(loadRealStats, 800); });
+    }
+})();
+</script>`;
+
+    return html.replace('</head>', injectScript + '</head>').replace('</body>', patchScript + '</body>');
+}
+
+app.get('/dashboard', authenticatePage, async (req, res) => {
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.setHeader('Pragma', 'no-cache');
     res.setHeader('Expires', '0');
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+
+    if (fs.existsSync(dashboardV2Path)) {
+        try {
+            const html = await _buildDashboardHtml(req);
+            res.send(html);
+        } catch (e) {
+            logger.error('[DASHBOARD] Falha ao montar dashboard atual:', e);
+            res.status(500).send('Dashboard indisponivel no momento.');
+        }
+    } else {
+        logger.error('[DASHBOARD] Build atual nao encontrado:', dashboardV2Path);
+        res.status(503).send('Dashboard indisponivel no momento.');
+    }
+});
+
+// Aliases de dashboard para instâncias Labor (caso nginx não remova o prefixo)
+async function _serveLaborDashboard(req, res, brand, mountPath) {
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    if (fs.existsSync(dashboardV2Path)) {
+        try {
+            const html = await _buildDashboardHtml(req, brand, mountPath);
+            res.send(html);
+        } catch (e) {
+            logger.error(`[DASHBOARD/${brand}] Erro:`, e);
+            res.status(500).send('Dashboard indisponivel no momento.');
+        }
+    } else {
+        res.redirect(302, '/dashboard');
+    }
+}
+app.get('/labor-energy/dashboard', authenticatePage, (req, res) => _serveLaborDashboard(req, res, 'labor-energy', '/labor-energy'));
+app.get('/labor-eletric/dashboard', authenticatePage, (req, res) => _serveLaborDashboard(req, res, 'labor-eletric', '/labor-eletric'));
+
+// Assets do dashboard V2 (JS/CSS chunks do Next.js)
+app.use('/dashboard-v2', authenticatePage, express.static(path.join(__dirname, 'public', 'dashboard-v2'), {
+    dotfiles: 'deny',
+    index: false,
+    maxAge: '7d',
+}));
+
+// SPA fallback para /dashboard-v2/* — evita 404 ao recarregar (F5) rotas do Next.js
+app.get('/dashboard-v2/*', authenticatePage, async (req, res) => {
+    if (fs.existsSync(dashboardV2Path)) {
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        try {
+            const html = await _buildDashboardHtml(req);
+            res.send(html);
+        } catch (e) {
+            res.sendFile(dashboardV2Path);
+        }
+    } else {
+        res.redirect('/dashboard');
+    }
+});
+
+// BUG-34: Suprimir erros de Vercel Analytics (sistema roda em VPS próprio, não na Vercel)
+app.get('/_vercel/insights/script.js', (req, res) => {
+    res.type('application/javascript').send('/* vercel analytics disabled */');
+});
+app.post('/_vercel/insights/view', (req, res) => res.json({ ok: true }));
+app.all('/_vercel/insights/*', (req, res) => res.status(204).send());
+
+// Aliases lowercase para módulos
+app.get('/rh', authenticatePage, (req, res) => res.redirect('/RH'));
+app.get('/pcp', authenticatePage, (req, res) => res.redirect('/PCP/index.html'));
+app.get('/vendas', authenticatePage, (req, res) => res.redirect('/Vendas'));
+app.get('/compras', authenticatePage, (req, res) => res.redirect('/Compras'));
+app.get('/logistica', authenticatePage, (req, res) => res.redirect('/Logistica'));
+app.get('/financeiro', authenticatePage, (req, res) => res.redirect('/Financeiro'));
+
+// Compatibilidade: rota antiga do dashboard redireciona para o painel atual
+app.get('/index.html', authenticatePage, (req, res) => {
+    res.redirect(302, '/dashboard');
 });
 
 // Servir página de Ajuda (institucional) - DEVE VIR ANTES do express.static(public)
 const ajudaPath = path.join(__dirname, 'ajuda');
 const ajudaOptions = {
     dotfiles: 'deny',
-    index: false,
+    index: 'index.html',
     setHeaders: (res, filePath) => {
         if (filePath.endsWith('.html')) {
             res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
@@ -970,6 +1239,27 @@ const ajudaOptions = {
 };
 app.use('/ajuda', express.static(ajudaPath, ajudaOptions));
 app.use('/Ajuda', express.static(ajudaPath, ajudaOptions));
+
+// Portal de empresas usado pelo login unificado.
+const empresasPortalPath = path.join(__dirname, 'Zyntra-SGE', 'Empresas');
+const empresasPortalOptions = {
+    dotfiles: 'deny',
+    index: false,
+    setHeaders: (res, filePath) => {
+        if (filePath.endsWith('.html')) {
+            res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+            res.setHeader('Pragma', 'no-cache');
+            res.setHeader('Expires', '0');
+        }
+    }
+};
+app.get(['/Empresas', '/Empresas/'], authenticatePage, (req, res) => {
+    res.redirect('/dashboard');
+});
+app.get(/^\/Empresas\/(?:aluforce|energy|labor-energy|labor-eletric)\/painel\.html$/i, authenticatePage, (req, res) => {
+    res.redirect(302, '/dashboard');
+});
+app.use('/Empresas', authenticatePage, express.static(empresasPortalPath, empresasPortalOptions));
 
 // ⚡ ENTERPRISE: Shared utilities (fetch-utils, confirm-dialog, etc.)
 app.use('/_shared', express.static(path.join(__dirname, '_shared'), {
@@ -1248,6 +1538,7 @@ function safeSendModuleHtml(req, res, next, moduleDir) {
     if (fs.existsSync(htmlPath)) {
         // Ler HTML, injetar scripts automáticos e enviar
         let html = fs.readFileSync(htmlPath, 'utf8');
+        html = applyGlobalHeaderSidebarCss(html, htmlPath, false);
         // Evitar duplicação: só injetar se report-viewer não estiver presente
         if (!html.includes('report-viewer.js')) {
             const lastBody = html.lastIndexOf('</body>');
@@ -1372,24 +1663,33 @@ app.get('/e-Nf-e/*', (req, res, next) => {
 
 // Financeiro — com clean URLs e aliases root-level
 // Todas as páginas disponíveis no módulo Financeiro
-const finEnabledPages = ['index', 'contas_pagar', 'contas_receber', 'contas_bancarias', 'fluxo_caixa', 'relatorios', 'plano_contas', 'conciliacao', 'orcamentos', 'impostos'];
+const finEnabledPages = ['index', 'contas_pagar', 'contas_receber', 'contas_bancarias', 'fluxo_caixa', 'relatorios', 'plano_contas', 'conciliacao', 'orcamentos', 'impostos', 'bancos', 'centros_custo', 'nfse', 'boletos', 'recorrencias', 'dashboard_contas_pagar', 'dashboard_contas_receber'];
 app.get('/Financeiro/*.html', authenticateModuleHtml, (req, res, next) => {
-    const rawPage = req.params[0].split('/').pop(); // Express strip .html from wildcard
-    const page = rawPage.replace(/-/g, '_');
+    const rawPage = req.params[0].split('/').pop();
+    // Strip .html extension before checking finEnabledPages (list has entries without extension)
+    const page = rawPage.replace(/\.html$/, '').replace(/-/g, '_');
     if (!finEnabledPages.includes(page)) {
         return res.redirect('/Financeiro/index.html');
     }
+    // Tenta public/ primeiro, depois o diretório raiz do módulo (bancos, centros-custo, etc.)
     req.params[0] = `${page}.html`;
-    safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'Financeiro', 'public'));
+    safeSendModuleHtml(req, res, () => {
+        req.params[0] = rawPage;
+        safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'Financeiro'));
+    }, path.join(__dirname, 'modules', 'Financeiro', 'public'));
 });
 app.get('/Financeiro/*', (req, res, next) => {
+    if (!req.params[0]) return next(); // trailing-slash → deixa rota raiz tratar
     if (req.params[0].includes('.')) return next();
-    authenticateModuleHtml(req, res, () => serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'Financeiro', 'public')));
+    authenticateModuleHtml(req, res, () => {
+        serveCleanUrl(req, res, () => {
+            serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'Financeiro'));
+        }, path.join(__dirname, 'modules', 'Financeiro', 'public'));
+    });
 });
-// Financeiro: Dashboard alias
-app.get('/Financeiro', authenticateModuleHtml, (req, res, next) => {
-    req.params = { 0: 'index.html' };
-    safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'Financeiro', 'public'));
+// Financeiro: redireciona para URL com nome de arquivo para que CSS relativo resolva corretamente
+app.get('/Financeiro', authenticateModuleHtml, (req, res) => {
+    res.redirect(302, '/Financeiro/index.html');
 });
 
 // Aliases root-level para páginas do Financeiro (apenas habilitadas)
@@ -1418,6 +1718,10 @@ app.get('/Vendas/*', (req, res, next) => {
     if (req.params[0].includes('.')) return next();
     authenticateModuleHtml(req, res, () => serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'Vendas', 'public')));
 });
+app.get('/Vendas', authenticateModuleHtml, (req, res, next) => {
+    req.params = { 0: 'index.html' };
+    safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'Vendas', 'public'));
+});
 
 // Compras
 app.get('/Compras/*.html', authenticateModuleHtml, (req, res, next) => {
@@ -1426,6 +1730,10 @@ app.get('/Compras/*.html', authenticateModuleHtml, (req, res, next) => {
 app.get('/Compras/*', (req, res, next) => {
     if (req.params[0].includes('.')) return next();
     authenticateModuleHtml(req, res, () => serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'Compras')));
+});
+app.get('/Compras', authenticateModuleHtml, (req, res, next) => {
+    req.params = { 0: 'index.html' };
+    safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'Compras'));
 });
 
 // RH
@@ -1443,18 +1751,22 @@ app.get('/RH/*', (req, res, next) => {
     if (req.params[0].includes('.')) return next();
     authenticateModuleHtml(req, res, () => serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'RH', 'public')));
 });
+app.get(['/RH', '/RecursosHumanos'], authenticateModuleHtml, (req, res, next) => {
+    req.params = { 0: 'areaadm.html' };
+    safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'RH', 'public'));
+});
 
 // Logistica
 app.get('/Logistica/*.html', authenticateModuleHtml, (req, res, next) => {
     safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'Logistica', 'public'));
 });
 app.get('/Logistica/*', (req, res, next) => {
+    if (!req.params[0]) return next(); // trailing-slash → deixa rota raiz tratar
     if (req.params[0].includes('.')) return next();
     authenticateModuleHtml(req, res, () => serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'Logistica', 'public')));
 });
-app.get('/Logistica', authenticateModuleHtml, (req, res, next) => {
-    req.params = { 0: 'index.html' };
-    safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'Logistica', 'public'));
+app.get('/Logistica', authenticateModuleHtml, (req, res) => {
+    res.redirect(302, '/Logistica/index.html');
 });
 
 // Faturamento
@@ -1462,12 +1774,12 @@ app.get('/Faturamento/*.html', authenticateModuleHtml, (req, res, next) => {
     safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'Faturamento', 'public'));
 });
 app.get('/Faturamento/*', (req, res, next) => {
+    if (!req.params[0]) return next(); // trailing-slash → deixa rota raiz tratar
     if (req.params[0].includes('.')) return next();
     authenticateModuleHtml(req, res, () => serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'Faturamento', 'public')));
 });
-app.get('/Faturamento', authenticateModuleHtml, (req, res, next) => {
-    req.params = { 0: 'dashboard.html' };
-    safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'Faturamento', 'public'));
+app.get('/Faturamento', authenticateModuleHtml, (req, res) => {
+    res.redirect(302, '/Faturamento/index.html');
 });
 
 app.use('/modules', (req, res, next) => {
@@ -1610,6 +1922,7 @@ app.use('/Financeiro', express.static(path.join(__dirname, 'modules', 'Financeir
 app.use('/Compras', express.static(path.join(__dirname, 'modules', 'Compras'), mso));
 app.use('/Logistica/css', express.static(path.join(__dirname, 'modules', 'Faturamento', 'css'), mso));
 app.use('/Logistica', express.static(path.join(__dirname, 'modules', 'Logistica', 'public'), mso));
+app.use('/Faturamento/css', express.static(path.join(__dirname, 'modules', 'Faturamento', 'public', 'css'), mso));
 app.use('/RecursosHumanos', express.static(path.join(__dirname, 'modules', 'RH', 'public'), mso));
 app.use('/RH', express.static(path.join(__dirname, 'modules', 'RH', 'public'), mso));
 
@@ -1636,6 +1949,26 @@ app.use('/modules', express.static(path.join(__dirname, 'modules'), {
 const healthEndpoint = createHealthEndpoint(pool, cacheService);
 app.get('/api/health', healthEndpoint);
 app.get('/health', healthEndpoint);
+
+// Dashboard V2 — stats para o painel principal Next.js
+app.get('/api/dashboard-stats', (req, res, next) => authenticateToken(req, res, next), asyncHandler(async (req, res) => {
+    let recebimentos = 0, pedidosCompra = 0, ordensAtivas = 0, recebimentosMesAnterior = 0;
+    if (pool) {
+        const now = new Date();
+        const m = now.getMonth() + 1, y = now.getFullYear();
+        const mp = m === 1 ? 12 : m - 1, yp = m === 1 ? y - 1 : y;
+        const safe = async (fn) => { try { return await fn(); } catch { return null; } };
+        const r1 = await safe(() => pool.query(`SELECT COALESCE(SUM(valor),0) AS v FROM pagamentos WHERE MONTH(data_pagamento)=? AND YEAR(data_pagamento)=? AND status='recebido'`, [m, y]));
+        if (r1) recebimentos = Number(r1[0][0]?.v || 0);
+        const r2 = await safe(() => pool.query(`SELECT COUNT(*) AS v FROM pedidos_compra WHERE status IN ('pendente','aprovado')`));
+        if (r2) pedidosCompra = Number(r2[0][0]?.v || 0);
+        const r3 = await safe(() => pool.query(`SELECT COUNT(*) AS v FROM ordens_producao WHERE status='ativa'`));
+        if (r3) ordensAtivas = Number(r3[0][0]?.v || 0);
+        const r4 = await safe(() => pool.query(`SELECT COALESCE(SUM(valor),0) AS v FROM pagamentos WHERE MONTH(data_pagamento)=? AND YEAR(data_pagamento)=? AND status='recebido'`, [mp, yp]));
+        if (r4) recebimentosMesAnterior = Number(r4[0][0]?.v || 0);
+    }
+    res.json({ success: true, stats: { recebimentos, pedidosCompra, ordensAtivas, recebimentosMesAnterior } });
+}));
 
 // =================================================================
 // 🤖 DISCORD — Rotas de notificação em tempo real
@@ -1777,6 +2110,76 @@ app.get('/api/proxy/cep/:cep', authenticateToken, asyncHandler(async (req, res) 
 }));
 
 // =================================================================
+// 🔍 Busca Global — pesquisa unificada entre clientes, pedidos e fornecedores
+// =================================================================
+app.get('/api/busca-global', authenticateToken, asyncHandler(async (req, res) => {
+    const q = (req.query.q || '').trim();
+    if (!q || q.length < 2) return res.json({ resultados: [], total: 0 });
+    if (!pool) return res.status(503).json({ error: 'Banco indisponível' });
+
+    const like = `%${q}%`;
+    const resultados = [];
+
+    try {
+        const conn = await pool.getConnection();
+        try {
+            // Clientes
+            const [clientes] = await conn.query(
+                `SELECT id, COALESCE(razao_social, nome, nome_fantasia) as titulo,
+                        CONCAT('CPF/CNPJ: ', COALESCE(cnpj_cpf, cnpj, cpf, '')) as subtitulo,
+                        NULL as valor
+                 FROM clientes
+                 WHERE razao_social LIKE ? OR nome LIKE ? OR nome_fantasia LIKE ? OR cnpj LIKE ? OR cnpj_cpf LIKE ?
+                 LIMIT 5`,
+                [like, like, like, like, like]
+            );
+            clientes.forEach(r => resultados.push({ ...r, tipo: 'cliente', url: `/modules/Vendas/public/index.html?cliente=${r.id}` }));
+
+            // Pedidos de Venda
+            const [pedidos] = await conn.query(
+                `SELECT p.id, CONCAT('Pedido #', p.numero_pedido) as titulo,
+                        CONCAT(COALESCE(c.razao_social, c.nome, ''), ' — ', p.status) as subtitulo,
+                        p.valor_total as valor
+                 FROM pedidos p
+                 LEFT JOIN clientes c ON c.id = p.cliente_id
+                 WHERE p.numero_pedido LIKE ? OR c.razao_social LIKE ? OR c.nome LIKE ?
+                 ORDER BY p.created_at DESC LIMIT 5`,
+                [like, like, like]
+            );
+            pedidos.forEach(r => resultados.push({ ...r, tipo: 'pedido', url: `/modules/Vendas/public/index.html?pedido=${r.id}` }));
+
+            // Fornecedores (Compras)
+            const [fornecedores] = await conn.query(
+                `SELECT id, COALESCE(razao_social, nome_fantasia) as titulo,
+                        COALESCE(cnpj, '') as subtitulo, NULL as valor
+                 FROM fornecedores
+                 WHERE razao_social LIKE ? OR nome_fantasia LIKE ? OR cnpj LIKE ?
+                 LIMIT 5`,
+                [like, like, like]
+            ).catch(() => [[]]);
+            fornecedores.forEach(r => resultados.push({ ...r, tipo: 'fornecedor', url: `/Compras/fornecedores.html` }));
+
+            // Funcionários
+            const [funcionarios] = await conn.query(
+                `SELECT id, COALESCE(nome_completo, nome) as titulo,
+                        COALESCE(departamento, cargo, '') as subtitulo, NULL as valor
+                 FROM funcionarios
+                 WHERE nome_completo LIKE ? OR nome LIKE ? OR cpf LIKE ?
+                 LIMIT 5`,
+                [like, like, like]
+            ).catch(() => [[]]);
+            funcionarios.forEach(r => resultados.push({ ...r, tipo: 'funcionario', url: `/modules/RH/public/areaadm.html` }));
+        } finally {
+            conn.release();
+        }
+    } catch (err) {
+        console.error('[busca-global] Erro:', err.message);
+    }
+
+    res.json({ resultados, total: resultados.length });
+}));
+
+// =================================================================
 // 📄 NFe API — Extracted to routes/nfe-api.js
 // =================================================================
 const nfeApiRouter = require('./routes/nfe-api')({ authenticateToken, pool });
@@ -1861,6 +2264,19 @@ try {
     console.error('❌ Erro ao carregar rotas Compras:', err.message);
 }
 
+// ── RH Treinamentos (vídeos locais) ─────────────────────────────────────────
+try {
+    const { runMigration: treinaVideosMigration } = require('./database/migrations/20260518_treinamentos_videos');
+    treinaVideosMigration(pool).catch(e => console.warn('[TREINA-VIDEO] Migration:', e.message));
+} catch (_) {}
+try {
+    const createRHTreinamentosRoutes = require('./routes/rh-treinamentos');
+    app.use('/api/rh', createRHTreinamentosRoutes({ pool, authenticateToken }));
+    console.log('✅ Rotas RH Treinamentos carregadas: /api/rh/treinamentos*');
+} catch (err) {
+    console.error('❌ Erro ao carregar rotas RH Treinamentos:', err.message);
+}
+
 // 📊 ENTERPRISE: Prometheus /metrics endpoint (protected at app level + nginx)
 app.get('/metrics', (req, res, next) => {
     // SECURITY: Require auth in ALL environments (metrics expose internal data)
@@ -1939,7 +2355,14 @@ if (process.platform !== 'win32') {
         maxAge: '1d',
         extensions: ['jpg', 'jpeg', 'png', 'webp', 'gif']
     }));
+    // Vídeos de treinamentos — streaming com accept-ranges
+    app.use('/videos', express.static('/var/www/uploads/videos', {
+        acceptRanges: true,
+        setHeaders: (res) => { res.setHeader('Accept-Ranges', 'bytes'); }
+    }));
 }
+// Dev fallback para vídeos de treinamentos
+app.use('/videos', express.static(path.join(__dirname, 'uploads', 'videos'), { acceptRanges: true }));
 
 // Middleware para servir avatares (fallback / desenvolvimento)
 app.use('/avatars', express.static(path.join(__dirname, 'public', 'avatars'), {
@@ -2306,6 +2729,20 @@ const healthRouter = require('./routes/health-api')({
 });
 app.use(healthRouter);
 console.log('✅ Health/Status endpoints carregados (modular)');
+
+// ─── RH DASHBOARD ───────────────────────────────────────────────────
+
+app.get('/api/rh/stats', authenticateToken, authorizeArea('rh'), asyncHandler(async (req, res) => {
+    if (!pool) return res.status(503).json({ error: 'Banco indisponível' });
+    const [[totRow]] = await pool.query(`SELECT COUNT(*) as total, SUM(CASE WHEN status='Ativo' OR ativo=1 THEN 1 ELSE 0 END) as ativos, SUM(CASE WHEN (status='Ativo' OR ativo=1) AND salario IS NOT NULL THEN salario ELSE 0 END) as folha FROM funcionarios`);
+    res.json({ totalFuncionarios: totRow.total || 0, funcionariosAtivos: totRow.ativos || 0, folhaPagamento: parseFloat(totRow.folha) || 0, faltasMes: 0 });
+}));
+
+app.get('/api/rh/funcionarios/recentes', authenticateToken, authorizeArea('rh'), asyncHandler(async (req, res) => {
+    if (!pool) return res.status(503).json({ error: 'Banco indisponível' });
+    const [rows] = await pool.query(`SELECT id, COALESCE(nome_completo,nome) as nome, cargo, departamento, status, ativo, data_admissao, email FROM funcionarios ORDER BY id DESC LIMIT 5`);
+    res.json(rows.map(f => ({ ...f, statusNorm: (f.status || (f.ativo ? 'Ativo' : 'Inativo')) })));
+}));
 
 // ─── FOLHA DE PAGAMENTO MANUAL (RH) ───────────────────────────────
 

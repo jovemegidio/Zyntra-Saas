@@ -7,44 +7,7 @@
 const jwt = require('jsonwebtoken');
 
 function setupSocketIO(httpServer, { Server, allowedOrigins, JWT_SECRET, pool }) {
-    function parseCookies(cookieHeader) {
-        if (!cookieHeader) return {};
-        return Object.fromEntries(
-            cookieHeader.split(';').map(c => {
-                const [k, ...v] = c.trim().split('=');
-                let value = v.join('=');
-                try {
-                    value = decodeURIComponent(value);
-                } catch {}
-                return [k, value];
-            }).filter(([k]) => k)
-        );
-    }
-
-    function tokenFromHeaders(headers = {}) {
-        const auth = headers.authorization;
-        if (auth && auth.startsWith('Bearer ')) return auth.slice(7);
-        const cookies = parseCookies(headers.cookie);
-        return cookies.authToken || cookies.token || null;
-    }
-
-    function verifySocketToken(token) {
-        if (!token) return null;
-        return jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
-    }
-
     const io = new Server(httpServer, {
-        allowRequest: (req, callback) => {
-            if (process.env.NODE_ENV === 'development') {
-                return callback(null, true);
-            }
-            try {
-                verifySocketToken(tokenFromHeaders(req.headers));
-                return callback(null, true);
-            } catch {
-                return callback('Autenticação necessária', false);
-            }
-        },
         cors: {
             origin: function(origin, callback) {
                 if (!origin) {
@@ -87,15 +50,29 @@ function setupSocketIO(httpServer, { Server, allowedOrigins, JWT_SECRET, pool })
 
     // ⚡ SECURITY: Socket.IO JWT Authentication Middleware
     io.use((socket, next) => {
+        // Parse cookies from handshake headers (httpOnly cookies)
+        let cookieToken = null;
+        const cookieHeader = socket.handshake.headers?.cookie;
+        if (cookieHeader) {
+            const cookies = Object.fromEntries(
+                cookieHeader.split(';').map(c => {
+                    const [k, ...v] = c.trim().split('=');
+                    return [k, v.join('=')];
+                })
+            );
+            cookieToken = cookies['authToken'] || cookies['token'] || null;
+        }
+
         const token = socket.handshake.auth?.token ||
                       socket.handshake.headers?.authorization?.replace('Bearer ', '') ||
-                      tokenFromHeaders(socket.handshake.headers);
+                      cookieToken ||
+                      socket.handshake.query?.token;
         if (!token) {
             if (process.env.NODE_ENV === 'development') return next();
             return next(new Error('Autenticação necessária'));
         }
         try {
-            const decoded = verifySocketToken(token);
+            const decoded = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
             socket.user = decoded;
             next();
         } catch (err) {
@@ -120,13 +97,13 @@ function setupSocketIO(httpServer, { Server, allowedOrigins, JWT_SECRET, pool })
         chatTeamsNs.use((socket, next) => {
             const token = socket.handshake.auth?.token ||
                           socket.handshake.headers?.authorization?.replace('Bearer ', '') ||
-                          tokenFromHeaders(socket.handshake.headers);
+                          socket.handshake.query?.token;
             if (!token) {
                 if (process.env.NODE_ENV === 'development') return next();
                 return next(new Error('Autenticação necessária'));
             }
             try {
-                const decoded = verifySocketToken(token);
+                const decoded = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
                 socket.user = decoded;
                 next();
             } catch (err) {

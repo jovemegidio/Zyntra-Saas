@@ -2,12 +2,6 @@
 const puppeteer = require('puppeteer-core');
 
 async function testLogin() {
-    const username = process.env.CDR_PABX_USER;
-    const password = process.env.CDR_PABX_PASS;
-    if (!username || !password) {
-        throw new Error('CDR_PABX_USER/CDR_PABX_PASS não configurados');
-    }
-
     console.log('Starting Chromium...');
     const browser = await puppeteer.launch({
         executablePath: '/snap/bin/chromium',
@@ -35,9 +29,9 @@ async function testLogin() {
     console.log('Has submit button:', !!hasSubmit);
 
     // Type credentials
-    console.log('Typing credentials from environment');
-    await page.type('#username', username, { delay: 50 });
-    await page.type('#password', password, { delay: 50 });
+    console.log('Typing credentials: Labor@ / F.0582#9d5c?');
+    await page.type('#username', 'Labor@', { delay: 50 });
+    await page.type('#password', 'F.0582#9d5c?', { delay: 50 });
 
     // Submit
     console.log('Clicking submit...');

@@ -7,22 +7,13 @@
 const express = require('express');
 const crypto = require('crypto');
 
-// Chave para criptografia dos secrets. Em produção usa env dedicada ou JWT_SECRET.
-const DEV_ENCRYPT_KEY = crypto.randomBytes(32).toString('hex');
+// Chave para criptografia dos secrets (usar variável de ambiente em produção)
+const ENCRYPT_KEY = process.env.INTEGRACAO_ENCRYPT_KEY || 'aluforce-integracao-bancaria-2026-key!';
 const ENCRYPT_IV_LENGTH = 16;
-
-function getEncryptKey() {
-    const key = process.env.INTEGRACAO_ENCRYPT_KEY || process.env.JWT_SECRET;
-    if (key && key.length >= 32) return key;
-    if (process.env.NODE_ENV === 'production') {
-        throw new Error('INTEGRACAO_ENCRYPT_KEY ou JWT_SECRET >= 32 chars é obrigatório em produção');
-    }
-    return DEV_ENCRYPT_KEY;
-}
 
 function encrypt(text) {
     if (!text) return '';
-    const key = crypto.scryptSync(getEncryptKey(), 'salt', 32);
+    const key = crypto.scryptSync(ENCRYPT_KEY, 'salt', 32);
     const iv = crypto.randomBytes(ENCRYPT_IV_LENGTH);
     const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
     let encrypted = cipher.update(text, 'utf8', 'hex');
@@ -33,7 +24,7 @@ function encrypt(text) {
 function decrypt(text) {
     if (!text || !text.includes(':')) return '';
     try {
-        const key = crypto.scryptSync(getEncryptKey(), 'salt', 32);
+        const key = crypto.scryptSync(ENCRYPT_KEY, 'salt', 32);
         const parts = text.split(':');
         const iv = Buffer.from(parts.shift(), 'hex');
         const encrypted = parts.join(':');

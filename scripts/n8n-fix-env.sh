@@ -6,21 +6,15 @@ echo "=== 1. Fixing .env variables ==="
 # Update N8N vars in .env
 cd /var/www/aluforce
 
-: "${N8N_SMTP_USER:?N8N_SMTP_USER required}"
-: "${N8N_SMTP_PASS:?N8N_SMTP_PASS required}"
-: "${N8N_SMTP_SENDER:?N8N_SMTP_SENDER required}"
-: "${N8N_ENCRYPTION_KEY:?N8N_ENCRYPTION_KEY required}"
-: "${N8N_API_KEY:?N8N_API_KEY required}"
-
 # Remove old/incorrect N8N vars
 sed -i '/^N8N_AUTH_USER=/d' .env
 sed -i '/^N8N_AUTH_PASSWORD=/d' .env
 sed -i '/^N8N_DB_NAME=/d' .env
 
 # Add missing vars if not present
-grep -q 'N8N_SMTP_USER' .env || echo "N8N_SMTP_USER=${N8N_SMTP_USER}" >> .env
-grep -q 'N8N_SMTP_PASS' .env || echo "N8N_SMTP_PASS=${N8N_SMTP_PASS}" >> .env
-grep -q 'N8N_SMTP_SENDER' .env || echo "N8N_SMTP_SENDER=${N8N_SMTP_SENDER}" >> .env
+grep -q 'N8N_SMTP_USER' .env || echo 'N8N_SMTP_USER=sistema@aluforce.ind.br' >> .env
+grep -q 'N8N_SMTP_PASS' .env || echo 'N8N_SMTP_PASS=apialuforce' >> .env
+grep -q 'N8N_SMTP_SENDER' .env || echo 'N8N_SMTP_SENDER=sistema@aluforce.ind.br' >> .env
 grep -q 'EMAIL_RELATORIO_DIARIO' .env || echo 'EMAIL_RELATORIO_DIARIO=diretoria@aluforce.ind.br' >> .env
 grep -q 'EMAIL_RELATORIOS' .env || echo 'EMAIL_RELATORIOS=diretoria@aluforce.ind.br' >> .env
 grep -q 'WHATSAPP_API_URL' .env || echo 'WHATSAPP_API_URL=http://localhost:3002' >> .env
@@ -48,21 +42,21 @@ services:
       WEBHOOK_URL: https://n8n.aluforce.api.br/
       GENERIC_TIMEZONE: America/Sao_Paulo
       TZ: America/Sao_Paulo
-      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY:?N8N_ENCRYPTION_KEY required}
+      N8N_ENCRYPTION_KEY: aluforce-n8n-encryption-key-2026
       EXECUTIONS_MODE: regular
 
       # ALUFORCE API (interno via Docker bridge)
       ALUFORCE_API_URL: http://172.17.0.1:3000
-      ALUFORCE_API_KEY: ${N8N_API_KEY:?N8N_API_KEY required}
+      ALUFORCE_API_KEY: n8n-internal-key-2026
 
       # SMTP para envio de emails pelos workflows
       N8N_EMAIL_MODE: smtp
       N8N_SMTP_HOST: mail.aluforce.ind.br
       N8N_SMTP_PORT: '465'
       N8N_SMTP_SSL: 'true'
-      N8N_SMTP_USER: ${N8N_SMTP_USER:?N8N_SMTP_USER required}
-      N8N_SMTP_PASS: ${N8N_SMTP_PASS:?N8N_SMTP_PASS required}
-      N8N_SMTP_SENDER: ${N8N_SMTP_SENDER:?N8N_SMTP_SENDER required}
+      N8N_SMTP_USER: sistema@aluforce.ind.br
+      N8N_SMTP_PASS: apialuforce
+      N8N_SMTP_SENDER: sistema@aluforce.ind.br
 
       # Destinatários padrão
       EMAIL_RELATORIO_DIARIO: diretoria@aluforce.ind.br

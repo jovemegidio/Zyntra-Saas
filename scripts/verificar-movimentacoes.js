@@ -4,7 +4,7 @@ async function verificar() {
     const pool = await mysql.createPool({
         host: 'interchange.proxy.rlwy.net',
         user: 'root',
-        password: process.env.DB_PASSWORD || '',
+        password: 'iiilOZutDOnPCwxgiTKeMuEaIzSwplcu',
         database: 'railway',
         port: 19396
     });

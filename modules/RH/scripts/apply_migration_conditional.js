@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+﻿#!/usr/bin/env node
 /**
  * apply_migration_conditional.js
  * Idempotent migration: checks INFORMATION_SCHEMA and adds missing columns to `funcionarios`.

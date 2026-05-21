@@ -2002,7 +2002,7 @@
                 modal = document.getElementById('modal-visualizar');
             }
 
-            document.getElementById('modal-pedido-numero').textContent = `#${pedido.numero || pedido.id}`;
+            document.getElementById('modal-pedido-número').textContent = `#${pedido.numero || pedido.id}`;
             modal.classList.add('active');
 
             // Buscar itens do pedido
@@ -2683,14 +2683,14 @@
             const clienteNome = pedido.cliente_nome || 'Cliente';
             const iniciais = clienteNome.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
 
-            document.getElementById('modal-titulo-pedido').textContent = `Orçamento Nº ${pedido.numero || pedido.id}`;
+            document.getElementById('modal-título-pedido').textContent = `Orçamento Nº ${pedido.numero || pedido.id}`;
             document.getElementById('modal-cliente-avatar').textContent = iniciais;
             document.getElementById('edit-cliente').value = clienteNome;
             document.getElementById('edit-vendedor').value = pedido.vendedor_nome || '';
             document.getElementById('edit-status').value = pedido.status || 'orcamento';
             document.getElementById('edit-valor-total').value = formatarValor(pedido.valor_total).replace('R$ ', '');
             document.getElementById('edit-total-mercadorias').value = formatarValor(pedido.valor_total).replace('R$ ', '');
-            document.getElementById('edit-observacoes').value = pedido.observação || '';
+            document.getElementById('edit-observações').value = pedido.observação || '';
             document.getElementById('edit-pedido-id').value = pedido.id;
 
             // Carregar itens do pedido
@@ -3077,15 +3077,15 @@
                 // ===== FRETE E TRANSPORTE =====
                 transportadora: document.getElementById('edit-transportadora')?.value || '',
                 tipo_frete: document.getElementById('edit-tipo-frete')?.value || '',
-                placa_veiculo: document.getElementById('edit-placa-veiculo')?.value || '',
-                veiculo_uf: document.getElementById('edit-veiculo-uf')?.value || '',
+                placa_veiculo: document.getElementById('edit-placa-veículo')?.value || '',
+                veiculo_uf: document.getElementById('edit-veículo-uf')?.value || '',
                 rntrc: document.getElementById('edit-rntrc')?.value || '',
 
                 // Volumes
                 qtd_volumes: parseInt(document.getElementById('edit-qtd-volumes')?.value) || 0,
                 especie_volumes: document.getElementById('edit-especie-volumes')?.value || '',
                 marca_volumes: document.getElementById('edit-marca-volumes')?.value || '',
-                numeracao_volumes: document.getElementById('edit-numeracao-volumes')?.value || '',
+                numeracao_volumes: document.getElementById('edit-numeração-volumes')?.value || '',
 
                 // Pesos e valores
                 peso_liquido: parseFloat(document.getElementById('edit-peso-líquido')?.value) || 0,
@@ -3095,11 +3095,11 @@
                 tipo_entrega: document.getElementById('edit-tipo-entrega')?.value || '',
 
                 // Outros dados de frete
-                numero_lacre: document.getElementById('edit-numero-lacre')?.value || '',
+                numero_lacre: document.getElementById('edit-número-lacre')?.value || '',
                 outras_despesas: parseFloat(document.getElementById('edit-outras-despesas')?.value) || 0,
                 prazo_entrega: document.getElementById('edit-previsão-entrega')?.value || '',
-                codigo_rastreio: document.getElementById('edit-codigo-rastreio')?.value || '',
-                veiculo_proprio: document.getElementById('edit-veiculo-proprio')?.checked ? 1 : 0,
+                codigo_rastreio: document.getElementById('edit-código-rastreio')?.value || '',
+                veiculo_proprio: document.getElementById('edit-veículo-proprio')?.checked ? 1 : 0,
 
                 // ===== INFORMAÇÕES ADICIONAIS =====
                 nf: document.getElementById('edit-nf')?.value || '',
@@ -3107,8 +3107,8 @@
                 info_complementar: document.getElementById('edit-info-complementar')?.value || '',
 
                 // ===== OBSERVAÇÕES =====
-                observação: document.getElementById('edit-observacoes')?.value || '',
-                observacao_cliente: document.getElementById('edit-observacoes-cliente')?.value || ''
+                observação: document.getElementById('edit-observações')?.value || '',
+                observacao_cliente: document.getElementById('edit-observações-cliente')?.value || ''
             };
 
             // Remover campos vazios/undefined para não sobrescrever dados existentes
@@ -3338,7 +3338,7 @@
                 }
 
                 // Remover modal anterior se existir
-                const existente = document.getElementById('modal-historico-pedido');
+                const existente = document.getElementById('modal-histórico-pedido');
                 if (existente) existente.remove();
 
                 const modalHtml = `
@@ -3346,7 +3346,7 @@
                         <div style="background:#fff;border-radius:12px;width:90%;max-width:520px;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
                             <div style="padding:16px 20px;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;">
                                 <h3 style="margin:0;font-size:15px;font-weight:600;color:#1e293b;"><i class="fas fa-history" style="margin-right:8px;color:#6366f1;"></i>Histórico — Pedido #${pedidoAtualModal.numero || pedidoAtualModal.id}</h3>
-                                <button onclick="document.getElementById('modal-historico-pedido').remove()" style="background:none;border:none;cursor:pointer;font-size:18px;color:#94a3b8;padding:4px 8px;border-radius:6px;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'">&times;</button>
+                                <button onclick="document.getElementById('modal-histórico-pedido').remove()" style="background:none;border:none;cursor:pointer;font-size:18px;color:#94a3b8;padding:4px 8px;border-radius:6px;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'">&times;</button>
                             </div>
                             <div style="overflow-y:auto;flex:1;">
                                 ${itensHtml}

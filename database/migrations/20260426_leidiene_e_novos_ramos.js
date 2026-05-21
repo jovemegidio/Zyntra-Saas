@@ -11,7 +11,7 @@
 
 'use strict';
 
-const bcrypt = require('bcryptjs');
+const bcrypt = require('bcrypt');
 
 async function runMigration(pool) {
     const conn = await pool.getConnection();

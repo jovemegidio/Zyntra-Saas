@@ -367,11 +367,11 @@ DELETE /api/pcp/produtos/:id    # Remove produto
             
             // Preencher campos
             document.getElementById('edit-product-id').value = produto.id || '';
-            document.getElementById('edit-codigo').value = produto.codigo || '';
+            document.getElementById('edit-código').value = produto.codigo || '';
             document.getElementById('edit-nome').value = produto.nome || '';
             document.getElementById('edit-sku').value = produto.sku || '';
             document.getElementById('edit-gtin').value = produto.gtin || '';
-            document.getElementById('edit-descricao').value = produto.descricao || '';
+            document.getElementById('edit-descrição').value = produto.descricao || '';
             document.getElementById('edit-marca').value = produto.marca || '';
             document.getElementById('edit-unidade').value = produto.unidade_medida || '';
             document.getElementById('edit-estoque').value = produto.quantidade || 0;
@@ -385,7 +385,7 @@ DELETE /api/pcp/produtos/:id    # Remove produto
                 new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR');
             
             // Processar variações
-            const variaçãoContainer = document.getElementById('edit-variacao-tags');
+            const variaçãoContainer = document.getElementById('edit-variação-tags');
             variaçãoContainer.innerHTML = '';
             
             let variações = [];
@@ -418,7 +418,7 @@ DELETE /api/pcp/produtos/:id    # Remove produto
 
         // Adicionar tag de Variação
         function adicionarTagVariação(variação) {
-            const container = document.getElementById('edit-variacao-tags');
+            const container = document.getElementById('edit-variação-tags');
             const tag = document.createElement('div');
             tag.className = 'tag-item';
             tag.innerHTML = `
@@ -449,7 +449,7 @@ DELETE /api/pcp/produtos/:id    # Remove produto
             });
             
             // Input de variações
-            const variaçãoInput = document.getElementById('edit-variacao');
+            const variaçãoInput = document.getElementById('edit-variação');
             if (variaçãoInput) {
                 variaçãoInput.addEventListener('keypress', function(e) {
                     if (e.key === 'Enter') {

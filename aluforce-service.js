@@ -26,7 +26,7 @@ const CONFIG = {
         host: process.env.DB_HOST || 'interchange.proxy.rlwy.net',
         port: parseInt(process.env.DB_PORT) || 19396,
         user: process.env.DB_USER || 'root',
-        password: process.env.DB_PASSWORD || '',
+        password: process.env.DB_PASSWORD || 'iiilOZutDOnPCwxgiTKeMuEaIzSwplcu',
         database: process.env.DB_NAME || 'railway',
         connectTimeout: 30000,
         waitForConnections: true,

@@ -29,10 +29,6 @@ if (!process.env.REFRESH_SECRET) {
     console.warn('⚠️ [SECURITY] REFRESH_SECRET não configurado. Usando derivação HMAC como fallback. Defina REFRESH_SECRET no .env para produção.');
 }
 
-function hashToken(token) {
-    return crypto.createHash('sha256').update(token).digest('hex');
-}
-
 /**
  * Gera par de tokens (access + refresh)
  * @param {Object} user - Dados do usuário
@@ -91,7 +87,7 @@ async function generateTokenPair(user, pool, deviceId = 'default') {
             INSERT INTO refresh_tokens 
             (token_id, user_id, token, device_id, expires_at, created_at)
             VALUES (?, ?, ?, ?, ?, NOW())
-        `, [refreshTokenId, id, hashToken(refreshToken), deviceId, expiresAt]);
+        `, [refreshTokenId, id, refreshToken, deviceId, expiresAt]);
     }
     
     return {
@@ -126,12 +122,6 @@ async function refreshTokens(refreshToken, pool) {
         
         if (tokens.length === 0) {
             throw new Error('Refresh token inválido ou revogado');
-        }
-
-        const storedToken = tokens[0].token;
-        const refreshTokenHash = hashToken(refreshToken);
-        if (storedToken && storedToken !== refreshTokenHash && storedToken !== refreshToken) {
-            throw new Error('Refresh token não corresponde ao registro ativo');
         }
         
         // Buscar dados atualizados do usuário

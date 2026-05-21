@@ -10,7 +10,7 @@ fi
 
 echo ""
 echo "=== 2. Verify n8n database ==="
-mysql -u aluforce -p"${N8N_DB_PASSWORD:?N8N_DB_PASSWORD required}" -e "SHOW DATABASES LIKE 'n8n';" 2>&1
+mysql -u aluforce -pCHANGE_ME_DB_PASSWORD -e "SHOW DATABASES LIKE 'n8n';" 2>&1
 
 echo ""
 echo "=== 3. Create standalone n8n docker-compose ==="
@@ -37,15 +37,15 @@ services:
       DB_MYSQLDB_PORT: 3306
       DB_MYSQLDB_DATABASE: n8n
       DB_MYSQLDB_USER: aluforce
-      DB_MYSQLDB_PASSWORD: ${N8N_DB_PASSWORD:?N8N_DB_PASSWORD required}
+      DB_MYSQLDB_PASSWORD: CHANGE_ME_DB_PASSWORD
       # Security
       N8N_BASIC_AUTH_ACTIVE: "true"
       N8N_BASIC_AUTH_USER: admin
-      N8N_BASIC_AUTH_PASSWORD: ${N8N_BASIC_AUTH_PASSWORD:?N8N_BASIC_AUTH_PASSWORD required}
-      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY:?N8N_ENCRYPTION_KEY required}
+      N8N_BASIC_AUTH_PASSWORD: Aluforce_n8n_2026!
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY:-aluforce-n8n-encryption-key-2026}
       # ALUFORCE API connection
       ALUFORCE_API_URL: http://172.17.0.1:3000
-      ALUFORCE_API_KEY: ${N8N_API_KEY:?N8N_API_KEY required}
+      ALUFORCE_API_KEY: ${N8N_API_KEY:-n8n-internal-key-2026}
       # Email
       N8N_EMAIL_MODE: smtp
       N8N_SMTP_HOST: mail.aluforce.ind.br

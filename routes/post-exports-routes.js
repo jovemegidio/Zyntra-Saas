@@ -1634,7 +1634,6 @@ let query = 'SELECT id, nome, tipo, icone, ativo, COALESCE(prazo, 0) as prazo, C
     
             const inicio = data_inicio || new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
             const fim = data_fim || new Date().toISOString().split('T')[0];
-            const params = [inicio, fim, inicio, fim];
     
             let query = `
                 SELECT
@@ -1658,13 +1657,12 @@ let query = 'SELECT id, nome, tipo, icone, ativo, COALESCE(prazo, 0) as prazo, C
             `;
     
             if (tipo && tipo !== 'todos') {
-                query += ' AND (c.tipo = ? OR c.tipo = "ambos")';
-                params.push(tipo);
+                query += ` AND (c.tipo = '${tipo}' OR c.tipo = 'ambos')`;
             }
     
             query += ` GROUP BY c.id, c.nome, c.tipo, c.cor, c.orcamento_mensal ORDER BY c.nome`;
     
-            const [relatorio] = await pool.query(query, params);
+            const [relatorio] = await pool.query(query, [inicio, fim, inicio, fim]);
     
             res.json(relatorio);
     

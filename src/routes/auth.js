@@ -210,19 +210,6 @@ async function auditLog(action, userId, description, req) {
     } catch (e) { /* fire-and-forget */ }
 }
 
-async function registerSessionActivity(userId, deviceId, context) {
-    if (!userId) return;
-    try {
-        const cacheService = require('../../services/cache');
-        const sessionKey = `session_activity:${userId}:${deviceId || 'default'}`;
-        const timeoutMs = parseInt(process.env.SESSION_INACTIVITY_TIMEOUT_MS, 10) || 15 * 60 * 1000;
-        await cacheService.cacheSet(sessionKey, Date.now(), timeoutMs + 60000);
-        console.log(`[AUTH/${context}] Session activity registered for userId ${userId}`);
-    } catch (redisErr) {
-        console.warn(`[AUTH/${context}] Redis session registration failed (non-blocking):`, redisErr.message);
-    }
-}
-
 // Rota de login corrigida (sem campo cargo)
 router.post('/login', validate(schemas.login), async (req, res) => {
     const isDevMode = process.env.NODE_ENV !== 'production';
@@ -943,7 +930,6 @@ router.post('/login', validate(schemas.login), async (req, res) => {
                 })()
             }
         };
-        await registerSessionActivity(user.id, deviceId, 'LOGIN');
         res.json(payload);
 
         // 📸 POST-LOGIN: sync foto from funcionarios -> usuarios (fire-and-forget)
@@ -968,6 +954,16 @@ router.post('/login', validate(schemas.login), async (req, res) => {
 
         auditLog('LOGIN_SUCCESS', user.id, `Login bem-sucedido: ${user.email}`, req);
 
+        // TC-AUTH-01-001: Registrar sessão no Redis para controle de inatividade
+        try {
+            const cacheService = require('../../services/cache');
+            const sessionKey = `session_activity:${user.id}:${deviceId}`;
+            const SESSION_INACTIVITY_MS = parseInt(process.env.SESSION_INACTIVITY_TIMEOUT_MS, 10) || 15 * 60 * 1000;
+            await cacheService.cacheSet(sessionKey, Date.now(), SESSION_INACTIVITY_MS + 60000); // 15min + 1min margem
+            console.log(`[AUTH/LOGIN] 📡 Sessão registrada no Redis: ${sessionKey}`);
+        } catch (redisErr) {
+            console.warn('[AUTH/LOGIN] ⚠️ Redis session registration failed (non-blocking):', redisErr.message);
+        }
     } catch (error) {
         // Log completo no servidor (stack quando disponível)
         console.error('Erro detalhado no login:', error.stack || error);
@@ -989,7 +985,7 @@ router.post('/logout', async (req, res) => {
     if (token) {
         try {
             const jwt = require('jsonwebtoken');
-            const decoded = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
+            const decoded = jwt.verify(token, JWT_SECRET);
             userName = decoded.nome || decoded.email || 'Usuário';
             userId = decoded.id;
         } catch (e) {
@@ -1070,7 +1066,7 @@ router.post('/auth/refresh', async (req, res) => {
             crypto.createHmac('sha256', JWT_SECRET).update('refresh-token-secret').digest('hex');
         let decoded;
         try {
-            decoded = jwtLib.verify(oldRefreshToken, REFRESH_SECRET, { algorithms: ['HS256'] });
+            decoded = jwtLib.verify(oldRefreshToken, REFRESH_SECRET);
         } catch (e) {
             return res.status(401).json({ code: 'INVALID_REFRESH_TOKEN', message: 'Refresh token inválido ou expirado.' });
         }
@@ -1122,7 +1118,16 @@ router.post('/auth/refresh', async (req, res) => {
             maxAge: 1000 * 60 * 60 * 24 * 7
         }));
 
-        await registerSessionActivity(result.user.id, decoded.deviceId || 'default', 'REFRESH');
+        // TC-AUTH-03-001: Renovar session_activity no Redis — refresh é atividade legítima
+        try {
+            const cacheService = require('../../services/cache');
+            const deviceId = decoded.deviceId || 'default';
+            const sessionKey = `session_activity:${result.user.id}:${deviceId}`;
+            const SESSION_INACTIVITY_MS = parseInt(process.env.SESSION_INACTIVITY_TIMEOUT_MS, 10) || 15 * 60 * 1000;
+            await cacheService.cacheSet(sessionKey, Date.now(), SESSION_INACTIVITY_MS + 60000);
+        } catch (redisErr) {
+            console.warn('[AUTH/REFRESH] ⚠️ Redis session renewal failed (non-blocking):', redisErr.message);
+        }
 
         console.log(`[AUTH/REFRESH] ✅ Tokens renovados para userId ${result.user.id}`);
 
@@ -1431,8 +1436,6 @@ router.post('/auth/validate-remember-token', async (req, res) => {
             maxAge: 1000 * 60 * 60 * 24 * 7
         }));
 
-        await registerSessionActivity(user.id, deviceId, 'VALIDATE-REMEMBER');
-
         res.json({
             success: true,
             user: user,
@@ -1646,7 +1649,8 @@ router.post('/verify-2fa', async (req, res) => {
             }
         }
 
-        const redirectTo = '/dashboard';
+        const baseUrl = (req.protocol || 'http') + '://' + (req.get('host') || req.headers.host || 'localhost');
+        const redirectTo = baseUrl + '/dashboard';
 
         // SECURITY: Token is NOT included in JSON response — delivered only via httpOnly cookie
         const payload = {
@@ -1690,7 +1694,6 @@ router.post('/verify-2fa', async (req, res) => {
         };
 
         console.log(`[AUTH/2FA] 📤 Resposta verify-2fa: trustedDeviceToken ${savedTrustedToken ? 'incluído' : 'NÃO incluído'}`);
-        await registerSessionActivity(user.id, deviceId, '2FA');
         res.json(payload);
 
     } catch (error) {

@@ -30,7 +30,7 @@
 
     <!-- CSS Padrão Global -->
     <link rel="stylesheet" href="/modules/Compras/css/compras-layout.css?v=20260301">
-    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260301">
+    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260418">
     <link rel="stylesheet" href="/css/skeleton-loader.css?v=20260301">
     <link rel="stylesheet" href="/css/popup-confirmacao.css?v=20260301">
     <style>
@@ -112,16 +112,16 @@
         <aside class="sidebar" id="mobile-sidebar">
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel"><i class="fas fa-home"></i></a>
             <nav class="sidebar-nav">
-                <button class="sidebar-btn" title="Dashboard" onclick="window.location.href='index.html'"><i class="fas fa-chart-line"></i></button>
-                <button class="sidebar-btn" title="Pedidos" onclick="window.location.href='pedidos.html'"><i class="fas fa-shopping-cart"></i></button>
-                <button class="sidebar-btn" title="Cotações" onclick="window.location.href='cotacoes.html'"><i class="fas fa-file-invoice-dollar"></i></button>
-                <button class="sidebar-btn" title="Fornecedores" onclick="window.location.href='fornecedores.html'"><i class="fas fa-users"></i></button>
-                <button class="sidebar-btn" title="Requisições" onclick="window.location.href='requisicoes.html'"><i class="fas fa-clipboard-list"></i></button>
-                <button class="sidebar-btn" title="Recebimento" onclick="window.location.href='recebimento.html'"><i class="fas fa-truck-loading"></i></button>
+                <button class="sidebar-btn" title="Dashboard" onclick="window.location.href='/Compras/index.html'"><i class="fas fa-chart-line"></i></button>
+                <button class="sidebar-btn" title="Pedidos" onclick="window.location.href='/Compras/pedidos.html'"><i class="fas fa-shopping-cart"></i></button>
+                <button class="sidebar-btn" title="Cotações" onclick="window.location.href='/Compras/cotacoes.html'"><i class="fas fa-file-invoice-dollar"></i></button>
+                <button class="sidebar-btn" title="Fornecedores" onclick="window.location.href='/Compras/fornecedores.html'"><i class="fas fa-users"></i></button>
+                <button class="sidebar-btn" title="Requisições" onclick="window.location.href='/Compras/requisicoes.html'"><i class="fas fa-clipboard-list"></i></button>
+                <button class="sidebar-btn" title="Recebimento" onclick="window.location.href='/Compras/recebimento.html'"><i class="fas fa-truck-loading"></i></button>
             </nav>
             <div class="sidebar-bottom">
-                <button class="sidebar-btn" title="Estoque MP" onclick="window.location.href='gestao-estoque.html'"><i class="fas fa-boxes"></i></button>
-                <button class="sidebar-btn active" title="Relatórios" onclick="window.location.href='relatorios.html'"><i class="fas fa-chart-bar"></i></button>
+                <button class="sidebar-btn" title="Estoque MP" onclick="window.location.href='/Compras/gestao-estoque.html'"><i class="fas fa-boxes"></i></button>
+                <button class="sidebar-btn active" title="Relatórios" onclick="window.location.href='/Compras/relatorios.html'"><i class="fas fa-chart-bar"></i></button>
             </div>
         </aside>
 
@@ -323,11 +323,12 @@
                 const r = await fetch('/api/compras/dashboard', { headers: this.getAuthHeaders() });
                 if (!r.ok) return;
                 const d = await r.json();
-                document.getElementById('stat-total-pedidos').textContent = d.total_pedidos || d.pedidos?.total || 0;
-                document.getElementById('stat-valor-total').textContent = this.formatarMoeda(d.valor_total || d.pedidos?.valor_total || 0);
-                document.getElementById('stat-fornecedores').textContent = d.fornecedores_ativos || d.fornecedores?.ativos || 0;
+                const s = d.stats || d;
+                document.getElementById('stat-total-pedidos').textContent = s.total_pedidos || d.total_pedidos || d.pedidos?.total || 0;
+                document.getElementById('stat-valor-total').textContent = this.formatarMoeda(s.compras_mes || d.valor_total || d.pedidos?.valor_total || 0);
+                document.getElementById('stat-fornecedores').textContent = s.fornecedores_ativos || d.fornecedores_ativos || d.fornecedores?.ativos || 0;
                 // Render recent orders
-                const pedidos = d.ultimos_pedidos || d.pedidos?.recentes || [];
+                const pedidos = d.pedidos_recentes || d.ultimos_pedidos || d.pedidos?.recentes || [];
                 this.carregarUltimosPedidos(pedidos);
             } catch (e) { console.log('Erro stats:', e); }
         },
@@ -713,3 +714,4 @@ ${this.gerarResumoPDF(resumo)}
     <script src="/_shared/accessibility-widget.js?v=20260418"></script>
 </body>
 </html>
+

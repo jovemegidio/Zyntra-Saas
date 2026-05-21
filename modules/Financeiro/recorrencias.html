@@ -384,7 +384,7 @@
         }
 
         function abrirModalCriar() {
-            document.getElementById('modal-titulo').innerHTML = '<i class="fas fa-redo"></i> Nova Recorrência';
+            document.getElementById('modal-título').innerHTML = '<i class="fas fa-redo"></i> Nova Recorrência';
             document.getElementById('rec-id').value = '';
             document.querySelectorAll('#modal-criar input[type="text"], #modal-criar input[type="number"]').forEach(el => el.value = '');
             document.getElementById('rec-tipo').value = 'pagar';
@@ -398,9 +398,9 @@
         function editarRecorrencia(id) {
             const r = recorrências.find(x => x.id === id);
             if (!r) return;
-            document.getElementById('modal-titulo').innerHTML = '<i class="fas fa-pen"></i> Editar Recorrência';
+            document.getElementById('modal-título').innerHTML = '<i class="fas fa-pen"></i> Editar Recorrência';
             document.getElementById('rec-id').value = r.id;
-            document.getElementById('rec-descricao').value = r.descricao || '';
+            document.getElementById('rec-descrição').value = r.descricao || '';
             document.getElementById('rec-tipo').value = r.tipo || 'pagar';
             document.getElementById('rec-valor').value = r.valor || '';
             document.getElementById('rec-frequencia').value = r.frequencia || 'mensal';
@@ -415,7 +415,7 @@
         async function salvarRecorrencia() {
             const id = document.getElementById('rec-id').value;
             const payload = {
-                descrição: document.getElementById('rec-descricao').value,
+                descrição: document.getElementById('rec-descrição').value,
                 tipo: document.getElementById('rec-tipo').value,
                 valor: parseFloat(document.getElementById('rec-valor').value),
                 frequencia: document.getElementById('rec-frequencia').value,

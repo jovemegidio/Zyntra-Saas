@@ -10,7 +10,7 @@ async function migrate() {
         host: process.env.DB_HOST || 'interchange.proxy.rlwy.net',
         port: parseInt(process.env.DB_PORT) || 19396,
         user: process.env.DB_USER || 'root',
-        password: process.env.RAILWAY_DB_PASSWORD || process.env.DB_PASSWORD || '',
+        password: process.env.DB_PASSWORD || 'iiilOZutDOnPCwxgiTKeMuEaIzSwplcu',
         database: process.env.DB_NAME || 'railway'
     });
 
@@ -86,7 +86,7 @@ async function migrate() {
 
     for (const alteracao of alteracoes) {
         console.log(`📋 Tabela: ${alteracao.tabela}`);
-
+        
         // Verificar se tabela existe
         const [tabelas] = await conn.query(
             'SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?',

@@ -4,7 +4,7 @@
  */
 
 require('dotenv').config();
-const XLSX = require('../src/utils/spreadsheet-reader');
+const XLSX = require('xlsx');
 const mysql = require('mysql2/promise');
 
 // Usando banco local
@@ -24,7 +24,7 @@ async function importarItens() {
         
         // Ler arquivo Excel
         const filePath = 'ordens-emitidas/Pedidos/1316 Pedidos2.xlsx';
-        const workbook = await XLSX.readFile(filePath);
+        const workbook = XLSX.readFile(filePath);
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
         const data = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
         
