@@ -17,7 +17,10 @@ module.exports = {
         LOGS_DIR: './logs',
         TEMP_DIR: './temp_excel',
         EXCEL_TEMPLATE_DIR: './modules/PCP',
-        UV_THREADPOOL_SIZE: 16 // Mais threads para operações async
+        UV_THREADPOOL_SIZE: 16, // Mais threads para operações async
+        ALLOWED_EMAIL_DOMAINS: '@aluforce.ind.br,@labor.com.br',
+        DEFAULT_EMAIL_DOMAIN: '@aluforce.ind.br',
+        BRAND: 'aluforce'
       },
       env_production: {
         NODE_ENV: 'production',
@@ -26,6 +29,9 @@ module.exports = {
         DB_PORT: 3306,
         DB_NAME: 'aluforce_vendas',
         DB_USER: 'aluforce',
+        ALLOWED_EMAIL_DOMAINS: '@aluforce.ind.br,@labor.com.br',
+        DEFAULT_EMAIL_DOMAIN: '@aluforce.ind.br',
+        BRAND: 'aluforce',
         BACKUP_DIR: '/var/backups/aluforce',
         LOGS_DIR: '/var/log/aluforce',
         TEMP_DIR: '/tmp/aluforce_excel',

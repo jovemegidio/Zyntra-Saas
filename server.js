@@ -1147,6 +1147,10 @@ async function _buildDashboardHtml(req, brandOverride, mountPathOverride) {
 }
 
 app.get('/dashboard', authenticatePage, async (req, res) => {
+    const _emailLow = (req.user?.email || '').toLowerCase();
+    if (_emailLow.endsWith('@labor.com.br')) {
+        return res.redirect(302, '/Zyntra-SGE/Empresas/dashboard.html');
+    }
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.setHeader('Pragma', 'no-cache');
