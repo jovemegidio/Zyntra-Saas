@@ -1403,8 +1403,12 @@ module.exports = function createAuthSectionRoutes(deps) {
         }
     }
 
-    // Servir /dashboard e /index.html apenas para usuários autenticados
+    // Servir /dashboard apenas para usuários autenticados
     router.get('/dashboard', requireAuthPage, (req, res) => {
+        const _emailLow = (req.user?.email || '').toLowerCase();
+        if (_emailLow.endsWith('@labor.com.br')) {
+            return res.redirect(302, '/Zyntra-SGE/Empresas/dashboard.html');
+        }
         res.setHeader('Content-Type', 'text/html; charset=utf-8');
         res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
         res.setHeader('Pragma', 'no-cache');
@@ -1414,12 +1418,7 @@ module.exports = function createAuthSectionRoutes(deps) {
     });
 
     router.get('/index.html', requireAuthPage, (req, res) => {
-        res.setHeader('Content-Type', 'text/html; charset=utf-8');
-        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-        res.setHeader('Pragma', 'no-cache');
-        res.setHeader('Expires', '0');
-        res.setHeader('Clear-Site-Data', '"cache"');
-        res.sendFile(path.join(__dirname, 'dashboard-emergent', 'index.html'));
+        res.redirect(302, '/dashboard');
     });
 
     // Servir arquivos estáticos do dashboard-emergent

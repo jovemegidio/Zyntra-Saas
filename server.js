@@ -1027,7 +1027,13 @@ app.get(/^\/Zyntra-SGE\/Empresas\/(?:aluforce|energy|labor-energy|labor-eletric)
 app.get(/^\/Zyntra-SGE\/(.+\.html)$/i, (req, res, next) => {
     const requestedPath = String(req.params[0] || '').toLowerCase();
     if (requestedPath.startsWith('empresas/')) {
-        return authenticatePage(req, res, () => sendZyntraSgeHtml(req, res, next));
+        return authenticatePage(req, res, () => {
+            const _emailLow = (req.user?.email || '').toLowerCase();
+            if (!_emailLow.endsWith('@labor.com.br') && !req.user?.is_admin) {
+                return res.redirect(302, '/dashboard');
+            }
+            return sendZyntraSgeHtml(req, res, next);
+        });
     }
     return sendZyntraSgeHtml(req, res, next);
 });
