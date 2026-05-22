@@ -56,6 +56,10 @@ storage/nfe/certificados/
 .pm2/
 ecosystem.config.js.backup
 
+# V0 design exports / build artifacts
+V0/
+*.zip
+
 # Claude Code — instruções locais com dados de infraestrutura
 CLAUDE.md
 CLAUDE.local.md
@@ -114,6 +118,25 @@ backups/backup-db-*
 
 # Legacy / Arquivos movidos para auditoria
 _Zyntra_Legacy/
+Zyntra-SGE/
+Empresas/
+backup-auditoria-*/
+
+# Scripts temporários de análise/debug (root)
+tmp_*.js
+tmp_*.sh
+tmp_*.sql
+tmp_*.tsv
+tmp-*.js
+tmp-*.sql
+vps-pull-backup.js
+executar-backup.bat
+update-labor-passwords.js
+
+# Backups de HTML e redesigns intermediários
+**/index-backup-*.html
+**/_backup_redesign/
+**/index-backup-pre-*.html
 
 # Arquivos Sensíveis
 docs/CREDENCIAIS_ACESSO.md
@@ -252,7 +275,6 @@ android-app/app/build/
 android-app/local.properties
 
 # Legacy/archive projects
-Zyntra-SGE/
 Login-Page-main/
 
 # Empty module copies (prevent recreation)
