@@ -17,6 +17,10 @@
     <link rel="stylesheet" href="../css/rh-pages.css?v=1.0">
 
     <style>
+        /* CRIT-04: Garantir que modais ficam ocultos por padrão (design-system pode sobrescrever) */
+        .modal { display: none !important; }
+        .modal.show { display: flex !important; }
+
         /* ===== ESTILOS ESPECÍFICOS — BENEFÍCIOS ===== */
 
         /* Content Area */
@@ -738,7 +742,7 @@
 
         // Funções do Modal Benefício
         function abrirModalNovoBeneficio() {
-            document.getElementById('modal-benefício-título').innerHTML = '<i class="fas fa-gift"></i> Novo Benefício';
+            document.getElementById('modal-benefício-titulo').innerHTML = '<i class="fas fa-gift"></i> Novo Benefício';
             document.getElementById('formBeneficio').reset();
             document.getElementById('benefício-id').value = '';
             document.getElementById('modalBeneficio').classList.add('show');
@@ -752,7 +756,7 @@
             const b = benefícios.find(x => x.id === id);
             if (!b) return;
 
-            document.getElementById('modal-benefício-título').innerHTML = '<i class="fas fa-edit"></i> Editar Benefício';
+            document.getElementById('modal-benefício-titulo').innerHTML = '<i class="fas fa-edit"></i> Editar Benefício';
             document.getElementById('benefício-id').value = b.id;
             document.getElementById('benefício-nome').value = b.nome || '';
             document.getElementById('benefício-fornecedor').value = b.fornecedor || '';

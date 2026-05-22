@@ -58,6 +58,7 @@
    var _isWarningVisible = false;
    var _isActive = false;       // Gerenciador está ativo?
    var _debounceTimeout = null;
+   var _lastWarningTime = 0;
    var _boundHandleActivity = null;
 
    function _debug(msg) {
@@ -539,8 +540,10 @@
    function _handleServerInactive() {
       _debug('Servidor reportou sess\u00e3o inativa (AUTH_INACTIVE)');
 
-      // Mostrar o modal, permitindo ao usuário decidir
-      // Se clicar "Continuar", o refresh token (7 dias) ainda é válido
+      var now = Date.now();
+      if (now - _lastWarningTime < 2000) return; // debounce: evitar loop em < 2s
+      _lastWarningTime = now;
+
       _isWarningVisible = false; // Reset para garantir que o modal abre
       _showWarningModal();
    }

@@ -320,7 +320,7 @@
 
         async carregarEstatisticas() {
             try {
-                const r = await fetch('/api/compras/dashboard', { headers: this.getAuthHeaders() });
+                const r = await fetch('/api/compras/dashboard', { headers: this.getAuthHeaders(), credentials: 'include' });
                 if (!r.ok) return;
                 const d = await r.json();
                 const s = d.stats || d;

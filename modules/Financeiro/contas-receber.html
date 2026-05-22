@@ -177,8 +177,8 @@
         .toast.error { border-color: #ef4444; }
         .toast.warning { border-color: #f59e0b; }
 
-        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10000; align-items: center; justify-content: center; }
-        .modal.active { display: flex; }
+        .modal { display: none !important; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10000; align-items: center; justify-content: center; }
+        .modal.active { display: flex !important; }
         .modal-content { background: white; border-radius: 16px; width: 95%; max-height: 90vh; overflow-y: auto; }
 
         .modal-institucional { max-width: 700px; }
@@ -419,7 +419,7 @@
                 <a href="impostos.html" class="sidebar-btn" title="Impostos">
                     <i class="fas fa-percent"></i>
                 </a>
-                <button class="sidebar-btn" title="Configurações" id="btn-config" onclick="toggleConfigurações()">
+                <button class="sidebar-btn" title="Configurações" id="btn-config" onclick="toggleConfiguracoes()">
                     <i class="fas fa-cog"></i>
                 </button>
             </div>
@@ -1135,7 +1135,7 @@
     </div>
 
     <!-- Modal Receber -->
-    <div id="modal-receber" class="modal">
+    <div id="modal-receber" class="modal" onclick="if(event.target===this)fecharModalReceber()">
         <div class="modal-content modal-receber">
             <div class="modal-receber-header">
                 <div class="icon"><i class="fas fa-check-double"></i></div>
@@ -1210,9 +1210,9 @@
 
         async function init() {
             await Promise.all([carregarUsuarioLogado(), carregarContas(), carregarClientes(), carregarCategorias(), carregarBancos()]);
-            // Abrir modal automaticamente se URL tiver ?ação=nova
             var params = new URLSearchParams(window.location.search);
-            if (params.get('ação') === 'nova') { abrirModal(); }
+            params.delete('ação');
+            history.replaceState(null, '', window.location.pathname + (params.toString() ? '?' + params.toString() : ''));
         }
 
         async function carregarResumo() {
@@ -1633,6 +1633,15 @@
             if (id) { fecharModal(); abrirModalReceber(parseInt(id), val); }
         }
 
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                var mr = document.getElementById('modal-receber');
+                if (mr && mr.classList.contains('active')) { fecharModalReceber(); return; }
+                var mc = document.getElementById('modalContaCR');
+                if (mc && mc.classList.contains('active')) { fecharModal(); }
+            }
+        });
+
         function abrirModalReceber(id, valor) {
             document.getElementById('receber-conta-id').value = id;
             document.getElementById('receber-valor-original').value = valor;
@@ -2008,6 +2017,12 @@
         }
 
         document.addEventListener('DOMContentLoaded', function(){
+            // BUG-003: Garantir que todos os modais estão fechados ao iniciar a página
+            var modalReceber = document.getElementById('modal-receber');
+            if (modalReceber) modalReceber.classList.remove('active');
+            var modalContaCR = document.getElementById('modalContaCR');
+            if (modalContaCR) modalContaCR.classList.remove('active');
+
             pgCR = new FinPagination({
                 containerId: 'fp-pg-cr',
                 perPage: 30,

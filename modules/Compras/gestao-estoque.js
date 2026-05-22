@@ -89,7 +89,7 @@ async function carregarEstoque() {
             ativo
         });
 
-        const resp = await fetch(`/api/compras/estoque/materiais-pcp?${params}`, { headers: getAuthHeaders() });
+        const resp = await fetch(`/api/compras/estoque/materiais-pcp?${params}`, { headers: getAuthHeaders(), credentials: 'include' });
         if (!resp.ok) throw new Error('Erro ao carregar materiais');
         const data = await resp.json();
 
@@ -338,6 +338,7 @@ async function bulkAction(action) {
         const resp = await fetch(url, {
             method: 'POST',
             headers: getAuthHeaders(),
+            credentials: 'include',
             body: JSON.stringify(body)
         });
 
@@ -411,6 +412,7 @@ async function confirmarEntrada() {
         const resp = await fetch('/api/compras/estoque/entrada', {
             method: 'POST',
             headers: getAuthHeaders(),
+            credentials: 'include',
             body: JSON.stringify({
                 material_id: materialId,
                 quantidade,
@@ -498,6 +500,7 @@ async function confirmarSaida() {
         const resp = await fetch('/api/compras/estoque/saida', {
             method: 'POST',
             headers: getAuthHeaders(),
+            credentials: 'include',
             body: JSON.stringify({
                 material_id: materialId,
                 quantidade,
@@ -585,6 +588,7 @@ async function confirmarAjuste() {
         const resp = await fetch('/api/compras/estoque/ajuste', {
             method: 'POST',
             headers: getAuthHeaders(),
+            credentials: 'include',
             body: JSON.stringify({
                 material_id: materialId,
                 quantidade_contada: qtdContada,
@@ -671,6 +675,7 @@ async function salvarEdicao() {
         const resp = await fetch(`/api/compras/estoque/materiais-pcp/${id}`, {
             method: 'PUT',
             headers: getAuthHeaders(),
+            credentials: 'include',
             body: JSON.stringify(dados)
         });
         const data = await resp.json();
@@ -701,6 +706,7 @@ async function excluirMaterial(id) {
         const resp = await fetch('/api/compras/estoque/materiais-pcp/bulk-delete', {
             method: 'POST',
             headers: getAuthHeaders(),
+            credentials: 'include',
             body: JSON.stringify({ ids: [id] })
         });
         const data = await resp.json();
@@ -759,6 +765,7 @@ async function salvarNovoMaterial() {
         const resp = await fetch('/api/compras/estoque/materiais-pcp/criar', {
             method: 'POST',
             headers: getAuthHeaders(),
+            credentials: 'include',
             body: JSON.stringify({
                 codigo_material: codigo,
                 descricao,
@@ -804,7 +811,8 @@ async function carregarHistoricoMaterial(materialId, nome) {
 
     try {
         const resp = await fetch('/api/compras/estoque/movimentacoes', {
-            headers: getAuthHeaders()
+            headers: getAuthHeaders(),
+            credentials: 'include'
         });
 
         if (!resp.ok) throw new Error('Erro ao carregar histórico');

@@ -737,7 +737,7 @@
                 <a href="impostos.html" class="sidebar-btn" title="Impostos">
                     <i class="fas fa-percent"></i>
                 </a>
-                <button class="sidebar-btn" title="Configurações" id="btn-config" onclick="toggleConfigurações()">
+                <button class="sidebar-btn" title="Configurações" id="btn-config" onclick="toggleConfiguracoes()">
                     <i class="fas fa-cog"></i>
                 </button>
             </div>
@@ -1941,7 +1941,7 @@
             if (elFim) elFim.value = ultimoDia;
         });
 
-        function toggleNotificações() {
+        function toggleNotificacoes() {
             const panel = document.getElementById('notification-panel');
             if (panel) panel.classList.toggle('active');
         }
@@ -2440,7 +2440,7 @@
                 const contasPagar = Array.isArray(pagarData) ? pagarData : (pagarData.data || []);
 
                 // Buscar saldo das contas bancárias
-                const bancosResp = await fetch('/api/financeiro/contas-bancarias', { credentials: 'include' });
+                const bancosResp = await fetch('/api/financeiro/bancos', { credentials: 'include' });
                 const bancosData = bancosResp.ok ? await bancosResp.json() : { data: [] };
                 const bancosArr = Array.isArray(bancosData) ? bancosData : (bancosData.data || []);
 

@@ -294,7 +294,7 @@
 
     <script>
         function toggleMobileSidebar() { document.getElementById('mobile-sidebar')?.classList.toggle('mobile-open'); document.getElementById('sidebar-overlay')?.classList.toggle('active'); }
-        function toggleNotificações() { if (typeof window.NotificationsManager !== 'undefined') window.NotificationsManager.togglePanel(); }
+        function toggleNotificacoes() { if (typeof window.NotificationsManager !== 'undefined') window.NotificationsManager.togglePanel(); }
 
         let fluxoData = [];
         let chartInstance = null;
@@ -309,7 +309,7 @@
                     const h = new Date().getHours();
                     const greetEl = document.getElementById('greeting-text');
                     if (greetEl) greetEl.textContent = h >= 18 || h < 5 ? 'Boa noite' : h >= 12 ? 'Boa tarde' : 'Bom dia';
-                    document.getElementById('user-name').textContent = (nome || '').split(' ')[0];
+                    const elUN = document.getElementById('user-name'); if (elUN) elUN.textContent = (nome || '').split(' ')[0];
 
                     const avatarMap = {'clemerson':'/avatars/Clemerson.webp','isabela':'/avatars/Isabela.webp','thaina':'/avatars/Thaina.webp','thiago':'/avatars/Thiago.webp','nicolas':'/avatars/NicolasDaniel.webp','nicolasdaniel':'/avatars/NicolasDaniel.webp','rh':'/avatars/Rh.webp','admin':'/avatars/admin.webp','ti':'/avatars/TI.webp','tialuforce':'/avatars/TI.webp','antonio':'/avatars/Antonio.webp','antônio':'/avatars/Antonio.webp','andreia':'/avatars/Andreia.webp','guilherme':'/avatars/Guilherme.webp','marcelo':'/avatars/Marcelo.webp','financeiro':'/avatars/Financeiro.webp','douglas':'/avatars/Douglas.webp','hellen':'/avatars/Hellen.webp','helen':'/avatars/Hellen.webp'};
                     let avatarUrl = null;
