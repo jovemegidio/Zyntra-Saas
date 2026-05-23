@@ -153,23 +153,30 @@
             }
         }
 
-        /* Header - Efeito Vidro (Glassmorphism) */
+        /* Header V0 — sticky glassmorphism */
         .main-header,
         #dashboard-area .main-header,
         #dashboard-area.bg-contrast-light .main-header,
         #dashboard-area.bg-contrast-dark .main-header {
-            position: fixed;
+            position: sticky !important;
             top: 0;
             left: 0;
             right: 0;
             height: 64px;
-            background: rgba(255, 255, 255, 0.45) !important;
-            -webkit-backdrop-filter: blur(24px) saturate(1.8) !important;
-            backdrop-filter: blur(24px) saturate(1.8) !important;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.3) !important;
+            background: rgba(255, 255, 255, 0.75) !important;
+            -webkit-backdrop-filter: blur(20px) saturate(1.8) !important;
+            backdrop-filter: blur(20px) saturate(1.8) !important;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.6) !important;
             z-index: 100;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.08) !important;
+            box-shadow: 0 1px 8px rgba(0, 0, 0, 0.06) !important;
         }
+
+        /* Acessibilidade: alto contraste */
+        body.a11y-high-contrast {
+            filter: contrast(1.25);
+        }
+        body.a11y-high-contrast a,
+        body.a11y-high-contrast button { text-decoration-thickness: 2px; }
 
         /* Logos brancas em fundo escuro */
         #dashboard-area.bg-contrast-light .header-logo .logo-azul,
@@ -200,76 +207,113 @@
         }
 
         .header-logo img {
-            height: 32px;
+            height: 36px;
             width: auto;
         }
 
         .header-right {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 4px;
         }
 
+        /* Inline search — visível apenas em telas grandes */
+        .header-search-inline-wrap {
+            display: none;
+            align-items: center;
+            position: relative;
+            margin-right: 4px;
+        }
+        @media (min-width: 1024px) {
+            .header-search-inline-wrap { display: flex; }
+            #search-btn { display: none !important; }
+        }
+        .header-search-inline-icon {
+            position: absolute; left: 10px;
+            color: #94a3b8; font-size: 13px;
+            pointer-events: none; transition: color 0.2s;
+        }
+        .header-search-inline-input {
+            width: 224px; height: 36px;
+            padding: 0 12px 0 32px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: rgba(248,250,252,0.8);
+            font-size: 13px; color: #334155;
+            font-family: inherit;
+            transition: all 0.2s; outline: none;
+        }
+        .header-search-inline-input:focus {
+            background: white;
+            border-color: #93c5fd;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+        }
+        .header-search-inline-input:focus + .header-search-inline-icon,
+        .header-search-inline-wrap:focus-within .header-search-inline-icon { color: #3b82f6; }
+        /* Results dropdown for inline search */
+        .header-search-inline-wrap #header-search-results {
+            position: absolute; top: calc(100% + 6px); left: 0;
+            width: 380px; background: white;
+            border: 1px solid #e2e8f0; border-radius: 12px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.14);
+            padding: 8px; z-index: 300;
+            margin-top: 0;
+            max-height: 400px;
+        }
+        .header-search-inline-wrap #header-search-results:empty { display: none; }
+
+        /* Icon buttons V0 style */
         .header-icon-btn,
         #dashboard-area .header-icon-btn,
         #dashboard-area.bg-contrast-light .header-icon-btn {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             border: none;
             background: transparent !important;
-            border-radius: 10px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--slate-600) !important;
+            color: #64748b !important;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.15s ease;
             position: relative;
+            font-size: 16px;
         }
-
         .header-icon-btn:hover {
-            background: var(--slate-100) !important;
-            color: var(--slate-900) !important;
-            transform: scale(1.05);
+            background: #f1f5f9 !important;
+            color: #334155 !important;
+            transform: none;
         }
 
+        /* Notification dot V0 style */
         .notification-dot {
             position: absolute;
-            top: 6px;
-            right: 6px;
-            min-width: 18px;
-            height: 18px;
+            top: 7px; right: 7px;
+            width: 8px; height: 8px;
             background: #ef4444;
-            border-radius: 9px;
-            font-size: 10px;
-            font-weight: 600;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0 5px;
+            border-radius: 50%;
             border: 2px solid white;
+            padding: 0; min-width: unset;
+            font-size: 0;
         }
-
-        .notification-dot:empty {
-            display: none;
-        }
+        .notification-dot:empty { display: flex; }
 
         .header-divider {
-            width: 1px;
-            height: 24px;
-            background: var(--slate-200);
-            margin: 0 8px;
+            width: 1px; height: 24px;
+            background: #e2e8f0;
+            margin: 0 4px;
         }
 
+        /* User profile button V0 style */
         .user-profile-header {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 6px 12px 6px 6px;
-            border-radius: 50px;
+            gap: 8px;
+            padding: 5px 8px 5px 5px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: background 0.15s ease;
             position: relative;
         }
 
@@ -291,18 +335,52 @@
             overflow: hidden;
         }
 
+        .user-avatar-header {
+            ring: 2px solid #f1f5f9;
+        }
+
         .user-avatar-header img {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
 
+        /* User info block (name + email) in header */
+        .user-info-header {
+            display: none;
+            flex-direction: column;
+            gap: 1px;
+        }
+        @media (min-width: 640px) {
+            .user-info-header { display: flex; }
+        }
+
         .user-name,
         #dashboard-area .user-name,
         #dashboard-area.bg-contrast-light .user-name {
             font-weight: 500;
-            font-size: 14px;
-            color: var(--slate-900) !important;
+            font-size: 13px;
+            color: #1e293b !important;
+            line-height: 1.3;
+        }
+
+        .user-email-header {
+            font-size: 11px;
+            color: #64748b;
+            line-height: 1.2;
+            max-width: 140px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .user-chevron {
+            color: #94a3b8;
+            font-size: 12px;
+            display: none;
+        }
+        @media (min-width: 640px) {
+            .user-chevron { display: block; }
         }
 
         /* User Dropdown */
@@ -433,7 +511,7 @@
             min-height: 100vh;
             max-width: 1280px;
             margin: 0 auto;
-            padding: 80px 24px 40px;
+            padding: 32px 24px 40px;
             position: relative;
             z-index: 10;
             display: flex;
@@ -733,40 +811,40 @@
             }
         }
 
-        /* Module Colors - glassmorphism colorido */
+        /* Module Colors - Vzero design system */
         .module-card.compras {
-            --card-bg: linear-gradient(135deg, #5b7cf7 0%, #4a6cf7 100%);
-            background: linear-gradient(135deg, #5b7cf7 0%, #4a6cf7 100%);
+            --card-bg: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
         }
 
         .module-card.vendas {
-            --card-bg: linear-gradient(135deg, #1a3ab5 0%, #2545c9 100%);
-            background: linear-gradient(135deg, #1a3ab5 0%, #2545c9 100%);
+            --card-bg: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+            background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
         }
 
         .module-card.nfe {
-            --card-bg: linear-gradient(135deg, #18b87e 0%, #21cc8e 100%);
-            background: linear-gradient(135deg, #18b87e 0%, #21cc8e 100%);
+            --card-bg: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
+            background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
         }
 
         .module-card.logistica {
-            --card-bg: linear-gradient(135deg, #18b87e 0%, #21cc8e 100%);
-            background: linear-gradient(135deg, #18b87e 0%, #21cc8e 100%);
+            --card-bg: linear-gradient(135deg, #059669 0%, #047857 100%);
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
         }
 
         .module-card.pcp {
-            --card-bg: linear-gradient(135deg, #ef4444 0%, #f25f5f 100%);
-            background: linear-gradient(135deg, #ef4444 0%, #f25f5f 100%);
+            --card-bg: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
+            background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
         }
 
         .module-card.financeiro {
-            --card-bg: linear-gradient(135deg, #7ccf00 0%, #8ed616 100%);
-            background: linear-gradient(135deg, #7ccf00 0%, #8ed616 100%);
+            --card-bg: linear-gradient(135deg, #65a30d 0%, #4d7c0f 100%);
+            background: linear-gradient(135deg, #65a30d 0%, #4d7c0f 100%);
         }
 
         .module-card.rh {
-            --card-bg: linear-gradient(135deg, #9b59b6 0%, #a76bc8 100%);
-            background: linear-gradient(135deg, #9b59b6 0%, #a76bc8 100%);
+            --card-bg: linear-gradient(135deg, #c026d3 0%, #a21caf 100%);
+            background: linear-gradient(135deg, #c026d3 0%, #a21caf 100%);
         }
 
 
@@ -1658,38 +1736,38 @@
         }
 
         body.dark-mode .module-card.compras .module-icon {
-            background: rgba(249, 115, 22, 0.15) !important;
-            color: #fb923c !important;
-        }
-
-        body.dark-mode .module-card.vendas .module-icon {
             background: rgba(59, 130, 246, 0.15) !important;
             color: #60a5fa !important;
         }
 
+        body.dark-mode .module-card.vendas .module-icon {
+            background: rgba(99, 102, 241, 0.15) !important;
+            color: #a5b4fc !important;
+        }
+
         body.dark-mode .module-card.nfe .module-icon {
-            background: rgba(37, 99, 235, 0.15) !important;
-            color: #93c5fd !important;
+            background: rgba(20, 184, 166, 0.15) !important;
+            color: #2dd4bf !important;
         }
 
         body.dark-mode .module-card.logistica .module-icon {
-            background: rgba(14, 165, 233, 0.15) !important;
-            color: #7dd3fc !important;
-        }
-
-        body.dark-mode .module-card.pcp .module-icon {
-            background: rgba(100, 116, 139, 0.2) !important;
-            color: #94a3b8 !important;
-        }
-
-        body.dark-mode .module-card.financeiro .module-icon {
             background: rgba(16, 185, 129, 0.15) !important;
             color: #34d399 !important;
         }
 
+        body.dark-mode .module-card.pcp .module-icon {
+            background: rgba(225, 29, 72, 0.15) !important;
+            color: #fb7185 !important;
+        }
+
+        body.dark-mode .module-card.financeiro .module-icon {
+            background: rgba(101, 163, 13, 0.15) !important;
+            color: #bef264 !important;
+        }
+
         body.dark-mode .module-card.rh .module-icon {
-            background: rgba(236, 72, 153, 0.15) !important;
-            color: #f472b6 !important;
+            background: rgba(192, 38, 211, 0.15) !important;
+            color: #e879f9 !important;
         }
 
         body.dark-mode .header-search-container,
@@ -1820,6 +1898,338 @@
         body.dark-mode .btn-modal-secondary:hover {
             background: #475569;
         }
+
+        /* =====================================================
+           V0 DASHBOARD REDESIGN — Hero Card + Stats Section
+           ===================================================== */
+
+        /* Page background light decorations */
+        .page-bg-decoration {
+            position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none;
+        }
+        .page-bg-blob-tr {
+            position: absolute; top: -30%; right: -20%; width: 60%; height: 60%;
+            background: radial-gradient(circle, rgba(219,234,254,0.35) 0%, transparent 65%);
+            border-radius: 50%; filter: blur(80px);
+        }
+        .page-bg-blob-bl {
+            position: absolute; bottom: -30%; left: -20%; width: 60%; height: 60%;
+            background: radial-gradient(circle, rgba(209,250,229,0.25) 0%, transparent 65%);
+            border-radius: 50%; filter: blur(80px);
+        }
+
+        /* Override animated-gradient to light mode */
+        .animated-gradient {
+            background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 30%, #f0fdf4 60%, #f8fafc 100%) !important;
+            background-size: 200% 200% !important;
+        }
+
+        /* Updated main-content */
+        .main-content {
+            max-width: 1280px !important;
+            margin: 0 auto !important;
+            padding: 80px 24px 48px !important;
+            min-height: unset !important;
+            display: block !important;
+        }
+
+        /* Hero Card */
+        .hero-card {
+            position: relative;
+            overflow: hidden;
+            border-radius: 24px;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            padding: 40px;
+            margin-bottom: 28px;
+            animation: fadeInDown 0.5s ease;
+        }
+        .hero-card-blob-1 {
+            position: absolute; top: -5%; right: -5%; width: 480px; height: 480px;
+            background: radial-gradient(circle, rgba(37,99,235,0.2) 0%, transparent 60%);
+            border-radius: 50%; filter: blur(60px);
+            animation: heroBlob 5s ease-in-out infinite alternate;
+            pointer-events: none;
+        }
+        .hero-card-blob-2 {
+            position: absolute; bottom: -10%; left: -5%; width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(5,150,105,0.15) 0%, transparent 60%);
+            border-radius: 50%; filter: blur(60px); pointer-events: none;
+        }
+        .hero-card-blob-3 {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 600px; height: 300px;
+            background: radial-gradient(ellipse, rgba(124,58,237,0.05) 0%, transparent 60%);
+            filter: blur(60px); pointer-events: none;
+        }
+        .hero-card-grid-pattern {
+            position: absolute; inset: 0; opacity: 0.03; pointer-events: none;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.15) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.15) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+        @keyframes heroBlob {
+            0%   { opacity: 0.5; transform: scale(1); }
+            100% { opacity: 1;   transform: scale(1.08); }
+        }
+
+        /* Hero top row */
+        .hero-top-row {
+            position: relative; z-index: 10;
+            display: flex; align-items: flex-start; justify-content: space-between;
+            gap: 24px; margin-bottom: 40px;
+        }
+        .hero-greeting { flex: 1; }
+        .hero-date-row {
+            display: flex; align-items: center; gap: 8px; margin-bottom: 14px;
+        }
+        .hero-date-icon { color: #94a3b8; font-size: 14px; }
+        .hero-date-text { font-size: 14px; color: #94a3b8; text-transform: capitalize; }
+
+        .hero-greeting-title {
+            font-family: 'Manrope', sans-serif;
+            font-size: clamp(26px, 3.5vw, 40px);
+            font-weight: 700; color: white; margin-bottom: 12px; line-height: 1.15;
+            text-shadow: none; letter-spacing: -0.5px;
+        }
+        .hero-greeting-name {
+            background: linear-gradient(90deg, #60a5fa 0%, #34d399 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero-quote-row { display: flex; align-items: center; gap: 8px; }
+        .hero-quote-icon { color: #fbbf24; font-size: 13px; }
+        .hero-quote-text { color: #cbd5e1; font-size: 15px; font-style: italic; }
+
+        /* Hero Clock */
+        .hero-clock {
+            display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+            background: rgba(255,255,255,0.06);
+            backdrop-filter: blur(20px);
+            padding: 14px 20px; border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
+        .hero-clock-icon {
+            width: 40px; height: 40px;
+            background: linear-gradient(135deg, #3b82f6, #4f46e5);
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 18px;
+        }
+        .hero-clock-time {
+            font-size: 26px; font-weight: 700; color: white;
+            letter-spacing: -0.5px; line-height: 1;
+        }
+        .hero-clock-label {
+            font-size: 10px; color: #94a3b8;
+            text-transform: uppercase; letter-spacing: 1px; margin-top: 3px;
+        }
+
+        /* Hero Module Grid */
+        .hero-modules-grid {
+            position: relative; z-index: 10;
+            display: grid !important;
+            grid-template-columns: repeat(7, 1fr) !important;
+            gap: 14px;
+        }
+        .hero-module-card {
+            position: relative;
+            display: flex !important;
+            flex-direction: column !important; align-items: center !important; justify-content: center !important;
+            padding: 20px 8px 18px !important;
+            border-radius: 16px !important; cursor: pointer !important;
+            transition: all 0.3s cubic-bezier(0.4,0,0.2,1) !important;
+            text-decoration: none !important; color: white !important;
+            overflow: hidden !important; gap: 0 !important;
+            border: 1px solid rgba(255,255,255,0.12) !important;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2) !important;
+        }
+        .hero-module-card::before {
+            content: ''; position: absolute; inset: 0; border-radius: 16px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.18) 0%, transparent 55%);
+            opacity: 0; transition: opacity 0.3s; pointer-events: none;
+        }
+        .hero-module-card:hover { transform: scale(1.04) translateY(-4px) !important; }
+        .hero-module-card:hover::before { opacity: 1; }
+
+        .hero-module-icon-wrap {
+            width: 48px; height: 48px;
+            background: rgba(255,255,255,0.2); border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; margin-bottom: 12px;
+            transition: transform 0.3s; backdrop-filter: blur(4px);
+        }
+        .hero-module-card:hover .hero-module-icon-wrap { transform: scale(1.1); }
+        .hero-module-name {
+            font-size: 11.5px; font-weight: 600; text-align: center;
+            color: white; line-height: 1.3;
+        }
+        .hero-module-desc {
+            font-size: 10px; color: rgba(255,255,255,0.55);
+            text-align: center; margin-top: 3px; line-height: 1.3;
+        }
+
+        /* Module color variants */
+        .hm-compras   { background: linear-gradient(135deg, #3b82f6, #4338ca) !important; }
+        .hm-vendas    { background: linear-gradient(135deg, #10b981, #0d9488) !important; }
+        .hm-nfe       { background: linear-gradient(135deg, #06b6d4, #2563eb) !important; }
+        .hm-logistica { background: linear-gradient(135deg, #f43f5e, #e11d48) !important; }
+        .hm-pcp       { background: linear-gradient(135deg, #f59e0b, #ea580c) !important; }
+        .hm-financeiro{ background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important; }
+        .hm-rh        { background: linear-gradient(135deg, #ec4899, #a855f7) !important; }
+
+        /* Admin Stats Section */
+        .admin-stats-section {
+            display: none;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 24px;
+            animation: fadeInUp 0.5s ease 0.15s both;
+        }
+        .admin-stats-section.visible { display: grid; }
+
+        .stats-col-main {
+            grid-column: span 2;
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+        }
+
+        /* Stat cards */
+        .stat-card {
+            background: white; border-radius: 16px; padding: 24px;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+            transition: all 0.25s; cursor: default;
+        }
+        .stat-card:hover {
+            box-shadow: 0 8px 28px rgba(0,0,0,0.08);
+            transform: translateY(-2px);
+        }
+        .stat-card-top {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        .stat-icon {
+            width: 48px; height: 48px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; color: white;
+        }
+        .stat-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 4px 10px; border-radius: 20px;
+            font-size: 12px; font-weight: 600; white-space: nowrap;
+        }
+        .stat-label { font-size: 13px; color: #64748b; font-weight: 500; margin-bottom: 4px; }
+        .stat-value { font-size: 26px; font-weight: 700; color: #0f172a; line-height: 1.15; }
+        .stat-progress-bar {
+            margin-top: 12px; height: 6px;
+            background: #f1f5f9; border-radius: 3px; overflow: hidden;
+        }
+        .stat-progress-fill { height: 100%; border-radius: 3px; transition: width 0.8s ease; }
+        .stat-sub { font-size: 11px; color: #94a3b8; margin-top: 6px; }
+        .stat-meta {
+            display: flex; align-items: center; gap: 6px;
+            margin-top: 12px; font-size: 12px; color: #64748b;
+        }
+
+        /* Side column */
+        .stats-col-side { display: flex; flex-direction: column; gap: 16px; }
+        .side-card {
+            background: white; border-radius: 16px; padding: 20px;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        }
+        .side-card-title {
+            font-size: 13px; font-weight: 600; color: #0f172a; margin-bottom: 14px;
+        }
+        .side-card-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 14px;
+        }
+        .side-card-link {
+            font-size: 12px; color: #3b82f6; font-weight: 500;
+            text-decoration: none; cursor: pointer;
+        }
+        .side-card-link:hover { color: #2563eb; }
+
+        .quick-actions-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+        }
+        .quick-action-btn {
+            display: flex; align-items: center; gap: 8px;
+            padding: 11px 12px; border-radius: 10px; border: none;
+            background: #f8fafc; cursor: pointer;
+            font-size: 12px; font-weight: 500; color: #475569;
+            transition: all 0.15s; text-align: left; font-family: inherit;
+        }
+        .quick-action-btn:hover { background: #f1f5f9; color: #0f172a; }
+        .quick-action-btn i { font-size: 14px; width: 16px; flex-shrink: 0; }
+
+        .activity-list { display: flex; flex-direction: column; gap: 12px; }
+        .activity-item { display: flex; align-items: center; gap: 10px; }
+        .activity-icon {
+            width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; color: white;
+        }
+        .activity-text { font-size: 13px; color: #374151; line-height: 1.3; }
+        .activity-time { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+
+        /* Chat FAB */
+        .chat-fab {
+            position: fixed; bottom: 24px; right: 24px;
+            width: 54px; height: 54px;
+            background: linear-gradient(135deg, #2563eb, #4f46e5, #7c3aed);
+            border-radius: 16px; border: none; cursor: pointer; color: white;
+            font-size: 22px; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 8px 24px rgba(37,99,235,0.4);
+            transition: all 0.3s; z-index: 100;
+        }
+        .chat-fab:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 32px rgba(37,99,235,0.5);
+        }
+
+        /* Dark mode overrides for new elements */
+        body.dark-mode .hero-card { background: linear-gradient(135deg, #020817 0%, #0f172a 50%, #020817 100%); }
+        body.dark-mode .stat-card,
+        body.dark-mode .side-card {
+            background: #1e293b; border-color: rgba(255,255,255,0.08);
+        }
+        body.dark-mode .stat-label { color: #94a3b8; }
+        body.dark-mode .stat-value { color: #f1f5f9; }
+        body.dark-mode .stat-progress-bar { background: #0f172a; }
+        body.dark-mode .stat-meta { color: #94a3b8; }
+        body.dark-mode .side-card-title { color: #f1f5f9; }
+        body.dark-mode .quick-action-btn { background: #0f172a; color: #94a3b8; }
+        body.dark-mode .quick-action-btn:hover { background: #1e3a5f; color: #e2e8f0; }
+        body.dark-mode .activity-text { color: #e2e8f0; }
+        body.dark-mode .animated-gradient {
+            background: linear-gradient(135deg, #020817 0%, #0f172a 60%, #020817 100%) !important;
+        }
+        body.dark-mode .page-bg-blob-tr,
+        body.dark-mode .page-bg-blob-bl { opacity: 0.15; }
+
+        /* Responsive */
+        @media (max-width: 1100px) {
+            .hero-modules-grid { grid-template-columns: repeat(4, 1fr) !important; }
+            .admin-stats-section { grid-template-columns: 1fr 1fr; }
+            .stats-col-main { grid-column: span 2; grid-template-columns: repeat(3, 1fr); }
+            .stats-col-side { grid-column: span 2; flex-direction: row; }
+        }
+        @media (max-width: 768px) {
+            .hero-card { padding: 28px 20px; }
+            .hero-top-row { flex-direction: column; }
+            .hero-clock { align-self: flex-start; }
+            .hero-modules-grid { grid-template-columns: repeat(4, 1fr) !important; gap: 10px; }
+            .admin-stats-section { grid-template-columns: 1fr; }
+            .stats-col-main { grid-column: span 1; grid-template-columns: 1fr; }
+            .stats-col-side { grid-column: span 1; }
+        }
+        @media (max-width: 500px) {
+            .hero-modules-grid { grid-template-columns: repeat(3, 1fr) !important; }
+            .hero-card { padding: 20px 16px; }
+        }
     </style>
     <!-- Chat Widget BOB AI --><!-- Chat Widget REMOVIDO --><!--
     <link rel="stylesheet" href="/chat/widget.css?v=20260218"> -->
@@ -1830,55 +2240,69 @@
 </head>
 
 <body>
-    <!-- Background Manager vai inserir o fundo aqui -->
+    <!-- Background: animated gradient (fallback) + Background Manager wallpapers -->
     <div class="animated-gradient"></div>
+    <!-- Light page decorations (blobs) -->
+    <div class="page-bg-decoration">
+        <div class="page-bg-blob-tr"></div>
+        <div class="page-bg-blob-bl"></div>
+    </div>
 
     <header class="main-header">
         <div class="header-content">
-            <div class="header-logo" style="display:flex;align-items:center;gap:12px;">
-                <img src="/images/zyntra-sem-fundo.png" alt="Zyntra" class="logo-zyntra-azul" style="height:28px;object-fit:contain;">
-                <img src="/images/zyntra-branco.png" alt="Zyntra" class="logo-zyntra-branca" id="logo-zyntra-branca" style="height:28px;object-fit:contain;display:none;">
-                <span class="logo-separator" style="color:rgba(0,0,0,0.15);font-weight:200;font-size:20px;user-select:none;">×</span>
-                <img src="/images/Logo Monocromatico - Azul - Aluforce.png" alt="ALUFORCE" class="logo-azul" id="logo-azul" style="height:26px;object-fit:contain;">
-                <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" class="logo-branca" id="logo-branca" style="height:26px;object-fit:contain;display:none;">
+            <div class="header-logo" style="display:flex;align-items:center;gap:14px;">
+                <img src="/images/zyntra-sem-fundo.png" alt="Zyntra" class="logo-zyntra-azul" style="height:36px;object-fit:contain;">
+                <img src="/images/zyntra-branco.png" alt="Zyntra" class="logo-zyntra-branca" id="logo-zyntra-branca" style="height:36px;object-fit:contain;display:none;">
+                <span class="logo-separator" style="color:rgba(0,0,0,0.18);font-weight:200;font-size:22px;user-select:none;line-height:1;">×</span>
+                <img src="/images/Logo Monocromatico - Azul - Aluforce.png" alt="ALUFORCE" class="logo-azul" id="logo-azul" style="height:36px;object-fit:contain;">
+                <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" class="logo-branca" id="logo-branca" style="height:36px;object-fit:contain;display:none;">
             </div>
 
             <div class="header-right">
-                <div class="header-search-wrapper">
-                    <button class="header-icon-btn" id="search-btn" title="Buscar">
+                <!-- Inline search (visible on large screens) -->
+                <div class="header-search-inline-wrap">
+                    <i class="fas fa-search" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:13px;pointer-events:none;"></i>
+                    <input type="search" id="header-search-input" class="header-search-inline-input" placeholder="Pesquisar..." autocomplete="off">
+                    <div id="header-search-results" class="header-search-results"></div>
+                </div>
+
+                <!-- Mobile search toggle -->
+                <div class="header-search-wrapper" style="display:flex;">
+                    <button class="header-icon-btn lg-hidden" id="search-btn" title="Buscar">
                         <i class="fas fa-search"></i>
                     </button>
                     <div id="header-search-container" class="header-search-container">
-                        <input type="search" id="header-search-input" placeholder="O que você deseja pesquisar?"
-                            autocomplete="off">
-                        <div id="header-search-results" class="header-search-results"></div>
+                        <input type="search" id="header-search-input-mobile" placeholder="O que você deseja pesquisar?" autocomplete="off">
                     </div>
                 </div>
 
-                <button class="header-icon-btn" id="settings-btn" title="Configurações" data-admin-only="true"
-                    style="display:none;">
-                    <i class="fas fa-cog"></i>
-                </button>
-
-
-
                 <button class="header-icon-btn" id="help-btn" title="Ajuda">
                     <i class="fas fa-question-circle"></i>
+                </button>
+
+                <button class="header-icon-btn" id="accessibility-btn" title="Acessibilidade">
+                    <i class="fas fa-universal-access"></i>
+                </button>
+
+                <button class="header-icon-btn" id="settings-btn" title="Configurações" data-admin-only="true" style="display:none;">
+                    <i class="fas fa-cog"></i>
                 </button>
 
                 <div class="header-divider"></div>
 
                 <div class="user-profile-header" id="user-profile">
                     <div class="user-avatar-header" id="user-avatar">U</div>
-                    <span class="user-name" id="user-name-display">Usuário</span>
+                    <div class="user-info-header">
+                        <span class="user-name" id="user-name-display">Usuário</span>
+                    </div>
+                    <i class="fas fa-chevron-down user-chevron"></i>
 
                     <div class="user-dropdown-menu" id="user-dropdown">
                         <div class="dropdown-header">
                             <div class="dropdown-avatar" id="dropdown-avatar">U</div>
                             <div class="dropdown-info">
                                 <span class="dropdown-user-name" id="dropdown-user-name">Usuário</span>
-                                <span class="dropdown-user-email"
-                                    id="dropdown-user-email">usuario@aluforce.ind.br</span>
+                                <span class="dropdown-user-email" id="dropdown-user-email">usuario@aluforce.ind.br</span>
                             </div>
                         </div>
                         <hr class="dropdown-divider">
@@ -1895,8 +2319,7 @@
                                 <i class="fas fa-users-cog"></i>
                                 <span>Gerenciar Usuários</span>
                             </div>
-                            <div class="dropdown-item" id="settings-option" data-admin-only="true"
-                                style="display: none;">
+                            <div class="dropdown-item" id="settings-option" data-admin-only="true" style="display: none;">
                                 <i class="fas fa-cog"></i>
                                 <span>Configurações</span>
                             </div>
@@ -1913,77 +2336,297 @@
     </header>
 
     <main class="main-content">
-        <section class="greeting-section">
-            <div class="greeting-date">
-                <span class="greeting-date-text" id="current-date"></span>
-                <div class="greeting-time">
-                    <i class="fas fa-clock"></i>
-                    <span id="current-time"></span>
+        <!-- ========== HERO CARD ========== -->
+        <div class="hero-card">
+            <!-- Decorative background elements -->
+            <div class="hero-card-blob-1"></div>
+            <div class="hero-card-blob-2"></div>
+            <div class="hero-card-blob-3"></div>
+            <div class="hero-card-grid-pattern"></div>
+
+            <!-- Top Row: Greeting + Clock -->
+            <div class="hero-top-row">
+                <div class="hero-greeting">
+                    <div class="hero-date-row">
+                        <i class="fas fa-calendar-days hero-date-icon"></i>
+                        <span id="current-date" class="hero-date-text"></span>
+                    </div>
+                    <h1 class="hero-greeting-title">
+                        Olá, <span id="greeting-name" class="hero-greeting-name">Usuário</span>
+                    </h1>
+                    <div class="hero-quote-row">
+                        <i class="fas fa-star hero-quote-icon"></i>
+                        <p id="greeting-quote" class="hero-quote-text">Grandes conquistas exigem grandes esforços.</p>
+                    </div>
+                </div>
+                <div class="hero-clock">
+                    <div class="hero-clock-icon"><i class="fas fa-clock"></i></div>
+                    <div>
+                        <div id="current-time" class="hero-clock-time">--:--</div>
+                        <div class="hero-clock-label">Brasília</div>
+                    </div>
                 </div>
             </div>
-            <h1 class="greeting-title">Olá, <span id="greeting-name">Usuário</span></h1>
-            <p class="greeting-quote">Grandes conquistas exigem grandes esforços.</p>
-        </section>
 
-        <section class="modules-grid">
-            <a href="/modules/Compras/index.html" class="module-card compras" data-area="compras">
-                <div class="module-arrow"><i class="fas fa-arrow-right"></i></div>
-                <div class="module-icon"><i class="fas fa-cart-shopping"></i></div>
-                <div class="module-info">
-                    <div class="module-title">Compras</div>
+            <!-- Module Grid -->
+            <div class="hero-modules-grid">
+                <a href="/Compras/" class="module-card hero-module-card hm-compras" data-area="compras">
+                    <div class="hero-module-icon-wrap"><i class="fas fa-cart-shopping"></i></div>
+                    <div class="hero-module-name">Compras</div>
+                    <div class="hero-module-desc">Gestão de pedidos</div>
+                </a>
+                <a href="/Vendas/" class="module-card hero-module-card hm-vendas" data-area="vendas">
+                    <div class="hero-module-icon-wrap"><i class="fas fa-chart-line"></i></div>
+                    <div class="hero-module-name">Vendas</div>
+                    <div class="hero-module-desc">Pipeline comercial</div>
+                </a>
+                <a href="/Faturamento/" class="module-card hero-module-card hm-nfe" data-area="nfe">
+                    <div class="hero-module-icon-wrap"><i class="fas fa-file-invoice"></i></div>
+                    <div class="hero-module-name">Faturamento</div>
+                    <div class="hero-module-desc">Notas e boletos</div>
+                </a>
+                <a href="/Logistica" class="module-card hero-module-card hm-logistica" data-area="logistica">
+                    <div class="hero-module-icon-wrap"><i class="fas fa-truck"></i></div>
+                    <div class="hero-module-name">Logística</div>
+                    <div class="hero-module-desc">Entregas e rotas</div>
+                </a>
+                <a href="/PCP/" class="module-card hero-module-card hm-pcp" data-area="pcp">
+                    <div class="hero-module-icon-wrap"><i class="fas fa-gears"></i></div>
+                    <div class="hero-module-name">PCP</div>
+                    <div class="hero-module-desc">Produção</div>
+                </a>
+                <a href="/Financeiro" class="module-card hero-module-card hm-financeiro" data-area="financeiro">
+                    <div class="hero-module-icon-wrap"><i class="fas fa-wallet"></i></div>
+                    <div class="hero-module-name">Financeiro</div>
+                    <div class="hero-module-desc">Contas e fluxo</div>
+                </a>
+                <a href="/modules/RH/index.html" class="module-card hero-module-card hm-rh" data-area="rh" id="rh-module-card" onclick="navegarRH(event)">
+                    <div class="hero-module-icon-wrap"><i class="fas fa-people-group"></i></div>
+                    <div class="hero-module-name">Recursos Humanos</div>
+                    <div class="hero-module-desc">Colaboradores</div>
+                </a>
+            </div>
+        </div>
+
+        <!-- ========== ADMIN STATS SECTION (exibido via JS para admins) ========== -->
+        <div class="admin-stats-section" id="admin-stats-section">
+            <!-- Main stats: 3 cards -->
+            <div class="stats-col-main">
+                <!-- Stat: Vendas/Recebimentos -->
+                <div class="stat-card">
+                    <div class="stat-card-top">
+                        <div class="stat-icon" style="background:linear-gradient(135deg,#10b981,#0d9488);box-shadow:0 4px 12px rgba(16,185,129,0.3);">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <span class="stat-badge" id="stat-vendas-badge" style="background:#ecfdf5;color:#059669;">
+                            <i class="fas fa-arrow-up" style="font-size:9px;"></i> <span id="stat-vendas-growth">—</span>
+                        </span>
+                    </div>
+                    <div class="stat-label">Recebimentos do Mês</div>
+                    <div class="stat-value" id="stat-vendas-valor">Carregando...</div>
+                    <div class="stat-progress-bar">
+                        <div class="stat-progress-fill" id="stat-vendas-bar" style="width:0%;background:linear-gradient(90deg,#10b981,#0d9488);"></div>
+                    </div>
+                    <div class="stat-sub" id="stat-vendas-sub">Mês atual</div>
                 </div>
-            </a>
 
-            <a href="/modules/Vendas/public/index.html" class="module-card vendas" data-area="vendas">
-                <div class="module-arrow"><i class="fas fa-arrow-right"></i></div>
-                <div class="module-icon"><i class="fas fa-chart-line"></i></div>
-                <div class="module-info">
-                    <div class="module-title">Vendas</div>
+                <!-- Stat: Pedidos em Aberto (BUG-001: renomeado de "Pendentes") -->
+                <div class="stat-card">
+                    <div class="stat-card-top">
+                        <div class="stat-icon" style="background:linear-gradient(135deg,#f59e0b,#ea580c);box-shadow:0 4px 12px rgba(245,158,11,0.3);">
+                            <i class="fas fa-file-lines"></i>
+                        </div>
+                        <span class="stat-badge" style="background:#fff7ed;color:#ea580c;">
+                            Compras
+                        </span>
+                    </div>
+                    <div class="stat-label">Pedidos em Aberto</div>
+                    <div class="stat-value" id="stat-pedidos-valor">—</div>
+                    <div class="stat-meta">
+                        <i class="fas fa-bullseye" style="color:#94a3b8;font-size:12px;"></i>
+                        <span>Pedidos de compra em aberto</span>
+                    </div>
                 </div>
-            </a>
 
-            <a href="/modules/Faturamento/public/dashboard.html" class="module-card nfe" data-area="nfe">
-                <div class="module-arrow"><i class="fas fa-arrow-right"></i></div>
-                <div class="module-icon"><i class="fas fa-file-invoice"></i></div>
-                <div class="module-info">
-                    <div class="module-title">Faturamento</div>
+                <!-- Stat: Ordens de Produção -->
+                <div class="stat-card">
+                    <div class="stat-card-top">
+                        <div class="stat-icon" style="background:linear-gradient(135deg,#3b82f6,#4f46e5);box-shadow:0 4px 12px rgba(59,130,246,0.3);">
+                            <i class="fas fa-gears"></i>
+                        </div>
+                        <span class="stat-badge" style="background:#eff6ff;color:#2563eb;">
+                            PCP
+                        </span>
+                    </div>
+                    <div class="stat-label">Ordens Ativas</div>
+                    <div class="stat-value" id="stat-ordens-valor">—</div>
+                    <div class="stat-meta">
+                        <i class="fas fa-clock" style="color:#94a3b8;font-size:12px;"></i>
+                        <span>Ordens de produção em andamento</span>
+                    </div>
                 </div>
-            </a>
+            </div>
 
-            <a href="/modules/Logistica/public/index.html" class="module-card logistica" data-area="logistica">
-                <div class="module-arrow"><i class="fas fa-arrow-right"></i></div>
-                <div class="module-icon"><i class="fas fa-truck"></i></div>
-                <div class="module-info">
-                    <div class="module-title">Logística</div>
+            <!-- Side column: Quick Actions + Recent Activity -->
+            <div class="stats-col-side">
+                <!-- Quick Actions -->
+                <div class="side-card">
+                    <div class="side-card-title">Ações Rápidas</div>
+                    <div class="quick-actions-grid">
+                        <button class="quick-action-btn" onclick="window.location.href=(window.__BASE_PATH||'')+'/Vendas/'">
+                            <i class="fas fa-chart-line" style="color:#10b981;"></i>
+                            <span>Nova Venda</span>
+                        </button>
+                        <button class="quick-action-btn" onclick="window.location.href=(window.__BASE_PATH||'')+'/Compras/'">
+                            <i class="fas fa-cart-plus" style="color:#3b82f6;"></i>
+                            <span>Novo Pedido</span>
+                        </button>
+                        <button class="quick-action-btn" onclick="window.location.href=(window.__BASE_PATH||'')+'/Faturamento/'">
+                            <i class="fas fa-file-invoice" style="color:#06b6d4;"></i>
+                            <span>Emitir NF</span>
+                        </button>
+                        <button class="quick-action-btn" onclick="window.location.href=(window.__BASE_PATH||'')+'/Financeiro'">
+                            <i class="fas fa-chart-bar" style="color:#8b5cf6;"></i>
+                            <span>Relatórios</span>
+                        </button>
+                    </div>
                 </div>
-            </a>
 
-            <a href="/modules/PCP/index.html" class="module-card pcp" data-area="pcp">
-                <div class="module-arrow"><i class="fas fa-arrow-right"></i></div>
-                <div class="module-icon"><i class="fas fa-gears"></i></div>
-                <div class="module-info">
-                    <div class="module-title">PCP</div>
+                <!-- Recent Activity -->
+                <div class="side-card">
+                    <div class="side-card-header">
+                        <span class="side-card-title" style="margin-bottom:0;">Atividade Recente</span>
+                        <a class="side-card-link" href="/Compras/">Ver tudo</a>
+                    </div>
+                    <div class="activity-list" id="activity-list">
+                        <div class="activity-item">
+                            <div class="activity-icon" style="background:#e2e8f0;"><i class="fas fa-spinner fa-spin" style="color:#94a3b8;"></i></div>
+                            <div>
+                                <div class="activity-text" style="color:#94a3b8;">Carregando atividades...</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </a>
-
-            <a href="/modules/Financeiro/index.html" class="module-card financeiro" data-area="financeiro">
-                <div class="module-arrow"><i class="fas fa-arrow-right"></i></div>
-                <div class="module-icon"><i class="fas fa-wallet"></i></div>
-                <div class="module-info">
-                    <div class="module-title">Financeiro</div>
-                </div>
-            </a>
-
-            <a href="#" class="module-card rh" data-area="rh" id="rh-module-card" onclick="navegarRH(event)">
-                <div class="module-arrow"><i class="fas fa-arrow-right"></i></div>
-                <div class="module-icon"><i class="fas fa-people-group"></i></div>
-                <div class="module-info">
-                    <div class="module-title">Recursos Humanos</div>
-                </div>
-            </a>
-        </section>
-
+            </div>
+        </div>
     </main>
+
+    <!-- Chat FAB -->
+    <button class="chat-fab" id="chat-fab-btn" title="Chat corporativo" onclick="if(typeof toggleChatWidget==='function')toggleChatWidget(); else document.querySelector('.chat-widget-toggle')?.click();">
+        <i class="fas fa-comment-dots"></i>
+    </button>
+
+    <!-- V0 Dashboard: Stats Section Loader -->
+    <script>
+        // Carrega KPIs e atividades para admins
+        async function loadDashboardStats() {
+            try {
+                const res = await fetch('/api/dashboard/kpis', { credentials: 'include' });
+                if (!res.ok) throw new Error('api-error');
+                const data = await res.json();
+
+                // Recebimentos do mês
+                if (data.vendas) {
+                    const el = document.getElementById('stat-vendas-valor');
+                    if (el) el.textContent = data.vendas.valor || '—';
+                    const growth = document.getElementById('stat-vendas-growth');
+                    if (growth) {
+                        growth.textContent = data.vendas.trend || '—';
+                        if (data.vendas.trendUp === false) {
+                            const badge = document.getElementById('stat-vendas-badge');
+                            if (badge) {
+                                badge.style.background = '#fff1f2';
+                                badge.style.color = '#e11d48';
+                                badge.querySelector('i')?.classList.replace('fa-arrow-up', 'fa-arrow-down');
+                            }
+                        }
+                    }
+                    // Animar barra de progresso
+                    const bar = document.getElementById('stat-vendas-bar');
+                    if (bar && data.vendas.chart) {
+                        const max = Math.max(...(data.vendas.chart || [1]));
+                        const last = data.vendas.chart[data.vendas.chart.length - 1] || 0;
+                        setTimeout(() => { bar.style.width = Math.min(100, Math.round(last / max * 100)) + '%'; }, 300);
+                    }
+                }
+
+                // Pedidos de compra
+                const pedidos = document.getElementById('stat-pedidos-valor');
+                if (pedidos) pedidos.textContent = data.pedidosAbertos ?? '—';
+
+                // Ordens ativas
+                const ordens = document.getElementById('stat-ordens-valor');
+                if (ordens) ordens.textContent = data.ordensAtivas ?? '—';
+
+            } catch (e) {
+                // Silenciosamente mantém placeholders
+                ['stat-vendas-valor','stat-pedidos-valor','stat-ordens-valor'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el && el.textContent === 'Carregando...') el.textContent = '—';
+                });
+            }
+        }
+
+        // Carrega atividades recentes via alertas do dashboard
+        async function loadRecentActivity() {
+            try {
+                const res = await fetch('/api/dashboard/alerts', { credentials: 'include' });
+                if (!res.ok) throw new Error('api-error');
+                const data = await res.json();
+                const list = document.getElementById('activity-list');
+                if (!list) return;
+
+                const activities = [];
+                if (data.pedidosPendentes > 0) activities.push({ icon: 'fa-cart-shopping', color: '#3b82f6', text: `${data.pedidosPendentes} pedido(s) pendente(s)`, time: 'Compras' });
+                if (data.aprovadosHoje > 0) activities.push({ icon: 'fa-check-circle', color: '#10b981', text: `${data.aprovadosHoje} aprovado(s) hoje`, time: 'Hoje' });
+
+                if (activities.length === 0) {
+                    list.innerHTML = '<div class="activity-item"><div class="activity-icon" style="background:#10b981;"><i class="fas fa-check"></i></div><div><div class="activity-text">Tudo em dia!</div><div class="activity-time">Sem pendências</div></div></div>';
+                    return;
+                }
+
+                list.innerHTML = activities.slice(0, 3).map(a => `
+                    <div class="activity-item">
+                        <div class="activity-icon" style="background:${a.color};"><i class="fas ${a.icon}"></i></div>
+                        <div>
+                            <div class="activity-text">${a.text}</div>
+                            <div class="activity-time">${a.time}</div>
+                        </div>
+                    </div>`).join('');
+            } catch (e) {
+                const list = document.getElementById('activity-list');
+                if (list) list.innerHTML = '<div class="activity-item"><div class="activity-icon" style="background:#e2e8f0;"><i class="fas fa-inbox" style="color:#94a3b8;"></i></div><div><div class="activity-text" style="color:#94a3b8;">Sem atividades recentes</div></div></div>';
+            }
+        }
+
+        // Exibir seção de stats para admins
+        function showAdminStats() {
+            const el = document.getElementById('admin-stats-section');
+            if (el && !el.classList.contains('visible')) {
+                el.classList.add('visible');
+                loadDashboardStats();
+                loadRecentActivity();
+            }
+        }
+
+        // Verificar na autenticação
+        window.addEventListener('authSuccess', function(e) {
+            if (e.detail && e.detail.user) {
+                const u = e.detail.user;
+                const isAdmin = u.is_admin === 1 || u.is_admin === true || u.role === 'admin' || u.role === 'administrador';
+                if (isAdmin) showAdminStats();
+            }
+        });
+
+        // Verificar no DOMContentLoaded (dados locais)
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                const u = JSON.parse(localStorage.getItem('userData') || '{}');
+                const isAdmin = u.is_admin === 1 || u.is_admin === true || u.role === 'admin' || u.role === 'administrador';
+                if (isAdmin) showAdminStats();
+            } catch(e) {}
+        });
+    </script>
 
     <!-- Scripts do sistema original -->
     <script src="/js/header-controls.js?v=20260219"></script>
@@ -1994,8 +2637,8 @@
     <script>
         // Carrega config-modals.html e config-modals-extended.html
         Promise.all([
-            fetch('/config-modals.html?v=20260326').then(r => r.ok ? r.text() : ''),
-            fetch('/config-modals-extended.html?v=20260326').then(r => r.ok ? r.text() : '')
+            fetch('/config-modals.html?v=20260424').then(r => r.ok ? r.text() : ''),
+            fetch('/config-modals-extended.html?v=20260424').then(r => r.ok ? r.text() : '')
         ]).then(([html1, html2]) => {
             const container = document.createElement('div');
             container.id = 'config-modals-container';
@@ -2017,6 +2660,18 @@
         }
         updateDateTime();
         setInterval(updateDateTime, 60000);
+
+        // Frases motivacionais rotativas (Vzero design)
+        (function () {
+            const quotes = [
+                'Grandes conquistas exigem grandes esforços.',
+                'O sucesso é a soma de pequenos esforços repetidos dia após dia.',
+                'Transforme seus sonhos em metas e suas metas em conquistas.',
+                'A excelência não é um ato, mas um hábito.',
+            ];
+            const el = document.getElementById('greeting-quote');
+            if (el) el.textContent = quotes[Math.floor(Math.random() * quotes.length)];
+        })();
 
         // Função para obter usuário logado (usa 'userData' - chave do sistema)
         function getUsuarioLogado() {
@@ -2065,9 +2720,11 @@
                 const greetingName = document.getElementById('greeting-name');
                 if (greetingName) greetingName.textContent = displayName;
 
-                // Atualizar nome no header
+                // Atualizar nome e email no header
                 const userName = document.getElementById('user-name-display');
                 if (userName) userName.textContent = displayName;
+                const userEmailDisplay = document.getElementById('user-email-display');
+                if (userEmailDisplay) userEmailDisplay.textContent = userEmail;
 
                 // Atualizar avatares
                 const userAvatar = document.getElementById('user-avatar');
@@ -2285,7 +2942,7 @@
             const container = document.getElementById('header-search-container');
             container.classList.toggle('active');
             if (container.classList.contains('active')) {
-                document.getElementById('header-search-input').focus();
+                document.getElementById('header-search-input-mobile').focus();
             }
         });
 
@@ -2351,30 +3008,13 @@
             }
         });
 
-        // Botão de notificações no header (sino)
-        document.getElementById('notifications-btn')?.addEventListener('click', function () {
-            if (typeof abrirCentralNotificacoes === 'function') {
-                abrirCentralNotificacoes();
-            } else if (typeof toggleNotificationPanel === 'function') {
-                toggleNotificationPanel();
-            } else {
-                // Fallback - verificar se existe o painel de notificações
-                const notifPanel = document.getElementById('notification-panel') ||
-                    document.getElementById('notifications-panel') ||
-                    document.querySelector('.notification-panel');
-                if (notifPanel) {
-                    notifPanel.classList.toggle('active');
-                    notifPanel.classList.toggle('show');
-                } else {
-                    console.log('Central de notificações não disponível');
-                }
-            }
-        });
-
         // Botão de ajuda no header (interrogação)
         document.getElementById('help-btn')?.addEventListener('click', function () {
             window.open('/ajuda/index.html', '_blank');
         });
+
+        // ========== ACESSIBILIDADE ==========
+        // Acessibilidade: o script compartilhado abre o painel pelo botão do header.
 
         // Função abrirModalConfig para abrir modal de configurações
         // Salvar título original da página para restaurar ao fechar
@@ -2505,7 +3145,7 @@
     <script src="/js/popup-confirmacao.js"></script>
     <script src="/js/modal-fix-global.js?v=20260219"></script>
     <script src="/js/background-manager.js?v=20260214"></script>
-    <script src="/js/config-modals.js?v=20260408"></script>
+    <script src="/js/config-modals.js?v=20260424"></script>
     <script src="/js/custos-precificacao.js?v=20260328"></script>
     <script src="/js/espelho-nf.js?v=20260327b"></script>
 
@@ -2847,7 +3487,7 @@
                 const prefs = JSON.parse(localStorage.getItem('userPreferences') || '{}');
                 document.getElementById('pref-notificações').checked = prefs.notificações !== false;
                 document.getElementById('pref-som').checked = prefs.som === true;
-                document.getElementById('pref-dark-mode').checked = localStorage.getItem('darkMode') === '1';
+                document.getElementById('pref-dark-mode').checked = localStorage.getItem('a11yDarkMode') !== '0';
                 document.getElementById('pref-fundos').checked = prefs.fundos !== false;
             } catch (e) {
                 console.error('Erro ao carregar preferências:', e);
@@ -2880,7 +3520,8 @@
 
                 // Aplicar dark mode
                 const darkMode = document.getElementById('pref-dark-mode').checked;
-                localStorage.setItem('darkMode', darkMode ? '1' : '0');
+                localStorage.setItem('a11yDarkMode', darkMode ? '1' : '0');
+                localStorage.removeItem('darkMode');
                 aplicarDarkMode(darkMode);
 
                 // Aplicar fundos animados
@@ -2964,33 +3605,17 @@
 
         // Função para aplicar/remover dark mode
         window.aplicarDarkMode = function (ativar) {
-            const logoAzul = document.getElementById('logo-azul');
-            const logoBranca = document.getElementById('logo-branca');
-            const logoZyntraAzul = document.querySelector('.logo-zyntra-azul');
-            const logoZyntraBranca = document.getElementById('logo-zyntra-branca');
-            const logoSep = document.querySelector('.logo-separator');
-
             if (ativar) {
-                document.body.classList.add('dark-mode');
-                if (logoAzul) logoAzul.style.display = 'none';
-                if (logoBranca) logoBranca.style.display = 'block';
-                if (logoZyntraAzul) logoZyntraAzul.style.display = 'none';
-                if (logoZyntraBranca) logoZyntraBranca.style.display = 'block';
-                if (logoSep) logoSep.style.color = 'rgba(255,255,255,0.3)';
+                document.documentElement.classList.add('a11y-dark-mode');
             } else {
-                document.body.classList.remove('dark-mode');
-                if (logoAzul) logoAzul.style.display = 'block';
-                if (logoBranca) logoBranca.style.display = 'none';
-                if (logoZyntraAzul) logoZyntraAzul.style.display = 'block';
-                if (logoZyntraBranca) logoZyntraBranca.style.display = 'none';
-                if (logoSep) logoSep.style.color = 'rgba(0,0,0,0.15)';
+                document.documentElement.classList.remove('a11y-dark-mode');
             }
         };
 
         // Aplicar preferências ao carregar a página
         document.addEventListener('DOMContentLoaded', function () {
             // Dark mode
-            const darkMode = localStorage.getItem('darkMode') === '1';
+            const darkMode = localStorage.getItem('a11yDarkMode') !== '0';
             if (darkMode) {
                 aplicarDarkMode(true);
             }
@@ -3812,6 +4437,9 @@
             }).join('');
         };
     </script>
+
+    <!-- Widget de Acessibilidade Global (dark mode, fonte, contraste, etc.) -->
+    <script src="/_shared/accessibility-widget.js?v=20260517"></script>
 </body>
 
 </html>

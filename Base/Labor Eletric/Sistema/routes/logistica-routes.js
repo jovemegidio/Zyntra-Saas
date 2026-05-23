@@ -20,10 +20,11 @@ module.exports = function createLogisticaRoutes(deps) {
             // Sprint E2E-S2 (E4-HIGH-06): Separar pendente de aguardando_separacao no dashboard
             // HOTFIX Pipeline E2E: Incluir status 'entregue' para que pedidos entregues não sumam do dashboard
             // (quando status_logistica='entregue', o status principal muda para 'entregue')
+            // BUG-024: incluir 'aguardando' no filtro para alinhar com listagem
             const [[aguardando]] = await pool.query(`
                 SELECT COUNT(*) as total FROM pedidos
                 WHERE status IN ('faturado', 'recibo', 'entregue')
-                AND (status_logistica IS NULL OR status_logistica = 'pendente' OR status_logistica = '')
+                AND (status_logistica IS NULL OR status_logistica IN ('pendente', 'aguardando', ''))
             `);
 
             const [[aguardandoSep]] = await pool.query(`
