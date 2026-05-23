@@ -68,10 +68,11 @@ router.get('/kpis', async (req, res) => {
             `).catch(() => [[{ total: 0 }]]),
             
             // Ordens de produção ativas
+            // BUG-003: excluir apenas status terminais para alinhar contagem com PCP
             db.query(`
-                SELECT COUNT(*) as total 
-                FROM ordens_producao 
-                WHERE status IN ('em_producao', 'aguardando', 'planejada', 'Em Produção', 'Aguardando')
+                SELECT COUNT(*) as total
+                FROM ordens_producao
+                WHERE status NOT IN ('concluida', 'cancelada', 'finalizada', 'Concluída', 'Cancelada', 'Finalizada')
             `).catch(() => [[{ total: 0 }]])
         ]);
         

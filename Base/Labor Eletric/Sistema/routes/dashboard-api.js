@@ -69,9 +69,9 @@ router.get('/kpis', async (req, res) => {
             
             // Ordens de produção ativas
             db.query(`
-                SELECT COUNT(*) as total 
-                FROM ordens_producao 
-                WHERE status IN ('em_producao', 'aguardando', 'planejada', 'Em Produção', 'Aguardando')
+                SELECT COUNT(*) as total
+                FROM ordens_producao
+                WHERE status NOT IN ('concluida', 'cancelada', 'finalizada', 'Concluída', 'Cancelada', 'Finalizada')
             `).catch(() => [[{ total: 0 }]])
         ]);
         

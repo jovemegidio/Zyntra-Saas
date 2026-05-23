@@ -198,35 +198,33 @@ async function carregarFornecedores() {
 }
 
 async function carregarProdutos() {
+    // Primary: Compras materiais API
     try {
-        const response = await fetch('/api/produtos', { credentials: 'include' });
+        const response = await fetch('/api/compras/materiais?limit=1000', { credentials: 'include' });
         if (response.ok) {
             const data = await response.json();
-            produtos = Array.isArray(data) ? data : (data.produtos || []);
-            return;
+            const raw = data.materiais || data.produtos || (Array.isArray(data) ? data : []);
+            produtos = raw.map(m => ({ ...m, nome: m.descricao || m.nome || '', codigo: m.codigo_material || m.codigo || '' }));
+            if (produtos.length > 0) return;
         }
     } catch (error) {
-        console.log('Carregando produtos do localStorage...');
+        console.log('Erro ao carregar materiais de compras:', error);
     }
 
-    // Tentar também da API de materiais do PCP
+    // Fallback: PCP materiais
     try {
         const response = await fetch('/api/pcp/materiais', { credentials: 'include' });
         if (response.ok) {
             const data = await response.json();
             produtos = Array.isArray(data) ? data : (data.materiais || []);
-            return;
+            if (produtos.length > 0) return;
         }
     } catch (error) {
-        console.log('Erro ao carregar materiais:', error);
+        console.log('Erro ao carregar materiais PCP:', error);
     }
 
     const produtosLocal = localStorage.getItem('produtos');
-    if (produtosLocal) {
-        produtos = JSON.parse(produtosLocal);
-    } else {
-        produtos = [];
-    }
+    produtos = produtosLocal ? JSON.parse(produtosLocal) : [];
 }
 
 // ============ MODAL NOVO/EDITAR PEDIDO ============
@@ -479,6 +477,8 @@ async function salvarPedido() {
 
     if (!fornecedorId) {
         mostrarToast('Selecione um fornecedor!', 'error');
+        const selForn = document.getElementById('fornecedorId') || document.getElementById('fornecedorSelect');
+        if (selForn) { selForn.style.borderColor = '#ef4444'; setTimeout(() => { selForn.style.borderColor = ''; }, 3000); }
         return;
     }
 
@@ -488,10 +488,29 @@ async function salvarPedido() {
         return;
     }
 
+    // BUG-005: Validar preço e quantidade de cada item
+    for (let i = 0; i < itens.length; i++) {
+        const item = itens[i];
+        if (!item.preco_unitario || parseFloat(item.preco_unitario) <= 0) {
+            alert('Preço unitário deve ser maior que zero.');
+            return;
+        }
+        if (!item.quantidade || parseFloat(item.quantidade) <= 0) {
+            alert('Quantidade deve ser maior que zero.');
+            return;
+        }
+    }
+
     const subtotal = itens.reduce((sum, item) => sum + item.preco_total, 0);
     const desconto = parseFloat(document.getElementById('desconto').value) || 0;
     const frete = parseFloat(document.getElementById('frete').value) || 0;
     const valorFinal = subtotal - desconto + frete;
+
+    // DB-002: Bloquear pedido com valor total zero ou negativo
+    if (valorFinal <= 0) {
+        mostrarToast('Valor total do pedido deve ser maior que zero.', 'error');
+        return;
+    }
 
     const fornecedor = fornecedores.find(f => f.id == fornecedorId);
 
@@ -653,9 +672,10 @@ function renderizarTabelaPedidos() {
                     <button class="btn-action view" onclick="visualizarPedido('${pedido.id}')" title="Visualizar">
                         <i class="fas fa-eye"></i>
                     </button>
+                    ${['pendente', 'rascunho', 'em_analise'].includes(pedido.status) ? `
                     <button class="btn-action edit" onclick="abrirModalEditarPedido('${pedido.id}')" title="Editar">
                         <i class="fas fa-edit"></i>
-                    </button>
+                    </button>` : ''}
                     ${pedido.status === 'pendente' ? `
                     <button class="btn-action success" onclick="aprovarPedido('${pedido.id}')" title="Aprovar">
                         <i class="fas fa-check"></i>
@@ -696,16 +716,18 @@ function atualizarCards() {
 async function visualizarPedido(pedidoId) {
     let pedido = pedidos.find(p => p.id == pedidoId);
 
-    // Se não tiver itens ou itens vazio, buscar da API
-    if (!pedido || !pedido.itens || pedido.itens.length === 0) {
-        try {
-            const response = await fetch(`/api/compras/pedidos/${pedidoId}`, { credentials: 'include' });
-            if (response.ok) {
-                pedido = await response.json();
-            }
-        } catch (error) {
-            console.error('Erro ao buscar pedido:', error);
+    // Sempre buscar da API para garantir dados completos (condicoes_pagamento, etc.)
+    try {
+        const _tok = localStorage.getItem('token');
+        const response = await fetch(`/api/compras/pedidos/${pedidoId}`, {
+            headers: _tok ? { 'Authorization': `Bearer ${_tok}` } : {},
+            credentials: 'include'
+        });
+        if (response.ok) {
+            pedido = await response.json();
         }
+    } catch (error) {
+        console.error('Erro ao buscar pedido:', error);
     }
 
     if (!pedido) {
@@ -807,6 +829,12 @@ function fecharModalVisualizar() {
 
 async function aprovarPedido(pedidoId) {
     if (!confirm('Deseja aprovar este pedido?')) return;
+
+    // BUG-009: Avisar se data de entrega não estiver preenchida
+    const pedido = pedidos.find(p => p.id === pedidoId || p.id == pedidoId);
+    if (pedido && !pedido.data_entrega_prevista) {
+        if (!confirm('Data de entrega prevista recomendada para rastreamento de SLA.\nDeseja prosseguir sem a data de entrega?')) return;
+    }
 
     try {
         const response = await fetch(`/api/compras/pedidos/${pedidoId}/aprovar`, {

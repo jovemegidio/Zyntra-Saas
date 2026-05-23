@@ -22,6 +22,28 @@ const MAX_LOGIN_ATTEMPTS = 5;
 const LOCKOUT_DURATION_MS = 15 * 60 * 1000; // 15 minutos
 const loginAttemptsCache = new Map(); // fallback in-memory
 
+// BE-003: Cache de /api/me — evitar 58+ queries redundantes por pageload
+// TTL de 90s: cobre múltiplas chamadas simultâneas sem tornar os dados obsoletos
+const _meCache = new Map();
+const ME_CACHE_TTL = 90 * 1000; // 90 segundos
+function _meCacheGet(userId) {
+    const entry = _meCache.get(userId);
+    if (!entry) return null;
+    if (Date.now() - entry.ts > ME_CACHE_TTL) { _meCache.delete(userId); return null; }
+    return entry.data;
+}
+function _meCacheSet(userId, data) {
+    _meCache.set(userId, { data, ts: Date.now() });
+    // Limpar entradas antigas a cada 200 usuários em cache
+    if (_meCache.size > 200) {
+        const cutoff = Date.now() - ME_CACHE_TTL;
+        for (const [k, v] of _meCache) { if (v.ts < cutoff) _meCache.delete(k); }
+    }
+}
+function _meCacheInvalidate(userId) { _meCache.delete(userId); }
+// Exportar invalidator para ser chamado após UPDATE de usuário
+module.exports && (module.exports._meCacheInvalidate = _meCacheInvalidate);
+
 async function getLoginAttempt(email) {
     const key = (email || '').toLowerCase().trim();
     try {
@@ -210,6 +232,19 @@ async function auditLog(action, userId, description, req) {
     } catch (e) { /* fire-and-forget */ }
 }
 
+async function registerSessionActivity(userId, deviceId, context) {
+    if (!userId) return;
+    try {
+        const cacheService = require('../../services/cache');
+        const sessionKey = `session_activity:${userId}:${deviceId || 'default'}`;
+        const timeoutMs = parseInt(process.env.SESSION_INACTIVITY_TIMEOUT_MS, 10) || 15 * 60 * 1000;
+        await cacheService.cacheSet(sessionKey, Date.now(), timeoutMs + 60000);
+        console.log(`[AUTH/${context}] Session activity registered for userId ${userId}`);
+    } catch (redisErr) {
+        console.warn(`[AUTH/${context}] Redis session registration failed (non-blocking):`, redisErr.message);
+    }
+}
+
 // Rota de login corrigida (sem campo cargo)
 router.post('/login', validate(schemas.login), async (req, res) => {
     const isDevMode = process.env.NODE_ENV !== 'production';
@@ -271,12 +306,9 @@ router.post('/login', validate(schemas.login), async (req, res) => {
         // Domínios permitidos para login (configurável via .env)
         const defaultDomains = [
             '@aluforce.ind.br',
-            '@aluforce.com',
-            '@energy.com.br',
-            '@laboreletric.com.br',
+            '@labor.com.br',
             '@lumiereassesoria.com.br',
-            '@lumiereassessoria.com.br',
-            '@zyntra.com.br'
+            '@lumiereassessoria.com.br'
         ];
         const dominiosPermitidos = process.env.ALLOWED_EMAIL_DOMAINS
             ? process.env.ALLOWED_EMAIL_DOMAINS.split(',').map(d => d.trim())
@@ -291,9 +323,7 @@ router.post('/login', validate(schemas.login), async (req, res) => {
         // Mapeamento domínio → empresa_id (multiempresa)
         const dominioEmpresaMap = {
             '@aluforce.ind.br': 1,
-            '@aluforce.com': 1,
-            '@laboreletric.com.br': 2,
-            '@energy.com.br': 3
+            '@labor.com.br': 2
         };
         const emailDominio = email ? ('@' + (email.split('@')[1] || '')) : '';
         const empresaIdPorDominio = dominioEmpresaMap[emailDominio] || null;
@@ -330,6 +360,15 @@ router.post('/login', validate(schemas.login), async (req, res) => {
 
         // Seleciona o usuário (busca por email OU login)
         let [rows] = await safeQuery('SELECT * FROM usuarios WHERE email = ? OR login = ? ORDER BY id ASC LIMIT 1', [email, email.split('@')[0]]);
+
+        // Fallback: @labor.com.br é alias de @aluforce.ind.br — busca com domínio canônico
+        if (!rows.length && email.endsWith('@labor.com.br')) {
+            const canonicalEmail = email.replace('@labor.com.br', '@aluforce.ind.br');
+            [rows] = await safeQuery('SELECT * FROM usuarios WHERE email = ? ORDER BY id ASC LIMIT 1', [canonicalEmail]);
+            if (rows.length) {
+                console.log(`[AUTH/LOGIN] 🔗 Labor alias: ${email} → ${canonicalEmail}`);
+            }
+        }
 
         // ========================================
         // CPF LOGIN SYNC: Sincronizar dados quando usuario é encontrado
@@ -930,6 +969,7 @@ router.post('/login', validate(schemas.login), async (req, res) => {
                 })()
             }
         };
+        await registerSessionActivity(user.id, deviceId, 'LOGIN');
         res.json(payload);
 
         // 📸 POST-LOGIN: sync foto from funcionarios -> usuarios (fire-and-forget)
@@ -954,16 +994,6 @@ router.post('/login', validate(schemas.login), async (req, res) => {
 
         auditLog('LOGIN_SUCCESS', user.id, `Login bem-sucedido: ${user.email}`, req);
 
-        // TC-AUTH-01-001: Registrar sessão no Redis para controle de inatividade
-        try {
-            const cacheService = require('../../services/cache');
-            const sessionKey = `session_activity:${user.id}:${deviceId}`;
-            const SESSION_INACTIVITY_MS = parseInt(process.env.SESSION_INACTIVITY_TIMEOUT_MS, 10) || 15 * 60 * 1000;
-            await cacheService.cacheSet(sessionKey, Date.now(), SESSION_INACTIVITY_MS + 60000); // 15min + 1min margem
-            console.log(`[AUTH/LOGIN] 📡 Sessão registrada no Redis: ${sessionKey}`);
-        } catch (redisErr) {
-            console.warn('[AUTH/LOGIN] ⚠️ Redis session registration failed (non-blocking):', redisErr.message);
-        }
     } catch (error) {
         // Log completo no servidor (stack quando disponível)
         console.error('Erro detalhado no login:', error.stack || error);
@@ -985,7 +1015,7 @@ router.post('/logout', async (req, res) => {
     if (token) {
         try {
             const jwt = require('jsonwebtoken');
-            const decoded = jwt.verify(token, JWT_SECRET);
+            const decoded = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
             userName = decoded.nome || decoded.email || 'Usuário';
             userId = decoded.id;
         } catch (e) {
@@ -1066,7 +1096,7 @@ router.post('/auth/refresh', async (req, res) => {
             crypto.createHmac('sha256', JWT_SECRET).update('refresh-token-secret').digest('hex');
         let decoded;
         try {
-            decoded = jwtLib.verify(oldRefreshToken, REFRESH_SECRET);
+            decoded = jwtLib.verify(oldRefreshToken, REFRESH_SECRET, { algorithms: ['HS256'] });
         } catch (e) {
             return res.status(401).json({ code: 'INVALID_REFRESH_TOKEN', message: 'Refresh token inválido ou expirado.' });
         }
@@ -1118,16 +1148,7 @@ router.post('/auth/refresh', async (req, res) => {
             maxAge: 1000 * 60 * 60 * 24 * 7
         }));
 
-        // TC-AUTH-03-001: Renovar session_activity no Redis — refresh é atividade legítima
-        try {
-            const cacheService = require('../../services/cache');
-            const deviceId = decoded.deviceId || 'default';
-            const sessionKey = `session_activity:${result.user.id}:${deviceId}`;
-            const SESSION_INACTIVITY_MS = parseInt(process.env.SESSION_INACTIVITY_TIMEOUT_MS, 10) || 15 * 60 * 1000;
-            await cacheService.cacheSet(sessionKey, Date.now(), SESSION_INACTIVITY_MS + 60000);
-        } catch (redisErr) {
-            console.warn('[AUTH/REFRESH] ⚠️ Redis session renewal failed (non-blocking):', redisErr.message);
-        }
+        await registerSessionActivity(result.user.id, decoded.deviceId || 'default', 'REFRESH');
 
         console.log(`[AUTH/REFRESH] ✅ Tokens renovados para userId ${result.user.id}`);
 
@@ -1436,6 +1457,8 @@ router.post('/auth/validate-remember-token', async (req, res) => {
             maxAge: 1000 * 60 * 60 * 24 * 7
         }));
 
+        await registerSessionActivity(user.id, deviceId, 'VALIDATE-REMEMBER');
+
         res.json({
             success: true,
             user: user,
@@ -1649,8 +1672,7 @@ router.post('/verify-2fa', async (req, res) => {
             }
         }
 
-        const baseUrl = (req.protocol || 'http') + '://' + (req.get('host') || req.headers.host || 'localhost');
-        const redirectTo = baseUrl + '/dashboard';
+        const redirectTo = '/dashboard';
 
         // SECURITY: Token is NOT included in JSON response — delivered only via httpOnly cookie
         const payload = {
@@ -1694,6 +1716,7 @@ router.post('/verify-2fa', async (req, res) => {
         };
 
         console.log(`[AUTH/2FA] 📤 Resposta verify-2fa: trustedDeviceToken ${savedTrustedToken ? 'incluído' : 'NÃO incluído'}`);
+        await registerSessionActivity(user.id, deviceId, '2FA');
         res.json(payload);
 
     } catch (error) {
@@ -2120,6 +2143,13 @@ router.get('/me', async (req, res) => {
             return res.status(401).json({ message: 'Token inválido', code: 'AUTH_INVALID' });
         }
 
+        // BE-003: Servir do cache se disponível (evita 58+ queries redundantes por pageload)
+        const cached = _meCacheGet(userId);
+        if (cached) {
+            res.setHeader('X-Cache', 'HIT');
+            return res.json(cached);
+        }
+
         const [rows] = await safeQuery(
             'SELECT id, nome, email, role, is_admin, avatar, foto, login, setor, areas FROM usuarios WHERE id = ? LIMIT 1',
             [userId]
@@ -2150,7 +2180,7 @@ router.get('/me', async (req, res) => {
             areas = ['vendas', 'rh', 'pcp', 'financeiro', 'nfe', 'compras', 'ti'];
         }
 
-        res.json({
+        const response = {
             id: u.id,
             nome: u.nome,
             email: u.email,
@@ -2161,7 +2191,12 @@ router.get('/me', async (req, res) => {
             login: u.login,
             setor: u.setor,
             areas
-        });
+        };
+
+        // Salvar no cache
+        _meCacheSet(userId, response);
+        res.setHeader('X-Cache', 'MISS');
+        res.json(response);
     } catch (err) {
         if (err.name === 'TokenExpiredError') {
             return res.status(401).json({ message: 'Token expirado', code: 'AUTH_EXPIRED' });

@@ -1061,8 +1061,23 @@ module.exports = function createFinanceiroRoutes(deps) {
             const params = [];
 
             if (status) {
-                whereClause += ' AND cr.status = ?';
-                params.push(status);
+                // FISC-001: Ao filtrar por 'vencido', incluir também registros 'pendente'
+                // com data_vencimento no passado (evita que contas atrasadas sumam da view)
+                if (status === 'vencido') {
+                    whereClause += ` AND (
+                        cr.status = 'vencido'
+                        OR (cr.status = 'pendente' AND cr.data_vencimento < CURRENT_DATE())
+                        OR (cr.status = 'pendente' AND cr.vencimento < CURRENT_DATE())
+                    )`;
+                } else if (status === 'pendente') {
+                    // Filtro 'pendente': excluir registros vencidos para não duplicar
+                    whereClause += ` AND cr.status = 'pendente'
+                        AND (cr.data_vencimento IS NULL OR cr.data_vencimento >= CURRENT_DATE())
+                        AND (cr.vencimento IS NULL OR cr.vencimento >= CURRENT_DATE())`;
+                } else {
+                    whereClause += ' AND cr.status = ?';
+                    params.push(status);
+                }
             }
 
             if (vencimento_inicio && vencimento_fim) {

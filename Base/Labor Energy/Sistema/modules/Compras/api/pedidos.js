@@ -2,6 +2,18 @@
 const router = express.Router();
 const { getDatabase } = require('../database');
 
+// BUG-006: Sanitizador HTML simples para prevenir XSS armazenado
+function sanitizeHtml(str) {
+    if (str == null) return null;
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/\//g, '&#x2F;');
+}
+
 // ============ LISTAR PEDIDOS ============
 router.get('/', async (req, res) => {
     try {
@@ -118,11 +130,20 @@ router.post('/', async (req, res) => {
             itens
         } = req.body;
         
+        // BUG-013: Extrair ID do usuário autenticado para trilha de auditoria
+        const usuario_id = req.user?.id || req.user?.user_id || req.user?.userId || null;
+
         if (!fornecedor_id || !itens || itens.length === 0) {
             await connection.rollback();
             return res.status(400).json({ error: 'Fornecedor e itens são obrigatórios' });
         }
-        
+
+        // BUG-009: data de entrega prevista é obrigatória
+        if (!data_entrega_prevista) {
+            await connection.rollback();
+            return res.status(400).json({ error: 'Data de entrega prevista é obrigatória.' });
+        }
+
         // Validar fornecedor existe
         const [fornecedorExists] = await connection.query(
             'SELECT id FROM fornecedores WHERE id = ?', [fornecedor_id]
@@ -150,12 +171,12 @@ router.post('/', async (req, res) => {
         // Gerar número do pedido
         const numero_pedido = 'PC-' + Date.now().toString().slice(-6);
         
-        // Inserir pedido
+        // Inserir pedido — BUG-006: sanitizar observacoes; BUG-013: gravar usuario_solicitante_id
         const [result] = await connection.query(
             `INSERT INTO pedidos_compra (
-                numero_pedido, fornecedor_id, data_pedido, data_entrega_prevista, 
-                valor_total, valor_final, status, observacoes
-            ) VALUES (?, ?, ?, ?, ?, ?, 'pendente', ?)`,
+                numero_pedido, fornecedor_id, data_pedido, data_entrega_prevista,
+                valor_total, valor_final, status, observacoes, usuario_solicitante_id
+            ) VALUES (?, ?, ?, ?, ?, ?, 'pendente', ?, ?)`,
 
             [
                 numero_pedido,
@@ -164,30 +185,31 @@ router.post('/', async (req, res) => {
                 data_entrega_prevista,
                 valor_total,
                 valor_total,
-                observacoes
+                sanitizeHtml(observacoes),
+                usuario_id
             ]
         );
-        
+
         const pedido_id = result.insertId;
-        
-        // Inserir itens
+
+        // Inserir itens — BUG-006: sanitizar descricao dos itens
         for (const item of itens) {
             await connection.query(
                 `INSERT INTO pedidos_compra_itens (
-                    pedido_id, material_id, descricao, quantidade, 
+                    pedido_id, material_id, descricao, quantidade,
                     preco_unitario, subtotal
                 ) VALUES (?, ?, ?, ?, ?, ?)`,
                 [
                     pedido_id,
                     item.material_id,
-                    item.descricao,
+                    sanitizeHtml(item.descricao),
                     item.quantidade,
                     item.preco_unitario,
                     item.quantidade * item.preco_unitario
                 ]
             );
         }
-        
+
         await connection.commit();
         
         res.status(201).json({

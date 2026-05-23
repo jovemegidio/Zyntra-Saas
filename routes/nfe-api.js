@@ -9,6 +9,11 @@ const express = require('express');
 module.exports = function createNfeApiRouter({ authenticateToken, pool }) {
     const router = express.Router();
 
+    // Formata valor em BRL para uso em mensagens de erro
+    function formatarValor(v) {
+        return 'R$' + Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
     // Escapa caracteres especiais XML para prevenir XML injection
     function escapeXml(str) {
         if (str == null) return '';
@@ -189,14 +194,30 @@ module.exports = function createNfeApiRouter({ authenticateToken, pool }) {
             if (!nfeData.itens || !nfeData.itens.length) {
                 erros.push('Adicione ao menos um item à NFe.');
             } else {
+                let valorTotalItens = 0;
                 nfeData.itens.forEach((item, idx) => {
                     const n = idx + 1;
                     if (!item.descricao) erros.push(`Item ${n}: descrição é obrigatória.`);
                     if (!item.ncm) erros.push(`Item ${n}: NCM é obrigatório.`);
                     if (!item.cfop) erros.push(`Item ${n}: CFOP é obrigatório.`);
                     if (!item.quantidade || item.quantidade <= 0) erros.push(`Item ${n}: quantidade deve ser maior que zero.`);
-                    if (!item.valorUnitario || item.valorUnitario <= 0) erros.push(`Item ${n}: valor unitário deve ser maior que zero.`);
+                    // FISC-007: Bloquear NF-e com produto de valor zero
+                    if (item.valorUnitario === undefined || item.valorUnitario === null || parseFloat(item.valorUnitario) <= 0) {
+                        erros.push(`Item ${n} (${item.descricao || 'sem nome'}): valor unitário deve ser maior que zero. Produtos com preço R$0,00 não podem ser faturados.`);
+                    } else {
+                        valorTotalItens += parseFloat(item.quantidade || 0) * parseFloat(item.valorUnitario);
+                    }
                 });
+
+                // FISC-006: Validar que condições de pagamento somam = valor total da NF-e
+                const pagamentos = nfeData.pagamentos || nfeData.formasPagamento || [];
+                if (pagamentos.length > 0 && valorTotalItens > 0) {
+                    const totalPagamentos = pagamentos.reduce((s, p) => s + parseFloat(p.valor || p.amount || 0), 0);
+                    const diff = Math.abs(totalPagamentos - valorTotalItens);
+                    if (diff > 0.05) { // tolerância de R$0,05 para arredondamentos
+                        erros.push(`Condições de pagamento (${formatarValor(totalPagamentos)}) não batem com o total da NF-e (${formatarValor(valorTotalItens)}). Diferença: R$${diff.toFixed(2)}.`);
+                    }
+                }
             }
 
             if (erros.length > 0) {

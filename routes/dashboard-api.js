@@ -17,7 +17,12 @@ router.get('/kpis', async (req, res) => {
         const db = req.app.locals.pool;
         
         if (!db) {
-            return res.json(getSimulatedKPIs());
+            return res.json({
+                vendas: { valor: 'R$ 0,00', trend: '0%', trendUp: true, chart: [] },
+                pedidosAbertos: 0,
+                aReceber: 'R$ 0,00',
+                ordensAtivas: 0
+            });
         }
         
         // Data atual e início do mês
@@ -34,44 +39,45 @@ router.get('/kpis', async (req, res) => {
             aReceberHoje,
             ordensAtivas
         ] = await Promise.allSettled([
-            // Vendas do mês atual (contas_receber pagas)
+            // Recebimentos do mês atual — usa data_recebimento e valor_recebido
+            // cobre status 'liquidada' (padrão) e variantes legadas 'pago'/'recebido'
             db.query(`
-                SELECT COALESCE(SUM(valor), 0) as total 
-                FROM contas_receber 
-                WHERE status = 'pago'
-                AND MONTH(data_vencimento) = MONTH(CURDATE())
-                AND YEAR(data_vencimento) = YEAR(CURDATE())
+                SELECT COALESCE(SUM(COALESCE(valor_recebido, valor)), 0) as total
+                FROM contas_receber
+                WHERE status IN ('liquidada', 'pago', 'recebido', 'paga', 'recebida', 'quitada', 'quitado')
+                AND MONTH(COALESCE(data_recebimento, data_vencimento)) = MONTH(CURDATE())
+                AND YEAR(COALESCE(data_recebimento, data_vencimento))  = YEAR(CURDATE())
             `).catch(() => [[{ total: 0 }]]),
-            
-            // Vendas do mês anterior (para comparação)
+
+            // Mês anterior (para calcular tendência)
             db.query(`
-                SELECT COALESCE(SUM(valor), 0) as total 
-                FROM contas_receber 
-                WHERE status = 'pago'
-                AND MONTH(data_vencimento) = MONTH(DATE_SUB(CURDATE(), INTERVAL 1 MONTH))
-                AND YEAR(data_vencimento) = YEAR(DATE_SUB(CURDATE(), INTERVAL 1 MONTH))
+                SELECT COALESCE(SUM(COALESCE(valor_recebido, valor)), 0) as total
+                FROM contas_receber
+                WHERE status IN ('liquidada', 'pago', 'recebido', 'paga', 'recebida', 'quitada', 'quitado')
+                AND MONTH(COALESCE(data_recebimento, data_vencimento)) = MONTH(DATE_SUB(CURDATE(), INTERVAL 1 MONTH))
+                AND YEAR(COALESCE(data_recebimento, data_vencimento))  = YEAR(DATE_SUB(CURDATE(), INTERVAL 1 MONTH))
             `).catch(() => [[{ total: 0 }]]),
-            
+
             // Pedidos de compra em aberto
             db.query(`
-                SELECT COUNT(*) as total 
-                FROM pedidos_compra 
+                SELECT COUNT(*) as total
+                FROM pedidos_compra
                 WHERE status IN ('pendente', 'aprovado', 'parcial', 'em_andamento')
             `).catch(() => [[{ total: 0 }]]),
-            
-            // Contas a receber pendentes (valor total)
+
+            // Contas a receber com vencimento hoje (ainda em aberto)
             db.query(`
-                SELECT COALESCE(SUM(valor), 0) as total 
-                FROM contas_receber 
-                WHERE data_vencimento = CURDATE() 
-                AND status IN ('pendente', 'aberto')
+                SELECT COALESCE(SUM(valor), 0) as total
+                FROM contas_receber
+                WHERE data_vencimento = CURDATE()
+                AND status IN ('a_vencer', 'vencida', 'pendente', 'aberto')
             `).catch(() => [[{ total: 0 }]]),
-            
-            // Ordens de produção ativas
+
+            // BUG-003: Ordens ativas — exclui apenas terminais (alinhado com query do PCP)
             db.query(`
-                SELECT COUNT(*) as total 
-                FROM ordens_producao 
-                WHERE status IN ('em_producao', 'aguardando', 'planejada', 'Em Produção', 'Aguardando')
+                SELECT COUNT(*) as total
+                FROM ordens_producao
+                WHERE status NOT IN ('concluida', 'cancelada', 'finalizada', 'Concluída', 'Cancelada', 'Finalizada')
             `).catch(() => [[{ total: 0 }]])
         ]);
         
@@ -89,9 +95,24 @@ router.get('/kpis', async (req, res) => {
             trendUp = trendPercent >= 0;
         }
         
-        // Mini chart fallback (dados estáticos por enquanto)
-        const chartData = [40, 55, 30, 65, 50, 75, 60];
-        
+        // Dados diários do mês atual para mini-chart
+        let chartData = [0, 0, 0, 0, 0, 0, 0];
+        try {
+            const [dailyRows] = await db.query(`
+                SELECT DAY(COALESCE(data_recebimento, data_vencimento)) as dia,
+                       COALESCE(SUM(COALESCE(valor_recebido, valor)), 0) as total
+                FROM contas_receber
+                WHERE status IN ('liquidada', 'pago', 'recebido', 'paga', 'recebida', 'quitada', 'quitado')
+                AND MONTH(COALESCE(data_recebimento, data_vencimento)) = MONTH(CURDATE())
+                AND YEAR(COALESCE(data_recebimento, data_vencimento)) = YEAR(CURDATE())
+                GROUP BY dia
+                ORDER BY dia ASC
+            `);
+            if (dailyRows && dailyRows.length > 0) {
+                chartData = dailyRows.map(r => parseFloat(r.total) || 0);
+            }
+        } catch (e) { /* mantém fallback */ }
+
         res.json({
             vendas: {
                 valor: formatCurrency(vendasAtual),
@@ -109,7 +130,12 @@ router.get('/kpis', async (req, res) => {
         
     } catch (error) {
         console.error('Dashboard KPIs Error:', error);
-        res.json(getSimulatedKPIs());
+        res.json({
+            vendas: { valor: 'R$ 0,00', trend: '0%', trendUp: true, chart: [] },
+            pedidosAbertos: 0,
+            aReceber: 'R$ 0,00',
+            ordensAtivas: 0
+        });
     }
 });
 
@@ -132,51 +158,61 @@ router.get('/alerts', async (req, res) => {
             contasVencidas,
             contasVencerHoje,
             estoqueCritico,
-            pedidosAprovados
+            pedidosAprovados,
+            pedidosPendentesTotal
         ] = await Promise.allSettled([
-            // Contas a pagar vencidas (data_vencimento < hoje E status pendente)
+            // Contas a pagar vencidas
             db.query(`
-                SELECT COUNT(*) as total 
-                FROM contas_pagar 
-                WHERE data_vencimento < CURDATE() 
-                AND status IN ('pendente', 'aberto')
+                SELECT COUNT(*) as total
+                FROM contas_pagar
+                WHERE data_vencimento < CURDATE()
+                AND status IN ('pendente', 'aberto', 'a_vencer', 'vencida')
             `).catch(() => [[{ total: 0 }]]),
-            
+
             // Contas a pagar vencendo hoje
             db.query(`
-                SELECT COUNT(*) as total 
-                FROM contas_pagar 
-                WHERE data_vencimento = CURDATE() 
-                AND status IN ('pendente', 'aberto')
+                SELECT COUNT(*) as total
+                FROM contas_pagar
+                WHERE data_vencimento = CURDATE()
+                AND status IN ('pendente', 'aberto', 'a_vencer')
             `).catch(() => [[{ total: 0 }]]),
-            
-            // Estoque crítico - mesma lógica do PCP (produtos com estoque <= mínimo)
+
+            // Estoque crítico
             db.query(`
-                SELECT COUNT(*) as total 
-                FROM produtos 
+                SELECT COUNT(*) as total
+                FROM produtos
                 WHERE (ativo = 1 OR ativo IS NULL OR status = 'ativo')
                 AND (estoque_atual < estoque_minimo OR quantidade_estoque < estoque_minimo)
                 AND estoque_minimo > 0
             `).catch(() => [[{ total: 0 }]]),
-            
+
             // Pedidos aprovados hoje
             db.query(`
-                SELECT COUNT(*) as total 
-                FROM pedidos_compra 
-                WHERE DATE(data_aprovacao) = CURDATE() 
+                SELECT COUNT(*) as total
+                FROM pedidos_compra
+                WHERE DATE(data_aprovacao) = CURDATE()
                 AND status = 'aprovado'
+            `).catch(() => [[{ total: 0 }]]),
+
+            // Pedidos de compra pendentes (campo usado pelo frontend em activity-list)
+            db.query(`
+                SELECT COUNT(*) as total
+                FROM pedidos_compra
+                WHERE status IN ('pendente', 'em_andamento', 'parcial')
             `).catch(() => [[{ total: 0 }]])
         ]);
         
         res.json({
-            vencidos: contasVencidas.status === 'fulfilled' ? 
+            vencidos: contasVencidas.status === 'fulfilled' ?
                 parseInt(contasVencidas.value[0]?.[0]?.total || 0) : 0,
-            vencerHoje: contasVencerHoje.status === 'fulfilled' ? 
+            vencerHoje: contasVencerHoje.status === 'fulfilled' ?
                 parseInt(contasVencerHoje.value[0]?.[0]?.total || 0) : 0,
-            estoqueCritico: estoqueCritico.status === 'fulfilled' ? 
+            estoqueCritico: estoqueCritico.status === 'fulfilled' ?
                 parseInt(estoqueCritico.value[0]?.[0]?.total || 0) : 0,
-            aprovadosHoje: pedidosAprovados.status === 'fulfilled' ? 
-                parseInt(pedidosAprovados.value[0]?.[0]?.total || 0) : 0
+            aprovadosHoje: pedidosAprovados.status === 'fulfilled' ?
+                parseInt(pedidosAprovados.value[0]?.[0]?.total || 0) : 0,
+            pedidosPendentes: pedidosPendentesTotal.status === 'fulfilled' ?
+                parseInt(pedidosPendentesTotal.value[0]?.[0]?.total || 0) : 0
         });
         
     } catch (error) {
@@ -271,6 +307,176 @@ router.get('/modules', async (req, res) => {
     }
 });
 
+/**
+ * GET /api/dashboard/fluxo-financeiro
+ * Recebimentos diários do mês atual para o gráfico de fluxo financeiro
+ */
+router.get('/fluxo-financeiro', async (req, res) => {
+    try {
+        const db = req.app.locals.pool;
+        if (!db) return res.json({ labels: [], recebimentos: [], pagamentos: [] });
+
+        const hoje = new Date();
+        const diasNoMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0).getDate();
+
+        const [recRows] = await db.query(`
+            SELECT DAY(COALESCE(data_recebimento, data_vencimento)) as dia,
+                   COALESCE(SUM(COALESCE(valor_recebido, valor)), 0) as total
+            FROM contas_receber
+            WHERE status IN ('liquidada', 'pago', 'recebido', 'paga', 'recebida', 'quitada', 'quitado')
+            AND MONTH(COALESCE(data_recebimento, data_vencimento)) = MONTH(CURDATE())
+            AND YEAR(COALESCE(data_recebimento, data_vencimento))  = YEAR(CURDATE())
+            GROUP BY dia ORDER BY dia
+        `).catch(() => [[]]);
+
+        const [pagRows] = await db.query(`
+            SELECT DAY(COALESCE(data_pagamento, data_vencimento)) as dia,
+                   COALESCE(SUM(COALESCE(valor_pago, valor)), 0) as total
+            FROM contas_pagar
+            WHERE status IN ('pago', 'paga', 'liquidada', 'quitada')
+            AND MONTH(COALESCE(data_pagamento, data_vencimento)) = MONTH(CURDATE())
+            AND YEAR(COALESCE(data_pagamento, data_vencimento))  = YEAR(CURDATE())
+            GROUP BY dia ORDER BY dia
+        `).catch(() => [[]]);
+
+        const recMap = {};
+        recRows.forEach(r => { recMap[r.dia] = parseFloat(r.total) || 0; });
+        const pagMap = {};
+        pagRows.forEach(r => { pagMap[r.dia] = parseFloat(r.total) || 0; });
+
+        const labels = [], recebimentos = [], pagamentos = [];
+        const diaAtual = hoje.getDate();
+        for (let d = 1; d <= Math.min(diaAtual, diasNoMes); d++) {
+            labels.push(d);
+            recebimentos.push(recMap[d] || 0);
+            pagamentos.push(pagMap[d] || 0);
+        }
+
+        res.json({ labels, recebimentos, pagamentos });
+    } catch (e) {
+        console.error('Dashboard fluxo-financeiro error:', e);
+        res.json({ labels: [], recebimentos: [], pagamentos: [] });
+    }
+});
+
+/**
+ * GET /api/dashboard/pedidos-recentes
+ * Últimos pedidos de venda para o widget do dashboard
+ */
+router.get('/pedidos-recentes', async (req, res) => {
+    try {
+        const db = req.app.locals.pool;
+        if (!db) return res.json([]);
+
+        const [rows] = await db.query(`
+            SELECT p.id,
+                   COALESCE(p.numero_pedido, CONCAT('#', p.id)) as numero_pedido,
+                   p.status,
+                   p.created_at,
+                   COALESCE(p.valor_total, p.valor, 0) as valor_total,
+                   COALESCE(c.razao_social, c.nome_fantasia, c.nome, p.cliente_nome, p.cliente, 'Cliente') AS cliente_nome
+            FROM pedidos p
+            LEFT JOIN clientes c ON p.cliente_id = c.id
+            ORDER BY p.id DESC
+            LIMIT 8
+        `).catch(() => [[]]);
+        res.json(rows || []);
+    } catch (e) {
+        console.error('Dashboard pedidos-recentes error:', e);
+        res.json([]);
+    }
+});
+
+/**
+ * GET /api/dashboard/atividade-recente
+ * Atividades reais recentes agregadas de múltiplos módulos
+ */
+router.get('/atividade-recente', async (req, res) => {
+    try {
+        const db = req.app.locals.pool;
+        if (!db) return res.json([]);
+
+        const activities = [];
+
+        // Pedidos recentes (vendas)
+        const [pedidos] = await db.query(`
+            SELECT 'pedido' as tipo,
+                   CONCAT('Pedido #', COALESCE(numero_pedido, id), ' — ',
+                          COALESCE(cliente_nome, cliente, 'Cliente')) as descricao,
+                   status,
+                   COALESCE(created_at, NOW()) as ts
+            FROM pedidos
+            ORDER BY id DESC LIMIT 3
+        `).catch(() => [[]]);
+
+        // NF-e recentes
+        const [nfes] = await db.query(`
+            SELECT 'nfe' as tipo,
+                   CONCAT('NF-e emitida — ', COALESCE(destinatario_nome, numero, '')) as descricao,
+                   status,
+                   COALESCE(created_at, data_emissao, NOW()) as ts
+            FROM nfe
+            ORDER BY id DESC LIMIT 3
+        `).catch(() => [[]]);
+
+        // Contas a receber recentes
+        const [receber] = await db.query(`
+            SELECT 'receber' as tipo,
+                   CONCAT('Recebimento: R$ ', FORMAT(COALESCE(valor_recebido, valor), 2, 'pt_BR'),
+                          ' — ', COALESCE(descricao, cliente_nome, 'Conta')) as descricao,
+                   status,
+                   COALESCE(data_recebimento, updated_at, created_at, NOW()) as ts
+            FROM contas_receber
+            WHERE status IN ('liquidada','pago','recebido','paga')
+            ORDER BY id DESC LIMIT 2
+        `).catch(() => [[]]);
+
+        // Contas pagas recentes
+        const [pagar] = await db.query(`
+            SELECT 'pagar' as tipo,
+                   CONCAT('Pagamento: R$ ', FORMAT(COALESCE(valor_pago, valor), 2, 'pt_BR'),
+                          ' — ', COALESCE(descricao, fornecedor_nome, 'Conta')) as descricao,
+                   status,
+                   COALESCE(data_pagamento, updated_at, created_at, NOW()) as ts
+            FROM contas_pagar
+            WHERE status IN ('pago','paga','liquidada','quitada')
+            ORDER BY id DESC LIMIT 2
+        `).catch(() => [[]]);
+
+        const iconMap = {
+            pedido:  { icon: 'fa-cart-shopping', color: '#3b82f6',  label: 'Vendas'     },
+            nfe:     { icon: 'fa-file-invoice',  color: '#06b6d4',  label: 'Faturamento' },
+            receber: { icon: 'fa-arrow-down',    color: '#10b981',  label: 'Financeiro'  },
+            pagar:   { icon: 'fa-arrow-up',      color: '#f59e0b',  label: 'Financeiro'  }
+        };
+
+        [...(pedidos||[]), ...(nfes||[]), ...(receber||[]), ...(pagar||[])]
+            .filter(r => r && r.tipo)
+            .forEach(r => {
+                const meta = iconMap[r.tipo] || { icon: 'fa-circle', color: '#94a3b8', label: '—' };
+                activities.push({
+                    icon: meta.icon,
+                    color: meta.color,
+                    text: r.descricao || '—',
+                    modulo: meta.label,
+                    ts: r.ts
+                });
+            });
+
+        // Ordenar por data e retornar os 5 mais recentes
+        activities.sort((a, b) => new Date(b.ts) - new Date(a.ts));
+
+        if (activities.length === 0) {
+            return res.json([{ icon: 'fa-check', color: '#10b981', text: 'Nenhuma atividade recente', modulo: 'Sistema', ts: null }]);
+        }
+
+        res.json(activities.slice(0, 5));
+    } catch (e) {
+        console.error('Dashboard atividade-recente error:', e);
+        res.json([]);
+    }
+});
+
 // === Funções auxiliares ===
 
 function formatCurrency(value) {
@@ -299,7 +505,8 @@ function getSimulatedAlerts() {
         vencidos: 3,
         vencerHoje: 5,
         estoqueCritico: 2,
-        aprovadosHoje: 7
+        aprovadosHoje: 7,
+        pedidosPendentes: 4
     };
 }
 

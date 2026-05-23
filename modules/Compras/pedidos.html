@@ -30,7 +30,7 @@
 
     <!-- CSS Padrão Global -->
     <link rel="stylesheet" href="/modules/Compras/css/compras-layout.css?v=20260301">
-    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260301">
+    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260418">
     <link rel="stylesheet" href="/css/skeleton-loader.css?v=20260301">
     <link rel="stylesheet" href="/css/popup-confirmacao.css?v=20260301">
 
@@ -81,16 +81,16 @@
         <aside class="sidebar" id="mobile-sidebar">
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel"><i class="fas fa-home"></i></a>
             <nav class="sidebar-nav">
-                <button class="sidebar-btn" title="Dashboard" onclick="window.location.href='index.html'"><i class="fas fa-chart-line"></i></button>
-                <button class="sidebar-btn active" title="Pedidos" onclick="window.location.href='pedidos.html'"><i class="fas fa-shopping-cart"></i></button>
-                <button class="sidebar-btn" title="Cotações" onclick="window.location.href='cotacoes.html'"><i class="fas fa-file-invoice-dollar"></i></button>
-                <button class="sidebar-btn" title="Fornecedores" onclick="window.location.href='fornecedores.html'"><i class="fas fa-users"></i></button>
-                <button class="sidebar-btn" title="Requisições" onclick="window.location.href='requisicoes.html'"><i class="fas fa-clipboard-list"></i></button>
-                <button class="sidebar-btn" title="Recebimento" onclick="window.location.href='recebimento.html'"><i class="fas fa-truck-loading"></i></button>
+                <button class="sidebar-btn" title="Dashboard" onclick="window.location.href='/Compras/index.html'"><i class="fas fa-chart-line"></i></button>
+                <button class="sidebar-btn active" title="Pedidos" onclick="window.location.href='/Compras/pedidos.html'"><i class="fas fa-shopping-cart"></i></button>
+                <button class="sidebar-btn" title="Cotações" onclick="window.location.href='/Compras/cotacoes.html'"><i class="fas fa-file-invoice-dollar"></i></button>
+                <button class="sidebar-btn" title="Fornecedores" onclick="window.location.href='/Compras/fornecedores.html'"><i class="fas fa-users"></i></button>
+                <button class="sidebar-btn" title="Requisições" onclick="window.location.href='/Compras/requisicoes.html'"><i class="fas fa-clipboard-list"></i></button>
+                <button class="sidebar-btn" title="Recebimento" onclick="window.location.href='/Compras/recebimento.html'"><i class="fas fa-truck-loading"></i></button>
             </nav>
             <div class="sidebar-bottom">
-                <button class="sidebar-btn" title="Estoque MP" onclick="window.location.href='gestao-estoque.html'"><i class="fas fa-boxes"></i></button>
-                <button class="sidebar-btn" title="Relatórios" onclick="window.location.href='relatorios.html'"><i class="fas fa-chart-bar"></i></button>
+                <button class="sidebar-btn" title="Estoque MP" onclick="window.location.href='/Compras/gestao-estoque.html'"><i class="fas fa-boxes"></i></button>
+                <button class="sidebar-btn" title="Relatórios" onclick="window.location.href='/Compras/relatorios.html'"><i class="fas fa-chart-bar"></i></button>
             </div>
         </aside>
 
@@ -228,8 +228,9 @@
                             <input type="date" id="dataPedido" class="form-control">
                         </div>
                         <div class="form-group">
-                            <label>Previsão de Entrega</label>
-                            <input type="date" id="dataEntregaPrevista" class="form-control">
+                            <!-- BUG-009: campo obrigatório para rastreamento de SLA -->
+                            <label>Previsão de Entrega <span style="color:#dc2626;">*</span></label>
+                            <input type="date" id="dataEntregaPrevista" class="form-control" required>
                         </div>
                     </div>
                     <div class="form-row">
@@ -345,6 +346,19 @@
             if (overlay) overlay.classList.toggle('active');
         }
     </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('keydown', function(e) {
+                if (e.key !== 'Escape') return;
+                if (typeof fecharModalPedido === 'function') fecharModalPedido();
+                if (typeof fecharModalVisualizar === 'function') fecharModalVisualizar();
+            });
+            var mPedido = document.getElementById('modalPedido');
+            var mVis = document.getElementById('modalVisualizarPedido');
+            if (mPedido) mPedido.addEventListener('click', function(e) { if (e.target === this && typeof fecharModalPedido === 'function') fecharModalPedido(); });
+            if (mVis) mVis.addEventListener('click', function(e) { if (e.target === this && typeof fecharModalVisualizar === 'function') fecharModalVisualizar(); });
+        });
+    </script>
 
     <!-- Module Scripts -->
     <script src="/modules/Compras/js/compras-utils.js?v=20260301"></script>
@@ -366,3 +380,4 @@
     <script src="/_shared/accessibility-widget.js?v=20260418"></script>
 </body>
 </html>
+

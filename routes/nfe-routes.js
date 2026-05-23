@@ -73,12 +73,27 @@ module.exports = function createNfeRoutes(deps) {
             // Integração Financeiro: cria conta a receber via serviço centralizado (Sprint 3 Gap-3)
             const contaCriada = await faturamentoShared.gerarContaReceber(connection, {
                 pedido_id: pedido_id || null,
+                nfe_id: nfeId,                  // FISC-001: rastrear NF-e para cancelamento
                 cliente_id,
                 descricao: descricao_servico,
                 valor,
                 tipo: 'nfe',
                 pedido: null
             });
+
+            // FISC-001: Se o serviço não persistiu nfe_id, atualizar via UPDATE direto
+            if (contaCriada && contaCriada.id) {
+                await connection.query(
+                    'UPDATE contas_receber SET nfe_id = ? WHERE id = ? AND nfe_id IS NULL',
+                    [nfeId, contaCriada.id]
+                );
+            } else {
+                // Fallback: setar nfe_id em entradas recentes desta sessão (max 1 registro)
+                await connection.query(
+                    'UPDATE contas_receber SET nfe_id = ? WHERE pedido_id = ? AND nfe_id IS NULL ORDER BY id DESC LIMIT 1',
+                    [nfeId, pedido_id || null]
+                );
+            }
     
             // Se há pedido vinculado, atualizar status
             if (pedido_id) {
@@ -167,7 +182,7 @@ module.exports = function createNfeRoutes(deps) {
             }
     
             // Verificar se NF-e existe e pode ser cancelada
-            const [nfe] = await connection.query('SELECT id, status, valor FROM nfe WHERE id = ?', [nfe_id]);
+            const [nfe] = await connection.query('SELECT id, status, valor, data_emissao, data_autorizacao FROM nfe WHERE id = ?', [nfe_id]);
             if (nfe.length === 0) {
                 await connection.rollback();
                 return res.status(404).json({ error: 'NF-e não encontrada' });
@@ -175,6 +190,20 @@ module.exports = function createNfeRoutes(deps) {
             if (nfe[0].status === 'cancelada') {
                 await connection.rollback();
                 return res.status(400).json({ error: 'NF-e já está cancelada' });
+            }
+
+            // FISC-010: Prazo máximo de cancelamento = 24h após autorização (norma SEFAZ NF-e)
+            const dataRef = nfe[0].data_autorizacao || nfe[0].data_emissao;
+            if (dataRef) {
+                const horasDecorridas = (Date.now() - new Date(dataRef).getTime()) / 3600000;
+                if (horasDecorridas > 24) {
+                    await connection.rollback();
+                    return res.status(400).json({
+                        error: `Cancelamento fora do prazo. A NF-e foi autorizada há ${Math.floor(horasDecorridas)}h — o prazo máximo é 24h conforme legislação SEFAZ.`,
+                        code: 'PRAZO_CANCELAMENTO_EXPIRADO',
+                        horas_decorridas: Math.floor(horasDecorridas)
+                    });
+                }
             }
     
             // Cancelar NF-e

@@ -11,8 +11,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link rel="stylesheet" href="css/faturamento-layout.css?v=20260413b">
-    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260216">
+    <link rel="stylesheet" href="/Faturamento/css/faturamento-layout.css?v=20260413b">
+    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260418">
     <link rel="stylesheet" href="/css/tooltips-professional.css?v=20260209">
     <link rel="stylesheet" href="/chat/widget.css?v=20260218">
     <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260324">
@@ -27,14 +27,14 @@
         <aside class="sidebar" id="mobile-sidebar">
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel"><i class="fas fa-home"></i></a>
             <nav class="sidebar-nav">
-                <a href="dashboard.html" class="sidebar-btn" title="Dashboard"><i class="fas fa-tachometer-alt"></i></a>
-                <a href="index.html" class="sidebar-btn" title="NF-e"><i class="fas fa-file-invoice-dollar"></i></a>
-                <a href="consultar.html" class="sidebar-btn" title="Consultar"><i class="fas fa-search"></i></a>
-                <a href="eventos.html" class="sidebar-btn" title="Eventos"><i class="fas fa-calendar-check"></i></a>
-                <a href="inutilizacao.html" class="sidebar-btn active" title="Inutilização"><i class="fas fa-ban"></i></a>
+                <a href="/Faturamento/dashboard.html" class="sidebar-btn" title="Dashboard"><i class="fas fa-tachometer-alt"></i></a>
+                <a href="/Faturamento/index.html" class="sidebar-btn" title="NF-e"><i class="fas fa-file-invoice-dollar"></i></a>
+                <a href="/Faturamento/consultar.html" class="sidebar-btn" title="Consultar"><i class="fas fa-search"></i></a>
+                <a href="/Faturamento/eventos.html" class="sidebar-btn" title="Eventos"><i class="fas fa-calendar-check"></i></a>
+                <a href="/Faturamento/inutilizacao.html" class="sidebar-btn active" title="Inutilização"><i class="fas fa-ban"></i></a>
             </nav>
             <div class="sidebar-bottom">
-                <a href="relatorios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
+                <a href="/Faturamento/relatorios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
             </div>
         </aside>
 
@@ -43,13 +43,13 @@
                 <div class="header-left">
                     <button class="mobile-menu-btn" onclick="toggleMobileSidebar()" title="Menu"><i
                             class="fas fa-bars"></i></button>
-                    <div class="header-brand" style="display:flex;align-items:center;gap:10px;">
+                    <a href="/dashboard" class="header-brand" style="display:flex;align-items:center;gap:10px;text-decoration:none;" title="Voltar ao painel">
                         <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE"
                             style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.3);font-size:12px;margin-left:4px;">— Faturamento</span>
-                    </div>
+                    </a>
                 </div>
                 <div class="header-right">
                     <button class="header-btn" title="Atualizar" onclick="location.reload()"><i
@@ -99,8 +99,8 @@
                     <div class="card-body">
                         <form id="form-inutilizacao" onsubmit="event.preventDefault(); inutilizarFaixa();" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;">
                             <div class="form-group">
-                                <label for="inut-ano">Ano (2 dígitos) <span style="color:#dc2626;">*</span></label>
-                                <input type="text" id="inut-ano" class="form-control" maxlength="2" pattern="[0-9]{2}" placeholder="26" required>
+                                <label for="inut-ano">Ano <span style="color:#dc2626;">*</span></label>
+                                <input type="number" id="inut-ano" class="form-control" min="2020" max="2099" maxlength="4" placeholder="2026" title="Informe o ano com 4 dígitos (ex: 2026)" required>
                             </div>
                             <div class="form-group">
                                 <label for="inut-serie">Série <span style="color:#dc2626;">*</span></label>
@@ -189,7 +189,16 @@
     </div>
 
     <script>
-        function toggleMobileSidebar() {
+                function _fat_toast(msg, tipo) {
+            tipo = tipo || (msg.toLowerCase().includes('sucesso') || msg.toLowerCase().includes('success') ? 'success' : msg.toLowerCase().includes('erro') || msg.toLowerCase().includes('error') || msg.toLowerCase().includes('inválid') ? 'error' : 'info');
+            var t = document.createElement('div');
+            var colors = { success: '#059669', error: '#dc2626', info: '#2563eb', warning: '#d97706' };
+            t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:' + (colors[tipo]||colors.info) + ';color:#fff;padding:12px 20px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.2);z-index:99999;max-width:420px;font-family:Inter,sans-serif;font-size:13px;line-height:1.5;';
+            t.textContent = msg.replace(/\\n\\n/g, ' | ').replace(/\\n/g, ' ');
+            document.body.appendChild(t);
+            setTimeout(function() { if (t.parentNode) t.parentNode.removeChild(t); }, 5000);
+        }
+function toggleMobileSidebar() {
             document.getElementById('mobile-sidebar').classList.toggle('open');
             document.getElementById('sidebar-overlay').classList.toggle('active');
         }
@@ -198,18 +207,22 @@
         function formatarMoeda(v) { return (parseFloat(v) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
 
         async function inutilizarFaixa() {
-            const ano = document.getElementById('inut-ano').value.trim();
+            const anoRaw = document.getElementById('inut-ano').value.trim();
             const serie = document.getElementById('inut-serie').value.trim();
             const numIni = parseInt(document.getElementById('inut-numero-ini').value, 10);
             const numFim = parseInt(document.getElementById('inut-numero-fim').value, 10);
             const justificativa = document.getElementById('inut-justificativa').value.trim();
 
-            if (!/^[0-9]{2}$/.test(ano)) { alert('Ano deve ter 2 dígitos numéricos (ex: 26).'); return; }
-            if (!/^[0-9]{1,3}$/.test(serie)) { alert('Série inválida.'); return; }
-            if (!Number.isFinite(numIni) || numIni < 1) { alert('Número inicial inválido.'); return; }
-            if (!Number.isFinite(numFim) || numFim < numIni) { alert('Número final deve ser ≥ ao inicial.'); return; }
+            // BUG-022: aceitar 4 ou 2 dígitos, converter para 2 para SEFAZ e 4 para exibição
+            const anoNum = parseInt(anoRaw, 10);
+            if (isNaN(anoNum) || (anoRaw.length !== 2 && anoRaw.length !== 4)) { _fat_toast('Informe o ano com 4 dígitos (ex: 2026).'); return; }
+            const anoSefaz = String(anoNum).slice(-2); // 2026 → "26" para SEFAZ
+            const ano = anoRaw.length === 2 ? '20' + anoRaw : anoRaw; // para exibição (4 dígitos)
+            if (!/^[0-9]{1,3}$/.test(serie)) { _fat_toast('Série inválida.'); return; }
+            if (!Number.isFinite(numIni) || numIni < 1) { _fat_toast('Número inicial inválido.'); return; }
+            if (!Number.isFinite(numFim) || numFim < numIni) { _fat_toast('Número final deve ser ≥ ao inicial.'); return; }
             if (justificativa.length < 15 || justificativa.length > 255) {
-                alert('Justificativa deve ter entre 15 e 255 caracteres.');
+                _fat_toast('Justificativa deve ter entre 15 e 255 caracteres.');
                 return;
             }
             if (!confirm(`Confirmar inutilização da faixa ${numIni}-${numFim} (Série ${serie}/Ano ${ano})? Esta operação é irreversível e enviada à SEFAZ.`)) return;
@@ -219,19 +232,19 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
-                    body: JSON.stringify({ ano, serie, numero_inicial: numIni, numero_final: numFim, justificativa })
+                    body: JSON.stringify({ ano: anoSefaz, serie, numero_inicial: numIni, numero_final: numFim, justificativa })
                 });
                 if (r.ok) {
-                    alert('Faixa inutilizada com sucesso.');
+                    _fat_toast('Faixa inutilizada com sucesso.');
                     document.getElementById('form-inutilizacao').reset();
                     document.getElementById('inut-serie').value = '1';
                     carregarInutilizacoes();
                 } else {
                     const e = await r.json().catch(() => ({}));
-                    alert('Erro: ' + (e.message || e.error || 'Falha ao inutilizar faixa.'));
+                    _fat_toast('Erro: ' + (e.message || e.error || 'Falha ao inutilizar faixa.'));
                 }
             } catch (e) {
-                alert('Erro de conexão ao inutilizar faixa.');
+                _fat_toast('Erro de conexão ao inutilizar faixa.');
             }
         }
 
@@ -247,9 +260,15 @@
                         tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><i class="fas fa-info-circle"></i><p>Nenhuma faixa inutilizada</p></div></td></tr>';
                         return;
                     }
+                    // BUG-022: normalizar ano para sempre exibir 4 dígitos (SEFAZ usa 2 internamente, UI deve mostrar 4)
+                    const anoDisplay = (ano) => {
+                        if (!ano) return '-';
+                        const s = String(ano);
+                        return s.length === 2 ? '20' + s : s;
+                    };
                     tbody.innerHTML = items.map(i => `<tr>
                         <td>${i.created_at ? new Date(i.created_at).toLocaleDateString('pt-BR') : '-'}</td>
-                        <td>${esc(i.ano || '-')}</td>
+                        <td>${esc(anoDisplay(i.ano))}</td>
                         <td>${esc(i.serie || '-')}</td>
                         <td><strong>${esc(i.numero_inicial)} - ${esc(i.numero_final)}</strong></td>
                         <td style="max-width:240px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${esc(i.justificativa)}">${esc(i.justificativa || '-')}</td>
@@ -296,9 +315,9 @@
             const h = new Date().getHours();
             const greetEl = document.getElementById('greeting-text');
             if (greetEl) greetEl.textContent = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
-            // Pré-popular ano (2 dígitos atual)
+            // Pré-popular ano (4 dígitos para BUG-022)
             const anoEl = document.getElementById('inut-ano');
-            if (anoEl) anoEl.value = String(new Date().getFullYear()).slice(-2);
+            if (anoEl) anoEl.value = String(new Date().getFullYear());
             fetch('/api/me', { credentials: 'include' }).then(r => r.json()).then(u => {
                 const userEl = document.getElementById('user-name');
                 if (userEl) userEl.textContent = (u.nome || u.name || 'Usuário').split(' ')[0];
@@ -317,3 +336,4 @@
 </body>
 
 </html>
+

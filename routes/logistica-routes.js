@@ -9,6 +9,38 @@ module.exports = function createLogisticaRoutes(deps) {
     const router = express.Router();
     const FinanceiroReactiveService = require('../services/financeiro-reactive.service');
     const financeiroReactive = new FinanceiroReactiveService(pool);
+
+    // Auto-migration: garantir colunas e tabelas auxiliares do módulo logística
+    (async () => {
+        try {
+            await pool.query(`ALTER TABLE ctes ADD COLUMN IF NOT EXISTS empresa_id INT NOT NULL DEFAULT 1 AFTER id`).catch(() => {});
+            await pool.query(`ALTER TABLE mdfes ADD COLUMN IF NOT EXISTS empresa_id INT NOT NULL DEFAULT 1 AFTER id`).catch(() => {});
+            await pool.query(`
+                CREATE TABLE IF NOT EXISTS mdfe_documentos (
+                    id INT PRIMARY KEY AUTO_INCREMENT,
+                    mdfe_id INT NOT NULL,
+                    tipo_documento ENUM('nfe','cte') NOT NULL DEFAULT 'nfe',
+                    chave_acesso CHAR(44) NOT NULL,
+                    ordem INT NOT NULL DEFAULT 1,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    INDEX idx_mdfe (mdfe_id)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            `);
+            await pool.query(`
+                CREATE TABLE IF NOT EXISTS mdfe_percursos (
+                    id INT PRIMARY KEY AUTO_INCREMENT,
+                    mdfe_id INT NOT NULL,
+                    uf CHAR(2) NOT NULL,
+                    ordem INT NOT NULL DEFAULT 1,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    INDEX idx_mdfe (mdfe_id)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            `);
+        } catch (e) {
+            console.error('[LOGISTICA] Erro na auto-migration:', e.message);
+        }
+    })();
+
     router.use(authenticateToken);
     // Logística é sub-módulo de NFe — usa mesma permissão para acesso
     router.use(authorizeArea('nfe'));
@@ -19,10 +51,11 @@ module.exports = function createLogisticaRoutes(deps) {
         try {
             const empresaId = req.user?.empresa_id;
 
+            // BUG-024: adicionar 'aguardando' ao filtro (listagem exibe status_logistica='aguardando' como "Aguardando")
             const [[aguardando]] = await pool.query(`
                 SELECT COUNT(*) as total FROM pedidos
                 WHERE status IN ('faturado', 'recibo', 'entregue')
-                AND (status_logistica IS NULL OR status_logistica = 'pendente' OR status_logistica = '')
+                AND (status_logistica IS NULL OR status_logistica IN ('pendente', 'aguardando', ''))
                 AND empresa_id = ?
             `, [empresaId]);
 
@@ -112,7 +145,8 @@ module.exports = function createLogisticaRoutes(deps) {
                     e.nome_fantasia as empresa_nome,
                     e.razao_social as empresa_razao,
                     t.nome_fantasia as transportadora_nome,
-                    t.razao_social as transportadora_razao
+                    t.razao_social as transportadora_razao,
+                    p.transportadora_nome as pedido_transportadora_nome
                 FROM pedidos p
                 LEFT JOIN clientes c ON p.cliente_id = c.id
                 LEFT JOIN empresas e ON p.empresa_id = e.id
@@ -162,7 +196,7 @@ module.exports = function createLogisticaRoutes(deps) {
                 // Sprint 3 (F-05 fix): Priorizar endereco_entrega do pedido sobre endereço cadastral
                 endereco_entrega: row.endereco_entrega || null,
                 cidade_uf: row.cliente_cidade && row.cliente_uf ? `${row.cliente_cidade}/${row.cliente_uf}` : '-',
-                transportadora: row.transportadora_nome || row.transportadora_razao || 'Não definida',
+                transportadora: row.transportadora_nome || row.transportadora_razao || row.pedido_transportadora_nome || 'Não definida',
                 transportadora_id: row.transportadora_id || null,
                 status: row.status_logistica || 'pendente',
                 previsao: row.data_prevista || row.prazo_entrega || '-',
