@@ -10343,7 +10343,12 @@ PRAZO DE PRODUÇÁO DE 30 DIAS ÚTEIS APÓS RECEPÇÁO FÍSICA..."></textarea>
                 }
                 
                 console.log('?? Carregando Kanban:', url);
-                
+
+                // Mostrar estado de carregamento nas colunas enquanto busca dados
+                document.querySelectorAll('.kanban-column-content').forEach(col => {
+                    col.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;padding:32px;color:#9ca3af;font-size:13px;">Carregando...</div>';
+                });
+
                 const resp = await fetch(url, {
                     credentials: 'include',
                     headers: headers

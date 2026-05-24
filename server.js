@@ -1110,35 +1110,110 @@ async function _buildDashboardHtml(req, brandOverride, mountPathOverride) {
     const mountScript = _buildMountScript(mountPath);
     const injectScript = `${mountScript}<script>window.__ZYNTRA_BRAND="${brand}";window.__ZYNTRA_USER=${JSON.stringify(userObj)};</script>`;
 
-    // Patch script: after React hydrates, replace mock KPI values with real API data
+    // Patch script: after React hydrates, replace mock KPI values and orders with real API data
     const patchScript = `<script>
 (function() {
-    var MOCK_VALUES = ['R$ 1.240.000','R$ 312.480','R$ 248.300','R$ 842.300','R$ 175.836','R$ 45.800','R$ 128.350','R$ 18.600','R$ 5.268','R$ 75.836','R$ 8.200','R$ 12.450','R$ 84.320','R$ 12.800','R$ 5.430','R$ 7.350','R$ 64.550','R$ 183.750'];
-    function patchDashboard(kpis) {
+    var MOCK_VALS = ['R$ 1.240.000','R$ 312.480','R$ 248.300','R$ 842.300','R$ 175.836','R$ 45.800','R$ 128.350','R$ 18.600','R$ 5.268','R$ 75.836','R$ 8.200','R$ 12.450','R$ 84.320','R$ 12.800','R$ 5.430','R$ 7.350','R$ 64.550','R$ 183.750'];
+    function fmtBRL(v) {
+        if (v === null || v === undefined) return 'R$ 0,00';
+        return 'R$ ' + parseFloat(v).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    }
+    function fmtDate(iso) {
+        if (!iso) return '-';
+        var d = String(iso).substring(0, 10);
+        return d.substring(8) + '/' + d.substring(5, 7) + '/' + d.substring(0, 4);
+    }
+    function statusStyle(s) {
+        var m = (s || '').toLowerCase();
+        if (/fatur|aprova|entreg|conclu/.test(m)) return 'bg-emerald-50 text-emerald-600 border-emerald-200';
+        if (/produ|andamento/.test(m)) return 'bg-amber-50 text-amber-600 border-amber-200';
+        if (/cancel/.test(m)) return 'bg-red-50 text-red-600 border-red-200';
+        return 'bg-blue-50 text-blue-600 border-blue-200';
+    }
+    var STATUS_MAP = {pendente:'Pendente',aprovado:'Aprovado',em_producao:'Em produção',faturado:'Faturado',entregue:'Entregue',cancelado:'Cancelado',orcamento:'Orçamento'};
+    function statusLabel(s) { return STATUS_MAP[(s||'').toLowerCase()] || s; }
+
+    function patchKPIs(kpis) {
         if (!kpis) return;
-        var vendasValor = (kpis.vendas && kpis.vendas.valor) ? kpis.vendas.valor : null;
-        var aReceberValor = kpis.aReceber || null;
+        var vendasValor = (kpis.vendas && kpis.vendas.valor) ? fmtBRL(kpis.vendas.valor) : null;
+        var aReceberValor = kpis.aReceber ? fmtBRL(parseFloat(String(kpis.aReceber).replace(/[^0-9.]/g,''))) : null;
         if (!vendasValor && !aReceberValor) return;
         var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
         var node, replaced = 0;
-        while (node = walker.nextNode()) {
+        while ((node = walker.nextNode())) {
             var text = node.textContent.trim();
-            if (MOCK_VALUES.indexOf(text) !== -1) {
+            if (MOCK_VALS.indexOf(text) !== -1) {
                 if (vendasValor && replaced === 0) { node.textContent = vendasValor; replaced++; }
                 else if (aReceberValor) { node.textContent = aReceberValor; }
             }
         }
     }
-    function loadRealStats() {
-        fetch('/api/dashboard/kpis', {credentials: 'include'})
-            .then(function(r) { return r.ok ? r.json() : null; })
-            .then(function(data) { if (data) patchDashboard(data); })
-            .catch(function() {});
+
+    function patchOrders(pedidos) {
+        if (!pedidos || !pedidos.length) return;
+        var tbodies = document.querySelectorAll('tbody');
+        var target = null;
+        for (var i = 0; i < tbodies.length; i++) {
+            var spans = tbodies[i].querySelectorAll('span');
+            for (var j = 0; j < spans.length; j++) {
+                if (spans[j].textContent.trim() === 'PED-4521') { target = tbodies[i]; break; }
+            }
+            if (target) break;
+        }
+        if (!target) return;
+        target.innerHTML = pedidos.slice(0, 5).map(function(p) {
+            var num = p.numero || ('PED-' + String(p.id).padStart(4, '0'));
+            var cliente = p.cliente_nome || p.cliente || '-';
+            var valor = fmtBRL(p.valor || p.valor_total || 0);
+            var stat = statusLabel(p.status);
+            var sc = statusStyle(p.status);
+            var data = fmtDate(p.data_pedido || p.created_at);
+            return '<tr class="transition-colors hover:bg-slate-50/50">'
+                + '<td class="whitespace-nowrap px-6 py-4"><span class="font-mono text-sm font-semibold text-slate-900">' + num + '</span></td>'
+                + '<td class="whitespace-nowrap px-6 py-4 text-sm text-slate-700">' + cliente + '</td>'
+                + '<td class="whitespace-nowrap px-6 py-4 text-right text-sm font-medium text-slate-900">' + valor + '</td>'
+                + '<td class="whitespace-nowrap px-6 py-4 text-center"><span class="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ' + sc + '">' + stat + '</span></td>'
+                + '<td class="whitespace-nowrap px-6 py-4 text-center text-xs text-slate-500">' + data + '</td>'
+                + '<td class="whitespace-nowrap px-6 py-4 text-right"></td>'
+                + '</tr>';
+        }).join('');
     }
+
+    function removeNotification() {
+        var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+        var node;
+        while ((node = walker.nextNode())) {
+            if (node.textContent.trim() === 'Pedido #4521 aprovado') {
+                var el = node.parentElement;
+                while (el && el !== document.body) {
+                    if (el.getAttribute('role') === 'menuitem' || el.classList.contains('cursor-pointer')) break;
+                    el = el.parentElement;
+                }
+                if (el && el !== document.body) {
+                    var prev = el.previousElementSibling;
+                    if (prev && prev.getAttribute('role') === 'separator') prev.remove();
+                    el.style.display = 'none';
+                }
+                break;
+            }
+        }
+    }
+
+    function loadAndPatch() {
+        Promise.all([
+            fetch('/api/dashboard/kpis', {credentials:'include'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
+            fetch('/api/vendas/pedidos?limite=5', {credentials:'include'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;})
+        ]).then(function(res) {
+            patchKPIs(res[0]);
+            patchOrders(res[1]);
+            removeNotification();
+        });
+    }
+
     if (document.readyState === 'complete') {
-        setTimeout(loadRealStats, 800);
+        setTimeout(loadAndPatch, 800);
     } else {
-        window.addEventListener('load', function() { setTimeout(loadRealStats, 800); });
+        window.addEventListener('load', function() { setTimeout(loadAndPatch, 800); });
     }
 })();
 </script>`;

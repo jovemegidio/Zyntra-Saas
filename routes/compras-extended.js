@@ -1907,7 +1907,7 @@ module.exports = function createComprasExtendedRoutes(deps) {
 
             // Pedidos pendentes
             const [pedidosPendentes] = await pool.query(
-                'SELECT COUNT(*) as total FROM pedidos_compra WHERE status = \'pendente\''
+                "SELECT COUNT(*) as total FROM pedidos_compra WHERE LOWER(status) IN ('pendente', 'aberto', 'em_andamento')"
             );
 
             // Valor total de compras do mês
@@ -1945,10 +1945,16 @@ module.exports = function createComprasExtendedRoutes(deps) {
                 LIMIT 10
             `);
 
+            // Requisições pendentes (pendente + rascunho)
+            const [reqPendentes] = await pool.query(
+                "SELECT COUNT(*) as total FROM requisicoes_compra WHERE status IN ('pendente', 'rascunho')"
+            ).catch(() => [[{ total: 0 }]]);
+
             res.json({
                 stats: {
                     total_pedidos: totalPedidos[0].total,
                     pedidos_pendentes: pedidosPendentes[0].total,
+                    requisicoes_pendentes: reqPendentes[0].total,
                     compras_mes: comprasMes[0].total || 0,
                     fornecedores_ativos: fornecedoresAtivos[0].total
                 },
@@ -2102,7 +2108,8 @@ module.exports = function createComprasExtendedRoutes(deps) {
             const { status, prioridade, solicitante, data_inicio, data_fim } = req.query;
             let query = `
                 SELECT r.*,
-                       (SELECT COUNT(*) FROM itens_requisicao WHERE requisicao_id = r.id) as total_itens
+                       (SELECT COUNT(*) FROM itens_requisicao WHERE requisicao_id = r.id) as total_itens,
+                       (SELECT ir.descricao FROM itens_requisicao ir WHERE ir.requisicao_id = r.id ORDER BY ir.id ASC LIMIT 1) as descricao
                 FROM requisicoes_compra r
                 WHERE 1=1
             `;
@@ -2471,7 +2478,7 @@ module.exports = function createComprasExtendedRoutes(deps) {
             const [stats] = await pool.query(`
                 SELECT
                     COUNT(*) as total,
-                    SUM(CASE WHEN status = 'pendente' THEN 1 ELSE 0 END) as pendentes,
+                    SUM(CASE WHEN status IN ('pendente', 'rascunho') THEN 1 ELSE 0 END) as pendentes,
                     SUM(CASE WHEN status = 'aprovado' THEN 1 ELSE 0 END) as aprovadas,
                     SUM(CASE WHEN status = 'cotacao' THEN 1 ELSE 0 END) as em_cotacao,
                     SUM(CASE WHEN prioridade = 'urgente' THEN 1 ELSE 0 END) as urgentes
