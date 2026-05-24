@@ -11,7 +11,6 @@ html, body, input, select, textarea, button, table, th, td, label, div, p, a, li
 [class^="fa-"]:not(.fa-brands):not(.fab), [class*=" fa-"]:not(.fa-brands):not(.fab),
 .material-icons, .material-icons-outlined, .material-icons-round, .material-symbols-outlined {
     font-family: 'Font Awesome 6 Free' !important;
-    font-weight: 900 !important;
 }
 .fab, .fa-brands {
     font-family: 'Font Awesome 6 Brands' !important;
@@ -32,26 +31,26 @@ pre code, code, .monospace, .code, kbd, samp {
    1. DESIGN TOKENS
    ============================================================ */
 :root {
-    /* Sidebar — Vzero (slate-900 + blue-600 active) */
-    --sidebar-w: 52px;
-    --sidebar-bg: #0f172a;
-    --sidebar-hover: #1e293b;
-    --sidebar-active-bg: #2563eb;
-    --sidebar-active-text: #ffffff;
-    --sidebar-icon-color: #94a3b8;
-    --sidebar-icon-hover: #ffffff;
+    /* Sidebar — Light Mode (default) */
+    --sidebar-w: 48px;
+    --sidebar-bg: #ffffff;
+    --sidebar-hover: rgba(30,58,138,0.07);
+    --sidebar-active-bg: rgba(30,58,138,0.12);
+    --sidebar-active-text: #1e3a8a;
+    --sidebar-icon-color: #64748b;
+    --sidebar-icon-hover: #1e3a8a;
 
-    /* Header — PRETO */
+    /* Header — Dark (logos brancas visíveis no fundo escuro) */
     --header-h: 42px;
-    --header-bg: #000000;
-    --header-text: #94a3b8;
-    --header-text-bold: #f1f5f9;
+    --header-bg: #1e293b;
+    --header-text: rgba(255,255,255,0.72);
+    --header-text-bold: #ffffff;
     --header-border: rgba(255,255,255,0.08);
 
-    /* Accent — Light Blue (for dark sidebar) */
-    --accent: #60a5fa;
-    --accent-hover: #93c5fd;
-    --accent-soft: rgba(96,165,250,0.15);
+    /* Accent — Blue */
+    --accent: #1e3a8a;
+    --accent-hover: #1e40af;
+    --accent-soft: rgba(30,58,138,0.08);
 
     /* Tooltip — Professional (mantém escuro para legibilidade) */
     --tooltip-bg: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
@@ -61,18 +60,18 @@ pre code, code, .monospace, .code, kbd, samp {
     --tooltip-border: 1px solid rgba(255,255,255,0.1);
 
     /* Override legacy variables */
-    --sidebar-width: 52px !important;
+    --sidebar-width: 48px !important;
     --header-height: 42px !important;
-    --primary-dark: #ffffff !important;
+    --primary-dark: #1e293b !important;
 }
 
 /* ============================================================
    DARK MODE — body.dark-mode
    ============================================================ */
 body.dark-mode {
-    --sidebar-bg: #0f172a;
-    --sidebar-hover: #1e293b;
-    --sidebar-active-bg: #1d4ed8;
+    --sidebar-bg: #1e1e1e;
+    --sidebar-hover: rgba(255,255,255,0.08);
+    --sidebar-active-bg: #3b3b3b;
     --sidebar-active-text: #fff;
     --sidebar-icon-color: #8b8b8b;
     --sidebar-icon-hover: #d4d4d4;
@@ -109,10 +108,10 @@ body.dark-mode {
 }
 
 .sidebar-logo {
-    width: 34px !important;
-    height: 34px !important;
-    background: rgba(255,255,255,0.06) !important;
-    border-radius: 8px !important;
+    width: 30px !important;
+    height: 30px !important;
+    background: #3b3b3b !important;
+    border-radius: 7px !important;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -137,19 +136,19 @@ body.dark-mode {
 .sidebar-nav {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 2px;
     flex: 1;
     width: 100%;
-    padding: 0;
+    padding: 0 6px;
     overflow: visible !important;
     scrollbar-width: none;
 }
 .sidebar-nav::-webkit-scrollbar { display: none; }
 
 .sidebar-btn {
-    width: 36px !important;
-    height: 36px !important;
-    min-height: 36px !important;
+    width: 34px !important;
+    height: 34px !important;
+    min-height: 34px !important;
     border: none;
     background: transparent;
     color: var(--sidebar-icon-color);
@@ -158,7 +157,7 @@ body.dark-mode {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 13px !important;
+    font-size: 14px !important;
     transition: all 0.15s ease;
     position: relative;
     margin: 0 auto;
@@ -179,14 +178,22 @@ body.dark-mode {
 }
 
 .sidebar-btn.active {
-    background: var(--sidebar-active-bg);
-    color: #ffffff;
-    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+    background: var(--accent-soft);
+    color: var(--accent);
 }
 
-/* Vzero: solid bg replaces left indicator bar — hide it entirely */
+/* Transição animada do indicador ativo */
 .sidebar-btn.active::before {
-    display: none !important;
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 60%;
+    background: var(--accent);
+    border-radius: 0 3px 3px 0;
+    animation: sidebarIndicatorIn 0.2s ease forwards;
 }
 
 @keyframes sidebarIndicatorIn {
@@ -204,32 +211,39 @@ body.dark-mode {
     animation: sidebarClickPulse 0.35s ease-out;
 }
 
-/* Vzero: also hide indicator bar for active buttons with tooltips */
+/* Override: no botão ativo, ::before mostra o indicador (barra lateral), NÃO a seta do tooltip.
+   No hover, a seta do tooltip aparece normalmente via as regras de hover abaixo. */
 .sidebar-btn.active[data-title]::before,
 .sidebar-btn.active[title]::before {
-    display: none !important;
-}
-
-/* Restore tooltip arrow on hover for active buttons */
-.sidebar-btn.active[data-title]:hover::before,
-.sidebar-btn.active[title]:hover::before {
-    display: block !important;
     content: '' !important;
     position: absolute !important;
-    left: calc(100% + 5px) !important;
+    left: 0 !important;
     top: 50% !important;
     transform: translateY(-50%) !important;
-    width: auto !important;
-    height: auto !important;
-    border: 6px solid transparent !important;
-    border-right-color: var(--tooltip-bg-solid, #1e293b) !important;
-    background: none !important;
-    border-radius: 0 !important;
+    width: 3px !important;
+    height: 60% !important;
+    background: var(--accent) !important;
+    border-radius: 0 3px 3px 0 !important;
     opacity: 1 !important;
     visibility: visible !important;
+    border: none !important;
+    filter: none !important;
+    border-color: transparent !important;
     pointer-events: none !important;
+    z-index: 1 !important;
+}
+
+/* No hover do botão ativo, ::before vira a seta do tooltip (restaura comportamento de tooltip) */
+.sidebar-btn.active[data-title]:hover::before,
+.sidebar-btn.active[title]:hover::before {
+    left: calc(100% + 5px) !important;
+    width: auto !important;
+    height: auto !important;
+    background: none !important;
+    border: 6px solid transparent !important;
+    border-right-color: var(--tooltip-bg-solid, #1e293b) !important;
+    border-radius: 0 !important;
     z-index: 10001 !important;
-    animation: none !important;
 }
 
 /* ============================================================
@@ -324,8 +338,9 @@ body.dark-mode {
     margin-top: auto;
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    padding: 8px 0 0;
+    gap: 2px;
+    padding: 0 6px;
+    padding-top: 8px;
     border-top: 1px solid rgba(255,255,255,0.06);
 }
 
@@ -821,9 +836,9 @@ body > main:not(.main-area) {
 
 /* --- Overlay backdrop --- */
 .modal-overlay {
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
+    background: rgba(0, 0, 0, 0.75) !important;
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
 }
 
 /* --- Container principal --- */
@@ -1013,6 +1028,82 @@ body > main:not(.main-area) {
     box-shadow: 0 1px 6px rgba(0,0,0,0.06);
 }
 
+/* Separador e borda inferior da nav visíveis no fundo branco */
+.sidebar-divider {
+    background: #e2e8f0;
+}
+
+.sidebar-bottom {
+    border-top-color: #e2e8f0;
+}
+
+/* Ícones com leve cor individual em modo claro para distinção visual */
+.sidebar-nav .sidebar-btn i.fa-chart-line,
+.sidebar-nav .sidebar-btn i.fa-chart-pie,
+.sidebar-nav .sidebar-btn i.fa-chart-bar,
+.sidebar-nav .sidebar-btn i.fa-chart-area { color: #3b82f6; }
+
+.sidebar-nav .sidebar-btn i.fa-file-invoice-dollar,
+.sidebar-nav .sidebar-btn i.fa-hand-holding-usd,
+.sidebar-nav .sidebar-btn i.fa-money-bill-wave { color: #10b981; }
+
+.sidebar-nav .sidebar-btn i.fa-university,
+.sidebar-nav .sidebar-btn i.fa-building,
+.sidebar-nav .sidebar-btn i.fa-landmark { color: #6366f1; }
+
+.sidebar-nav .sidebar-btn i.fa-list-alt,
+.sidebar-nav .sidebar-btn i.fa-clipboard-list,
+.sidebar-nav .sidebar-btn i.fa-list { color: #64748b; }
+
+.sidebar-nav .sidebar-btn i.fa-calculator,
+.sidebar-nav .sidebar-btn i.fa-file-invoice { color: #f59e0b; }
+
+.sidebar-nav .sidebar-btn i.fa-balance-scale { color: #8b5cf6; }
+
+.sidebar-nav .sidebar-btn i.fa-columns,
+.sidebar-nav .sidebar-btn i.fa-shopping-cart,
+.sidebar-nav .sidebar-btn i.fa-shopping-bag { color: #0ea5e9; }
+
+.sidebar-nav .sidebar-btn i.fa-users,
+.sidebar-nav .sidebar-btn i.fa-user { color: #ec4899; }
+
+.sidebar-nav .sidebar-btn i.fa-truck { color: #f97316; }
+
+.sidebar-nav .sidebar-btn i.fa-industry,
+.sidebar-nav .sidebar-btn i.fa-cogs { color: #64748b; }
+
+.sidebar-nav .sidebar-btn i.fa-crosshairs { color: #ef4444; }
+
+.sidebar-nav .sidebar-btn i.fa-boxes-stacked,
+.sidebar-nav .sidebar-btn i.fa-box { color: #f97316; }
+
+.sidebar-nav .sidebar-btn i.fa-percentage,
+.sidebar-nav .sidebar-btn i.fa-percent { color: #10b981; }
+
+.sidebar-nav .sidebar-btn i.fa-search,
+.sidebar-nav .sidebar-btn i.fa-magnifying-glass { color: #64748b; }
+
+.sidebar-nav .sidebar-btn i.fa-clock { color: #f59e0b; }
+
+.sidebar-nav .sidebar-btn i.fa-gift { color: #ec4899; }
+
+.sidebar-nav .sidebar-btn i.fa-shield-alt { color: #6366f1; }
+
+.sidebar-nav .sidebar-btn i.fa-database { color: #64748b; }
+
+.sidebar-nav .sidebar-btn i.fa-users-cog { color: #8b5cf6; }
+
+/* Ícones do sidebar-bottom */
+.sidebar-bottom .sidebar-btn i.fa-percent { color: #ef4444; }
+.sidebar-bottom .sidebar-btn i.fa-cog { color: #64748b; }
+.sidebar-bottom .sidebar-btn i.fa-sitemap { color: #8b5cf6; }
+
+/* No hover e no estado ativo, cor sobe para o accent do módulo */
+.sidebar-nav .sidebar-btn:hover i,
+.sidebar-bottom .sidebar-btn:hover i,
+.sidebar-nav .sidebar-btn.active i,
+.sidebar-bottom .sidebar-btn.active i { color: var(--sidebar-active-text); }
+
 /* DARK MODE specific overrides */
 body.dark-mode .sidebar {
     box-shadow: none;
@@ -1033,4 +1124,19 @@ body.dark-mode .user-avatar {
 body.dark-mode .user-role-badge {
     background: rgba(255,255,255,0.1) !important;
     color: #d4d4d4 !important;
+}
+
+/* Restaurar cores escuras do divider e borda em dark mode */
+body.dark-mode .sidebar-divider {
+    background: rgba(255,255,255,0.06);
+}
+
+body.dark-mode .sidebar-bottom {
+    border-top-color: rgba(255,255,255,0.06);
+}
+
+/* Restaurar ícones para cor neutra do dark mode */
+body.dark-mode .sidebar-nav .sidebar-btn i,
+body.dark-mode .sidebar-bottom .sidebar-btn i {
+    color: inherit;
 }

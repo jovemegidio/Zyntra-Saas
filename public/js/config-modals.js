@@ -58,7 +58,8 @@ async function abrirConfiguracao(tipo) {
         'custos-precificacao': 'modal-custos-precificacao',
         'espelho-nf': 'modal-espelho-nf',
         'baixar-aplicativo': 'modal-baixar-aplicativo',
-        'bloco-k': 'modal-bloco-k'
+        'bloco-k': 'modal-bloco-k',
+        'pcp-carteira-pedidos': 'modal-pcp-carteira-pedidos'
     };
 
     const modalId = modalMap[tipo];
@@ -153,7 +154,8 @@ async function abrirConfiguracao(tipo) {
         'sla': 'SLA de Atendimento',
         'nfse': 'NFS-e',
         'espelho-nf': 'Espelho de Nota Fiscal',
-        'bloco-k': 'Bloco K — SPED Fiscal'
+        'bloco-k': 'Bloco K — SPED Fiscal',
+        'pcp-carteira-pedidos': 'Carteira de Pedidos — PCP'
     };
     if (titleMap[tipo]) {
         document.title = 'Zyntra: Configurações — ' + titleMap[tipo];
@@ -278,6 +280,9 @@ async function abrirConfiguracao(tipo) {
         case 'bloco-k':
             if (typeof loadBlocoKData === 'function') loadBlocoKData();
             break;
+        case 'pcp-carteira-pedidos':
+            loadCarteiraPedidosPCPData();
+            break;
     }
 }
 
@@ -336,7 +341,9 @@ function closeAllConfigModals() {
  */
 async function loadEmpresaData() {
     try {
-        const response = await fetch('/api/configuracoes/empresa');
+        const response = await fetch('/api/configuracoes/empresa', {
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}` }
+        });
         if (response.ok) {
             const data = await response.json();
             populateEmpresaForm(data);
@@ -354,35 +361,37 @@ function populateEmpresaForm(data) {
     if (!form || !data) return;
 
     // Preenche os campos do formulário
-    const fields = ['razao_social', 'nome_fantasia', 'cnpj', 'inscricao_estadual', 
-                   'inscricao_municipal', 'telefone', 'email', 'site', 'cep', 
+    const fields = ['razao_social', 'nome_fantasia', 'cnpj', 'inscricao_estadual',
+                   'inscricao_municipal', 'regime_tributario', 'atividade_principal',
+                   'telefone', 'email', 'site', 'cep',
                    'estado', 'cidade', 'bairro', 'endereco', 'numero', 'complemento'];
-    
+
     fields.forEach(field => {
         const input = form.querySelector(`[name="${field}"]`);
-        if (input && data[field]) {
+        if (input && data[field] !== undefined && data[field] !== null) {
             input.value = data[field];
         }
     });
 
-    // Exibir preview do logo atual
-    if (data.logo_url) {
+    // logo_path é o nome da coluna no banco; logo_url é o alias que pode vir em alguns contextos
+    const logoUrl = data.logo_path || data.logo_url;
+    if (logoUrl) {
         const logoPreview = document.getElementById('logo-preview');
         if (logoPreview) {
             const img = logoPreview.querySelector('img');
-            if (img) img.src = data.logo_url + '?v=' + Date.now();
+            if (img) img.src = logoUrl + '?v=' + Date.now();
             logoPreview.style.display = 'block';
         }
         const logoName = form.querySelector('#input-logo')?.parentElement?.querySelector('.config-file-upload-name');
         if (logoName) logoName.textContent = 'Logo atual carregado';
     }
 
-    // Exibir preview do favicon atual
-    if (data.favicon_url) {
+    const faviconUrl = data.favicon_path || data.favicon_url;
+    if (faviconUrl) {
         const faviconPreview = document.getElementById('favicon-preview');
         if (faviconPreview) {
             const img = faviconPreview.querySelector('img');
-            if (img) img.src = data.favicon_url + '?v=' + Date.now();
+            if (img) img.src = faviconUrl + '?v=' + Date.now();
             faviconPreview.style.display = 'block';
         }
         const faviconName = form.querySelector('#input-favicon')?.parentElement?.querySelector('.config-file-upload-name');
@@ -413,7 +422,8 @@ async function saveEmpresaConfig() {
         const response = await fetch('/api/configuracoes/empresa', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`
             },
             body: JSON.stringify(data)
         });
@@ -430,6 +440,7 @@ async function saveEmpresaConfig() {
             
             const logoResponse = await fetch('/api/configuracoes/upload-logo', {
                 method: 'POST',
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}` },
                 body: logoFormData
             });
             
@@ -448,6 +459,7 @@ async function saveEmpresaConfig() {
             
             const faviconResponse = await fetch('/api/configuracoes/upload-favicon', {
                 method: 'POST',
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}` },
                 body: faviconFormData
             });
             
@@ -1766,7 +1778,9 @@ async function excluirProjeto(id) {
  */
 async function loadCertificadoData() {
     try {
-        const response = await fetch('/api/configuracoes/certificado');
+        const response = await fetch('/api/configuracoes/certificado', {
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}` }
+        });
         if (response.ok) {
             const data = await response.json();
             displayCertificadoInfo(data);
@@ -1855,6 +1869,7 @@ async function saveCertificadoConfig() {
     try {
         const response = await fetch('/api/configuracoes/certificado', {
             method: 'POST',
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}` },
             body: formData
         });
 
@@ -1888,7 +1903,8 @@ async function excluirCertificado() {
 
     try {
         const response = await fetch('/api/configuracoes/certificado', {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}` }
         });
 
         if (response.ok) {
@@ -4348,7 +4364,7 @@ function displayContasBancarias(contas) {
  */
 function abrirFormContaBancaria(id = null) {
     const form = document.getElementById('form-nova-conta-bancaria');
-    const titulo = document.getElementById('form-conta-titulo');
+    const titulo = document.getElementById('form-conta-bancaria-titulo');
     
     // Resetar formulário
     document.getElementById('form-conta-bancaria-config').reset();
@@ -8627,4 +8643,246 @@ window.excluirGrupoCliente = excluirGrupoCliente;
 window.editarCondicao = editarCondicao;
 window.excluirCondicao = excluirCondicao;
 window.salvarEdicaoCondicao = salvarEdicaoCondicao;
+
+// =========================
+// PCP — CARTEIRA DE PEDIDOS
+// =========================
+
+let _pcpCarteiraPagina = 1;
+const _pcpCarteiraPorPagina = 20;
+let _pcpCarteiraTodos = [];
+
+async function loadCarteiraPedidosPCPData() {
+    const tbody = document.getElementById('pcp-carteira-tbody');
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:40px;color:#94a3b8;"><i class="fas fa-spinner fa-spin" style="font-size:20px;"></i><p style="margin-top:10px;">Carregando pedidos...</p></td></tr>';
+    _pcpCarteiraPagina = 1;
+    try {
+        const res = await fetch('/api/vendas/pedidos?limit=500&offset=0', { credentials: 'same-origin' });
+        if (!res.ok) throw new Error('Erro ao buscar pedidos');
+        const data = await res.json();
+        _pcpCarteiraTodos = Array.isArray(data) ? data : (data.pedidos || data.data || []);
+        _renderCarteiraPedidosPCP();
+    } catch (err) {
+        console.error('[PCP Carteira]', err);
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:40px;color:#ef4444;"><i class="fas fa-exclamation-circle" style="font-size:20px;"></i><p style="margin-top:10px;">Erro ao carregar pedidos. Tente novamente.</p></td></tr>';
+    }
+}
+
+function filtrarCarteiraPedidosPCP() {
+    _pcpCarteiraPagina = 1;
+    _renderCarteiraPedidosPCP();
+}
+
+function mudarPaginaCarteiraPCP(delta) {
+    _pcpCarteiraPagina += delta;
+    _renderCarteiraPedidosPCP();
+}
+
+function _renderCarteiraPedidosPCP() {
+    const tbody = document.getElementById('pcp-carteira-tbody');
+    const infoEl = document.getElementById('pcp-carteira-info');
+    const prevBtn = document.getElementById('pcp-carteira-prev');
+    const nextBtn = document.getElementById('pcp-carteira-next');
+    if (!tbody) return;
+
+    const busca = (document.getElementById('pcp-carteira-busca')?.value || '').toLowerCase();
+    const statusFiltro = (document.getElementById('pcp-carteira-status')?.value || '').toLowerCase();
+    const prioridadeFiltro = (document.getElementById('pcp-carteira-prioridade')?.value || '').toLowerCase();
+
+    const filtrados = _pcpCarteiraTodos.filter(p => {
+        const num = String(p.numero || p.numero_pedido || p.id || '').toLowerCase();
+        const cliente = String(p.cliente_nome || p.cliente || '').toLowerCase();
+        const produto = String(p.produto_nome || p.descricao || '').toLowerCase();
+        const status = String(p.status || '').toLowerCase().replace(/\s+/g, '-');
+        const prio = String(p.prioridade || '').toLowerCase()
+            .replace('é', 'e').replace('é', 'e');
+        const matchBusca = !busca || num.includes(busca) || cliente.includes(busca) || produto.includes(busca);
+        const matchStatus = !statusFiltro || status.includes(statusFiltro);
+        const matchPrio = !prioridadeFiltro || prio.includes(prioridadeFiltro);
+        return matchBusca && matchStatus && matchPrio;
+    });
+
+    const total = filtrados.length;
+    const totalPaginas = Math.max(1, Math.ceil(total / _pcpCarteiraPorPagina));
+    if (_pcpCarteiraPagina > totalPaginas) _pcpCarteiraPagina = totalPaginas;
+    const inicio = (_pcpCarteiraPagina - 1) * _pcpCarteiraPorPagina;
+    const pagina = filtrados.slice(inicio, inicio + _pcpCarteiraPorPagina);
+
+    if (infoEl) infoEl.textContent = `Exibindo ${pagina.length ? inicio + 1 : 0}–${Math.min(inicio + pagina.length, total)} de ${total} pedidos`;
+    if (prevBtn) prevBtn.disabled = _pcpCarteiraPagina <= 1;
+    if (nextBtn) nextBtn.disabled = _pcpCarteiraPagina >= totalPaginas;
+
+    if (!pagina.length) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:40px;color:#94a3b8;"><i class="fas fa-inbox" style="font-size:24px;"></i><p style="margin-top:10px;">Nenhum pedido encontrado.</p></td></tr>';
+        return;
+    }
+
+    const _statusBadge = (s) => {
+        const map = {
+            'pendente': ['#fef3c7','#d97706','Pendente'],
+            'em-producao': ['#dbeafe','#1d4ed8','Em Produção'],
+            'em producao': ['#dbeafe','#1d4ed8','Em Produção'],
+            'concluido': ['#dcfce7','#15803d','Concluído'],
+            'expedido': ['#f3e8ff','#7e22ce','Expedido'],
+        };
+        const norm = (s||'').toLowerCase().replace(/\s+/g,'-');
+        const [bg, color, label] = map[norm] || ['#f1f5f9','#64748b', s || '—'];
+        return `<span style="background:${bg};color:${color};padding:3px 9px;border-radius:12px;font-size:11px;font-weight:600;">${label}</span>`;
+    };
+
+    const _prioBadge = (p) => {
+        const map = {
+            'alta': ['#fee2e2','#dc2626','Alta'],
+            'media': ['#fef3c7','#d97706','Média'],
+            'média': ['#fef3c7','#d97706','Média'],
+            'normal': ['#f0fdf4','#16a34a','Normal'],
+            'baixa': ['#f1f5f9','#64748b','Baixa'],
+        };
+        const [bg, color, label] = map[(p||'').toLowerCase()] || ['#f1f5f9','#64748b', p || '—'];
+        return `<span style="background:${bg};color:${color};padding:3px 9px;border-radius:12px;font-size:11px;font-weight:600;">${label}</span>`;
+    };
+
+    const _fmt = (d) => {
+        if (!d) return '—';
+        try { return new Date(d).toLocaleDateString('pt-BR'); } catch { return d; }
+    };
+
+    tbody.innerHTML = pagina.map(p => `
+        <tr style="border-bottom:1px solid #f1f5f9;transition:background 0.15s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''">
+            <td style="padding:10px 12px;font-weight:600;color:#1e293b;white-space:nowrap;">${p.numero || p.numero_pedido || ('#' + p.id) || '—'}</td>
+            <td style="padding:10px 12px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${p.cliente_nome || p.cliente || ''}">${p.cliente_nome || p.cliente || '—'}</td>
+            <td style="padding:10px 12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${p.produto_nome || p.descricao || ''}">${p.produto_nome || p.descricao || '—'}</td>
+            <td style="padding:10px 12px;text-align:right;font-variant-numeric:tabular-nums;">${p.quantidade != null ? Number(p.quantidade).toLocaleString('pt-BR') : '—'}</td>
+            <td style="padding:10px 12px;text-align:center;white-space:nowrap;">${_fmt(p.data_pedido || p.created_at)}</td>
+            <td style="padding:10px 12px;text-align:center;white-space:nowrap;">${_fmt(p.data_entrega || p.data_previsao_entrega)}</td>
+            <td style="padding:10px 12px;text-align:center;">${_statusBadge(p.status)}</td>
+            <td style="padding:10px 12px;text-align:center;">${_prioBadge(p.prioridade)}</td>
+            <td style="padding:10px 12px;text-align:center;">
+                <a href="/dashboard-v2/pcp.html" target="_blank" title="Abrir no PCP" style="color:#f39c12;font-size:15px;text-decoration:none;"><i class="fas fa-external-link-alt"></i></a>
+            </td>
+        </tr>
+    `).join('');
+}
+
+window.loadCarteiraPedidosPCPData = loadCarteiraPedidosPCPData;
+window.filtrarCarteiraPedidosPCP = filtrarCarteiraPedidosPCP;
+window.mudarPaginaCarteiraPCP = mudarPaginaCarteiraPCP;
 window.editarUnidadeInline = editarUnidadeInline;
+
+// =========================
+// BUSCA NO MODAL DE CONFIGURAÇÕES
+// =========================
+
+function limparBuscaConfig() {
+    const input = document.getElementById('config-search-input');
+    if (input) {
+        input.value = '';
+        filtrarCardsConfig('');
+    }
+    const clearBtn = document.querySelector('.search-clear-btn');
+    if (clearBtn) clearBtn.style.display = 'none';
+}
+
+function filtrarCardsConfig(termo) {
+    const termoLower = (termo || '').toLowerCase().trim();
+    const allCards = document.querySelectorAll('#modal-configuracoes .modal-config-card');
+    const allTabContents = document.querySelectorAll('#modal-configuracoes .modal-config-tab-content');
+    const allTabs = document.querySelectorAll('#modal-configuracoes .modal-config-tab');
+
+    if (!termoLower) {
+        // Restaurar exibição normal — ativa a primeira tab visível
+        allCards.forEach(card => card.style.display = '');
+        allTabContents.forEach(content => {
+            content.style.display = '';
+            content.classList.remove('active');
+        });
+        allTabs.forEach(tab => tab.classList.remove('active'));
+        const firstVisibleTab = document.querySelector('#modal-configuracoes .modal-config-tab:not([style*="display: none"])');
+        if (firstVisibleTab) {
+            firstVisibleTab.classList.add('active');
+            const tabId = 'tab-' + firstVisibleTab.dataset.tab;
+            const tabContent = document.getElementById(tabId);
+            if (tabContent) {
+                tabContent.classList.add('active');
+                tabContent.style.display = 'block';
+            }
+        }
+        return;
+    }
+
+    // Em modo de busca: mostrar todos os conteúdos ao mesmo tempo e filtrar cards
+    allTabContents.forEach(content => {
+        content.classList.add('active');
+        content.style.display = 'block';
+    });
+    allTabs.forEach(tab => tab.classList.remove('active'));
+
+    let totalVisiveis = 0;
+    allCards.forEach(card => {
+        const titulo = (card.querySelector('h3')?.textContent || '').toLowerCase();
+        const subtitulo = (card.querySelector('.modal-config-card-subtitle')?.textContent || '').toLowerCase();
+        const visivel = titulo.includes(termoLower) || subtitulo.includes(termoLower);
+        card.style.display = visivel ? '' : 'none';
+        if (visivel) totalVisiveis++;
+    });
+
+    // Ocultar seções de tab que ficaram sem cards visíveis
+    allTabContents.forEach(content => {
+        const cardsVisiveis = content.querySelectorAll('.modal-config-card:not([style*="display: none"])');
+        if (cardsVisiveis.length === 0) {
+            content.style.display = 'none';
+        }
+    });
+}
+
+// Inicializa o campo de busca quando o modal é carregado
+function initBuscaConfig() {
+    const input = document.getElementById('config-search-input');
+    const clearBtn = document.querySelector('.search-clear-btn');
+    if (!input || input._buscaIniciada) return;
+    input._buscaIniciada = true;
+
+    if (clearBtn) clearBtn.style.display = 'none';
+
+    input.addEventListener('input', function () {
+        const termo = this.value;
+        if (clearBtn) clearBtn.style.display = termo ? 'flex' : 'none';
+        filtrarCardsConfig(termo);
+    });
+
+    input.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            limparBuscaConfig();
+            this.blur();
+        }
+    });
+}
+
+// Observa quando o modal de configurações é aberto para iniciar a busca
+(function () {
+    const observer = new MutationObserver(function () {
+        const modal = document.getElementById('modal-configuracoes');
+        if (modal && modal.classList.contains('active')) {
+            initBuscaConfig();
+        }
+    });
+    // Inicia observação quando o DOM estiver pronto
+    function startObserver() {
+        const modal = document.getElementById('modal-configuracoes');
+        if (modal) {
+            observer.observe(modal, { attributes: true, attributeFilter: ['class'] });
+        } else {
+            setTimeout(startObserver, 500);
+        }
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', startObserver);
+    } else {
+        startObserver();
+    }
+})();
+
+window.limparBuscaConfig = limparBuscaConfig;
+window.filtrarCardsConfig = filtrarCardsConfig;
+window.initBuscaConfig = initBuscaConfig;

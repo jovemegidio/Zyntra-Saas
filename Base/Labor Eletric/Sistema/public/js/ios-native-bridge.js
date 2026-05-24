@@ -411,7 +411,7 @@
 
   function isActive(path) {
     const current = window.location.pathname;
-    if (path === '/') return current === '/' || current === '/index.html' ? 'active' : '';
+    if (path === '/') return current === '/' || current === '/dashboard' ? 'active' : '';
     return current.includes(path) ? 'active' : '';
   }
 
@@ -433,7 +433,7 @@
           ${moreMenuItem('Compras', 'fa-truck', '/Compras/')}
           ${moreMenuItem('NFe / Faturamento', 'fa-file-invoice', '/NFe/')}
           ${moreMenuItem('RH', 'fa-users', '/RH/')}
-          ${moreMenuItem('Logística', 'fa-route', '/modules/Logistica/')}
+          ${moreMenuItem('Logística', 'fa-route', '/modules/Logistica/public/index.html')}
           ${moreMenuItem('Chat', 'fa-comments', '/chat/')}
         </div>
         <div class="section-header" style="margin-top:8px;">Sistema</div>

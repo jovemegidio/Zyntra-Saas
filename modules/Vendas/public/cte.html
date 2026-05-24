@@ -131,7 +131,7 @@
         <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
 
         <!-- Sidebar -->
-        <aside class="sidebar" id="sidebar">
+        <aside class="sidebar" id="mobile-sidebar">
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel"><i class="fas fa-home"></i></a>
             <nav class="sidebar-nav">
                 <button class="sidebar-btn" onclick="window.location.href='index.html'" title="Kanban"><i class="fas fa-columns"></i></button>
@@ -146,7 +146,7 @@
                 <button class="sidebar-btn active" title="CT-e"><i class="fas fa-truck"></i></button>
             </nav>
             <div class="sidebar-bottom">
-                <button class="sidebar-btn" title="Configurações"><i class="fas fa-cog"></i></button>
+                <button class="sidebar-btn" title="Configurações" onclick="window.location.href='/dashboard'"><i class="fas fa-cog"></i></button>
             </div>
         </aside>
 
@@ -168,6 +168,10 @@
                     <button class="header-btn" onclick="exportarExcel()" title="Exportar"><i class="fas fa-download"></i></button>
                     <div class="user-greeting">
                         <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
+                        <div class="user-avatar" id="user-avatar">
+                            <img src="" alt="Foto do usuário" id="user-photo" style="display:none;">
+                            <span id="user-initial">U</span>
+                        </div>
                     </div>
                 </div>
             </header>
@@ -966,7 +970,7 @@
     <!-- Toggle Mobile Sidebar -->
     <script>
         function toggleMobileSidebar() {
-            const sidebar = document.getElementById('sidebar');
+            const sidebar = document.getElementById('mobile-sidebar');
             const overlay = document.getElementById('sidebar-overlay');
             if (sidebar) sidebar.classList.toggle('open');
             if (overlay) overlay.classList.toggle('active');
@@ -974,7 +978,7 @@
     </script>
 
     <!-- Footer Scripts Padrão Aluforce -->
-    <script src="/js/connection-monitor.js?v=20260131"></script>
+    <script src="../../_shared/connection-monitor.js?v=20260131"></script>
     <script src="/js/popup-confirmacao.js?v=20260131"></script>
     <script src="/js/confirm-modal.js?v=20260201"></script>
     <script src="/js/performance-utils.js?v=20260207"></script>
@@ -982,7 +986,7 @@
     <script src="/js/mobile-auto-enhance.js?v=20260202" defer></script>
     <script src="/js/user-dropdown.js?v=20260222" defer></script>
     <script src="/js/sidebar-click-animation.js?v=20260212"></script>
-    <script src="/js/mobile-sidebar.js?v=20260212"></script>
+    <script src="js/mobile-sidebar.js?v=20260212"></script>
 
     <!-- Chat Widget BOB AI - DESATIVADO -->
     <!-- <script src="/chat/widget.js?v=20260418" defer></script> -->

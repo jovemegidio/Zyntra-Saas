@@ -10,7 +10,6 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/modern-saas.css?v=20260209">
     <link rel="stylesheet" href="/modules/RH/public/css/rh-pages.css?v=20260209">
 
     <style>
@@ -535,7 +534,7 @@
     <!-- Tooltips Profissionais -->
     <link rel="stylesheet" href="/css/tooltips-professional.css?v=20260209">
     <script src="/js/tooltips-professional.js?v=20260209" defer></script>
-    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260216">
+    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260418">
     <!-- Chat Widget BOB AI -->
     <link rel="stylesheet" href="/chat/widget.css?v=20260218">
     <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260324">
@@ -1008,7 +1007,7 @@
                         <label for="anexoAlteração">Anexo Comprobatório</label>
                         <span class="field-note">Opcional, mas recomendado para documentos, endereço, dados Bancários e dependentes.</span>
                         <div class="file-upload-wrapper">
-                            <div id="fileUploadArea" class="file-upload-area" onclick="document.getElementById('anexoAlteração').click()">
+                            <div id="fileUploadArea" class="file-upload-area" onclick="document.getElementById('anexoAlteracao').click()">
                                 <div class="file-upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
                                 <div class="file-upload-text">
                                     <div class="main-text">Clique para selecionar um arquivo</div>
@@ -1551,7 +1550,7 @@
 
         function removeFile(e) {
             e.stopPropagation();
-            const input = document.getElementById('anexoAlteração');
+            const input = document.getElementById('anexoAlteracao');
             input.value = '';
             const area = document.getElementById('fileUploadArea');
             area.classList.remove('has-file');
@@ -1565,19 +1564,19 @@
         }
 
         function abrirModalSolicitação() {
-            document.getElementById('modalSolicitação').classList.add('show');
+            document.getElementById('modalSolicitacao').classList.add('show');
         }
 
         function fecharModal() {
-            document.getElementById('modalSolicitação').classList.remove('show');
-            document.getElementById('formSolicitação').reset();
+            document.getElementById('modalSolicitacao').classList.remove('show');
+            document.getElementById('formSolicitacao').reset();
             removeFile(new Event('click'));
         }
 
         async function enviarSolicitação() {
-            const tipo = document.getElementById('tipoAlteração').value;
-            const descrição = document.getElementById('descriçãoAlteração').value;
-            const anexo = document.getElementById('anexoAlteração').files[0];
+            const tipo = document.getElementById('tipoAlteracao').value;
+            const descrição = document.getElementById('descricaoAlteracao').value;
+            const anexo = document.getElementById('anexoAlteracao').files[0];
 
             if (!tipo || !descrição) {
                 showToast('Preencha todos os campos obrigatórios', 'error');
@@ -1650,6 +1649,7 @@
     <script src="/js/user-dropdown.js?v=20260319" defer></script>
 </body>
 </html>
+
 
 
 

@@ -11,8 +11,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link rel="stylesheet" href="css/faturamento-layout.css?v=20260413b">
-    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260216">
+    <link rel="stylesheet" href="/Faturamento/css/faturamento-layout.css?v=20260413b">
+    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260418">
     <link rel="stylesheet" href="/css/tooltips-professional.css?v=20260209">
     <!-- Chat Widget BOB AI --><!-- Chat Widget REMOVIDO --><!--
     <link rel="stylesheet" href="/chat/widget.css?v=20260218"> -->
@@ -28,14 +28,14 @@
         <aside class="sidebar" id="mobile-sidebar">
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel"><i class="fas fa-home"></i></a>
             <nav class="sidebar-nav">
-                <a href="dashboard.html" class="sidebar-btn" title="Dashboard"><i class="fas fa-tachometer-alt"></i></a>
-                <a href="index.html" class="sidebar-btn" title="NF-e"><i class="fas fa-file-invoice-dollar"></i></a>
-                <a href="consultar.html" class="sidebar-btn active" title="Consultar"><i class="fas fa-search"></i></a>
-                <a href="eventos.html" class="sidebar-btn" title="Eventos"><i class="fas fa-calendar-check"></i></a>
-                <a href="inutilizacao.html" class="sidebar-btn" title="Inutilização"><i class="fas fa-ban"></i></a>
+                <a href="/Faturamento/dashboard.html" class="sidebar-btn" title="Dashboard"><i class="fas fa-tachometer-alt"></i></a>
+                <a href="/Faturamento/index.html" class="sidebar-btn" title="NF-e"><i class="fas fa-file-invoice-dollar"></i></a>
+                <a href="/Faturamento/consultar.html" class="sidebar-btn active" title="Consultar"><i class="fas fa-search"></i></a>
+                <a href="/Faturamento/eventos.html" class="sidebar-btn" title="Eventos"><i class="fas fa-calendar-check"></i></a>
+                <a href="/Faturamento/inutilizacao.html" class="sidebar-btn" title="Inutilização"><i class="fas fa-ban"></i></a>
             </nav>
             <div class="sidebar-bottom">
-                <a href="relatorios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
+                <a href="/Faturamento/relatorios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
             </div>
         </aside>
 
@@ -44,13 +44,13 @@
                 <div class="header-left">
                     <button class="mobile-menu-btn" onclick="toggleMobileSidebar()" title="Menu"><i
                             class="fas fa-bars"></i></button>
-                    <div class="header-brand" style="display:flex;align-items:center;gap:10px;">
+                    <a href="/dashboard" class="header-brand" style="display:flex;align-items:center;gap:10px;text-decoration:none;" title="Voltar ao painel">
                         <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE"
                             style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.3);font-size:12px;margin-left:4px;">— Faturamento</span>
-                    </div>
+                    </a>
                 </div>
                 <div class="header-right">
                     <button class="header-btn" title="Atualizar" onclick="location.reload()"><i
@@ -169,7 +169,16 @@
     </div>
 
     <script>
-        function toggleMobileSidebar() {
+                function _fat_toast(msg, tipo) {
+            tipo = tipo || (msg.toLowerCase().includes('sucesso') || msg.toLowerCase().includes('success') ? 'success' : msg.toLowerCase().includes('erro') || msg.toLowerCase().includes('error') || msg.toLowerCase().includes('inválid') ? 'error' : 'info');
+            var t = document.createElement('div');
+            var colors = { success: '#059669', error: '#dc2626', info: '#2563eb', warning: '#d97706' };
+            t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:' + (colors[tipo]||colors.info) + ';color:#fff;padding:12px 20px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.2);z-index:99999;max-width:420px;font-family:Inter,sans-serif;font-size:13px;line-height:1.5;';
+            t.textContent = msg.replace(/\\n\\n/g, ' | ').replace(/\\n/g, ' ');
+            document.body.appendChild(t);
+            setTimeout(function() { if (t.parentNode) t.parentNode.removeChild(t); }, 5000);
+        }
+function toggleMobileSidebar() {
             const sidebar = document.getElementById('mobile-sidebar');
             const overlay = document.getElementById('sidebar-overlay');
             sidebar.classList.toggle('open');
@@ -254,7 +263,7 @@
         }
 
         function visualizarNFe(id, origem) {
-            if (!id) { alert('ID não disponível'); return; }
+            if (!id) { _fat_toast('ID não disponível'); return; }
             const qs = origem === 'pedido' ? '?origem=pedido' : '';
             fetch(`/api/faturamento/nfes/${id}${qs}`, { credentials: 'include' })
                 .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
@@ -269,19 +278,19 @@
                         'Data: ' + (nfe.data_emissao ? new Date(nfe.data_emissao).toLocaleString('pt-BR') : '-'),
                         'Protocolo: ' + (nfe.protocolo || '-')
                     ].join('\n');
-                    alert(info);
+                    _fat_toast(info);
                 })
-                .catch(e => alert('Erro ao carregar detalhes'));
+                .catch(e => _fat_toast('Erro ao carregar detalhes'));
         }
 
         async function baixarXML(id, origem) {
-            if (!id) { alert('ID não disponível'); return; }
+            if (!id) { _fat_toast('ID não disponível'); return; }
             try {
                 const qs = origem === 'pedido' ? '?origem=pedido' : '';
                 const r = await fetch(`/api/faturamento/nfes/${id}/xml${qs}`, { credentials: 'include' });
                 if (r.ok) { const b = await r.blob(); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = `nfe_${id}.xml`; a.click(); URL.revokeObjectURL(u); }
-                else { alert('XML não disponível para esta NF-e'); }
-            } catch (e) { alert('Erro ao baixar XML'); }
+                else { _fat_toast('XML não disponível para esta NF-e'); }
+            } catch (e) { _fat_toast('Erro ao baixar XML'); }
         }
 
         function gerarDANFE(id, origem) { const qs = origem === 'pedido' ? '?origem=pedido' : ''; window.open(`/api/faturamento/nfes/${id}/danfe${qs}`, '_blank'); }
@@ -325,3 +334,4 @@
 </body>
 
 </html>
+

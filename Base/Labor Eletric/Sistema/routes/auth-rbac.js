@@ -14,13 +14,15 @@ const crypto = require('crypto');
 const fs = require('fs');
 const twoFactorService = require('../services/two-factor.service');
 
-// Helper de log que também escreve em arquivo
+// Helper de log. File logging is opt-in because this middleware can run on every request.
+const AUTH_RBAC_DEBUG = process.env.AUTH_RBAC_DEBUG === '1' || process.env.AUTH_RBAC_DEBUG === 'true';
 const logToFile = (msg) => {
+    if (!AUTH_RBAC_DEBUG) return;
     const line = `${new Date().toISOString()} ${msg}`;
     console.log(msg);
     try {
         const logPath = require('path').join(__dirname, '..', 'auth-rbac.log');
-        fs.appendFileSync(logPath, line + '\n');
+        fs.appendFile(logPath, line + '\n', () => {});
     } catch(e) {}
 };
 
@@ -51,7 +53,7 @@ const authMiddleware = async (req, res, next) => {
             req.cookies?.authToken ||
             req.headers['authorization']?.replace('Bearer ', '');
 
-        logToFile('[AUTH-RBAC] Token encontrado: ' + (token ? token.substring(0, 30) + '...' : 'NENHUM'));
+        logToFile('[AUTH-RBAC] Token encontrado: ' + (token ? 'PRESENTE' : 'NENHUM'));
 
         if (!token) {
             logToFile('[AUTH-RBAC] ERRO: Token não fornecido');
@@ -63,7 +65,7 @@ const authMiddleware = async (req, res, next) => {
         }
 
         logToFile('[AUTH-RBAC] Verificando token com JWT_SECRET...');
-        const decoded = jwt.verify(token, JWT_SECRET);
+        const decoded = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
         logToFile('[AUTH-RBAC] Token decodificado - ID: ' + decoded.id);
         
         // Buscar usuário atualizado do banco
@@ -141,7 +143,7 @@ const checkModuleAccess = (moduloCodigo, tipoPermissao = 'visualizar') => {
                 return next();
             }
 
-            const pool = req.app.locals.pool || require('./database').getPool();
+            const pool = req.app.locals.pool || require('../database/pool');
             
             // Verificar permissão via procedure ou query direta
             const [result] = await pool.query(`
@@ -236,10 +238,22 @@ router.post('/login', async (req, res) => {
         console.log('[RBAC LOGIN] Tentativa de login:', email);
 
         if (!email || !password) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Email e senha são obrigatórios' 
+            return res.status(400).json({
+                success: false,
+                message: 'Email e senha são obrigatórios'
             });
+        }
+
+        // Filtro por domínio de email quando ALLOWED_EMAIL_DOMAINS está configurado (isolamento multi-tenant)
+        const allowedDomains = process.env.ALLOWED_EMAIL_DOMAINS;
+        if (allowedDomains) {
+            const domains = allowedDomains.split(',').map(d => d.trim().toLowerCase());
+            const emailLower = email.toLowerCase().trim();
+            const isAllowed = domains.some(domain => emailLower.endsWith(domain));
+            if (!isAllowed) {
+                await logAccess(pool, null, 'login_falha', null, req, { email, motivo: 'dominio_nao_permitido' });
+                return res.status(401).json({ success: false, message: 'Credenciais inválidas' });
+            }
         }
 
         // Bloqueio de contas agora utiliza o campo status='bloqueado' no banco de dados
@@ -380,7 +394,7 @@ router.post('/login', async (req, res) => {
             message: 'Login realizado com sucesso',
             token,
             user: userResponse,
-            redirectTo: '/index.html'
+            redirectTo: '/dashboard'
         });
 
     } catch (error) {

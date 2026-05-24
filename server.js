@@ -1697,9 +1697,10 @@ app.get('/Financeiro/*', (req, res, next) => {
         }, path.join(__dirname, 'modules', 'Financeiro', 'public'));
     });
 });
-// Financeiro: redireciona para URL com nome de arquivo para que CSS relativo resolva corretamente
-app.get('/Financeiro', authenticateModuleHtml, (req, res) => {
-    res.redirect(302, '/Financeiro/index.html');
+// Financeiro: serve index.html diretamente (sem redirect para evitar erro de frame)
+app.get('/Financeiro', authenticateModuleHtml, (req, res, next) => {
+    req.params = { 0: 'index.html' };
+    safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'Financeiro', 'public'));
 });
 
 // Aliases root-level para páginas do Financeiro (apenas habilitadas)
@@ -1767,6 +1768,10 @@ app.get(['/RH', '/RecursosHumanos'], authenticateModuleHtml, (req, res, next) =>
 });
 
 // Logistica
+// BUG-027: dashboard.html não existe — redireciona para index.html
+app.get('/Logistica/dashboard.html', authenticateModuleHtml, (req, res) => res.redirect('/Logistica/index.html'));
+// FUNC-04: trailing slash explícito → rota raiz
+app.get('/Logistica/', authenticateModuleHtml, (req, res) => res.redirect(301, '/Logistica'));
 app.get('/Logistica/*.html', authenticateModuleHtml, (req, res, next) => {
     safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'Logistica', 'public'));
 });
@@ -1775,8 +1780,9 @@ app.get('/Logistica/*', (req, res, next) => {
     if (req.params[0].includes('.')) return next();
     authenticateModuleHtml(req, res, () => serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'Logistica', 'public')));
 });
-app.get('/Logistica', authenticateModuleHtml, (req, res) => {
-    res.redirect(302, '/Logistica/index.html');
+app.get('/Logistica', authenticateModuleHtml, (req, res, next) => {
+    req.params = { 0: 'index.html' };
+    safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'Logistica', 'public'));
 });
 
 // Faturamento
@@ -1802,6 +1808,16 @@ app.use('/modules', (req, res, next) => {
 // Catch-all modules
 app.get('/modules/*.html', authenticateModuleHtml, (req, res, next) => {
     safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules'));
+});
+
+// RT-001: Redirects para URLs legadas de PCP (ordens.html / producao.html → URLs corretas)
+app.get(['/PCP/ordens.html', '/modules/PCP/ordens.html'], (req, res) => {
+    const base = req.path.startsWith('/modules') ? '/modules/PCP' : '/PCP';
+    res.redirect(301, `${base}/ordens-producao.html`);
+});
+app.get(['/PCP/producao.html', '/modules/PCP/producao.html'], (req, res) => {
+    const base = req.path.startsWith('/modules') ? '/modules/PCP' : '/PCP';
+    res.redirect(301, `${base}/pages/gestao-producao.html`);
 });
 
 // Rotas estáticas do PCP - Cache desabilitado para TODOS os tipos de arquivo

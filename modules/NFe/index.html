@@ -37,7 +37,7 @@
     <link rel="stylesheet" href="/modules/Faturamento/css/faturamento-layout.css?v=20260325">
 
     <!-- Global Header & Sidebar — Padrão Institucional -->
-    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260325">
+    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260418">
 
     <!-- Performance: Skeleton Loaders -->
     <link rel="stylesheet" href="/css/skeleton-loader.css?v=20260325">
@@ -1319,13 +1319,13 @@
         const _nfeOriginalTitle = document.title;
 
         function abrirModalConfigurações() {
-            document.getElementById('modal-configurações-nfe').classList.add('active');
+            document.getElementById('modal-configuracoes-nfe').classList.add('active');
             document.title = 'Zyntra: Configurações NFe';
             carregarConfiguracoes();
         }
 
         function fecharModalConfigurações() {
-            document.getElementById('modal-configurações-nfe').classList.remove('active');
+            document.getElementById('modal-configuracoes-nfe').classList.remove('active');
             document.title = _nfeOriginalTitle;
         }
 
@@ -1369,7 +1369,7 @@
             finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-save"></i> Salvar Configurações'; }
         }
 
-        document.getElementById('modal-configurações-nfe')?.addEventListener('click', (e) => {
+        document.getElementById('modal-configuracoes-nfe')?.addEventListener('click', (e) => {
             if (e.target.id === 'modal-configurações-nfe') fecharModalConfigurações();
         });
 
@@ -1455,8 +1455,10 @@
                     const tbody = document.getElementById('nfe-table-body');
                     if (data.notas && data.notas.length > 0) {
                         tbody.innerHTML = data.notas.map(nfe => {
-                            const statusClass = nfe.status === 'autorizada' || nfe.status === 'emitida' ? 'emitida' : nfe.status === 'pendente' || nfe.status === 'rejeitada' ? 'pendente' : nfe.status === 'cancelada' ? 'cancelada' : 'pendente';
-                            const statusText = nfe.status.charAt(0).toUpperCase() + nfe.status.slice(1);
+                            const statusMap = { autorizada: 'emitida', emitida: 'emitida', pendente: 'pendente', em_processamento: 'pendente', cancelada: 'cancelada', rejeitada: 'cancelada', denegada: 'cancelada' };
+                            const statusClass = statusMap[nfe.status] || 'pendente';
+                            const statusLabelMap = { autorizada: 'Autorizada', emitida: 'Emitida', pendente: 'Pendente', em_processamento: 'Processando', cancelada: 'Cancelada', rejeitada: 'Rejeitada', denegada: 'Denegada' };
+                            const statusText = statusLabelMap[nfe.status] || (nfe.status ? nfe.status.charAt(0).toUpperCase() + nfe.status.slice(1) : '-');
                             const dataFormatada = nfe.data ? new Date(nfe.data).toLocaleDateString('pt-BR') : '-';
                             const valorFormatado = (nfe.valor || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
                             return '<tr><td><strong>' + (nfe.numero || '-') + '</strong></td><td>' + (nfe.cliente || '-') + '</td><td>' + dataFormatada + '</td><td>' + valorFormatado + '</td><td><span class="badge ' + statusClass + '">' + statusText + '</span></td></tr>';

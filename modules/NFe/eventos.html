@@ -33,7 +33,7 @@
     <link rel="stylesheet" href="/modules/Faturamento/css/faturamento-layout.css?v=20260325">
 
     <!-- Global Header & Sidebar é Padrão Institucional -->
-    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260325">
+    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260418">
 
     <!-- Performance: Skeleton Loaders -->
     <link rel="stylesheet" href="/css/skeleton-loader.css?v=20260325">
@@ -279,7 +279,7 @@
             })
             .then(data => {
                 nfeCarregada = data.nfe || data.data || data;
-                const elNum = document.getElementById('infoNúmero'); if (elNum) elNum.textContent = nfeCarregada.numero || nfeCarregada.id || '-';
+                const elNum = document.getElementById('infoNumero'); if (elNum) elNum.textContent = nfeCarregada.numero || nfeCarregada.id || '-';
                 const elSerie = document.getElementById('infoSerie'); if (elSerie) elSerie.textContent = nfeCarregada.serie || '1';
                 const elChave = document.getElementById('infoChave'); if (elChave) elChave.textContent = nfeCarregada.chave || nfeCarregada.chave_acesso || '-';
                 const elDest = document.getElementById('infoDestinatario'); if (elDest) elDest.textContent = nfeCarregada.destinatario || nfeCarregada.cliente || '-';

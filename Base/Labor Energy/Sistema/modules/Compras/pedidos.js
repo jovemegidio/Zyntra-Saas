@@ -133,8 +133,15 @@ async function inicializarSistema() {
 
 async function carregarPedidos() {
     try {
-        // Tentar carregar do backend
+        // Carregar do backend — única fonte de dados (BE-002: sem fallback localStorage)
         const response = await fetch('/api/compras/pedidos', { credentials: 'include' });
+        if (response.status === 401) {
+            // Sessão expirada — auth-unified.js vai redirecionar; mostrar estado vazio
+            pedidos = [];
+            renderizarTabelaPedidos();
+            atualizarCards();
+            return;
+        }
         if (response.ok) {
             const data = await response.json();
             pedidos = Array.isArray(data) ? data : (data.pedidos || []);
@@ -156,20 +163,25 @@ async function carregarPedidos() {
             atualizarCards();
             return;
         }
+        throw new Error(`HTTP ${response.status}`);
     } catch (error) {
-        console.log('Erro ao carregar pedidos da API:', error);
-    }
-
-    // Fallback: localStorage
-    const pedidosLocal = localStorage.getItem('compras_pedidos');
-    if (pedidosLocal) {
-        pedidos = JSON.parse(pedidosLocal);
-    } else {
+        console.error('[Pedidos] Erro ao carregar pedidos da API:', error);
+        // BE-002: Sem fallback localStorage — mostrar estado de erro claro ao usuário
         pedidos = [];
+        const tbody = document.getElementById('pedidosTableBody');
+        if (tbody) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="8" style="text-align:center;padding:40px;color:#64748b;">
+                        <i class="fas fa-exclamation-triangle" style="font-size:32px;margin-bottom:12px;display:block;color:#f59e0b;"></i>
+                        <p style="font-weight:600;margin-bottom:8px;">Não foi possível carregar os pedidos</p>
+                        <p style="font-size:13px;margin-bottom:16px;">Verifique sua conexão e tente novamente.</p>
+                        <button class="btn btn-sm btn-secondary" onclick="carregarPedidos()"><i class="fas fa-sync-alt"></i> Tentar Novamente</button>
+                    </td>
+                </tr>`;
+        }
+        atualizarCards();
     }
-
-    renderizarTabelaPedidos();
-    atualizarCards();
 }
 
 async function carregarFornecedores() {
@@ -186,47 +198,40 @@ async function carregarFornecedores() {
         console.log('Erro ao carregar fornecedores:', error);
     }
 
-    const fornecedoresLocal = localStorage.getItem('compras_fornecedores');
-    if (fornecedoresLocal) {
-        fornecedores = JSON.parse(fornecedoresLocal);
-    } else {
-        fornecedores = [];
-    }
-
+    // BE-002: Sem fallback localStorage para fornecedores
+    fornecedores = [];
     preencherSelectFornecedores();
     preencherSelectCompradores();
 }
 
 async function carregarProdutos() {
+    // Primary: Compras materiais API
     try {
-        const response = await fetch('/api/produtos', { credentials: 'include' });
+        const response = await fetch('/api/compras/materiais?limit=1000', { credentials: 'include' });
         if (response.ok) {
             const data = await response.json();
-            produtos = Array.isArray(data) ? data : (data.produtos || []);
-            return;
+            const raw = data.materiais || data.produtos || (Array.isArray(data) ? data : []);
+            produtos = raw.map(m => ({ ...m, nome: m.descricao || m.nome || '', codigo: m.codigo_material || m.codigo || '' }));
+            if (produtos.length > 0) return;
         }
     } catch (error) {
-        console.log('Carregando produtos do localStorage...');
+        console.log('Erro ao carregar materiais de compras:', error);
     }
 
-    // Tentar também da API de materiais do PCP
+    // Fallback: PCP materiais
     try {
         const response = await fetch('/api/pcp/materiais', { credentials: 'include' });
         if (response.ok) {
             const data = await response.json();
             produtos = Array.isArray(data) ? data : (data.materiais || []);
-            return;
+            if (produtos.length > 0) return;
         }
     } catch (error) {
-        console.log('Erro ao carregar materiais:', error);
+        console.log('Erro ao carregar materiais PCP:', error);
     }
 
-    const produtosLocal = localStorage.getItem('produtos');
-    if (produtosLocal) {
-        produtos = JSON.parse(produtosLocal);
-    } else {
-        produtos = [];
-    }
+    // BE-002: Sem fallback localStorage para produtos
+    produtos = [];
 }
 
 // ============ MODAL NOVO/EDITAR PEDIDO ============
@@ -276,7 +281,8 @@ async function abrirModalEditarPedido(pedidoId) {
     const forn = fornecedores.find(f => f.id == pedido.fornecedor_id);
     const fornBusca = document.getElementById('fornecedorBusca');
     if (fornBusca) fornBusca.value = forn ? (forn.razao_social || forn.nome) : (pedido.fornecedor || pedido.fornecedor_nome || '');
-    document.getElementById('compradorId').value = pedido.comprador_id || '';
+    const compradorEl = document.getElementById('compradorId');
+    if (compradorEl) compradorEl.value = pedido.comprador_id || '';
     document.getElementById('dataEntregaPrevista').value = pedido.data_entrega_prevista ? pedido.data_entrega_prevista.split('T')[0] : '';
     document.getElementById('statusPedido').value = pedido.status || 'pendente';
     document.getElementById('condicoesPagamento').value = pedido.condicoes_pagamento || '';
@@ -308,6 +314,42 @@ function fecharModalPedido() {
 
 // ============ GERENCIAMENTO DE ITENS ============
 
+function filtrarProdutosItem(itemId, termo) {
+    const dropdown = document.getElementById(`prod-dropdown-${itemId}`);
+    if (!dropdown) return;
+    if (!termo || termo.length < 1) { dropdown.style.display = 'none'; return; }
+    const termoLower = termo.toLowerCase();
+    const filtrados = produtos.filter(p => {
+        const nome = (p.nome || p.descricao || p.nome_material || '').toLowerCase();
+        const codigo = (p.codigo || p.cod || '').toLowerCase();
+        return nome.includes(termoLower) || codigo.includes(termoLower);
+    }).slice(0, 8);
+    if (filtrados.length === 0) { dropdown.style.display = 'none'; return; }
+    dropdown.innerHTML = filtrados.map(p => {
+        const nome = escapeHtml(p.nome || p.descricao || p.nome_material || '');
+        const preco = p.preco_custo || p.preco || p.valor || 0;
+        const codigo = escapeHtml(p.codigo || p.cod || '');
+        return `<div style="padding:8px 12px;cursor:pointer;border-bottom:1px solid #f1f5f9;font-size:0.82rem;display:flex;justify-content:space-between;align-items:center;"
+                     onmouseover="this.style.background='#f0f9ff'" onmouseout="this.style.background='#fff'"
+                     onclick="selecionarProdutoItem(${itemId}, '${nome.replace(/'/g,"\\'")}', ${preco})">
+            <span>${codigo ? '<span style=\'color:#94a3b8;margin-right:6px;\'>' + codigo + '</span>' : ''}${nome}</span>
+            ${preco > 0 ? '<span style="color:#22c55e;font-weight:600;">R$ ' + Number(preco).toFixed(2) + '</span>' : ''}
+        </div>`;
+    }).join('');
+    dropdown.style.display = 'block';
+}
+
+function selecionarProdutoItem(itemId, nome, preco) {
+    const row = document.getElementById(`item-${itemId}`);
+    if (!row) return;
+    row.querySelector('.item-descricao').value = nome;
+    if (preco > 0) row.querySelector('.item-preco').value = Number(preco).toFixed(2);
+    const dropdown = document.getElementById(`prod-dropdown-${itemId}`);
+    if (dropdown) dropdown.style.display = 'none';
+    calcularItemTotal(itemId);
+    calcularTotais();
+}
+
 function adicionarItem(itemData = null) {
     itemCounter++;
     const tbody = document.getElementById('itensTableBody');
@@ -317,14 +359,21 @@ function adicionarItem(itemData = null) {
     tr.id = `item-${itemCounter}`;
 
     const unidadeAtual = itemData?.unidade || 'UN';
+    const currentId = itemCounter;
 
     tr.innerHTML = `
-        <td>
+        <td style="position:relative;">
             <input type="text" class="item-descricao"
-                   value="${itemData?.descricao || ''}"
-                   placeholder="Descrição do item"
+                   value="${escapeHtml(itemData?.descricao || '')}"
+                   placeholder="Digite para buscar produto/material..."
+                   autocomplete="off"
                    style="width: 100%; padding: 8px; border: 1px solid #e5e7eb; border-radius: 6px;"
-                   onchange="calcularTotais()">
+                   oninput="filtrarProdutosItem(${currentId}, this.value)"
+                   onchange="calcularTotais()"
+                   onfocus="filtrarProdutosItem(${currentId}, this.value)"
+                   onblur="setTimeout(()=>{ const d=document.getElementById('prod-dropdown-${currentId}'); if(d)d.style.display='none'; }, 200)">
+            <div id="prod-dropdown-${currentId}"
+                 style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #e2e8f0;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.12);max-height:180px;overflow-y:auto;z-index:9999;"></div>
         </td>
         <td>
             <input type="number" class="item-quantidade"
@@ -434,14 +483,29 @@ async function salvarPedido() {
     const fornecedorId = document.getElementById('fornecedorId').value;
 
     if (!fornecedorId) {
-        alert('Selecione um fornecedor!');
+        mostrarToast('Selecione um fornecedor!', 'error');
+        const selForn = document.getElementById('fornecedorId') || document.getElementById('fornecedorSelect');
+        if (selForn) { selForn.style.borderColor = '#ef4444'; setTimeout(() => { selForn.style.borderColor = ''; }, 3000); }
         return;
     }
 
     const itens = coletarItens();
     if (itens.length === 0) {
-        alert('Adicione pelo menos um item ao pedido!');
+        mostrarToast('Adicione pelo menos um item ao pedido!', 'error');
         return;
+    }
+
+    // BUG-005: Validar preço e quantidade de cada item
+    for (let i = 0; i < itens.length; i++) {
+        const item = itens[i];
+        if (!item.preco_unitario || parseFloat(item.preco_unitario) <= 0) {
+            alert('Preço unitário deve ser maior que zero.');
+            return;
+        }
+        if (!item.quantidade || parseFloat(item.quantidade) <= 0) {
+            alert('Quantidade deve ser maior que zero.');
+            return;
+        }
     }
 
     const subtotal = itens.reduce((sum, item) => sum + item.preco_total, 0);
@@ -449,10 +513,17 @@ async function salvarPedido() {
     const frete = parseFloat(document.getElementById('frete').value) || 0;
     const valorFinal = subtotal - desconto + frete;
 
+    // DB-002: Bloquear pedido com valor total zero ou negativo
+    if (valorFinal <= 0) {
+        mostrarToast('Valor total do pedido deve ser maior que zero.', 'error');
+        return;
+    }
+
     const fornecedor = fornecedores.find(f => f.id == fornecedorId);
 
+    // DB-001: Nunca gerar ID no cliente (Date.now()) — usar apenas ID atribuído pelo servidor
     const pedido = {
-        id: pedidoId || Date.now().toString(),
+        ...(pedidoId ? { id: pedidoId } : {}),
         numero_pedido: document.getElementById('numeroPedido').value,
         fornecedor_id: parseInt(fornecedorId),
         fornecedor_nome: fornecedor?.nome || fornecedor?.razao_social || 'N/A',
@@ -499,17 +570,10 @@ async function salvarPedido() {
             throw new Error('Erro na API');
         }
     } catch (error) {
-        console.log('Salvando localmente...', error);
-        // Salvar localmente como fallback
-        if (pedidoId) {
-            const index = pedidos.findIndex(p => p.id === pedidoId);
-            if (index !== -1) {
-                pedidos[index] = pedido;
-            }
-        } else {
-            pedidos.unshift(pedido);
-        }
-        salvarPedidosLocal();
+        // BE-002: Sem fallback localStorage — exibir erro claro
+        console.error('[Pedidos] Erro ao salvar pedido na API:', error);
+        mostrarToast('Erro ao salvar pedido. Verifique sua conexão e tente novamente.', 'error');
+        return; // Não fechar o modal para o usuário não perder os dados digitados
     }
 
     // Atualizar interface em tempo real
@@ -609,9 +673,10 @@ function renderizarTabelaPedidos() {
                     <button class="btn-action view" onclick="visualizarPedido('${pedido.id}')" title="Visualizar">
                         <i class="fas fa-eye"></i>
                     </button>
+                    ${['pendente', 'rascunho', 'em_analise'].includes(pedido.status) ? `
                     <button class="btn-action edit" onclick="abrirModalEditarPedido('${pedido.id}')" title="Editar">
                         <i class="fas fa-edit"></i>
-                    </button>
+                    </button>` : ''}
                     ${pedido.status === 'pendente' ? `
                     <button class="btn-action success" onclick="aprovarPedido('${pedido.id}')" title="Aprovar">
                         <i class="fas fa-check"></i>
@@ -652,16 +717,17 @@ function atualizarCards() {
 async function visualizarPedido(pedidoId) {
     let pedido = pedidos.find(p => p.id == pedidoId);
 
-    // Se não tiver itens ou itens vazio, buscar da API
-    if (!pedido || !pedido.itens || pedido.itens.length === 0) {
-        try {
-            const response = await fetch(`/api/compras/pedidos/${pedidoId}`, { credentials: 'include' });
-            if (response.ok) {
-                pedido = await response.json();
-            }
-        } catch (error) {
-            console.error('Erro ao buscar pedido:', error);
+    // Sempre buscar da API para garantir dados completos (condicoes_pagamento, etc.)
+    try {
+        // BE-002: Usar apenas cookies httpOnly — nunca localStorage.getItem('token')
+        const response = await fetch(`/api/compras/pedidos/${pedidoId}`, {
+            credentials: 'include'
+        });
+        if (response.ok) {
+            pedido = await response.json();
         }
+    } catch (error) {
+        console.error('Erro ao buscar pedido:', error);
     }
 
     if (!pedido) {
@@ -764,6 +830,12 @@ function fecharModalVisualizar() {
 async function aprovarPedido(pedidoId) {
     if (!confirm('Deseja aprovar este pedido?')) return;
 
+    // BUG-009: Avisar se data de entrega não estiver preenchida
+    const pedido = pedidos.find(p => p.id === pedidoId || p.id == pedidoId);
+    if (pedido && !pedido.data_entrega_prevista) {
+        if (!confirm('Data de entrega prevista recomendada para rastreamento de SLA.\nDeseja prosseguir sem a data de entrega?')) return;
+    }
+
     try {
         const response = await fetch(`/api/compras/pedidos/${pedidoId}/aprovar`, {
             method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }
@@ -777,16 +849,8 @@ async function aprovarPedido(pedidoId) {
         mostrarNotificacao(err.message || 'Erro ao aprovar pedido', 'error');
     } catch (error) {
         console.error('Erro ao aprovar pedido:', error);
-        // Fallback local
-        const pedido = pedidos.find(p => p.id === pedidoId);
-        if (pedido) {
-            pedido.status = 'aprovado';
-            pedido.data_aprovacao = new Date().toISOString();
-            salvarPedidosLocal();
-            renderizarTabelaPedidos();
-            atualizarCards();
-            mostrarNotificacao('Pedido aprovado localmente', 'warning');
-        }
+        // BE-002: Sem fallback localStorage — mostrar erro claro
+        mostrarToast('Erro de conexão ao aprovar pedido. Tente novamente.', 'error');
     }
 }
 
@@ -803,16 +867,14 @@ async function excluirPedido(pedidoId) {
             await carregarPedidos();
             return;
         }
+        // Tratar erros HTTP (ex: 409 Conflict)
+        const errData = await response.json().catch(() => ({}));
+        mostrarToast(errData.message || errData.error || `Erro ao excluir pedido (${response.status})`, 'error');
+        await carregarPedidos();
     } catch (error) {
         console.error('Erro ao excluir pedido:', error);
+        mostrarToast('Erro de conexão ao excluir pedido', 'error');
     }
-
-    // Fallback local
-    pedidos = pedidos.filter(p => p.id !== pedidoId);
-    salvarPedidosLocal();
-    renderizarTabelaPedidos();
-    atualizarCards();
-    mostrarNotificacao('Pedido removido localmente', 'warning');
 }
 
 function imprimirPedido() {
@@ -880,6 +942,9 @@ function atualizarSelecao() {
         selectAllCb.checked = totalSelected === allCheckboxes.length && totalSelected > 0;
         selectAllCb.indeterminate = totalSelected > 0 && totalSelected < allCheckboxes.length;
     }
+
+    const btnExcluir = document.getElementById('btn-excluir-selecionados');
+    if (btnExcluir) btnExcluir.style.display = totalSelected > 0 ? '' : 'none';
 }
 
 async function excluirSelecionados() {
@@ -969,7 +1034,21 @@ function gerarNumeroPedido() {
 }
 
 function preencherSelectFornecedores() {
-    // Fornecedores loaded - autocomplete ready
+    // Preencher select com options de fornecedores
+    const select = document.getElementById('fornecedorId');
+    if (select) {
+        const valorAtual = select.value;
+        select.innerHTML = '<option value="">Selecione o fornecedor...</option>';
+        fornecedores.forEach(f => {
+            const nome = escapeHtml(f.razao_social || f.nome || f.nome_fantasia || '');
+            const opt = document.createElement('option');
+            opt.value = f.id;
+            opt.textContent = nome;
+            select.appendChild(opt);
+        });
+        if (valorAtual) select.value = valorAtual;
+    }
+    // Autocomplete input (se existir)
     const input = document.getElementById('fornecedorBusca');
     if (input) input.placeholder = `Digite para buscar (${fornecedores.length} fornecedores)...`;
 }
@@ -1077,8 +1156,9 @@ function getStatusLabel(status) {
     return labels[status] || status;
 }
 
+// BE-002: salvarPedidosLocal() removido — toda persistência é feita pela API do servidor
 function salvarPedidosLocal() {
-    localStorage.setItem('compras_pedidos', JSON.stringify(pedidos));
+    console.warn('[Pedidos] salvarPedidosLocal() foi chamado mas está desabilitado (BE-002: sem localStorage)');
 }
 
 function mostrarNotificacao(mensagem, tipo) {

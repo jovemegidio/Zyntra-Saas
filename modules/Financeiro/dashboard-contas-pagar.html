@@ -30,7 +30,6 @@
     <!-- CSS Padrão Global -->
     <link rel="stylesheet" href="/modules/Compras/css/compras-layout.css?v=20260301">
     <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260301">
-    <link rel="stylesheet" href="css/fin-header-sidebar.css?v=20260418">
     <link rel="stylesheet" href="/css/skeleton-loader.css?v=20260301">
     <link rel="stylesheet" href="/css/popup-confirmacao.css?v=20260301">
 
@@ -102,7 +101,7 @@
     </style>
 
     <script>
-        function toggleNotificações() { const p = document.getElementById('notification-panel'); if (p) p.classList.toggle('active'); }
+        function toggleNotificacoes() { const p = document.getElementById('notification-panel'); if (p) p.classList.toggle('active'); }
         function marcarTodasLidas() {}
         function limparNotificações() {}
     </script>
@@ -347,11 +346,11 @@
         }
 
         async function abrirModalNovaCotação() {
-            document.getElementById('modalNovaCotação').classList.add('active');
-            document.getElementById('modalCotaçãoTítulo').textContent = 'Nova Cotação de Compra';
-            document.getElementById('formCotação').reset();
-            document.getElementById('cotaçãoId').value = '';
-            document.getElementById('cotaçãoNúmero').value = '';
+            document.getElementById('modalNovaCotacao').classList.add('active');
+            document.getElementById('modalCotacaoTitulo').textContent = 'Nova Cotação de Compra';
+            document.getElementById('formCotacao').reset();
+            document.getElementById('cotacaoId').value = '';
+            document.getElementById('cotacaoNumero').value = '';
             // Carregar materiais e fornecedores dinamicamente
             carregarMateriaisCotação();
             carregarFornecedores();
@@ -359,12 +358,12 @@
             try {
                 const token = localStorage.getItem('token') || sessionStorage.getItem('token');
                 const r = await fetch('/api/compras/cotacoes/próximo-numero', { headers: { 'Authorization': `Bearer ${token}` } });
-                if (r.ok) { const d = await r.json(); document.getElementById('cotaçãoNúmero').value = d.numero || d.proximo_numero || ''; }
-            } catch (e) { document.getElementById('cotaçãoNúmero').value = 'COT-' + String(Date.now()).slice(-4); }
+                if (r.ok) { const d = await r.json(); document.getElementById('cotacaoNumero').value = d.numero || d.proximo_numero || ''; }
+            } catch (e) { document.getElementById('cotacaoNumero').value = 'COT-' + String(Date.now()).slice(-4); }
         }
 
         function fecharModalCotação() {
-            document.getElementById('modalNovaCotação').classList.remove('active');
+            document.getElementById('modalNovaCotacao').classList.remove('active');
         }
 
         let _salvandoCotação = false;
@@ -373,7 +372,7 @@
             _salvandoCotação = true;
             const btn = event && event.target ? event.target : null;
             if (btn) btn.disabled = true;
-            const descrição = document.getElementById('cotDescrição').value;
+            const descrição = document.getElementById('cotDescricao').value;
             const validade = document.getElementById('cotValidade').value;
             const material = document.getElementById('cotMaterial').value;
             const quantidade = document.getElementById('cotQuantidade').value;
@@ -387,19 +386,19 @@
             const fornecedores_ids = Array.from(fornecedoresChecked).map(cb => parseInt(cb.value));
 
             const body = {
-                número: document.getElementById('cotaçãoNúmero').value,
+                número: document.getElementById('cotacaoNumero').value,
                 descrição: descrição,
                 data_abertura: new Date().toISOString().split('T')[0],
                 data_validade: validade,
                 quantidade: parseFloat(quantidade),
                 unidade: document.getElementById('cotUnidade').value,
-                observações: document.getElementById('cotObservações').value,
+                observações: document.getElementById('cotObservacoes').value,
                 fornecedores_ids: fornecedores_ids
             };
 
             try {
                 const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-                const cotaçãoId = document.getElementById('cotaçãoId').value;
+                const cotaçãoId = document.getElementById('cotacaoId').value;
                 const url = cotaçãoId ? `/api/compras/cotações/${cotaçãoId}` : '/api/compras/cotações';
                 const method = cotaçãoId ? 'PUT' : 'POST';
 
@@ -430,7 +429,7 @@
             }
         }
 
-        document.getElementById('modalNovaCotação').addEventListener('click', function(e) {
+        document.getElementById('modalNovaCotacao').addEventListener('click', function(e) {
             if (e.target === this) fecharModalCotação();
         });
     </script>
@@ -440,13 +439,13 @@
         <div class="modal" style="max-width:700px;">
             <div class="modal-header">
                 <h3><i class="fas fa-eye"></i> Detalhes da Cotação</h3>
-                <button class="modal-close" onclick="document.getElementById('modalVisualizarCotação').classList.remove('active')">&times;</button>
+                <button class="modal-close" onclick="document.getElementById('modalVisualizarCotacao').classList.remove('active')">&times;</button>
             </div>
             <div class="modal-body" id="viewCotacaoBody" style="max-height:60vh; overflow-y:auto;">
                 <p style="text-align:center; color:var(--gray-400);"><i class="fas fa-spinner fa-spin"></i> Carregando...</p>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="document.getElementById('modalVisualizarCotação').classList.remove('active')">Fechar</button>
+                <button class="btn btn-secondary" onclick="document.getElementById('modalVisualizarCotacao').classList.remove('active')">Fechar</button>
             </div>
         </div>
     </div>

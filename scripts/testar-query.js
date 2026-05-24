@@ -4,7 +4,7 @@ async function testar() {
     const pool = await mysql.createPool({
         host: 'interchange.proxy.rlwy.net',
         user: 'root',
-        password: 'iiilOZutDOnPCwxgiTKeMuEaIzSwplcu',
+        password: process.env.DB_PASSWORD || '',
         database: 'railway',
         port: 19396
     });

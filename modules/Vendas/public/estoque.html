@@ -695,7 +695,7 @@
     <link rel="stylesheet" href="/css/tooltips-professional.css?v=20260209">
     <script src="/js/tooltips-professional.js?v=20260209"></script>
     <script src="/js/modal-title.js?v=20260210"></script>
-    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260216">
+    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260418">
 
     <!-- Chat Widget BOB AI - DESATIVADO -->
     <!-- <link rel="stylesheet" href="/chat/widget.css?v=20260218"> -->
@@ -709,7 +709,7 @@
 
         
         <!-- Sidebar -->
-        <aside class="sidebar" id="sidebar">
+        <aside class="sidebar" id="mobile-sidebar">
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel">
                 <i class="fas fa-home"></i>
             </a>
@@ -745,6 +745,9 @@
             </nav>
 
             <div class="sidebar-bottom">
+                <button class="sidebar-btn" title="Configurações" onclick="window.location.href='/dashboard'">
+                    <i class="fas fa-cog"></i>
+                </button>
             </div>
         </aside>
 
@@ -760,7 +763,7 @@
                         <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
-                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;"></span>
+                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">—</span>
                         <span class="page-title" style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Estoque</span>
                     </div>
                 </div>
@@ -770,6 +773,10 @@
                     </button>
                     <div class="user-greeting">
                         <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
+                        <div class="user-avatar" id="user-avatar">
+                            <img src="" alt="Foto do usuário" id="user-photo" style="display:none;">
+                            <span id="user-initial">U</span>
+                        </div>
                     </div>
                 </div>
             </header>
@@ -796,9 +803,42 @@
                         0%, 100% { opacity: 1; }
                         50% { opacity: 0.4; }
                     }
-                
+
     /* ===== COMPRAS STANDARD — STAT CARDS ===== */
 
+    .category-chips {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+        margin: 0 0 16px;
+    }
+    .category-chips-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: #6b7280;
+        white-space: nowrap;
+    }
+    .category-chip {
+        padding: 5px 14px;
+        border-radius: 20px;
+        border: 1.5px solid #e5e7eb;
+        background: white;
+        font-size: 12px;
+        font-weight: 500;
+        color: #374151;
+        cursor: pointer;
+        transition: all 0.15s;
+    }
+    .category-chip:hover {
+        border-color: #3b82f6;
+        color: #3b82f6;
+    }
+    .category-chip.active {
+        background: #3b82f6;
+        border-color: #3b82f6;
+        color: white;
+    }
 
     </style>
 
@@ -871,6 +911,20 @@
                     <button class="btn-refresh" onclick="carregarProdutos()" id="btn-refresh-table">
                         <i class="fas fa-sync-alt"></i> Atualizar
                     </button>
+                </div>
+
+                <!-- Categorias Rápidas -->
+                <div class="category-chips" id="category-chips">
+                    <span class="category-chips-label">Categorias:</span>
+                    <button class="category-chip active" onclick="filtrarCategoria(this, '')">Todas</button>
+                    <button class="category-chip" onclick="filtrarCategoria(this, 'Ferramentas')">Ferramentas</button>
+                    <button class="category-chip" onclick="filtrarCategoria(this, 'Material Elétrico')">Material Elétrico</button>
+                    <button class="category-chip" onclick="filtrarCategoria(this, 'EPI')">EPI</button>
+                    <button class="category-chip" onclick="filtrarCategoria(this, 'Cabos e Fios')">Cabos e Fios</button>
+                    <button class="category-chip" onclick="filtrarCategoria(this, 'Iluminação')">Iluminação</button>
+                    <button class="category-chip" onclick="filtrarCategoria(this, 'Automação')">Automação</button>
+                    <button class="category-chip" onclick="filtrarCategoria(this, 'Hidráulica')">Hidráulica</button>
+                    <button class="category-chip" onclick="filtrarCategoria(this, 'Outros')">Outros</button>
                 </div>
 
                 <!-- Table -->
@@ -1259,6 +1313,15 @@
             if (valorAtual && categoriasLocal[valorAtual]) {
                 select.value = valorAtual;
             }
+        }
+
+        // Filtro rápido por categoria (chips)
+        function filtrarCategoria(btn, categoria) {
+            document.querySelectorAll('.category-chip').forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            const select = document.getElementById('filter-categoria');
+            if (select) select.value = categoria;
+            filtrarProdutos();
         }
 
         // Filtrar produtos
@@ -1800,7 +1863,7 @@
         
         // Toggle Sidebar Mobile
         function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
+            const sidebar = document.getElementById('mobile-sidebar');
             const overlay = document.getElementById('sidebar-overlay');
             sidebar.classList.toggle('open');
             if (overlay) overlay.classList.toggle('active');
@@ -1831,5 +1894,6 @@
     <script src="/chat-teams/chat-widget.js?v=20260319" defer></script>
 </body>
 </html>
+
 
 

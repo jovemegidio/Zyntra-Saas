@@ -30,7 +30,7 @@
 
     <!-- CSS Padrão Global -->
     <link rel="stylesheet" href="/modules/Compras/css/compras-layout.css?v=20260301">
-    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260301">
+    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260418">
     <link rel="stylesheet" href="/css/skeleton-loader.css?v=20260301">
     <link rel="stylesheet" href="/css/popup-confirmacao.css?v=20260301">
 
@@ -75,31 +75,31 @@
             </a>
 
             <nav class="sidebar-nav">
-                <button class="sidebar-btn active" title="Dashboard" onclick="window.location.href='index.html'">
+                <button class="sidebar-btn active" title="Dashboard" onclick="window.location.href='/Compras/index.html'">
                     <i class="fas fa-chart-line"></i>
                 </button>
-                <button class="sidebar-btn" title="Pedidos" onclick="window.location.href='pedidos.html'">
+                <button class="sidebar-btn" title="Pedidos" onclick="window.location.href='/Compras/pedidos.html'">
                     <i class="fas fa-shopping-cart"></i>
                 </button>
-                <button class="sidebar-btn" title="Cotações" onclick="window.location.href='cotacoes.html'">
+                <button class="sidebar-btn" title="Cotações" onclick="window.location.href='/Compras/cotacoes.html'">
                     <i class="fas fa-file-invoice-dollar"></i>
                 </button>
-                <button class="sidebar-btn" title="Fornecedores" onclick="window.location.href='fornecedores.html'">
+                <button class="sidebar-btn" title="Fornecedores" onclick="window.location.href='/Compras/fornecedores.html'">
                     <i class="fas fa-users"></i>
                 </button>
-                <button class="sidebar-btn" title="Requisições" onclick="window.location.href='requisicoes.html'">
+                <button class="sidebar-btn" title="Requisições" onclick="window.location.href='/Compras/requisicoes.html'">
                     <i class="fas fa-clipboard-list"></i>
                 </button>
-                <button class="sidebar-btn" title="Recebimento" onclick="window.location.href='recebimento.html'">
+                <button class="sidebar-btn" title="Recebimento" onclick="window.location.href='/Compras/recebimento.html'">
                     <i class="fas fa-truck-loading"></i>
                 </button>
             </nav>
 
             <div class="sidebar-bottom">
-                <button class="sidebar-btn" title="Estoque MP" onclick="window.location.href='gestao-estoque.html'">
+                <button class="sidebar-btn" title="Estoque MP" onclick="window.location.href='/Compras/gestao-estoque.html'">
                     <i class="fas fa-boxes"></i>
                 </button>
-                <button class="sidebar-btn" title="Relatórios" onclick="window.location.href='relatorios.html'">
+                <button class="sidebar-btn" title="Relatórios" onclick="window.location.href='/Compras/relatorios.html'">
                     <i class="fas fa-chart-bar"></i>
                 </button>
             </div>
@@ -165,10 +165,10 @@
                 <div class="page-header">
                     <div class="page-header-top">
                         <div class="page-actions">
-                            <button class="btn btn-secondary" onclick="window.location.href='relatorios.html'">
+                            <button class="btn btn-secondary" onclick="window.location.href='/Compras/relatorios.html'">
                                 <i class="fas fa-chart-bar"></i> Relatórios
                             </button>
-                            <button class="btn btn-primary" onclick="window.location.href='requisicoes.html?action=new'">
+                            <button class="btn btn-primary" onclick="window.location.href='/Compras/requisicoes.html?action=new'">
                                 <i class="fas fa-plus"></i> Nova Requisição
                             </button>
                         </div>
@@ -180,7 +180,7 @@
                     <div class="stat-card amber">
                         <div class="stat-header">
                             <div class="stat-icon amber"><i class="fas fa-clipboard-list"></i></div>
-                            <span class="stat-trend up"><i class="fas fa-arrow-up"></i> 8%</span>
+                            <span class="stat-trend up" id="trend-requisicoes"><i class="fas fa-arrow-up"></i> 8%</span>
                         </div>
                         <div class="stat-value" id="kpi-requisicoes">--</div>
                         <div class="stat-label">Requisições Pendentes</div>
@@ -192,7 +192,7 @@
                     <div class="stat-card indigo">
                         <div class="stat-header">
                             <div class="stat-icon indigo"><i class="fas fa-file-invoice-dollar"></i></div>
-                            <span class="stat-trend up"><i class="fas fa-arrow-up"></i> 12%</span>
+                            <span class="stat-trend up" id="trend-cotacoes"><i class="fas fa-arrow-up"></i> 12%</span>
                         </div>
                         <div class="stat-value" id="kpi-cotacoes">--</div>
                         <div class="stat-label">Cotações em Análise</div>
@@ -204,7 +204,7 @@
                     <div class="stat-card green">
                         <div class="stat-header">
                             <div class="stat-icon green"><i class="fas fa-shopping-cart"></i></div>
-                            <span class="stat-trend up"><i class="fas fa-arrow-up"></i> 5%</span>
+                            <span class="stat-trend up" id="trend-pedidos"><i class="fas fa-arrow-up"></i> 5%</span>
                         </div>
                         <div class="stat-value" id="kpi-pedidos">R$ --</div>
                         <div class="stat-label">Volume Este Mês</div>
@@ -216,7 +216,7 @@
                     <div class="stat-card purple">
                         <div class="stat-header">
                             <div class="stat-icon purple"><i class="fas fa-building"></i></div>
-                            <span class="stat-trend up"><i class="fas fa-arrow-up"></i> 3</span>
+                            <span class="stat-trend up" id="trend-fornecedores"><i class="fas fa-arrow-up"></i> 3</span>
                         </div>
                         <div class="stat-value" id="kpi-fornecedores">--</div>
                         <div class="stat-label">Fornecedores Ativos</div>
@@ -350,24 +350,29 @@
                 if (response.ok) {
                     const data = await response.json();
                     const stats = data.stats || data.data || data;
-                    document.getElementById('kpi-requisicoes').textContent = stats.pedidos_pendentes || stats.requisicoes_pendentes || 0;
-                    document.getElementById('kpi-cotacoes').textContent = stats.total_pedidos || stats.cotacoes_analise || 0;
-                    document.getElementById('kpi-pedidos').textContent = formatarMoeda(stats.compras_mes || stats.total_mes_atual || stats.volume_mes || 0);
-                    document.getElementById('kpi-fornecedores').textContent = stats.fornecedores_ativos || 0;
+                    const vReq = stats.requisicoes_pendentes || stats.pedidos_pendentes || 0;
+                    const vCot = stats.cotacoes_abertas || stats.cotacoes_analise || 0;
+                    const vPed = stats.valor_total_pedidos || stats.valor_total || stats.compras_mes || 0;
+                    const vForn = stats.fornecedores_ativos || 0;
+                    document.getElementById('kpi-requisicoes').textContent = vReq;
+                    document.getElementById('kpi-cotacoes').textContent = vCot;
+                    document.getElementById('kpi-pedidos').textContent = formatarMoeda(vPed);
+                    document.getElementById('kpi-fornecedores').textContent = vForn;
+                    const ocultarTrend = (id, val) => { const el = document.getElementById(id); if (el) el.style.display = (val === 0 || val === '0') ? 'none' : ''; };
+                    ocultarTrend('trend-requisicoes', vReq); ocultarTrend('trend-cotacoes', vCot); ocultarTrend('trend-pedidos', vPed); ocultarTrend('trend-fornecedores', vForn);
 
                     // Atualizar atividades recentes com pedidos reais
                     if (data.pedidos_recentes && data.pedidos_recentes.length) {
                         renderizarAtividades(data.pedidos_recentes);
                     }
                     // Atualizar gráfico com dados reais
-                    if (data.pedidos_por_status) {
-                        atualizarGraficoReal(data);
-                    }
+                    atualizarGraficoReal(data);
                 } else {
                     document.getElementById('kpi-requisicoes').textContent = '0';
                     document.getElementById('kpi-cotacoes').textContent = '0';
                     document.getElementById('kpi-pedidos').textContent = 'R$ 0';
                     document.getElementById('kpi-fornecedores').textContent = '0';
+                    ['trend-requisicoes','trend-cotacoes','trend-pedidos','trend-fornecedores'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
                 }
             } catch(e) {
                 console.log('Erro ao carregar KPIs:', e);
@@ -375,6 +380,7 @@
                 document.getElementById('kpi-cotacoes').textContent = '0';
                 document.getElementById('kpi-pedidos').textContent = 'R$ 0';
                 document.getElementById('kpi-fornecedores').textContent = '0';
+                ['trend-requisicoes','trend-cotacoes','trend-pedidos','trend-fornecedores'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
             }
         }
 
@@ -426,11 +432,19 @@
                     const data = await response.json();
                     renderizarRequisicoes(data.requisicoes || data || []);
                 } else {
-                    renderizarRequisicoes([]);
+                    // UX-001: distinguir erro de API de "sem dados"
+                    const tbody = document.getElementById('tbody-requisicoes');
+                    if (tbody) {
+                        const msg = response.status === 401
+                            ? 'Sessão expirada. <a href="/login.html" style="color:#2563eb">Fazer login novamente</a>'
+                            : `Erro ao carregar requisições (HTTP ${response.status}). <button onclick="carregarRequisicoes()" style="color:#2563eb;background:none;border:none;cursor:pointer;text-decoration:underline">Tentar novamente</button>`;
+                        tbody.innerHTML = `<tr><td colspan="5" class="empty-state" style="color:#dc2626;"><i class="fas fa-exclamation-triangle"></i><p>${msg}</p></td></tr>`;
+                    }
                 }
             } catch(e) {
-                console.log('Erro ao carregar requisições:', e);
-                renderizarRequisicoes([]);
+                console.error('[Compras] Erro ao carregar requisições:', e);
+                const tbody = document.getElementById('tbody-requisicoes');
+                if (tbody) tbody.innerHTML = `<tr><td colspan="5" class="empty-state" style="color:#dc2626;"><i class="fas fa-wifi"></i><p>Sem conexão com o servidor. <button onclick="carregarRequisicoes()" style="color:#2563eb;background:none;border:none;cursor:pointer;text-decoration:underline">Tentar novamente</button></p></td></tr>`;
             }
         }
 
@@ -443,7 +457,7 @@
             tbody.innerHTML = requisicoes.slice(0, 5).map(req => `
                 <tr>
                     <td class="code">${req.numero || req.codigo || req.id}</td>
-                    <td>${req.descricao || req.material || '-'}</td>
+                    <td>${req.descricao || req.justificativa || req.projeto || req.material || '-'}</td>
                     <td>${req.solicitante || req.usuario_nome || '-'}</td>
                     <td>${formatarData(req.data || req.created_at)}</td>
                     <td><span class="badge ${getStatusClass(req.status)}">${req.status || 'Pendente'}</span></td>
@@ -539,14 +553,29 @@
         // === Atualizar gráfico com dados reais do backend ===
         function atualizarGraficoReal(data) {
             if (!purchaseChartInstance) return;
-            // Usar top_fornecedores para gráfico de barras ou pedidos_por_status
-            if (data.top_fornecedores && data.top_fornecedores.length) {
+            // Preferir evolução mensal (linha) — mostra tendência real de 12 meses
+            if (data.evolucao_mensal && data.evolucao_mensal.length > 1) {
+                const meses = data.evolucao_mensal;
+                purchaseChartInstance.config.type = 'line';
+                purchaseChartInstance.data.labels = meses.map(m => {
+                    const [ano, mes] = (m.mes || '').split('-');
+                    const nomes = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+                    return (nomes[parseInt(mes, 10) - 1] || mes) + (ano ? '/' + ano.slice(2) : '');
+                });
+                purchaseChartInstance.data.datasets[0].data = meses.map(m => parseFloat(m.valor_total || m.total || 0));
+                purchaseChartInstance.data.datasets[0].label = 'Volume de Compras';
+                purchaseChartInstance.data.datasets[0].backgroundColor = 'rgba(245, 158, 11, 0.08)';
+                purchaseChartInstance.data.datasets[0].borderColor = '#f59e0b';
+                purchaseChartInstance.data.datasets[0].fill = true;
+                purchaseChartInstance.update();
+            } else if (data.top_fornecedores && data.top_fornecedores.length) {
                 purchaseChartInstance.config.type = 'bar';
-                purchaseChartInstance.data.labels = data.top_fornecedores.map(f => (f.razao_social || '').substring(0, 15));
-                purchaseChartInstance.data.datasets[0].data = data.top_fornecedores.map(f => f.total_valor || 0);
+                purchaseChartInstance.data.labels = data.top_fornecedores.map(f => (f.razao_social || f.nome_fantasia || '').substring(0, 15));
+                purchaseChartInstance.data.datasets[0].data = data.top_fornecedores.map(f => parseFloat(f.valor_total || f.total_valor || 0));
                 purchaseChartInstance.data.datasets[0].label = 'Volume por Fornecedor';
                 purchaseChartInstance.data.datasets[0].backgroundColor = 'rgba(245, 158, 11, 0.6)';
                 purchaseChartInstance.data.datasets[0].borderColor = '#f59e0b';
+                purchaseChartInstance.data.datasets[0].fill = false;
                 purchaseChartInstance.update();
             }
         }
@@ -586,3 +615,4 @@
     <script src="/_shared/accessibility-widget.js?v=20260418"></script>
 </body>
 </html>
+

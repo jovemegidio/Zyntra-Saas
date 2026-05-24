@@ -13,7 +13,6 @@
     <script src="/js/inactivity-manager.js?v=20260324" defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
-    <link rel="stylesheet" href="css/fin-layout.css?v=20260215">
     <link rel="stylesheet" href="css/fin-components.css?v=20260215">
     <style>
         :root { --primary-blue:#3b82f6; --primary-orange:#3b82f6; --success:#22c55e; --danger:#ef4444; --warning:#f59e0b; --info:#3b82f6; --text-primary:#1e293b; --text-secondary:#64748b; --bg-gray:#f8fafc; --border-color:#e2e8f0; --primary-dark: #ffffff; --sidebar-width:48px; --header-height:42px; }
@@ -106,8 +105,7 @@
         @media (max-width:768px) { .kpi-grid { grid-template-columns:1fr; } .form-grid { grid-template-columns:1fr; } }
     </style>
     <link rel="stylesheet" href="css/fin-counter-standard.css?v=20260313">
-    <link rel="stylesheet" href="css/fin-header-sidebar.css?v=20260211">
-    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260216">
+    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260418">
     <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260414">
     <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260614">
     <link rel="stylesheet" href="/css/design-system.css?v=20260502">
@@ -281,8 +279,15 @@
 
     <script>
         const API = '/api/financeiro';
-        function getToken() { return ''; /* Auth via httpOnly cookie */ }
-        function hdrs() { return { 'Content-Type': 'application/json' }; /* Auth via httpOnly cookie */ }
+        function _apiFetch(url, opts) {
+            opts = opts || {};
+            var tok = localStorage.getItem('token');
+            var hdrs2 = Object.assign({}, opts.headers || {});
+            if (tok) hdrs2['Authorization'] = 'Bearer ' + tok;
+            return fetch(url, Object.assign({ credentials: 'include' }, opts, { headers: hdrs2 }));
+        }
+        function getToken() { return localStorage.getItem('token') || ''; }
+        function hdrs() { var tok = getToken(); var h = { 'Content-Type': 'application/json' }; if (tok) h['Authorization'] = 'Bearer ' + tok; return h; }
         function fmtMoeda(v) { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v); }
         function fmtData(d) { if (!d) return '-'; try { var s=String(d).slice(0,10); if(!/^\d{4}-\d{2}-\d{2}$/.test(s)) return '-'; return new Date(s+'T00:00:00').toLocaleDateString('pt-BR'); } catch(e) { return '-'; } }
 
@@ -384,7 +389,7 @@
         }
 
         function abrirModalCriar() {
-            document.getElementById('modal-título').innerHTML = '<i class="fas fa-redo"></i> Nova Recorrência';
+            document.getElementById('modal-titulo').innerHTML = '<i class="fas fa-redo"></i> Nova Recorrência';
             document.getElementById('rec-id').value = '';
             document.querySelectorAll('#modal-criar input[type="text"], #modal-criar input[type="number"]').forEach(el => el.value = '');
             document.getElementById('rec-tipo').value = 'pagar';
@@ -398,9 +403,9 @@
         function editarRecorrencia(id) {
             const r = recorrências.find(x => x.id === id);
             if (!r) return;
-            document.getElementById('modal-título').innerHTML = '<i class="fas fa-pen"></i> Editar Recorrência';
+            document.getElementById('modal-titulo').innerHTML = '<i class="fas fa-pen"></i> Editar Recorrência';
             document.getElementById('rec-id').value = r.id;
-            document.getElementById('rec-descrição').value = r.descricao || '';
+            document.getElementById('rec-descricao').value = r.descricao || '';
             document.getElementById('rec-tipo').value = r.tipo || 'pagar';
             document.getElementById('rec-valor').value = r.valor || '';
             document.getElementById('rec-frequencia').value = r.frequencia || 'mensal';
@@ -415,7 +420,7 @@
         async function salvarRecorrencia() {
             const id = document.getElementById('rec-id').value;
             const payload = {
-                descrição: document.getElementById('rec-descrição').value,
+                descrição: document.getElementById('rec-descricao').value,
                 tipo: document.getElementById('rec-tipo').value,
                 valor: parseFloat(document.getElementById('rec-valor').value),
                 frequencia: document.getElementById('rec-frequencia').value,
@@ -471,7 +476,7 @@
 
         async function carregarUsuario() {
             try {
-                const r = await fetch('/api/me', { credentials: 'include' });
+                const r = await _apiFetch('/api/me');
                 if (r.ok) {
                     const u = await r.json();
                     const nome = u.apelido || (u.nome ? u.nome.split(' ')[0] : 'Usuário');
@@ -499,3 +504,4 @@
     <script src="/js/user-dropdown.js?v=20260319" defer></script>
 </body>
 </html>
+

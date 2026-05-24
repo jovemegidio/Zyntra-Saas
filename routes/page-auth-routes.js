@@ -276,17 +276,8 @@ module.exports = function mountPageRoutes(app, { authenticatePage, userPermissio
 
     app.get('/modules/Financeiro/financeiro.html', authenticatePage, (req, res) => res.redirect('/modules/Financeiro/index.html'));
 
-    // Faturamento
-    app.get('/modules/Faturamento/index.html', authenticatePage, (req, res) => {
-        if (req.user && req.user.permissoes && req.user.permissoes.includes('nfe')) {
-            res.sendFile(path.join(__dirname, '..', 'modules', 'Faturamento', 'public', 'dashboard.html'));
-        } else {
-            res.status(403).send('<h1>Acesso Negado</h1><p>Você não tem permissão para acessar o módulo de Faturamento.</p>');
-        }
-    });
-
-    app.get('/Faturamento/', authenticatePage, (req, res) => res.redirect('/modules/Faturamento/index.html'));
-    app.get('/Financeiro/', authenticatePage, (req, res) => res.redirect('/modules/Financeiro/index.html'));
+    // Faturamento / Logistica / Financeiro — rotas raiz tratadas em server.js
+    // (redirects anteriores removidos: conflitavam com wildcards e usavam permissoes inexistente no JWT)
 
     // NFe legacy redirects
     app.get('/e-Nf-e/nfe.html', authenticatePage, (req, res) => res.redirect('/NFe/nfe.html'));

@@ -12,8 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Design System CSS -->
-    <link rel="stylesheet" href="/css/modern-saas.css?v=3.0">
-    <link rel="stylesheet" href="../css/rh-pages.css?v=1.0">
+    <link rel="stylesheet" href="/modules/RH/public/css/rh-pages.css?v=20260210">
 
     <style>
         /* ===== ESTILOS ESPECÍFICOS  FUNCIONÁRIOS ===== */
@@ -69,18 +68,29 @@
            MODAL SAAS EMPRESARIAL - DESIGN MODERNO
            ======================================== */
         .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            z-index: 1000 !important;
+            display: none !important;
+            align-items: center !important;
+            justify-content: center !important;
+            padding: 20px !important;
+            background: transparent !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            max-width: none !important;
+            max-height: none !important;
         }
-        .modal.show { display: flex; }
+        .modal.show { display: flex !important; }
+        /* design-system.css applies position:fixed + opacity:0 to .modal-overlay globally — undo it here */
+        .modal .modal-overlay {
+            position: absolute !important;
+            opacity: 1 !important;
+            pointer-events: auto !important;
+        }
 
         .modal-overlay {
             position: absolute;
@@ -1382,7 +1392,7 @@
     <!-- Tooltips Profissionais -->
     <link rel="stylesheet" href="/css/tooltips-professional.css?v=20260209">
     <script src="/js/tooltips-professional.js?v=20260209" defer></script>
-    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260216">
+    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260418">
     <!-- Chat Widget BOB AI -->
     <link rel="stylesheet" href="/chat/widget.css?v=20260218">
     <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260324">
@@ -1405,6 +1415,7 @@
                 <a href="importar-ponto.html" class="sidebar-btn" title="Importar Ponto (Control iD)"><i class="fas fa-upload"></i></a>
                 <a href="gestao-solicitacoes.html" class="sidebar-btn" title="Gestão de Solicitações"><i class="fas fa-tasks"></i></a>
                 <a href="calendario-rh.html" class="sidebar-btn" title="Calendário RH"><i class="fas fa-calendar-alt"></i></a>
+                <a href="requisicoes-compra.html" class="sidebar-btn" title="Requisições de Compra"><i class="fas fa-shopping-cart"></i></a>
             </nav>
             <div class="sidebar-bottom">
                 <a href="../funcionario.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-user"></i></a>
@@ -1544,7 +1555,7 @@
                     <img id="viewFoto" src="/avatars/default.webp" alt="Foto" class="view-avatar" onerror="this.onerror=null;this.src='/avatars/default.webp';">
                     <div class="view-header-info">
                         <h4 id="viewNomeCompleto">-</h4>
-                        <p><span id="viewCargo">-</span>  <span id="viewDepartamento">-</span></p>
+                        <p><span id="viewCargo">-</span> <span style="color:#cbd5e1;font-size:11px;">|</span> <span id="viewDepartamento">-</span></p>
                         <p id="viewEmail" style="color: #6366f1; font-weight: 500;">-</p>
                     </div>
                 </div>
@@ -2580,9 +2591,9 @@
                         <div style="text-align: left;">
                             <h4 style="margin: 0 0 4px; color: #059669; font-size: 15px;">
                                 <i class="fas fa-file-excel" style="color: #10b981; margin-right: 8px;"></i>
-                                Template de Importao
+                                Template de Importação
                             </h4>
-                            <p style="margin: 0; color: #64748b; font-size: 13px;">Baixe o modelo Excel com instrues e campos formatados</p>
+                            <p style="margin: 0; color: #64748b; font-size: 13px;">Baixe o modelo Excel com instruções e campos formatados</p>
                         </div>
                         <button type="button" onclick="baixarModelo(event)" class="btn-action" style="background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: 600; white-space: nowrap;">
                             <i class="fas fa-download"></i> Baixar Template Excel
@@ -4754,8 +4765,8 @@
                 sexo: document.getElementById('novoSexo').value,
                 nacionalidade: document.getElementById('novoNacionalidade').value,
                 naturalidade: document.getElementById('novoNaturalidade').value,
-                filiacao_mae: document.getElementById('novoFiliaçãoMae').value,
-                filiacao_pai: document.getElementById('novoFiliaçãoPai').value,
+                filiacao_mae: document.getElementById('novoFiliacaoMae').value,
+                filiacao_pai: document.getElementById('novoFiliacaoPai').value,
                 email: document.getElementById('novoEmail').value,
                 cargo: document.getElementById('novoCargo').value,
                 departamento: document.getElementById('novoDepartamento').value,
@@ -4763,12 +4774,12 @@
                 status: document.getElementById('novoStatus').value,
                 dependentes: parseInt(document.getElementById('novoDependentes').value) || 0,
                 pis_pasep: document.getElementById('novoPisPasep').value,
-                ctps_numero: document.getElementById('novoCtpsNúmero').value,
+                ctps_numero: document.getElementById('novoCtpsNumero').value,
                 ctps_serie: document.getElementById('novoCtpsSerie').value,
-                titulo_eleitor: document.getElementById('novoTítuloEleitor').value,
+                titulo_eleitor: document.getElementById('novoTituloEleitor').value,
                 cnh: document.getElementById('novoCnh').value,
                 certificado_reservista: document.getElementById('novoCertificadoReservista').value,
-                endereco: [document.getElementById('novoEndereco').value, document.getElementById('novoNúmero').value].filter(Boolean).join(', ') + (document.getElementById('novoComplemento').value ? ', ' + document.getElementById('novoComplemento').value : ''),
+                endereco: [document.getElementById('novoEndereco').value, document.getElementById('novoNumero').value].filter(Boolean).join(', ') + (document.getElementById('novoComplemento').value ? ', ' + document.getElementById('novoComplemento').value : ''),
                 bairro: document.getElementById('novoBairro').value,
                 cidade: document.getElementById('novoCidade').value,
                 estado: document.getElementById('novoEstado').value,
@@ -5054,5 +5065,6 @@
     <script src="/js/user-dropdown.js?v=20260319" defer></script>
 </body>
 </html>
+
 
 

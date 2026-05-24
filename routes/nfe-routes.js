@@ -95,9 +95,18 @@ module.exports = function createNfeRoutes(deps) {
                 );
             }
     
-            // Se há pedido vinculado, atualizar status
+            // Se há pedido vinculado, atualizar status + trigger logística (LA-001/WF-001)
             if (pedido_id) {
-                await connection.query('UPDATE pedidos SET status = "faturado", nfe_id = ?, data_faturamento = NOW() WHERE id = ?', [nfeId, pedido_id]);
+                await connection.query(
+                    `UPDATE pedidos
+                     SET status = "faturado", nfe_id = ?, data_faturamento = NOW(),
+                         status_logistica = CASE
+                             WHEN (status_logistica IS NULL OR status_logistica = '') THEN 'aguardando'
+                             ELSE status_logistica
+                         END
+                     WHERE id = ?`,
+                    [nfeId, pedido_id]
+                );
             }
     
             // AUDIT-FIX S1.2: Integração Estoque com FOR UPDATE (previne race condition / oversell)
@@ -329,7 +338,9 @@ module.exports = function createNfeRoutes(deps) {
     // 8. Dashboard de Status das NF-e
     router.get('/dashboard', async (req, res, next) => {
         try {
-            const [autorizadas] = await pool.query('SELECT COUNT(*) AS qtd, COALESCE(SUM(valor),0) AS total FROM nfe WHERE status = "autorizada" AND MONTH(data_emissao) = MONTH(CURRENT_DATE()) AND YEAR(data_emissao) = YEAR(CURRENT_DATE())');
+            // FISC-002: 'emitida' é um status interno coloquial — inclui no grupo 'autorizadas'
+            // pois uma NF-e "emitida" sem protocolo deve ser tratada como pendente de autorização
+            const [autorizadas] = await pool.query('SELECT COUNT(*) AS qtd, COALESCE(SUM(valor),0) AS total FROM nfe WHERE status IN ("autorizada","emitida") AND MONTH(data_emissao) = MONTH(CURRENT_DATE()) AND YEAR(data_emissao) = YEAR(CURRENT_DATE())');
             const [canceladas] = await pool.query('SELECT COUNT(*) AS qtd, COALESCE(SUM(valor),0) AS total FROM nfe WHERE status = "cancelada" AND MONTH(data_emissao) = MONTH(CURRENT_DATE()) AND YEAR(data_emissao) = YEAR(CURRENT_DATE())');
             const [pendentes] = await pool.query('SELECT COUNT(*) AS qtd, COALESCE(SUM(valor),0) AS total FROM nfe WHERE status IN ("pendente", "rejeitada") AND MONTH(data_emissao) = MONTH(CURRENT_DATE()) AND YEAR(data_emissao) = YEAR(CURRENT_DATE())');
             const qtdAutorizadas = Number(autorizadas[0]?.qtd) || 0;

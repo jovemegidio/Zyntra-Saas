@@ -11,6 +11,8 @@ module.exports = {
             PORT: 3001,
             BRAND: 'labor-eletric',
             MOUNT_PATH: '/labor-eletric',
+            DEFAULT_EMAIL_DOMAIN: '@labor.com.br',
+            ALLOWED_EMAIL_DOMAINS: '@labor.com.br',
             DB_HOST: 'localhost',
             DB_PORT: 3306,
             DB_NAME: 'labor_eletric_vendas',

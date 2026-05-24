@@ -611,7 +611,7 @@ module.exports = function createMiscRoutes(deps) {
                         tipo: 'info',
                         modulo: 'Vendas',
                         mensagem: `${pedidosResult[0].aguardando} pedido(s) aguardando aprovação`,
-                        link: '/modules/Vendas/index.html'
+                        link: '/modules/Vendas/public/index.html'
                     });
                 }
     

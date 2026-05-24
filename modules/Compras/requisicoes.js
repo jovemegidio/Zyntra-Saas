@@ -225,8 +225,7 @@ async function carregarRequisicoes() {
     if (requisicoesLocal) {
         requisicoes = JSON.parse(requisicoesLocal);
     } else {
-        requisicoes = gerarRequisicoesExemplo();
-        salvarRequisicoesLocal();
+        requisicoes = [];
     }
 
     renderizarTabelaRequisicoes();
@@ -250,7 +249,7 @@ function abrirModalNovaRequisicao() {
 }
 
 function abrirModalEditarRequisicao(requisicaoId) {
-    const req = requisicoes.find(r => r.id === requisicaoId);
+    const req = requisicoes.find(r => r.id == requisicaoId);
     if (!req) return;
 
     // Só permite editar se estiver em rascunho ou aguardando aprovação
@@ -259,14 +258,16 @@ function abrirModalEditarRequisicao(requisicaoId) {
         return;
     }
 
+    const toDateInput = v => v ? String(v).substring(0, 10) : '';
+
     document.getElementById('modalRequisicaoTitle').textContent = 'Editar Requisição';
     document.getElementById('requisicaoId').value = req.id;
     document.getElementById('numeroRequisicao').value = req.numero;
-    document.getElementById('dataRequisicao').value = req.data;
+    document.getElementById('dataRequisicao').value = toDateInput(req.data);
     document.getElementById('solicitante').value = req.solicitante;
     document.getElementById('departamento').value = req.departamento;
     document.getElementById('prioridade').value = req.prioridade;
-    document.getElementById('dataNecessaria').value = req.data_necessaria || '';
+    document.getElementById('dataNecessaria').value = toDateInput(req.data_necessaria);
     document.getElementById('justificativa').value = req.justificativa;
 
     limparItensRequisicao();

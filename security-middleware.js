@@ -364,6 +364,29 @@ function csrfProtection(req, res, next) {
         return next(); // API token-based — CSRF não se aplica
     }
 
+    // Browser com cookie httpOnly: exigir mesma origem quando Origin/Referer vierem presentes.
+    // Mantém compatibilidade com fetch JSON existente, mas bloqueia CSRF cross-site.
+    if (req.cookies?.authToken) {
+        const origin = req.headers.origin;
+        const referer = req.headers.referer;
+        const host = req.headers.host;
+        const isSameHost = (value) => {
+            if (!value || !host) return true;
+            try {
+                return new URL(value).host === host;
+            } catch {
+                return false;
+            }
+        };
+        if (!isSameHost(origin) || !isSameHost(referer)) {
+            console.warn(`[CSRF] ⚠️ Origem bloqueada: ${req.ip} - ${req.method} ${req.path}`);
+            return res.status(403).json({
+                error: 'Origem da requisição não permitida',
+                code: 'CSRF_ORIGIN_INVALID'
+            });
+        }
+    }
+
     // FIX 24/03/2026: Para requests autenticados via httpOnly cookie (SameSite=Strict),
     // verificar que a requisição tem um header customizado que browsers automaticamente
     // não enviam em cross-origin requests (double-submit com header customizado).

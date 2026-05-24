@@ -301,8 +301,12 @@
         };
 
         if (htmlContent) {
-            // Conteúdo HTML direto
-            iframe.srcdoc = htmlContent;
+            // Conteúdo HTML direto — usar Blob URL para evitar about:srcdoc (ERR_INVALID_URL)
+            const blob = new Blob([htmlContent], { type: 'text/html; charset=utf-8' });
+            if (currentBlobUrl) URL.revokeObjectURL(currentBlobUrl);
+            currentBlobUrl = URL.createObjectURL(blob);
+            iframe.removeAttribute('srcdoc');
+            iframe.src = currentBlobUrl;
             downloadBtn.style.display = 'none';
         } else if (url) {
             // URL (PDF ou blob)
@@ -354,8 +358,10 @@
     }
 
     function openInNewTab() {
-        if (currentHtmlContent) {
-            const blob = new Blob([currentHtmlContent], { type: 'text/html' });
+        if (currentBlobUrl) {
+            originalWindowOpen(currentBlobUrl, '_blank');
+        } else if (currentHtmlContent) {
+            const blob = new Blob([currentHtmlContent], { type: 'text/html; charset=utf-8' });
             const url = URL.createObjectURL(blob);
             originalWindowOpen(url, '_blank');
         } else if (currentUrl) {

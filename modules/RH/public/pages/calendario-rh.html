@@ -10,7 +10,6 @@
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/modern-saas.css?v=20260209">
     <link rel="stylesheet" href="/modules/RH/public/css/rh-pages.css?v=20260209">
     
     <style>
@@ -401,13 +400,13 @@
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             z-index: 1000;
-            display: none;
+            display: none !important;
             align-items: center;
             justify-content: center;
             padding: 20px;
         }
 
-        .modal.show { display: flex; }
+        .modal.show { display: flex !important; }
 
         .modal-overlay {
             position: absolute;
@@ -553,7 +552,7 @@
     <link rel="stylesheet" href="/css/tooltips-professional.css?v=20260209">
     <link rel="stylesheet" href="/css/popup-confirmacao.css">
     <script src="/js/tooltips-professional.js?v=20260209" defer></script>
-    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260216">
+    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260418">
     <!-- Chat Widget BOB AI -->
     <link rel="stylesheet" href="/chat/widget.css?v=20260218">
     <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260324">
@@ -569,7 +568,7 @@
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel de Controle"><i class="fas fa-home"></i></a>
             <nav class="sidebar-nav">
                 <a href="../areaadm.html" class="sidebar-btn" title="Dashboard RH"><i class="fas fa-chart-pie"></i></a>
-                <a href="funcionários.html" class="sidebar-btn" title="Funcionários"><i class="fas fa-users"></i></a>
+                <a href="funcionarios.html" class="sidebar-btn" title="Funcionários"><i class="fas fa-users"></i></a>
                 <a href="../gestao-holerites.html" class="sidebar-btn" title="Gestão de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="folha.html" class="sidebar-btn" title="Folha de Pagamento"><i class="fas fa-money-check-alt"></i></a>
                 <a href="gestao-ponto.html" class="sidebar-btn" title="Gestão do Ponto"><i class="fas fa-clock"></i></a>
@@ -677,11 +676,11 @@
                             <div class="mini-calendar-grid" id="mini-calendar"></div>
                         </div>
 
-                        <!-- Prximos Eventos -->
+                        <!-- Próximos Eventos -->
                         <div class="sidebar-card">
                             <h3 class="sidebar-title">
                                 <i class="fas fa-calendar-check"></i>
-                                Prximos Eventos
+                                Próximos Eventos
                             </h3>
                             <div class="event-list" id="proximos-eventos">
                                 <!-- Carregado dinamicamente -->
@@ -709,7 +708,7 @@
                                 </div>
                                 <div class="legend-item">
                                     <div class="legend-color" style="background: #f97316;"></div>
-                                    <span>Reunies</span>
+                                    <span>Reuniões</span>
                                 </div>
                                 <div class="legend-item">
                                     <div class="legend-color" style="background: #22c55e;"></div>
@@ -1046,7 +1045,7 @@
                 container.appendChild(criarDiaCalendario(day, false, isToday));
             }
 
-            // Dias do prximo mês
+            // Dias do próximo mês
             const totalCells = startDay + totalDays;
             const remainingCells = 42 - totalCells;
             for (let day = 1; day <= remainingCells; day++) {
@@ -1152,7 +1151,7 @@
             }
         }
 
-        // Prximos eventos
+        // Próximos Eventos
         function renderizarProximosEventos() {
             const container = document.getElementById('proximos-eventos');
             const hoje = new Date();
@@ -1167,7 +1166,7 @@
                 .slice(0, 5);
 
             if (proximos.length === 0) {
-                container.innerHTML = '<p style="color: #94a3b8; text-align: center; padding: 20px;">Nenhum evento prximo</p>';
+                container.innerHTML = '<p style="color: #94a3b8; text-align: center; padding: 20px;">Nenhum evento próximo</p>';
                 return;
             }
 
@@ -1347,8 +1346,8 @@
         // Filtros
         document.querySelectorAll('.filter-btn').forEach(btn => {
             btn.addEventListener('click', function() {
-                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('show'));
-                this.classList.add('show');
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
                 filtroAtivo = this.dataset.filter;
                 renderizarCalendario();
             });
@@ -1356,6 +1355,7 @@
 
         // Init
         document.addEventListener('DOMContentLoaded', () => {
+            renderizarCalendario();
             carregarUsuario();
             carregarEventos();
             renderizarMiniCalendario();
@@ -1388,5 +1388,6 @@
     <script src="/js/user-dropdown.js?v=20260319" defer></script>
 </body>
 </html>
+
 
 

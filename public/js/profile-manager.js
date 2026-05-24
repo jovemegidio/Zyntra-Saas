@@ -72,6 +72,58 @@
             });
         },
 
+        getAuthToken() {
+            try {
+                return localStorage.getItem('authToken') ||
+                    localStorage.getItem('token') ||
+                    sessionStorage.getItem('authToken') ||
+                    sessionStorage.getItem('token') ||
+                    '';
+            } catch (e) {
+                return '';
+            }
+        },
+
+        getFieldValue(fieldId) {
+            const field = document.getElementById(fieldId);
+            return field ? field.value : '';
+        },
+
+        sanitizeImageUrl(value) {
+            const raw = String(value || '').trim();
+            if (!raw) return '';
+            if (/^data:image\/(?:png|jpe?g|gif|webp);base64,/i.test(raw)) return raw;
+            if (/^(?:javascript|vbscript|data):/i.test(raw)) return '';
+            if (/^(?:\/|\.\/|\.\.\/)/.test(raw)) return raw;
+            try {
+                const parsed = new URL(raw, window.location.origin);
+                return (parsed.protocol === 'http:' || parsed.protocol === 'https:') ? parsed.href : '';
+            } catch (e) {
+                return '';
+            }
+        },
+
+        setAvatarImage(target, avatarUrl) {
+            const safeUrl = this.sanitizeImageUrl(avatarUrl);
+            if (!target || !safeUrl) return;
+
+            const img = target.tagName === 'IMG'
+                ? target
+                : target.querySelector('img') || document.createElement('img');
+
+            img.src = safeUrl;
+            img.alt = 'Avatar';
+            img.style.width = '100%';
+            img.style.height = '100%';
+            img.style.borderRadius = '50%';
+            img.style.objectFit = 'cover';
+
+            if (target !== img && !img.parentNode) {
+                target.textContent = '';
+                target.appendChild(img);
+            }
+        },
+
         setupAvatarUpload() {
             const avatarInput = document.getElementById('profile-avatar-input');
             const avatarBtn = document.getElementById('profile-avatar-btn');
@@ -162,11 +214,12 @@
                 this.setLoading(true);
 
                 // Get token from localStorage or cookies
+                const token = this.getAuthToken();
 
-                const response = await fetch('/api/upload-avatar', { credentials: 'include', method: 'POST',
-                    headers: token ? {
-                    } : {},
-                    credentials: 'include', // Include cookies
+                const response = await fetch('/api/upload-avatar', {
+                    method: 'POST',
+                    headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+                    credentials: 'include',
                     body: formData
                 });
 
@@ -203,23 +256,26 @@
         },
 
         updateHeaderAvatar(avatarUrl) {
-            console.log('[AVATAR] Atualizando avatar em todo o sistema:', avatarUrl);
+            const safeAvatarUrl = this.sanitizeImageUrl(avatarUrl);
+            if (!safeAvatarUrl) return;
+
+            console.log('[AVATAR] Atualizando avatar em todo o sistema:', safeAvatarUrl);
             
             // 1. Update avatar in header dropdown
             const headerAvatar = document.querySelector('.user-avatar-header');
             if (headerAvatar) {
                 let img = headerAvatar.querySelector('img');
                 if (img) {
-                    img.src = avatarUrl;
+                    img.src = safeAvatarUrl;
                 } else {
-                    headerAvatar.innerHTML = `<img src="${avatarUrl}" alt="Avatar" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+                    this.setAvatarImage(headerAvatar, safeAvatarUrl);
                 }
             }
             
             // 2. Update dropdown avatar button (no header)
             const dropdownAvatars = document.querySelectorAll('#user-dropdown-btn img, .dropdown-avatar img, .header-avatar img, .user-btn img');
             dropdownAvatars.forEach(img => {
-                if (img) img.src = avatarUrl;
+                if (img) img.src = safeAvatarUrl;
             });
             
             // 3. Update iniciais/fallback - esconder e mostrar imagem
@@ -231,14 +287,14 @@
             // 4. Update avatar em saudações do dashboard
             const greetingAvatars = document.querySelectorAll('.greeting-avatar img, .welcome-avatar img, #userAvatarLarge img, .user-avatar-large img');
             greetingAvatars.forEach(img => {
-                if (img) img.src = avatarUrl;
+                if (img) img.src = safeAvatarUrl;
             });
             
             // 5. Update container de avatar grande (saudação)
             const avatarLargeContainers = document.querySelectorAll('#userAvatarLarge, .user-avatar-large');
             avatarLargeContainers.forEach(container => {
                 if (container && !container.querySelector('img')) {
-                    container.innerHTML = `<img src="${avatarUrl}" alt="Avatar" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+                    this.setAvatarImage(container, safeAvatarUrl);
                 }
             });
             
@@ -246,10 +302,10 @@
             const allAvatars = document.querySelectorAll('.user-profile-avatar, .user-avatar, .avatar-circle, .profile-avatar');
             allAvatars.forEach(avatar => {
                 if (avatar.tagName === 'IMG') {
-                    avatar.src = avatarUrl;
+                    avatar.src = safeAvatarUrl;
                 } else {
                     const img = avatar.querySelector('img');
-                    if (img) img.src = avatarUrl;
+                    if (img) img.src = safeAvatarUrl;
                 }
             });
             
@@ -257,13 +313,13 @@
             const userPhotos = document.querySelectorAll('#user-photo, .user-photo');
             userPhotos.forEach(photo => {
                 if (photo.tagName === 'IMG') {
-                    photo.src = avatarUrl;
+                    photo.src = safeAvatarUrl;
                     photo.style.display = 'block';
                 }
             });
             
             // 8. Dispatch custom event para outros scripts atualizarem
-            window.dispatchEvent(new CustomEvent('avatar-updated', { detail: { avatarUrl } }));
+            window.dispatchEvent(new CustomEvent('avatar-updated', { detail: { avatarUrl: safeAvatarUrl } }));
             
             console.log('[AVATAR] Todos os avatares atualizados!');
         },
@@ -293,12 +349,13 @@
                 this.setLoading(true);
 
                 // Get token from localStorage or use cookie authentication
+                const token = this.getAuthToken();
 
                 const response = await fetch('/api/me', {
                     credentials: 'include',
                     headers: token ? {
-                }) : {},
-                    credentials: 'include' // Include cookies for authentication
+                        'Authorization': `Bearer ${token}`
+                    } : {}
                 });
 
                 if (!response.ok) {
@@ -320,8 +377,9 @@
         populateForm(user) {
             // Set avatar
             const avatarImg = document.getElementById('profile-avatar-img');
-            if (avatarImg && user.avatar) {
-                avatarImg.src = user.avatar || "/avatars/default.webp";
+            const avatarUrl = this.sanitizeImageUrl(user.avatar || user.avatar_url || user.foto_perfil_url);
+            if (avatarImg && avatarUrl) {
+                avatarImg.src = avatarUrl;
             }
 
             // Set fields
@@ -363,11 +421,11 @@
                 this.clearMessages();
 
                 const formData = {
-                    nome: document.getElementById('profile-nome').value,
-                    apelido: document.getElementById('profile-apelido').value,
-                    telefone: document.getElementById('profile-telefone').value,
-                    data_nascimento: document.getElementById('profile-data-nascimento').value,
-                    bio: document.getElementById('profile-bio').value
+                    nome: this.getFieldValue('profile-nome'),
+                    apelido: this.getFieldValue('profile-apelido'),
+                    telefone: this.getFieldValue('profile-telefone'),
+                    data_nascimento: this.getFieldValue('profile-data-nascimento'),
+                    bio: this.getFieldValue('profile-bio')
                 };
 
                 // Validate
@@ -377,13 +435,15 @@
                 }
 
                 // Get token from localStorage or use cookie authentication
+                const token = this.getAuthToken();
 
-                const response = await fetch('/api/me', { credentials: 'include', method: 'PUT',
+                const response = await fetch('/api/me', {
+                    method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
                         ...(token ? { 'Authorization': `Bearer ${token}` } : {})
                     },
-                    credentials: 'include', // Include cookies for authentication
+                    credentials: 'include',
                     body: JSON.stringify(formData)
                 });
 
@@ -498,7 +558,8 @@
                 '<i class="fas fa-check-circle"></i>' : 
                 '<i class="fas fa-exclamation-circle"></i>';
             
-            messageEl.innerHTML = `${icon} ${message}`;
+            messageEl.innerHTML = icon;
+            messageEl.appendChild(document.createTextNode(' ' + String(message || '')));
             
             this.form.insertBefore(messageEl, this.form.firstChild);
 

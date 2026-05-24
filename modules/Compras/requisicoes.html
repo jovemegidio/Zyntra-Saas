@@ -30,7 +30,7 @@
 
     <!-- CSS Padrão Global -->
     <link rel="stylesheet" href="/modules/Compras/css/compras-layout.css?v=20260301">
-    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260301">
+    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260418">
     <link rel="stylesheet" href="/css/skeleton-loader.css?v=20260301">
     <link rel="stylesheet" href="/css/popup-confirmacao.css?v=20260301">
     <style>
@@ -256,16 +256,16 @@
         <aside class="sidebar" id="mobile-sidebar">
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel"><i class="fas fa-home"></i></a>
             <nav class="sidebar-nav">
-                <button class="sidebar-btn" title="Dashboard" onclick="window.location.href='index.html'"><i class="fas fa-chart-line"></i></button>
-                <button class="sidebar-btn" title="Pedidos" onclick="window.location.href='pedidos.html'"><i class="fas fa-shopping-cart"></i></button>
-                <button class="sidebar-btn" title="Cotações" onclick="window.location.href='cotacoes.html'"><i class="fas fa-file-invoice-dollar"></i></button>
-                <button class="sidebar-btn" title="Fornecedores" onclick="window.location.href='fornecedores.html'"><i class="fas fa-users"></i></button>
-                <button class="sidebar-btn active" title="Requisições" onclick="window.location.href='requisicoes.html'"><i class="fas fa-clipboard-list"></i></button>
-                <button class="sidebar-btn" title="Recebimento" onclick="window.location.href='recebimento.html'"><i class="fas fa-truck-loading"></i></button>
+                <button class="sidebar-btn" title="Dashboard" onclick="window.location.href='/Compras/index.html'"><i class="fas fa-chart-line"></i></button>
+                <button class="sidebar-btn" title="Pedidos" onclick="window.location.href='/Compras/pedidos.html'"><i class="fas fa-shopping-cart"></i></button>
+                <button class="sidebar-btn" title="Cotações" onclick="window.location.href='/Compras/cotacoes.html'"><i class="fas fa-file-invoice-dollar"></i></button>
+                <button class="sidebar-btn" title="Fornecedores" onclick="window.location.href='/Compras/fornecedores.html'"><i class="fas fa-users"></i></button>
+                <button class="sidebar-btn active" title="Requisições" onclick="window.location.href='/Compras/requisicoes.html'"><i class="fas fa-clipboard-list"></i></button>
+                <button class="sidebar-btn" title="Recebimento" onclick="window.location.href='/Compras/recebimento.html'"><i class="fas fa-truck-loading"></i></button>
             </nav>
             <div class="sidebar-bottom">
-                <button class="sidebar-btn" title="Estoque MP" onclick="window.location.href='gestao-estoque.html'"><i class="fas fa-boxes"></i></button>
-                <button class="sidebar-btn" title="Relatórios" onclick="window.location.href='relatorios.html'"><i class="fas fa-chart-bar"></i></button>
+                <button class="sidebar-btn" title="Estoque MP" onclick="window.location.href='/Compras/gestao-estoque.html'"><i class="fas fa-boxes"></i></button>
+                <button class="sidebar-btn" title="Relatórios" onclick="window.location.href='/Compras/relatorios.html'"><i class="fas fa-chart-bar"></i></button>
             </div>
         </aside>
 
@@ -298,7 +298,7 @@
                         </div>
                     </div>
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
+                        <span><span id="greeting-text">Olá</span>, <strong id="user-name">Usuário</strong></span>
                         <div class="user-avatar" id="user-avatar"><img src="" alt="" id="user-photo" style="display:none;"><span id="user-initial">U</span></div>
                     </div>
                 </div>
@@ -461,7 +461,7 @@
                     <div style="padding-top:var(--space-4); border-top:1.5px solid var(--gray-200); margin-bottom:var(--space-4);">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--space-3);">
                             <h4 style="font-size:0.8rem; font-weight:600; color:var(--gray-500); text-transform:uppercase; letter-spacing:0.5px;"><i class="fas fa-boxes" style="margin-right:6px; color:var(--primary-500);"></i>Itens da Requisição</h4>
-                            <button type="button" class="btn btn-primary btn-sm" onclick="adicionarItemReq()"><i class="fas fa-plus"></i> Adicionar Item</button>
+                            <button type="button" class="btn btn-primary btn-sm" id="btnAdicionarItemReq"><i class="fas fa-plus"></i> Adicionar Item</button>
                         </div>
                         <div id="itensContainer"></div>
                         <div class="resumo-itens">
@@ -499,8 +499,8 @@
                 <div class="modal-footer" style="justify-content:space-between;">
                     <button type="button" class="btn btn-secondary" id="btnCancelarRequisicao" onclick="fecharModalNovaRequisicao()">Cancelar</button>
                     <div style="display:flex; gap:var(--space-2);">
-                        <button type="button" class="btn btn-secondary" id="btnSalvarRascunho" onclick="salvarRascunho()"><i class="fas fa-save"></i> Salvar Rascunho</button>
-                        <button type="button" class="btn btn-primary" id="btnEnviarRequisicao" onclick="enviarRequisicao()"><i class="fas fa-paper-plane"></i> Enviar Requisição</button>
+                        <button type="button" class="btn btn-secondary" id="btnSalvarRascunho"><i class="fas fa-save"></i> Salvar Rascunho</button>
+                        <button type="button" class="btn btn-primary" id="btnEnviarRequisicao"><i class="fas fa-paper-plane"></i> Enviar Requisição</button>
                     </div>
                 </div>
             </form>
@@ -536,6 +536,33 @@
     let editingId = null;
     const avatarNameMap = {};
 
+    function asArray(payload, keys = []) {
+        if (Array.isArray(payload)) return payload;
+        for (const key of keys) {
+            if (Array.isArray(payload?.[key])) return payload[key];
+        }
+        return [];
+    }
+
+    function obterSaudacao() {
+        const hora = new Date().getHours();
+        if (hora >= 5 && hora < 12) return 'Bom dia';
+        if (hora >= 12 && hora < 18) return 'Boa tarde';
+        return 'Boa noite';
+    }
+
+    function atualizarSaudacaoUsuario(user) {
+        const nomeCompleto = user?.apelido || user?.nome || user?.name || 'Usuário';
+        const primeiroNome = String(nomeCompleto).split(' ')[0] || 'Usuário';
+        const greetingEl = document.getElementById('greeting-text');
+        const userNameEl = document.getElementById('user-name');
+        const initialEl = document.getElementById('user-initial') || document.getElementById('user-initials');
+
+        if (greetingEl) greetingEl.textContent = obterSaudacao();
+        if (userNameEl) userNameEl.textContent = primeiroNome;
+        if (initialEl) initialEl.textContent = primeiroNome.charAt(0).toUpperCase();
+    }
+
     function toggleMobileSidebar() {
         const sidebar = document.getElementById('mobile-sidebar');
         const overlay = document.getElementById('sidebar-overlay');
@@ -545,6 +572,7 @@
 
     /* ========== Init ========== */
     document.addEventListener('DOMContentLoaded', () => {
+        atualizarSaudacaoUsuario(usuarioLogado);
         carregarUsuarioLogado();
         carregarDadosIniciais();
         configurarEventos();
@@ -553,9 +581,11 @@
     async function carregarUsuarioLogado() {
         try {
             const token = localStorage.getItem('token');
-            const r = await fetch('/api/me', { headers: { 'Authorization': `Bearer ${token}` } });
+            const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+            const r = await fetch('/api/me', { headers, credentials: 'include' });
             if (r.ok) { usuarioLogado = await r.json(); }
         } catch (e) { console.log('Erro user:', e); }
+        atualizarSaudacaoUsuario(usuarioLogado);
     }
 
     async function carregarDadosIniciais() {
@@ -565,10 +595,11 @@
     async function carregarRequisicoes() {
         try {
             const token = localStorage.getItem('token');
-            const r = await fetch('/api/compras/requisicoes', { headers: { 'Authorization': `Bearer ${token}` } });
+            const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+            const r = await fetch('/api/compras/requisicoes', { headers, credentials: 'include' });
             if (r.ok) {
                 const data = await r.json();
-                requisicoesData = data.requisicoes || data || [];
+                requisicoesData = asArray(data, ['requisicoes', 'data']);
             }
         } catch (e) { console.log('Erro requisições:', e); requisicoesData = gerarDadosExemplo(); }
         atualizarContadores();
@@ -577,17 +608,28 @@
 
     async function carregarMateriais() {
         try {
-            const token = localStorage.getItem('token');
-            const r = await fetch('/api/pcp/produtos?limit=1000', { headers: { 'Authorization': `Bearer ${token}` } });
-            if (r.ok) { const d = await r.json(); materiaisData = d.produtos || d || []; }
-        } catch (e) { console.log('Erro materiais:', e); }
+            const r = await fetch('/api/compras/materiais?limit=1000', { credentials: 'include' });
+            if (r.ok) {
+                const d = await r.json();
+                materiaisData = asArray(d, ['materiais', 'produtos', 'data']).map(function(m) {
+                    return Object.assign({}, m, { nome: m.descricao || m.nome || '', codigo: m.codigo_material || m.codigo || '' });
+                });
+                return;
+            }
+        } catch (e) { console.log('Erro ao carregar materiais de compras:', e); }
+        // Fallback: PCP products
+        try {
+            const r2 = await fetch('/api/pcp/produtos?limit=1000', { credentials: 'include' });
+            if (r2.ok) { const d2 = await r2.json(); materiaisData = asArray(d2, ['produtos', 'data']); }
+        } catch (e2) { console.log('Erro materiais pcp:', e2); }
     }
 
     async function carregarCentrosCusto() {
         try {
             const token = localStorage.getItem('token');
-            const r = await fetch('/api/compras/centros-custo', { headers: { 'Authorization': `Bearer ${token}` }, credentials: 'include' });
-            if (r.ok) { const d = await r.json(); centrosCustoData = d.centros || d || []; }
+            const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+            const r = await fetch('/api/compras/centros-custo', { headers, credentials: 'include' });
+            if (r.ok) { const d = await r.json(); centrosCustoData = asArray(d, ['centros', 'data']); }
         } catch (e) { console.log('Erro CC:', e); }
     }
 
@@ -601,6 +643,24 @@
     function configurarEventos() {
         const search = document.getElementById('searchRequisicao');
         if (search) search.addEventListener('input', () => { termoBusca = search.value; filtrarRequisicoes(filtroAtual); });
+
+        const btnAdicionar = document.getElementById('btnAdicionarItemReq');
+        if (btnAdicionar) btnAdicionar.addEventListener('click', (event) => {
+            event.preventDefault();
+            adicionarItemReq();
+        });
+
+        const btnRascunho = document.getElementById('btnSalvarRascunho');
+        if (btnRascunho) btnRascunho.addEventListener('click', (event) => {
+            event.preventDefault();
+            salvarRascunho();
+        });
+
+        const btnEnviar = document.getElementById('btnEnviarRequisicao');
+        if (btnEnviar) btnEnviar.addEventListener('click', (event) => {
+            event.preventDefault();
+            enviarRequisicao();
+        });
     }
 
     /* ========== Filter & Render ========== */
@@ -619,18 +679,19 @@
     function renderizarTabela(dados) {
         const tbody = document.getElementById('requisicoesTableBody');
         if (!dados.length) {
-            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding:var(--space-8); color:var(--gray-400);"><i class="fas fa-inbox"></i> Nenhuma requisição encontrada</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; padding:var(--space-8); color:var(--gray-400);"><i class="fas fa-inbox"></i> Nenhuma requisição encontrada</td></tr>';
             return;
         }
         tbody.innerHTML = dados.map((r, i) => `
             <tr>
                 <td>${i + 1}</td>
                 <td><strong>${r.numero || '-'}</strong></td>
+                <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${(r.itens?.[0]?.descricao || r.observacoes || '').replace(/"/g, '&quot;')}">${(r.itens?.[0]?.descricao || r.observacoes || '-').substring(0, 40)}</td>
                 <td>${r.solicitante || '-'}</td>
                 <td>${formatarData(r.data_solicitacao)}</td>
-                <td>${r.centro_custo || '-'}</td>
+                <td>${r.centro_custo || r.departamento || '-'}</td>
                 <td><span class="badge badge-${r.prioridade === 'urgente' ? 'urgent' : r.prioridade === 'alta' ? 'pending' : r.prioridade === 'normal' ? 'in-progress' : 'approved'}">${{urgente:'Urgente',alta:'Alta',media:'Média',normal:'Normal',baixa:'Baixa'}[r.prioridade] || 'Normal'}</span></td>
-                <td>${formatarMoeda(r.valor_estimado)}</td>
+                <td>${formatarMoeda(r.valor_estimado > 0 ? r.valor_estimado : (r.itens || []).reduce((s,i) => s + parseFloat(i.valor_estimado || i.preco_unitario || 0) * (parseFloat(i.quantidade) || 1), 0))}</td>
                 <td><span class="badge badge-${getStatusClass(r.status)}">${getStatusLabel(r.status)}</span></td>
                 <td>
                     <div class="action-btns">
@@ -659,15 +720,20 @@
         document.getElementById('itensContainer').innerHTML = '';
         document.getElementById('anexosList').innerHTML = '';
         document.getElementById('reqDataSolicitacao').value = new Date().toISOString().split('T')[0];
-        if (usuarioLogado) document.getElementById('reqSolicitante').value = usuarioLogado.nome || usuarioLogado.name || 'Usuário';
+        document.getElementById('reqSolicitante').value = usuarioLogado ? (usuarioLogado.nome || usuarioLogado.name || 'Usuário') : 'Usuário';
         // Populate CC
         const sel = document.getElementById('reqCentroCusto');
-        sel.innerHTML = '<option value="">Selecione</option>' + centrosCustoData.map(c => `<option value="${c.id || c.nome}">${c.nome || c.descricao}</option>`).join('');
+        sel.innerHTML = '<option value="">Selecione</option>' + centrosCustoData.map(c => `<option value="${escapeAttr(c.id || c.nome || c.descricao || '')}">${escapeHtml(c.nome || c.descricao || '')}</option>`).join('');
         // Get next number
         try {
-            const token = localStorage.getItem('token');
-            const r = await fetch('/api/compras/requisicoes/proximo-numero', { headers: { 'Authorization': `Bearer ${token}` } });
-            if (r.ok) { const d = await r.json(); document.getElementById('reqNumero').value = d.numero || d.proximo_numero || ''; }
+            const r = await fetch('/api/compras/requisicoes/proximo-numero', { credentials: 'include' });
+            if (r.ok) {
+                const d = await r.json();
+                const num = d.numero || d.proximo_numero || '';
+                document.getElementById('reqNumero').value = num || ('RC-' + String(requisicoesData.length + 1).padStart(3, '0'));
+            } else {
+                document.getElementById('reqNumero').value = 'RC-' + String(requisicoesData.length + 1).padStart(3, '0');
+            }
         } catch (e) { document.getElementById('reqNumero').value = 'RC-' + String(requisicoesData.length + 1).padStart(3, '0'); }
         // Restaurar título do modal para criação
         const modalTitle = document.querySelector('#modalNovaRequisicao .modal-header h3');
@@ -688,7 +754,7 @@
             const unidade = m.unidade || 'UN';
             const label = (m.codigo ? m.codigo + ' - ' : '') + (m.nome || m.descricao || '');
             const val = m.nome || m.descricao || '';
-            return `<option value="${val}" data-preco="${preco}" data-unidade="${unidade}">${label}</option>`;
+            return `<option value="${escapeAttr(val)}" data-preco="${escapeAttr(preco)}" data-unidade="${escapeAttr(unidade)}">${escapeHtml(label)}</option>`;
         }).join('');
         const html = `
         <div class="item-card" id="item-${id}">
@@ -721,8 +787,8 @@
                     <input type="text" class="form-control" id="itemSubtotal-${id}" readonly value="R$ 0,00">
                 </div>
                 <div class="form-group" style="grid-column:span 2;">
-                    <label>Especificação</label>
-                    <input type="text" class="form-control" id="itemSpec-${id}" placeholder="Detalhes adicionais...">
+                    <label>Descrição/Especificação</label>
+                    <input type="text" class="form-control" id="itemSpec-${id}" placeholder="Use para item avulso ou detalhes adicionais...">
                 </div>
             </div>
         </div>`;
@@ -781,9 +847,6 @@
         // Prevenir duplo clique
         if (salvandoRequisicao) return;
 
-        const justificativa = document.getElementById('reqJustificativa').value;
-        if (status !== 'rascunho' && !justificativa) { showToast('Preencha a justificativa', 'warning'); return; }
-
         const numero = document.getElementById('reqNumero').value;
         if (!numero) { showToast('Número da requisição não gerado. Feche e reabra o formulário.', 'warning'); return; }
 
@@ -792,8 +855,9 @@
             const id = card.id.split('-')[1];
             const qtd = parseFloat(document.getElementById('itemQtd-' + id)?.value) || 0;
             const preco = parseMoeda(document.getElementById('itemPreco-' + id)?.value);
+            const descricao = document.getElementById('itemMaterial-' + id)?.value || document.getElementById('itemSpec-' + id)?.value || '';
             items.push({
-                descricao: document.getElementById('itemMaterial-' + id)?.value || '',
+                descricao,
                 quantidade: qtd,
                 unidade: document.getElementById('itemUnidade-' + id)?.value || 'UN',
                 valor_estimado: preco,
@@ -802,9 +866,33 @@
             });
         });
 
+        // VAL-01: Validação simultânea com highlight visual de todos os campos com erro
+        if (status !== 'rascunho') {
+            const camposObrigatorios = [
+                { id: 'reqDataNecessidade', label: 'Data de Necessidade' },
+                { id: 'reqJustificativa',   label: 'Justificativa' }
+            ];
+            const erros = [];
+            camposObrigatorios.forEach(c => {
+                const el = document.getElementById(c.id);
+                if (!el || !el.value.trim()) {
+                    erros.push(c.label);
+                    if (el) {
+                        el.style.borderColor = '#ef4444';
+                        el.style.boxShadow = '0 0 0 2px rgba(239,68,68,0.2)';
+                        setTimeout(() => { el.style.borderColor = ''; el.style.boxShadow = ''; }, 4000);
+                    }
+                }
+            });
+            if (erros.length > 0) {
+                showToast('Preencha os campos obrigatórios: ' + erros.join(', '), 'warning');
+                return;
+            }
+        }
+
         if (items.length === 0) { showToast('Adicione pelo menos 1 item', 'warning'); return; }
         const itemSemDescricao = items.find(i => !i.descricao || !i.descricao.trim());
-        if (itemSemDescricao) { showToast('Preencha a descrição de todos os itens', 'warning'); return; }
+        if (itemSemDescricao) { showToast('Selecione um material ou preencha a descrição de todos os itens', 'warning'); return; }
         const itemSemQtd = items.find(i => !i.quantidade || i.quantidade <= 0);
         if (itemSemQtd) { showToast('Informe a quantidade de todos os itens (maior que zero)', 'warning'); return; }
 
@@ -1035,7 +1123,17 @@
         const v = parseMoeda(el.value);
         el.value = formatarMoeda(v);
     }
+    function escapeAttr(t) { return escapeHtml(t).replace(/"/g, '&quot;'); }
     function escapeHtml(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+
+    /* ========== Modal: ESC key + overlay click ========== */
+    document.addEventListener('keydown', function(e) {
+        if (e.key !== 'Escape') return;
+        fecharModalNovaRequisicao();
+        fecharModalVisualizar();
+    });
+    document.getElementById('modalNovaRequisicao').addEventListener('click', function(e) { if (e.target === this) fecharModalNovaRequisicao(); });
+    document.getElementById('modalVisualizarRequisicao').addEventListener('click', function(e) { if (e.target === this) fecharModalVisualizar(); });
 
     /* ========== Toast Notification System ========== */
     function showToast(message, type = 'success', duration = 4000) {

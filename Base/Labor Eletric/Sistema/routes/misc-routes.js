@@ -74,51 +74,6 @@ module.exports = function createMiscRoutes(deps) {
         }
     });
     
-    // ===================== PROXY CNAE =====================
-    // Endpoint raiz usado pelo CRM: /api/proxy/cnae/:id
-    router.get('/proxy/cnae/:id', authenticateToken, async (req, res) => {
-        try {
-            const cnaeId = String(req.params.id || '').replace(/\D/g, '');
-            if (!cnaeId) {
-                return res.status(400).json({ error: 'CNAE inválido' });
-            }
-
-            if (typeof fetch === 'function') {
-                try {
-                    const response = await fetch(`https://servicodados.ibge.gov.br/api/v2/cnae/subclasses/${cnaeId}`);
-                    if (response.ok) {
-                        const data = await response.json();
-                        const item = Array.isArray(data) ? data[0] : data;
-                        if (item) {
-                            return res.json({
-                                codigo: item.id || cnaeId,
-                                descricao: item.descricao || item.classe || item.nome || 'CNAE encontrado',
-                                secao: item.secao?.descricao || item.secao || null,
-                                divisao: item.divisao?.descricao || item.divisao || null,
-                                grupo: item.grupo?.descricao || item.grupo || null,
-                                fonte: 'IBGE'
-                            });
-                        }
-                    }
-                } catch (fetchError) {
-                    console.warn('[PROXY CNAE] Falha ao consultar IBGE:', fetchError.message);
-                }
-            }
-
-            return res.json({
-                codigo: cnaeId,
-                descricao: 'Consulta CNAE indisponível no momento',
-                secao: null,
-                divisao: null,
-                grupo: null,
-                fonte: 'fallback'
-            });
-        } catch (error) {
-            console.error('[PROXY CNAE] Erro interno:', error);
-            res.status(500).json({ error: 'Erro ao consultar CNAE' });
-        }
-    });
-
     // ===================== API DE NOTIFICAÇÕES DO CHAT =====================
     // Endpoint para notificar suporte técnico via chat (requer autenticação)
     router.post('/notify-support', authenticateToken, express.json(), async (req, res) => {
@@ -656,7 +611,7 @@ module.exports = function createMiscRoutes(deps) {
                         tipo: 'info',
                         modulo: 'Vendas',
                         mensagem: `${pedidosResult[0].aguardando} pedido(s) aguardando aprovação`,
-                        link: '/modules/Vendas/index.html'
+                        link: '/modules/Vendas/public/index.html'
                     });
                 }
     
@@ -739,6 +694,8 @@ module.exports = function createMiscRoutes(deps) {
             if (exibirCancelados !== 'true') statusExcluir.push('cancelado');
             if (exibirDenegados !== 'true') statusExcluir.push('denegado');
             if (exibirEncerrados !== 'true') statusExcluir.push('encerrado');
+            // Sempre excluir pedidos com soft-delete (status = 'excluido')
+            statusExcluir.push('excluido');
     
             if (statusExcluir.length > 0) {
                 whereConditions.push(`p.status NOT IN (${statusExcluir.map(() => '?').join(', ')})`);
@@ -816,7 +773,11 @@ module.exports = function createMiscRoutes(deps) {
                     transportadora: p.transportadora || p.transportadora_nome || p.metodo_envio || null,
                     transportadora_id: p.transportadora_id || null,
                     nf: p.nf || p.nota_fiscal || null,
+                    numero_pedido: p.numero_pedido || p.id,
                     data_pedido: p.created_at,
+                    created_at: p.created_at,
+                    data_criacao: p.created_at,
+                    data_inclusao: p.created_at,
                     observacao: p.observacao,
                     mensagem: p.observacao,
                     // Campos de transporte

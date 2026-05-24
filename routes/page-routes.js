@@ -154,10 +154,13 @@ function setupPageRoutes(app, baseDir, authenticatePage, userPermissions) {
     // MÓDULO COMPRAS
     // ========================================
     
-    const comprasPages = ['index.html', 'compras.html', 'cotacoes.html', 'pedidos.html', 
+    const comprasPages = ['index.html', 'compras.html', 'cotacoes.html', 'pedidos.html',
                           'recebimento.html', 'fornecedores.html', 'gestao-estoque.html',
-                          'requisicoes.html', 'relatorios.html', 'alcadas.html', 
+                          'requisicoes.html', 'relatorios.html', 'alcadas.html',
                           'otimizacao-estoque.html', 'dashboard-executivo.html', 'dashboard-pro.html'];
+
+    // BUG-011: estoque-mp.html não existe — redireciona para gestao-estoque.html
+    app.get('/Compras/estoque-mp.html', authenticatePage, (req, res) => res.redirect('/Compras/gestao-estoque.html'));
 
     app.get('/Compras', authenticatePage, serveWithPermission('compras', 'modules/Compras/public/index.html'));
     app.get('/Compras/', authenticatePage, (req, res) => res.redirect('/Compras/compras.html'));

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
@@ -878,8 +878,9 @@
                 const r = await fetch('/api/logistica/dashboard', { credentials: 'include' });
                 if (r.ok) {
                     const d = await r.json();
-                    document.getElementById('count-aguardando').textContent = d.aguardando_separação || d.aguardando || 0;
-                    document.getElementById('count-separacao').textContent = d.em_separação || d.separação || 0;
+                    // BUG-024: API retorna sem acento (aguardando_separacao, em_separacao)
+                    document.getElementById('count-aguardando').textContent = d.pendente || d.aguardando_separacao || d.aguardando_separação || d.aguardando || 0;
+                    document.getElementById('count-separacao').textContent = d.em_separacao || d.em_separação || d.separação || 0;
                     document.getElementById('count-expedicao').textContent = d.em_expedicao || d.expedicao || 0;
                     document.getElementById('count-transporte').textContent = d.em_transporte || d.transporte || 0;
                     document.getElementById('count-entregues').textContent = d.entregues || 0;
@@ -1274,6 +1275,11 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
 
         async function salvarExpedicao() {
             if (window._guardSalvarExpedicao) return;
+            // BUG-028: avisar se transportadora não for selecionada
+            const transportadoraId = document.getElementById('exp-transportadora').value;
+            if (!transportadoraId || transportadoraId === '') {
+                if (!confirm('Expedição sem transportadora definida. Deseja continuar?')) return;
+            }
             window._guardSalvarExpedicao = true;
             const actionButton = getModalPrimaryActionButton('modal-nova-expedicao');
             setModalButtonBusy(actionButton, true);

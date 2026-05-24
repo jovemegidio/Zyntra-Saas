@@ -18,7 +18,6 @@
     <title>Zyntra: Dashboard RH</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/modern-saas.css?v=3.0">
     <link rel="stylesheet" href="../css/rh-pages.css?v=1.0">
     <link rel="stylesheet" href="../dashboard-numbers-fix.css">
     <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260324">
@@ -157,7 +156,7 @@
     <!-- Tooltips Profissionais -->
     <link rel="stylesheet" href="/css/tooltips-professional.css?v=20260209">
     <script src="/js/tooltips-professional.js?v=20260209" defer></script>
-    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260216">
+    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260418">
     <!-- Chat Widget BOB AI -->
     <link rel="stylesheet" href="/chat/widget.css?v=20260218">
     <link rel="stylesheet" href="/css/design-system.css?v=20260502">
@@ -705,7 +704,7 @@ Equipe de Recursos Humanos
                 const total = stats.total || funcionários.length;
                 const ativos = stats.ativos || funcionários.filter(f => (f.status || '').toLowerCase() === 'ativo').length;
                 const aniv = stats.aniversariantes || 0;
-                document.getElementById('total-funcionários').textContent = ativos;
+                document.getElementById('total-funcionarios').textContent = ativos;
                 document.getElementById('count-folha').textContent = ativos;
                 document.getElementById('count-aniversariantes').textContent = aniv;
 
@@ -854,7 +853,7 @@ Equipe de Recursos Humanos
         // Funções dos Modals - Definir como globais
         window.openNovoFuncionárioModal = function() {
             console.log('Abrindo modal de novo funcionário...');
-            const modal = document.getElementById('novoFuncionárioModal');
+            const modal = document.getElementById('novoFuncionarioModal');
             if (modal) {
                 modal.classList.add('show');
                 document.body.style.overflow = 'hidden';
@@ -866,11 +865,11 @@ Equipe de Recursos Humanos
 
         window.closeNovoFuncionárioModal = function() {
             console.log('Fechando modal de novo funcionário...');
-            const modal = document.getElementById('novoFuncionárioModal');
+            const modal = document.getElementById('novoFuncionarioModal');
             if (modal) {
                 modal.classList.remove('show');
                 document.body.style.overflow = 'auto';
-                const form = document.getElementById('novoFuncionárioForm');
+                const form = document.getElementById('novoFuncionarioForm');
                 if (form) form.reset();
             }
         };
@@ -1082,7 +1081,7 @@ Equipe de Recursos Humanos
 
         // Salvar funcionário no banco de dados
         async function salvarFuncionário() {
-            const form = document.getElementById('novoFuncionárioForm');
+            const form = document.getElementById('novoFuncionarioForm');
             const formData = new FormData(form);
             
             // Validar campos obrigatórios
@@ -1133,7 +1132,7 @@ Equipe de Recursos Humanos
                     closeNovoFuncionárioModal();
                     
                     // Atualizar contador se existir
-                    const totalElement = document.getElementById('total-funcionários');
+                    const totalElement = document.getElementById('total-funcionarios');
                     if (totalElement) {
                         const currentTotal = parseInt(totalElement.textContent) || 0;
                         totalElement.textContent = currentTotal + 1;
@@ -1158,7 +1157,7 @@ Equipe de Recursos Humanos
             console.log('Inicializando dashboard...');
             
             // Verificar se os modais existem
-            const modalFuncionário = document.getElementById('novoFuncionárioModal');
+            const modalFuncionário = document.getElementById('novoFuncionarioModal');
             const modalHolerites = document.getElementById('gerarHoleritesModal');
             
             if (!modalFuncionário) {
@@ -1178,7 +1177,7 @@ Equipe de Recursos Humanos
             if (modalHolerites) modalHolerites.classList.remove('show');
 
             // Verificar se os botes existem e adicionar event listeners alternativos
-            const btnFuncionário = document.getElementById('btnNovoFuncionário');
+            const btnFuncionário = document.getElementById('btnNovoFuncionario');
             const btnHolerites = document.getElementById('btnGerarHolerites');
 
             if (btnFuncionário) {
@@ -1382,5 +1381,6 @@ Equipe de Recursos Humanos
     <script src="/js/user-dropdown.js?v=20260319" defer></script>
 </body>
 </html>
+
 
 

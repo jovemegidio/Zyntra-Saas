@@ -20,7 +20,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
 
     <!-- Financeiro Design System -->
-    <link rel="stylesheet" href="css/fin-layout.css?v=20260215">
     <link rel="stylesheet" href="css/fin-components.css?v=20260215">
 
     <!-- Chart.js -->
@@ -293,12 +292,10 @@
             transition: all 0.2s;
         }
         .template-download-btn:hover { background: #047857; }
-/* SIDEBAR + HEADER + NOTIFICATION - estilos definidos em fin-layout.css */
 .user-avatar img.visible { display: block; }
         .user-avatar .user-initial { display: block; }
         .user-avatar img.visible + .user-initial { display: none; }
 
-        /* PAGE - .page-content, .page-header, .page-title, .page-actions definidos em fin-layout.css + fin-components.css */
 /* BUTTONS - .btn, .btn-primary, .btn-secondary, .btn-success, .btn-sm definidos em fin-components.css */
 
         /* FILTERS - Redesigned */
@@ -669,7 +666,6 @@
     <script src="/js/tooltips-professional.js?v=20260209"></script>
 
     <!-- Header & Sidebar refinado -->
-    <link rel="stylesheet" href="css/fin-header-sidebar.css?v=20260215">
     <!-- Global Header & Sidebar - override final unificado -->
     <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260216">
     <script src="/js/anti-copy-protection.js"></script>
@@ -879,7 +875,7 @@
                         <h3>Títulos Liquidados</h3>
                         <p>Listagem de todos os títulos que foram pagos/recebidos no período selecionado.</p>
                         <div class="relatorio-actions">
-                            <button class="btn btn-secondary btn-sm"><i class="fas fa-eye"></i> Visualizar</button>
+                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); abrirRelatório('títulos-liquidados')"><i class="fas fa-eye"></i> Visualizar</button>
                             <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatório('títulos-liquidados', 'pdf')"><i class="fas fa-file-pdf"></i></button>
                             <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatório('títulos-liquidados', 'excel')"><i class="fas fa-file-excel"></i></button>
                         </div>
@@ -890,7 +886,7 @@
                         <h3>Títulos Vencidos</h3>
                         <p>Títulos com data de vencimento ultrapassada e ainda não liquidados.</p>
                         <div class="relatorio-actions">
-                            <button class="btn btn-secondary btn-sm"><i class="fas fa-eye"></i> Visualizar</button>
+                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); abrirRelatório('títulos-vencidos')"><i class="fas fa-eye"></i> Visualizar</button>
                             <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatório('títulos-vencidos', 'pdf')"><i class="fas fa-file-pdf"></i></button>
                             <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatório('títulos-vencidos', 'excel')"><i class="fas fa-file-excel"></i></button>
                         </div>
@@ -901,7 +897,7 @@
                         <h3>Títulos a Vencer</h3>
                         <p>Títulos com vencimento futuro, organizados por data de vencimento.</p>
                         <div class="relatorio-actions">
-                            <button class="btn btn-secondary btn-sm"><i class="fas fa-eye"></i> Visualizar</button>
+                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); abrirRelatório('títulos-a-vencer')"><i class="fas fa-eye"></i> Visualizar</button>
                             <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatório('títulos-a-vencer', 'pdf')"><i class="fas fa-file-pdf"></i></button>
                             <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatório('títulos-a-vencer', 'excel')"><i class="fas fa-file-excel"></i></button>
                         </div>
@@ -912,7 +908,7 @@
                         <h3>Por Cliente</h3>
                         <p>Títulos a receber agrupados por cliente, com totais e detalhamento.</p>
                         <div class="relatorio-actions">
-                            <button class="btn btn-secondary btn-sm"><i class="fas fa-eye"></i> Visualizar</button>
+                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); abrirRelatório('títulos-por-cliente')"><i class="fas fa-eye"></i> Visualizar</button>
                             <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatório('títulos-por-cliente', 'pdf')"><i class="fas fa-file-pdf"></i></button>
                             <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatório('títulos-por-cliente', 'excel')"><i class="fas fa-file-excel"></i></button>
                         </div>
@@ -923,7 +919,7 @@
                         <h3>Portador "Carteira"</h3>
                         <p>Títulos em carteira (não enviados para cobrança bancária).</p>
                         <div class="relatorio-actions">
-                            <button class="btn btn-secondary btn-sm"><i class="fas fa-eye"></i> Visualizar</button>
+                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); abrirRelatório('portador-carteira')"><i class="fas fa-eye"></i> Visualizar</button>
                             <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatório('portador-carteira', 'pdf')"><i class="fas fa-file-pdf"></i></button>
                             <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatório('portador-carteira', 'excel')"><i class="fas fa-file-excel"></i></button>
                         </div>

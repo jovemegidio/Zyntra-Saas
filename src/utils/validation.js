@@ -10,8 +10,21 @@
  * @param {any} id - ID a ser validado
  * @returns {{valid: boolean, value: number|null, error: string|null}}
  */
+function parseStrictInteger(value) {
+    if (typeof value === 'number') {
+        return Number.isInteger(value) ? value : null;
+    }
+
+    if (typeof value === 'string') {
+        const trimmed = value.trim();
+        if (/^\d+$/.test(trimmed)) return Number(trimmed);
+    }
+
+    return null;
+}
+
 function validateId(id) {
-    const parsed = parseInt(id, 10);
+    const parsed = parseStrictInteger(id);
     if (!Number.isInteger(parsed) || parsed <= 0) {
         return { valid: false, value: null, error: 'ID deve ser um número inteiro positivo' };
     }
@@ -133,7 +146,7 @@ function validateEmail(email) {
  * @returns {{valid: boolean, value: number|null, error: string|null}}
  */
 function validateMonth(month) {
-    const parsed = parseInt(month, 10);
+    const parsed = parseStrictInteger(month);
     if (!Number.isInteger(parsed) || parsed < 1 || parsed > 12) {
         return { valid: false, value: null, error: 'Mês deve ser um número entre 1 e 12' };
     }
@@ -146,7 +159,7 @@ function validateMonth(month) {
  * @returns {{valid: boolean, value: number|null, error: string|null}}
  */
 function validateYear(year) {
-    const parsed = parseInt(year, 10);
+    const parsed = parseStrictInteger(year);
     if (!Number.isInteger(parsed) || parsed < 2000 || parsed > 2100) {
         return { valid: false, value: null, error: 'Ano deve ser um número entre 2000 e 2100' };
     }
@@ -168,7 +181,7 @@ function validateLimit(limit, options = {}) {
         return { valid: true, value: defaultValue, error: null };
     }
     
-    const parsed = parseInt(limit, 10);
+    const parsed = parseStrictInteger(limit);
     if (!Number.isInteger(parsed) || parsed < 1) {
         return { valid: false, value: defaultValue, error: 'Limite deve ser um número positivo' };
     }

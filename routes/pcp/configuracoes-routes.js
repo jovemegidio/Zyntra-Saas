@@ -11,7 +11,63 @@ module.exports = function registerConfiguracoesRoutes(router, deps) {
     const path = require('path');
     const fs = require('fs');
     const multer = require('multer');
-    const upload = multer({ dest: path.join(__dirname, '..', '..', 'uploads'), limits: { fileSize: 10 * 1024 * 1024 } });
+
+    // Em produção (Linux/VPS), salvar em /var/www/uploads/empresa para sobreviver deploys
+    const empresaUploadDir = process.platform !== 'win32'
+        ? '/var/www/uploads/empresa'
+        : path.join(__dirname, '..', '..', 'public', 'uploads', 'empresa');
+    if (!fs.existsSync(empresaUploadDir)) {
+        fs.mkdirSync(empresaUploadDir, { recursive: true });
+    }
+
+    const uploadEmpresa = multer({
+        storage: multer.diskStorage({
+            destination: (_req, _file, cb) => cb(null, empresaUploadDir),
+            filename: (_req, file, cb) => {
+                const ext = path.extname(file.originalname).toLowerCase();
+                cb(null, file.fieldname + '-' + Date.now() + ext);
+            }
+        }),
+        limits: { fileSize: 2 * 1024 * 1024 },
+        fileFilter: (_req, file, cb) => {
+            if (file.mimetype.startsWith('image/')) cb(null, true);
+            else cb(new Error('Apenas imagens são aceitas'));
+        }
+    });
+
+    // Helpers para defaults por marca
+    const BRAND_DEFAULTS = {
+        'labor-energy': {
+            razao_social: 'Labor Energy Comércio de Condutores Ltda',
+            nome_fantasia: 'Labor Energy',
+            telefone: '',
+            estado: 'SP'
+        },
+        'labor-eletric': {
+            razao_social: 'Labor Elétric Comércio de Condutores Ltda',
+            nome_fantasia: 'Labor Elétric',
+            telefone: '',
+            estado: 'SP'
+        },
+        'zyntra': {
+            razao_social: 'Zyntra Tecnologia Ltda',
+            nome_fantasia: 'Zyntra',
+            telefone: '',
+            estado: 'SP'
+        },
+        'aluforce': {
+            razao_social: 'I. M. DOS REIS - ALUFORCE INDUSTRIA E COMERCIO DE CONDUTORES',
+            nome_fantasia: 'ALUFORCE INDUSTRIA E COMERCIO DE CONDUTORES ELETRICOS',
+            cnpj: '68.192.475/0001-60',
+            telefone: '(11) 91793-9089',
+            cep: '08537-400',
+            estado: 'SP',
+            cidade: 'Ferraz de Vasconcelos',
+            bairro: 'VILA SÃO JOÃO',
+            endereco: 'RUA ERNESTINA',
+            numero: '270'
+        }
+    };
 
     // ========================================
     // API: CONFIGURAÇÕES DA EMPRESA
@@ -27,20 +83,8 @@ module.exports = function registerConfiguracoesRoutes(router, deps) {
             if (rows.length > 0) {
                 res.json(rows[0]);
             } else {
-                // Retorna dados padrão da Aluforce
-                res.json({
-                    razao_social: 'I. M. DOS REIS - ALUFORCE INDUSTRIA E COMERCIO DE CONDUTORES',
-                    nome_fantasia: 'ALUFORCE INDUSTRIA E COMERCIO DE CONDUTORES ELETRICOS',
-                    cnpj: '68.192.475/0001-60',
-                    telefone: '(11) 91793-9089',
-                    cep: '08537-400',
-                    estado: 'SP',
-                    cidade: 'Ferraz de Vasconcelos (SP)',
-                    bairro: 'VILA SÃO JOÃO',
-                    endereco: 'RUA ERNESTINA',
-                    numero: '270',
-                    complemento: ''
-                });
+                const brand = (process.env.BRAND || 'aluforce').toLowerCase();
+                res.json(BRAND_DEFAULTS[brand] || BRAND_DEFAULTS['aluforce']);
             }
         } catch (error) {
             console.error('❌ Erro ao buscar configurações:', error);
@@ -55,6 +99,7 @@ module.exports = function registerConfiguracoesRoutes(router, deps) {
 
             const {
                 razao_social, nome_fantasia, cnpj, inscricao_estadual, inscricao_municipal,
+                regime_tributario, atividade_principal,
                 telefone, email, site, cep, estado, cidade, bairro, endereco, numero, complemento
             } = req.body;
 
@@ -62,35 +107,37 @@ module.exports = function registerConfiguracoesRoutes(router, deps) {
             const [existing] = await pool.query('SELECT id FROM configuracoes_empresa LIMIT 1');
 
             if (existing.length > 0) {
-                // Atualizar registro existente
                 await pool.query(`
                     UPDATE configuracoes_empresa
                     SET razao_social = ?, nome_fantasia = ?, cnpj = ?, inscricao_estadual = ?,
-                        inscricao_municipal = ?, telefone = ?, email = ?, site = ?, cep = ?,
+                        inscricao_municipal = ?, regime_tributario = ?, atividade_principal = ?,
+                        telefone = ?, email = ?, site = ?, cep = ?,
                         estado = ?, cidade = ?, bairro = ?, endereco = ?, numero = ?, complemento = ?
                     WHERE id = ?
                 `, [razao_social, nome_fantasia, cnpj, inscricao_estadual, inscricao_municipal,
+                    regime_tributario || null, atividade_principal || null,
                     telefone, email, site, cep, estado, cidade, bairro, endereco, numero, complemento,
                     existing[0].id]);
-
-                console.log('✅ Configurações atualizadas');
             } else {
-                // Inserir novo registro
                 await pool.query(`
                     INSERT INTO configuracoes_empresa
                     (razao_social, nome_fantasia, cnpj, inscricao_estadual, inscricao_municipal,
+                     regime_tributario, atividade_principal,
                      telefone, email, site, cep, estado, cidade, bairro, endereco, numero, complemento)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 `, [razao_social, nome_fantasia, cnpj, inscricao_estadual, inscricao_municipal,
+                    regime_tributario || null, atividade_principal || null,
                     telefone, email, site, cep, estado, cidade, bairro, endereco, numero, complemento]);
-
-                console.log('✅ Configurações criadas');
             }
 
-            res.json({
-                success: true,
-                message: 'Configurações salvas com sucesso!'
-            });
+            // Invalidar cache para que o próximo GET busque dados frescos
+            try {
+                const cacheService = require('../../services/cache');
+                await cacheService.cacheDelete('cfg_empresa');
+            } catch (_) { /* cache opcional */ }
+
+            console.log('✅ Configurações da empresa salvas');
+            res.json({ success: true, message: 'Configurações salvas com sucesso!' });
 
         } catch (error) {
             console.error('❌ Erro ao salvar configurações:', error);
@@ -103,78 +150,62 @@ module.exports = function registerConfiguracoesRoutes(router, deps) {
     });
 
     // POST - Upload de logo da empresa
-    router.post('/api/configuracoes/upload-logo', authenticateToken, authorizeAdmin, upload.single('logo'), async (req, res) => {
+    router.post('/api/configuracoes/upload-logo', authenticateToken, authorizeAdmin, uploadEmpresa.single('logo'), async (req, res) => {
         try {
-            console.log('🖼️ Upload de logo da empresa...');
-
             if (!req.file) {
                 return res.status(400).json({ success: false, error: 'Nenhum arquivo enviado' });
             }
 
             const logoPath = '/uploads/empresa/' + req.file.filename;
 
-            // Atualizar URL do logo no banco de dados
             const [existing] = await pool.query('SELECT id FROM configuracoes_empresa LIMIT 1');
-
             if (existing.length > 0) {
-                await pool.query('UPDATE configuracoes_empresa SET logo_url = ? WHERE id = ?', [logoPath, existing[0].id]);
+                await pool.query('UPDATE configuracoes_empresa SET logo_path = ? WHERE id = ?', [logoPath, existing[0].id]);
             } else {
-                await pool.query('INSERT INTO configuracoes_empresa (logo_url) VALUES (?)', [logoPath]);
+                await pool.query('INSERT INTO configuracoes_empresa (logo_path) VALUES (?)', [logoPath]);
             }
 
-            console.log('✅ Logo atualizado:', logoPath);
+            try {
+                const cacheService = require('../../services/cache');
+                await cacheService.cacheDelete('cfg_empresa');
+            } catch (_) { /* cache opcional */ }
 
-            res.json({
-                success: true,
-                url: logoPath,
-                message: 'Logo atualizado com sucesso!'
-            });
+            console.log('✅ Logo atualizado:', logoPath);
+            res.json({ success: true, url: logoPath, message: 'Logo atualizado com sucesso!' });
 
         } catch (error) {
             console.error('❌ Erro ao fazer upload do logo:', error);
-            res.status(500).json({
-                success: false,
-                error: 'Erro ao fazer upload do logo',
-                message: error.message
-            });
+            res.status(500).json({ success: false, error: 'Erro ao fazer upload do logo', message: error.message });
         }
     });
 
     // POST - Upload de favicon da empresa
-    router.post('/api/configuracoes/upload-favicon', authenticateToken, authorizeAdmin, upload.single('favicon'), async (req, res) => {
+    router.post('/api/configuracoes/upload-favicon', authenticateToken, authorizeAdmin, uploadEmpresa.single('favicon'), async (req, res) => {
         try {
-            console.log('🖼️ Upload de favicon da empresa...');
-
             if (!req.file) {
                 return res.status(400).json({ success: false, error: 'Nenhum arquivo enviado' });
             }
 
             const faviconPath = '/uploads/empresa/' + req.file.filename;
 
-            // Atualizar URL do favicon no banco de dados
             const [existing] = await pool.query('SELECT id FROM configuracoes_empresa LIMIT 1');
-
             if (existing.length > 0) {
-                await pool.query('UPDATE configuracoes_empresa SET favicon_url = ? WHERE id = ?', [faviconPath, existing[0].id]);
+                await pool.query('UPDATE configuracoes_empresa SET favicon_path = ? WHERE id = ?', [faviconPath, existing[0].id]);
             } else {
-                await pool.query('INSERT INTO configuracoes_empresa (favicon_url) VALUES (?)', [faviconPath]);
+                await pool.query('INSERT INTO configuracoes_empresa (favicon_path) VALUES (?)', [faviconPath]);
             }
 
-            console.log('✅ Favicon atualizado:', faviconPath);
+            try {
+                const cacheService = require('../../services/cache');
+                await cacheService.cacheDelete('cfg_empresa');
+            } catch (_) { /* cache opcional */ }
 
-            res.json({
-                success: true,
-                url: faviconPath,
-                message: 'Favicon atualizado com sucesso!'
-            });
+            console.log('✅ Favicon atualizado:', faviconPath);
+            res.json({ success: true, url: faviconPath, message: 'Favicon atualizado com sucesso!' });
 
         } catch (error) {
             console.error('❌ Erro ao fazer upload do favicon:', error);
-            res.status(500).json({
-                success: false,
-                error: 'Erro ao fazer upload do favicon',
-                message: error.message
-            });
+            res.status(500).json({ success: false, error: 'Erro ao fazer upload do favicon', message: error.message });
         }
     });
 

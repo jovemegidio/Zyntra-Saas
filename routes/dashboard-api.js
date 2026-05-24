@@ -73,11 +73,11 @@ router.get('/kpis', async (req, res) => {
                 AND status IN ('a_vencer', 'vencida', 'pendente', 'aberto')
             `).catch(() => [[{ total: 0 }]]),
 
-            // BUG-003: Ordens ativas — exclui apenas terminais (alinhado com query do PCP)
+            // UI-02: Alinhado com whitelist de status ativos do PCP (pcp-routes.js linha ~352)
             db.query(`
                 SELECT COUNT(*) as total
                 FROM ordens_producao
-                WHERE status NOT IN ('concluida', 'cancelada', 'finalizada', 'Concluída', 'Cancelada', 'Finalizada')
+                WHERE status IN ('ativa', 'em_producao', 'Em Produção', 'em_andamento', 'A Fazer', 'pendente', 'planejada', 'Planejada')
             `).catch(() => [[{ total: 0 }]])
         ]);
         
@@ -244,11 +244,11 @@ router.get('/modules', async (req, res) => {
             financeiro,
             rh
         ] = await Promise.allSettled([
-            // Compras: pedidos de compra pendentes ou em andamento
+            // Compras: pedidos de compra não finalizados/cancelados
             db.query(`
-                SELECT COUNT(*) as total 
-                FROM pedidos_compra 
-                WHERE status IN ('pendente', 'aprovado', 'parcial', 'em_andamento')
+                SELECT COUNT(*) as total
+                FROM pedidos_compra
+                WHERE status NOT IN ('cancelado', 'rejeitado', 'concluido', 'finalizado', 'entregue', 'deletado', 'arquivado')
             `).catch(() => [[{ total: 0 }]]),
             
             // Vendas: orçamentos em aberto (usar pedidos se orcamentos não existir)

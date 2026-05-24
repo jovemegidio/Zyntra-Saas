@@ -168,22 +168,52 @@ module.exports = function createRHRoutes(deps) {
         try {
             const { status, departamento, search, limit = 100, offset = 0 } = req.query;
 
-            let sql = `
-                SELECT
-                    id, nome_completo, email, cpf, rg, telefone,
-                    cargo, departamento, status, role,
-                    data_nascimento, data_admissao,
-                    estado_civil, nacionalidade, naturalidade,
-                    endereco, foto_perfil_url, foto_thumb_url,
-                    pis_pasep, ctps_numero, ctps_serie,
-                    banco, agencia, conta_corrente,
-                    tipo_chave_pix, chave_pix,
-                    dependentes, cnh, certificado_reservista,
-                    titulo_eleitor, zona_eleitoral, secao_eleitoral,
-                    filiacao_mae, filiacao_pai, dados_conjuge
-                FROM funcionarios
-                WHERE 1=1
-            `;
+            // BE-005: Verificar se o usuário tem acesso explícito ao módulo RH
+            // Apenas usuários com área 'rh' recebem campos PII sensíveis
+            const userAreas = req.user?.areas || [];
+            const hasRhAccess = req.user?.is_admin === 1 ||
+                (Array.isArray(userAreas) && (userAreas.includes('rh') || userAreas.includes('RH')));
+
+            let sql;
+            if (hasRhAccess) {
+                // Acesso RH completo — todos os campos PII
+                sql = `
+                    SELECT
+                        id, nome_completo, email, cpf, rg, telefone,
+                        cargo, departamento, status, role,
+                        data_nascimento, data_admissao,
+                        estado_civil, nacionalidade, naturalidade,
+                        endereco, foto_perfil_url, foto_thumb_url,
+                        pis_pasep, ctps_numero, ctps_serie,
+                        banco, agencia, conta_corrente,
+                        tipo_chave_pix, chave_pix,
+                        dependentes, cnh, certificado_reservista,
+                        titulo_eleitor, zona_eleitoral, secao_eleitoral,
+                        filiacao_mae, filiacao_pai, dados_conjuge
+                    FROM funcionarios
+                    WHERE 1=1
+                `;
+            } else {
+                // Acesso sem RH — apenas campos não-PII (BE-005: conformidade LGPD)
+                sql = `
+                    SELECT
+                        id, nome_completo,
+                        CONCAT(SUBSTRING_INDEX(email,'@',1), '@***') AS email,
+                        NULL AS cpf, NULL AS rg,
+                        cargo, departamento, status, role,
+                        NULL AS data_nascimento, data_admissao,
+                        NULL AS estado_civil, NULL AS nacionalidade, NULL AS naturalidade,
+                        NULL AS endereco, foto_perfil_url, foto_thumb_url,
+                        NULL AS pis_pasep, NULL AS ctps_numero, NULL AS ctps_serie,
+                        NULL AS banco, NULL AS agencia, NULL AS conta_corrente,
+                        NULL AS tipo_chave_pix, NULL AS chave_pix,
+                        NULL AS dependentes, NULL AS cnh, NULL AS certificado_reservista,
+                        NULL AS titulo_eleitor, NULL AS zona_eleitoral, NULL AS secao_eleitoral,
+                        NULL AS filiacao_mae, NULL AS filiacao_pai, NULL AS dados_conjuge
+                    FROM funcionarios
+                    WHERE 1=1
+                `;
+            }
             const params = [];
 
             if (status) {
@@ -195,9 +225,9 @@ module.exports = function createRHRoutes(deps) {
                 params.push(departamento);
             }
             if (search) {
-                sql += ' AND (nome_completo LIKE ? OR email LIKE ? OR cargo LIKE ? OR cpf LIKE ?)';
+                sql += ' AND (nome_completo LIKE ? OR email LIKE ? OR cargo LIKE ?)';
                 const searchTerm = `%${search}%`;
-                params.push(searchTerm, searchTerm, searchTerm, searchTerm);
+                params.push(searchTerm, searchTerm, searchTerm);
             }
 
             sql += ' ORDER BY nome_completo ASC LIMIT ? OFFSET ?';
@@ -223,18 +253,21 @@ module.exports = function createRHRoutes(deps) {
             const [cargoRows] = await pool.query('SELECT DISTINCT cargo FROM funcionarios WHERE cargo IS NOT NULL AND cargo != "" ORDER BY cargo');
             const cargos = cargoRows.map(r => r.cargo);
 
-            // Descriptografar CPF/RG (LGPD)
-            const _dec = lgpdCrypto ? lgpdCrypto.decryptPII : (v => v);
-            rows.forEach(r => {
-                if (r.cpf) r.cpf = _dec(r.cpf);
-                if (r.rg) r.rg = _dec(r.rg);
-            });
+            // Descriptografar CPF/RG (LGPD) — apenas se usuário tem acesso RH
+            if (hasRhAccess) {
+                const _dec = lgpdCrypto ? lgpdCrypto.decryptPII : (v => v);
+                rows.forEach(r => {
+                    if (r.cpf) r.cpf = _dec(r.cpf);
+                    if (r.rg) r.rg = _dec(r.rg);
+                });
+            }
 
             res.json({
                 funcionarios: rows,
                 stats: stats || { total: 0, ativos: 0, aniversariantes: 0, admissoes_mes: 0 },
                 departamentos,
-                cargos
+                cargos,
+                pii_masked: !hasRhAccess // Indicador para o frontend saber se os dados estão mascarados
             });
         } catch (error) {
             console.error('Erro ao listar funcionários:', error);

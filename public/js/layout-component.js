@@ -16,13 +16,13 @@
     // ── 1. CONFIGURAÇÃO DOS MÓDULOS ────────────────────────────────
     const MODULOS = [
         { slug: 'dashboard',   icon: 'fas fa-home',               label: 'Painel',           href: '/dashboard' },
-        { slug: 'vendas',      icon: 'fas fa-shopping-cart',      label: 'Vendas',            href: '/modules/Vendas/public/index.html' },
-        { slug: 'faturamento', icon: 'fas fa-file-invoice-dollar',label: 'Faturamento',       href: '/modules/Faturamento/public/index.html' },
-        { slug: 'financeiro',  icon: 'fas fa-wallet',             label: 'Financeiro',        href: '/modules/Financeiro/index.html' },
-        { slug: 'compras',     icon: 'fas fa-truck-loading',      label: 'Compras',           href: '/modules/Compras/index.html' },
-        { slug: 'pcp',         icon: 'fas fa-industry',           label: 'PCP',               href: '/modules/PCP/index.html' },
-        { slug: 'logistica',   icon: 'fas fa-shipping-fast',      label: 'Log\u00edstica',    href: '/modules/Logistica/public/index.html' },
-        { slug: 'rh',          icon: 'fas fa-users',              label: 'RH',                href: '/modules/RH/index.html' },
+        { slug: 'vendas',      icon: 'fas fa-shopping-cart',      label: 'Vendas',            href: '/Vendas/' },
+        { slug: 'faturamento', icon: 'fas fa-file-invoice-dollar',label: 'Faturamento',       href: '/Faturamento/emitir' },
+        { slug: 'financeiro',  icon: 'fas fa-wallet',             label: 'Financeiro',        href: '/Financeiro/contas_pagar' },
+        { slug: 'compras',     icon: 'fas fa-truck-loading',      label: 'Compras',           href: '/Compras/' },
+        { slug: 'pcp',         icon: 'fas fa-industry',           label: 'PCP',               href: '/PCP/' },
+        { slug: 'logistica',   icon: 'fas fa-shipping-fast',      label: 'Log\u00edstica',    href: '/Logistica/index.html' },
+        { slug: 'rh',          icon: 'fas fa-users',              label: 'RH',                href: '/RH/' },
         { slug: 'relatorios',  icon: 'fas fa-chart-bar',          label: 'Relat\u00f3rios',   href: '/relatorios', bottom: true },
         { slug: 'config',      icon: 'fas fa-cog',                label: 'Configura\u00e7\u00f5es', href: '/config.html', bottom: true },
     ];
@@ -175,14 +175,10 @@
             container = wrapper;
         }
 
-        // ── Verificar se já existe sidebar com navegação do módulo ────
-        // Se existir, PRESERVAR (respeitar navegação intra-módulo específica).
-        // Se não existir, injetar o sidebar de navegação cross-módulo.
-        const existingSidebar = container.querySelector('aside.sidebar:not(#zc-sidebar)');
-        const hasManagedSidebar = !!document.getElementById('zc-sidebar');
-        const shouldInjectSidebar = !existingSidebar && !hasManagedSidebar;
+        // Remover sidebar e header existentes (hardcoded ou gerenciados) para substituir pelo padronizado
+        const existingSidebar = container.querySelector('aside.sidebar');
+        if (existingSidebar) existingSidebar.remove();
 
-        // Remover apenas duplicatas gerenciadas por este script
         const zcSidebar  = document.getElementById('zc-sidebar');
         const zcOverlay  = document.getElementById('zc-sidebar-overlay');
         const zcHeader   = document.getElementById('zc-header');
@@ -190,8 +186,7 @@
         if (zcOverlay)  zcOverlay.remove();
         if (zcHeader)   zcHeader.remove();
 
-        // Remover header hardcoded (sempre substituído pelo padronizado)
-        const existingHeader = container.querySelector('header.header:not(#zc-header)');
+        const existingHeader = container.querySelector('header.header');
         if (existingHeader) existingHeader.remove();
 
         // Garantir .main-area
@@ -210,24 +205,11 @@
             container.appendChild(mainArea);
         }
 
-        if (shouldInjectSidebar) {
-            // Nenhum sidebar existente → injetar sidebar de navegação cross-módulo
-            const sidebarFrag = document.createElement('div');
-            sidebarFrag.innerHTML = buildSidebar(moduloAtivo);
-            while (sidebarFrag.firstChild) {
-                container.insertBefore(sidebarFrag.firstChild, mainArea);
-            }
-        } else if (existingSidebar && !existingSidebar.id) {
-            // Sidebar existente sem ID → atribuir ID para ser gerenciado
-            existingSidebar.id = 'zc-sidebar';
-            // Atualizar botão ativo no sidebar existente
-            if (moduloAtivo) {
-                existingSidebar.querySelectorAll('.sidebar-btn').forEach(function (btn) {
-                    const href = btn.getAttribute('href') || '';
-                    const isActive = href.toLowerCase().includes(moduloAtivo);
-                    btn.classList.toggle('active', isActive);
-                });
-            }
+        // Sempre injetar o sidebar padronizado dark
+        const sidebarFrag = document.createElement('div');
+        sidebarFrag.innerHTML = buildSidebar(moduloAtivo);
+        while (sidebarFrag.firstChild) {
+            container.insertBefore(sidebarFrag.firstChild, mainArea);
         }
 
         // Sempre injetar/substituir o header (padronização visual)

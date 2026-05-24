@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Treinamentos</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:#f1f5f9;color:#1e293b;min-height:100vh;}
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* ── Header ── */
+.hdr{background:linear-gradient(135deg,#1e1b4b,#312e81);color:white;padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,.3);}
+.hdr-left{display:flex;align-items:center;gap:16px;}
+.hdr-logo{font-size:18px;font-weight:700;letter-spacing:-.5px;}
+.hdr-sep{width:1px;height:24px;background:rgba(255,255,255,.2);}
+.hdr-title{font-size:15px;font-weight:500;opacity:.9;}
+.hdr-right{display:flex;align-items:center;gap:10px;}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:600;transition:.15s;}
+.btn-primary{background:#6366f1;color:white;}
+.btn-primary:hover{background:#4f46e5;}
+.btn-sm{padding:5px 11px;font-size:12px;}
+.btn-ghost{background:rgba(255,255,255,.12);color:white;}
+.btn-ghost:hover{background:rgba(255,255,255,.22);}
+.btn-danger{background:#fee2e2;color:#dc2626;}
+.btn-danger:hover{background:#fecaca;}
+.btn-warning{background:#fef3c7;color:#d97706;}
+
+/* ── Stats ── */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;padding:20px 24px 0;}
+.stat-card{background:white;border-radius:12px;padding:16px 20px;box-shadow:0 1px 3px rgba(0,0,0,.06);}
+.stat-num{font-size:28px;font-weight:700;color:#6366f1;}
+.stat-label{font-size:12px;color:#64748b;font-weight:500;margin-top:2px;}
+
+/* ── Toolbar ── */
+.toolbar{display:flex;align-items:center;gap:10px;padding:16px 24px;flex-wrap:wrap;}
+.search-box{display:flex;align-items:center;gap:8px;background:white;border:1px solid #e2e8f0;border-radius:8px;padding:8px 12px;flex:1;max-width:300px;}
+.search-box input{border:none;outline:none;font-size:13px;width:100%;background:transparent;}
+.filter-select{padding:8px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;background:white;color:#374151;}
+
+/* ── Grid ── */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;padding:0 24px 24px;}
+.card{background:white;border-radius:14px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.07);transition:.2s;}
+.card:hover{box-shadow:0 4px 16px rgba(0,0,0,.12);transform:translateY(-2px);}
+.card-thumb{position:relative;height:168px;background:#e2e8f0;overflow:hidden;}
+.card-thumb img{width:100%;height:100%;object-fit:cover;}
+.card-thumb-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1e1b4b,#4c1d95);}
+.card-thumb-placeholder i{font-size:40px;color:rgba(255,255,255,.4);}
+.card-badge{position:absolute;top:10px;left:10px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;}
+.badge-pub{background:#d1fae5;color:#065f46;}
+.badge-ras{background:#fef3c7;color:#92400e;}
+.badge-arq{background:#f3f4f6;color:#6b7280;}
+.card-dur{position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.7);color:white;padding:2px 7px;border-radius:6px;font-size:11px;font-weight:600;}
+.card-body{padding:14px 16px;}
+.card-cat{font-size:11px;font-weight:600;color:#6366f1;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;}
+.card-title{font-size:15px;font-weight:600;color:#1e293b;margin-bottom:6px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.card-desc{font-size:12px;color:#64748b;margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.card-meta{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:#94a3b8;margin-bottom:12px;}
+.card-actions{display:flex;gap:7px;}
+.empty{padding:48px;text-align:center;color:#94a3b8;grid-column:1/-1;}
+.empty i{font-size:40px;display:block;margin-bottom:12px;}
+
+/* ── Drawer ── */
+.drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;display:none;opacity:0;transition:opacity .25s;}
+.drawer-overlay.open{display:block;opacity:1;}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:520px;max-width:100vw;background:white;z-index:1001;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;box-shadow:-4px 0 24px rgba(0,0,0,.15);}
+.drawer.open{transform:none;}
+.drawer-hdr{padding:20px 24px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.drawer-hdr h3{font-size:16px;font-weight:700;}
+.drawer-body{padding:24px;flex:1;overflow-y:auto;}
+.drawer-footer{padding:16px 24px;border-top:1px solid #f1f5f9;display:flex;justify-content:flex-end;gap:10px;flex-shrink:0;}
+
+/* ── Form ── */
+.form-group{margin-bottom:16px;}
+.form-label{display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;}
+.form-label span{color:#ef4444;margin-left:2px;}
+.form-control{width:100%;padding:9px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px;outline:none;transition:.15s;}
+.form-control:focus{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.12);}
+textarea.form-control{resize:vertical;min-height:80px;}
+select.form-control{background:white;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+/* ── Upload area ── */
+.upload-area{border:2px dashed #e2e8f0;border-radius:10px;padding:24px;text-align:center;cursor:pointer;transition:.2s;background:#fafafa;}
+.upload-area:hover,.upload-area.drag{border-color:#6366f1;background:#f5f3ff;}
+.upload-area i{font-size:28px;color:#6366f1;margin-bottom:8px;display:block;}
+.upload-area p{font-size:13px;color:#64748b;}
+.upload-area .fname{font-size:13px;font-weight:600;color:#1e293b;margin-top:8px;word-break:break-all;}
+.upload-area input[type=file]{display:none;}
+
+/* ── Progress ── */
+.progress-wrap{display:none;margin-top:10px;}
+.progress-bar-bg{background:#e2e8f0;border-radius:99px;height:6px;overflow:hidden;}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,#6366f1,#8b5cf6);border-radius:99px;width:0%;transition:width .2s;}
+.progress-info{display:flex;justify-content:space-between;font-size:11px;color:#64748b;margin-top:4px;}
+
+/* ── Video modal ── */
+.vmodal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:2000;display:none;align-items:center;justify-content:center;}
+.vmodal-overlay.open{display:flex;}
+.vmodal{background:#000;border-radius:12px;overflow:hidden;max-width:90vw;max-height:90vh;width:900px;position:relative;}
+.vmodal video{width:100%;display:block;max-height:85vh;}
+.vmodal-close{position:absolute;top:12px;right:12px;background:rgba(255,255,255,.15);border:none;color:white;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;}
+
+/* ── Loading ── */
+.spinner{display:inline-block;width:20px;height:20px;border:2px solid #e2e8f0;border-top-color:#6366f1;border-radius:50%;animation:spin .6s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Toast ── */
+#toast{position:fixed;bottom:24px;right:24px;padding:12px 18px;border-radius:10px;font-size:13px;font-weight:600;color:white;z-index:9999;transform:translateY(80px);opacity:0;transition:.3s;pointer-events:none;}
+#toast.show{transform:none;opacity:1;}
+#toast.success{background:#10b981;}
+#toast.error{background:#ef4444;}
+#toast.info{background:#6366f1;}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-left">
+    <span class="hdr-logo">Zyntra Admin</span>
+    <div class="hdr-sep"></div>
+    <span class="hdr-title"><i class="fas fa-play-circle"></i> Treinamentos</span>
+  </div>
+  <div class="hdr-right">
+    <a href="/dashboard" class="btn btn-ghost btn-sm"><i class="fas fa-th-large"></i> Dashboard</a>
+    <button class="btn btn-primary" onclick="abrirDrawer()"><i class="fas fa-plus"></i> Novo Treinamento</button>
+  </div>
+</div>
+
+<div class="stats" id="stats">
+  <div class="stat-card"><div class="stat-num" id="st-total">—</div><div class="stat-label">Total de Vídeos</div></div>
+  <div class="stat-card"><div class="stat-num" id="st-pub">—</div><div class="stat-label">Publicados</div></div>
+  <div class="stat-card"><div class="stat-num" id="st-views">—</div><div class="stat-label">Visualizações</div></div>
+  <div class="stat-card"><div class="stat-num" id="st-size">—</div><div class="stat-label">Espaço Usado</div></div>
+</div>
+
+<div class="toolbar">
+  <div class="search-box">
+    <i class="fas fa-search" style="color:#94a3b8;font-size:13px;"></i>
+    <input type="text" id="busca" placeholder="Buscar treinamento..." oninput="filtrar()">
+  </div>
+  <select class="filter-select" id="filtro-status" onchange="filtrar()">
+    <option value="">Todos os status</option>
+    <option value="publicado">Publicado</option>
+    <option value="rascunho">Rascunho</option>
+    <option value="arquivado">Arquivado</option>
+  </select>
+  <select class="filter-select" id="filtro-cat" onchange="filtrar()">
+    <option value="">Todas as categorias</option>
+  </select>
+  <button class="btn btn-ghost" style="background:#e2e8f0;color:#475569;" onclick="carregarTudo()">
+    <i class="fas fa-sync-alt"></i>
+  </button>
+</div>
+
+<div class="grid" id="grid">
+  <div class="empty"><i class="fas fa-spinner fa-spin"></i>Carregando...</div>
+</div>
+
+<!-- Drawer criar/editar -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="fecharDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-hdr">
+    <h3 id="drawer-title">Novo Treinamento</h3>
+    <button onclick="fecharDrawer()" style="background:#f1f5f9;border:none;width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:16px;">×</button>
+  </div>
+  <div class="drawer-body">
+    <input type="hidden" id="f-id">
+
+    <div class="form-group">
+      <label class="form-label">Título <span>*</span></label>
+      <input type="text" id="f-titulo" class="form-control" placeholder="Nome do treinamento">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Descrição</label>
+      <textarea id="f-desc" class="form-control" placeholder="Descreva o conteúdo do treinamento..."></textarea>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Categoria</label>
+        <input type="text" id="f-cat" class="form-control" list="cats-list" placeholder="Ex: Segurança, Vendas...">
+        <datalist id="cats-list"></datalist>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Instrutor</label>
+        <input type="text" id="f-instrutor" class="form-control" placeholder="Nome do instrutor">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Carga Horária (min)</label>
+        <input type="number" id="f-carga" class="form-control" placeholder="0" min="0">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select id="f-status" class="form-control">
+          <option value="publicado">Publicado</option>
+          <option value="rascunho">Rascunho</option>
+          <option value="arquivado">Arquivado</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Arquivo de Vídeo</label>
+      <div class="upload-area" id="video-drop" onclick="document.getElementById('video-input').click()"
+           ondragover="e=>{e.preventDefault();this.classList.add('drag')}"
+           ondragleave="this.classList.remove('drag')"
+           ondrop="handleVideoDrop(event)">
+        <i class="fas fa-film"></i>
+        <p>Clique ou arraste o vídeo aqui</p>
+        <p style="font-size:11px;color:#94a3b8;margin-top:4px;">.mp4 · .webm · .mov · .avi — até 4 GB</p>
+        <div class="fname" id="video-name" style="display:none;"></div>
+        <input type="file" id="video-input" accept="video/mp4,video/webm,video/quicktime,video/x-msvideo,.mkv,.m4v" onchange="handleVideoSelect(this)">
+      </div>
+      <div class="progress-wrap" id="progress-wrap">
+        <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-fill"></div></div>
+        <div class="progress-info"><span id="progress-txt">Enviando...</span><span id="progress-pct">0%</span></div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Thumbnail (opcional)</label>
+      <div class="upload-area" id="thumb-drop" onclick="document.getElementById('thumb-input').click()"
+           ondragover="e=>{e.preventDefault();this.classList.add('drag')}"
+           ondragleave="this.classList.remove('drag')"
+           ondrop="handleThumbDrop(event)">
+        <i class="fas fa-image"></i>
+        <p>Clique ou arraste a imagem de capa</p>
+        <p style="font-size:11px;color:#94a3b8;margin-top:4px;">.jpg · .png · .webp</p>
+        <div class="fname" id="thumb-name" style="display:none;"></div>
+        <input type="file" id="thumb-input" accept="image/jpeg,image/png,image/webp,image/gif" onchange="handleThumbSelect(this)">
+      </div>
+    </div>
+  </div>
+  <div class="drawer-footer">
+    <button class="btn" style="background:#f1f5f9;color:#475569;" onclick="fecharDrawer()">Cancelar</button>
+    <button class="btn btn-primary" id="btn-salvar" onclick="salvar()"><i class="fas fa-save"></i> Salvar</button>
+  </div>
+</div>
+
+<!-- Modal vídeo -->
+<div class="vmodal-overlay" id="vmodal" onclick="fecharVideo(event)">
+  <div class="vmodal">
+    <video id="vplayer" controls preload="metadata" playsinline></video>
+    <button class="vmodal-close" onclick="fecharVideo()">×</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const TOKEN = () => localStorage.getItem('authToken') || localStorage.getItem('token') || '';
+const AUTH  = () => ({ 'Authorization': `Bearer ${TOKEN()}` });
+
+let _dados = [];
+let _videoFile = null;
+let _thumbFile = null;
+
+// ── Verificar autenticação admin ─────────────────────────────────────────────
+async function checkAuth() {
+    try {
+        const r = await fetch('/api/auth/me', { headers: AUTH() });
+        if (!r.ok) { window.location.href = '/login.html'; return false; }
+        const u = await r.json();
+        if (!u.is_admin && u.role !== 'admin' && u.role !== 'superadmin') {
+            document.body.innerHTML = '<div style="padding:48px;text-align:center;font-family:sans-serif;"><h2>Acesso restrito</h2><p>Apenas administradores podem acessar esta página.</p></div>';
+            return false;
+        }
+        return true;
+    } catch { window.location.href = '/login.html'; return false; }
+}
+
+// ── Carregar tudo ────────────────────────────────────────────────────────────
+async function carregarTudo() {
+    await Promise.all([carregarStats(), carregarCategorias(), carregarTreinamentos()]);
+}
+
+async function carregarStats() {
+    try {
+        const r = await fetch('/api/rh/treinamentos-dashboard', { headers: AUTH() });
+        if (!r.ok) return;
+        const d = await r.json();
+        document.getElementById('st-total').textContent = d.total ?? 0;
+        document.getElementById('st-pub').textContent   = d.publicados ?? 0;
+        document.getElementById('st-views').textContent = d.total_visualizacoes ?? 0;
+        document.getElementById('st-size').textContent  = d.tamanho_fmt ?? '0 B';
+    } catch {}
+}
+
+async function carregarCategorias() {
+    try {
+        const r = await fetch('/api/rh/treinamentos-categorias', { headers: AUTH() });
+        if (!r.ok) return;
+        const cats = await r.json();
+        const sel = document.getElementById('filtro-cat');
+        sel.innerHTML = '<option value="">Todas as categorias</option>' +
+            cats.map(c => `<option value="${c}">${c}</option>`).join('');
+        const dl = document.getElementById('cats-list');
+        dl.innerHTML = cats.map(c => `<option value="${c}">`).join('');
+    } catch {}
+}
+
+async function carregarTreinamentos() {
+    document.getElementById('grid').innerHTML = '<div class="empty"><i class="fas fa-spinner fa-spin"></i>Carregando...</div>';
+    try {
+        const r = await fetch('/api/rh/treinamentos', { headers: AUTH() });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        _dados = await r.json();
+        filtrar();
+    } catch (err) {
+        document.getElementById('grid').innerHTML = `<div class="empty"><i class="fas fa-exclamation-triangle" style="color:#ef4444"></i>Erro: ${err.message}</div>`;
+    }
+}
+
+function filtrar() {
+    const q    = (document.getElementById('busca').value || '').toLowerCase();
+    const st   = document.getElementById('filtro-status').value;
+    const cat  = document.getElementById('filtro-cat').value;
+    let list = _dados;
+    if (q)   list = list.filter(t => (t.titulo||'').toLowerCase().includes(q) || (t.descricao||'').toLowerCase().includes(q));
+    if (st)  list = list.filter(t => t.status === st);
+    if (cat) list = list.filter(t => t.categoria === cat);
+    renderGrid(list);
+}
+
+function renderGrid(list) {
+    const grid = document.getElementById('grid');
+    if (!list.length) {
+        grid.innerHTML = '<div class="empty"><i class="fas fa-video-slash"></i>Nenhum treinamento encontrado</div>';
+        return;
+    }
+    const fmtDate = d => d ? new Date(d).toLocaleDateString('pt-BR') : '—';
+    const fmtSize = b => {
+        if (!b) return '';
+        const u = ['B','KB','MB','GB']; const i = Math.floor(Math.log(b)/Math.log(1024));
+        return `${(b/Math.pow(1024,i)).toFixed(1)} ${u[i]}`;
+    };
+    const badgeClass = s => s==='publicado'?'badge-pub':s==='rascunho'?'badge-ras':'badge-arq';
+    const badgeLabel = s => s==='publicado'?'Publicado':s==='rascunho'?'Rascunho':'Arquivado';
+
+    grid.innerHTML = list.map(t => {
+        const thumb = t.thumbnail_path
+            ? `<img src="/videos/thumbnails/${t.thumbnail_path}" onerror="this.style.display='none'">`
+            : `<div class="card-thumb-placeholder"><i class="fas fa-play-circle"></i></div>`;
+        const dur = t.carga_horaria ? `<span class="card-dur">${t.carga_horaria} min</span>` : '';
+        const hasVideo = !!t.video_path;
+        return `
+        <div class="card">
+          <div class="card-thumb">
+            ${thumb}
+            <span class="card-badge ${badgeClass(t.status)}">${badgeLabel(t.status)}</span>
+            ${dur}
+          </div>
+          <div class="card-body">
+            ${t.categoria ? `<div class="card-cat">${t.categoria}</div>` : ''}
+            <div class="card-title">${t.titulo}</div>
+            ${t.descricao ? `<div class="card-desc">${t.descricao}</div>` : ''}
+            <div class="card-meta">
+              <span><i class="fas fa-eye" style="margin-right:3px;"></i>${t.visualizacoes||0} views</span>
+              <span>${fmtDate(t.created_at)} ${t.video_tamanho ? '· '+fmtSize(t.video_tamanho) : ''}</span>
+            </div>
+            <div class="card-actions">
+              ${hasVideo ? `<button class="btn btn-sm btn-primary" onclick="verVideo(${t.id},'${t.video_path}','${(t.titulo||'').replace(/'/g,"\\'")}')"><i class="fas fa-play"></i> Ver</button>` : ''}
+              <button class="btn btn-sm" style="background:#f1f5f9;color:#475569;" onclick="editarDrawer(${t.id})"><i class="fas fa-edit"></i> Editar</button>
+              <button class="btn btn-sm btn-danger" onclick="excluir(${t.id},'${(t.titulo||'').replace(/'/g,"\\'")}')"><i class="fas fa-trash-alt"></i></button>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+}
+
+// ── Drawer ───────────────────────────────────────────────────────────────────
+function abrirDrawer(dados) {
+    document.getElementById('f-id').value         = dados?.id || '';
+    document.getElementById('f-titulo').value     = dados?.titulo || '';
+    document.getElementById('f-desc').value       = dados?.descricao || '';
+    document.getElementById('f-cat').value        = dados?.categoria || '';
+    document.getElementById('f-instrutor').value  = dados?.instrutor || '';
+    document.getElementById('f-carga').value      = dados?.carga_horaria || '';
+    document.getElementById('f-status').value     = dados?.status || 'publicado';
+    document.getElementById('drawer-title').textContent = dados ? 'Editar Treinamento' : 'Novo Treinamento';
+    document.getElementById('video-name').style.display = 'none';
+    document.getElementById('thumb-name').style.display = 'none';
+    document.getElementById('progress-wrap').style.display = 'none';
+    document.getElementById('video-input').value = '';
+    document.getElementById('thumb-input').value = '';
+    _videoFile = null; _thumbFile = null;
+    document.getElementById('drawer-overlay').classList.add('open');
+    document.getElementById('drawer').classList.add('open');
+}
+
+function fecharDrawer() {
+    document.getElementById('drawer-overlay').classList.remove('open');
+    document.getElementById('drawer').classList.remove('open');
+}
+
+async function editarDrawer(id) {
+    const t = _dados.find(x => x.id === id);
+    if (t) abrirDrawer(t);
+}
+
+// ── File handlers ─────────────────────────────────────────────────────────────
+function handleVideoSelect(inp) {
+    _videoFile = inp.files[0] || null;
+    const nm = document.getElementById('video-name');
+    if (_videoFile) { nm.textContent = _videoFile.name; nm.style.display = 'block'; }
+    else { nm.style.display = 'none'; }
+}
+function handleThumbSelect(inp) {
+    _thumbFile = inp.files[0] || null;
+    const nm = document.getElementById('thumb-name');
+    if (_thumbFile) { nm.textContent = _thumbFile.name; nm.style.display = 'block'; }
+    else { nm.style.display = 'none'; }
+}
+function handleVideoDrop(e) {
+    e.preventDefault();
+    document.getElementById('video-drop').classList.remove('drag');
+    const f = e.dataTransfer.files[0];
+    if (f) { _videoFile = f; document.getElementById('video-name').textContent = f.name; document.getElementById('video-name').style.display = 'block'; }
+}
+function handleThumbDrop(e) {
+    e.preventDefault();
+    document.getElementById('thumb-drop').classList.remove('drag');
+    const f = e.dataTransfer.files[0];
+    if (f) { _thumbFile = f; document.getElementById('thumb-name').textContent = f.name; document.getElementById('thumb-name').style.display = 'block'; }
+}
+
+// ── Salvar ────────────────────────────────────────────────────────────────────
+async function salvar() {
+    const id     = document.getElementById('f-id').value;
+    const titulo = document.getElementById('f-titulo').value.trim();
+    if (!titulo) { toast('Título é obrigatório', 'error'); return; }
+
+    const btn = document.getElementById('btn-salvar');
+    btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Enviando...';
+
+    const fd = new FormData();
+    fd.append('titulo',       titulo);
+    fd.append('descricao',    document.getElementById('f-desc').value);
+    fd.append('categoria',    document.getElementById('f-cat').value);
+    fd.append('instrutor',    document.getElementById('f-instrutor').value);
+    fd.append('carga_horaria',document.getElementById('f-carga').value || '0');
+    fd.append('status',       document.getElementById('f-status').value);
+    if (_videoFile) fd.append('video',     _videoFile);
+    if (_thumbFile) fd.append('thumbnail', _thumbFile);
+
+    const pw = document.getElementById('progress-wrap');
+    const pf = document.getElementById('progress-fill');
+    const pt = document.getElementById('progress-txt');
+    const pp = document.getElementById('progress-pct');
+
+    try {
+        if (_videoFile) pw.style.display = 'block';
+
+        await new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            const url = id ? `/api/rh/treinamentos/${id}` : '/api/rh/treinamentos';
+            xhr.open(id ? 'PUT' : 'POST', url);
+            xhr.setRequestHeader('Authorization', `Bearer ${TOKEN()}`);
+            xhr.upload.onprogress = e => {
+                if (e.lengthComputable) {
+                    const pct = Math.round(e.loaded / e.total * 100);
+                    pf.style.width = pct + '%';
+                    pp.textContent = pct + '%';
+                    pt.textContent = pct < 100 ? 'Enviando vídeo...' : 'Processando...';
+                }
+            };
+            xhr.onload = () => {
+                if (xhr.status >= 200 && xhr.status < 300) resolve(JSON.parse(xhr.responseText));
+                else reject(new Error(JSON.parse(xhr.responseText)?.error || 'Erro ' + xhr.status));
+            };
+            xhr.onerror = () => reject(new Error('Falha na conexão'));
+            xhr.send(fd);
+        });
+
+        toast(id ? 'Treinamento atualizado!' : 'Treinamento criado!', 'success');
+        fecharDrawer();
+        carregarTudo();
+    } catch (err) {
+        toast('Erro: ' + err.message, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-save"></i> Salvar';
+        pw.style.display = 'none';
+        pf.style.width = '0%';
+    }
+}
+
+// ── Excluir ───────────────────────────────────────────────────────────────────
+async function excluir(id, titulo) {
+    if (!confirm(`Excluir "${titulo}"?\n\nEsta ação remove o arquivo de vídeo permanentemente.`)) return;
+    try {
+        const r = await fetch(`/api/rh/treinamentos/${id}`, { method: 'DELETE', headers: AUTH() });
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.error || d.message);
+        toast('Treinamento excluído', 'success');
+        carregarTudo();
+    } catch (err) { toast('Erro: ' + err.message, 'error'); }
+}
+
+// ── Video player ──────────────────────────────────────────────────────────────
+function verVideo(id, filename, titulo) {
+    const player = document.getElementById('vplayer');
+    player.src = `/videos/treinamentos/${filename}`;
+    player.load();
+    document.getElementById('vmodal').classList.add('open');
+    player.play().catch(() => {});
+}
+function fecharVideo(e) {
+    if (e && e.target !== document.getElementById('vmodal') && !e.target.classList.contains('vmodal-close')) return;
+    const player = document.getElementById('vplayer');
+    player.pause(); player.src = '';
+    document.getElementById('vmodal').classList.remove('open');
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+function toast(msg, type = 'info') {
+    const el = document.getElementById('toast');
+    el.textContent = msg; el.className = 'show ' + type;
+    clearTimeout(el._t); el._t = setTimeout(() => el.className = '', 3000);
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+(async () => {
+    if (!(await checkAuth())) return;
+    carregarTudo();
+})();
+</script>
+</body>
+</html>

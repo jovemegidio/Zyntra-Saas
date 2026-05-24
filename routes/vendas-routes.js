@@ -1831,22 +1831,24 @@ module.exports = function createVendasRoutes(deps) {
                     }
 
                     if (valorFaturamento > 0) {
-                        // Verificar se já existe conta a receber para este pedido (evita duplicação)
+                        // M-06 FIX: Check total covered by existing CRs (partials may have created CRs for < full value)
                         const [existingCR] = await connection.query(
-                            'SELECT id FROM contas_receber WHERE pedido_id = ? LIMIT 1', [id]
+                            'SELECT COALESCE(SUM(valor), 0) as total_coberto FROM contas_receber WHERE pedido_id = ? AND status != "cancelada"', [id]
                         );
-                        if (existingCR.length === 0) {
+                        const totalCoberto = parseFloat(existingCR[0].total_coberto) || 0;
+                        const valorFaltante = Math.round((valorFaturamento - totalCoberto) * 100) / 100;
+                        if (valorFaltante > 0.01) {
                             contaReceberGerada = await faturamentoShared.gerarContaReceber(connection, {
                                 pedido_id: parseInt(id),
                                 cliente_id: pedidoData.cliente_id || null,
                                 descricao: `Faturamento Pedido #${id} - ${pedidoData.cliente_nome || 'Cliente'}`,
-                                valor: valorFaturamento,
+                                valor: valorFaltante,
                                 tipo: 'faturamento',
                                 pedido: pedidoData
                             });
-                            console.log(`[FINANCEIRO_AUTO] Conta a receber #${contaReceberGerada.insertId} gerada para pedido #${id} (R$${valorFaturamento}, venc. ${contaReceberGerada.data_vencimento_dias} dias)`);
+                            console.log(`[FINANCEIRO_AUTO] Conta a receber #${contaReceberGerada.insertId} gerada para pedido #${id} (R$${valorFaltante} de R$${valorFaturamento})`);
                         } else {
-                            console.log(`[FINANCEIRO_AUTO] Conta a receber já existe para pedido #${id} (id=${existingCR[0].id}), pulando`);
+                            console.log(`[FINANCEIRO_AUTO] Contas a receber já cobrem R$${totalCoberto} de R$${valorFaturamento} para pedido #${id} — pulando`);
                         }
                     }
                 } catch (financeiroError) {
@@ -4653,21 +4655,24 @@ module.exports = function createVendasRoutes(deps) {
                     }
 
                     if (valorFaturamento > 0) {
+                        // M-06 FIX: Check total already covered by existing CRs (partials may have created CRs for < full value)
                         const [existingCR] = await connection.query(
-                            'SELECT id FROM contas_receber WHERE pedido_id = ? LIMIT 1', [id]
+                            'SELECT COALESCE(SUM(valor), 0) as total_coberto FROM contas_receber WHERE pedido_id = ? AND status != "cancelada"', [id]
                         );
-                        if (existingCR.length === 0) {
+                        const totalCoberto = parseFloat(existingCR[0].total_coberto) || 0;
+                        const valorFaltante = Math.round((valorFaturamento - totalCoberto) * 100) / 100;
+                        if (valorFaltante > 0.01) {
                             contaReceberGerada = await faturamentoShared.gerarContaReceber(connection, {
                                 pedido_id: parseInt(id),
                                 cliente_id: pedido.cliente_id || null,
                                 descricao: `Faturamento Pedido #${id} - ${pedido.cliente || 'Cliente'}`,
-                                valor: valorFaturamento,
+                                valor: valorFaltante,
                                 tipo: 'faturamento',
                                 pedido
                             });
-                            console.log(`[FATURAR] Conta a receber #${contaReceberGerada?.insertId} gerada para pedido #${id} (R$${valorFaturamento})`);
+                            console.log(`[FATURAR] Conta a receber #${contaReceberGerada?.insertId} gerada para pedido #${id} (R$${valorFaltante} de R$${valorFaturamento})`);
                         } else {
-                            console.log(`[FATURAR] Conta a receber já existe para pedido #${id} — pulando`);
+                            console.log(`[FATURAR] Contas a receber já cobrem R$${totalCoberto} de R$${valorFaturamento} para pedido #${id} — pulando`);
                         }
                     }
                 } catch (financeiroError) {
@@ -5372,16 +5377,19 @@ module.exports = function createVendasRoutes(deps) {
             try { nodemailer = require('nodemailer'); } catch(e) {
                 return res.status(500).json({ message: 'Serviço de e-mail não disponível' });
             }
+            if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+                return res.status(503).json({ message: 'SMTP não configurado para envio de e-mail' });
+            }
 
             const transporter = nodemailer.createTransport({
-                host: 'mail.aluforce.ind.br',
-                port: 465,
-                secure: true,
+                host: process.env.SMTP_HOST || 'mail.aluforce.ind.br',
+                port: parseInt(process.env.SMTP_PORT || '465', 10),
+                secure: process.env.SMTP_SECURE !== 'false',
                 auth: {
-                    user: process.env.SMTP_USER || 'noreply@aluforce.ind.br',
-                    pass: process.env.SMTP_PASS || 'noreplyalu'
+                    user: process.env.SMTP_USER,
+                    pass: process.env.SMTP_PASS
                 },
-                tls: { rejectUnauthorized: false }
+                tls: { rejectUnauthorized: process.env.NODE_ENV === 'production' }
             });
 
             const pedidoNum = String(pedido.id).padStart(5, '0');
@@ -5401,7 +5409,7 @@ module.exports = function createVendasRoutes(deps) {
             `;
 
             await transporter.sendMail({
-                from: `"Aluforce ERP" <${process.env.SMTP_USER || 'noreply@aluforce.ind.br'}>`,
+                from: `"Aluforce ERP" <${process.env.SMTP_USER}>`,
                 to: destinatario,
                 subject: assunto,
                 html: htmlBody

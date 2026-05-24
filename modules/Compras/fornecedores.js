@@ -14,7 +14,6 @@ class FornecedoresManager {
 
     async init() {
         await this.carregarFornecedores();
-        this.renderizarTabela();
         this.inicializarUsuario();
     }
 
@@ -31,7 +30,9 @@ class FornecedoresManager {
 
     async carregarFornecedores() {
         try {
+            const token = localStorage.getItem('token') || this.getAuthToken();
             const response = await fetch('/api/compras/fornecedores', {
+                headers: token ? { 'Authorization': `Bearer ${token}` } : {},
                 credentials: 'include'
             });
             if (!response.ok) throw new Error('Erro ao carregar fornecedores');

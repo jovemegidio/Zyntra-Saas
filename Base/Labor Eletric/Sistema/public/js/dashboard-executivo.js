@@ -132,7 +132,7 @@ class DashboardExecutivo {
                                 <span class="mini-valor" id="vendas-conversao">0%</span>
                             </div>
                         </div>
-                        <a href="/modules/Vendas/index.html" class="modulo-link">Ver detalhes →</a>
+                        <a href="/modules/Vendas/public/index.html" class="modulo-link">Ver detalhes →</a>
                     </div>
 
                     <!-- Compras -->
@@ -267,7 +267,7 @@ class DashboardExecutivo {
                                 <span class="mini-valor" id="nfe-canceladas">0</span>
                             </div>
                         </div>
-                        <a href="/modules/NFe/index.html" class="modulo-link">Ver detalhes →</a>
+                        <a href="/modules/Faturamento/index.html" class="modulo-link">Ver detalhes →</a>
                     </div>
                 </div>
 

@@ -10,9 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <!-- Design System Institucional Financeiro -->
-    <link rel="stylesheet" href="/Financeiro/css/fin-layout.css?v=1775916179">
     <link rel="stylesheet" href="/Financeiro/css/fin-components.css?v=1775916179">
-    <link rel="stylesheet" href="/Financeiro/css/fin-header-sidebar.css?v=1775916179">
     <link rel="stylesheet" href="/Financeiro/css/fin-counter-standard.css?v=20260410">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" integrity="sha384-vtjasyidUo0kW94K5MXDXntzOJpQgBKXmE7e2Ga4LG0skTTLeBi97eFAXsqewJjw" crossorigin="anonymous"></script>
@@ -135,8 +133,8 @@
         .toast.error { border-color: #ef4444; }
         .toast.warning { border-color: #f59e0b; }
 
-        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10000; align-items: center; justify-content: center; }
-        .modal.active { display: flex; }
+        .modal { display: none !important; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10000; align-items: center; justify-content: center; }
+        .modal.active { display: flex !important; }
         .modal-content { background: white; border-radius: 16px; width: 95%; max-height: 90vh; overflow-y: auto; }
 
         .modal-institucional { max-width: 700px; }
@@ -1475,7 +1473,7 @@
     </div>
 
     <!-- Modal Receber -->
-    <div id="modal-receber" class="modal">
+    <div id="modal-receber" class="modal" onclick="if(event.target===this)fecharModalReceber()">
         <div class="modal-content modal-receber">
             <div class="modal-receber-header">
                 <div class="icon"><i class="fas fa-check-double"></i></div>
@@ -1505,7 +1503,7 @@
         function _escFin(s) { if (s == null) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
         function toggleMobileSidebar() { document.getElementById('mobile-sidebar').classList.toggle('mobile-open'); document.getElementById('sidebar-overlay').classList.toggle('active'); }
-        function toggleNotificações() { if (typeof window.NotificationsManager !== 'undefined') window.NotificationsManager.togglePanel(); }
+        function toggleNotificacoes() { if (typeof window.NotificationsManager !== 'undefined') window.NotificationsManager.togglePanel(); }
         let contas = [];
         let clientesList = [];
         let currentView = 'completa';
@@ -2005,6 +2003,15 @@
             document.getElementById('modal-receber').classList.add('active');
         }
         function fecharModalReceber() { document.getElementById('modal-receber').classList.remove('active'); }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                var mr = document.getElementById('modal-receber');
+                if (mr && mr.classList.contains('active')) { fecharModalReceber(); return; }
+                var mc = document.getElementById('modalContaCR');
+                if (mc && mc.classList.contains('active')) { fecharModal(); }
+            }
+        });
 
         async function confirmarRecebimento(event) {
             event.preventDefault();
@@ -3012,7 +3019,12 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', function(){ initTabsCR(); init().catch(function(e){ console.error(e); }); });
+        document.addEventListener('DOMContentLoaded', function(){
+            // CRIT-01: Garantir que todos os modais estão fechados ao carregar a página
+            document.querySelectorAll('.modal').forEach(function(m){ m.classList.remove('active'); });
+            initTabsCR();
+            init().catch(function(e){ console.error(e); });
+        });
     </script>
 
     <script src="/js/chat-suporte-widgets.js?v=20260319"></script>

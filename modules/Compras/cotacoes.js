@@ -328,7 +328,7 @@ class CotacoesManager {
 
             tr.innerHTML = `
                 <td><input type="checkbox" class="cotacao-checkbox" data-id="${cotacao.id}"></td>
-                <td><strong>${this.escapeHtml(cotacao.numero) || '-'}</strong></td>
+                <td><strong>${this.escapeHtml(cotacao.numero_cotacao || cotacao.numero) || '-'}</strong></td>
                 <td>${this.formatarData(cotacao.data)}</td>
                 <td>${this.escapeHtml(cotacao.solicitante) || '-'}</td>
                 <td>
@@ -618,8 +618,9 @@ class CotacoesManager {
                 '<th style="padding:8px 10px;text-align:right;font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;border-bottom:1px solid #e5e7eb;">Valor</th>' +
                 '<th style="padding:8px 10px;text-align:left;font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;border-bottom:1px solid #e5e7eb;">Prazo</th></tr></thead><tbody>' +
                 propostas.map(p => {
-                    const forn = this.fornecedores.find(f => f.id === p.fornecedorId);
-                    const fornNome = forn ? forn.nome : `Fornecedor #${p.fornecedorId}`;
+                    const pFornId = p.fornecedorId || p.fornecedor_id;
+                    const forn = this.fornecedores.find(f => f.id == pFornId);
+                    const fornNome = forn ? forn.nome : (pFornId ? `Fornecedor #${pFornId}` : p.fornecedor_nome || p.nome_fornecedor || 'Fornecedor desconhecido');
                     const valor = p.valorTotal ? `R$ ${parseFloat(p.valorTotal).toLocaleString('pt-BR', {minimumFractionDigits: 2})}` : '-';
                     return `<tr><td style="padding:8px 10px;font-size:13px;border-bottom:1px solid #f3f4f6;">${fornNome}</td><td style="padding:8px 10px;font-size:13px;border-bottom:1px solid #f3f4f6;text-align:right;font-weight:600;">${valor}</td><td style="padding:8px 10px;font-size:13px;border-bottom:1px solid #f3f4f6;">${p.prazoEntrega || '-'} dias</td></tr>`;
                 }).join('') + '</tbody></table>';
@@ -1196,8 +1197,11 @@ class CotacoesManager {
 
     formatarData(data) {
         if (!data) return '-';
-        const [ano, mes, dia] = data.split('-');
-        return `${dia}/${mes}/${ano}`;
+        const d = new Date(data);
+        if (!isNaN(d.getTime())) return d.toLocaleDateString('pt-BR');
+        const parts = data.split('-');
+        if (parts.length >= 3) return `${parts[2].substring(0,2)}/${parts[1]}/${parts[0]}`;
+        return data;
     }
 }
 

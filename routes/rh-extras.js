@@ -759,7 +759,24 @@ router.get('/ponto/alteracoes', authenticateToken, async (req, res) => {
 router.get('/ponto/resumo', authenticateToken, async (req, res) => {
     try {
         const { funcionario_id, mes, ano } = req.query;
-        if (!funcionario_id) return res.status(400).json({ success: false, message: 'funcionario_id obrigatório' });
+
+        if (!funcionario_id) {
+            const hoje = new Date().toISOString().split('T')[0];
+            const [[funcRow]] = await pool.query(
+                `SELECT COUNT(*) as total FROM funcionarios WHERE status = 'ativo' OR ativo = 1`
+            );
+            const [[marcRow]] = await pool.query(
+                `SELECT COUNT(DISTINCT funcionario_id) as total FROM ponto_marcacoes WHERE data = ?`,
+                [hoje]
+            ).catch(() => [[{ total: 0 }]]);
+            return res.json({
+                success: true,
+                funcionarios_ativos: funcRow.total || 0,
+                presentes_hoje: marcRow.total || 0,
+                marcacoes_hoje: marcRow.total || 0,
+                faltas_mes: 0
+            });
+        }
 
         const mesNum = parseInt(mes) || (new Date().getMonth() + 1);
         const anoNum = parseInt(ano) || new Date().getFullYear();

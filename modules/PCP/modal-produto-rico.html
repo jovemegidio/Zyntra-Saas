@@ -627,11 +627,11 @@ function abrirModalProdutoRico(produto) {
     // Preencher dados se fornecido
     if (produto) {
         document.getElementById('modal-produto-rico-code').textContent = produto.codigo || '';
-        document.getElementById('rico-código').value = produto.codigo || '';
+        document.getElementById('rico-codigo').value = produto.codigo || '';
         document.getElementById('rico-sku').value = produto.sku || '';
         document.getElementById('rico-gtin').value = produto.gtin || '';
         document.getElementById('rico-nome').value = produto.nome || '';
-        document.getElementById('rico-descrição').value = produto.descricao || '';
+        document.getElementById('rico-descricao').value = produto.descricao || '';
         document.getElementById('rico-unidade').value = produto.unidade_medida || '';
         
         // Campos adicionais
@@ -683,8 +683,8 @@ function abrirModalProdutoRico(produto) {
         if (document.getElementById('rico-caracteristicas')) {
             document.getElementById('rico-caracteristicas').value = produto.caracteristicas || '';
         }
-        if (document.getElementById('rico-observações')) {
-            document.getElementById('rico-observações').value = produto.observações || '';
+        if (document.getElementById('rico-observacoes')) {
+            document.getElementById('rico-observacoes').value = produto.observações || '';
         }
 
         // Atualizar cards de estoque
@@ -761,7 +761,7 @@ function atualizarContadorRico(inputId, counterId) {
 function toggleProdutoTipo() {
     const simples = document.getElementById('rico-simples');
     const kit = document.getElementById('rico-kit');
-    const variações = document.getElementById('rico-variações');
+    const variações = document.getElementById('rico-variacoes');
 
     // Apenas um pode estar ativo por vez
     if (simples.checked) {
@@ -797,11 +797,11 @@ async function salvarProdutoRico() {
     try {
         // Montar payload completo
         const produto = {
-            código: document.getElementById('rico-código').value.trim(),
+            código: document.getElementById('rico-codigo').value.trim(),
             sku: document.getElementById('rico-sku').value.trim(),
             gtin: document.getElementById('rico-gtin').value.trim(),
             nome: document.getElementById('rico-nome').value.trim(),
-            descrição: document.getElementById('rico-descrição').value.trim(),
+            descrição: document.getElementById('rico-descricao').value.trim(),
             unidade_medida: document.getElementById('rico-unidade').value,
             familia: document.getElementById('rico-familia')?.value || '',
             peso: parseFloat(document.getElementById('rico-peso')?.value) || 0,
@@ -818,7 +818,7 @@ async function salvarProdutoRico() {
             icms: parseFloat(document.getElementById('rico-icms')?.value) || 0,
             fornecedor: document.getElementById('rico-fornecedor')?.value || '',
             caracteristicas: document.getElementById('rico-caracteristicas')?.value || '',
-            observações: document.getElementById('rico-observações')?.value || '',
+            observações: document.getElementById('rico-observacoes')?.value || '',
             controle_lote: document.getElementById('rico-controle-lote')?.checked || false
         };
 
@@ -955,7 +955,7 @@ function duplicarProdutoRico() {
         nomeEl.value = nomeEl.value + ' (Cópia)';
     }
     
-    const códigoEl = document.getElementById('rico-código');
+    const códigoEl = document.getElementById('rico-codigo');
     if (códigoEl && códigoEl.value) {
         códigoEl.value = códigoEl.value + '-COPIA';
     }
@@ -1039,7 +1039,7 @@ document.addEventListener('DOMContentLoaded', function() {
         ricoNome.addEventListener('input', () => atualizarContadorRico('rico-nome', 'rico-nome-count'));
     }
 
-    const ricoDesc = document.getElementById('rico-descrição');
+    const ricoDesc = document.getElementById('rico-descricao');
     if (ricoDesc) {
         ricoDesc.addEventListener('input', () => atualizarContadorRico('rico-descrição', 'rico-desc-count'));
     }

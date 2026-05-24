@@ -40,11 +40,12 @@ function toggleUserMenu() {
 
 // Função para alternar modo escuro
 function toggleDarkMode() {
-    document.body.classList.toggle('dark-mode');
+    document.documentElement.classList.toggle('a11y-dark-mode');
     
     // Salvar preferência
-    const isDark = document.body.classList.contains('dark-mode');
-    localStorage.setItem('darkMode', isDark);
+    const isDark = document.documentElement.classList.contains('a11y-dark-mode');
+    localStorage.setItem('a11yDarkMode', isDark ? '1' : '0');
+    localStorage.removeItem('darkMode');
     
     // Atualizar ícone
     const icon = document.getElementById('dark-mode-icon');
@@ -81,9 +82,9 @@ document.addEventListener('DOMContentLoaded', function() {
     loadUserInfo();
     
     // Aplicar modo escuro salvo
-    const savedDarkMode = localStorage.getItem('darkMode') === 'true';
+    const savedDarkMode = localStorage.getItem('a11yDarkMode') === '1';
     if (savedDarkMode) {
-        document.body.classList.add('dark-mode');
+        document.documentElement.classList.add('a11y-dark-mode');
         const icon = document.getElementById('dark-mode-icon');
         if (icon) {
             icon.className = 'fas fa-sun';

@@ -375,7 +375,11 @@ Write-Host "━━━━━ ETAPA 4/4: Discord Webhook ━━━━━━━━�
 Write-Host ""
 
 try {
-   $webhookUrl = "https://discord.com/api/webhooks/1465740298243018793/fjkXYSN7Vv06YRyimpqneNVOhADqDACpVTXQxRbyUJnsk-cWpJvnpZzD9JntRVFyhfVt"
+   $webhookUrl = $env:DISCORD_WEBHOOK_URL
+   if (-not $webhookUrl) {
+      Write-Host "  Aviso: DISCORD_WEBHOOK_URL nao configurado; notificacao pulada." -ForegroundColor Yellow
+      return
+   }
 
    # Módulos afetados
    $modulosAfetados = @()

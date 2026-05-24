@@ -237,9 +237,9 @@
     /**
      * Verifica e redireciona se não tem permissão para módulo atual
      * @param {String} moduleName - Nome do módulo
-     * @param {String} redirectUrl - URL de redirecionamento (padrão: /index.html)
+     * @param {String} redirectUrl - URL de redirecionamento (padrão: /dashboard)
      */
-    async function requireModuleAccess(moduleName, redirectUrl = '/index.html') {
+    async function requireModuleAccess(moduleName, redirectUrl = '/dashboard') {
         const hasPermission = await hasAccessAsync(moduleName);
         
         if (!hasPermission) {

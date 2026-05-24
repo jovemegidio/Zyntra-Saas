@@ -144,9 +144,20 @@ if ($ok -gt 0) {
         $restart = "s"
     }
     if ($restart -eq "s" -or $restart -eq "S") {
-        Write-Host "Reiniciando PM2..." -ForegroundColor Cyan
+        Write-Host "Reiniciando PM2 (Aluforce)..." -ForegroundColor Cyan
         ssh @SSH_OPTS $VPS_HOST "pm2 restart aluforce-v2-production --update-env; pm2 save"
-        Write-Host "PM2 reiniciado!" -ForegroundColor Green
+        Write-Host "PM2 Aluforce reiniciado!" -ForegroundColor Green
+
+        # Sincroniza dashboard-v2 para instâncias Labor e reinicia
+        Write-Host "Sincronizando dashboard-v2 para Labor Energy e Labor Eletric..." -ForegroundColor Cyan
+        ssh @SSH_OPTS $VPS_HOST @"
+cp -r /var/www/aluforce/public/dashboard-v2 /var/www/labor-energy/public/
+cp -r /var/www/aluforce/public/dashboard-v2 /var/www/labor-eletric/public/
+pm2 restart labor-energy-demo --update-env
+pm2 restart labor-eletric-demo --update-env
+pm2 save
+"@
+        Write-Host "Labor Energy e Labor Eletric sincronizados e reiniciados!" -ForegroundColor Green
     }
 
     Write-Host ""

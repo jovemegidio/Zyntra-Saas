@@ -732,7 +732,7 @@
     <link rel="stylesheet" href="/css/tooltips-professional.css?v=20260209">
     <script src="/js/tooltips-professional.js?v=20260209"></script>
     <script src="/js/modal-title.js?v=20260210"></script>
-    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260216">
+    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260418">
 
     <!-- Chat Widget BOB AI - DESATIVADO -->
     <!-- <link rel="stylesheet" href="/chat/widget.css?v=20260218"> -->
@@ -757,6 +757,9 @@
                 <button class="sidebar-btn" title="Comissões" onclick="window.location.href='comissoes.html'"><i class="fas fa-percentage"></i></button>
             </nav>
             <div class="sidebar-bottom">
+                <button class="sidebar-btn" title="Configurações" onclick="window.location.href='/dashboard'">
+                    <i class="fas fa-cog"></i>
+                </button>
             </div>
         </aside>
 
@@ -771,7 +774,7 @@
                         <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
-                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;"></span>
+                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">—</span>
                         <span class="page-title" style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Clientes</span>
                     </div>
                 </div>
@@ -779,6 +782,10 @@
 
                     <div class="user-greeting">
                         <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
+                        <div class="user-avatar" id="user-avatar">
+                            <img src="" alt="Foto do usuário" id="user-photo" style="display:none;">
+                            <span id="user-initial">U</span>
+                        </div>
                     </div>
                 </div>
             </header>
@@ -1675,7 +1682,7 @@
             if (document.getElementById('clienteVendedorPadrao')) document.getElementById('clienteVendedorPadrao').value = cliente.vendedor_padrao || '';
             if (document.getElementById('clienteEmailNFe')) document.getElementById('clienteEmailNFe').value = cliente.email_nfe || '';
             if (document.getElementById('clienteTransportadora')) document.getElementById('clienteTransportadora').value = cliente.transportadora || '';
-            if (document.getElementById('clienteCódigoReceita')) document.getElementById('clienteCódigoReceita').value = cliente.codigo_receita || '';
+            if (document.getElementById('clienteCodigoReceita')) document.getElementById('clienteCodigoReceita').value = cliente.codigo_receita || '';
             
             // Faturamento
             if (document.getElementById('clienteBloquearFaturamento')) document.getElementById('clienteBloquearFaturamento').checked = !!cliente.bloquear_faturamento;
@@ -1817,7 +1824,7 @@
                 vendedor_padrao: (document.getElementById('clienteVendedorPadrao') || {}).value || '',
                 email_nfe: (document.getElementById('clienteEmailNFe') || {}).value || '',
                 transportadora: (document.getElementById('clienteTransportadora') || {}).value || '',
-                codigo_receita: (document.getElementById('clienteCódigoReceita') || {}).value || '',
+                codigo_receita: (document.getElementById('clienteCodigoReceita') || {}).value || '',
                 // Faturamento
                 bloquear_faturamento: (document.getElementById('clienteBloquearFaturamento') || {}).checked ? 1 : 0,
                 // Tags
@@ -2320,7 +2327,7 @@
             const id = document.getElementById('clienteId').value;
             if (!id) { mostrarToast('Salve o cliente antes de ver o histórico', 'error'); return; }
             
-            const panel = document.getElementById('panelHistóricoFinanceiro');
+            const panel = document.getElementById('panelHistoricoFinanceiro');
             const body = document.getElementById('panelFinanceiroBody');
             const nome = document.getElementById('clienteNome').value || 'Cliente';
             document.getElementById('panelFinanceiroSubtitle').textContent = nome;
@@ -2446,8 +2453,8 @@
             const id = document.getElementById('clienteId').value;
             if (!id) { mostrarToast('Salve o cliente primeiro', 'error'); return; }
             
-            const panel = document.getElementById('panelHistóricoAlterações');
-            const body = document.getElementById('panelHistóricoBody');
+            const panel = document.getElementById('panelHistoricoAlteracoes');
+            const body = document.getElementById('panelHistoricoBody');
             panel.classList.add('active');
             body.innerHTML = `<div class="resumo-loading"><div class="loading-spinner"></div><div class="resumo-loading-text">Carregando histórico...</div></div>`;
             
@@ -2694,5 +2701,6 @@
     <script src="/chat-teams/chat-widget.js?v=20260319" defer></script>
 </body>
 </html>
+
 
 

@@ -364,7 +364,7 @@ router.post('/login', async (req, res) => {
             : [];
 
         // Se for admin, liberar todas as áreas
-        const todasAreas = ['pcp', 'vendas', 'compras', 'financeiro', 'nfe', 'rh', 'faturamento', 'admin'];
+        const todasAreas = ['pcp', 'vendas', 'compras', 'financeiro', 'nfe', 'rh', 'faturamento', 'logistica', 'ti', 'admin'];
         const areasPermitidas = user.is_admin ? todasAreas : areas;
 
         // Definir cookie HttpOnly
@@ -477,7 +477,7 @@ router.get('/me', authMiddleware, async (req, res) => {
         }
         
         // Se for admin, dar acesso a tudo
-        const todasAreas = ['dashboard', 'pcp', 'vendas', 'compras', 'financeiro', 'nfe', 'rh', 'faturamento', 'admin'];
+        const todasAreas = ['dashboard', 'pcp', 'vendas', 'compras', 'financeiro', 'nfe', 'rh', 'faturamento', 'logistica', 'ti', 'admin'];
         if (user.is_admin) {
             areas = todasAreas;
         }

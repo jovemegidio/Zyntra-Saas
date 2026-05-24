@@ -2810,13 +2810,13 @@
                 codigo_barras: document.getElementById('conta-código-barras').value,
                 valor_total: parseMoeda(document.getElementById('conta-valor').value),
                 data_emissao: document.getElementById('conta-emissão').value || null,
-                data_vencimento_original: document.getElementById('conta-vencimento-original').value,
-                data_vencimento: document.getElementById('conta-vencimento').value || document.getElementById('conta-vencimento-original').value,
+                data_vencimento_original: document.getElementById('conta-vencimento-original').value || null,
+                data_vencimento: document.getElementById('conta-vencimento').value || document.getElementById('conta-vencimento-original').value || null,
                 conta_bancaria_id: document.getElementById('conta-banco').value || null,
                 observacoes: document.getElementById('conta-observacoes').value
             };
 
-            if (!dados.fornecedor || !dados.valor_total || !dados.data_vencimento_original) {
+            if (!dados.fornecedor || !dados.valor_total || !(dados.data_vencimento || dados.data_vencimento_original)) {
                 mostrarNotificacao('Preencha os campos obrigatórios', 'warning');
                 return;
             }

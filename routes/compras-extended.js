@@ -21,6 +21,17 @@ module.exports = function createComprasExtendedRoutes(deps) {
     const upload = multer({ dest: path.join(__dirname, '..', 'uploads'), limits: { fileSize: 10 * 1024 * 1024 }, fileFilter: safeFileFilter });
     const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
+    // Escapa HTML para prevenir XSS ao salvar texto livre no banco
+    const sanitizeText = (str) => {
+        if (str == null) return null;
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    };
+
     // AUDIT-FIX R2: Middleware RBAC para operações de escrita em Compras
     const requireComprasWrite = (req, res, next) => {
         const rolesPermitidas = ['admin', 'administrador', 'gerente', 'gerente_compras', 'comprador', 'diretor'];
@@ -93,6 +104,20 @@ module.exports = function createComprasExtendedRoutes(deps) {
     });
 
     // Criar novo fornecedor
+    function validarCNPJ(cnpj) {
+        cnpj = String(cnpj).replace(/\D/g, '');
+        if (cnpj.length !== 14) return false;
+        if (/^(\d)\1+$/.test(cnpj)) return false;
+        let soma = 0, pos = 5;
+        for (let i = 0; i < 12; i++) { soma += parseInt(cnpj[i]) * pos--; if (pos < 2) pos = 9; }
+        let dig = soma % 11 < 2 ? 0 : 11 - (soma % 11);
+        if (dig !== parseInt(cnpj[12])) return false;
+        soma = 0; pos = 6;
+        for (let i = 0; i < 13; i++) { soma += parseInt(cnpj[i]) * pos--; if (pos < 2) pos = 9; }
+        dig = soma % 11 < 2 ? 0 : 11 - (soma % 11);
+        return dig === parseInt(cnpj[13]);
+    }
+
     router.post('/fornecedores', authenticateToken, requireComprasWrite, async (req, res) => {
         try {
             const {
@@ -103,6 +128,10 @@ module.exports = function createComprasExtendedRoutes(deps) {
 
             if (!razao_social || !cnpj) {
                 return res.status(400).json({ message: 'Razão social e CNPJ são obrigatórios' });
+            }
+
+            if (!validarCNPJ(cnpj)) {
+                return res.status(400).json({ message: 'CNPJ inválido' });
             }
 
             const [result] = await pool.query(
@@ -141,6 +170,10 @@ module.exports = function createComprasExtendedRoutes(deps) {
                 estado, cep, telefone, email, contato_principal,
                 condicoes_pagamento, prazo_entrega_padrao, observacoes, ativo
             } = req.body;
+
+            if (cnpj && !validarCNPJ(cnpj)) {
+                return res.status(400).json({ message: 'CNPJ inválido' });
+            }
 
             await pool.query(
                 `UPDATE fornecedores SET
@@ -1021,9 +1054,9 @@ module.exports = function createComprasExtendedRoutes(deps) {
                     });
                 }
 
-                // Validar preço unitário
+                // Validar preço unitário — não permite zero (BUG-005)
                 const preco = parseFloat(item.preco_unitario);
-                if (isNaN(preco) || preco < 0 || preco > 999999999.99) {
+                if (isNaN(preco) || preco <= 0 || preco > 999999999.99) {
                     await connection.rollback();
                     return res.status(400).json({
                         error: `Preço unitário inválido no item ${i + 1}`,
@@ -1049,6 +1082,9 @@ module.exports = function createComprasExtendedRoutes(deps) {
 
             console.log(`[COMPRAS-AUDIT] Novo pedido criado por usuário ${req.user.id} - Fornecedor: ${fornecedorCheck[0].razao_social} - Valor: R$ ${valor_total_sanitizado.toFixed(2)} - Itens: ${itens.length}`);
 
+            // Sanitizar campo de texto livre antes de persistir (BUG-006 — XSS)
+            const observacoesSanitizadas = sanitizeText(observacoes);
+
             // Inserir pedido
             const [result] = await connection.query(
                 `INSERT INTO pedidos_compra (
@@ -1056,7 +1092,7 @@ module.exports = function createComprasExtendedRoutes(deps) {
                     valor_total, valor_final, observacoes, usuario_solicitante_id, status
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pendente')`,
                 [numero_pedido, fornecedorIdParsed, data_pedido, data_entrega_prevista,
-                 valor_total_sanitizado, valor_total_sanitizado, observacoes, req.user.id]
+                 valor_total_sanitizado, valor_total_sanitizado, observacoesSanitizadas, req.user.id]
             );
 
             const pedido_id = result.insertId;
@@ -1069,9 +1105,11 @@ module.exports = function createComprasExtendedRoutes(deps) {
                         preco_unitario, preco_total, observacoes
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
                     [
-                        pedido_id, item.codigo_produto, item.descricao, item.quantidade,
+                        pedido_id, item.codigo_produto,
+                        sanitizeText(item.descricao),      // BUG-006: sanitiza descricao
+                        item.quantidade,
                         item.unidade || 'UN', item.preco_unitario, item.preco_total,
-                        item.observacoes
+                        sanitizeText(item.observacoes)     // BUG-006: sanitiza observacoes do item
                     ]
                 );
 

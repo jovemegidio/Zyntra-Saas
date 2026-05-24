@@ -7,13 +7,18 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // ========== DARK MODE ==========
     const darkToggle = document.getElementById('darkmode-toggle');
-    const headerEl = document.querySelector('.main-header');
-    const bodyEl = document.body;
+    const headerEl = document.querySelector('.main-header, .header, .topbar, .dash-nav');
+    const rootEl = document.documentElement;
+    const DARK_KEY = 'a11yDarkMode';
     
     // Aplicar preferência salva
     try { 
-        if (localStorage.getItem('darkMode') === '1') {
-            if (bodyEl) bodyEl.classList.add('dark-mode');
+        if (localStorage.getItem('darkMode') === '1' && localStorage.getItem(DARK_KEY) == null) {
+            localStorage.setItem(DARK_KEY, '1');
+            localStorage.removeItem('darkMode');
+        }
+        if (localStorage.getItem(DARK_KEY) === '1') {
+            if (rootEl) rootEl.classList.add('a11y-dark-mode');
             if (headerEl) headerEl.classList.add('dark');
             console.log('[Header] Dark mode aplicado');
         }
@@ -24,12 +29,13 @@ document.addEventListener('DOMContentLoaded', function() {
     if (darkToggle) {
         darkToggle.addEventListener('click', function() {
             console.log('[Header] Toggle dark mode clicked');
-            if (bodyEl) bodyEl.classList.toggle('dark-mode');
+            if (rootEl) rootEl.classList.toggle('a11y-dark-mode');
             if (headerEl) headerEl.classList.toggle('dark');
             
             try { 
-                const isDark = bodyEl && bodyEl.classList.contains('dark-mode');
-                localStorage.setItem('darkMode', isDark ? '1' : '0');
+                const isDark = rootEl && rootEl.classList.contains('a11y-dark-mode');
+                localStorage.setItem(DARK_KEY, isDark ? '1' : '0');
+                localStorage.removeItem('darkMode');
                 console.log('[Header] Dark mode:', isDark ? 'ON' : 'OFF');
             } catch(e) {
                 console.error('[Header] Erro ao salvar dark mode:', e);
@@ -41,9 +47,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // ========== SEARCH GLOBAL INTELIGENTE ==========
     const searchBtn = document.getElementById('search-btn');
-    if (searchBtn) {
+    const headerSearchInput = document.getElementById('header-search-input');
+    if (searchBtn || headerSearchInput) {
         const headerSearchContainer = document.getElementById('header-search-container');
-        const headerSearchInput = document.getElementById('header-search-input');
         const headerSearchResults = document.getElementById('header-search-results');
         let searchOpen = false;
         let searchTimeout = null;
@@ -81,7 +87,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 { id: 'vendas', nome: 'Vendas', icone: 'fa-chart-line', cor: '#10b981', corRgb: '16,185,129', url: '/modules/Vendas/public/index.html' },
                 { id: 'compras', nome: 'Compras', icone: 'fa-cart-shopping', cor: '#6366f1', corRgb: '99,102,241', url: '/modules/Compras/index.html' },
                 { id: 'financeiro', nome: 'Financeiro', icone: 'fa-wallet', cor: '#a855f7', corRgb: '168,85,247', url: '/modules/Financeiro/index.html' },
-                { id: 'nfe', nome: 'Faturamento', icone: 'fa-file-invoice', cor: '#f97316', corRgb: '249,115,22', url: '/modules/NFe/index.html' },
+                { id: 'nfe', nome: 'Faturamento', icone: 'fa-file-invoice', cor: '#f97316', corRgb: '249,115,22', url: '/modules/Faturamento/index.html' },
+                { id: 'logistica', nome: 'Logística', icone: 'fa-truck', cor: '#0ea5e9', corRgb: '14,165,233', url: '/modules/Logistica/public/index.html' },
                 { id: 'pcp', nome: 'PCP', icone: 'fa-gears', cor: '#475569', corRgb: '71,85,105', url: '/modules/PCP/index.html' },
                 { id: 'rh', nome: 'Recursos Humanos', icone: 'fa-people-group', cor: '#ec4899', corRgb: '236,72,153', url: getUrlRH() }
             ];
@@ -279,15 +286,15 @@ document.addEventListener('DOMContentLoaded', function() {
             const id = item.id;
             
             const links = {
-                cliente: `/Vendas/index.html?cliente=${id}`,
-                pedido: `/Vendas/index.html?pedido=${id}`,
-                nfe: `/NFe/index.html?nfe=${id}`,
+                cliente: `/modules/Vendas/public/index.html?cliente=${id}`,
+                pedido: `/modules/Vendas/public/index.html?pedido=${id}`,
+                nfe: `/modules/Faturamento/index.html?nfe=${id}`,
                 funcionario: `/RecursosHumanos/funcionarios.html?funcionario=${id}`,
-                produto: `/PCP/index.html?produto=${id}`,
+                produto: `/modules/PCP/index.html?produto=${id}`,
                 conta_pagar: `/Financeiro/contas-pagar.html?conta_pagar=${id}`,
                 conta_receber: `/Financeiro/contas-receber.html?conta_receber=${id}`,
-                fornecedor: `/Compras/index.html?fornecedor=${id}`,
-                ordem_producao: `/PCP/ordens-producao.html?ordem=${id}`
+                fornecedor: `/modules/Compras/index.html?fornecedor=${id}`,
+                ordem_producao: `/modules/PCP/ordens-producao.html?ordem=${id}`
             };
             
             return links[tipo] || item.url || null;
@@ -318,10 +325,12 @@ document.addEventListener('DOMContentLoaded', function() {
             return Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
 
-        searchBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            if (!searchOpen) openHeaderSearch(); else closeHeaderSearch();
-        });
+        if (searchBtn) {
+            searchBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (!searchOpen) openHeaderSearch(); else closeHeaderSearch();
+            });
+        }
 
         // Removido: não fecha mais ao clicar fora - sugestões e barra são integrados
 
@@ -463,7 +472,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Redirecionar para login
             console.log('[Header] ↩️ Redirecionando para login...');
-            setTimeout(() => { window.location.href = '/login.html'; }, 150);
+            setTimeout(() => { window.location.assign('/login.html'); }, 150);
         });
         console.log('[Header] ✅ Logout configurado');
     } else {

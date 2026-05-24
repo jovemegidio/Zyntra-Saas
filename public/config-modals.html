@@ -54,6 +54,23 @@
                             <input type="text" name="inscricao_municipal" placeholder="Digite a IM">
                         </div>
                     </div>
+
+                    <div class="config-form-row">
+                        <div class="config-form-group">
+                            <label>Regime Tributário</label>
+                            <select name="regime_tributario">
+                                <option value="">Selecione</option>
+                                <option value="simples_nacional">Simples Nacional</option>
+                                <option value="lucro_presumido">Lucro Presumido</option>
+                                <option value="lucro_real">Lucro Real</option>
+                                <option value="mei">MEI</option>
+                            </select>
+                        </div>
+                        <div class="config-form-group">
+                            <label>Atividade Principal</label>
+                            <input type="text" name="atividade_principal" placeholder="Ex: Comércio de materiais elétricos">
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Contato -->
@@ -94,10 +111,33 @@
                             <label>Estado</label>
                             <select name="estado">
                                 <option value="">Selecione</option>
-                                <option value="SP">SP - São Paulo</option>
-                                <option value="RJ">RJ - Rio de Janeiro</option>
+                                <option value="AC">AC - Acre</option>
+                                <option value="AL">AL - Alagoas</option>
+                                <option value="AP">AP - Amapá</option>
+                                <option value="AM">AM - Amazonas</option>
+                                <option value="BA">BA - Bahia</option>
+                                <option value="CE">CE - Ceará</option>
+                                <option value="DF">DF - Distrito Federal</option>
+                                <option value="ES">ES - Espírito Santo</option>
+                                <option value="GO">GO - Goiás</option>
+                                <option value="MA">MA - Maranhão</option>
+                                <option value="MT">MT - Mato Grosso</option>
+                                <option value="MS">MS - Mato Grosso do Sul</option>
                                 <option value="MG">MG - Minas Gerais</option>
-                                <!-- Adicionar todos os estados -->
+                                <option value="PA">PA - Pará</option>
+                                <option value="PB">PB - Paraíba</option>
+                                <option value="PR">PR - Paraná</option>
+                                <option value="PE">PE - Pernambuco</option>
+                                <option value="PI">PI - Piauí</option>
+                                <option value="RJ">RJ - Rio de Janeiro</option>
+                                <option value="RN">RN - Rio Grande do Norte</option>
+                                <option value="RS">RS - Rio Grande do Sul</option>
+                                <option value="RO">RO - Rondônia</option>
+                                <option value="RR">RR - Roraima</option>
+                                <option value="SC">SC - Santa Catarina</option>
+                                <option value="SP">SP - São Paulo</option>
+                                <option value="SE">SE - Sergipe</option>
+                                <option value="TO">TO - Tocantins</option>
                             </select>
                         </div>
                     </div>
@@ -116,11 +156,11 @@
                     <div class="config-form-row">
                         <div class="config-form-group">
                             <label>Endereço</label>
-                            <input type="text" name="endereço" placeholder="Rua, Avenida...">
+                            <input type="text" name="endereco" placeholder="Rua, Avenida...">
                         </div>
                         <div class="config-form-group">
                             <label>Número</label>
-                            <input type="text" name="número" placeholder="Número">
+                            <input type="text" name="numero" placeholder="Número">
                         </div>
                     </div>
 
@@ -739,87 +779,114 @@
     <div class="config-detail-card">
         <div class="config-detail-header">
             <div class="config-detail-title">
-                <div class="config-detail-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
-                    <i class="fas fa-mobile-alt"></i>
+                <div class="config-detail-icon" style="background: linear-gradient(135deg, #6366f1, #4f46e5);">
+                    <i class="fas fa-desktop"></i>
                 </div>
                 <div class="config-detail-title-text">
                     <h3>Baixar Aplicativo</h3>
-                    <p>Instale o Zyntra ERP no seu dispositivo</p>
+                    <p>Instale o Zyntra ERP como programa nativo no seu dispositivo</p>
                 </div>
             </div>
             <button class="config-detail-close" onclick="closeConfigModal('modal-baixar-aplicativo')">×</button>
         </div>
 
         <div class="config-detail-body">
+
+            <!-- Windows -->
             <div class="config-form-section">
                 <h4 class="config-form-section-title">
-                    <i class="fas fa-desktop"></i> Desktop (Windows)
+                    <i class="fab fa-windows"></i> Windows
                 </h4>
                 <p style="color: #64748b; margin-bottom: 15px; font-size: 14px;">
-                    Instale o Zyntra ERP como um aplicativo na sua área de trabalho para acesso rápido.
+                    Instalador nativo para Windows 10/11 — programa completo sem precisar de navegador.
                 </p>
                 <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                    <button class="config-btn config-btn-primary" onclick="instalarPWA()" id="btn-instalar-pwa" style="flex: 1; min-width: 200px;">
-                        <i class="fas fa-download"></i> Instalar como Aplicativo Desktop
-                    </button>
-                </div>
-                <div id="pwa-install-info" style="margin-top: 12px; display: none;">
-                    <div class="config-message success">
-                        <i class="fas fa-check-circle"></i>
-                        <div>
-                            <strong>App já instalado!</strong><br>
-                            <small>O Zyntra ERP já está instalado neste dispositivo.</small>
-                        </div>
-                    </div>
+                    <a href="/downloads/zyntra-erp-setup.exe" download
+                       class="config-btn config-btn-primary" style="flex: 1; min-width: 200px; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+                        <i class="fas fa-download"></i> Baixar para Windows (.exe)
+                    </a>
                 </div>
                 <div style="margin-top: 12px; padding: 12px; background: #f0f9ff; border-radius: 8px; border: 1px solid #bae6fd;">
                     <p style="margin: 0; font-size: 13px; color: #0369a1;">
                         <i class="fas fa-info-circle" style="margin-right: 6px;"></i>
-                        <strong>Dica:</strong> No Chrome/Edge, você também pode clicar no ícone <i class="fas fa-plus-square"></i> na barra de endereço para instalar.
+                        Versão <strong>1.0.0</strong> · Instalador NSIS · Windows 10 64-bit ou superior
                     </p>
                 </div>
             </div>
 
+            <!-- macOS -->
             <div class="config-form-section" style="margin-top: 20px;">
                 <h4 class="config-form-section-title">
-                    <i class="fab fa-android"></i> Android
+                    <i class="fab fa-apple"></i> macOS
                 </h4>
                 <p style="color: #64748b; margin-bottom: 15px; font-size: 14px;">
-                    Acesse o sistema pelo celular adicionando à tela inicial.
+                    Aplicativo nativo para macOS — compatível com Apple Silicon e Intel.
                 </p>
-                <div style="padding: 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
-                    <ol style="margin: 0; padding-left: 20px; color: #334155; font-size: 14px; line-height: 2;">
-                        <li>Abra o <strong>Chrome</strong> no seu celular Android</li>
-                        <li>Acesse <strong id="app-url-display">aluforce.api.br</strong></li>
-                        <li>Toque no menu <i class="fas fa-ellipsis-v"></i> (3 pontos)</li>
-                        <li>Selecione <strong>"Adicionar à tela inicial"</strong></li>
-                        <li>Confirme e o app será instalado</li>
-                    </ol>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <a href="/downloads/zyntra-erp.dmg" download
+                       class="config-btn config-btn-primary" style="flex: 1; min-width: 200px; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+                        <i class="fas fa-download"></i> Baixar para macOS (.dmg)
+                    </a>
+                </div>
+                <div style="margin-top: 12px; padding: 12px; background: #f0f9ff; border-radius: 8px; border: 1px solid #bae6fd;">
+                    <p style="margin: 0; font-size: 13px; color: #0369a1;">
+                        <i class="fas fa-info-circle" style="margin-right: 6px;"></i>
+                        Versão <strong>1.0.0</strong> · macOS 11 Big Sur ou superior
+                    </p>
                 </div>
             </div>
 
+            <!-- Linux -->
             <div class="config-form-section" style="margin-top: 20px;">
                 <h4 class="config-form-section-title">
-                    <i class="fab fa-apple"></i> iPhone / iPad
+                    <i class="fab fa-linux"></i> Linux
                 </h4>
                 <p style="color: #64748b; margin-bottom: 15px; font-size: 14px;">
-                    Adicione o Zyntra ERP à tela inicial do seu dispositivo Apple.
+                    Pacote AppImage portátil — executa sem instalação na maioria das distribuições.
                 </p>
-                <div style="padding: 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
-                    <ol style="margin: 0; padding-left: 20px; color: #334155; font-size: 14px; line-height: 2;">
-                        <li>Abra o <strong>Safari</strong> no seu iPhone/iPad</li>
-                        <li>Acesse <strong>aluforce.api.br</strong></li>
-                        <li>Toque no ícone de compartilhar <i class="fas fa-share-square"></i></li>
-                        <li>Selecione <strong>"Adicionar à Tela de Início"</strong></li>
-                        <li>Confirme e o app será adicionado</li>
-                    </ol>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <a href="/downloads/zyntra-erp.AppImage" download
+                       class="config-btn config-btn-primary" style="flex: 1; min-width: 200px; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+                        <i class="fas fa-download"></i> Baixar para Linux (.AppImage)
+                    </a>
                 </div>
             </div>
+
+            <!-- Mobile -->
+            <div class="config-form-section" style="margin-top: 20px;">
+                <h4 class="config-form-section-title">
+                    <i class="fas fa-mobile-alt"></i> Acesso Mobile (Android / iPhone)
+                </h4>
+                <p style="color: #64748b; margin-bottom: 15px; font-size: 14px;">
+                    Adicione o sistema à tela inicial do celular para acesso rápido.
+                </p>
+                <div style="padding: 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div>
+                            <p style="margin: 0 0 8px; font-size: 13px; font-weight: 600; color: #334155;"><i class="fab fa-android"></i> Android</p>
+                            <ol style="margin: 0; padding-left: 18px; color: #64748b; font-size: 13px; line-height: 1.8;">
+                                <li>Abra o <strong>Chrome</strong></li>
+                                <li>Acesse <strong id="app-url-display">aluforce.api.br</strong></li>
+                                <li>Menu <i class="fas fa-ellipsis-v"></i> → <strong>Adicionar à tela inicial</strong></li>
+                            </ol>
+                        </div>
+                        <div>
+                            <p style="margin: 0 0 8px; font-size: 13px; font-weight: 600; color: #334155;"><i class="fab fa-apple"></i> iPhone / iPad</p>
+                            <ol style="margin: 0; padding-left: 18px; color: #64748b; font-size: 13px; line-height: 1.8;">
+                                <li>Abra o <strong>Safari</strong></li>
+                                <li>Acesse <strong>aluforce.api.br</strong></li>
+                                <li>Compartilhar <i class="fas fa-share-square"></i> → <strong>Adicionar à Tela de Início</strong></li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
         <div class="config-detail-footer">
             <div class="config-detail-footer-left">
-                <span style="color: #94a3b8; font-size: 12px;"><i class="fas fa-shield-alt"></i> PWA — Progressive Web App</span>
+                <span style="color: #94a3b8; font-size: 12px;"><i class="fas fa-shield-alt"></i> Aplicativo Desktop Nativo — Powered by Tauri</span>
             </div>
             <div class="config-detail-footer-right">
                 <button class="config-btn config-btn-secondary" onclick="closeConfigModal('modal-baixar-aplicativo')">

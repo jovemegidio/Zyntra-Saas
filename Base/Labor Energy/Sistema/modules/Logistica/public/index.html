@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
@@ -878,8 +878,9 @@
                 const r = await fetch('/api/logistica/dashboard', { credentials: 'include' });
                 if (r.ok) {
                     const d = await r.json();
-                    document.getElementById('count-aguardando').textContent = d.aguardando_separação || d.aguardando || 0;
-                    document.getElementById('count-separacao').textContent = d.em_separação || d.separação || 0;
+                    // BUG-024: API retorna sem acento (aguardando_separacao, em_separacao)
+                    document.getElementById('count-aguardando').textContent = d.pendente || d.aguardando_separacao || d.aguardando_separação || d.aguardando || 0;
+                    document.getElementById('count-separacao').textContent = d.em_separacao || d.em_separação || d.separação || 0;
                     document.getElementById('count-expedicao').textContent = d.em_expedicao || d.expedicao || 0;
                     document.getElementById('count-transporte').textContent = d.em_transporte || d.transporte || 0;
                     document.getElementById('count-entregues').textContent = d.entregues || 0;
@@ -1274,6 +1275,11 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
 
         async function salvarExpedicao() {
             if (window._guardSalvarExpedicao) return;
+            // BUG-028: avisar se transportadora não for selecionada
+            const transportadoraId = document.getElementById('exp-transportadora').value;
+            if (!transportadoraId || transportadoraId === '') {
+                if (!confirm('Expedição sem transportadora definida. Deseja continuar?')) return;
+            }
             window._guardSalvarExpedicao = true;
             const actionButton = getModalPrimaryActionButton('modal-nova-expedicao');
             setModalButtonBusy(actionButton, true);
@@ -1701,10 +1707,73 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
             `).join('');
         }
 
+        // ============================================================
+        // BE-006: Funções de validação fiscal (CNPJ, CPF, Placa, Chave NF-e)
+        // ============================================================
+        function validarCNPJ(cnpj) {
+            cnpj = cnpj.replace(/\D/g, '');
+            if (cnpj.length !== 14) return false;
+            if (/^(\d)\1+$/.test(cnpj)) return false;
+            let soma = 0, peso = 5;
+            for (let i = 0; i < 12; i++) { soma += parseInt(cnpj[i]) * peso; peso = peso === 2 ? 9 : peso - 1; }
+            let r = soma % 11;
+            if ((r < 2 ? 0 : 11 - r) !== parseInt(cnpj[12])) return false;
+            soma = 0; peso = 6;
+            for (let i = 0; i < 13; i++) { soma += parseInt(cnpj[i]) * peso; peso = peso === 2 ? 9 : peso - 1; }
+            r = soma % 11;
+            return (r < 2 ? 0 : 11 - r) === parseInt(cnpj[13]);
+        }
+        function validarCPF(cpf) {
+            cpf = cpf.replace(/\D/g, '');
+            if (cpf.length !== 11) return false;
+            if (/^(\d)\1+$/.test(cpf)) return false;
+            let soma = 0;
+            for (let i = 0; i < 9; i++) soma += parseInt(cpf[i]) * (10 - i);
+            let r = soma % 11;
+            if ((r < 2 ? 0 : 11 - r) !== parseInt(cpf[9])) return false;
+            soma = 0;
+            for (let i = 0; i < 10; i++) soma += parseInt(cpf[i]) * (11 - i);
+            r = soma % 11;
+            return (r < 2 ? 0 : 11 - r) === parseInt(cpf[10]);
+        }
+        function validarPlaca(placa) {
+            const limpa = placa.replace(/[-\s]/g, '').toUpperCase();
+            return /^[A-Z]{3}[0-9]{4}$/.test(limpa) || /^[A-Z]{3}[0-9][A-Z][0-9]{2}$/.test(limpa);
+        }
+        function validarChaveAcesso(chave) {
+            chave = chave.replace(/\D/g, '');
+            if (chave.length !== 44) return false;
+            let soma = 0, peso = 2;
+            for (let i = 42; i >= 0; i--) {
+                soma += parseInt(chave[i]) * peso;
+                peso = peso === 9 ? 2 : peso + 1;
+            }
+            const resto = soma % 11;
+            const dv = resto < 2 ? 0 : 11 - resto;
+            return dv === parseInt(chave[43]);
+        }
+
         async function salvarCTe() {
             const transportadora_id = document.getElementById('cte-transportadora').value;
             const valor_frete = document.getElementById('cte-valor-frete').value;
             if (!transportadora_id || !valor_frete) { showToast('Transportadora e valor do frete são obrigatórios', 'warning'); return; }
+
+            // BE-006: Validações fiscais CT-e
+            const remCnpj = (document.getElementById('cte-rem-cnpj').value || '').replace(/\D/g, '');
+            if (remCnpj.length === 14 && !validarCNPJ(remCnpj)) {
+                showToast('CNPJ do remetente inválido (dígito verificador incorreto)', 'error');
+                document.getElementById('cte-rem-cnpj').focus(); return;
+            }
+            if (remCnpj.length === 11 && !validarCPF(remCnpj)) {
+                showToast('CPF do remetente inválido', 'error');
+                document.getElementById('cte-rem-cnpj').focus(); return;
+            }
+            const destCnpj = (document.getElementById('cte-dest-cnpj').value || '').replace(/\D/g, '');
+            if (destCnpj.length === 14 && !validarCNPJ(destCnpj)) {
+                showToast('CNPJ do destinatário inválido', 'error');
+                document.getElementById('cte-dest-cnpj').focus(); return;
+            }
+
             if (window._guardSalvarCTe) return;
             window._guardSalvarCTe = true;
             const actionButton = getModalPrimaryActionButton('modal-novo-cte');
@@ -1858,6 +1927,19 @@ body { font-family: 'Arial', 'Helvetica Neue', sans-serif; width: 100mm; height:
             const uf_inicio = document.getElementById('mdfe-uf-inicio').value.trim().toUpperCase();
             const uf_fim = document.getElementById('mdfe-uf-fim').value.trim().toUpperCase();
             if (!transportadora_id || !uf_inicio || !uf_fim) { showToast('Transportadora, UF início e UF fim são obrigatórios', 'warning'); return; }
+
+            // BE-006: Validações fiscais MDF-e
+            const condCpf = (document.getElementById('mdfe-condutor-cpf').value || '').replace(/\D/g, '');
+            if (condCpf.length > 0 && !validarCPF(condCpf)) {
+                showToast('CPF do condutor inválido', 'error');
+                document.getElementById('mdfe-condutor-cpf').focus(); return;
+            }
+            const placa = (document.getElementById('mdfe-placa').value || '').trim();
+            if (placa.length > 0 && !validarPlaca(placa)) {
+                showToast('Placa inválida. Use formato antigo (ABC-1234) ou Mercosul (ABC1D23)', 'error');
+                document.getElementById('mdfe-placa').focus(); return;
+            }
+
             if (window._guardSalvarMDFe) return;
             window._guardSalvarMDFe = true;
             const actionButton = getModalPrimaryActionButton('modal-novo-mdfe');

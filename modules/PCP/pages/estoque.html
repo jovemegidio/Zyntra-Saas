@@ -150,7 +150,7 @@
     <script src="/js/tooltips-professional.js?v=20260209"></script>
 
     <!-- Global Header & Sidebar -->
-    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260224">
+    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260418">
 
     <!-- PCP Header & Sidebar  Design Refinado (DEVE SER O ÚLTIMO) -->
     <link rel="stylesheet" href="../css/pcp-header-sidebar.css?v=20260224">
@@ -1663,14 +1663,16 @@
             // API pode retornar estoque_atual ou estoque
             const baixo = produtosData.filter(p => {
                 const estoque = p.estoque_atual ?? p.estoque ?? 0;
-                const minimo = p.estoque_minimo ?? 10;
-                return estoque <= minimo;
+                const minimo = p.estoque_minimo ?? p.minimo ?? null;
+                return minimo !== null && estoque <= minimo;
             }).length;
             const normal = total - baixo;
 
             document.getElementById('produtos-total').textContent = total;
             document.getElementById('produtos-normal').textContent = normal;
             document.getElementById('produtos-baixo').textContent = baixo;
+            const elMateriais = document.getElementById('materiais-total');
+            if (elMateriais) elMateriais.textContent = total;
         }
 
         function renderizarProdutos() {
@@ -1681,7 +1683,7 @@
 
             let filtrados = produtosData.filter(p => {
                 const estoque = p.estoque_atual ?? p.estoque ?? 0;
-                const minimo = p.estoque_minimo ?? 10;
+                const minimo = p.estoque_minimo ?? p.minimo ?? null;
                 const matchSearch = !searchTerm ||
                     (p.codigo && p.codigo.toLowerCase().includes(searchTerm)) ||
                     (p.nome && p.nome.toLowerCase().includes(searchTerm)) ||
@@ -1689,8 +1691,8 @@
                     (p.sku && p.sku.toLowerCase().includes(searchTerm));
                 const matchCategoria = !categoria || p.categoria === categoria;
                 const matchStatus = !statusEstoque ||
-                    (statusEstoque === 'baixo' && estoque <= minimo) ||
-                    (statusEstoque === 'normal' && estoque > minimo);
+                    (statusEstoque === 'baixo' && minimo !== null && estoque <= minimo) ||
+                    (statusEstoque === 'normal' && (minimo === null || estoque > minimo));
                 return matchSearch && matchCategoria && matchStatus;
             });
 
@@ -1709,7 +1711,8 @@
             tbody.innerHTML = filtrados.map(p => {
                 const estoque = p.estoque_atual ?? p.estoque ?? 0;
                 const cancelado = Number(p.estoque_cancelado || 0);
-                const minimo = p.estoque_minimo ?? 10;
+                const minimo = p.estoque_minimo ?? p.minimo ?? null;
+                const isBaixo = minimo !== null && estoque <= minimo;
                 return `
                 <tr>
                     <td><strong>${p.codigo || '-'}</strong></td>
@@ -1718,11 +1721,11 @@
                     <td><span class="badge badge-gray">${p.categoria || '-'}</span></td>
                     <td>${estoque}</td>
                     <td>${cancelado > 0 ? `<span class="badge" style="background: #ff9800; color: #fff; padding: 2px 8px; border-radius: 4px;" title="Estoque de pedidos cancelados">${cancelado}</span>` : '<span style="color: var(--gray-400);">-</span>'}</td>
-                    <td>${minimo}</td>
+                    <td>${minimo !== null ? minimo : '-'}</td>
                     <td>${formatarMoeda(p.preco_venda || p.preco)}</td>
                     <td>
-                        <span class="status-badge ${estoque <= minimo ? 'pendente' : 'concluido'}">
-                            ${estoque <= minimo ? 'Baixo' : 'Normal'}
+                        <span class="status-badge ${isBaixo ? 'pendente' : 'concluido'}">
+                            ${isBaixo ? 'Baixo' : 'Normal'}
                         </span>
                     </td>
                     <td>
@@ -1766,7 +1769,7 @@
         function preencherModalVisualização(p) {
             // Header
             document.getElementById('view-produto-nome').textContent = p.nome || p.descricao || 'Produto';
-            document.getElementById('view-produto-código').textContent = p.codigo || '-';
+            document.getElementById('view-produto-codigo').textContent = p.codigo || '-';
             document.getElementById('view-produto-sku').textContent = p.sku || '-';
 
             // Status badge (novo estilo Omie)
@@ -1850,7 +1853,7 @@
             if (elOrigem) elOrigem.textContent = p.origem || '0 - Nacional';
 
             // Observações (aba Obs)
-            const elObs = document.getElementById('view-observações');
+            const elObs = document.getElementById('view-observacoes');
             if (elObs) {
                 elObs.textContent = (p.observações && p.observações.trim()) ? p.observações : 'Nenhuma observação registrada.';
             }
@@ -1890,7 +1893,7 @@
         // ===== FUNÇÕES DO HISTÓRICO =====
 
         async function carregarHistoricoProduto(produtoId) {
-            const container = document.getElementById('view-histórico-lista');
+            const container = document.getElementById('view-historico-lista');
             const loading = document.getElementById('history-loading');
             const empty = document.getElementById('history-empty');
 
@@ -2676,7 +2679,7 @@ var qrDataMap = {`;
 
         async function carregarMovimentaçõesGlobal() {
             if (movimentaçõesCarregadas) return;
-            const container = document.getElementById('tab-movimentações-content');
+            const container = document.getElementById('tab-movimentacoes-content');
             if (!container) return;
             container.innerHTML = '<div style="text-align:center;padding:40px;color:#94a3b8;"><i class="fas fa-spinner fa-spin" style="font-size:24px;"></i><p>Carregando movimentações...</p></div>';
             try {
@@ -2728,7 +2731,7 @@ var qrDataMap = {`;
                 const tab = this.dataset.tab;
 
                 // Show/hide tab-specific content
-                const movPanel = document.getElementById('tab-movimentações-panel');
+                const movPanel = document.getElementById('tab-movimentacoes-panel');
                 const mainContent = document.getElementById('main-produtos-content');
 
                 if (tab === 'movimentações') {
@@ -2785,3 +2788,4 @@ var qrDataMap = {`;
     <script src="/js/user-dropdown.js?v=20260319" defer></script>
 </body>
 </html>
+

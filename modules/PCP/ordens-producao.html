@@ -2664,7 +2664,7 @@
             if (confirm('Deseja realmente sair?')) {
                 localStorage.removeItem('token');
                 document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-                window.location.href = '/login';
+                window.location.assign('/login');
             }
         }
 
@@ -2724,14 +2724,14 @@
                 checkboxDiv.style.borderColor = '#f97316';
                 checkboxDiv.innerHTML = '<i class="fas fa-check" style="color: white; font-size: 11px;"></i>';
             });
-            document.getElementById('filtro-período').value = 'todos';
+            document.getElementById('filtro-periodo').value = 'todos';
         }
 
         function confirmarFiltros() {
             const pendentes = document.getElementById('filtro-pendentes').checked;
             const atrasadas = document.getElementById('filtro-atrasadas').checked;
             const concluidas = document.getElementById('filtro-concluidas').checked;
-            const período = document.getElementById('filtro-período').value;
+            const período = document.getElementById('filtro-periodo').value;
 
             // Salvar filtros
             window.filtrosAtivos = { pendentes, atrasadas, concluidas, período };
@@ -2961,7 +2961,7 @@
                 revisao: document.getElementById('opRevisao').value,
                 num_pedido: document.getElementById('opPedido').value,
                 numero_pedido: document.getElementById('opPedido').value,
-                data_liberacao: document.getElementById('opDataLiberação').value,
+                data_liberacao: document.getElementById('opDataLiberacao').value,
                 vendedor: document.getElementById('opVendedor').value,
                 prazo_entrega: document.getElementById('opPrazoEntrega').value,
                 tipo_frete: document.getElementById('opTipoFrete').value,
@@ -2992,7 +2992,7 @@
                 cidade_entrega: document.getElementById('opCidadeEntrega').value,
                 instrucoes_entrega: document.getElementById('opInstrucoesEntrega').value,
                 // Observações
-                observações: document.getElementById('opObservações').value,
+                observações: document.getElementById('opObservacoes').value,
                 // Produtos
                 produtos: produtos,
                 produto: produtoDesc || document.getElementById('opCliente').value,
@@ -3574,7 +3574,7 @@
             }
 
             // Preencher observações
-            const obsEl = document.getElementById('modal-observações');
+            const obsEl = document.getElementById('modal-observacoes');
             if (obsEl) obsEl.value = ordem.observações || '';
 
             // Atualizar status no footer
@@ -3736,7 +3736,7 @@
                 btnSalvar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
 
                 const novaPrevisao = document.getElementById('modal-previsão-conclusao').value;
-                const observações = document.getElementById('modal-observações').value;
+                const observações = document.getElementById('modal-observacoes').value;
 
                 const payload = {};
                 if (novaPrevisao) payload.data_prevista = novaPrevisao;
@@ -3871,8 +3871,8 @@
         }
 
         async function salvarItemEstrutura() {
-            const código = document.getElementById('item-código').value.trim();
-            const descrição = document.getElementById('item-descrição').value.trim();
+            const código = document.getElementById('item-codigo').value.trim();
+            const descrição = document.getElementById('item-descricao').value.trim();
             const quantidade = parseFloat(document.getElementById('item-quantidade').value) || 0;
             const unidade = document.getElementById('item-unidade').value;
             const tipo = document.getElementById('item-tipo').value;
@@ -5038,7 +5038,7 @@
                                     <h3 style="margin:0;font-size:18px;"><i class="fas fa-history"></i> Histórico de Alterações</h3>
                                     <p style="margin:5px 0 0;opacity:0.9;font-size:14px;">${ordem.numero || 'OP-' + ordem.id}</p>
                                 </div>
-                                <button onclick="document.getElementById('modal-histórico').remove()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;width:36px;height:36px;border-radius:8px;cursor:pointer;font-size:18px;">?</button>
+                                <button onclick="document.getElementById('modal-historico').remove()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;width:36px;height:36px;border-radius:8px;cursor:pointer;font-size:18px;">?</button>
                             </div>
                         </div>
 
@@ -5049,7 +5049,7 @@
 
                         <!-- Footer -->
                         <div style="padding:16px 20px;background:#f8f9fa;border-top:1px solid #e5e7eb;flex-shrink:0;text-align:right;">
-                            <button onclick="document.getElementById('modal-histórico').remove()" style="padding:10px 20px;background:#6b7280;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;">
+                            <button onclick="document.getElementById('modal-historico').remove()" style="padding:10px 20px;background:#6b7280;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;">
                                 <i class="fas fa-times"></i> Fechar
                             </button>
                         </div>
@@ -5743,8 +5743,8 @@
         }
 
         async function salvarEdicaoItem(index) {
-            const código = document.getElementById('edit-item-código').value.trim();
-            const descrição = document.getElementById('edit-item-descrição').value.trim();
+            const código = document.getElementById('edit-item-codigo').value.trim();
+            const descrição = document.getElementById('edit-item-descricao').value.trim();
             const quantidade = parseFloat(document.getElementById('edit-item-quantidade').value) || 0;
             const unidade = document.getElementById('edit-item-unidade').value;
             const tipo = document.getElementById('edit-item-tipo').value;
@@ -6524,10 +6524,10 @@
 
         // Quando o select de variação muda
         function onVariaçãoSelectChange(select) {
-            const customDiv = document.getElementById('etiqueta-variação-custom');
+            const customDiv = document.getElementById('etiqueta-variacao-custom');
             if (select.value === '__custom__') {
                 customDiv.style.display = 'block';
-                document.getElementById('etiqueta-variação-input').focus();
+                document.getElementById('etiqueta-variacao-input').focus();
             } else {
                 customDiv.style.display = 'none';
                 etiquetaVariaçãoSelecionada = select.value;
@@ -6559,10 +6559,10 @@
             if (!el) return;
 
             let variaçãoTexto = 'Automática';
-            const select = document.getElementById('etiqueta-variação-select');
+            const select = document.getElementById('etiqueta-variacao-select');
             if (select) {
                 if (select.value === '__custom__') {
-                    const input = document.getElementById('etiqueta-variação-input');
+                    const input = document.getElementById('etiqueta-variacao-input');
                     variaçãoTexto = input && input.value ? input.value : 'Personalizada';
                 } else if (select.value) {
                     variaçãoTexto = select.value;
@@ -6574,9 +6574,9 @@
 
         // Confirmar e gerar etiqueta com parâmetros selecionados
         function confirmarGerarEtiqueta() {
-            const select = document.getElementById('etiqueta-variação-select');
+            const select = document.getElementById('etiqueta-variacao-select');
             if (select && select.value === '__custom__') {
-                const input = document.getElementById('etiqueta-variação-input');
+                const input = document.getElementById('etiqueta-variacao-input');
                 etiquetaVariaçãoSelecionada = input ? input.value.trim() : '';
             } else if (select) {
                 etiquetaVariaçãoSelecionada = select.value;

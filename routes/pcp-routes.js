@@ -404,15 +404,21 @@ module.exports = function createPCPRoutes(deps) {
 
             // 1. Produtos com estoque CRÍTICO (zerado)
             // Exclui categoria 'GERAL' (suprimentos, limpeza, escritório) — não são itens de produção PCP
-            const [produtosCriticos] = await pool.query(`
-                SELECT codigo, nome, estoque_atual, estoque_minimo, unidade_medida as unidade, categoria
-                FROM produtos
-                WHERE (estoque_atual <= 0 OR quantidade_estoque <= 0)
-                AND (ativo = 1 OR ativo IS NULL OR status = 'ativo')
-                AND (categoria IS NULL OR categoria != 'GERAL')
-                ORDER BY nome ASC
-                LIMIT 50
-            `);
+            let produtosCriticos = [];
+            try {
+                [produtosCriticos] = await pool.query(`
+                    SELECT codigo, nome,
+                        COALESCE(estoque_atual, quantidade_estoque, 0) as estoque_atual,
+                        COALESCE(estoque_minimo, 0) as estoque_minimo,
+                        COALESCE(unidade_medida, unidade, 'UN') as unidade, categoria
+                    FROM produtos
+                    WHERE COALESCE(estoque_atual, quantidade_estoque, 0) <= 0
+                    AND (ativo = 1 OR ativo IS NULL OR status = 'ativo')
+                    AND (categoria IS NULL OR categoria != 'GERAL')
+                    ORDER BY nome ASC
+                    LIMIT 50
+                `);
+            } catch (e) { console.log('[PCP/ALERTAS] Query produtos críticos falhou:', e.message); }
 
             if (produtosCriticos && produtosCriticos.length > 0) {
                 alertas.push({
@@ -436,17 +442,23 @@ module.exports = function createPCPRoutes(deps) {
 
             // 2. Produtos com estoque BAIXO (abaixo do mínimo)
             // Exclui categoria 'GERAL' (suprimentos, limpeza, escritório) — não são itens de produção PCP
-            const [produtosBaixo] = await pool.query(`
-                SELECT codigo, nome, estoque_atual, estoque_minimo, unidade_medida as unidade, categoria
-                FROM produtos
-                WHERE estoque_atual > 0
-                AND estoque_atual < COALESCE(estoque_minimo, 10)
-                AND COALESCE(estoque_minimo, 10) > 0
-                AND (ativo = 1 OR ativo IS NULL OR status = 'ativo')
-                AND (categoria IS NULL OR categoria != 'GERAL')
-                ORDER BY estoque_atual ASC
-                LIMIT 50
-            `);
+            let produtosBaixo = [];
+            try {
+                [produtosBaixo] = await pool.query(`
+                    SELECT codigo, nome,
+                        COALESCE(estoque_atual, quantidade_estoque, 0) as estoque_atual,
+                        COALESCE(estoque_minimo, 0) as estoque_minimo,
+                        COALESCE(unidade_medida, unidade, 'UN') as unidade, categoria
+                    FROM produtos
+                    WHERE COALESCE(estoque_atual, quantidade_estoque, 0) > 0
+                    AND COALESCE(estoque_atual, quantidade_estoque, 0) < COALESCE(estoque_minimo, 10)
+                    AND COALESCE(estoque_minimo, 10) > 0
+                    AND (ativo = 1 OR ativo IS NULL OR status = 'ativo')
+                    AND (categoria IS NULL OR categoria != 'GERAL')
+                    ORDER BY estoque_atual ASC
+                    LIMIT 50
+                `);
+            } catch (e) { console.log('[PCP/ALERTAS] Query produtos baixo falhou:', e.message); }
 
             if (produtosBaixo && produtosBaixo.length > 0) {
                 alertas.push({
@@ -469,14 +481,17 @@ module.exports = function createPCPRoutes(deps) {
             }
 
             // 3. Ordens de Produção em atraso
-            const [ordensAtraso] = await pool.query(`
-                SELECT id, codigo, produto_nome, data_previsao_entrega, status, cliente
-                FROM ordens_producao
-                WHERE data_previsao_entrega < CURDATE()
-                AND status NOT IN ('concluida', 'Concluída', 'cancelada', 'Cancelada', 'entregue', 'finalizada')
-                ORDER BY data_previsao_entrega ASC
-                LIMIT 20
-            `);
+            let ordensAtraso = [];
+            try {
+                [ordensAtraso] = await pool.query(`
+                    SELECT id, codigo, produto_nome, data_previsao_entrega, status, cliente
+                    FROM ordens_producao
+                    WHERE data_previsao_entrega < CURDATE()
+                    AND status NOT IN ('concluida', 'Concluída', 'cancelada', 'Cancelada', 'entregue', 'finalizada')
+                    ORDER BY data_previsao_entrega ASC
+                    LIMIT 20
+                `);
+            } catch (e) { console.log('[PCP/ALERTAS] Query ordens atraso falhou:', e.message); }
 
             if (ordensAtraso && ordensAtraso.length > 0) {
                 alertas.push({
@@ -499,14 +514,17 @@ module.exports = function createPCPRoutes(deps) {
             }
 
             // 4. Ordens pendentes há mais de 7 dias
-            const [ordensPendentes] = await pool.query(`
-                SELECT id, codigo, produto_nome, created_at, status, cliente
-                FROM ordens_producao
-                WHERE status IN ('pendente', 'a_produzir', 'A Fazer')
-                AND created_at < DATE_SUB(CURDATE(), INTERVAL 7 DAY)
-                ORDER BY created_at ASC
-                LIMIT 20
-            `);
+            let ordensPendentes = [];
+            try {
+                [ordensPendentes] = await pool.query(`
+                    SELECT id, codigo, produto_nome, created_at, status, cliente
+                    FROM ordens_producao
+                    WHERE status IN ('pendente', 'a_produzir', 'A Fazer')
+                    AND created_at < DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+                    ORDER BY created_at ASC
+                    LIMIT 20
+                `);
+            } catch (e) { console.log('[PCP/ALERTAS] Query ordens pendentes falhou:', e.message); }
 
             if (ordensPendentes && ordensPendentes.length > 0) {
                 alertas.push({
@@ -10157,6 +10175,79 @@ tr:nth-child(even){background:#f8fafc}
         }
     });
 
+
+    // CARTEIRA DE PEDIDOS
+    router.get('/carteira', async (req, res, next) => {
+        try {
+            const { status, cliente, prioridade, data_inicio, data_fim } = req.query;
+            const limit = Math.min(parseInt(req.query.limit) || 500, 1000);
+
+            const conditions = ['p.deleted_at IS NULL'];
+            const params = [];
+
+            if (status)      { conditions.push('p.status = ?');                                   params.push(status); }
+            if (cliente)     { conditions.push('(p.cliente_nome LIKE ? OR c.nome LIKE ?)');       params.push(`%${cliente}%`, `%${cliente}%`); }
+            if (prioridade)  { conditions.push('p.prioridade = ?');                               params.push(prioridade); }
+            if (data_inicio) { conditions.push('DATE(p.created_at) >= ?');                        params.push(data_inicio); }
+            if (data_fim)    { conditions.push('DATE(p.created_at) <= ?');                        params.push(data_fim); }
+
+            const where = `WHERE ${conditions.join(' AND ')}`;
+            params.push(limit);
+
+            const [rows] = await pool.query(`
+                SELECT
+                    p.id,
+                    p.numero_pedido,
+                    p.numero_orcamento,
+                    COALESCE(c.nome, p.cliente_nome)   AS cliente,
+                    p.descricao,
+                    p.valor,
+                    p.valor_total,
+                    p.status,
+                    p.prioridade,
+                    p.prazo_entrega,
+                    p.condicao_pagamento,
+                    p.nfe_numero,
+                    p.nfe_chave,
+                    p.created_at,
+                    op.status       AS status_producao,
+                    op.quantidade,
+                    op.produto_nome,
+                    DATEDIFF(p.prazo_entrega, CURDATE()) AS dias_entrega
+                FROM pedidos p
+                LEFT JOIN clientes c ON p.cliente_id = c.id
+                LEFT JOIN (
+                    SELECT numero_pedido, MAX(id) AS max_id
+                    FROM ordens_producao
+                    WHERE deleted_at IS NULL
+                    GROUP BY numero_pedido
+                ) op_latest ON op_latest.numero_pedido = p.numero_pedido
+                LEFT JOIN ordens_producao op ON op.id = op_latest.max_id
+                ${where}
+                ORDER BY p.id DESC
+                LIMIT ?
+            `, params);
+
+            const emProducao = rows.filter(r => {
+                const s = (r.status_producao || '').toLowerCase();
+                return s.includes('produ') || s === 'iniciada' || s === 'em_producao';
+            }).length;
+            const atrasados = rows.filter(r =>
+                r.dias_entrega != null && r.dias_entrega < 0 &&
+                !['faturado', 'cancelado', 'recibo'].includes(r.status)
+            ).length;
+            const aFaturar = rows.filter(r => r.status === 'faturar' && !r.nfe_numero).length;
+
+            res.json({
+                success: true,
+                pedidos: rows,
+                kpis: { total: rows.length, emProducao, atrasados, aFaturar }
+            });
+        } catch (err) {
+            console.error('[PCP/CARTEIRA] Erro:', err.message);
+            res.status(500).json({ success: false, message: 'Erro ao carregar carteira de pedidos.' });
+        }
+    });
 
     return router;
 };

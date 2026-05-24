@@ -1,8 +1,8 @@
 #!/bin/bash
 # Test MagnusBilling API - Various Authentication Methods
 BASE="https://sip10.tsinfo.net.br"
-USER="Labor@"
-PASS='F.0582#9d5c?'
+USER="${CDR_PABX_USER:?CDR_PABX_USER required}"
+PASS="${CDR_PABX_PASS:?CDR_PABX_PASS required}"
 
 echo "=============================================="
 echo "TEST 1: MagnusBilling API format with user/pass in URL"

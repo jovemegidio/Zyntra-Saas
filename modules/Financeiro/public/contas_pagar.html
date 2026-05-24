@@ -10,9 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <!-- Design System Institucional Financeiro -->
-    <link rel="stylesheet" href="/Financeiro/css/fin-layout.css?v=1775916179">
     <link rel="stylesheet" href="/Financeiro/css/fin-components.css?v=1775916179">
-    <link rel="stylesheet" href="/Financeiro/css/fin-header-sidebar.css?v=1775916179">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="js/importar-xlsx.js"></script>
@@ -1060,6 +1058,10 @@
                                 <label><i class="fas fa-building"></i> Centro de Custo</label>
                                 <select class="form-input" id="centro-custo"><option value="">Selecione (opcional)</option></select>
                             </div>
+                            <div class="form-group">
+                                <label><i class="fas fa-university"></i> Conta Corrente</label>
+                                <select class="form-input" id="conta-banco"><option value="">Carregando contas...</option></select>
+                            </div>
                         </div>
                         <div class="form-group full">
                             <label><i class="fas fa-comment"></i> Observações</label>
@@ -1145,6 +1147,10 @@
                                 <option value="dinheiro">Dinheiro</option>
                             </select>
                         </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-university"></i> Conta Corrente</label>
+                            <select class="form-input" id="pagar-conta-banco"><option value="">Selecione...</option></select>
+                        </div>
                     </div>
                     <div class="form-group"><label><i class="fas fa-comment"></i> Observações</label><textarea class="form-input" id="pagar-obs" rows="2" placeholder="Observações sobre o pagamento..."></textarea></div>
                 </div>
@@ -1166,7 +1172,7 @@
             document.getElementById('sidebar-overlay')?.classList.toggle('active');
         }
 
-        function toggleNotificações() {
+        function toggleNotificacoes() {
             if (typeof window.NotificationsManager !== 'undefined') {
                 window.NotificationsManager.togglePanel();
             }
@@ -1174,6 +1180,7 @@
 
         let contas = [];
         let fornecedoresList = [];
+        let contasBancarias = [];
         let contasSelecionadas = new Set();
         let cnabConteudo = '';
 
@@ -1193,7 +1200,8 @@
                         else if (hour >= 18 || hour < 5) greeting = 'Boa noite';
                         greetingTextEl.textContent = greeting;
                     }
-                    document.getElementById('user-name').textContent = primeiroNome;
+                    const userNameEl = document.getElementById('user-name');
+                    if (userNameEl) userNameEl.textContent = primeiroNome;
 
                     const avatarNameMap = {
                         'clemerson':'/avatars/Clemerson.webp','isabela':'/avatars/Isabela.webp','thaina':'/avatars/Thaina.webp',
@@ -1238,7 +1246,7 @@
 
         // ===== INIT =====
         async function init() {
-            await Promise.all([carregarUsuarioLogado(), carregarResumo(), carregarContas(), carregarFornecedores(), carregarCategorias(), carregarCentrosCusto()]);
+            await Promise.all([carregarUsuarioLogado(), carregarResumo(), carregarContas(), carregarFornecedores(), carregarCategorias(), carregarCentrosCusto(), carregarContasBancarias()]);
             const urlParams = new URLSearchParams(window.location.search);
             const ação = urlParams.get('ação');
             const id = urlParams.get('id');
@@ -1324,6 +1332,55 @@
             } catch (error) { console.error('Erro ao carregar centros de custo:', error); }
         }
 
+        function normalizarListaContas(raw) {
+            if (Array.isArray(raw)) return raw;
+            if (Array.isArray(raw?.data)) return raw.data;
+            if (Array.isArray(raw?.contas)) return raw.contas;
+            return [];
+        }
+
+        function rotuloContaBancaria(conta) {
+            if (conta.nome) return conta.nome;
+            const banco = conta.banco || conta.instituicao || 'Conta bancária';
+            const numero = conta.numero_conta || conta.conta || conta.conta_corrente || '';
+            const agencia = conta.agencia || '';
+            const partes = [banco];
+            if (numero) partes.push('Cc. ' + numero);
+            if (agencia) partes.push('Ag. ' + agencia);
+            return partes.join(' - ');
+        }
+
+        function renderizarSelectsContasBancarias() {
+            const selects = [document.getElementById('conta-banco'), document.getElementById('pagar-conta-banco')].filter(Boolean);
+            const options = contasBancarias
+                .filter(c => c && c.id)
+                .map(c => `<option value="${esc(c.id)}">${esc(rotuloContaBancaria(c))}</option>`)
+                .join('');
+
+            selects.forEach(select => {
+                select.innerHTML = '<option value="">Selecione...</option>' + options;
+            });
+        }
+
+        async function carregarContasBancarias() {
+            try {
+                const response = await fetch('/api/financeiro/bancos-select', { credentials: 'include' });
+                if (response.ok) {
+                    contasBancarias = normalizarListaContas(await response.json());
+                }
+
+                if (!contasBancarias.length) {
+                    const fallback = await fetch('/api/financeiro/contas-bancarias', { credentials: 'include' });
+                    if (fallback.ok) contasBancarias = normalizarListaContas(await fallback.json());
+                }
+            } catch (error) {
+                console.error('Erro ao carregar contas bancárias:', error);
+                contasBancarias = [];
+            } finally {
+                renderizarSelectsContasBancarias();
+            }
+        }
+
         async function carregarCategorias(fornecedorId) {
             try {
                 let url = '/api/financeiro/categorias';
@@ -1367,6 +1424,8 @@
                     document.getElementById('observacoes').value = conta.observações || '';
                     document.getElementById('numero-documento').value = conta.numero_documento || '';
                     document.getElementById('centro-custo').value = conta.centro_custo_id || '';
+                    const contaBancoEl = document.getElementById('conta-banco');
+                    if (contaBancoEl) contaBancoEl.value = conta.conta_bancaria_id || conta.banco_id || '';
                 }
             }
         }
@@ -1377,6 +1436,9 @@
             document.getElementById('pagar-valor').value = valor || 0;
             document.getElementById('pagar-data').value = new Date().toISOString().split('T')[0];
             document.getElementById('pagar-obs').value = '';
+            const conta = contas.find(c => String(c.id) === String(id));
+            const contaBancoEl = document.getElementById('pagar-conta-banco');
+            if (contaBancoEl) contaBancoEl.value = conta?.conta_bancaria_id || conta?.banco_id || '';
             document.getElementById('modal-pagar').classList.add('active');
         }
         function fecharModalPagar() { document.getElementById('modal-pagar').classList.remove('active'); }
@@ -1388,7 +1450,7 @@
             if (btnPagar) { if (btnPagar.disabled) return; btnPagar.disabled = true; btnPagar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...'; }
             const idStr = document.getElementById('pagar-conta-id').value;
             const ids = idStr.includes(',') ? idStr.split(',').map(Number).filter(Boolean) : [parseInt(idStr)];
-            const dados = { valor_pago: parseFloat(document.getElementById('pagar-valor').value), data_pagamento: document.getElementById('pagar-data').value, forma_pagamento: document.getElementById('pagar-forma').value, observações: document.getElementById('pagar-obs').value };
+            const dados = { valor_pago: parseFloat(document.getElementById('pagar-valor').value), data_pagamento: document.getElementById('pagar-data').value, forma_pagamento: document.getElementById('pagar-forma').value, conta_bancaria_id: document.getElementById('pagar-conta-banco')?.value || null, observações: document.getElementById('pagar-obs').value };
 
             try {
                 if (ids.length === 1) {
@@ -1421,7 +1483,7 @@
             const btnSave = event.target.querySelector('.btn-save');
             if (btnSave) { if (btnSave.disabled) return; btnSave.disabled = true; btnSave.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...'; }
             const id = document.getElementById('conta-id').value;
-            const dados = { descrição: document.getElementById('descricao').value, fornecedor_id: document.getElementById('fornecedor-id').value, categoria_id: document.getElementById('categoria-id').value, valor: parseMoeda(document.getElementById('conta-valor').value), data_vencimento: document.getElementById('conta-vencimento').value, forma_pagamento: document.getElementById('forma-pagamento').value, observações: document.getElementById('observacoes').value, numero_documento: document.getElementById('numero-documento').value, centro_custo_id: document.getElementById('centro-custo').value || null, num_parcelas: parseInt(document.getElementById('conta-parcelas').value) || 1 };
+            const dados = { descrição: document.getElementById('descricao').value, fornecedor_id: document.getElementById('fornecedor-id').value, categoria_id: document.getElementById('categoria-id').value, valor: parseMoeda(document.getElementById('conta-valor').value), data_vencimento: document.getElementById('conta-vencimento').value, forma_pagamento: document.getElementById('forma-pagamento').value, conta_bancaria_id: document.getElementById('conta-banco')?.value || null, observações: document.getElementById('observacoes').value, numero_documento: document.getElementById('numero-documento').value, centro_custo_id: document.getElementById('centro-custo').value || null, num_parcelas: parseInt(document.getElementById('conta-parcelas').value) || 1 };
             try {
                 const url = id ? `/api/financeiro/contas-pagar/${id}` : '/api/financeiro/contas-pagar';
                 const method = id ? 'PUT' : 'POST';

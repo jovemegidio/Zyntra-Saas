@@ -1,5 +1,5 @@
 // auth-unified.js - Sistema de autenticação unificado para todos os módulos ALUFORCE
-// VERSÃO 7.5 - ISOLAMENTO POR ABA + VALIDAÇÃO VIA SERVIDOR + RESILIÊNCIA
+// VERSAO 7.6 - ISOLAMENTO POR ABA + VALIDACAO VIA SERVIDOR + RESILIENCIA
 // FIX v7.0: Resolve o problema de "espelhamento" onde o login de outro usuário em outra aba
 //      sobrescreve a sessão da aba atual via localStorage/cookie compartilhados.
 // FIX v7.1: NÃO copia mais token/userData de localStorage para sessionStorage em novas abas.
@@ -9,18 +9,25 @@
 //      exige 3 falhas consecutivas no check periódico antes de redirecionar.
 // FIX v7.5: AUTH_INACTIVE retorna Response sintética (evita 401 no caller), 503 retry
 //      sem signal abortado, proactive refresh usa config centralizada.
+// FIX v7.6: 502/504 entram no mesmo caminho resiliente de retry/fallback.
 
 // =============================================================================
-// 🎨 ANTI-FOUC: Restaurar dark-mode imediatamente para evitar flash branco
-// Deve rodar ANTES de qualquer outro código (síncrono)
+// ANTI-FOUC: restaurar somente header/sidebar escuros.
+// Não aplica `dark-mode` no body para não alterar o conteúdo das páginas.
 // =============================================================================
 ;(function antiFlashRestore() {
     try {
-        if (localStorage.getItem('darkMode') === '1') {
-            document.documentElement.classList.add('dark-mode');
-            if (document.body) document.body.classList.add('dark-mode');
+        var legacyDark = localStorage.getItem('darkMode') === '1';
+        if (legacyDark && localStorage.getItem('a11yDarkMode') == null) {
+            localStorage.setItem('a11yDarkMode', '1');
         }
-    } catch (e) { /* localStorage indisponível */ }
+        if (legacyDark) {
+            localStorage.removeItem('darkMode');
+        }
+        if (localStorage.getItem('a11yDarkMode') === '1') {
+            document.documentElement.classList.add('a11y-dark-mode');
+        }
+    } catch (e) { /* localStorage indisponivel */ }
 })();
 
 // =============================================================================
@@ -118,6 +125,7 @@
 
     function syncModalState(modal, force = false) {
         if (!(modal instanceof Element)) return;
+        if (!modal.matches(modalSelector)) return;
 
         const state = modalState.get(modal) || {};
         const isOpen = isModalOpen(modal);
@@ -260,6 +268,8 @@
 // Retorna valores do sessionStorage (isolado por aba) quando disponíveis
 // =============================================================================
 (function StorageIsolator() {
+    if (window.__storageIsolatorInitialized) return;
+    window.__storageIsolatorInitialized = true;
     try {
         var _origGet = Storage.prototype.getItem;
         var _authKeyMap = {
@@ -310,14 +320,25 @@
 (function () {
     'use strict';
 
-    console.log('🔐 Sistema de Autenticação Unificado ALUFORCE v7.5 (Tab-Isolated + Server Validation + Token Refresh)');
+    if (window.__authUnifiedInitialized) return;
+    window.__authUnifiedInitialized = true;
+
+    console.log('[AUTH] Sistema de Autenticacao Unificado ALUFORCE v7.6 (Tab-Isolated + Server Validation + Token Refresh)');
+
+    const AUTH_BASE_PATH = window.__BASE_PATH || window.__MOUNT_PATH__ || '';
+    function withAuthBase(path) {
+        if (AUTH_BASE_PATH && typeof path === 'string' && path.charAt(0) === '/' && path.indexOf(AUTH_BASE_PATH) !== 0) {
+            return AUTH_BASE_PATH + path;
+        }
+        return path;
+    }
 
     // Configurações
     const AUTH_CONFIG = {
-        loginUrl: '/login.html',
-        apiMeEndpoint: '/api/me',
-        refreshEndpoint: '/api/auth/refresh',
-        dashboardUrl: '/index.html',
+        loginUrl: withAuthBase('/login.html'),
+        apiMeEndpoint: withAuthBase('/api/me'),
+        refreshEndpoint: withAuthBase('/api/auth/refresh'),
+        dashboardUrl: withAuthBase('/dashboard'),
         timeout: 5000,
         accessTokenLifetimeMs: 15 * 60 * 1000, // 15 min
         refreshBeforeExpiryMs: 2 * 60 * 1000,  // Refresh 2 min antes de expirar
@@ -433,19 +454,19 @@
         }
         if (timeoutId) clearTimeout(timeoutId);
 
-        // v7.4 FIX: Tratar 503 (cache/serviço indisponível) — retry automático com limite
-        if (response.status === 503) {
+        // v7.6 FIX: Tratar 502/503/504 (gateway/cache/servico indisponivel) com retry limitado
+        if ([502, 503, 504].includes(response.status)) {
             const retryCount = (init._retryCount || 0);
             if (retryCount < 2) {
                 const delay = 2000 * (retryCount + 1); // backoff: 2s, 4s
-                debugLog(`⚠️ 503 retry ${retryCount + 1}/2 em ${delay}ms...`);
+                debugLog(`${response.status} retry ${retryCount + 1}/2 em ${delay}ms...`);
                 await new Promise(r => setTimeout(r, delay));
                 var retryInit = Object.assign({}, init);
                 delete retryInit.signal;
                 retryInit._retryCount = retryCount + 1;
                 return window.fetch(input, retryInit);
             }
-            debugLog('❌ 503 após 2 retries — retornando resposta original');
+            debugLog(`${response.status} apos 2 retries - retornando resposta original`);
         }
 
         if (response.status === 401) {
@@ -682,7 +703,7 @@
         const returnTo = encodeURIComponent(currentPath);
 
         let loginUrl = AUTH_CONFIG.loginUrl;
-        if (currentPath !== '/' && currentPath !== '/index.html' && currentPath.length > 1) {
+        if (currentPath !== '/' && currentPath !== '/dashboard' && currentPath.length > 1 && !currentPath.startsWith('/Zyntra-SGE/')) {
             loginUrl = `${AUTH_CONFIG.loginUrl}?returnTo=${returnTo}`;
         }
 
@@ -962,7 +983,10 @@
             }
 
             // Buscar do servidor caso não tenha no localStorage (primeira visita)
-            if (!faviconUrl && !logoUrl) {
+            // Pular requisição quando o usuário ainda não está autenticado (login page ou sem cookie)
+            // — isso evita o 401 "Unauthorized" na rota /api/configuracoes/empresa antes do login.
+            const hasAuthCookie = !!getCookie('authToken') || !!getCookie('token');
+            if (!faviconUrl && !logoUrl && !isLoginPage() && hasAuthCookie) {
                 fetch('/api/configuracoes/empresa', { credentials: 'include' })
                     .then(r => r.ok ? r.json() : null)
                     .then(data => {
@@ -997,6 +1021,6 @@
     // Inicializar
     initAuth();
 
-    debugLog('✅ Sistema de autenticação v7.5 (Tab-Isolated + Server Validation + Token Refresh) inicializado');
+    debugLog('Sistema de autenticacao v7.6 (Tab-Isolated + Server Validation + Token Refresh) inicializado');
 
 })();

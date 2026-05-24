@@ -18,8 +18,9 @@ const path = require('path');
 const fs = require('fs');
 
 // Webhook URL do Discord (canal #atualizações)
-const WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL 
-    || 'https://discord.com/api/webhooks/1465740298243018793/fjkXYSN7Vv06YRyimpqneNVOhADqDACpVTXQxRbyUJnsk-cWpJvnpZzD9JntRVFyhfVt';
+const WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL
+    || process.env.DISCORD_WEBHOOK_ATUALIZACOES
+    || null;
 
 const CHANGELOG_FILE = path.join(__dirname, '..', 'logs', 'changelog.json');
 
@@ -44,6 +45,12 @@ const TIPOS = {
 // =========================================================
 function sendWebhook(payload) {
     return new Promise((resolve, reject) => {
+        if (!WEBHOOK_URL) {
+            console.error('DISCORD_WEBHOOK_URL nao configurado');
+            resolve(false);
+            return;
+        }
+
         const data = JSON.stringify(payload);
         const url = new URL(WEBHOOK_URL);
 
@@ -324,7 +331,7 @@ Exemplos:
         const gitInfo = getGitInfo();
         const modulo = detectModuleFromFiles(files);
 
-        const descricao = gitInfo 
+        const descricao = gitInfo
             ? `Deploy automático: ${gitInfo.message}`
             : 'Deploy automático realizado';
 

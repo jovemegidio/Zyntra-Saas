@@ -13,7 +13,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Design System CSS -->
-    <link rel="stylesheet" href="/css/modern-saas.css?v=3.0">
     <link rel="stylesheet" href="../css/rh-pages.css?v=1.0">
 
     <style>
@@ -413,8 +412,8 @@
     </div>
 
     <script>
-        // Configurao dos benefícios (salvos em localStorage para persistncia)
-        const STORAGE_KEY = 'aluforce_benefícios_v2';
+        // BE-002: Benefícios carregados exclusivamente da API (sem localStorage)
+        const STORAGE_KEY = 'aluforce_benefícios_v2'; // mantido apenas para limpar cache antigo
 
         // Sanitizao XSS
         function escapeHtml(value) {
@@ -522,6 +521,8 @@
         }
 
         async function carregarBeneficios() {
+            // BE-002: Limpar cache localStorage antigo se existir
+            try { localStorage.removeItem(STORAGE_KEY); } catch(_) {}
             try {
                 const response = await fetch('/api/rh/beneficios', {
                     headers: getApiHeaders(),
@@ -531,33 +532,21 @@
                     const data = await response.json();
                     if (data && data.length > 0) {
                         benefícios = data;
-                        localStorage.setItem(STORAGE_KEY, JSON.stringify(benefícios));
                         return;
                     }
                 }
-            } catch (e) {
-                console.warn('[Benefícios] API indisponível, usando cache local:', e.message);
-            }
-            // Fallback: localStorage
-            const saved = localStorage.getItem(STORAGE_KEY);
-            if (saved) {
-                benefícios = JSON.parse(saved);
-            } else {
+                // API retornou lista vazia — usar benefícios padrão como visualização
                 benefícios = [...benefíciosPadrao];
-                salvarBeneficiosLocal();
+            } catch (e) {
+                // BE-002: Sem fallback localStorage — usar dados padrão embutidos apenas para exibição
+                console.warn('[Benefícios] API indisponível, exibindo benefícios padrão:', e.message);
+                benefícios = [...benefíciosPadrao];
             }
-            // Garantir que todos os benefícios Padrão esto presentes (ex: Cesta Básica adicionada depois)
-            benefíciosPadrao.forEach(bp => {
-                const existe = benefícios.some(b => b.id === bp.id || b.nome === bp.nome);
-                if (!existe) {
-                    benefícios.push({ ...bp });
-                }
-            });
-            salvarBeneficiosLocal();
         }
 
+        // BE-002: salvarBeneficiosLocal() removido — persistência via API apenas
         function salvarBeneficiosLocal() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(benefícios));
+            console.warn('[Benefícios] salvarBeneficiosLocal() desabilitado (BE-002)');
         }
 
         function renderizarBeneficios() {

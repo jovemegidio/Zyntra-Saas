@@ -998,7 +998,7 @@
     <link rel="stylesheet" href="/css/tooltips-professional.css?v=20260209">
     <script src="/js/tooltips-professional.js?v=20260209" defer></script>
     <script src="/js/modal-title.js?v=20260210" defer></script>
-    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260216">
+    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260418">
 
     <!-- Chat Widget BOB AI - DESATIVADO -->
     <!-- <link rel="stylesheet" href="/chat/widget.css?v=20260218"> -->
@@ -1012,7 +1012,7 @@
 
         
         <!-- Sidebar -->
-        <aside class="sidebar" id="sidebar">
+        <aside class="sidebar" id="mobile-sidebar">
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel">
                 <i class="fas fa-home"></i>
             </a>
@@ -1046,6 +1046,9 @@
                 </button>
             </nav>
             <div class="sidebar-bottom">
+                <button class="sidebar-btn" title="Configurações" onclick="window.location.href='/dashboard'">
+                    <i class="fas fa-cog"></i>
+                </button>
             </div>
         </aside>
 
@@ -1061,7 +1064,7 @@
                         <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
-                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;"></span>
+                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">—</span>
                         <span class="page-title" style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Gestão de Vendas</span>
                     </div>
                 </div>
@@ -1069,6 +1072,10 @@
                     
                     <div class="user-greeting">
                         <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
+                        <div class="user-avatar" id="user-avatar">
+                            <img src="" alt="Foto do usuário" id="user-photo" style="display:none;">
+                            <span id="user-initial">U</span>
+                        </div>
                     </div>
                 </div>
             </header>
@@ -1895,9 +1902,14 @@
                     fetch('/api/vendas/vendedores', { credentials: 'include' })
                 ]);
 
-                const pedidosAtual = pedidosAtualRes.ok ? await pedidosAtualRes.json() : [];
-                const pedidosAnterior = pedidosAnteriorRes.ok ? await pedidosAnteriorRes.json() : [];
-                const vendedores = vendedoresRes.ok ? await vendedoresRes.json() : [];
+                const rawAtual = pedidosAtualRes.ok ? await pedidosAtualRes.json() : [];
+                const pedidosAtual = Array.isArray(rawAtual) ? rawAtual : (rawAtual.data || rawAtual.pedidos || []);
+
+                const rawAnterior = pedidosAnteriorRes.ok ? await pedidosAnteriorRes.json() : [];
+                const pedidosAnterior = Array.isArray(rawAnterior) ? rawAnterior : (rawAnterior.data || rawAnterior.pedidos || []);
+
+                const rawVendedores = vendedoresRes.ok ? await vendedoresRes.json() : [];
+                const vendedores = Array.isArray(rawVendedores) ? rawVendedores : (rawVendedores.data || []);
 
                 // 1. VENDAS DO M²S
                 const totalVendasAtual = pedidosAtual.reduce((sum, p) => sum + (parseFloat(p.valor) || parseFloat(p.valor_total) || 0), 0);
@@ -2548,7 +2560,7 @@
         
         // Toggle Sidebar Mobile
         function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
+            const sidebar = document.getElementById('mobile-sidebar');
             const overlay = document.getElementById('sidebar-overlay');
             sidebar.classList.toggle('open');
             if (overlay) overlay.classList.toggle('active');
@@ -2578,5 +2590,6 @@
     <script src="/chat-teams/chat-widget.js?v=20260319" defer></script>
 </body>
 </html>
+
 
 

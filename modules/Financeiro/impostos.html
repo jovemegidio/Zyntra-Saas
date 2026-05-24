@@ -16,7 +16,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link rel="stylesheet" href="css/fin-pagination.css">
     <script src="js/fin-pagination.js"></script>
-    <link rel="stylesheet" href="css/fin-layout.css?v=20260215">
     <link rel="stylesheet" href="css/fin-components.css?v=20260215">
     <style>
         :root {
@@ -112,7 +111,6 @@
 
 
 
-        /* CONTENT - .page-content definido em fin-layout.css */
 /* PAGE HEADER/BUTTONS - definidos em fin-components.css */
 /* Override de cor de acento para Impostos (purple) */
         .page-title h1 i { color: var(--purple); }
@@ -192,7 +190,6 @@
     </style>
     <link rel="stylesheet" href="/css/tooltips-professional.css?v=20260209">
     <script src="/js/tooltips-professional.js?v=20260209"></script>
-    <link rel="stylesheet" href="css/fin-header-sidebar.css?v=20260215">
     <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260216">
         <!-- Chat Widget BOB AI -->
     <link rel="stylesheet" href="/chat/widget.css?v=20260218">
@@ -248,7 +245,7 @@
                 <a href="impostos.html" class="sidebar-btn active" title="Impostos">
                     <i class="fas fa-percent"></i>
                 </a>
-                <button class="sidebar-btn" title="Configurações" id="btn-config" onclick="toggleConfigurações()">
+                <button class="sidebar-btn" title="Configurações" id="btn-config" onclick="toggleConfiguracoes()">
                     <i class="fas fa-cog"></i>
                 </button>
             </div>
@@ -671,25 +668,25 @@
             editandoId = id;
             document.getElementById('modal-titulo').textContent = 'Editar Imposto';
             document.getElementById('imposto-id').value = imposto.id;
-            document.getElementById('imposto-código').value = imposto.codigo || '';
+            document.getElementById('imposto-codigo').value = imposto.codigo || '';
             document.getElementById('imposto-nome').value = imposto.nome || '';
             document.getElementById('imposto-tipo').value = imposto.tipo || 'federal';
             document.getElementById('imposto-aliquota').value = imposto.aliquota || 0;
             document.getElementById('imposto-base').value = imposto.base || 'faturamento';
-            document.getElementById('imposto-descrição').value = imposto.descricao || '';
+            document.getElementById('imposto-descricao').value = imposto.descricao || '';
             document.getElementById('imposto-ativo').value = imposto.ativo ? '1' : '0';
             document.getElementById('modalImposto').classList.add('active');
         }
 
         async function salvarImposto() {
             const dados = {
-                código: document.getElementById('imposto-código').value,
+                código: document.getElementById('imposto-codigo').value,
                 tipo: document.getElementById('imposto-tipo').value,
                 nome: document.getElementById('imposto-nome').value,
                 aliquota: parseFloat(document.getElementById('imposto-aliquota').value) || 0,
                 base: document.getElementById('imposto-base').value,
-                descrição: document.getElementById('imposto-descrição').value,
-                observações: document.getElementById('imposto-descrição').value,
+                descrição: document.getElementById('imposto-descricao').value,
+                observações: document.getElementById('imposto-descricao').value,
                 ativo: document.getElementById('imposto-ativo').value === '1'
             };
 

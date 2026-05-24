@@ -1589,175 +1589,32 @@ module.exports = function createVendasExtendedRoutes(deps) {
         return COMISSAO_CATEGORIAS['OUTROS'];
     }
 
-    function criarPdfRelatorio(titulo, colunas, linhas, filtrosTexto, opcoes = {}) {
-        const PDFDocument = require('pdfkit');
-        const doc = new PDFDocument({ size: 'A4', layout: 'landscape', margin: 40, bufferPages: true });
-        const buffers = [];
-        doc.on('data', b => buffers.push(b));
-
-        const pageW = doc.page.width - 80;
-        const margin = 40;
-
-        function desenharHeader(isFirstPage) {
-            // Barra superior com gradiente simulado
-            doc.rect(0, 0, doc.page.width, 6).fill('#1e40af');
-
-            // Logo e nome
-            doc.fontSize(22).font('Helvetica-Bold').fillColor('#1e293b').text('Zyntra', margin, 18);
-            doc.fontSize(9).font('Helvetica').fillColor('#94a3b8').text('Sistema de Gestão Empresarial', margin, 44);
-
-            // Data de geração no canto direito
-            doc.fontSize(8).fillColor('#94a3b8')
-               .text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, margin, 20, { align: 'right', width: pageW });
-
-            // Linha separadora
-            doc.moveTo(margin, 60).lineTo(doc.page.width - margin, 60).strokeColor('#e2e8f0').lineWidth(1).stroke();
-
-            if (isFirstPage) {
-                // Título centralizado
-                doc.fontSize(16).font('Helvetica-Bold').fillColor('#1e293b').text(titulo, margin, 70, { align: 'center', width: pageW });
-                if (filtrosTexto) {
-                    doc.fontSize(9).font('Helvetica').fillColor('#64748b').text(filtrosTexto, margin, 90, { align: 'center', width: pageW });
-                }
-
-                // Resumo cards se fornecidos
-                if (opcoes.resumo && opcoes.resumo.length > 0) {
-                    const cardY = filtrosTexto ? 110 : 95;
-                    const cardW = Math.min(160, (pageW - (opcoes.resumo.length - 1) * 12) / opcoes.resumo.length);
-                    const totalCardsW = cardW * opcoes.resumo.length + (opcoes.resumo.length - 1) * 12;
-                    const startX = margin + (pageW - totalCardsW) / 2;
-
-                    opcoes.resumo.forEach((card, i) => {
-                        const cx = startX + i * (cardW + 12);
-                        doc.roundedRect(cx, cardY, cardW, 48, 6).fill(card.cor || '#f0f9ff');
-                        doc.roundedRect(cx, cardY, cardW, 48, 6).strokeColor(card.borda || '#bfdbfe').lineWidth(0.5).stroke();
-                        doc.fontSize(8).font('Helvetica').fillColor('#64748b').text(card.label, cx + 12, cardY + 10, { width: cardW - 24 });
-                        doc.fontSize(13).font('Helvetica-Bold').fillColor(card.corTexto || '#1e40af').text(card.valor, cx + 12, cardY + 24, { width: cardW - 24 });
-                    });
-                    return cardY + 62;
-                }
-                return filtrosTexto ? 108 : 95;
-            }
-            return 70;
-        }
-
-        function desenharFooter(pageNum, totalPages) {
-            const y = doc.page.height - 30;
-            doc.moveTo(margin, y - 8).lineTo(doc.page.width - margin, y - 8).strokeColor('#e2e8f0').lineWidth(0.5).stroke();
-            doc.fontSize(7).font('Helvetica').fillColor('#94a3b8')
-               .text('Zyntra - Relatório Confidencial', margin, y, { width: pageW / 2 })
-               .text(`Página ${pageNum} de ${totalPages}`, margin, y, { align: 'right', width: pageW });
-        }
-
-        // Calcular larguras de coluna proporcionais
-        const colWidths = opcoes.colWidths || colunas.map(() => pageW / colunas.length);
-        const colAligns = opcoes.colAligns || colunas.map(() => 'left');
-
-        // Primeira página: header + título
-        let tableStart = desenharHeader(true);
-
-        // Cabeçalho da tabela
-        function desenharCabecalhoTabela(y) {
-            doc.rect(margin, y, pageW, 26).fill('#1e293b');
-            let x = margin;
-            colunas.forEach((col, i) => {
-                doc.fontSize(9).font('Helvetica-Bold').fillColor('#ffffff')
-                   .text(col, x + 8, y + 8, { width: colWidths[i] - 16, align: colAligns[i] });
-                x += colWidths[i];
-            });
-            return y + 26;
-        }
-
-        let y = desenharCabecalhoTabela(tableStart);
-        const rowH = 22;
-
-        // Seções agrupadas ou linhas simples
-        if (opcoes.secoes) {
-            opcoes.secoes.forEach((secao) => {
-                // Verificar espaço para header de seção + pelo menos 1 linha
-                if (y + 30 + rowH > doc.page.height - 50) {
-                    doc.addPage();
-                    tableStart = desenharHeader(false);
-                    y = desenharCabecalhoTabela(tableStart);
-                }
-                // Header de seção
-                doc.rect(margin, y, pageW, 24).fill(secao.cor || '#eff6ff');
-                doc.fontSize(9).font('Helvetica-Bold').fillColor(secao.corTexto || '#1e40af')
-                   .text(secao.titulo, margin + 10, y + 7, { width: pageW - 20 });
-                if (secao.info) {
-                    doc.fontSize(8).font('Helvetica').fillColor('#64748b')
-                       .text(secao.info, margin + 10, y + 7, { align: 'right', width: pageW - 20 });
-                }
-                y += 24;
-
-                secao.linhas.forEach((linha, idx) => {
-                    if (y + rowH > doc.page.height - 50) {
-                        doc.addPage();
-                        tableStart = desenharHeader(false);
-                        y = desenharCabecalhoTabela(tableStart);
-                    }
-                    if (idx % 2 === 0) doc.rect(margin, y, pageW, rowH).fill('#f8fafc');
-                    let x = margin;
-                    linha.forEach((val, i) => {
-                        const isMoney = String(val).startsWith('R$');
-                        doc.fontSize(8).font(isMoney ? 'Helvetica-Bold' : 'Helvetica').fillColor('#334155')
-                           .text(String(val || '-'), x + 8, y + 6, { width: colWidths[i] - 16, align: colAligns[i] });
-                        x += colWidths[i];
-                    });
-                    y += rowH;
-                });
-
-                // Subtotal da seção
-                if (secao.subtotal) {
-                    doc.rect(margin, y, pageW, 22).fill('#e0e7ff');
-                    doc.fontSize(8).font('Helvetica-Bold').fillColor('#3730a3')
-                       .text(secao.subtotal, margin + 10, y + 6, { width: pageW - 20, align: 'right' });
-                    y += 24;
-                }
-            });
-        } else {
-            linhas.forEach((linha, idx) => {
-                if (y + rowH > doc.page.height - 50) {
-                    doc.addPage();
-                    tableStart = desenharHeader(false);
-                    y = desenharCabecalhoTabela(tableStart);
-                }
-                if (idx % 2 === 0) doc.rect(margin, y, pageW, rowH).fill('#f8fafc');
-                // Linha de separação suave
-                doc.moveTo(margin, y + rowH).lineTo(margin + pageW, y + rowH).strokeColor('#f1f5f9').lineWidth(0.3).stroke();
-
-                let x = margin;
-                linha.forEach((val, i) => {
-                    const isMoney = String(val).startsWith('R$');
-                    doc.fontSize(8).font(isMoney ? 'Helvetica-Bold' : 'Helvetica').fillColor('#334155')
-                       .text(String(val || '-'), x + 8, y + 6, { width: colWidths[i] - 16, align: colAligns[i] });
-                    x += colWidths[i];
-                });
-                y += rowH;
-            });
-        }
-
-        // Rodapé com total
-        y += 8;
-        doc.rect(margin, y, pageW, 1).fill('#e2e8f0');
-        doc.fontSize(9).font('Helvetica-Bold').fillColor('#1e40af')
-           .text(`Total de registros: ${opcoes.totalRegistros || linhas.length}`, margin + 8, y + 8);
-
-        // Totalizadores gerais
-        if (opcoes.totais) {
-            doc.fontSize(9).font('Helvetica-Bold').fillColor('#1e293b')
-               .text(opcoes.totais, margin + 8, y + 8, { align: 'right', width: pageW - 16 });
-        }
-
-        // Adicionar footer em todas as páginas
-        const totalPages = doc.bufferedPageRange().count;
-        for (let i = 0; i < totalPages; i++) {
-            doc.switchToPage(i);
-            desenharFooter(i + 1, totalPages);
-        }
-
-        doc.end();
-        return new Promise(resolve => doc.on('end', () => resolve(Buffer.concat(buffers))));
+    async function criarPdfRelatorio(titulo, colunas, linhas, filtrosTexto, opcoes = {}) {
+        const generatePdfRelatorio = require('../src/services/pdf-relatorio');
+        const colAligns = opcoes.colAligns || [];
+        const colsFormatadas = colunas.map((col, i) => ({
+            label: col,
+            align: colAligns[i] || 'left'
+        }));
+        const relatorioData = {
+            relatorio: {
+                titulo,
+                filtros: filtrosTexto,
+                data_geracao: new Date().toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
+            },
+            resumo: (opcoes.resumo || []).map(r => ({ label: r.label, valor: r.valor })),
+            colunas: colsFormatadas,
+            linhas: opcoes.secoes ? [] : linhas,
+            secoes: opcoes.secoes ? opcoes.secoes.map(s => ({
+                titulo: s.titulo,
+                info: s.info,
+                linhas: s.linhas,
+                subtotal: s.subtotal
+            })) : null,
+            totais: opcoes.totais,
+            total_registros: opcoes.totalRegistros != null ? opcoes.totalRegistros : linhas.length
+        };
+        return generatePdfRelatorio(relatorioData);
     }
 
     function formatarMoedaPdf(valor) {

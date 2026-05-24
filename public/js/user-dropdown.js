@@ -207,8 +207,8 @@
             });
             // Limpar cookie de sessão
             document.cookie = 'connect.sid=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-            // Redirecionar para login
-            window.location.href = '/login.html';
+            // Redirecionar para login (location.assign permite intercepção pelo MOUNT_SCRIPT)
+            window.location.assign('/login.html');
         });
 
         // Carregar dados do usuário para o dropdown

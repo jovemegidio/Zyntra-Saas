@@ -162,13 +162,13 @@ function initRevenueChart() {
     gradient.addColorStop(0, 'rgba(99, 102, 241, 0.3)');
     gradient.addColorStop(1, 'rgba(99, 102, 241, 0)');
 
-    new Chart(ctx, {
+    window._revenueChart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: ['01', '05', '10', '15', '20', '25', '30'],
+            labels: [],
             datasets: [{
-                label: 'Faturamento',
-                data: [45000, 52000, 38000, 71000, 55000, 82000, 95000],
+                label: 'Recebimentos',
+                data: [],
                 borderColor: '#6366f1',
                 backgroundColor: gradient,
                 borderWidth: 3,
@@ -443,17 +443,25 @@ function getInitials(name) {
 // ============================================
 async function loadDashboardData() {
     try {
-        // Try to fetch real data from API
-        const [faturamento, pedidos, clientes] = await Promise.all([
-            fetchWithFallback('/api/dashboard/faturamento-hoje', { total: 45280 }),
-            fetchWithFallback('/api/dashboard/pedidos-hoje', { count: 24 }),
-            fetchWithFallback('/api/dashboard/novos-clientes', { count: 7 })
+        const [kpis, fluxo] = await Promise.all([
+            fetchWithFallback('/api/dashboard/kpis', {
+                vendas: { valor: 'R$ 0,00', trend: '0%', trendUp: true, chart: [] },
+                pedidosAbertos: 0, aReceber: 'R$ 0,00', ordensAtivas: 0
+            }),
+            fetchWithFallback('/api/dashboard/fluxo-financeiro', { labels: [], recebimentos: [], pagamentos: [] })
         ]);
 
-        // Update KPIs
-        animateValue('kpiFaturamento', 0, faturamento.total, 1500, (v) =>
-            'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2 })
-        );
+        // Atualizar KPI de faturamento com dados reais
+        const valorVendas = kpis.vendas?.valor || 'R$ 0,00';
+        const elFat = document.getElementById('kpiFaturamento');
+        if (elFat) elFat.textContent = valorVendas;
+
+        // Atualizar gráfico com dados reais do fluxo financeiro
+        if (window._revenueChart && fluxo.labels && fluxo.labels.length > 0) {
+            window._revenueChart.data.labels = fluxo.labels.map(d => String(d).padStart(2, '0'));
+            window._revenueChart.data.datasets[0].data = fluxo.recebimentos;
+            window._revenueChart.update();
+        }
 
         // Load recent orders
         loadRecentOrders();

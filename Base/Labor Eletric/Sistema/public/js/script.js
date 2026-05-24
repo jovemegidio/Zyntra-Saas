@@ -36,7 +36,7 @@ async function handleLogin() {
             const data = await response.json();
             localStorage.setItem('authToken', data.token);
             localStorage.setItem('userData', JSON.stringify(data.user));
-            window.location.href = 'index.html';
+            window.location.href = '/dashboard';
         } catch (error) {
             alert('Erro ao fazer login.');
         }
@@ -59,18 +59,18 @@ function renderSidebarMenu() {
         html = `
             <ul>
                 <li><a href="CRM/crm.html"><i class="fas fa-filter"></i> CRM</a></li>
-                <li><a href="Vendas/vendas.html"><i class="fas fa-chart-line"></i> Vendas</a></li>
-                <li><a href="Financeiro/financeiro.html"><i class="fas fa-wallet"></i> Financeiro</a></li>
-                <li><a href="PCP/pcp.html"><i class="fas fa-box"></i> PCP</a></li>
-                <li><a href="RH/index.html"><i class="fas fa-user-tie"></i> RH</a></li>
-                <li><a href="/NFe/nfe.html"><i class="fas fa-file-invoice"></i> NF-e</a></li>
+                <li><a href="/modules/Vendas/public/index.html"><i class="fas fa-chart-line"></i> Vendas</a></li>
+                <li><a href="/modules/Financeiro/index.html"><i class="fas fa-wallet"></i> Financeiro</a></li>
+                <li><a href="/modules/PCP/index.html"><i class="fas fa-box"></i> PCP</a></li>
+                <li><a href="/modules/RH/index.html"><i class="fas fa-user-tie"></i> RH</a></li>
+                <li><a href="/modules/Faturamento/index.html"><i class="fas fa-file-invoice"></i> Faturamento</a></li>
             </ul>
         `;
     } else if (comercialEmails.includes((user.email || '').toLowerCase())) {
         html = `
             <ul>
                 <li><a href="CRM/crm.html"><i class="fas fa-filter"></i> CRM</a></li>
-                <li><a href="Vendas/vendas.html"><i class="fas fa-chart-line"></i> Vendas</a></li>
+                <li><a href="/modules/Vendas/public/index.html"><i class="fas fa-chart-line"></i> Vendas</a></li>
                 <li><a href="RH/area.html"><i class="fas fa-user-tie"></i> RH</a></li>
             </ul>
         `;
@@ -105,7 +105,7 @@ function hideUnauthorizedModules(role) {
 function logout() {
     localStorage.removeItem('jwt');
     localStorage.removeItem('userRole');
-    window.location.href = 'index.html';
+    window.location.href = '/login.html';
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -208,7 +208,7 @@ function initPCPPage() {
             const response = await fetch(url, Object.assign({}, fetchOptions, {
                     credentials: 'include',
                     headers
-                })));
+                }));
             if (response.status === 401 || response.status === 403) {
                 // Clear only user-related storage and redirect to login
                 localStorage.removeItem('userData');
@@ -665,7 +665,7 @@ function initDashboardPage() {
         const darkModeIcon = darkModeBtn ? darkModeBtn.querySelector('i') : null;
 
     function toggleDarkMode() {
-        const isDark = document.body.classList.toggle('dark-mode');
+        const isDark = document.documentElement.classList.toggle('a11y-dark-mode');
         if (darkModeIcon) {
             if (isDark) {
                 darkModeIcon.classList.remove('fa-sun');
@@ -677,11 +677,12 @@ function initDashboardPage() {
                 darkModeBtn.title = 'Modo escuro';
             }
         }
-        localStorage.setItem('darkMode', isDark ? '1' : '0');
+        localStorage.setItem('a11yDarkMode', isDark ? '1' : '0');
+        localStorage.removeItem('darkMode');
     }
 
-    if (localStorage.getItem('darkMode') === '1') {
-        document.body.classList.add('dark-mode');
+    if (localStorage.getItem('a11yDarkMode') === '1') {
+        document.documentElement.classList.add('a11y-dark-mode');
         if (darkModeIcon) {
             darkModeIcon.classList.remove('fa-sun');
             darkModeIcon.classList.add('fa-moon');

@@ -80,6 +80,17 @@ deploy_company() {
     SESSION_SECRET=$(get_env_value SESSION_SECRET)
     DB_PASSWORD=$(get_env_value DB_PASSWORD)
     REDIS_URL=$(get_env_value REDIS_URL)
+    INTEGRACAO_ENCRYPT_KEY=$(get_env_value INTEGRACAO_ENCRYPT_KEY)
+    N8N_ENABLED=$(get_env_value N8N_ENABLED)
+    N8N_WEBHOOK_URL=$(get_env_value N8N_WEBHOOK_URL)
+    N8N_API_KEY=$(get_env_value N8N_API_KEY)
+    CDR_PABX_URL=$(get_env_value CDR_PABX_URL)
+    CDR_PABX_USER=$(get_env_value CDR_PABX_USER)
+    CDR_PABX_PASS=$(get_env_value CDR_PABX_PASS)
+    MINIO_ENDPOINT=$(get_env_value MINIO_ENDPOINT)
+    MINIO_ACCESS_KEY=$(get_env_value MINIO_ACCESS_KEY)
+    MINIO_SECRET_KEY=$(get_env_value MINIO_SECRET_KEY)
+    MINIO_BUCKET=$(get_env_value MINIO_BUCKET)
 
     cat > "${dir}/.env" << ENV
 NODE_ENV=production
@@ -110,6 +121,19 @@ ENABLE_CSRF=true
 
 # Redis
 REDIS_URL=${REDIS_URL}
+
+# Integrações externas
+INTEGRACAO_ENCRYPT_KEY=${INTEGRACAO_ENCRYPT_KEY}
+N8N_ENABLED=${N8N_ENABLED:-false}
+N8N_WEBHOOK_URL=${N8N_WEBHOOK_URL}
+N8N_API_KEY=${N8N_API_KEY}
+CDR_PABX_URL=${CDR_PABX_URL:-https://sip10.tsinfo.net.br}
+CDR_PABX_USER=${CDR_PABX_USER}
+CDR_PABX_PASS=${CDR_PABX_PASS}
+MINIO_ENDPOINT=${MINIO_ENDPOINT}
+MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+MINIO_BUCKET=${MINIO_BUCKET}
 
 # Rate limiting
 LOGIN_RATE_LIMIT=5

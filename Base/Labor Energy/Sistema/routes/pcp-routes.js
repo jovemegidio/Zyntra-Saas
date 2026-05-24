@@ -201,15 +201,18 @@ module.exports = function createPCPRoutes(deps) {
 
             // 1. Produtos com estoque CRÍTICO (zerado)
             // Exclui categoria 'GERAL' (suprimentos, limpeza, escritório) — não são itens de produção PCP
-            const [produtosCriticos] = await pool.query(`
-                SELECT codigo, nome, estoque_atual, estoque_minimo, unidade_medida as unidade, categoria
-                FROM produtos
-                WHERE (estoque_atual <= 0 OR quantidade_estoque <= 0)
-                AND (ativo = 1 OR ativo IS NULL OR status = 'ativo')
-                AND (categoria IS NULL OR categoria != 'GERAL')
-                ORDER BY nome ASC
-                LIMIT 50
-            `);
+            let produtosCriticos = [];
+            try {
+                [produtosCriticos] = await pool.query(`
+                    SELECT codigo, nome, estoque_atual, estoque_minimo, unidade_medida as unidade, categoria
+                    FROM produtos
+                    WHERE (estoque_atual <= 0 OR quantidade_estoque <= 0)
+                    AND (ativo = 1 OR ativo IS NULL OR status = 'ativo')
+                    AND (categoria IS NULL OR categoria != 'GERAL')
+                    ORDER BY nome ASC
+                    LIMIT 50
+                `);
+            } catch (e) { console.log('[PCP/ALERTAS] Query produtos críticos falhou:', e.message); }
 
             if (produtosCriticos && produtosCriticos.length > 0) {
                 alertas.push({
@@ -233,17 +236,20 @@ module.exports = function createPCPRoutes(deps) {
 
             // 2. Produtos com estoque BAIXO (abaixo do mínimo)
             // Exclui categoria 'GERAL' (suprimentos, limpeza, escritório) — não são itens de produção PCP
-            const [produtosBaixo] = await pool.query(`
-                SELECT codigo, nome, estoque_atual, estoque_minimo, unidade_medida as unidade, categoria
-                FROM produtos
-                WHERE estoque_atual > 0
-                AND estoque_atual < COALESCE(estoque_minimo, 10)
-                AND COALESCE(estoque_minimo, 10) > 0
-                AND (ativo = 1 OR ativo IS NULL OR status = 'ativo')
-                AND (categoria IS NULL OR categoria != 'GERAL')
-                ORDER BY estoque_atual ASC
-                LIMIT 50
-            `);
+            let produtosBaixo = [];
+            try {
+                [produtosBaixo] = await pool.query(`
+                    SELECT codigo, nome, estoque_atual, estoque_minimo, unidade_medida as unidade, categoria
+                    FROM produtos
+                    WHERE estoque_atual > 0
+                    AND estoque_atual < COALESCE(estoque_minimo, 10)
+                    AND COALESCE(estoque_minimo, 10) > 0
+                    AND (ativo = 1 OR ativo IS NULL OR status = 'ativo')
+                    AND (categoria IS NULL OR categoria != 'GERAL')
+                    ORDER BY estoque_atual ASC
+                    LIMIT 50
+                `);
+            } catch (e) { console.log('[PCP/ALERTAS] Query produtos baixo falhou:', e.message); }
 
             if (produtosBaixo && produtosBaixo.length > 0) {
                 alertas.push({
@@ -266,14 +272,17 @@ module.exports = function createPCPRoutes(deps) {
             }
 
             // 3. Ordens de Produção em atraso
-            const [ordensAtraso] = await pool.query(`
-                SELECT id, codigo, produto_nome, data_previsao_entrega, status, cliente
-                FROM ordens_producao
-                WHERE data_previsao_entrega < CURDATE()
-                AND status NOT IN ('concluida', 'Concluída', 'cancelada', 'Cancelada', 'entregue', 'finalizada')
-                ORDER BY data_previsao_entrega ASC
-                LIMIT 20
-            `);
+            let ordensAtraso = [];
+            try {
+                [ordensAtraso] = await pool.query(`
+                    SELECT id, codigo, produto_nome, data_previsao_entrega, status, cliente
+                    FROM ordens_producao
+                    WHERE data_previsao_entrega < CURDATE()
+                    AND status NOT IN ('concluida', 'Concluída', 'cancelada', 'Cancelada', 'entregue', 'finalizada')
+                    ORDER BY data_previsao_entrega ASC
+                    LIMIT 20
+                `);
+            } catch (e) { console.log('[PCP/ALERTAS] Query ordens atraso falhou:', e.message); }
 
             if (ordensAtraso && ordensAtraso.length > 0) {
                 alertas.push({
@@ -296,14 +305,17 @@ module.exports = function createPCPRoutes(deps) {
             }
 
             // 4. Ordens pendentes há mais de 7 dias
-            const [ordensPendentes] = await pool.query(`
-                SELECT id, codigo, produto_nome, created_at, status, cliente
-                FROM ordens_producao
-                WHERE status IN ('pendente', 'a_produzir', 'A Fazer')
-                AND created_at < DATE_SUB(CURDATE(), INTERVAL 7 DAY)
-                ORDER BY created_at ASC
-                LIMIT 20
-            `);
+            let ordensPendentes = [];
+            try {
+                [ordensPendentes] = await pool.query(`
+                    SELECT id, codigo, produto_nome, created_at, status, cliente
+                    FROM ordens_producao
+                    WHERE status IN ('pendente', 'a_produzir', 'A Fazer')
+                    AND created_at < DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+                    ORDER BY created_at ASC
+                    LIMIT 20
+                `);
+            } catch (e) { console.log('[PCP/ALERTAS] Query ordens pendentes falhou:', e.message); }
 
             if (ordensPendentes && ordensPendentes.length > 0) {
                 alertas.push({

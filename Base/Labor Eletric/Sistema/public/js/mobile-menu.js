@@ -45,8 +45,7 @@
         const hora = new Date().getHours();
         if (hora >= 5 && hora < 12) return 'Bom dia';
         if (hora >= 12 && hora < 18) return 'Boa tarde';
-        if (hora >= 18 && hora < 24) return 'Boa noite';
-        return 'Olá';
+        return 'Boa noite';
     }
 
     /**
@@ -92,6 +91,7 @@
             }
         }
 
+        console.log('👤 Saudação do usuário adicionada ao header mobile');
     }
 
     /**
@@ -149,7 +149,7 @@
         setupEventListeners();
         addUserInfoToSidebar();
         
-
+        console.log('📱 Menu mobile inicializado com saudação');
     }
 
     /**

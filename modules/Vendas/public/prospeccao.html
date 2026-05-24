@@ -983,7 +983,7 @@
     <link rel="stylesheet" href="/css/tooltips-professional.css?v=20260209">
     <script src="/js/tooltips-professional.js?v=20260209"></script>
     <script src="/js/modal-title.js?v=20260210"></script>
-    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260216">
+    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260418">
 
     <!-- Chat Widget BOB AI - DESATIVADO -->
     <!-- <link rel="stylesheet" href="/chat/widget.css?v=20260218"> -->
@@ -1008,6 +1008,9 @@
                 <button class="sidebar-btn" title="Comissões" onclick="window.location.href='comissoes.html'"><i class="fas fa-percentage"></i></button>
             </nav>
             <div class="sidebar-bottom">
+                <button class="sidebar-btn" title="Configurações" onclick="window.location.href='/dashboard'">
+                    <i class="fas fa-cog"></i>
+                </button>
             </div>
         </aside>
 
@@ -1023,7 +1026,7 @@
                         <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
-                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">?</span>
+                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">—</span>
                         <span class="page-title" style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Prospecções e Leads</span>
                     </div>
                 </div>
@@ -1032,6 +1035,10 @@
                     
                     <div class="user-greeting">
                         <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
+                        <div class="user-avatar" id="user-avatar">
+                            <img src="" alt="Foto do usuário" id="user-photo" style="display:none;">
+                            <span id="user-initial">U</span>
+                        </div>
                     </div>
                 </div>
             </header>
@@ -1068,12 +1075,33 @@
                             </select>
                             <select class="filter-select" id="filter-uf">
                                 <option value="">Estado</option>
-                                <option value="SP">São Paulo</option>
+                                <option value="AC">Acre</option>
+                                <option value="AL">Alagoas</option>
+                                <option value="AP">Amapá</option>
+                                <option value="AM">Amazonas</option>
+                                <option value="BA">Bahia</option>
+                                <option value="CE">Ceará</option>
+                                <option value="DF">Distrito Federal</option>
+                                <option value="ES">Espírito Santo</option>
+                                <option value="GO">Goiás</option>
+                                <option value="MA">Maranhão</option>
+                                <option value="MT">Mato Grosso</option>
+                                <option value="MS">Mato Grosso do Sul</option>
                                 <option value="MG">Minas Gerais</option>
-                                <option value="RJ">Rio de Janeiro</option>
+                                <option value="PA">Pará</option>
+                                <option value="PB">Paraíba</option>
                                 <option value="PR">Paraná</option>
+                                <option value="PE">Pernambuco</option>
+                                <option value="PI">Piauí</option>
+                                <option value="RJ">Rio de Janeiro</option>
+                                <option value="RN">Rio Grande do Norte</option>
                                 <option value="RS">Rio Grande do Sul</option>
+                                <option value="RO">Rondônia</option>
+                                <option value="RR">Roraima</option>
                                 <option value="SC">Santa Catarina</option>
+                                <option value="SP">São Paulo</option>
+                                <option value="SE">Sergipe</option>
+                                <option value="TO">Tocantins</option>
                             </select>
                             <select class="filter-select" id="filter-porte">
                                 <option value="">Porte</option>
@@ -1371,16 +1399,33 @@
                         <label>Estado (UF)</label>
                         <select class="form-control" id="lead-uf">
                             <option value="">Selecione...</option>
-                            <option value="SP">São Paulo</option>
-                            <option value="MG">Minas Gerais</option>
-                            <option value="RJ">Rio de Janeiro</option>
-                            <option value="PR">Paraná</option>
-                            <option value="RS">Rio Grande do Sul</option>
-                            <option value="SC">Santa Catarina</option>
+                            <option value="AC">Acre</option>
+                            <option value="AL">Alagoas</option>
+                            <option value="AP">Amapá</option>
+                            <option value="AM">Amazonas</option>
                             <option value="BA">Bahia</option>
-                            <option value="GO">Goiás</option>
-                            <option value="ES">Espírito Santo</option>
+                            <option value="CE">Ceará</option>
                             <option value="DF">Distrito Federal</option>
+                            <option value="ES">Espírito Santo</option>
+                            <option value="GO">Goiás</option>
+                            <option value="MA">Maranhão</option>
+                            <option value="MT">Mato Grosso</option>
+                            <option value="MS">Mato Grosso do Sul</option>
+                            <option value="MG">Minas Gerais</option>
+                            <option value="PA">Pará</option>
+                            <option value="PB">Paraíba</option>
+                            <option value="PR">Paraná</option>
+                            <option value="PE">Pernambuco</option>
+                            <option value="PI">Piauí</option>
+                            <option value="RJ">Rio de Janeiro</option>
+                            <option value="RN">Rio Grande do Norte</option>
+                            <option value="RS">Rio Grande do Sul</option>
+                            <option value="RO">Rondônia</option>
+                            <option value="RR">Roraima</option>
+                            <option value="SC">Santa Catarina</option>
+                            <option value="SP">São Paulo</option>
+                            <option value="SE">Sergipe</option>
+                            <option value="TO">Tocantins</option>
                         </select>
                     </div>
                 </div>
@@ -3094,6 +3139,7 @@ Aceita com ou sem formatação"></textarea>
     <script src="/chat-teams/chat-widget.js?v=20260319" defer></script>
 </body>
 </html>
+
 
 
 

@@ -55,23 +55,23 @@ module.exports = function createAuthSectionRoutes(deps) {
     } catch (lgpdErr) {
         console.error('[LGPD] ERRO ao montar rotas LGPD:', lgpdErr.message);
     }
-    
+
     // =================================================================
     // 6. ROTAS PARA SERVIR PÁGINAS HTML E LOGIN (se houver)
     // =================================================================
-    
+
     // --- ROTA DE LOGIN / AUTH (API) ---
     // NOTA: A rota principal de login é gerenciada pelo authRouter (src/routes/auth.js)
     // montado em router.use('/api', authRouter) no início do arquivo.
     // A rota abaixo é mantida como FALLBACK caso o authRouter não processe a requisição.
     // Em operação normal, o authRouter captura /api/login primeiro.
-    
+
     // ============================================================================
     // ENDPOINTS TEMPORÁRIOS REMOVIDOS - USAR SCRIPT EM /scripts/update_permissions.js
     // ============================================================================
     // SISTEMA DE LOGIN - ENDPOINT FALLBACK (authRouter é o principal)
     // ============================================================================
-    
+
     // AUDIT-FIX R2: Rate limiter reativado no login fallback
     const rateLimit = require('express-rate-limit');
     const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 10, message: { message: 'Muitas tentativas de login. Tente novamente em 15 minutos.' }, standardHeaders: true, legacyHeaders: false });
@@ -81,38 +81,49 @@ module.exports = function createAuthSectionRoutes(deps) {
         logger.warn('[SERVER/LOGIN-FALLBACK] Rota de login fallback atingida - authRouter pode não estar funcionando');
         try {
             const { email, password } = req.body;
-    
+
             if (!email || !password) {
                 return res.status(400).json({ message: 'Email e senha são obrigatórios.' });
             }
-    
+
+            // Filtro por domínio de email (isolamento multi-tenant)
+            const allowedDomains = process.env.ALLOWED_EMAIL_DOMAINS;
+            if (allowedDomains) {
+                const domains = allowedDomains.split(',').map(d => d.trim().toLowerCase());
+                const emailLower = email.toLowerCase().trim();
+                const isAllowed = domains.some(domain => emailLower.endsWith(domain));
+                if (!isAllowed) {
+                    return res.status(401).json({ message: 'Credenciais inválidas' });
+                }
+            }
+
             // Buscar usuário na tabela usuarios primeiro
             const [rows] = await pool.query('SELECT * FROM usuarios WHERE email = ? LIMIT 1', [email]);
             let user = (rows && rows.length) ? rows[0] : null;
-    
+
             // Verificar se usuário está inativo (por status OU por campo ativo)
             if (user && (
                 (user.status && user.status.toLowerCase() === 'inativo') ||
                 (user.ativo !== undefined && user.ativo === 0)
             )) {
-                return res.status(403).json({ message: 'Sua conta está inativa. Entre em contato com o administrador.' });
+                return res.status(403).json({ message: 'Conta desativada. Contate o administrador.' });
             }
-    
+
             // Se não encontrado em usuarios, tentar na tabela funcionarios
             if (!user) {
                 try {
                     const [frows] = await pool.query('SELECT * FROM funcionarios WHERE email = ? LIMIT 1', [email]);
                     if (frows && frows.length) {
                         const f = frows[0];
-    
+
                         // Converter role para is_admin (tabela funcionarios não tem is_admin)
                         const roleAdmin = (f.role === 'admin' || f.role === 'administrador');
-    
+
                         // Verificar se funcionário está inativo
                         if (f.status && f.status.toLowerCase() === 'inativo') {
-                            return res.status(403).json({ message: 'Sua conta está inativa. Entre em contato com o administrador.' });
+                            return res.status(403).json({ message: 'Conta desativada. Contate o administrador.' });
                         }
-    
+
                         user = {
                             id: f.id,
                             nome: f.nome_completo || f.nome || null,
@@ -127,14 +138,14 @@ module.exports = function createAuthSectionRoutes(deps) {
                     logger.error('[LOGIN] Erro ao buscar funcionario:', e);
                 }
             }
-    
+
             if (!user) {
-                return res.status(401).json({ message: 'Credenciais inválidas.' });
+                return res.status(401).json({ message: 'Login ou senha incorretos.' });
             }
-    
+
             // Verificar senha
             let senhaValida = false;
-    
+
             // Tentar bcrypt primeiro se houver hash
             if (user.senha_hash) {
                 try {
@@ -144,7 +155,7 @@ module.exports = function createAuthSectionRoutes(deps) {
                     logger.error('[LOGIN] Erro bcrypt:', e);
                 }
             }
-    
+
             // AUDIT-FIX R2: Plaintext migration com timing-safe compare (previne timing attack)
             if (!senhaValida && user.senha && !user.senha_hash) {
                 try {
@@ -167,15 +178,15 @@ module.exports = function createAuthSectionRoutes(deps) {
                     logger.error('[SECURITY] Erro na migração de senha:', migErr);
                 }
             }
-    
+
             if (!senhaValida) {
-                return res.status(401).json({ message: 'Credenciais inválidas.' });
+                return res.status(401).json({ message: 'Login ou senha incorretos.' });
             }
-    
+
             // 🔒 MULTI-DEVICE: Gerar deviceId único para cada dispositivo
             // Isso garante que cada login em cada dispositivo tem sua própria sessão
             const deviceId = uuidv4();
-    
+
             // Gerar JWT token com deviceId para isolamento de sessão
             const tokenPayload = {
                 id: user.id,
@@ -185,10 +196,10 @@ module.exports = function createAuthSectionRoutes(deps) {
                 is_admin: user.is_admin || 0,
                 deviceId: deviceId // CRITICAL: Identificador único do dispositivo
             };
-    
+
             // AUDIT-FIX ARCH-004: Added algorithm HS256 + audience claim
             const token = jwt.sign(tokenPayload, JWT_SECRET, { algorithm: 'HS256', audience: 'aluforce', expiresIn: '8h' });
-    
+
             // Definir cookie httpOnly - secure=true para HTTPS (produção)
             const isSecure = req.headers['x-forwarded-proto'] === 'https' || process.env.NODE_ENV === 'production' || req.secure;
             res.cookie('authToken', token, {
@@ -198,9 +209,9 @@ module.exports = function createAuthSectionRoutes(deps) {
                 maxAge: 8 * 60 * 60 * 1000, // 8 horas
                 path: '/'
             });
-    
+
             console.log(`✅ Login bem-sucedido: ${user.email} | Secure Cookie: ${isSecure}`);
-    
+
             // AUDIT-FIX R2: JWT removido do body (usa apenas httpOnly cookie)
             res.json({
                 message: 'Login realizado com sucesso',
@@ -215,24 +226,24 @@ module.exports = function createAuthSectionRoutes(deps) {
                 },
                 redirectTo: '/dashboard'
             });
-    
+
         } catch (error) {
             console.error('Erro no login:', error);
             res.status(500).json({ message: 'Erro interno do servidor.' });
         }
     });
-    
+
     // ============================================================================
     // FIM DO SISTEMA DE LOGIN
     // ============================================================================
-    
+
     // ============================================================================
     // SISTEMA DE AUDIT LOG - HISTÓRICO DE ALTERAÇÕES
     // ============================================================================
-    
+
     // Armazenamento em memória (pode migrar para banco de dados depois)
     let auditLogs = [];
-    
+
     /**
      * Função para registrar uma ação no audit log
      * @param {Object} logData - Dados do log
@@ -249,103 +260,40 @@ module.exports = function createAuthSectionRoutes(deps) {
             ip: logData.ip || null,
             data: new Date().toISOString()
         };
-    
+
         auditLogs.unshift(log); // Adiciona no início
-    
+
         // Limita a 1000 registros em memória
         if (auditLogs.length > 1000) {
             auditLogs = auditLogs.slice(0, 1000);
         }
-    
+
         return log;
     }
-    
+
     // Expõe a função globalmente
     global.registrarAuditLog = registrarAuditLog;
-    
-    // GET /api/audit-log - Listar logs de auditoria
-    // SECURITY: Requer autenticação e privilégios de administrador
-    router.get('/audit-log', authenticateToken, authorizeAdmin, (req, res) => {
-        try {
-            const { limite = 50, modulo, usuario, acao, dataInicio, dataFim } = req.query;
-    
-            let logs = [...auditLogs];
-    
-            // Filtros
-            if (modulo) {
-                logs = logs.filter(l => l.modulo.toLowerCase() === modulo.toLowerCase());
-            }
-    
-            if (usuario) {
-                logs = logs.filter(l => l.usuario.toLowerCase().includes(usuario.toLowerCase()));
-            }
-    
-            if (acao) {
-                logs = logs.filter(l => l.acao.toLowerCase() === acao.toLowerCase());
-            }
-    
-            if (dataInicio) {
-                const inicio = new Date(dataInicio);
-                logs = logs.filter(l => new Date(l.data) >= inicio);
-            }
-    
-            if (dataFim) {
-                const fim = new Date(dataFim);
-                logs = logs.filter(l => new Date(l.data) <= fim);
-            }
-    
-            // Limita resultado
-            const resultado = logs.slice(0, parseInt(limite));
-    
-            res.json({
-                success: true,
-                logs: resultado,
-                total: auditLogs.length,
-                filtrados: logs.length
-            });
-        } catch (error) {
-            console.error('Erro ao buscar logs:', error);
-            res.status(500).json({ success: false, message: 'Erro ao buscar logs' });
-        }
-    });
-    
-    // POST /api/audit-log - Registrar nova entrada
-    // SECURITY: Requer autenticação para registrar logs
-    router.post('/audit-log', authenticateToken, (req, res) => {
-        try {
-            const { usuario, usuarioId, acao, modulo, descricao, dados } = req.body;
-    
-            const log = registrarAuditLog({
-                usuario,
-                usuarioId,
-                acao,
-                modulo,
-                descricao,
-                dados,
-                ip: req.ip || req.connection?.remoteAddress
-            });
-    
-            res.json({ success: true, log });
-        } catch (error) {
-            console.error('Erro ao registrar log:', error);
-            res.status(500).json({ success: false, message: 'Erro ao registrar log' });
-        }
-    });
-    
-    // Adiciona alguns logs de exemplo na inicialização
+
+    // NOTA: GET/POST /api/audit-log foi removido daqui.
+    // O endpoint real está em routes/audit-api.js que lê do banco de dados.
+
+    // Adiciona log de inicialização no banco via writeAuditLog (se disponível)
     setTimeout(() => {
-        registrarAuditLog({
-            usuario: 'Sistema',
-            acao: 'Iniciou',
-            modulo: 'Sistema',
-            descricao: 'Sistema Aluforce iniciado com sucesso'
-        });
+        if (typeof writeAuditLog === 'function') {
+            writeAuditLog({
+                userId: null,
+                action: 'Iniciou',
+                module: 'Sistema',
+                description: 'Sistema Aluforce iniciado com sucesso',
+                ip: '127.0.0.1'
+            }).catch(() => {});
+        }
     }, 1000);
-    
+
     // ============================================================================
     // FIM DO SISTEMA DE AUDIT LOG
     // ============================================================================
-    
+
     // Endpoint para o front-end verificar se está autenticado via cookie
     // ⚡ OTIMIZADO COM CACHE EM MEMÓRIA - MULTI-DEVICE SAFE
     // 🔐 v6.0: Prioridade = Authorization header > cookie (isolamento por aba)
@@ -359,11 +307,11 @@ module.exports = function createAuthSectionRoutes(deps) {
             if (ht && ht !== 'null' && ht !== 'undefined') token = ht;
         }
         if (!token) token = req.cookies?.authToken;
-    
+
         if (!token) {
             return res.status(401).json({ message: 'Não autenticado' });
         }
-    
+
         // 🔐 MULTI-DEVICE: Decodificar token para obter userId e deviceId
         let tokenData = null;
         try {
@@ -371,23 +319,23 @@ module.exports = function createAuthSectionRoutes(deps) {
         } catch (e) {
             return res.status(401).json({ message: 'Token inválido' });
         }
-    
+
         // ⚡ MULTI-DEVICE: Cache key agora usa userId + deviceId para isolamento
         // Isso garante que cada dispositivo tem seu próprio cache de sessão
         const cacheKey = tokenData.deviceId
             ? `user_session_${tokenData.id}_${tokenData.deviceId}`
             : `user_session_${token.substring(0, 32)}`; // Fallback para tokens antigos
-    
+
         const cachedUser = await cacheGet(cacheKey);
         if (cachedUser) {
             // Adicionar deviceId na resposta para o frontend saber qual dispositivo é
             return res.json({ ...cachedUser, deviceId: tokenData.deviceId });
         }
-    
-    
+
+
         try {
             const user = tokenData;
-    
+
             // Buscar dados completos do usuário no banco (tentar usuarios primeiro, depois funcionarios)
             let dbUser = null;
             try {
@@ -410,7 +358,7 @@ module.exports = function createAuthSectionRoutes(deps) {
                     [user.id]
                 );
                 dbUser = rows && rows[0] ? rows[0] : null;
-    
+
                 // Se não encontrou em usuarios, buscar em funcionarios
                 if (!dbUser) {
                     const [frows] = await pool.query(
@@ -444,7 +392,7 @@ module.exports = function createAuthSectionRoutes(deps) {
                         };
                     }
                 }
-    
+
                 if (dbUser) {
                     // Função helper para parse seguro de permissões
                     function parsePermissao(perm) {
@@ -471,7 +419,7 @@ module.exports = function createAuthSectionRoutes(deps) {
                         }
                         return [];
                     }
-    
+
                     // Parse permissões de forma segura
                     let permissoes_pcp = parsePermissao(dbUser.permissoes_pcp);
                     let permissoes_rh = parsePermissao(dbUser.permissoes_rh);
@@ -479,10 +427,10 @@ module.exports = function createAuthSectionRoutes(deps) {
                     let permissoes_compras = parsePermissao(dbUser.permissoes_compras);
                     let permissoes_financeiro = parsePermissao(dbUser.permissoes_financeiro);
                     let permissoes_nfe = parsePermissao(dbUser.permissoes_nfe);
-    
+
                     // Combinar todas as permissões para "areas" - priorizar coluna areas se existir
                     let areasUsuario = parsePermissao(dbUser.areas);
-    
+
                     // Se não tem areas definidas, usar as permissões combinadas
                     if (areasUsuario.length === 0) {
                         areasUsuario = [
@@ -494,7 +442,7 @@ module.exports = function createAuthSectionRoutes(deps) {
                             ...permissoes_nfe.length > 0 ? ['nfe'] : []
                         ];
                     }
-    
+
                     // Fallback final: usar permissions-server.js se DB não tem dados
                     if (areasUsuario.length === 0) {
                         let fn = 'unknown';
@@ -506,26 +454,26 @@ module.exports = function createAuthSectionRoutes(deps) {
                             console.log(`[API/ME] Fallback para permissions-server: ${fn} => [${areasUsuario.join(',')}]`);
                         }
                     }
-    
+
                     // Determinar a foto do usuário (prioridade: avatar > foto > foto_funcionario)
                     const fotoUsuario = dbUser.avatar || dbUser.foto || dbUser.foto_funcionario || "/avatars/default.webp";
-    
+
                     // Formatar data de admissão
                     let dataAdmissaoFormatada = null;
                     if (dbUser.data_admissao) {
                         const d = new Date(dbUser.data_admissao);
                         dataAdmissaoFormatada = d.toLocaleDateString('pt-BR');
                     }
-    
+
                     // Formatar matrícula com zeros à esquerda
                     let matriculaFormatada = null;
                     if (dbUser.matricula) {
                         matriculaFormatada = String(dbUser.matricula).padStart(5, '0');
                     }
-    
+
                     // Determinar o role/perfil do usuário
                     const userRole = dbUser.role || user.role || 'user';
-    
+
                     const response = {
                         id: dbUser.id,
                         nome: dbUser.nome,
@@ -572,17 +520,17 @@ module.exports = function createAuthSectionRoutes(deps) {
                             } catch(e) { return null; }
                         })()
                     };
-    
+
                     // ⚡ Salvar no cache por 1 minuto
                     await cacheSet(cacheKey, response, CACHE_CONFIG.userSession);
-    
+
                     // 🔐 MULTI-DEVICE: Incluir deviceId na resposta
                     return res.json({ ...response, deviceId: tokenData.deviceId });
                 }
             } catch (dbErr) {
                 console.error('[API/ME] Erro ao buscar usuário no banco:', dbErr);
             }
-    
+
             // Fallback: retornar dados do token com deviceId
             return res.json({
                 id: user.id,
@@ -597,13 +545,13 @@ module.exports = function createAuthSectionRoutes(deps) {
             return res.status(401).json({ message: 'Token inválido' });
         }
     });
-    
+
     // ============================================================================
-    
+
     // ============================================================================
     // API DE PERMISSÕES GRANULARES - CRUD para admin gerenciar permissões
     // ============================================================================
-    
+
     // GET /api/permissions/profiles - Listar perfis disponíveis
     router.get('/permissions/profiles', authenticateToken, (req, res) => {
         const profiles = {};
@@ -617,12 +565,12 @@ module.exports = function createAuthSectionRoutes(deps) {
         }
         res.json(profiles);
     });
-    
+
     // GET /api/permissions/actions - Listar todas as ações possíveis por módulo
     router.get('/permissions/actions', authenticateToken, (req, res) => {
         res.json(userPermissions.MODULE_ACTIONS);
     });
-    
+
     // GET /api/permissions/user/:userId - Obter permissões de um usuário
     router.get('/permissions/user/:userId', authenticateToken, async (req, res) => {
         try {
@@ -630,23 +578,23 @@ module.exports = function createAuthSectionRoutes(deps) {
             if (!isAdmin && req.user.id !== parseInt(req.params.userId)) {
                 return res.status(403).json({ message: 'Acesso negado' });
             }
-    
+
             const [rows] = await pool.query(
                 'SELECT id, nome, email, role, is_admin FROM usuarios WHERE id = ?',
                 [req.params.userId]
             );
             if (!rows.length) return res.status(404).json({ message: 'Usuário não encontrado' });
-    
+
             const user = rows[0];
             const firstName = user.nome ? user.nome.split(' ')[0].toLowerCase() : '';
             const emailPrefix = user.email ? user.email.split('@')[0].split('.')[0].toLowerCase() : '';
             const lookupName = firstName || emailPrefix;
-    
+
             const userData = userPermissions.getUserData(lookupName);
             const profile = userPermissions.getUserProfile(lookupName);
             const allPermissions = userPermissions.getUserAllPermissions(lookupName, user.role);
             const areas = userPermissions.getUserAreas(lookupName);
-    
+
             res.json({
                 user: { id: user.id, nome: user.nome, email: user.email, role: user.role, is_admin: user.is_admin },
                 lookupName,
@@ -660,28 +608,28 @@ module.exports = function createAuthSectionRoutes(deps) {
             res.status(500).json({ message: 'Erro interno' });
         }
     });
-    
+
     // GET /api/permissions/users - Listar todos os usuários com suas permissões
     router.get('/permissions/users', authenticateToken, async (req, res) => {
         try {
             const isAdmin = req.user.role === 'admin' || req.user.is_admin === 1 || req.user.is_admin === true;
             if (!isAdmin) return res.status(403).json({ message: 'Acesso restrito a administradores' });
-    
+
             const [rows] = await pool.query(
                 `SELECT id, nome, email, role, is_admin, ativo, status
                  FROM usuarios WHERE status != 'inativo' OR status IS NULL
                  ORDER BY nome`
             );
-    
+
             const users = rows.map(user => {
                 const firstName = user.nome ? user.nome.split(' ')[0].toLowerCase() : '';
                 const emailPrefix = user.email ? user.email.split('@')[0].split('.')[0].toLowerCase() : '';
                 const lookupName = firstName || emailPrefix;
-    
+
                 const profile = userPermissions.getUserProfile(lookupName);
                 const areas = userPermissions.getUserAreas(lookupName);
                 const allPerms = userPermissions.getUserAllPermissions(lookupName, user.role);
-    
+
                 return {
                     id: user.id,
                     nome: user.nome,
@@ -695,37 +643,37 @@ module.exports = function createAuthSectionRoutes(deps) {
                     permissionCount: Object.values(allPerms).reduce((sum, arr) => sum + arr.length, 0)
                 };
             });
-    
+
             res.json(users);
         } catch (err) {
             console.error('[PERMISSIONS] Erro ao listar usuários:', err);
             res.status(500).json({ message: 'Erro interno' });
         }
     });
-    
+
     // POST /api/permissions/check - Verificar se o usuário atual tem uma permissão
     router.post('/permissions/check', authenticateToken, (req, res) => {
         const { module, action } = req.body;
         if (!module || !action) return res.status(400).json({ message: 'module e action são obrigatórios' });
-    
+
         let firstName = 'unknown';
         if (req.user.nome) firstName = req.user.nome.split(' ')[0].toLowerCase();
         else if (req.user.email) firstName = req.user.email.split('@')[0].split('.')[0].toLowerCase();
-    
+
         const allowed = userPermissions.hasPermission(firstName, module, action, req.user.role);
         res.json({ allowed, module, action });
     });
-    
+
     // GET /api/permissions/me - Obter todas as permissões do usuário logado
     router.get('/permissions/me', authenticateToken, (req, res) => {
         let firstName = 'unknown';
         if (req.user.nome) firstName = req.user.nome.split(' ')[0].toLowerCase();
         else if (req.user.email) firstName = req.user.email.split('@')[0].split('.')[0].toLowerCase();
-    
+
         const profile = userPermissions.getUserProfile(firstName);
         const allPerms = userPermissions.getUserAllPermissions(firstName, req.user.role);
         const areas = userPermissions.getUserAreas(firstName);
-    
+
         res.json({
             areas,
             profile: profile ? { id: profile.id, label: profile.label, description: profile.description } : null,
@@ -733,25 +681,25 @@ module.exports = function createAuthSectionRoutes(deps) {
             actions_catalog: userPermissions.MODULE_ACTIONS
         });
     });
-    
+
     // PUT /api/permissions/user/:userId - Salvar permissões de um usuário
     router.put('/permissions/user/:userId', authenticateToken, async (req, res) => {
         try {
             const isAdmin = req.user.role === 'admin' || req.user.is_admin === 1 || req.user.is_admin === true;
             if (!isAdmin) return res.status(403).json({ message: 'Acesso restrito a administradores' });
-    
+
             const userId = parseInt(req.params.userId);
             const { profile, areas, permissions } = req.body;
-    
+
             if (!areas || !Array.isArray(areas)) {
                 return res.status(400).json({ message: 'Áreas são obrigatórias' });
             }
-    
+
             const [rows] = await pool.query('SELECT id, nome, email, role FROM usuarios WHERE id = ?', [userId]);
             if (!rows.length) return res.status(404).json({ message: 'Usuário não encontrado' });
             const user = rows[0];
             const firstName = user.nome ? user.nome.split(' ')[0].toLowerCase() : '';
-    
+
             const permissoesJson = JSON.stringify(permissions || {});
             const areasJson = JSON.stringify(areas);
             await pool.query(
@@ -777,7 +725,7 @@ module.exports = function createAuthSectionRoutes(deps) {
                     userId
                 ]
             );
-    
+
             if (firstName && userPermissions.userPermissions) {
                 const userData = userPermissions.userPermissions[firstName];
                 if (userData) {
@@ -793,9 +741,9 @@ module.exports = function createAuthSectionRoutes(deps) {
                     };
                 }
             }
-    
+
             console.log(`[PERMISSIONS] Permissoes atualizadas - User: ${user.nome} (ID:${userId}), Profile: ${profile || 'custom'}, Areas: [${areas.join(',')}], Admin: ${req.user.nome}`);
-    
+
             res.json({
                 message: 'Permissoes salvas com sucesso',
                 userId: userId,
@@ -808,7 +756,7 @@ module.exports = function createAuthSectionRoutes(deps) {
             res.status(500).json({ message: 'Erro interno ao salvar permissoes' });
         }
     });
-    
+
     // ROTA PAGINA DE PERMISSOES (Admin only)
     router.get('/admin/permissoes', authenticatePage, (req, res) => {
         // Admin check removido - client-side handles auth via API
@@ -820,7 +768,7 @@ module.exports = function createAuthSectionRoutes(deps) {
             res.status(403).send('<h1>Acesso Negado</h1><p>Apenas administradores podem acessar esta página.</p>');
         }
     });
-    
+
     // ALIAS /api/auth/me → redireciona para /api/me (compatibilidade com módulos)
     // Alguns módulos (Compras, Admin) usam /api/auth/me em vez de /api/me
     // ============================================================================
@@ -836,24 +784,24 @@ module.exports = function createAuthSectionRoutes(deps) {
         if (!token) {
             return res.status(401).json({ message: 'Não autenticado' });
         }
-    
+
         let tokenData;
         try {
             tokenData = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
         } catch (e) {
             return res.status(401).json({ message: 'Token inválido' });
         }
-    
+
         // Cache key com deviceId
         const cacheKey = tokenData.deviceId
             ? `user_session_${tokenData.id}_${tokenData.deviceId}`
             : `user_session_${token.substring(0, 32)}`;
-    
+
         const cachedUser = await cacheGet(cacheKey);
         if (cachedUser) {
             return res.json({ ...cachedUser, deviceId: tokenData.deviceId });
         }
-    
+
         try {
             const [rows] = await pool.query(
                 `SELECT u.id, u.nome, u.email, u.role, u.is_admin, u.setor,
@@ -868,7 +816,7 @@ module.exports = function createAuthSectionRoutes(deps) {
                  WHERE u.id = ?`,
                 [tokenData.id]
             );
-    
+
             if (rows && rows[0]) {
                 const dbUser = rows[0];
                 const fotoUsuario = dbUser.avatar || dbUser.foto || dbUser.foto_funcionario || "/avatars/default.webp";
@@ -889,7 +837,7 @@ module.exports = function createAuthSectionRoutes(deps) {
                 await cacheSet(cacheKey, response, 60000);
                 return res.json(response);
             }
-    
+
             // Fallback
             return res.json({
                 id: tokenData.id,
@@ -911,7 +859,7 @@ module.exports = function createAuthSectionRoutes(deps) {
             });
         }
     });
-    
+
     // Alias para /api/usuario/atual (compatibilidade com Vendas)
     // 🔐 v6.0: Prioridade = Authorization header > cookie
     router.get('/usuario/atual', authenticateToken, async (req, res) => {
@@ -953,7 +901,7 @@ module.exports = function createAuthSectionRoutes(deps) {
             return res.status(401).json({ message: 'Token inválido' });
         }
     });
-    
+
     // Endpoint para obter permissões do usuário
     // 🔐 v7.0: Usa authenticateToken centralizado (fix: JWT bypass manual removido)
     router.get('/permissions', authenticateToken, (req, res) => {
@@ -969,7 +917,7 @@ module.exports = function createAuthSectionRoutes(deps) {
 
         return res.json(permissions);
     });
-    
+
     // Atualizar perfil do usuário (nome, apelido, telefone, bio, etc.) - aceita token via cookie ou Authorization header
     // 🔐 v6.0: Prioridade = Authorization header > cookie
     router.put('/me', authenticateToken, async (req, res) => {
@@ -984,15 +932,15 @@ module.exports = function createAuthSectionRoutes(deps) {
         try {
             const user = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
             const { nome, apelido, telefone, data_nascimento, bio } = req.body || {};
-    
+
             // Validação básica
             if (nome && nome.trim() === '') {
                 return res.status(400).json({ error: 'Nome completo não pode ser vazio' });
             }
-    
+
             // Limpar apelido se for string vazia
             const apelidoFinal = (apelido && apelido.trim() !== '') ? apelido.trim() : null;
-    
+
             // Em modo DEV_MOCK, apenas retorna objeto atualizado sem persistir
             if (process.env.DEV_MOCK === '1' || process.env.DEV_MOCK === 'true') {
                 const updated = Object.assign({}, user);
@@ -1003,25 +951,25 @@ module.exports = function createAuthSectionRoutes(deps) {
                 if (bio) updated.bio = bio;
                 return res.json({ user: updated });
             }
-    
+
             // Em produção, atualiza na tabela usuarios
             const updates = [];
             const params = [];
-    
+
             if (nome) { updates.push('nome = ?'); params.push(nome); }
             updates.push('apelido = ?');
             params.push(apelidoFinal);
             if (telefone !== undefined) { updates.push('telefone = ?'); params.push(telefone || null); }
             if (data_nascimento !== undefined) { updates.push('data_nascimento = ?'); params.push(data_nascimento || null); }
             if (bio !== undefined) { updates.push('bio = ?'); params.push(bio || null); }
-    
+
             if (updates.length > 0) {
                 params.push(user.id);
                 const sql = `UPDATE usuarios SET ${updates.join(', ')} WHERE id = ?`;
                 console.log('[API/ME PUT] 📝 Atualizando usuário:', user.email);
                 await pool.query(sql, params);
             }
-    
+
             // Buscar usuário atualizado com todas as informações
             const [[updatedUser]] = await pool.query(
                 `SELECT id, nome, email, role, is_admin, apelido, telefone, data_nascimento,
@@ -1031,7 +979,7 @@ module.exports = function createAuthSectionRoutes(deps) {
                  FROM usuarios WHERE id = ?`,
                 [user.id]
             );
-    
+
             // Parse permissões de forma segura
             function parsePermissao(perm) {
                 if (!perm) return [];
@@ -1046,14 +994,14 @@ module.exports = function createAuthSectionRoutes(deps) {
                 }
                 return [];
             }
-    
+
             let permissoes_pcp = parsePermissao(updatedUser.permissoes_pcp);
             let permissoes_rh = parsePermissao(updatedUser.permissoes_rh);
             let permissoes_vendas = parsePermissao(updatedUser.permissoes_vendas);
             let permissoes_compras = parsePermissao(updatedUser.permissoes_compras);
             let permissoes_financeiro = parsePermissao(updatedUser.permissoes_financeiro);
             let permissoes_nfe = parsePermissao(updatedUser.permissoes_nfe);
-    
+
             let permissoes = [
                 ...permissoes_pcp,
                 ...permissoes_rh,
@@ -1062,7 +1010,7 @@ module.exports = function createAuthSectionRoutes(deps) {
                 ...permissoes_financeiro,
                 ...permissoes_nfe
             ];
-    
+
             const response = {
                 user: {
                     id: updatedUser.id,
@@ -1088,18 +1036,18 @@ module.exports = function createAuthSectionRoutes(deps) {
                     areas: permissoes
                 }
             };
-    
+
             console.log('[API/ME PUT] ✅ Perfil atualizado:', user.email);
-    
+
             console.log('[API/ME PUT] ✅ Perfil atualizado com sucesso. Apelido:', apelidoFinal);
-    
+
             return res.json(response);
         } catch (err) {
             console.error('Erro em PUT /api/me:', err && err.stack ? err.stack : err);
             return res.status(500).json({ message: 'Erro ao atualizar perfil' });
         }
     });
-    
+
     // Upload de Avatar do Usuário
     const avatarStorage = multer.diskStorage({
         destination: (req, file, cb) => {
@@ -1117,7 +1065,7 @@ module.exports = function createAuthSectionRoutes(deps) {
             cb(null, filename);
         }
     });
-    
+
     const avatarFilter = (req, file, cb) => {
         const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
         if (allowedTypes.includes(file.mimetype)) {
@@ -1126,7 +1074,7 @@ module.exports = function createAuthSectionRoutes(deps) {
             cb(new Error('Formato de arquivo inválido. Use JPG, PNG, GIF ou WEBP.'), false);
         }
     };
-    
+
     const uploadAvatar = multer({
         storage: avatarStorage,
         fileFilter: avatarFilter,
@@ -1134,7 +1082,7 @@ module.exports = function createAuthSectionRoutes(deps) {
             fileSize: 2 * 1024 * 1024 // 2MB
         }
     });
-    
+
     router.post('/upload-avatar', (req, res, next) => {
         // 🔐 v6.0: header PRIMEIRO, cookie depois
         const authHeader = req.headers['authorization'];
@@ -1147,7 +1095,7 @@ module.exports = function createAuthSectionRoutes(deps) {
         if (!token) {
             return res.status(401).json({ error: 'Não autenticado' });
         }
-    
+
         try {
             const user = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
             req.userId = user.id;
@@ -1161,9 +1109,9 @@ module.exports = function createAuthSectionRoutes(deps) {
             if (!req.file) {
                 return res.status(400).json({ error: 'Nenhum arquivo enviado' });
             }
-    
+
             const avatarUrl = `/avatars/${req.file.filename}`;
-    
+
             // Atualizar banco de dados com o caminho do avatar - salvar em ambas colunas
             try {
                 await pool.query(
@@ -1175,38 +1123,38 @@ module.exports = function createAuthSectionRoutes(deps) {
                 console.error('Erro ao atualizar avatar no banco:', dbErr);
                 // Continua mesmo se falhar no DB, pois o arquivo já foi salvo
             }
-    
+
             console.log(`[AVATAR] Upload bem-sucedido para usuário ${req.userEmail}: ${avatarUrl}`);
-    
+
             res.json({
                 success: true,
                 avatarUrl: avatarUrl,
                 message: 'Avatar atualizado com sucesso'
             });
-    
+
         } catch (error) {
             console.error('Erro ao fazer upload do avatar:', error);
             res.status(500).json({ error: 'Erro ao fazer upload do avatar' });
         }
     });
-    
+
     // ============================================================
     // ENDPOINTS DE RESET DE SENHA
     // ============================================================
-    
+
     // Endpoint para solicitar reset de senha
     router.post('/auth/forgot-password', async (req, res) => {
         const { email } = req.body;
-    
+
         if (!email || !email.trim()) {
             return res.status(400).json({ message: 'Email é obrigatório' });
         }
-    
+
         try {
             // Verificar se o email existe na tabela usuarios ou funcionarios
             let userExists = false;
             let userName = '';
-    
+
             // Verificar na tabela usuarios
             const [usuarios] = await pool.query('SELECT nome_completo, email FROM usuarios WHERE email = ?', [email]);
             if (usuarios && usuarios.length > 0) {
@@ -1220,7 +1168,7 @@ module.exports = function createAuthSectionRoutes(deps) {
                     userName = funcionarios[0].nome_completo;
                 }
             }
-    
+
             // Por segurança, sempre retornar sucesso mesmo que o email não exista
             // Isso evita que atacantes descubram quais emails estão cadastrados
             if (!userExists) {
@@ -1229,24 +1177,24 @@ module.exports = function createAuthSectionRoutes(deps) {
                     message: 'Se o email estiver cadastrado, você receberá um link para redefinir sua senha.'
                 });
             }
-    
+
             // Gerar token único
             const crypto = require('crypto');
             const token = crypto.randomBytes(32).toString('hex');
-    
+
             // Token expira em 30 minutos
             const expiresAt = new Date();
             expiresAt.setMinutes(expiresAt.getMinutes() + 30);
-    
+
             // Salvar token no banco
             await pool.query(
                 'INSERT INTO password_reset_tokens (email, token, expira_em) VALUES (?, ?, ?)',
                 [email, token, expiresAt]
             );
-    
+
             // Gerar link de reset
             const resetLink = `http://localhost:${PORT}/reset-password.html?token=${token}`;
-    
+
             // Enviar email
             try {
                 await enviarEmail(
@@ -1282,15 +1230,15 @@ module.exports = function createAuthSectionRoutes(deps) {
                 // Mesmo que o email falhe, retornar sucesso (o token foi criado)
                 // Em produção, você pode querer logar isso e tentar reenviar
             }
-    
+
             return res.json({
                 message: 'Se o email estiver cadastrado, você receberá um link para redefinir sua senha.',
                 success: true
             });
-    
+
         } catch (err) {
             console.error('[RESET] Erro ao processar solicitação:', err);
-    
+
             // Verificar se é erro de tabela não existente
             if (err.code === 'ER_NO_SUCH_TABLE') {
                 // AUDIT-FIX ARCH-002: Removed duplicate CREATE TABLE password_reset_tokens
@@ -1301,45 +1249,45 @@ module.exports = function createAuthSectionRoutes(deps) {
                     retry: true
                 });
             }
-    
+
             return res.status(500).json({ message: 'Erro ao processar solicitação. Tente novamente.' });
         }
     });
-    
+
     // Endpoint para validar token de reset
     router.get('/auth/validate-reset-token/:token', async (req, res) => {
         const { token } = req.params;
-    
+
         if (!token) {
             return res.status(400).json({ message: 'Token inválido', valid: false });
         }
-    
+
         try {
             const [tokens] = await pool.query(
                 'SELECT * FROM password_reset_tokens WHERE token = ? AND usado = 0 AND expira_em > NOW()',
                 [token]
             );
-    
+
             if (!tokens || tokens.length === 0) {
                 return res.json({ valid: false, message: 'Token inválido ou expirado' });
             }
-    
+
             return res.json({ valid: true, email: tokens[0].email });
-    
+
         } catch (err) {
             console.error('[RESET] Erro ao validar token:', err);
             return res.status(500).json({ message: 'Erro ao validar token', valid: false });
         }
     });
-    
+
     // Endpoint para redefinir a senha
     router.post('/auth/reset-password', async (req, res) => {
         const { token, novaSenha } = req.body;
-    
+
         if (!token || !novaSenha) {
             return res.status(400).json({ message: 'Token e nova senha são obrigatórios' });
         }
-    
+
         // SECURITY FIX: Política de senha forte (Due Diligence 2026-02-15)
         if (novaSenha.length < 10) {
             return res.status(400).json({ message: 'A senha deve ter no mínimo 10 caracteres' });
@@ -1356,95 +1304,95 @@ module.exports = function createAuthSectionRoutes(deps) {
         if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(novaSenha)) {
             return res.status(400).json({ message: 'A senha deve conter pelo menos um caractere especial (!@#$%...)' });
         }
-    
+
         try {
             // Buscar token válido
             const [tokens] = await pool.query(
                 'SELECT * FROM password_reset_tokens WHERE token = ? AND usado = 0 AND expira_em > NOW()',
                 [token]
             );
-    
+
             if (!tokens || tokens.length === 0) {
                 return res.status(400).json({ message: 'Token inválido ou expirado' });
             }
-    
+
             const resetToken = tokens[0];
             const email = resetToken.email;
-    
+
             // Hash da nova senha
             const bcrypt = require('bcryptjs');
             const senhaHash = await bcrypt.hash(novaSenha, 10);
-    
+
             // Atualizar senha na tabela usuarios (SECURITY: apenas hash, nunca texto plano)
             const [usuariosResult] = await pool.query(
                 'UPDATE usuarios SET senha_hash = ?, password_hash = ? WHERE email = ?',
                 [senhaHash, senhaHash, email]
             );
-    
+
             // Atualizar senha na tabela funcionarios (SECURITY: hash bcrypt, limpar texto plano)
             const [funcionariosResult] = await pool.query(
                 'UPDATE funcionarios SET senha = ?, senha_texto = NULL WHERE email = ?',
                 [senhaHash, email]
             );
-    
+
             // Marcar token como usado
             await pool.query(
                 'UPDATE password_reset_tokens SET usado = 1 WHERE token = ?',
                 [token]
             );
-    
+
             // Invalidar todos os tokens antigos deste email
             await pool.query(
                 'UPDATE password_reset_tokens SET usado = 1 WHERE email = ? AND token != ?',
                 [email, token]
             );
-    
+
             console.log(`[RESET] ✅ Senha redefinida com sucesso para: ${email}`);
-    
+
             return res.json({
                 message: 'Senha redefinida com sucesso! Você já pode fazer login.',
                 success: true
             });
-    
+
         } catch (err) {
             console.error('[RESET] Erro ao redefinir senha:', err);
             return res.status(500).json({ message: 'Erro ao redefinir senha. Tente novamente.' });
         }
     });
-    
+
     // Note: /api/logout é provido por authRouter; se preferir usar a implementação
     // embutida aqui, substitua/remova a rota no arquivo auth.js.
-    
+
     // Rota para servir o favicon
     router.get('/favicon.ico', (req, res) => {
         res.sendFile(path.join(__dirname, '..', 'public', 'images', 'favicon.ico'));
     });
-    
-    
+
+
     // Rota raiz: sempre servir a tela de login
     router.get('/', (req, res) => {
         res.setHeader('Content-Type', 'text/html; charset=utf-8');
         return res.sendFile(path.join(__dirname, '..', 'public', 'login.html'));
     });
-    
+
     // Manter rotas antigas de login apontando para a tela de login
     router.get(['/login.html', '/login'], (req, res) => {
         res.setHeader('Content-Type', 'text/html; charset=utf-8');
         return res.sendFile(path.join(__dirname, '..', 'public', 'login.html'));
     });
-    
+
     // Middleware que exige autenticação via JWT (cookie ou Authorization header) - para servir páginas protegidas
     // SECURITY: Não aceita token via query string (expõe em logs/histórico do navegador)
     function requireAuthPage(req, res, next) {
         // Primeiro tenta pegar do cookie, depois do header Authorization
         const token = req.cookies?.token || req.cookies?.authToken || req.headers['authorization']?.replace('Bearer ', '');
-    
+
         if (!token) {
             // não autenticado -> redireciona para login
             console.log('[AUTH] Sem token ao acessar página protegida, redirecionando para login');
             return res.redirect('/login.html');
         }
-    
+
         try {
             const user = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
             req.user = user;
@@ -1454,8 +1402,8 @@ module.exports = function createAuthSectionRoutes(deps) {
             return res.redirect('/login.html');
         }
     }
-    
-    // Servir /dashboard e /index.html apenas para usuários autenticados
+
+    // Servir /dashboard apenas para usuários autenticados
     router.get('/dashboard', requireAuthPage, (req, res) => {
         res.setHeader('Content-Type', 'text/html; charset=utf-8');
         res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
@@ -1464,19 +1412,14 @@ module.exports = function createAuthSectionRoutes(deps) {
         res.setHeader('Clear-Site-Data', '"cache"');
         res.sendFile(path.join(__dirname, 'dashboard-emergent', 'index.html'));
     });
-    
+
     router.get('/index.html', requireAuthPage, (req, res) => {
-        res.setHeader('Content-Type', 'text/html; charset=utf-8');
-        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-        res.setHeader('Pragma', 'no-cache');
-        res.setHeader('Expires', '0');
-        res.setHeader('Clear-Site-Data', '"cache"');
-        res.sendFile(path.join(__dirname, 'dashboard-emergent', 'index.html'));
+        res.redirect(302, '/dashboard');
     });
-    
+
     // Servir arquivos estáticos do dashboard-emergent
     router.use('/dashboard-emergent', express.static(path.join(__dirname, 'dashboard-emergent')));
-    
+
     // Middleware para autenticação via JWT no backend
     // SECURITY: Não aceita token via query string (expõe em logs/histórico do navegador)
     function authenticatePage(req, res, next) {
@@ -1497,11 +1440,11 @@ module.exports = function createAuthSectionRoutes(deps) {
             return next();
         });
     }
-    
+
     // ============================================================
     // ROTAS PROTEGIDAS DO FINANCEIRO
     // ============================================================
-    
+
     // Rotas principais do Financeiro
     router.get('/Financeiro/financeiro.html', authenticatePage, (req, res) => {
         if (req.user && req.user.nome) {
@@ -1515,7 +1458,7 @@ module.exports = function createAuthSectionRoutes(deps) {
             res.redirect('/login.html');
         }
     });
-    
+
     router.get('/Financeiro/index.html', authenticatePage, (req, res) => {
         if (req.user && req.user.nome) {
             const firstName = req.user.nome.split(' ')[0].toLowerCase();
@@ -1528,7 +1471,7 @@ module.exports = function createAuthSectionRoutes(deps) {
             res.redirect('/login.html');
         }
     });
-    
+
 
     return router;
 };

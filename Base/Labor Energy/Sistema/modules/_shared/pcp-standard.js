@@ -6,9 +6,9 @@ function initDarkMode() {
     const darkModeIcon = document.getElementById('dark-mode-icon');
     
     // Verificar preferência salva
-    const isDarkMode = localStorage.getItem('darkMode') === 'true';
+    const isDarkMode = localStorage.getItem('a11yDarkMode') === '1';
     if (isDarkMode) {
-        document.body.classList.add('dark-mode');
+        document.documentElement.classList.add('a11y-dark-mode');
         if (darkModeIcon) {
             darkModeIcon.classList.remove('fa-moon');
             darkModeIcon.classList.add('fa-sun');
@@ -18,9 +18,10 @@ function initDarkMode() {
     // Toggle dark mode
     if (darkModeToggle) {
         darkModeToggle.addEventListener('click', () => {
-            document.body.classList.toggle('dark-mode');
-            const isNowDark = document.body.classList.contains('dark-mode');
-            localStorage.setItem('darkMode', isNowDark);
+            document.documentElement.classList.toggle('a11y-dark-mode');
+            const isNowDark = document.documentElement.classList.contains('a11y-dark-mode');
+            localStorage.setItem('a11yDarkMode', isNowDark ? '1' : '0');
+            localStorage.removeItem('darkMode');
             
             if (darkModeIcon) {
                 if (isNowDark) {

@@ -4,14 +4,49 @@
  */
 'use strict';
 
+async function ensureColumn(pool, table, column, definition) {
+    try {
+        const [rows] = await pool.query(
+            `SELECT COLUMN_NAME
+             FROM INFORMATION_SCHEMA.COLUMNS
+             WHERE TABLE_SCHEMA = DATABASE()
+               AND TABLE_NAME = ?
+               AND COLUMN_NAME = ?
+             LIMIT 1`,
+            [table, column]
+        );
+        if (!rows.length) {
+            await pool.query(`ALTER TABLE \`${table}\` ADD COLUMN \`${column}\` ${definition}`);
+            console.log(`[MULTIEMPRESA] Coluna criada: ${table}.${column}`);
+        }
+    } catch (err) {
+        console.warn(`[MULTIEMPRESA] Coluna ${table}.${column}: ${err.message}`);
+    }
+}
+
 async function runMultiempresaSetup(pool) {
     console.log('[MULTIEMPRESA] Iniciando setup multiempresa...');
+
+    await ensureColumn(pool, 'usuarios', 'empresa_id', 'INT NULL DEFAULT 1');
+    await ensureColumn(pool, 'usuarios', 'empresa_default_id', 'INT NULL DEFAULT NULL');
+    await ensureColumn(pool, 'nfe_configuracoes', 'empresa_id', 'INT NOT NULL DEFAULT 1');
+    await ensureColumn(pool, 'nfe_configuracoes', 'serie', 'INT NOT NULL DEFAULT 1');
+    await ensureColumn(pool, 'nfe_configuracoes', 'ultimo_numero', 'INT NOT NULL DEFAULT 0');
+    await ensureColumn(pool, 'nfe_configuracoes', 'ambiente', "VARCHAR(20) NOT NULL DEFAULT 'homologacao'");
+    await ensureColumn(pool, 'nfe_configuracoes', 'regime_tributario', "VARCHAR(10) NOT NULL DEFAULT '1'");
+    await ensureColumn(pool, 'nfe_configuracoes', 'ativo', 'TINYINT(1) NOT NULL DEFAULT 1');
+
+    try {
+        await pool.query('UPDATE usuarios SET empresa_default_id = COALESCE(empresa_default_id, empresa_id, 1) WHERE empresa_default_id IS NULL');
+    } catch (err) {
+        console.warn('[MULTIEMPRESA] empresa_default_id sync: ' + err.message);
+    }
 
     // 1. Garantir que as 3 empresas existam em `empresas`
     const empresasDef = [
         { id: 1, cnpj: process.env.ALUFORCE_CNPJ || '00.000.000/0000-00', razao_social: process.env.ALUFORCE_RAZAO || 'ALUFORCE INDUSTRIA E COMERCIO LTDA', nome_fantasia: 'Aluforce' },
-        { id: 2, cnpj: process.env.LABOR_ELETRIC_CNPJ || '11.111.111/0000-00', razao_social: process.env.LABOR_ELETRIC_RAZAO || 'LABOR ELETRIC LTDA', nome_fantasia: 'Labor Eletric' },
-        { id: 3, cnpj: process.env.LABOR_ENERGY_CNPJ || '22.222.222/0000-00', razao_social: process.env.LABOR_ENERGY_RAZAO || 'LABOR ENERGY LTDA', nome_fantasia: 'Labor Energy' }
+        { id: 2, cnpj: process.env.LABOR_ELETRIC_CNPJ || '35.165.246/0001-06', razao_social: process.env.LABOR_ELETRIC_RAZAO || 'LABOR ELETRIC INDUSTRIA E COMERCIO UNIPESSOAL LTDA', nome_fantasia: 'Labor Eletric' },
+        { id: 3, cnpj: process.env.LABOR_ENERGY_CNPJ || '53.937.474/0001-20', razao_social: process.env.LABOR_ENERGY_RAZAO || 'ENERGY COMERCIO LTDA', nome_fantasia: 'Energy Comercio' }
     ];
 
     for (const emp of empresasDef) {

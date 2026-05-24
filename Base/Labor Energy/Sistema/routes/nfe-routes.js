@@ -345,7 +345,8 @@ module.exports = function createNfeRoutes(deps) {
     // 8. Dashboard de Status das NF-e
     router.get('/dashboard', async (req, res, next) => {
         try {
-            const [autorizadas] = await pool.query('SELECT COUNT(*) AS qtd, COALESCE(SUM(valor),0) AS total FROM nfe WHERE status = "autorizada" AND MONTH(data_emissao) = MONTH(CURRENT_DATE()) AND YEAR(data_emissao) = YEAR(CURRENT_DATE())');
+            // FISC-002: 'emitida' incluído no grupo autorizadas (normalização de status coloquial)
+            const [autorizadas] = await pool.query('SELECT COUNT(*) AS qtd, COALESCE(SUM(valor),0) AS total FROM nfe WHERE status IN ("autorizada","emitida") AND MONTH(data_emissao) = MONTH(CURRENT_DATE()) AND YEAR(data_emissao) = YEAR(CURRENT_DATE())');
             const [canceladas] = await pool.query('SELECT COUNT(*) AS qtd, COALESCE(SUM(valor),0) AS total FROM nfe WHERE status = "cancelada" AND MONTH(data_emissao) = MONTH(CURRENT_DATE()) AND YEAR(data_emissao) = YEAR(CURRENT_DATE())');
             const [pendentes] = await pool.query('SELECT COUNT(*) AS qtd, COALESCE(SUM(valor),0) AS total FROM nfe WHERE status IN ("pendente", "rejeitada") AND MONTH(data_emissao) = MONTH(CURRENT_DATE()) AND YEAR(data_emissao) = YEAR(CURRENT_DATE())');
             const qtdAutorizadas = Number(autorizadas[0]?.qtd) || 0;

@@ -75,14 +75,14 @@ const userPermissions = {
         isAdmin: true
     },
 
-    // Guilherme Bastos (compras@aluforce.ind.br)
+    // Guilherme Bastos (compras@aluforce.ind.br) — Compras + RH (funcionário) + Configurações
     'compras': {
-        areas: ['vendas', 'compras', 'pcp', 'financeiro'],
+        areas: ['compras', 'rh'],
         rhType: 'funcionario',
         isAdmin: false
     },
-    'guilherme.bastos': {
-        areas: ['vendas', 'compras', 'pcp', 'financeiro'],
+    'guilherme': {
+        areas: ['compras', 'rh'],
         rhType: 'funcionario',
         isAdmin: false
     },
@@ -290,9 +290,9 @@ function getFinanceiroPermissoes(userName) {
 // Mapeamento de áreas para URLs
 const areaURLs = {
     'pcp': '/modules/PCP/index.html',
-    'vendas': '/modules/Vendas/index.html',
-    'financeiro': '/modules/Financeiro/financeiro.html',
-    'nfe': '/modules/NFe/nfe.html',
+    'vendas': '/modules/Vendas/public/index.html',
+    'financeiro': '/modules/Financeiro/index.html',
+    'nfe': '/modules/Faturamento/index.html',
     'compras': '/modules/Compras/compras.html',
     'rh': '/modules/RH/area.html',
     'ti': '/TI/ti.html'

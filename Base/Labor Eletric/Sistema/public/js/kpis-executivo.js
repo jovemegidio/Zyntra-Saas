@@ -261,7 +261,7 @@ function carregarKPIsSimulados() {
     // Alertas simulados
     atualizarAlertas([
         { tipo: 'warning', modulo: 'Financeiro', mensagem: '3 títulos vencendo hoje', link: '/modules/Financeiro/index.html' },
-        { tipo: 'info', modulo: 'Vendas', mensagem: '5 pedidos aguardando aprovação', link: '/Vendas/index.html' }
+        { tipo: 'info', modulo: 'Vendas', mensagem: '5 pedidos aguardando aprovação', link: '/modules/Vendas/public/index.html' }
     ]);
 }
 
@@ -742,7 +742,7 @@ function formatarMoedaCurto(valor) {
 document.addEventListener('DOMContentLoaded', function() {
     const moduloCards = document.querySelectorAll('.kpi-modulo-card');
     const moduloLinks = {
-        vendas: '/modules/Vendas/index.html',
+        vendas: '/modules/Vendas/public/index.html',
         compras: '/modules/Compras/index.html',
         pcp: '/modules/PCP/index.html',
         rh: '/modules/RH/public/dashboard.html'

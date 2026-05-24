@@ -4,16 +4,16 @@
  */
 
 require('dotenv').config();
-const XLSX = require('xlsx');
+const XLSX = require('../src/utils/spreadsheet-reader');
 const mysql = require('mysql2/promise');
 
 // Configuração do banco
 const dbConfig = {
-    host: process.env.DB_HOST || 'interchange.proxy.rlwy.net',
+    host: process.env.DB_HOST || 'localhost',
     port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 19396,
     user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || 'iiilOZutDOnPCwxgiTKeMuEaIzSwplcu',
-    database: process.env.DB_NAME || 'railway',
+    password: process.env.DB_PASSWORD || '',
+    database: process.env.DB_NAME || 'aluforce_vendas',
     charset: 'utf8mb4'
 };
 
@@ -25,7 +25,7 @@ async function importarPedidos() {
         
         // Ler arquivo Excel
         const filePath = 'ordens-emitidas/Pedidos/1316 Pedidos2.xlsx';
-        const workbook = XLSX.readFile(filePath);
+        const workbook = await XLSX.readFile(filePath);
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
         const data = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
         

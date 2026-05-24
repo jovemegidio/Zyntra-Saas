@@ -13,11 +13,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Design System CSS -->
-    <link rel="stylesheet" href="/css/modern-saas.css?v=3.0">
     <link rel="stylesheet" href="../css/rh-pages.css?v=1.0">
 
     <style>
-        /* ===== ESTILOS ESPECÍFICOS  BENEFCIOS ===== */
+        /* CRIT-04: Garantir que modais ficam ocultos por padrão (design-system pode sobrescrever) */
+        .modal { display: none !important; }
+        .modal.show { display: flex !important; }
+
+        /* ===== ESTILOS ESPECÍFICOS — BENEFÍCIOS ===== */
 
         /* Content Area */
         .content-area { flex: 1; overflow-y: auto; padding: 32px; background: #f8fafc; }
@@ -183,7 +186,7 @@
     <!-- Tooltips Profissionais -->
     <link rel="stylesheet" href="/css/tooltips-professional.css?v=20260209">
     <script src="/js/tooltips-professional.js?v=20260209" defer></script>
-    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260216">
+    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260418">
     <!-- Chat Widget BOB AI -->
     <link rel="stylesheet" href="/chat/widget.css?v=20260218">
     <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260324">
@@ -202,11 +205,9 @@
                 <a href="meus-holerites.html" class="sidebar-btn" title="Meus Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="dados-cadastrais.html" class="sidebar-btn" title="Dados Cadastrais"><i class="fas fa-id-card"></i></a>
                 <a href="beneficios.html" class="sidebar-btn active" title="Meus Benefícios"><i class="fas fa-gift"></i></a>
-                <a href="minhas-ferias.html" class="sidebar-btn" title="Minhas Férias"><i class="fas fa-umbrella-beach"></i></a>
                 <a href="espelho-ponto.html" class="sidebar-btn" title="Espelho de Ponto"><i class="fas fa-list-check"></i></a>
                 <a href="enviar-atestado.html" class="sidebar-btn" title="Enviar Atestado"><i class="fas fa-file-medical"></i></a>
-                <a href="autoavaliação.html" class="sidebar-btn" title="Autoavaliação"><i class="fas fa-user-check"></i></a>
-                <a href="avaliacoes-recebidas.html" class="sidebar-btn" title="Avaliações Recebidas"><i class="fas fa-inbox"></i></a>
+                <a href="../solicitacoes.html" class="sidebar-btn" title="Minhas Solicitações"><i class="fas fa-clipboard-list"></i></a>
                 <a href="manual-colaborador.html" class="sidebar-btn" title="Manual do Colaborador"><i class="fas fa-book"></i></a>
             </nav>
             <div class="sidebar-bottom">
@@ -235,10 +236,6 @@
                     <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
                     <div class="user-greeting">
                         <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
-                        <div class="user-avatar" id="user-avatar">
-                            <img src="" alt="Foto do Usuário" id="user-photo">
-                            <span id="user-initials">U</span>
-                        </div>
                     </div>
                 </div>
             </header>
@@ -250,7 +247,7 @@
                         <i class="fas fa-gift"></i>
                         Meus Benefícios
                     </h1>
-                    <p class="page-subtitle">Consulte e gerencie seus benefcios corporativos</p>
+                    <p class="page-subtitle">Consulte e gerencie seus benefícios corporativos</p>
                 </div>
 
                 <div class="controls-bar">
@@ -289,7 +286,7 @@
                             <i class="fas fa-plus-circle"></i>
                         </div>
                         <div class="summary-content">
-                            <h4>Disponveis</h4>
+                            <h4>Disponíveis</h4>
                             <div class="value" id="count-disponiveis">0</div>
                         </div>
                     </div>
@@ -299,7 +296,7 @@
                 <div class="benefits-grid" id="benefits-grid">
                     <div style="grid-column: 1/-1; text-align: center; padding: 60px; color: #94a3b8;">
                         <i class="fas fa-spinner fa-spin" style="font-size: 48px; margin-bottom: 16px; display: block;"></i>
-                        Carregando benefcios...
+                        Carregando benefícios...
                     </div>
                 </div>
             </div>
@@ -317,25 +314,25 @@
             <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <p style="color: #64748b; font-size: 0.9rem; margin: 0;">
-                        Configure os benefcios disponveis para os funcionários.
+                        Configure os benefícios disponíveis para os funcionários.
                     </p>
                     <button class="btn btn-success btn-sm" onclick="abrirModalNovoBeneficio()">
-                        <i class="fas fa-plus"></i> Novo Benefcio
+                        <i class="fas fa-plus"></i> Novo Benefício
                     </button>
                 </div>
                 <div id="lista-benefícios-admin">
-                    <!-- Lista dinmica -->
+                    <!-- Lista dinâmica -->
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal Novo/Editar Benefcio -->
+    <!-- Modal Novo/Editar Benefício -->
     <div id="modalBeneficio" class="modal">
         <div class="modal-overlay" onclick="fecharModalBeneficio()"></div>
         <div class="modal-content" style="max-width: 600px;">
             <div class="modal-header">
-                <h3 id="modal-benefício-título"><i class="fas fa-gift"></i> Novo Benefcio</h3>
+                <h3 id="modal-benefício-titulo"><i class="fas fa-gift"></i> Novo Benefício</h3>
                 <button class="modal-close" onclick="fecharModalBeneficio()"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body">
@@ -343,8 +340,8 @@
                     <input type="hidden" id="benefício-id">
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Nome do Benefcio *</label>
-                            <input type="text" id="benefício-nome" class="form-input" required placeholder="Ex: Vale Refeio">
+                            <label>Nome do Benefício *</label>
+                            <input type="text" id="benefício-nome" class="form-input" required placeholder="Ex: Vale Refeição">
                         </div>
                         <div class="form-group">
                             <label>Fornecedor</label>
@@ -356,13 +353,13 @@
                             <label>Tipo *</label>
                             <select id="benefício-tipo" class="form-input" required>
                                 <option value="">Selecione...</option>
-                                <option value="health">Plano de Sade</option>
-                                <option value="dental">Plano Odontolgico</option>
-                                <option value="food">Vale Alimentao/Refeio</option>
-                                <option value="telemedicine">CS Sade (Telemedicina)</option>
+                                <option value="health">Plano de Saúde</option>
+                                <option value="dental">Plano Odontológico</option>
+                                <option value="food">Vale Alimentação/Refeição</option>
+                                <option value="telemedicine">CS Saúde (Telemedicina)</option>
                                 <option value="gym">Academia/Bem-estar</option>
                                 <option value="life">Seguro de Vida</option>
-                                <option value="education">Educao</option>
+                                <option value="education">Educação</option>
                                 <option value="other">Outro</option>
                             </select>
                         </div>
@@ -371,7 +368,7 @@
                             <select id="benefício-status" class="form-input" required>
                                 <option value="active">Ativo</option>
                                 <option value="pending">Pendente</option>
-                                <option value="inactive">Disponvel</option>
+                                <option value="inactive">disponível</option>
                             </select>
                         </div>
                     </div>
@@ -385,17 +382,17 @@
                                     maxlength="14"
                                     style="padding-left: 38px;"
                                     oninput="mascaraMoeda(this)"
-                                    onkeypress="return somenteNumeros(event)">
+                                    onkeypress="return somenteNúmeros(event)">
                             </div>
                         </div>
                         <div class="form-group">
-                            <label>Informao Adicional</label>
+                            <label>Informação Adicional</label>
                             <input type="text" id="benefício-info" class="form-input" placeholder="Ex: Cobertura nacional">
                         </div>
                     </div>
                     <div class="form-group">
-                        <label>Descrio</label>
-                        <textarea id="benefício-descrição" class="form-input" rows="3" placeholder="Descrio detalhada do benefcio..."></textarea>
+                        <label>Descrição</label>
+                        <textarea id="benefício-descricao" class="form-input" rows="3" placeholder="Descrição detalhada do benefício..."></textarea>
                     </div>
                 </form>
             </div>
@@ -415,8 +412,8 @@
     </div>
 
     <script>
-        // Configurao dos benefcios (salvos em localStorage para persistncia)
-        const STORAGE_KEY = 'aluforce_benefícios_v2';
+        // BE-002: Benefícios carregados exclusivamente da API (sem localStorage)
+        const STORAGE_KEY = 'aluforce_benefícios_v2'; // mantido apenas para limpar cache antigo
 
         // Sanitizao XSS
         function escapeHtml(value) {
@@ -426,7 +423,7 @@
             return div.innerHTML;
         }
 
-        // Benefícios padro da empresa (podem ser editados pelo admin)
+        // Benefícios Padrão da empresa (podem ser editados pelo admin)
         const benefíciosPadrao = [
             {
                 id: 1,
@@ -435,29 +432,29 @@
                 tipo: 'transport',
                 status: 'active',
                 valor: 'R$ 11,00/dia',
-                info: 'Benefcio Fixo',
-                descrição: 'Vale-transporte para deslocamento casa-trabalho-casa. Benefcio fixo concedido a todos os funcionários CLT.'
+                info: 'Benefício Fixo',
+                descrição: 'Vale-transporte para deslocamento casa-trabalho-casa. Benefício fixo concedido a todos os funcionários CLT.'
             },
             {
                 id: 2,
-                nome: 'CS Sade',
-                fornecedor: 'CS Sade',
+                nome: 'CS Saúde',
+                fornecedor: 'CS Saúde',
                 tipo: 'health',
                 status: 'active',
                 valor: 'Consulte o portal',
                 info: 'Telemedicina e consultas',
-                descrição: 'Plataforma de sade com telemedicina, consultas online e presenciais. Acesse: cssaude.app.br',
+                descrição: 'Plataforma de Saúde com telemedicina, consultas online e presenciais. Acesse: cssaude.app.br',
                 link: 'https://www.cssaude.app.br/'
             },
             {
                 id: 3,
-                nome: 'Cesta Bsica',
+                nome: 'Cesta Básica',
                 fornecedor: 'Empresa',
                 tipo: 'food',
                 status: 'active',
                 valor: 'Mensal',
-                info: 'Condicionado  pontualidade',
-                descrição: 'Cesta bsica mensal concedida aos colaboradores que no possuem atrasos ou sadas antecipadas acima de 20 minutos no ms, com base nos registros de ponto importados do RHiD Cloud.',
+                info: 'Condicionado à pontualidade',
+                descrição: 'Cesta básica mensal concedida aos colaboradores que não possuem atrasos ou saídas antecipadas acima de 20 minutos no mês, com base nos registros de ponto importados do RHiD Cloud.',
                 condicional: true,
                 condiçãoTipo: 'pontualidade'
             }
@@ -480,7 +477,7 @@
         const statusLabels = {
             'active': { text: 'Ativo', class: 'active' },
             'pending': { text: 'Pendente', class: 'pending' },
-            'inactive': { text: 'Disponvel', class: 'inactive' }
+            'inactive': { text: 'disponível', class: 'inactive' }
         };
 
         const avatarNameMap = {
@@ -516,13 +513,16 @@
             return null;
         }
 
-        // Helper: Obtm headers de Autenticação
+        // Helper: Obtém headers de Autenticação
         function getApiHeaders(json = false) {
+            const h = {};
             if (json) h['Content-Type'] = 'application/json';
             return h;
         }
 
         async function carregarBeneficios() {
+            // BE-002: Limpar cache localStorage antigo se existir
+            try { localStorage.removeItem(STORAGE_KEY); } catch(_) {}
             try {
                 const response = await fetch('/api/rh/beneficios', {
                     headers: getApiHeaders(),
@@ -532,33 +532,21 @@
                     const data = await response.json();
                     if (data && data.length > 0) {
                         benefícios = data;
-                        localStorage.setItem(STORAGE_KEY, JSON.stringify(benefícios));
                         return;
                     }
                 }
-            } catch (e) {
-                console.warn('[Benefícios] API indisponvel, usando cache local:', e.message);
-            }
-            // Fallback: localStorage
-            const saved = localStorage.getItem(STORAGE_KEY);
-            if (saved) {
-                benefícios = JSON.parse(saved);
-            } else {
+                // API retornou lista vazia — usar benefícios padrão como visualização
                 benefícios = [...benefíciosPadrao];
-                salvarBeneficiosLocal();
+            } catch (e) {
+                // BE-002: Sem fallback localStorage — usar dados padrão embutidos apenas para exibição
+                console.warn('[Benefícios] API indisponível, exibindo benefícios padrão:', e.message);
+                benefícios = [...benefíciosPadrao];
             }
-            // Garantir que todos os benefcios padro esto presentes (ex: Cesta Bsica adicionada depois)
-            benefíciosPadrao.forEach(bp => {
-                const existe = benefícios.some(b => b.id === bp.id || b.nome === bp.nome);
-                if (!existe) {
-                    benefícios.push({ ...bp });
-                }
-            });
-            salvarBeneficiosLocal();
         }
 
+        // BE-002: salvarBeneficiosLocal() removido — persistência via API apenas
         function salvarBeneficiosLocal() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(benefícios));
+            console.warn('[Benefícios] salvarBeneficiosLocal() desabilitado (BE-002)');
         }
 
         function renderizarBeneficios() {
@@ -568,7 +556,7 @@
                 grid.innerHTML = `
                     <div style="grid-column: 1/-1; text-align: center; padding: 60px; color: #94a3b8;">
                         <i class="fas fa-gift" style="font-size: 64px; margin-bottom: 20px; display: block;"></i>
-                        <p style="font-size: 1.1rem; font-weight: 600; margin-bottom: 8px;">Nenhum benefcio cadastrado</p>
+                        <p style="font-size: 1.1rem; font-weight: 600; margin-bottom: 8px;">Nenhum benefício cadastrado</p>
                         <p style="font-size: 0.9rem;">Entre em contato com o RH para mais informações.</p>
                     </div>
                 `;
@@ -603,23 +591,23 @@
                                 ` : ''}
                                 ${b.info ? `
                                 <div class="detail-item">
-                                    <div class="detail-label">Informao</div>
+                                    <div class="detail-label">Informação</div>
                                     <div class="detail-value">${escapeHtml(b.info)}</div>
                                 </div>
                                 ` : ''}
                             </div>
                             ` : ''}
-                            ${b.descrição ? `<p class="benefit-description">${escapeHtml(b.descrição)}</p>` : ''}
+                            ${b.descricao ? `<p class="benefit-description">${escapeHtml(b.descricao)}</p>` : ''}
                             <div class="benefit-actions">
                                 ${b.status === 'inactive' ? `
                                 <button class="btn btn-success btn-sm" onclick="solicitarAdesao(${b.id})">
                                     <i class="fas fa-plus"></i>
-                                    Solicitar Adeso
+                                    Solicitar Adesão
                                 </button>
                                 ` : b.status === 'pending' ? `
                                 <button class="btn btn-primary btn-sm" onclick="ativarBeneficio(${b.id})">
                                     <i class="fas fa-check"></i>
-                                    Ativar Benefcio
+                                    Ativar Benefício
                                 </button>
                                 ` : `
                                 <button class="btn btn-outline btn-sm" onclick="verDetalhes(${b.id})">
@@ -653,7 +641,7 @@
                 lista.innerHTML = `
                     <div style="text-align: center; padding: 40px; color: #94a3b8;">
                         <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 12px; display: block;"></i>
-                        Nenhum benefcio cadastrado
+                        Nenhum benefício cadastrado
                     </div>
                 `;
                 return;
@@ -685,7 +673,7 @@
             }).join('');
         }
 
-        // Funes do Modal Gerenciar
+        // Funções do Modal Gerenciar
         function abrirModalGerenciar() {
             renderizarListaAdmin();
             document.getElementById('modalGerenciar').classList.add('show');
@@ -695,8 +683,8 @@
             document.getElementById('modalGerenciar').classList.remove('show');
         }
 
-        // === Mscara de Moeda ===
-        function somenteNumeros(e) {
+        // === Máscara de Moeda ===
+        function somenteNúmeros(e) {
             const char = String.fromCharCode(e.which || e.keyCode);
             if (!/[0-9]/.test(char)) {
                 e.preventDefault();
@@ -741,9 +729,9 @@
             return 'R$ ' + limpo;
         }
 
-        // Funes do Modal Benefcio
+        // Funções do Modal Benefício
         function abrirModalNovoBeneficio() {
-            document.getElementById('modal-benefício-título').innerHTML = '<i class="fas fa-gift"></i> Novo Benefcio';
+            document.getElementById('modal-benefício-titulo').innerHTML = '<i class="fas fa-gift"></i> Novo Benefício';
             document.getElementById('formBeneficio').reset();
             document.getElementById('benefício-id').value = '';
             document.getElementById('modalBeneficio').classList.add('show');
@@ -757,7 +745,7 @@
             const b = benefícios.find(x => x.id === id);
             if (!b) return;
 
-            document.getElementById('modal-benefício-título').innerHTML = '<i class="fas fa-edit"></i> Editar Benefcio';
+            document.getElementById('modal-benefício-titulo').innerHTML = '<i class="fas fa-edit"></i> Editar Benefício';
             document.getElementById('benefício-id').value = b.id;
             document.getElementById('benefício-nome').value = b.nome || '';
             document.getElementById('benefício-fornecedor').value = b.fornecedor || '';
@@ -765,7 +753,7 @@
             document.getElementById('benefício-status').value = b.status || 'active';
             document.getElementById('benefício-valor').value = formatarValorParaExibicao(b.valor || '');
             document.getElementById('benefício-info').value = b.info || '';
-            document.getElementById('benefício-descrição').value = b.descrição || '';
+            document.getElementById('benefício-descrição').value = b.descricao || '';
 
             document.getElementById('modalBeneficio').classList.add('show');
         }
@@ -811,7 +799,7 @@
                 }
 
                 if (response.ok) {
-                    showToast(id ? 'Benefcio atualizado com sucesso!' : 'Benefcio criado com sucesso!', 'success');
+                    showToast(id ? 'Benefício atualizado com sucesso!' : 'Benefício criado com sucesso!', 'success');
                     await carregarBeneficios();
                 } else {
                     // Fallback local
@@ -823,10 +811,10 @@
                         benefícios.push({ id: novoId, ...dados });
                     }
                     salvarBeneficiosLocal();
-                    showToast(id ? 'Benefcio atualizado localmente' : 'Benefcio criado localmente', 'success');
+                    showToast(id ? 'Benefício atualizado localmente' : 'Benefício criado localmente', 'success');
                 }
             } catch (error) {
-                console.error('Erro ao salvar benefcio:', error);
+                console.error('Erro ao salvar benefício:', error);
                 // Fallback local
                 if (id) {
                     const index = benefícios.findIndex(b => b.id === parseInt(id));
@@ -836,7 +824,7 @@
                     benefícios.push({ id: novoId, ...dados });
                 }
                 salvarBeneficiosLocal();
-                showToast(id ? 'Benefcio atualizado localmente' : 'Benefcio criado localmente', 'success');
+                showToast(id ? 'Benefício atualizado localmente' : 'Benefício criado localmente', 'success');
             }
 
             renderizarBeneficios();
@@ -848,9 +836,9 @@
             const b = benefícios.find(x => x.id === id);
             if (!b) return;
 
-            mostrarPopupConfirmacao({
-                título: 'Excluir Benefcio',
-                mensagem: 'Deseja realmente excluir este benefcio?',
+            mostrarPopupConfirmação({
+                título: 'Excluir Benefício',
+                mensagem: 'Deseja realmente excluir este benefício?',
                 icone: 'fa-trash-alt',
                 tipoIcone: 'danger',
                 textoBtnConfirmar: 'Sim, Excluir',
@@ -876,23 +864,23 @@
                     }
                     renderizarBeneficios();
                     renderizarListaAdmin();
-                    showToast('Benefcio excludo com sucesso!', 'success');
+                    showToast('Benefício excluído com sucesso!', 'success');
                 }
             });
         }
 
-        // Aes do funcionário
+        // Ações do funcionário
         function solicitarAdesao(id) {
-            showToast('Solicitao de adeso enviada ao RH!', 'success');
+            showToast('Solicitação de adesão enviada ao RH!', 'success');
         }
 
         function ativarBeneficio(id) {
             const index = benefícios.findIndex(b => b.id === id);
             if (index !== -1) {
                 benefícios[index].status = 'active';
-                salvarBeneficios();
+                salvarBeneficiosLocal();
                 renderizarBeneficios();
-                showToast('Benefcio ativado com sucesso!', 'success');
+                showToast('Benefício ativado com sucesso!', 'success');
             }
         }
 
@@ -946,10 +934,10 @@
                                 <span style="font-size: 0.875rem; color: #92400e;">${b.info}</span>
                             </div>
                             ` : ''}
-                            ${b.descrição ? `
+                            ${b.descricao ? `
                             <div style="margin-bottom: 16px;">
-                                <div style="font-size: 0.875rem; font-weight: 600; color: #374151; margin-bottom: 8px;">Descrio</div>
-                                <p style="font-size: 0.875rem; color: #64748b; line-height: 1.6; margin: 0;">${b.descrição}</p>
+                                <div style="font-size: 0.875rem; font-weight: 600; color: #374151; margin-bottom: 8px;">Descrição</div>
+                                <p style="font-size: 0.875rem; color: #64748b; line-height: 1.6; margin: 0;">${b.descricao}</p>
                             </div>
                             ` : ''}
                             ${b.link ? `
@@ -989,7 +977,7 @@
             }, 4000);
         }
 
-        // Helper: Obtm headers de Autenticação com o token
+        // Helper: Obtém headers de Autenticação com o token
         function getAuthHeaders(additionalHeaders = {}) {
             return {
                 ...additionalHeaders
@@ -1005,7 +993,7 @@
                 if (response.ok) {
                     const user = await response.json();
 
-                    // Atualizar saudao dinmica baseada na hora
+                    // Atualizar saudação dinâmica baseada na hora
                     const greetingTextEl = document.getElementById('greeting-text');
                     if (greetingTextEl) {
                         const hour = new Date().getHours();
@@ -1015,7 +1003,7 @@
                         greetingTextEl.textContent = greeting;
                     }
 
-                    // Usar apelido se disponvel, seno primeiro nome
+                    // Usar apelido se disponível, senão primeiro nome
                     const userName = user.apelido || user.nome || 'Usuário';
                     const primeiroNome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usuário');
                     let userAvatar = user.avatar && user.avatar !== '/avatars/default.webp' ? user.avatar : null;
@@ -1056,17 +1044,17 @@
             }
         }
 
-        // Verificar elegibilidade da Cesta Bsica (sem atrasos/sadas > 20 min)
+        // Verificar elegibilidade da Cesta Básica (sem atrasos/saídas > 20 min)
         async function verificarElegibilidadeCestaBasica() {
             try {
-                const headers = { 'Authorization': token ? `Bearer ${token}` : '' };
+                const headers = getApiHeaders();
 
                 // Buscar dados do Usuário logado
                 const meResp = await fetch('/api/me', { headers, credentials: 'include' });
                 if (!meResp.ok) return;
                 const me = await meResp.json();
 
-                // Buscar marcações do ms atual para o funcionário
+                // Buscar marcações do mês atual para o funcionário
                 const hoje = new Date();
                 const inicioMes = hoje.getFullYear() + '-' + String(hoje.getMonth() + 1).padStart(2, '0') + '-01';
                 const fimMes = hoje.toISOString().split('T')[0];
@@ -1077,26 +1065,26 @@
 
                 if (!pontoResp.ok) return;
                 const pontoData = await pontoResp.json();
-                const marcacoes = pontoData.marcacoes || [];
+                const marcações = pontoData.marcações || [];
 
                 // Filtrar marcações do funcionário logado
-                const minhasMarcacoes = marcacoes.filter(m => {
-                    if (me.funcionário_id && m.funcionário_id == me.funcionário_id) return true;
-                    const obs = (m.observacao || '').toUpperCase();
+                const minhasMarcações = marcações.filter(m => {
+                    if (me.funcionario_id && m.funcionario_id == me.funcionario_id) return true;
+                    const obs = (m.observação || '').toUpperCase();
                     const meuNome = (me.nome || '').toUpperCase();
                     return meuNome && obs.includes(meuNome);
                 });
 
-                // Verificar atrasos ou sadas antecipadas > 20 minutos
-                // Agrupa por dia e verifica se h atraso de entrada ou sada antecipada
+                // Verificar atrasos ou saídas antecipadas > 20 minutos
+                // Agrupa por dia e verifica se h atraso de entrada ou saída antecipada
                 let possuiIrregularidade = false;
                 const porDia = {};
-                minhasMarcacoes.forEach(m => {
+                minhasMarcações.forEach(m => {
                     if (!porDia[m.data]) porDia[m.data] = [];
                     porDia[m.data].push(m);
                 });
 
-                // Horrio padro: entrada 07:30, sada 17:18
+                // Horário Padrão: entrada 07:30, saída 17:18
                 const horarioEntrada = 7 * 60 + 30; // 450 min
                 const horarioSaida = 17 * 60 + 18;  // 1038 min
                 const toleranciaMax = 20; // 20 minutos
@@ -1108,14 +1096,14 @@
                     }).sort((a, b) => a - b);
 
                     if (horas.length > 0) {
-                        // Primeira marcao = entrada
+                        // Primeira marcação = entrada
                         const entrada = horas[0];
                         const atraso = entrada - horarioEntrada;
                         if (atraso > toleranciaMax) {
                             possuiIrregularidade = true;
                         }
 
-                        // ltima marcao = sada (se houver mais de 1)
+                        // úúltima marcação = saída (se houver mais de 1)
                         if (horas.length > 1) {
                             const saida = horas[horas.length - 1];
                             const saidaAntecipada = horarioSaida - saida;
@@ -1126,28 +1114,34 @@
                     }
                 });
 
-                // Atualizar status da Cesta Bsica conforme elegibilidade
+                // Atualizar status da Cesta Básica conforme elegibilidade
                 const cestaIndex = benefícios.findIndex(b => b.condicional && b.condiçãoTipo === 'pontualidade');
                 if (cestaIndex >= 0) {
                     if (possuiIrregularidade) {
-                        // No elegvel: remover da lista visvel para o colaborador (admin continua vendo)
+                        // Não elegível: remover da lista visível para o colaborador (admin continua vendo)
                         if (!isAdmin) {
                             benefícios[cestaIndex].status = 'inactive';
-                            benefícios[cestaIndex].info = 'Indisponvel  verificar pontualidade';
+                            benefícios[cestaIndex].info = 'Indisponível — verificar pontualidade';
                         }
                     } else {
                         benefícios[cestaIndex].status = 'active';
-                        benefícios[cestaIndex].info = '? Voc est elegvel este ms!';
+                        benefícios[cestaIndex].info = '✓ Você está elegível este mês!';
                     }
                     renderizarBeneficios();
                 }
 
             } catch (e) {
-                console.warn('[Benefícios] Erro ao verificar elegibilidade cesta bsica:', e.message);
+                console.warn('[Benefícios] Erro ao verificar elegibilidade cesta básica:', e.message);
             }
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
+            // CRIT-04: Garantir que todos os modais estão fechados ao iniciar a página
+            const elBenef = document.getElementById('modalBeneficio');
+            if (elBenef) elBenef.classList.remove('show', 'active');
+            const elGer = document.getElementById('modalGerenciar');
+            if (elGer) elGer.classList.remove('show', 'active');
+
             await carregarBeneficios();
             renderizarBeneficios();
             carregarUsuarioLogado();
@@ -1163,7 +1157,7 @@
             }
         });
     </script>
-    <!-- Sistema de Monitoramento de Conexo -->
+    <!-- Sistema de Monitoramento de Conexão -->
     <script src="/modules/_shared/connection-monitor.js?v=20260111" defer></script>
     <script src="/js/popup-confirmacao.js" defer></script>
     <script src="/js/auth-unified.js?v=20260214" defer></script>
@@ -1172,7 +1166,7 @@
     <script src="/modules/RH/public/js/rh-ui-common.js" defer></script>
     <script src="/js/mobile-auto-enhance.js?v=20260202" defer></script>
     <!-- Chat Widget BOB AI -->
-    <script src="/chat/widget.js?v=20260218" defer></script>
+    <script src="/chat/widget.js?v=20260419" defer></script>
     <script src="/_shared/accessibility-widget.js?v=20260226" defer></script>
 
     <!-- Chat Corporativo (Teams) -->
@@ -1181,5 +1175,6 @@
     <script src="/js/user-dropdown.js?v=20260319" defer></script>
 </body>
 </html>
+
 
 

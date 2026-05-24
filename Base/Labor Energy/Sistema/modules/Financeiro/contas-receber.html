@@ -1116,9 +1116,9 @@
 
         async function init() {
             await Promise.all([carregarUsuarioLogado(), carregarContas(), carregarClientes(), carregarCategorias()]);
-            // Abrir modal automaticamente se URL tiver ?acao=nova
             var params = new URLSearchParams(window.location.search);
-            if (params.get('acao') === 'nova') { abrirModal(); }
+            params.delete('acao');
+            history.replaceState(null, '', window.location.pathname + (params.toString() ? '?' + params.toString() : ''));
         }
 
         async function carregarResumo() {
@@ -1494,6 +1494,15 @@
             document.getElementById('modal-receber').classList.add('active');
         }
         function fecharModalReceber() { document.getElementById('modal-receber').classList.remove('active'); }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                var mr = document.getElementById('modal-receber');
+                if (mr && mr.classList.contains('active')) { fecharModalReceber(); return; }
+                var mc = document.getElementById('modalContaCR');
+                if (mc && mc.classList.contains('active')) { fecharModal(); }
+            }
+        });
 
         async function confirmarRecebimento(event) {
             event.preventDefault();

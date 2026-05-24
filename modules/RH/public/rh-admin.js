@@ -296,6 +296,37 @@ class SistemaRHAdmin {
         return `<span class="badge ${badgeClass}">${status || 'N/A'}</span>`;
     }
 
+    getFuncionarioRowHTML(f) {
+        const status = f.statusNorm || f.status || (f.ativo ? 'Ativo' : 'Inativo');
+        const admissao = f.data_admissao ? new Date(f.data_admissao).toLocaleDateString('pt-BR') : '-';
+        return `<tr>
+            <td><strong>${f.nome || '-'}</strong><br><small>${f.email || ''}</small></td>
+            <td>${f.cargo || '-'}</td>
+            <td>${f.departamento || '-'}</td>
+            <td>${admissao}</td>
+            <td>${this.getStatusBadge(status.toLowerCase())}</td>
+            <td><button class="btn btn-primary" style="padding:6px 12px;font-size:11px;" onclick="rhAdmin.viewFuncionario(${f.id})"><i class="fas fa-eye"></i></button></td>
+        </tr>`;
+    }
+
+    getFuncionarioCompleteRowHTML(f) {
+        const status = f.statusNorm || f.status || (f.ativo ? 'Ativo' : 'Inativo');
+        const salario = f.salario ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(f.salario) : '-';
+        return `<tr>
+            <td>${f.id}</td>
+            <td><strong>${f.nome || f.nome_completo || '-'}</strong><br><small>${f.email || ''}</small></td>
+            <td>${f.cpf || '-'}</td>
+            <td>${f.cargo || '-'}</td>
+            <td>${f.departamento || '-'}</td>
+            <td>${salario}</td>
+            <td>${this.getStatusBadge(status.toLowerCase())}</td>
+            <td>
+                <button class="btn btn-primary" style="padding:4px 8px;font-size:11px;margin-right:4px;" onclick="rhAdmin.editFuncionario(${f.id})"><i class="fas fa-edit"></i></button>
+                <button class="btn btn-danger" style="padding:4px 8px;font-size:11px;" onclick="rhAdmin.deleteFuncionario(${f.id})"><i class="fas fa-trash"></i></button>
+            </td>
+        </tr>`;
+    }
+
     // Templates HTML
     getFuncionariosRecentesHTML() {
         return `

@@ -20,7 +20,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
 
     <!-- Financeiro Design System -->
-    <link rel="stylesheet" href="css/fin-layout.css?v=20260215">
     <link rel="stylesheet" href="css/fin-components.css?v=20260215">
 
     <!-- XLSX Library -->
@@ -116,12 +115,10 @@
         .btn-novo-banco:active {
             transform: translateY(0);
         }
-/* SIDEBAR + HEADER + NOTIFICATION - estilos definidos em fin-layout.css */
 .user-avatar img.visible { display: block; }
         .user-avatar .user-initial { display: block; }
         .user-avatar img.visible + .user-initial { display: none; }
 
-        /* PAGE - .page-content, .page-header, .page-title, .page-actions definidos em fin-layout.css + fin-components.css */
 /* BUTTONS - .btn, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .btn-sm definidos em fin-components.css */
 
         /* Page Header com espaamento correto */
@@ -1772,7 +1769,6 @@
     <script src="/js/tooltips-professional.js?v=20260209"></script>
 
     <!-- Header & Sidebar refinado -->
-    <link rel="stylesheet" href="css/fin-header-sidebar.css?v=20260215">
     <!-- Global Header & Sidebar - override final unificado -->
     <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260216">
     <script src="/js/anti-copy-protection.js"></script>
@@ -1840,7 +1836,7 @@
                 <a href="impostos.html" class="sidebar-btn" title="Impostos">
                     <i class="fas fa-percent"></i>
                 </a>
-                <button class="sidebar-btn" title="Configurações" id="btn-config" onclick="toggleConfigurações()">
+                <button class="sidebar-btn" title="Configurações" id="btn-config" onclick="toggleConfiguracoes()">
                     <i class="fas fa-cog"></i>
                 </button>
             </div>
@@ -1866,7 +1862,9 @@
                     <button class="header-btn" title="Atualizar" onclick="location.reload()">
                         <i class="fas fa-sync-alt"></i>
                     </button>
-                    
+                    <div class="user-greeting">
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
+                    </div>
                 </div>
             </header>
 
@@ -2126,7 +2124,7 @@
                                     <h4 id="integracaoStatusTitulo">Integração não configurada</h4>
                                     <p id="integracaoStatusDesc">Configure as credenciais da API bancária para habilitar a integração automática</p>
                                 </div>
-                                <button class="integracao-test-btn" id="btnTestarIntegracao" onclick="testarIntegraçãoBancaria()" disabled>
+                                <button class="integracao-test-btn" id="btnTestarIntegracao" onclick="testarIntegracaoBancaria()" disabled>
                                     <i class="fas fa-vial"></i> Testar Conexão
                                 </button>
                             </div>
@@ -3272,7 +3270,7 @@
                     <button class="btn-padrão-ghost" type="button" onclick="fecharModal('modalExtrato')">
                         <i class="fas fa-times"></i> Fechar
                     </button>
-                    <button class="btn-padrão-primary" type="button" id="btnEditarExtrato" onclick="editarDaVisualizacação()">
+                    <button class="btn-padrão-primary" type="button" id="btnEditarExtrato" onclick="editarDaVisualizacao()">
                         <i class="fas fa-edit"></i> Editar Conta
                     </button>
                 </div>
@@ -3864,7 +3862,7 @@
             }
         }
 
-        function editarDaVisualizacação() {
+        function editarDaVisualizacao() {
             if (bancoVisualizando) {
                 fecharModal('modalExtrato');
                 editarBanco(bancoVisualizando.id);
@@ -4125,7 +4123,7 @@
         }
 
         // Sistema de Notificações
-        function toggleNotificações() {
+        function toggleNotificacoes() {
             const panel = document.getElementById('notification-panel');
             panel.classList.toggle('active');
         }
@@ -4242,7 +4240,7 @@
         }
 
         // Testar conexão com API bancária
-        async function testarIntegraçãoBancaria() {
+        async function testarIntegracaoBancaria() {
             const btn = document.getElementById('btnTestarIntegracao');
             const statusCard = document.getElementById('integracaoStatusCard');
             const statusIcon = document.getElementById('integracaoStatusIcon');

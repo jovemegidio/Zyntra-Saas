@@ -9,7 +9,6 @@
     <title>Zyntra: Importar Ponto</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/modern-saas.css?v=20260209">
     <link rel="stylesheet" href="/modules/RH/public/css/rh-pages.css?v=20260209">
     <style>
         /* === IMPORTAR PONTO - CSS ESPECÍFICO === */
@@ -125,7 +124,7 @@
     <link rel="stylesheet" href="/css/tooltips-professional.css?v=20260209">
     <link rel="stylesheet" href="/css/popup-confirmacao.css">
     <script src="/js/tooltips-professional.js?v=20260209" defer></script>
-    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260216">
+    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260418">
     <!-- Chat Widget BOB AI --><!-- Chat Widget REMOVIDO --><!-- 
     <link rel="stylesheet" href="/chat/widget.css?v=20260218"> -->
     <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260324">
@@ -207,17 +206,17 @@
                 <div id="tab-rhid" class="tab-content active">
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title"><i class="fas fa-cloud"></i> Configurao RHiD Cloud</h3>
+                            <h3 class="card-title"><i class="fas fa-cloud"></i> Configuração RHiD Cloud</h3>
                             <div class="connection-status offline" id="rhid-connection-status">
                                 <i class="fas fa-circle" style="font-size:8px"></i>
-                                <span>No conectado</span>
+                                <span>Não conectado</span>
                             </div>
                         </div>
                         <div class="card-body">
                             <div class="alert alert-info">
                                 <i class="fas fa-info-circle"></i>
                                 <div>
-                                    <strong>Integrao RHiD Cloud</strong><br>
+                                    <strong>Integração RHiD Cloud</strong><br>
                                     Conecte ao portal RHiD (rhid.com.br) para sincronizar automaticamente as marcações de ponto dos funcionários cadastrados no Control iD.
                                 </div>
                             </div>
@@ -240,7 +239,7 @@
                                     <i class="fas fa-plug"></i> Testar Conexão
                                 </button>
                                 <button class="btn btn-success" onclick="saveRhidConfig()" id="btn-save-rhid" disabled>
-                                    <i class="fas fa-save"></i> Salvar Configurao
+                                    <i class="fas fa-save"></i> Salvar Configuração
                                 </button>
                             </div>
 
@@ -248,7 +247,7 @@
                                 <h4><i class="fas fa-check-circle" style="color:#22c55e"></i> Conexão Estabelecida</h4>
                                 <div class="device-info-grid">
                                     <div class="device-info-item">
-                                        <span class="device-info-label">Domnio</span>
+                                        <span class="device-info-label">Domínio</span>
                                         <span class="device-info-value" id="rhid-domain">-</span>
                                     </div>
                                     <div class="device-info-item">
@@ -260,7 +259,7 @@
                                         <span class="device-info-value" id="rhid-employees">-</span>
                                     </div>
                                     <div class="device-info-item">
-                                        <span class="device-info-label">Mx Usuários</span>
+                                        <span class="device-info-label">Máx. Usuários</span>
                                         <span class="device-info-value" id="rhid-max-users">-</span>
                                     </div>
                                 </div>
@@ -283,13 +282,13 @@
                                 <i class="fas fa-cloud-download-alt"></i>
                                 <div>
                                     Busca marcações de ponto registradas no RHiD Cloud e importa automaticamente para o banco local.
-                                    Registros duplicados so ignorados automaticamente.
+                                    Registros duplicados são ignorados automaticamente.
                                 </div>
                             </div>
 
                             <div class="form-grid">
                                 <div class="form-group">
-                                    <label class="form-label">Data Incio *</label>
+                                    <label class="form-label">Data Início *</label>
                                     <input type="date" class="form-input" id="sync-date-start">
                                 </div>
                                 <div class="form-group">
@@ -312,7 +311,7 @@
 
                             <!-- Progress -->
                             <div id="sync-progress" style="display: none; margin-top: 24px;">
-                                <h4 style="font-size: 0.875rem; color: #64748b; margin-bottom: 8px;">Progresso da Sincronizao</h4>
+                                <h4 style="font-size: 0.875rem; color: #64748b; margin-bottom: 8px;">Progresso da Sincronização</h4>
                                 <div class="progress-bar">
                                     <div class="progress-bar-fill" id="sync-progress-fill" style="width: 0%"></div>
                                 </div>
@@ -327,7 +326,7 @@
                             </div>
 
                             <div id="sync-log-section" style="display: none; margin-top: 24px;">
-                                <h4 style="font-size: 0.875rem; color: #64748b; margin-bottom: 8px;">Log de Sincronizao</h4>
+                                <h4 style="font-size: 0.875rem; color: #64748b; margin-bottom: 8px;">Log de Sincronização</h4>
                                 <div class="log-container" id="sync-log"></div>
                             </div>
                         </div>
@@ -359,13 +358,13 @@
                             <div class="alert alert-warning">
                                 <i class="fas fa-exclamation-triangle"></i>
                                 <div>
-                                    Use esta opo apenas se preferir importar manualmente de um arquivo AFD (Portaria 1.510/2009) ou CSV exportado do Control iD.
+                                    Use esta opção apenas se preferir importar manualmente de um arquivo AFD (Portaria 1.510/2009) ou CSV exportado do Control iD.
                                 </div>
                             </div>
 
                             <div class="form-grid">
                                 <div class="form-group">
-                                    <label class="form-label">Data Incio *</label>
+                                    <label class="form-label">Data Início *</label>
                                     <input type="date" class="form-input" id="file-date-start">
                                 </div>
                                 <div class="form-group">
@@ -533,13 +532,13 @@
                 });
                 var result = await resp.json();
                 if (result.success) {
-                    showToast('Configurao RHiD salva com sucesso!', 'success');
+                    showToast('Configuração RHiD salva com sucesso!', 'success');
                 } else {
                     showToast('Erro: ' + (result.message || 'Tente novamente'), 'error');
                 }
             } catch (e) {
                 console.error('Erro ao salvar config:', e);
-                showToast('Erro ao salvar configurao', 'error');
+                showToast('Erro ao salvar configuração', 'error');
             }
         }
 
@@ -660,7 +659,7 @@
 
             var logEl = document.getElementById('sync-log');
             logEl.innerHTML = '';
-            addLog(logEl, 'Iniciando sincronizao com RHiD Cloud...', 'info');
+            addLog(logEl, 'Iniciando sincronização com RHiD Cloud...', 'info');
             addLog(logEl, 'Período: ' + dateStart + ' a ' + dateEnd, 'info');
 
             try {
@@ -675,7 +674,7 @@
                 document.getElementById('sync-progress-fill').style.width = '100%';
 
                 if (result.success) {
-                    document.getElementById('sync-progress-text').textContent = 'Sincronizao concluda!';
+                    document.getElementById('sync-progress-text').textContent = 'Sincronização concluída!';
                     document.getElementById('sync-summary').style.display = 'grid';
                     document.getElementById('sync-total').textContent = result.summary.total;
                     document.getElementById('sync-success').textContent = result.summary.success;
@@ -686,7 +685,7 @@
                     addLog(logEl, 'Importados com sucesso: ' + result.summary.success, 'success');
                     if (result.summary.duplicates > 0) addLog(logEl, 'Duplicados ignorados: ' + result.summary.duplicates, 'warning');
                     if (result.summary.errors > 0) addLog(logEl, 'Erros: ' + result.summary.errors, 'error');
-                    addLog(logEl, 'Sincronizao concluda!', 'success');
+                    addLog(logEl, 'Sincronização concluída!', 'success');
 
                     if (result.message) addLog(logEl, result.message, 'info');
 
@@ -700,15 +699,15 @@
                         }).join('');
                     }
 
-                    showToast('Sincronizao concluda! ' + result.summary.success + ' registros importados', 'success');
+                    showToast('Sincronização concluída! ' + result.summary.success + ' registros importados', 'success');
                 } else {
-                    document.getElementById('sync-progress-text').textContent = 'Erro na sincronizao';
+                    document.getElementById('sync-progress-text').textContent = 'Erro na sincronização';
                     addLog(logEl, 'Erro: ' + result.message, 'error');
                     showToast(result.message, 'error');
                 }
             } catch (e) {
-                console.error('Erro na sincronizao:', e);
-                document.getElementById('sync-progress-text').textContent = 'Erro na sincronizao';
+                console.error('Erro na sincronização:', e);
+                document.getElementById('sync-progress-text').textContent = 'Erro na sincronização';
                 addLog(logEl, 'Erro: ' + e.message, 'error');
                 showToast('Erro ao sincronizar: ' + e.message, 'error');
             }
@@ -751,7 +750,7 @@
 
                     document.getElementById('file-progress-fill').style.width = '100%';
                     if (result.success) {
-                        document.getElementById('file-progress-text').textContent = 'Importao concluda!';
+                        document.getElementById('file-progress-text').textContent = 'Importação concluída!';
                         document.getElementById('file-summary').style.display = 'grid';
                         document.getElementById('file-total').textContent = result.summary.total;
                         document.getElementById('file-success').textContent = result.summary.success;
@@ -860,7 +859,7 @@
                 var tbody = document.getElementById('history-tbody');
 
                 if (!data.success || !data.importações || data.importações.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#94a3b8;padding:40px;">Nenhuma importao realizada</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#94a3b8;padding:40px;">Nenhuma importação realizada</td></tr>';
                     return;
                 }
 
@@ -918,3 +917,4 @@
     <script src="/js/user-dropdown.js?v=20260319" defer></script>
 </body>
 </html>
+

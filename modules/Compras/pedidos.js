@@ -133,8 +133,15 @@ async function inicializarSistema() {
 
 async function carregarPedidos() {
     try {
-        // Tentar carregar do backend
+        // Carregar do backend — única fonte de dados (BE-002: sem fallback localStorage)
         const response = await fetch('/api/compras/pedidos', { credentials: 'include' });
+        if (response.status === 401) {
+            // Sessão expirada — auth-unified.js vai redirecionar; mostrar estado vazio
+            pedidos = [];
+            renderizarTabelaPedidos();
+            atualizarCards();
+            return;
+        }
         if (response.ok) {
             const data = await response.json();
             pedidos = Array.isArray(data) ? data : (data.pedidos || []);
@@ -156,20 +163,25 @@ async function carregarPedidos() {
             atualizarCards();
             return;
         }
+        throw new Error(`HTTP ${response.status}`);
     } catch (error) {
-        console.log('Erro ao carregar pedidos da API:', error);
-    }
-
-    // Fallback: localStorage
-    const pedidosLocal = localStorage.getItem('compras_pedidos');
-    if (pedidosLocal) {
-        pedidos = JSON.parse(pedidosLocal);
-    } else {
+        console.error('[Pedidos] Erro ao carregar pedidos da API:', error);
+        // BE-002: Sem fallback localStorage — mostrar estado de erro claro ao usuário
         pedidos = [];
+        const tbody = document.getElementById('pedidosTableBody');
+        if (tbody) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="8" style="text-align:center;padding:40px;color:#64748b;">
+                        <i class="fas fa-exclamation-triangle" style="font-size:32px;margin-bottom:12px;display:block;color:#f59e0b;"></i>
+                        <p style="font-weight:600;margin-bottom:8px;">Não foi possível carregar os pedidos</p>
+                        <p style="font-size:13px;margin-bottom:16px;">Verifique sua conexão e tente novamente.</p>
+                        <button class="btn btn-sm btn-secondary" onclick="carregarPedidos()"><i class="fas fa-sync-alt"></i> Tentar Novamente</button>
+                    </td>
+                </tr>`;
+        }
+        atualizarCards();
     }
-
-    renderizarTabelaPedidos();
-    atualizarCards();
 }
 
 async function carregarFornecedores() {
@@ -186,13 +198,8 @@ async function carregarFornecedores() {
         console.log('Erro ao carregar fornecedores:', error);
     }
 
-    const fornecedoresLocal = localStorage.getItem('compras_fornecedores');
-    if (fornecedoresLocal) {
-        fornecedores = JSON.parse(fornecedoresLocal);
-    } else {
-        fornecedores = [];
-    }
-
+    // BE-002: Sem fallback localStorage para fornecedores
+    fornecedores = [];
     preencherSelectFornecedores();
     preencherSelectCompradores();
 }
@@ -223,8 +230,8 @@ async function carregarProdutos() {
         console.log('Erro ao carregar materiais PCP:', error);
     }
 
-    const produtosLocal = localStorage.getItem('produtos');
-    produtos = produtosLocal ? JSON.parse(produtosLocal) : [];
+    // BE-002: Sem fallback localStorage para produtos
+    produtos = [];
 }
 
 // ============ MODAL NOVO/EDITAR PEDIDO ============
@@ -514,8 +521,9 @@ async function salvarPedido() {
 
     const fornecedor = fornecedores.find(f => f.id == fornecedorId);
 
+    // DB-001: Nunca gerar ID no cliente (Date.now()) — usar apenas ID atribuído pelo servidor
     const pedido = {
-        id: pedidoId || Date.now().toString(),
+        ...(pedidoId ? { id: pedidoId } : {}),
         numero_pedido: document.getElementById('numeroPedido').value,
         fornecedor_id: parseInt(fornecedorId),
         fornecedor_nome: fornecedor?.nome || fornecedor?.razao_social || 'N/A',
@@ -562,17 +570,10 @@ async function salvarPedido() {
             throw new Error('Erro na API');
         }
     } catch (error) {
-        console.log('Salvando localmente...', error);
-        // Salvar localmente como fallback
-        if (pedidoId) {
-            const index = pedidos.findIndex(p => p.id === pedidoId);
-            if (index !== -1) {
-                pedidos[index] = pedido;
-            }
-        } else {
-            pedidos.unshift(pedido);
-        }
-        salvarPedidosLocal();
+        // BE-002: Sem fallback localStorage — exibir erro claro
+        console.error('[Pedidos] Erro ao salvar pedido na API:', error);
+        mostrarToast('Erro ao salvar pedido. Verifique sua conexão e tente novamente.', 'error');
+        return; // Não fechar o modal para o usuário não perder os dados digitados
     }
 
     // Atualizar interface em tempo real
@@ -718,9 +719,8 @@ async function visualizarPedido(pedidoId) {
 
     // Sempre buscar da API para garantir dados completos (condicoes_pagamento, etc.)
     try {
-        const _tok = localStorage.getItem('token');
+        // BE-002: Usar apenas cookies httpOnly — nunca localStorage.getItem('token')
         const response = await fetch(`/api/compras/pedidos/${pedidoId}`, {
-            headers: _tok ? { 'Authorization': `Bearer ${_tok}` } : {},
             credentials: 'include'
         });
         if (response.ok) {
@@ -849,16 +849,8 @@ async function aprovarPedido(pedidoId) {
         mostrarNotificacao(err.message || 'Erro ao aprovar pedido', 'error');
     } catch (error) {
         console.error('Erro ao aprovar pedido:', error);
-        // Fallback local
-        const pedido = pedidos.find(p => p.id === pedidoId);
-        if (pedido) {
-            pedido.status = 'aprovado';
-            pedido.data_aprovacao = new Date().toISOString();
-            salvarPedidosLocal();
-            renderizarTabelaPedidos();
-            atualizarCards();
-            mostrarNotificacao('Pedido aprovado localmente', 'warning');
-        }
+        // BE-002: Sem fallback localStorage — mostrar erro claro
+        mostrarToast('Erro de conexão ao aprovar pedido. Tente novamente.', 'error');
     }
 }
 
@@ -1164,8 +1156,9 @@ function getStatusLabel(status) {
     return labels[status] || status;
 }
 
+// BE-002: salvarPedidosLocal() removido — toda persistência é feita pela API do servidor
 function salvarPedidosLocal() {
-    localStorage.setItem('compras_pedidos', JSON.stringify(pedidos));
+    console.warn('[Pedidos] salvarPedidosLocal() foi chamado mas está desabilitado (BE-002: sem localStorage)');
 }
 
 function mostrarNotificacao(mensagem, tipo) {
