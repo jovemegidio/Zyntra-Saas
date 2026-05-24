@@ -891,8 +891,10 @@
         async function carregarPedidos() {
             try {
                 const r = await fetch('/api/logistica/pedidos', { credentials: 'include' });
-                if (r.ok) { pedidos = await r.json(); pedidos = Array.isArray(pedidos) ? pedidos : pedidos.data || []; renderizarPedidos(pedidos); }
-            } catch (e) { console.error(e); }
+                if (r.ok) { pedidos = await r.json(); pedidos = Array.isArray(pedidos) ? pedidos : pedidos.data || []; }
+                else { pedidos = []; }
+                renderizarPedidos(pedidos);
+            } catch (e) { console.error(e); renderizarPedidos([]); } // BUG-005: limpar "Carregando..." no erro
         }
 
         function renderizarPedidos(lista) {

@@ -137,16 +137,15 @@ class FornecedoresManager {
         }
 
         tbody.innerHTML = fornecedoresFiltrados.map(forn => {
-            const cidadeUF = forn.cidade && forn.estado ? `${forn.cidade}/${forn.estado}` : (forn.cidade || forn.estado || '-');
-            
+            // BUG-008: colunas reordenadas para coincidir com headers: Categoria, Contato, Avaliação
             return `
             <tr>
                 <td><input type="checkbox" class="row-checkbox" data-id="${forn.id}" title="Selecionar"></td>
                 <td><strong>${this.escapeHtml(forn.nome)}</strong></td>
                 <td><span class="cnpj-text">${this.formatarCNPJ(forn.cnpj)}</span></td>
+                <td><span class="badge badge-${this.getCategoriaColor(forn.categoria)}">${this.escapeHtml(forn.categoria) || '-'}</span></td>
                 <td>${this.escapeHtml(forn.contato) || '-'}</td>
-                <td>${this.escapeHtml(cidadeUF)}</td>
-                <td><span class="badge badge-${this.getCategoriaColor(forn.categoria)}">${this.escapeHtml(forn.categoria)}</span></td>
+                <td>${this.renderizarEstrelas(forn.avaliacao)}</td>
                 <td><span class="status-badge ${forn.status}">${this.getStatusLabel(forn.status)}</span></td>
                 <td>
                     <button class="btn-action view" title="Ver detalhes" onclick="fornecedoresManager.verDetalhes(${forn.id})"><i class="fas fa-eye"></i></button>

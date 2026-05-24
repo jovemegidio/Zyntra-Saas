@@ -1764,7 +1764,12 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', function(){ initTabsCR(); init().catch(function(e){ console.error(e); }); });
+        document.addEventListener('DOMContentLoaded', function(){
+            // BUG-004: garantir que nenhum modal fica visível no carregamento inicial
+            document.querySelectorAll('.modal-overlay-omie').forEach(function(m){ m.classList.remove('active'); });
+            initTabsCR();
+            init().catch(function(e){ console.error(e); });
+        });
     </script>
 
     <script src="/js/chat-suporte-widgets.js?v=20260319"></script>

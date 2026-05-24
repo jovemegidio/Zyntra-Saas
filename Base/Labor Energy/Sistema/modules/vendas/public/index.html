@@ -13125,6 +13125,7 @@ td{padding:5px 8px;border-bottom:1px solid #e5e7eb;font-size:10px}
 
         // Modal de Faturamento Parcial (Meia Nota) para Kanban
         async function abrirModalFaturamentoParcialKanban() {
+            if (!pedidoAtual) { console.warn('[BUG-001] pedidoAtual é null — abortando modal'); return; } // BUG-001 guard
             fecharModalEscolhaFaturamento();
 
             const valorTotal = parseFloat(pedidoAtual.valor) || 0;
@@ -16521,7 +16522,8 @@ td{padding:5px 8px;border-bottom:1px solid #e5e7eb;font-size:10px}
                     credentials: 'include',
                 });
                 if (response.ok) {
-                    const rawItens = await response.json();
+                    const rawData = await response.json();
+                    const rawItens = Array.isArray(rawData) ? rawData : (rawData.itens || rawData.data || rawData.items || []);
                     itensPedidoAtual = rawItens.map(it => ({
                         ...it,
                         código: it.codigo || it.codigo || '',

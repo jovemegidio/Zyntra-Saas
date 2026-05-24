@@ -15126,11 +15126,11 @@ Zyntra:                                 <div class="razao">I. M. DOS REIS INDÚS
         async function carregarItensPedido(pedidoId) {
             try {
                 const response = await fetch(`/api/vendas/pedidos/${pedidoId}/itens`, {
-                    credentials: 'include',
                     credentials: 'include'
                 });
                 if (response.ok) {
-                    itensPedidoAtual = await response.json();
+                    const data = await response.json();
+                    itensPedidoAtual = Array.isArray(data) ? data : (data.itens || data.data || data.items || []);
                 } else {
                     itensPedidoAtual = [];
                 }
