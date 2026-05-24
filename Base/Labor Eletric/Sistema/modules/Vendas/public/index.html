@@ -5892,7 +5892,7 @@
                         <div class="kanban-column-header">
                             <div>
                                 <div class="column-title">Análise de Crédito</div>
-                                <div class="column-count" id="count-análise">12 registros</div>
+                                <div class="column-count" id="count-análise">Carregando...</div>
                             </div>
                             <div class="column-indicator análise"></div>
                         </div>
@@ -5906,7 +5906,7 @@
                         <div class="kanban-column-header">
                             <div>
                                 <div class="column-title">Pedido Aprovado</div>
-                                <div class="column-count" id="count-aprovado">5 registros</div>
+                                <div class="column-count" id="count-aprovado">Carregando...</div>
                             </div>
                             <div class="column-indicator aprovado"></div>
                         </div>
@@ -5920,7 +5920,7 @@
                         <div class="kanban-column-header">
                             <div>
                                 <div class="column-title">Faturar</div>
-                                <div class="column-count" id="count-faturar">23 registros</div>
+                                <div class="column-count" id="count-faturar">Carregando...</div>
                             </div>
                             <div class="column-indicator faturar"></div>
                         </div>
@@ -5935,7 +5935,7 @@
                         <div class="kanban-column-header">
                             <div>
                                 <div class="column-title">Faturado</div>
-                                <div class="column-count" id="count-faturado">52 registros</div>
+                                <div class="column-count" id="count-faturado">Carregando...</div>
                             </div>
                             <div class="column-indicator faturado"></div>
                         </div>
@@ -5950,7 +5950,7 @@
                         <div class="kanban-column-header">
                             <div>
                                 <div class="column-title">Recibo</div>
-                                <div class="column-count" id="count-recibo">Nenhum registro</div>
+                                <div class="column-count" id="count-recibo">Carregando...</div>
                             </div>
                             <div class="column-indicator recibo"></div>
                         </div>
@@ -6738,7 +6738,8 @@
                     <div class="filtro-group">
                         <label>Considerar Data de Faturamento</label>
                         <select class="filtro-select" id="filtro-data-faturamento">
-                            <option value="ultimos-30" selected>Últimos 30 dias</option>
+                            <option value="tudo" selected>Tudo</option>
+                            <option value="ultimos-30">Últimos 30 dias</option>
                             <option value="ultimos-60">Últimos 60 dias</option>
                             <option value="ultimos-90">Últimos 90 dias</option>
                             <option value="ultimos-120">Últimos 120 dias</option>
@@ -10731,13 +10732,13 @@
                     statusEl = `<span style="display:inline-block;padding:5px 12px;background:${sbg};color:${sfg};border-radius:20px;font-size:11px;font-weight:700;letter-spacing:0.5px;">${statusLabels[col]||col.toUpperCase()}</span>`;
                 } else if (!isAdmin) {
                     // Vendedor: só pode mover orçamento ? análise
-                    statusEl = `<select onchange="moverParaStatusLista(${it.id}, this.value)" style="border:1.5px solid ${sfg}33;padding:5px 10px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:0.3px;cursor:pointer;background:${sbg};color:${sfg};outline:none;">
+                    statusEl = `<select onchange="moverParaStatusLista(${it.id}, this.value)" style="display:inline-block;border:1.5px solid ${sfg}33;padding:5px 10px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:0.3px;cursor:pointer;background:${sbg};color:${sfg};outline:none;">
                         <option value="orcamento" ${col==='orcamento'?'selected':''}>ORÇAMENTO</option>
                         <option value="análise" ${col==='análise'?'selected':''}>ANÁLISE</option>
                     </select>`;
                 } else {
                     // Admin: todas as opções
-                    statusEl = `<select onchange="moverParaStatusLista(${it.id}, this.value)" style="border:1.5px solid ${sfg}33;padding:5px 10px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:0.3px;cursor:pointer;background:${sbg};color:${sfg};outline:none;">
+                    statusEl = `<select onchange="moverParaStatusLista(${it.id}, this.value)" style="display:inline-block;border:1.5px solid ${sfg}33;padding:5px 10px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:0.3px;cursor:pointer;background:${sbg};color:${sfg};outline:none;">
                         <option value="orcamento" ${col==='orcamento'?'selected':''}>ORÇAMENTO</option>
                         <option value="análise" ${col==='análise'?'selected':''}>ANÁLISE</option>
                         <option value="aprovado" ${col==='aprovado'?'selected':''}>APROVADO</option>
@@ -11274,7 +11275,7 @@
             return null;
         }
 
-        function abrirModalEditar(id) {
+        async function abrirModalEditar(id) {
             const pedido = encontrarPedido(id);
             if (!pedido) {
                 showNotification('Pedido não encontrado', 'error');
@@ -11869,7 +11870,7 @@
                     body: JSON.stringify({
                         status: 'orcamento',
                         valor: valorTotal,
-                        empresa_id: clienteId || null,
+                        empresa_id: null,
                         cliente_nome: cliente,
                         cliente_id: editTipoNovo === 'cliente' ? (editItemIdNovo || clienteId || null) : null,
                         vendedor_nome: vendedor,
@@ -14458,7 +14459,7 @@ td{padding:5px 8px;border-bottom:1px solid #e5e7eb;font-size:10px}
         const filtrosState = {
             dataInclusao: 'tudo',
             dataPrevisao: 'tudo',
-            dataFaturamento: 'ultimos-30',
+            dataFaturamento: 'tudo',
             vendedor: 'todos',
             vendedorNome: 'Todos os Vendedores',
             projeto: 'todos',
@@ -14482,7 +14483,7 @@ td{padding:5px 8px;border-bottom:1px solid #e5e7eb;font-size:10px}
         function desfazerFiltros() {
             document.getElementById('filtro-data-inclusao').value = 'tudo';
             document.getElementById('filtro-data-previsão').value = 'tudo';
-            document.getElementById('filtro-data-faturamento').value = 'ultimos-30';
+            document.getElementById('filtro-data-faturamento').value = 'tudo';
             document.getElementById('filtro-vendedor').value = '';
             document.getElementById('filtro-vendedor').placeholder = 'Todos os Vendedores';
             document.getElementById('filtro-projeto').value = '';
@@ -14494,7 +14495,7 @@ td{padding:5px 8px;border-bottom:1px solid #e5e7eb;font-size:10px}
             // Atualizar estado
             filtrosState.dataInclusao = 'tudo';
             filtrosState.dataPrevisao = 'tudo';
-            filtrosState.dataFaturamento = 'ultimos-30';
+            filtrosState.dataFaturamento = 'tudo';
             filtrosState.vendedor = 'todos';
             filtrosState.vendedorNome = 'Todos os Vendedores';
             filtrosState.projeto = 'todos';
@@ -19593,7 +19594,7 @@ td{padding:5px 8px;border-bottom:1px solid #e5e7eb;font-size:10px}
                     credentials: 'include', method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        empresa_id: clienteId || null,
+                        empresa_id: null,
                         cliente_id: clienteTipo === 'cliente' ? (clienteItemId || clienteId || null) : null,
                         cliente_nome: cliente.toUpperCase(),
                         vendedor_id: vendedorId,

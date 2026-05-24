@@ -183,14 +183,29 @@ module.exports = function createLogisticaRoutes(deps) {
             const { status_logistica, observacao } = req.body;
     
             const validStatuses = ['pendente', 'aguardando_separacao', 'em_separacao', 'em_expedicao', 'em_transporte', 'entregue'];
-    
+
             if (!validStatuses.includes(status_logistica)) {
                 return res.status(400).json({
                     message: 'Status inválido',
                     valid: validStatuses
                 });
             }
-    
+
+            // LOG-01: buscar pedido para verificar transportadora antes de avançar
+            const [pedCheck] = await pool.query(
+                'SELECT id, transportadora_id FROM pedidos WHERE id = ?', [id]
+            );
+            if (!pedCheck.length) {
+                return res.status(404).json({ error: 'Pedido não encontrado.' });
+            }
+            const statusQueExigemTransportadora = ['em_expedicao', 'em_transporte', 'entregue'];
+            if (statusQueExigemTransportadora.includes(status_logistica) && !pedCheck[0].transportadora_id) {
+                return res.status(400).json({
+                    error: 'Transportadora obrigatória',
+                    message: `Não é possível avançar para "${status_logistica}" sem definir a transportadora.`
+                });
+            }
+
             await pool.query(
                 'UPDATE pedidos SET status_logistica = ?, observacao = CONCAT(COALESCE(observacao, ""), ?) WHERE id = ?',
                 [status_logistica, observacao ? `\n[LOG] ${new Date().toLocaleString('pt-BR')}: ${observacao}` : '', id]
@@ -365,11 +380,19 @@ module.exports = function createLogisticaRoutes(deps) {
 
             // Se for baseado em um pedido existente, atualizar
             if (pedido) {
-                // Tenant isolation — verificar empresa_id
-                const [pedCheck] = await pool.query('SELECT id FROM pedidos WHERE id = ? AND empresa_id = ?', [pedido, req.user.empresa_id]);
-                if (!pedCheck.length) {
+                // LOG-02: buscar dados do pedido + cliente para auto-popular endereço e prazo
+                const [pedRows] = await pool.query(`
+                    SELECT p.id, p.endereco_entrega, p.data_prevista, p.prazo_entrega,
+                           c.endereco as cli_endereco, c.cidade as cli_cidade, c.estado as cli_uf
+                    FROM pedidos p
+                    LEFT JOIN clientes c ON p.cliente_id = c.id
+                    WHERE p.id = ? AND p.empresa_id = ?
+                `, [pedido, req.user.empresa_id]);
+                if (!pedRows.length) {
                     return res.status(404).json({ error: 'Pedido não encontrado.' });
                 }
+                const pedData = pedRows[0];
+
                 // Validar FK — transportadora deve existir
                 if (transportadora_id) {
                     const [transp] = await pool.query('SELECT id FROM transportadoras WHERE id = ? AND (status IS NULL OR status != "inativa")', [transportadora_id]);
@@ -377,17 +400,33 @@ module.exports = function createLogisticaRoutes(deps) {
                         return res.status(400).json({ error: 'Transportadora não encontrada ou inativa.' });
                     }
                 }
+
+                // LOG-01: Aviso ao criar expedição sem transportadora
+                const aviso = (!transportadora_id)
+                    ? 'Expedição criada sem transportadora definida — atribua uma antes de avançar para em_expedicao.'
+                    : null;
+
+                // LOG-02: usar previsão e endereço do pedido como fallback
+                const previsaoFinal = previsao || pedData.data_prevista || pedData.prazo_entrega || null;
+                const enderecoFinal = pedData.endereco_entrega
+                    || (pedData.cli_endereco
+                        ? `${pedData.cli_endereco}${pedData.cli_cidade ? ', ' + pedData.cli_cidade : ''}${pedData.cli_uf ? '/' + pedData.cli_uf : ''}`
+                        : null);
+
                 await pool.query(`
                     UPDATE pedidos SET
                         status_logistica = ?,
                         transportadora_id = ?,
-                        data_prevista = ?,
+                        data_prevista = COALESCE(?, data_prevista),
+                        endereco_entrega = COALESCE(endereco_entrega, ?),
                         prioridade = ?,
                         observacao = CONCAT(COALESCE(observacao, ''), ?)
                     WHERE id = ? AND empresa_id = ?
-                `, [status || 'pendente', transportadora_id, previsao, prioridade, observacoes ? `\n[EXP] ${observacoes}` : '', pedido, req.user.empresa_id]);
+                `, [status || 'pendente', transportadora_id, previsaoFinal, enderecoFinal, prioridade, observacoes ? `\n[EXP] ${observacoes}` : '', pedido, req.user.empresa_id]);
 
-                return res.json({ success: true, message: 'Expedição criada com sucesso', pedido_id: pedido });
+                const responseBody = { success: true, message: 'Expedição criada com sucesso', pedido_id: pedido };
+                if (aviso) responseBody.aviso = aviso;
+                return res.json(responseBody);
             }
 
             res.status(400).json({ success: false, message: 'Pedido ou NF-e é obrigatório' });

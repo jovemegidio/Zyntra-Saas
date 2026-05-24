@@ -1891,17 +1891,23 @@ module.exports = (pool, authenticateToken) => {
             }, req.user.empresa_uf);
 
             if (resultado.sucesso) {
-                // Registrar inutilização com auditoria
+                // FISCAL-03: Extrair protocolo SEFAZ do resultado e persistir
+                const protocolo_sefaz = resultado.protocolo || resultado.nProt || resultado.numProtocolo || null;
+                const anoInut = new Date().getFullYear().toString().substring(2);
+                const empresa_id_inut = req.user?.empresa_id || 1;
+
+                // Registrar inutilização com auditoria + protocolo SEFAZ
                 await pool.query(`
                     INSERT INTO nfe_inutilizacoes (
-                        serie, numero_inicial, numero_final,
-                        justificativa, xml_inutilizacao, usuario_id, created_at
-                    ) VALUES (?, ?, ?, ?, ?, ?, NOW())
-                `, [serie, numeroInicial, numeroFinal, justificativa, resultado.xmlCompleto, usuario_id]);
+                        empresa_id, serie, numero_inicial, numero_final, ano, modelo,
+                        justificativa, protocolo, xml_inutilizacao, status, data_inutilizacao, usuario_id, created_at
+                    ) VALUES (?, ?, ?, ?, ?, '55', ?, ?, ?, 'processado', NOW(), ?, NOW())
+                `, [empresa_id_inut, serie, numeroInicial, numeroFinal, anoInut, justificativa, protocolo_sefaz, resultado.xmlCompleto, usuario_id]);
 
                 res.json({
                     success: true,
-                    message: 'Numeração inutilizada'
+                    message: 'Numeração inutilizada',
+                    protocolo: protocolo_sefaz
                 });
             } else {
                 res.status(400).json({

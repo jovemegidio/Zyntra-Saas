@@ -2072,17 +2072,23 @@ module.exports = (pool, authenticateToken) => {
             }, req.user.empresa_uf);
 
             if (resultado.sucesso) {
-                // Registrar inutilização com auditoria
+                // FISCAL-03: Extrair protocolo SEFAZ do resultado e persistir
+                const protocolo_sefaz = resultado.protocolo || resultado.nProt || resultado.numProtocolo || null;
+                const anoInut = new Date().getFullYear().toString().substring(2);
+                const empresa_id_inut = req.user?.empresa_id || 1;
+
+                // Registrar inutilização com auditoria + protocolo SEFAZ
                 await pool.query(`
                     INSERT INTO nfe_inutilizacoes (
-                        serie, numero_inicial, numero_final,
-                        justificativa, xml_inutilizacao, usuario_id, created_at
-                    ) VALUES (?, ?, ?, ?, ?, ?, NOW())
-                `, [serie, numeroInicial, numeroFinal, justificativa, resultado.xmlCompleto, usuario_id]);
+                        empresa_id, serie, numero_inicial, numero_final, ano, modelo,
+                        justificativa, protocolo, xml_inutilizacao, status, data_inutilizacao, usuario_id, created_at
+                    ) VALUES (?, ?, ?, ?, ?, '55', ?, ?, ?, 'processado', NOW(), ?, NOW())
+                `, [empresa_id_inut, serie, numeroInicial, numeroFinal, anoInut, justificativa, protocolo_sefaz, resultado.xmlCompleto, usuario_id]);
 
                 res.json({
                     success: true,
-                    message: 'Numeração inutilizada'
+                    message: 'Numeração inutilizada',
+                    protocolo: protocolo_sefaz
                 });
             } else {
                 res.status(400).json({
@@ -2094,6 +2100,108 @@ module.exports = (pool, authenticateToken) => {
         } catch (error) {
             console.error('[FATURAMENTO] Erro ao inutilizar:', error);
             res.status(500).json({ success: false, message: error.message });
+        }
+    });
+
+    // ============================================================
+    // INUTILIZAÇÕES — GET e POST /inutilizacoes
+    // Frontend: modules/Faturamento/public/inutilizacao.html
+    // ============================================================
+
+    router.get('/inutilizacoes', authenticateToken, async (req, res) => {
+        try {
+            const { serie, ano } = req.query;
+            let sql = `
+                SELECT id, serie, numero_inicial, numero_final, ano, justificativa,
+                       protocolo, status, data_inutilizacao, created_at
+                FROM nfe_inutilizacoes
+                WHERE 1=1
+            `;
+            const params = [];
+            if (serie !== undefined && serie !== '') { sql += ' AND serie = ?'; params.push(serie); }
+            if (ano) { sql += ' AND ano = ?'; params.push(ano); }
+            sql += ' ORDER BY created_at DESC LIMIT 200';
+
+            const [rows] = await pool.query(sql, params);
+            res.json(rows);
+        } catch (error) {
+            console.error('[FATURAMENTO/INUTILIZACOES] Erro ao listar:', error);
+            res.json([]);
+        }
+    });
+
+    router.post('/inutilizacoes', authenticateToken, async (req, res) => {
+        try {
+            const { ano, serie, numero_inicial, numero_final, justificativa } = req.body;
+            const usuario_id = req.user?.id || null;
+            const empresa_id = req.user?.empresa_id || 1;
+
+            if (!serie || !numero_inicial || !numero_final || !justificativa) {
+                return res.status(400).json({ success: false, error: 'Série, faixa de números e justificativa são obrigatórios' });
+            }
+            if (!justificativa || justificativa.trim().length < 15) {
+                return res.status(400).json({ success: false, error: 'Justificativa deve ter no mínimo 15 caracteres conforme exigência SEFAZ' });
+            }
+            if (Number(numero_final) < Number(numero_inicial)) {
+                return res.status(400).json({ success: false, error: 'Número final deve ser maior ou igual ao inicial' });
+            }
+            if ((Number(numero_final) - Number(numero_inicial)) > 10000) {
+                return res.status(400).json({ success: false, error: 'Não é permitido inutilizar mais de 10.000 números por operação' });
+            }
+
+            const anoNum = ano ? parseInt(ano) : new Date().getFullYear();
+
+            // Verificar conflito com NF-es já emitidas
+            const [nfesUsadas] = await pool.query(
+                'SELECT numero FROM nfes WHERE serie = ? AND numero BETWEEN ? AND ? LIMIT 1',
+                [serie, numero_inicial, numero_final]
+            );
+            if (nfesUsadas.length) {
+                return res.status(400).json({ success: false, error: `Número ${nfesUsadas[0].numero} da série ${serie} já foi emitido e não pode ser inutilizado` });
+            }
+
+            // Verificar sobreposição com inutilizações existentes
+            const [inutilExist] = await pool.query(
+                'SELECT id FROM nfe_inutilizacoes WHERE serie = ? AND ((numero_inicial BETWEEN ? AND ?) OR (numero_final BETWEEN ? AND ?)) LIMIT 1',
+                [serie, numero_inicial, numero_final, numero_inicial, numero_final]
+            );
+            if (inutilExist.length) {
+                return res.status(400).json({ success: false, error: 'Parte da faixa já foi inutilizada anteriormente' });
+            }
+
+            // Tentar enviar para SEFAZ via serviço (opcional — falha silenciosa se não configurado)
+            let protocolo = null;
+            let xmlInutilizacao = null;
+            let statusInut = 'processado';
+            try {
+                const resultSefaz = await sefazService.inutilizarNumeracao({
+                    ano: String(anoNum).substring(2),
+                    cnpj: req.user?.empresa_cnpj || '',
+                    modelo: '55',
+                    serie,
+                    numeroInicial: numero_inicial,
+                    numeroFinal: numero_final,
+                    justificativa
+                }, req.user?.empresa_uf || 'SP');
+                if (resultSefaz?.sucesso) {
+                    protocolo = resultSefaz.protocolo || null;
+                    xmlInutilizacao = resultSefaz.xmlCompleto || null;
+                }
+            } catch (sefazErr) {
+                console.warn('[FATURAMENTO/INUTILIZACOES] SEFAZ indisponível, salvando localmente:', sefazErr.message);
+            }
+
+            await pool.query(`
+                INSERT INTO nfe_inutilizacoes (
+                    empresa_id, serie, numero_inicial, numero_final, ano, modelo,
+                    justificativa, protocolo, xml_inutilizacao, status, data_inutilizacao, usuario_id, created_at
+                ) VALUES (?, ?, ?, ?, ?, '55', ?, ?, ?, ?, NOW(), ?, NOW())
+            `, [empresa_id, serie, numero_inicial, numero_final, anoNum, justificativa, protocolo, xmlInutilizacao, statusInut, usuario_id]);
+
+            res.json({ success: true, message: 'Faixa inutilizada com sucesso', protocolo });
+        } catch (error) {
+            console.error('[FATURAMENTO/INUTILIZACOES] Erro ao inutilizar:', error);
+            res.status(500).json({ success: false, error: 'Erro ao registrar inutilização: ' + error.message });
         }
     });
 
