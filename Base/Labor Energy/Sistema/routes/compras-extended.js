@@ -1,4 +1,4 @@
-/**
+﻿/**
  * COMPRAS EXTENDED ROUTES - Extracted from server.js (Lines 22797-24849)
  * Fornecedores CRUD, cotacoes, requisicoes avancadas
  * @module routes/compras-extended
@@ -1829,6 +1829,62 @@ module.exports = function createComprasExtendedRoutes(deps) {
     });
 
     // ===== REQUISIÇÕES DE COMPRA =====
+
+    // COM001-FIX: Criar tabelas de pedidos de compra se não existirem
+    (async () => {
+        try {
+            await pool.query(`
+                CREATE TABLE IF NOT EXISTS pedidos_compra (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    numero_pedido VARCHAR(50),
+                    fornecedor_id INT,
+                    requisicao_id INT,
+                    data_pedido DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    data_entrega_prevista DATE,
+                    valor_total DECIMAL(15,2) DEFAULT 0,
+                    valor_final DECIMAL(15,2) DEFAULT 0,
+                    status VARCHAR(50) DEFAULT 'pendente',
+                    forma_pagamento VARCHAR(100),
+                    condicao_pagamento VARCHAR(100),
+                    observacoes TEXT,
+                    motivo_cancelamento TEXT,
+                    usuario_solicitante_id INT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            `);
+            await pool.query(`
+                CREATE TABLE IF NOT EXISTS pedidos_compra_itens (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    pedido_id INT NOT NULL,
+                    material_id INT,
+                    descricao VARCHAR(255) NOT NULL DEFAULT '',
+                    quantidade DECIMAL(15,4) DEFAULT 0,
+                    preco_unitario DECIMAL(15,4) DEFAULT 0,
+                    subtotal DECIMAL(15,2) DEFAULT 0,
+                    FOREIGN KEY (pedido_id) REFERENCES pedidos_compra(id) ON DELETE CASCADE
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            `);
+            await pool.query(`
+                CREATE TABLE IF NOT EXISTS itens_pedido (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    pedido_id INT NOT NULL,
+                    codigo_produto VARCHAR(50),
+                    descricao VARCHAR(255) NOT NULL DEFAULT '',
+                    quantidade DECIMAL(15,4) DEFAULT 0,
+                    unidade VARCHAR(20) DEFAULT 'UN',
+                    preco_unitario DECIMAL(15,4) DEFAULT 0,
+                    preco_total DECIMAL(15,2) DEFAULT 0,
+                    quantidade_recebida DECIMAL(15,4) DEFAULT 0,
+                    observacoes TEXT,
+                    FOREIGN KEY (pedido_id) REFERENCES pedidos_compra(id) ON DELETE CASCADE
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            `);
+            console.log('✅ Tabelas pedidos_compra, pedidos_compra_itens e itens_pedido verificadas/criadas');
+        } catch (err) {
+            console.error('⚠️ Erro ao criar tabelas de pedidos compra:', err.message);
+        }
+    })();
 
     // Criar tabela de requisições se não existir (aguarda conclusão antes de aceitar requests)
     let tabelasRequisicoesProntas = false;

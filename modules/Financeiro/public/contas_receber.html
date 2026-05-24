@@ -2016,7 +2016,7 @@
         async function confirmarRecebimento(event) {
             event.preventDefault();
             var id = document.getElementById('receber-conta-id').value;
-            var dados = { valor_recebido: parseFloat(document.getElementById('receber-valor').value), data_recebimento: document.getElementById('receber-data').value, forma_recebimento: document.getElementById('receber-forma').value, observações: document.getElementById('receber-obs').value };
+            var dados = { valor_recebido: parseFloat(document.getElementById('receber-valor').value), data_recebimento: document.getElementById('receber-data').value, forma_recebimento: document.getElementById('receber-forma').value, observacoes: document.getElementById('receber-obs').value };
             try {
                 var r = await fetch('/api/financeiro/contas-receber/'+id+'/baixa', { method: 'POST', headers:{'Content-Type':'application/json'}, credentials: 'include', body: JSON.stringify(dados) });
                 if (r.ok) { showToast('Recebimento confirmado com sucesso!'); fecharModalReceber(); await init(); } else { showToast('Erro ao confirmar recebimento', 'error'); }
@@ -2027,7 +2027,7 @@
             event.preventDefault();
             var id = document.getElementById('conta-id').value;
             var dados = {
-                descrição: document.getElementById('descricao').value,
+                descricao: document.getElementById('descricao').value,
                 cliente_id: document.getElementById('cliente-id').value,
                 categoria_id: document.getElementById('categoria-id').value,
                 valor: parseMoeda(document.getElementById('conta-valor').value),
@@ -2035,7 +2035,7 @@
                 data_vencimento: document.getElementById('conta-vencimento').value,
                 vencimento: document.getElementById('conta-vencimento').value,
                 forma_recebimento: document.getElementById('forma-pagamento').value,
-                observações: document.getElementById('observacoes').value,
+                observacoes: document.getElementById('observacoes').value,
                 numero_documento: document.getElementById('numero-documento').value,
                 num_parcelas: parseInt(document.getElementById('num-parcelas').value) || 1,
                 status: document.getElementById('cr-status').value,
@@ -2809,7 +2809,7 @@
                 valor_recebido: parseFloat(document.getElementById('fat-edit-valor-recebido').value) || 0,
                 numero_documento: document.getElementById('fat-edit-num-doc').value,
                 numero_boleto: document.getElementById('fat-edit-num-boleto').value,
-                observações: document.getElementById('fat-edit-observacoes').value
+                observacoes: document.getElementById('fat-edit-observacoes').value
             };
             try {
                 var r = await fetch('/api/financeiro/contas-receber/' + id, {
