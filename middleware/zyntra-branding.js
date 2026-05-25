@@ -89,6 +89,9 @@ function buildBrandCSS(cfg) {
     --primary-hover: ${cfg.primaryHover} !important;
     --accent: ${cfg.accent} !important;
 }
+/* Vendas: cabeçalho da tabela lista usa background:#1e293b hardcoded — override pela marca */
+#list-table thead tr { background: ${cfg.primaryColor} !important; }
+#list-table thead th { color: #fff !important; }
 </style>
 `;
 }
@@ -178,7 +181,11 @@ function applyBrandReplacements(body, cfg) {
         .replace(/\baluforce\b(?!\.api\.br|\.ind\.br|_vendas|_db|[A-Za-z_])/g, cfg.nameLower)
         // Emails
         .replace(/@aluforce\.ind\.br/g, cfg.email)
-        .replace(/@aluforce\.com\.br/g, cfg.email);
+        .replace(/@aluforce\.com\.br/g, cfg.email)
+        // Dashboard Next.js — logo da empresa (src="/aluforce-logo.png" → logo da marca)
+        .replace(/src="\/aluforce-logo\.png"/gi, `src="/images/${logoColor}"`)
+        // Dashboard Next.js — título da aba e do painel
+        .replace(/Zyntra: Painel de Controle/g, `${cfg.nameFull}: Painel de Controle`);
 }
 
 /**

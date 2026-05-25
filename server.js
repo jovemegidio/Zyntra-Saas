@@ -1266,6 +1266,10 @@ async function _serveLaborDashboard(req, res, brand, mountPath) {
 app.get('/labor-energy/dashboard', authenticatePage, (req, res) => _serveLaborDashboard(req, res, 'labor-energy', '/labor-energy'));
 app.get('/labor-eletric/dashboard', authenticatePage, (req, res) => _serveLaborDashboard(req, res, 'labor-eletric', '/labor-eletric'));
 
+// Redirect /labor e /labor/* → portal Zyntra-SGE (evita 404 com branding Aluforce — PROBLEMA-003)
+app.get(['/labor', '/labor/'], (req, res) => res.redirect(302, '/Zyntra-SGE/Empresas/dashboard.html'));
+app.get('/labor/*', (req, res) => res.redirect(302, '/Zyntra-SGE/Empresas/dashboard.html'));
+
 // Assets do dashboard V2 (JS/CSS chunks do Next.js)
 app.use('/dashboard-v2', authenticatePage, express.static(path.join(__dirname, 'public', 'dashboard-v2'), {
     dotfiles: 'deny',

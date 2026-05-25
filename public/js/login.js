@@ -155,7 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
     '@labor.com.br': {
       label: 'Labor Eletric / Energy Comercio',
       destination: '/dashboard',
-      badge: '<span style="display:inline-flex;align-items:center;gap:6px;background:rgba(34,197,94,0.15);color:#4ADE80;border:1px solid rgba(34,197,94,0.3);border-radius:20px;padding:5px 14px;font-size:0.78rem;font-weight:600;">Labor Eletric / Energy</span>'
+      badge: '<span style="display:inline-flex;align-items:center;gap:6px;background:rgba(243,156,18,0.15);color:#F39C12;border:1px solid rgba(243,156,18,0.3);border-radius:20px;padding:5px 14px;font-size:0.78rem;font-weight:600;">Labor Eletric / Energy</span>'
     },
     '@laboreletric.com.br': {
       label: 'Labor Eletric',
