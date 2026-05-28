@@ -5748,6 +5748,10 @@
                             <label class="valor-label">Total de ICMS ST</label>
                             <input type="text" class="valor-input" id="edit-icms-st" value="0,00" readonly>
                         </div>
+                        <div class="valor-item" id="edit-difal-container" style="display:none;">
+                            <label class="valor-label">Total de DIFAL</label>
+                            <input type="text" class="valor-input" id="edit-difal" value="0,00" readonly>
+                        </div>
                         <div class="valor-item">
                             <label class="valor-label">Valor</label>
                             <input type="text" class="valor-input highlight" id="edit-valor-total" value="R$ 0,00" readonly>
@@ -5756,6 +5760,28 @@
 
                     <!-- Linha de Vendedor, Parcelas, Cenário -->
                     <div class="info-row">
+                        <div class="info-field">
+                            <label>Tipo de Venda</label>
+                            <div style="display:flex;gap:6px;">
+                                <button type="button" id="edit-btn-consumidor" onclick="setTipoVendaEdit('consumidor')" style="flex:1;padding:6px 10px;border-radius:6px;border:1.5px solid #3b82f6;background:#eff6ff;color:#1d4ed8;font-size:12px;font-weight:600;cursor:pointer;">Consumidor Final</button>
+                                <button type="button" id="edit-btn-revenda" onclick="setTipoVendaEdit('revenda')" style="flex:1;padding:6px 10px;border-radius:6px;border:1.5px solid #e2e8f0;background:white;color:#64748b;font-size:12px;font-weight:600;cursor:pointer;">Revenda</button>
+                            </div>
+                            <input type="hidden" id="edit-tipo-venda" value="consumidor">
+                        </div>
+                        <div class="info-field">
+                            <label>Estado Destino</label>
+                            <select id="edit-estado-destino" onchange="setTipoVendaEdit(document.getElementById('edit-tipo-venda').value)">
+                                <option value="SP">SP</option><option value="MG">MG</option><option value="RJ">RJ</option>
+                                <option value="RS">RS</option><option value="PR">PR</option><option value="SC">SC</option>
+                                <option value="BA">BA</option><option value="GO">GO</option><option value="MS">MS</option>
+                                <option value="MT">MT</option><option value="ES">ES</option><option value="PA">PA</option>
+                                <option value="CE">CE</option><option value="PE">PE</option><option value="MA">MA</option>
+                                <option value="DF">DF</option><option value="AC">AC</option><option value="AL">AL</option>
+                                <option value="AM">AM</option><option value="AP">AP</option><option value="PB">PB</option>
+                                <option value="PI">PI</option><option value="RN">RN</option><option value="RO">RO</option>
+                                <option value="RR">RR</option><option value="SE">SE</option><option value="TO">TO</option>
+                            </select>
+                        </div>
                         <div class="info-field">
                             <label>Vendedor</label>
                             <select id="edit-vendedor">
@@ -6821,6 +6847,10 @@ PRAZO DE PRODUÇÁO DE 30 DIAS ÚTEIS APÓS RECEPÇÁO FÍSICA..." style="min-he
                             <label>Total de ICMS ST</label>
                             <input type="text" id="novo-total-icms" class="orcamento-valor-input" value="0,00" readonly>
                         </div>
+                        <div class="orcamento-valor-box" id="novo-difal-container" style="display:none;">
+                            <label>Total de DIFAL</label>
+                            <input type="text" id="novo-total-difal" class="orcamento-valor-input" value="0,00" readonly>
+                        </div>
                         <div class="orcamento-valor-box destaque">
                             <label>Valor Total do Pedido</label>
                             <input type="text" id="novo-valor-total" class="orcamento-valor-input destaque" value="0,00" readonly>
@@ -6869,6 +6899,28 @@ PRAZO DE PRODUÇÁO DE 30 DIAS ÚTEIS APÓS RECEPÇÁO FÍSICA..." style="min-he
                                     <i class="fas fa-plus"></i>
                                 </button>
                             </div>
+                        </div>
+                        <div class="orcamento-field-group">
+                            <label>Tipo de Venda</label>
+                            <div style="display:flex;gap:6px;">
+                                <button type="button" id="novo-btn-consumidor" onclick="setTipoVendaNovo('consumidor')" style="flex:1;padding:7px 10px;border-radius:6px;border:1.5px solid #3b82f6;background:#eff6ff;color:#1d4ed8;font-size:12px;font-weight:700;cursor:pointer;">Consumidor Final</button>
+                                <button type="button" id="novo-btn-revenda" onclick="setTipoVendaNovo('revenda')" style="flex:1;padding:7px 10px;border-radius:6px;border:1.5px solid #e2e8f0;background:white;color:#64748b;font-size:12px;font-weight:600;cursor:pointer;">Revenda</button>
+                            </div>
+                            <input type="hidden" id="novo-tipo-venda" value="consumidor">
+                        </div>
+                        <div class="orcamento-field-group" style="min-width:100px;">
+                            <label>Estado Destino</label>
+                            <select id="novo-estado-destino" class="orcamento-input" onchange="setTipoVendaNovo(document.getElementById('novo-tipo-venda').value)">
+                                <option value="SP">SP</option><option value="MG">MG</option><option value="RJ">RJ</option>
+                                <option value="RS">RS</option><option value="PR">PR</option><option value="SC">SC</option>
+                                <option value="BA">BA</option><option value="GO">GO</option><option value="MS">MS</option>
+                                <option value="MT">MT</option><option value="ES">ES</option><option value="PA">PA</option>
+                                <option value="CE">CE</option><option value="PE">PE</option><option value="MA">MA</option>
+                                <option value="DF">DF</option><option value="AC">AC</option><option value="AL">AL</option>
+                                <option value="AM">AM</option><option value="AP">AP</option><option value="PB">PB</option>
+                                <option value="PI">PI</option><option value="RN">RN</option><option value="RO">RO</option>
+                                <option value="RR">RR</option><option value="SE">SE</option><option value="TO">TO</option>
+                            </select>
                         </div>
                         <div class="orcamento-field-group">
                             <label>Cenário Fiscal</label>
@@ -7724,7 +7776,7 @@ PRAZO DE PRODUÇÁO DE 30 DIAS ÚTEIS APÓS RECEPÇÁO FÍSICA..."></textarea>
                     <div class="section-row">
                         <div class="field-group" style="flex: 0 0 100px;">
                             <label>Quantidade</label>
-                            <input type="number" id="item-pedido-quantidade" value="1.0000" step="0.0001" min="0.0001" class="input-number">
+                            <input type="number" id="item-pedido-quantidade" value="1.0000" step="0.0001" min="0.0001" class="input-number" oninput="atualizarCalculosItem()">
                         </div>
                         <div class="field-group" style="flex: 1;">
                             <label>Local de Estoque</label>
@@ -7750,7 +7802,7 @@ PRAZO DE PRODUÇÁO DE 30 DIAS ÚTEIS APÓS RECEPÇÁO FÍSICA..."></textarea>
                     <div class="section-row">
                         <div class="field-group" style="flex: 0 0 120px;">
                             <label>Preço Unitário de Venda</label>
-                            <input type="text" id="item-pedido-preco" value="0,000000" class="input-number">
+                            <input type="text" id="item-pedido-preco" value="0,000000" class="input-number" readonly style="background:#f3f4f6;cursor:not-allowed;" title="Preço definido pelo produto selecionado">
                         </div>
                         <div class="field-group" style="flex: 1;">
                             <label>Tabela de Preço</label>
@@ -7761,7 +7813,7 @@ PRAZO DE PRODUÇÁO DE 30 DIAS ÚTEIS APÓS RECEPÇÁO FÍSICA..."></textarea>
                         </div>
                         <div class="field-group" style="flex: 0 0 150px;">
                             <label>% do Desconto <i class="fas fa-exchange-alt" style="font-size: 10px; color: #999;"></i></label>
-                            <input type="text" id="item-pedido-desconto-pct" value="0,0000000000" class="input-number">
+                            <input type="text" id="item-pedido-desconto-pct" value="0,0000000000" class="input-number" oninput="validarDescontoItem(this)">
                         </div>
                         <div class="field-group checkbox-field">
                             <label class="toggle-label">
@@ -7820,6 +7872,10 @@ PRAZO DE PRODUÇÁO DE 30 DIAS ÚTEIS APÓS RECEPÇÁO FÍSICA..."></textarea>
                     <div class="valor-calc-item">
                         <span class="valor-calc-label">ICMS ST+FCP ST</span>
                         <span class="valor-calc-value" id="calc-icms-st">R$ 0,00</span>
+                    </div>
+                    <div class="valor-calc-item" style="display:none;">
+                        <span class="valor-calc-label">DIFAL</span>
+                        <span class="valor-calc-value" id="calc-difal">R$ 0,00</span>
                     </div>
                     <div class="valor-calc-item">
                         <span class="valor-calc-label">Total do Item</span>
@@ -11512,6 +11568,15 @@ PRAZO DE PRODUÇÁO DE 30 DIAS ÚTEIS APÓS RECEPÇÁO FÍSICA..."></textarea>
             itemSelecionado = null;
             itemSelecionadoIdx = null;
             
+            // Restaurar Tipo de Venda (Consumidor Final / Revenda) e Estado Destino do pedido
+            // (antes de carregar os itens, para o recálculo de DIFAL/ICMS-ST usar os valores corretos)
+            const ufDestinoPedido = pedido.estado_destino || pedido.uf_destino || 'SP';
+            const estadoDestinoSel = document.getElementById('edit-estado-destino');
+            if (estadoDestinoSel) estadoDestinoSel.value = ufDestinoPedido;
+            if (typeof setTipoVendaEdit === 'function') {
+                setTipoVendaEdit(pedido.tipo_venda === 'revenda' ? 'revenda' : 'consumidor');
+            }
+
             // Carregar itens do pedido da API
             carregarItensPedido(pedido.id);
             
@@ -11712,6 +11777,9 @@ PRAZO DE PRODUÇÁO DE 30 DIAS ÚTEIS APÓS RECEPÇÁO FÍSICA..."></textarea>
                 email_cliente: emailCliente,
                 transportadora_id: transportadoraId,
                 previsao_faturamento: previsaoFaturamento,
+                // Tipo de Venda (Consumidor Final / Revenda) + UF destino para DIFAL/ICMS-ST
+                tipo_venda: document.getElementById('edit-tipo-venda')?.value || 'consumidor',
+                estado_destino: document.getElementById('edit-estado-destino')?.value || 'SP',
                 // Campos da aba Informações Adicionais
                 categoria: categoria,
                 conta_corrente: contaCorrente,
@@ -14898,27 +14966,74 @@ Zyntra:                                 <div class="razao">I. M. DOS REIS INDÚS
 
         // Atualizar valores calculados
         function atualizarCalculosItem() {
-            const quantidade = parseFloat(document.getElementById('item-pedido-quantidade')?.value) || 0;
+            const quantidadeRaw = String(document.getElementById('item-pedido-quantidade')?.value || '0');
+            // Campo é type="number" (ponto decimal); se vier no formato pt-BR (com vírgula), normaliza
+            const quantidade = quantidadeRaw.includes(',')
+                ? parseFloat(quantidadeRaw.replace(/\./g, '').replace(',', '.')) || 0
+                : parseFloat(quantidadeRaw) || 0;
             const preco = parseDecimal(document.getElementById('item-pedido-preco')?.value);
             const descontoPct = parseFloat(document.getElementById('item-pedido-desconto-pct')?.value?.replace(',', '.')) || 0;
-            
+
             const valorMercadoria = quantidade * preco;
             const valorDesconto = valorMercadoria * (descontoPct / 100);
-            const totalItem = valorMercadoria - valorDesconto;
-            
+            const subtotalItem = valorMercadoria - valorDesconto;
+
+            // Calcular IPI e ICMS ST baseado no produto selecionado
+            let valorIPI = 0;
+            let valorICMSST = 0;
+            if (produtoSelecionadoAutoComplete) {
+                const aliqIPI = parseFloat(produtoSelecionadoAutoComplete.aliquota_ipi) || 0;
+                if (aliqIPI > 0) {
+                    valorIPI = subtotalItem * (aliqIPI / 100);
+                }
+                const calcST = parseInt(produtoSelecionadoAutoComplete.calcular_icms_st) || 0;
+                const mvaST = parseFloat(produtoSelecionadoAutoComplete.mva_st) || 0;
+                const aliqICMS = parseFloat(produtoSelecionadoAutoComplete.aliquota_icms) || 0;
+                if (calcST && mvaST > 0 && aliqICMS > 0) {
+                    const baseICMSST = subtotalItem * (1 + mvaST / 100);
+                    const icmsST = (baseICMSST * aliqICMS / 100) - (subtotalItem * aliqICMS / 100);
+                    valorICMSST = Math.max(0, icmsST);
+                }
+            }
+
+            // Calcular DIFAL (consumidor final) ou ICMS-ST (revenda) conforme tipo de venda
+            const tipoVendaAtual = document.getElementById('edit-tipo-venda')?.value || document.getElementById('novo-tipo-venda')?.value || 'consumidor';
+            const ufDestinoAtual = document.getElementById('edit-estado-destino')?.value || document.getElementById('novo-estado-destino')?.value || 'SP';
+            const valorDifal = calcularDifalItem(subtotalItem, tipoVendaAtual, ufDestinoAtual);
+            // ICMS-ST para revenda: usa tabela UF se não houver cálculo por produto
+            const valorIcmsStTipoVenda = calcularIcmsStItem(subtotalItem, tipoVendaAtual, ufDestinoAtual);
+            if (valorIcmsStTipoVenda > 0 && valorICMSST === 0) {
+                valorICMSST = valorIcmsStTipoVenda;
+            }
+
+            const totalItem = subtotalItem + valorIPI + valorICMSST + valorDifal;
+
             // Atualizar exibição
             document.getElementById('calc-valor-mercadoria').textContent = formatarMoeda(valorMercadoria);
             document.getElementById('calc-valor-desconto').textContent = formatarMoeda(valorDesconto);
+            const calcIpiEl = document.getElementById('calc-ipi');
+            const calcIcmsStEl = document.getElementById('calc-icms-st');
+            const calcDifalEl = document.getElementById('calc-difal');
+            if (calcIpiEl) calcIpiEl.textContent = formatarMoeda(valorIPI);
+            if (calcIcmsStEl) calcIcmsStEl.textContent = formatarMoeda(valorICMSST);
+            if (calcDifalEl) {
+                calcDifalEl.textContent = formatarMoeda(valorDifal);
+                const difalContainer = calcDifalEl.closest('.valor-calc-item');
+                if (difalContainer) difalContainer.style.display = valorDifal > 0 ? '' : 'none';
+            }
             document.getElementById('calc-total-item').textContent = formatarMoeda(totalItem);
-            
+
             // Calcular total do pedido (itens existentes + este item)
             const totalExistente = itensPedidoAtual.reduce((sum, item) => {
                 const qtd = parseFloat(item.quantidade) || 0;
                 const prc = parseFloat(item.preco_unitario) || 0;
                 const desc = parseFloat(item.desconto) || 0;
-                return sum + (qtd * prc - desc);
+                const ipi = parseFloat(item.valor_ipi) || 0;
+                const icmsSt = parseFloat(item.valor_icms_st) || 0;
+                const difal = parseFloat(item.valor_difal) || 0;
+                return sum + (qtd * prc - desc) + ipi + icmsSt + difal;
             }, 0);
-            
+
             document.getElementById('calc-total-pedido').textContent = formatarMoeda(totalExistente + totalItem);
         }
 
@@ -15139,7 +15254,12 @@ Zyntra:                                 <div class="razao">I. M. DOS REIS INDÚS
                 itensPedidoAtual = [];
             }
             renderizarTabelaItens();
-            
+
+            // Recalcular DIFAL / ICMS-ST nos itens carregados (cliente, conforme tipo de venda e UF)
+            const tipoVendaCarregar = document.getElementById('edit-tipo-venda')?.value || 'consumidor';
+            const ufDestinoCarregar = document.getElementById('edit-estado-destino')?.value || 'SP';
+            recalcularDifalItens(tipoVendaCarregar, ufDestinoCarregar);
+
             // Atualizar totais do modal após carregar os itens
             atualizarTotalModalEditar();
         }
@@ -15206,7 +15326,9 @@ Zyntra:                                 <div class="razao">I. M. DOS REIS INDÚS
             modoEdicaoItem = false;
             itemSelecionado = null;
             produtoSelecionadoAutoComplete = null;
-            
+            // Cada novo item exige nova autorização para desconto acima do limite
+            window._descontoItemAutorizado = false;
+
             // Limpar campos do novo modal
             document.getElementById('item-pedido-id').value = '';
             document.getElementById('item-pedido-produto').value = '';
@@ -15214,7 +15336,12 @@ Zyntra:                                 <div class="razao">I. M. DOS REIS INDÚS
             document.getElementById('item-pedido-quantidade').value = '1';
             document.getElementById('item-pedido-preco').value = '0,00';
             document.getElementById('item-pedido-tabela-preco').value = '';
-            document.getElementById('item-pedido-desconto-pct').value = '0';
+            const descItemEl = document.getElementById('item-pedido-desconto-pct');
+            descItemEl.value = '0';
+            descItemEl.style.border = '';
+            descItemEl.style.background = '';
+            descItemEl.style.color = '';
+            descItemEl.style.fontWeight = '';
             document.getElementById('item-pedido-estoque').value = 'PADRAO - Local de Estoque Padrão';
             document.getElementById('item-pedido-cenario').value = 'Padrão';
             document.getElementById('item-pedido-npc').value = '';
@@ -15270,6 +15397,7 @@ Zyntra:                                 <div class="razao">I. M. DOS REIS INDÚS
             
             modoEdicaoItem = true;
             itemSelecionado = item;
+            window._descontoItemAutorizado = false;
             produtoSelecionadoAutoComplete = {
                 id: item.produto_id,
                 código: item.codigo,
@@ -15396,10 +15524,17 @@ Zyntra:                                 <div class="razao">I. M. DOS REIS INDÚS
                     if (continuarIncluindo && !modoEdicaoItem) {
                         // Limpar formulário e manter modal aberto
                         produtoSelecionadoAutoComplete = null;
+                        // Cada novo item exige nova autorização para desconto acima do limite
+                        window._descontoItemAutorizado = false;
                         document.getElementById('item-pedido-produto').value = '';
                         document.getElementById('item-pedido-quantidade').value = '1';
                         document.getElementById('item-pedido-preco').value = '0,00';
-                        document.getElementById('item-pedido-desconto-pct').value = '0';
+                        const descContinuar = document.getElementById('item-pedido-desconto-pct');
+                        descContinuar.value = '0';
+                        descContinuar.style.border = '';
+                        descContinuar.style.background = '';
+                        descContinuar.style.color = '';
+                        descContinuar.style.fontWeight = '';
                         document.getElementById('item-pedido-produto').focus();
                         
                         // Recarregar itens para atualizar total
@@ -15496,20 +15631,28 @@ Zyntra:                                 <div class="razao">I. M. DOS REIS INDÚS
                 return sum + (parseFloat(item.valor_icms_st) || 0);
             }, 0);
             
+            const totalDIFAL = itensPedidoAtual.reduce((sum, item) => {
+                return sum + (parseFloat(item.valor_difal) || 0);
+            }, 0);
+
             // Valor final
-            const valorTotal = totalMercadorias - totalDesconto + totalIPI + totalICMSST;
+            const valorTotal = totalMercadorias - totalDesconto + totalIPI + totalICMSST + totalDIFAL;
             
             // Atualizar campos do modal
             const totalMercadoriasInput = document.getElementById('edit-total-mercadorias');
             const descontoInput = document.getElementById('edit-desconto');
             const ipiInput = document.getElementById('edit-ipi');
             const icmsStInput = document.getElementById('edit-icms-st');
+            const difalInput = document.getElementById('edit-difal');
+            const difalContainer = document.getElementById('edit-difal-container');
             const valorTotalInput = document.getElementById('edit-valor-total');
             
             if (totalMercadoriasInput) totalMercadoriasInput.value = formatarMoeda(totalMercadorias);
             if (descontoInput && totalDesconto > 0) descontoInput.value = formatarMoeda(totalDesconto);
             if (ipiInput) ipiInput.value = formatarMoeda(totalIPI);
             if (icmsStInput) icmsStInput.value = formatarMoeda(totalICMSST);
+            if (difalInput) difalInput.value = formatarMoeda(totalDIFAL);
+            if (difalContainer) difalContainer.style.display = totalDIFAL > 0 ? '' : 'none';
             if (valorTotalInput) valorTotalInput.value = formatarMoeda(valorTotal);
             
             // Atualizar o valor no pedidoAtual
@@ -15527,6 +15670,248 @@ Zyntra:                                 <div class="razao">I. M. DOS REIS INDÚS
                 valorTotal 
             });
         }
+
+        // =====================================================================
+        // Tipo de Venda: Consumidor Final / Revenda com estado destino
+        // (DIFAL para consumidor final, ICMS-ST por UF para revenda)
+        // =====================================================================
+        // Tabela DIFAL por UF (diferença de alíquota ICMS destino vs interestadual)
+        let _DIFAL_POR_UF = {
+            'AC': 5, 'AL': 6, 'AM': 6, 'AP': 6, 'BA': 7.5, 'CE': 6,
+            'DF': 6, 'ES': 5, 'GO': 5, 'MA': 6, 'MG': 6, 'MS': 5,
+            'MT': 5, 'PA': 5, 'PB': 6, 'PE': 6, 'PI': 9, 'PR': 7,
+            'RJ': 8, 'RN': 6, 'RO': 5.5, 'RR': 5, 'RS': 5, 'SC': 5,
+            'SE': 6, 'SP': 0, 'TO': 6
+        };
+
+        // Tabela ICMS-ST por UF (Substituição Tributária para Revenda)
+        let _ICMSST_POR_UF = {
+            'AC': 0, 'AL': 0, 'AM': 0, 'AP': 0, 'BA': 0, 'CE': 0,
+            'DF': 0, 'ES': 0, 'GO': 0, 'MA': 0, 'MG': 10, 'MS': 0,
+            'MT': 0, 'PA': 0, 'PB': 0, 'PE': 0, 'PI': 0, 'PR': 10,
+            'RJ': 10, 'RN': 0, 'RO': 0, 'RR': 0, 'RS': 10, 'SC': 10,
+            'SE': 0, 'SP': 10, 'TO': 0
+        };
+
+        // Sincronizar tabelas de impostos com a API de Custos & Precificação
+        async function carregarImpostosArvore() {
+            try {
+                const resp = await fetch('/api/pcp/arvore-produto', { credentials: 'include' });
+                if (!resp.ok) return;
+                const data = await resp.json();
+                const icmsEstados = (data.parametros || data.parâmetros || data.config || {}).icms_estados;
+                if (!icmsEstados) return;
+                const novoDifal = {}, novoSt = {};
+                Object.keys(icmsEstados).forEach(uf => {
+                    novoDifal[uf] = parseFloat(icmsEstados[uf].difal) || 0;
+                    novoSt[uf] = parseFloat(icmsEstados[uf].st) || 0;
+                });
+                if (Object.keys(novoDifal).length > 0) {
+                    _DIFAL_POR_UF = novoDifal;
+                    _ICMSST_POR_UF = novoSt;
+                }
+            } catch (e) {
+                console.warn('Usando tabelas de impostos padrão (fallback):', e.message);
+            }
+        }
+
+        // Calcula DIFAL por item (só para consumidor final e UF != SP)
+        function calcularDifalItem(subtotalItem, tipoVenda, ufDestino) {
+            if (tipoVenda !== 'consumidor') return 0;
+            const uf = (ufDestino || 'SP').toUpperCase();
+            const difal = _DIFAL_POR_UF[uf] || 0;
+            if (difal <= 0) return 0;
+            return subtotalItem * (difal / 100);
+        }
+
+        // Calcula ICMS-ST por item (só para revenda)
+        function calcularIcmsStItem(subtotalItem, tipoVenda, ufDestino) {
+            if (tipoVenda !== 'revenda') return 0;
+            const uf = (ufDestino || 'SP').toUpperCase();
+            const st = _ICMSST_POR_UF[uf] || 0;
+            if (st <= 0) return 0;
+            return subtotalItem * (st / 100);
+        }
+
+        // Recalcula impostos (DIFAL / ICMS-ST) nos itens do pedido em edição
+        function recalcularDifalItens(tipoVenda, ufDestino) {
+            (itensPedidoAtual || []).forEach(item => {
+                const qtd = parseFloat(item.quantidade) || 0;
+                const preco = parseFloat(item.preco_unitario) || 0;
+                const desc = parseFloat(item.desconto) || 0;
+                const subtotal = (qtd * preco) - desc;
+                item.valor_difal = calcularDifalItem(subtotal, tipoVenda, ufDestino);
+                item.valor_icms_st = calcularIcmsStItem(subtotal, tipoVenda, ufDestino);
+            });
+        }
+
+        function setTipoVendaEdit(tipo) {
+            const hidden = document.getElementById('edit-tipo-venda');
+            if (hidden) hidden.value = tipo;
+            const btnCons = document.getElementById('edit-btn-consumidor');
+            const btnRev  = document.getElementById('edit-btn-revenda');
+            if (btnCons && btnRev) {
+                const ativo = 'flex:1;padding:6px 10px;border-radius:6px;border:1.5px solid #3b82f6;background:#eff6ff;color:#1d4ed8;font-size:12px;font-weight:600;cursor:pointer;';
+                const inativo = 'flex:1;padding:6px 10px;border-radius:6px;border:1.5px solid #e2e8f0;background:white;color:#64748b;font-size:12px;font-weight:600;cursor:pointer;';
+                btnCons.style.cssText = tipo === 'consumidor' ? ativo : inativo;
+                btnRev.style.cssText  = tipo === 'revenda' ? ativo : inativo;
+            }
+            if (pedidoAtual) pedidoAtual.tipo_venda = tipo;
+            const ufDestino = document.getElementById('edit-estado-destino')?.value || 'SP';
+            recalcularDifalItens(tipo, ufDestino);
+            atualizarTotalModalEditar();
+        }
+
+        function setTipoVendaNovo(tipo) {
+            const hidden = document.getElementById('novo-tipo-venda');
+            if (hidden) hidden.value = tipo;
+            const btnCons = document.getElementById('novo-btn-consumidor');
+            const btnRev  = document.getElementById('novo-btn-revenda');
+            if (btnCons && btnRev) {
+                const ativo = 'flex:1;padding:7px 10px;border-radius:6px;border:1.5px solid #3b82f6;background:#eff6ff;color:#1d4ed8;font-size:12px;font-weight:700;cursor:pointer;';
+                const inativo = 'flex:1;padding:7px 10px;border-radius:6px;border:1.5px solid #e2e8f0;background:white;color:#64748b;font-size:12px;font-weight:600;cursor:pointer;';
+                btnCons.style.cssText = tipo === 'consumidor' ? ativo : inativo;
+                btnRev.style.cssText  = tipo === 'revenda' ? ativo : inativo;
+            }
+            const ufDestino = document.getElementById('novo-estado-destino')?.value || 'SP';
+            (itensOrcamento || []).forEach(item => {
+                const subtotal = (parseFloat(item.quantidade) || 0) * (parseFloat(item.precoUnitario) || 0);
+                item.valor_difal = calcularDifalItem(subtotal, tipo, ufDestino);
+                item.valor_icms_st = calcularIcmsStItem(subtotal, tipo, ufDestino);
+            });
+            if (typeof calcularTotaisOrcamento === 'function') calcularTotaisOrcamento();
+        }
+
+        // Senhas de supervisores autorizados (desconto acima do limite)
+        const _SENHAS_SUPERVISORES = {
+            'andreia': 'Pegasus1910',
+            'guilherme': 'Pegasus1910'
+        };
+
+        // Valida desconto do item: acima de 33,88% exige senha de supervisor
+        function validarDescontoItem(input) {
+            let valor = input.value.replace(/[^0-9.,]/g, '');
+            let numero = parseFloat(valor.replace(',', '.')) || 0;
+            if (numero < 0) { numero = 0; input.value = '0'; }
+            if (numero > 100) { numero = 100; input.value = '100'; }
+
+            const LIMITE_DESCONTO = 33.88;
+            if (numero > LIMITE_DESCONTO && !window._descontoItemAutorizado) {
+                input.style.border = '2px solid #ef4444';
+                input.style.background = '#fef2f2';
+                input.style.color = '#dc2626';
+                input.style.fontWeight = '700';
+
+                let modal = document.getElementById('modal-senha-desconto-item');
+                if (!modal) {
+                    modal = document.createElement('div');
+                    modal.id = 'modal-senha-desconto-item';
+                    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:99999;';
+                    modal.innerHTML = `
+                        <div style="background:white;border-radius:16px;padding:30px;max-width:400px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+                            <div style="text-align:center;margin-bottom:20px;">
+                                <div style="width:60px;height:60px;background:#fef2f2;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+                                    <i class="fas fa-lock" style="font-size:24px;color:#dc2626;"></i>
+                                </div>
+                                <h3 style="color:#1e293b;margin:0 0 6px;">Autorização Necessária</h3>
+                                <p style="color:#64748b;font-size:13px;margin:0;">Desconto acima de ${LIMITE_DESCONTO}% requer senha de supervisor</p>
+                            </div>
+                            <div style="margin-bottom:16px;">
+                                <input type="password" id="input-senha-desconto-item" placeholder="Senha do supervisor"
+                                    style="width:100%;padding:12px 16px;border:2px solid #e2e8f0;border-radius:10px;font-size:14px;box-sizing:border-box;"
+                                    onkeydown="if(event.key==='Enter') confirmarDescontoItemAutorizado()">
+                                <p id="erro-senha-desconto-item" style="color:#dc2626;font-size:12px;margin:6px 0 0;display:none;">Senha incorreta</p>
+                            </div>
+                            <div style="display:flex;gap:10px;">
+                                <button onclick="cancelarDescontoItem()" style="flex:1;padding:10px;border:1px solid #e2e8f0;border-radius:8px;background:white;color:#64748b;font-weight:600;cursor:pointer;">Cancelar</button>
+                                <button onclick="confirmarDescontoItemAutorizado()" style="flex:1;padding:10px;border:none;border-radius:8px;background:#3b82f6;color:white;font-weight:600;cursor:pointer;">Confirmar</button>
+                            </div>
+                        </div>
+                    `;
+                    document.body.appendChild(modal);
+                } else {
+                    modal.style.display = 'flex';
+                    document.getElementById('input-senha-desconto-item').value = '';
+                    document.getElementById('erro-senha-desconto-item').style.display = 'none';
+                }
+                setTimeout(() => document.getElementById('input-senha-desconto-item')?.focus(), 100);
+                return;
+            }
+
+            // Autorizado ou dentro do limite — limpar estilos e recalcular
+            input.style.border = '';
+            input.style.background = '';
+            input.style.color = '';
+            input.style.fontWeight = '';
+            atualizarCalculosItem();
+        }
+
+        function confirmarDescontoItemAutorizado() {
+            const senha = document.getElementById('input-senha-desconto-item').value;
+            const erroMsg = document.getElementById('erro-senha-desconto-item');
+            let autorizado = false;
+            for (const [, senhaCorreta] of Object.entries(_SENHAS_SUPERVISORES)) {
+                if (senha === senhaCorreta) { autorizado = true; break; }
+            }
+            if (autorizado) {
+                window._descontoItemAutorizado = true;
+                const modal = document.getElementById('modal-senha-desconto-item');
+                if (modal) modal.style.display = 'none';
+                const input = document.getElementById('item-pedido-desconto-pct');
+                if (input) {
+                    input.style.border = '2px solid #22c55e';
+                    input.style.background = '#f0fdf4';
+                    input.style.color = '#15803d';
+                    input.style.fontWeight = '700';
+                }
+                if (typeof showNotification === 'function') showNotification('Desconto autorizado pelo supervisor!', 'success');
+                atualizarCalculosItem();
+            } else {
+                erroMsg.style.display = 'block';
+                erroMsg.textContent = 'Senha incorreta. Tente novamente.';
+            }
+        }
+
+        function cancelarDescontoItem() {
+            const modal = document.getElementById('modal-senha-desconto-item');
+            if (modal) modal.style.display = 'none';
+            const input = document.getElementById('item-pedido-desconto-pct');
+            if (input) {
+                input.value = '0';
+                input.style.border = '';
+                input.style.background = '';
+                input.style.color = '';
+                input.style.fontWeight = '';
+            }
+            atualizarCalculosItem();
+        }
+
+        // Formatar campo de quantidade (até 2 casas decimais) e recalcular
+        function formatarQuantidadeInput(input) {
+            let valor = input.value.replace(/[^0-9,\.]/g, '').replace(/\./g, ',');
+            if (valor.includes(',')) {
+                const partes = valor.split(',');
+                valor = partes[0] + ',' + partes.slice(1).join('').substring(0, 2);
+            }
+            input.value = valor;
+            atualizarCalculosItem();
+        }
+
+        // Formatar campo de preço (até 2 casas decimais) e recalcular
+        function formatarPreco(input) {
+            let valor = input.value.replace(/[^0-9,\.]/g, '').replace('.', ',');
+            if (valor.includes(',')) {
+                const partes = valor.split(',');
+                valor = partes[0] + ',' + partes.slice(1).join('').substring(0, 2);
+            }
+            input.value = valor;
+            atualizarCalculosItem();
+        }
+
+        // Sincronizar tabelas DIFAL/ICMS-ST com Custos & Precificação na inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof carregarImpostosArvore === 'function') carregarImpostosArvore();
+        });
 
         // Fechar modal de item ao clicar fora
         document.addEventListener('DOMContentLoaded', function() {
@@ -17314,15 +17699,21 @@ Zyntra:                                 <div class="razao">I. M. DOS REIS INDÚS
         
         // Calcular totais
         function calcularTotaisOrcamento() {
-            const totalMercadorias = itensOrcamento.reduce((sum, item) => sum + (item.quantidade * item.precoUnitario), 0);
-            const desconto = parseFloat(document.getElementById('novo-desconto').value.replace(',', '.')) || 0;
-            const totalIpi = totalMercadorias * 0.05; // Exemplo: 5% de IPI
-            const totalIcms = 0; // ICMS ST zerado por padrão
-            const valorTotal = totalMercadorias - desconto + totalIpi + totalIcms;
-            
+            const totalMercadorias = itensOrcamento.reduce((sum, item) => sum + ((parseFloat(item.quantidade) || 0) * (parseFloat(item.precoUnitario) || 0)), 0);
+            const desconto = parseFloat((document.getElementById('novo-desconto').value || '0').replace(/\./g, '').replace(',', '.')) || 0;
+            // Impostos por item (DIFAL/ICMS-ST conforme tipo de venda; IPI por produto)
+            const totalIpi = itensOrcamento.reduce((sum, item) => sum + (parseFloat(item.valor_ipi) || 0), 0);
+            const totalIcms = itensOrcamento.reduce((sum, item) => sum + (parseFloat(item.valor_icms_st) || 0), 0);
+            const totalDifal = itensOrcamento.reduce((sum, item) => sum + (parseFloat(item.valor_difal) || 0), 0);
+            const valorTotal = totalMercadorias - desconto + totalIpi + totalIcms + totalDifal;
+
             document.getElementById('novo-total-mercadorias').value = totalMercadorias.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
             document.getElementById('novo-total-ipi').value = totalIpi.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
             document.getElementById('novo-total-icms').value = totalIcms.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+            const difalInput = document.getElementById('novo-total-difal');
+            if (difalInput) difalInput.value = totalDifal.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+            const difalContainer = document.getElementById('novo-difal-container');
+            if (difalContainer) difalContainer.style.display = totalDifal > 0 ? '' : 'none';
             document.getElementById('novo-valor-total').value = valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
         }
         
@@ -17373,6 +17764,8 @@ Zyntra:                                 <div class="razao">I. M. DOS REIS INDÚS
             });
             
             renderTabelaItens();
+            // Recalcular impostos (DIFAL/ICMS-ST) conforme tipo de venda e atualizar totais
+            setTipoVendaNovo(document.getElementById('novo-tipo-venda')?.value || 'consumidor');
             fecharModalAdicionarItem();
             showNotification('Item adicionado ao orçamento!', 'success');
         }
