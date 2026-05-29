@@ -3301,6 +3301,7 @@ module.exports = function createVendasRoutes(deps) {
                         COALESCE(NULLIF(preco_venda, 0), NULLIF(preco, 0), preco_custo, 0) as preco_venda,
                         COALESCE(preco_custo, 0) as preco_custo,
                         COALESCE(estoque_atual, 0) as estoque_atual,
+                        COALESCE(controla_estoque, 1) as controla_estoque,
                         COALESCE(localizacao, '') as local_estoque,
                         COALESCE(gtin, '') as ean,
                         COALESCE(aliquota_ipi, 0) as aliquota_ipi,

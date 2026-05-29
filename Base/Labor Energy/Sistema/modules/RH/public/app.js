@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Script unificado para o Portal do Funcionário e para a Área Administrativa.
  * Detecta a página (admin ou funcionário) e inicializa as funcionalidades relevantes.
  */
@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const isEmployeePage = document.getElementById('welcome-message');
     
     // Debug: identificar qual página estamos
-    console.log('🔍 DEBUG Page Detection:', {
+    console.log('?? DEBUG Page Detection:', {
         currentURL: window.location.href,
         isAdminPage: !!isAdminPage,
         isEmployeePage: !!isEmployeePage,
@@ -22,19 +22,19 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Se é admin mas está na página de funcionário
             if (isUserAdmin && isEmployeePage) {
-                console.warn('⚠️ Usuário admin na página de funcionário, redirecionando...');
+                console.warn('?? Usuário admin na página de funcionário, redirecionando...');
                 window.location.href = '/RecursosHumanos/areaadm.html';
                 return;
             }
             
             // Se é funcionário mas está na página admin
             if (!isUserAdmin && isAdminPage) {
-                console.warn('⚠️ Usuário funcionário na página admin, redirecionando...');
+                console.warn('?? Usuário funcionário na página admin, redirecionando...');
                 window.location.href = '/RecursosHumanos/area.html';
                 return;
             }
             
-            console.log('✅ Usuário na página correta:', { isAdmin: isUserAdmin, onAdminPage: !!isAdminPage, onEmployeePage: !!isEmployeePage });
+            console.log('? Usuário na página correta:', { isAdmin: isUserAdmin, onAdminPage: !!isAdminPage, onEmployeePage: !!isEmployeePage });
         }
     } catch (e) {
         console.error('Erro ao verificar redirecionamento:', e);
@@ -144,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
             modal.classList.remove('open');
             modal.style.display = 'none';
         });
-        console.log('🔒 Todos os modais forçadamente fechados na inicializaçáo');
+        console.log('?? Todos os modais forçadamente fechados na inicializaçáo');
     }, 100);
 
     if (isAdminPage) {
@@ -377,9 +377,9 @@ function safeRedirectToLogin() {
                 // SSO: Preservar URL atual para retornar após login
                 const returnTo = encodeURIComponent(window.location.pathname + window.location.search + window.location.hash);
                 window.location.href = `/login.html?returnTo=${returnTo}`;
-            } catch (e) { try { notifyRedirectAttempt('safeRedirectToLogin', 'catch-fallback'); window.location.href = '/login.html'; } catch (_) {} }
+            } catch (e) { try { notifyRedirectAttempt('safeRedirectToLogin', 'catch-fallback'); window.location.href = window.__withBasePath ? window.__withBasePath('/login.html') : '/login.html'; } catch (_) {} }
         });
-    } catch (e) { try { notifyRedirectAttempt('safeRedirectToLogin', 'outer-catch'); window.location.href = '/login.html'; } catch (_) {} }
+    } catch (e) { try { notifyRedirectAttempt('safeRedirectToLogin', 'outer-catch'); window.location.href = window.__withBasePath ? window.__withBasePath('/login.html') : '/login.html'; } catch (_) {} }
 }
 
 // Consistent control disabling helper: accepts an Element or id and marks it disabled for anchors/buttons
@@ -739,7 +739,7 @@ function initAdminPage() {
     const localUserData = JSON.parse(localStorage.getItem('userData'));
     
     // Debug: mostrar informações detalhadas do usuário
-    console.log('🔍 DEBUG initAdminPage - Dados do usuário:', {
+    console.log('?? DEBUG initAdminPage - Dados do usuário:', {
         userData: localUserData,
         role: localUserData?.role,
         hasUserData: !!localUserData,
@@ -747,22 +747,22 @@ function initAdminPage() {
     });
     
     if (!localUserData || localUserData.role !== 'admin') {
-        console.log('❌ DEBUG initAdminPage - Acesso negado. Redirecionando para login.');
-        console.log('❌ Motivo:', !localUserData ? 'Sem userData' : `Role inválido: ${localUserData.role}`);
+        console.log('? DEBUG initAdminPage - Acesso negado. Redirecionando para login.');
+        console.log('? Motivo:', !localUserData ? 'Sem userData' : `Role inválido: ${localUserData.role}`);
         
         // Se o usuário tem role de funcionário, redirecionar para area.html ao invés de login
         if (localUserData && localUserData.role === 'funcionario') {
-            console.log('🔄 DEBUG initAdminPage - Redirecionando funcionário para área correta');
+            console.log('?? DEBUG initAdminPage - Redirecionando funcionário para área correta');
             window.location.href = '/area.html';
             return;
         }
         
         showToast("Acesso negado. Apenas administradores podem aceder a está página.", 'error');
-        window.location.href = '/login.html';
+        window.location.href = window.__withBasePath ? window.__withBasePath('/login.html') : '/login.html';
         return;
     }
     
-    console.log('✅ DEBUG initAdminPage - Acesso autorizado para admin');
+    console.log('? DEBUG initAdminPage - Acesso autorizado para admin');
 
     // --- Seletores de Elementos ---
     // use relative URL so the frontend works regardless of host/port
@@ -1222,15 +1222,15 @@ function initAdminPage() {
     }
 
     async function abrirModalDetalhes(id, forceOpen = false) {
-        console.log(`🔍 abrirModalDetalhes chamado: id=${id}, forceOpen=${forceOpen}, _userInteracted=${window._userInteracted}, _modalExplicitlyRequested=${window._modalExplicitlyRequested}`);
+        console.log(`?? abrirModalDetalhes chamado: id=${id}, forceOpen=${forceOpen}, _userInteracted=${window._userInteracted}, _modalExplicitlyRequested=${window._modalExplicitlyRequested}`);
         
         // PROTEÇÁO ABSOLUTA: Modal só deve abrir com interaçáo EXPLÍCITA do usuário
         if (!forceOpen && (!window._userInteracted || !window._modalExplicitlyRequested)) {
-            console.warn('🚫 abrirModalDetalhes: BLOCKED - modal requires explicit user request');
+            console.warn('?? abrirModalDetalhes: BLOCKED - modal requires explicit user request');
             return;
         }
         
-        console.log('✅ abrirModalDetalhes: PERMITIDO - abrindo modal');
+        console.log('? abrirModalDetalhes: PERMITIDO - abrindo modal');
         
         currentFuncionarioId = id;
         const detalhesContent = document.getElementById('detalhes-funcionario-content');
@@ -1349,7 +1349,7 @@ function initAdminPage() {
     function fecharModal() { 
         // Resetar permissáo ao fechar o modal
         window._modalExplicitlyRequested = false;
-        console.log('🔒 Permissáo de modal resetada ao fechar');
+        console.log('?? Permissáo de modal resetada ao fechar');
         closeModal(modal); 
     }
 
@@ -1407,7 +1407,7 @@ function initAdminPage() {
             if (e.target && e.target.classList && e.target.classList.contains('btn-detalhes')) {
                 // Marcar que o modal foi EXPLICITAMENTE solicitado pelo usuário
                 window._modalExplicitlyRequested = true;
-                console.log('✅ Modal explicitamente solicitado pelo usuário via botáo Detalhes');
+                console.log('? Modal explicitamente solicitado pelo usuário via botáo Detalhes');
                 abrirModalDetalhes(e.target.dataset.id, true); // forceOpen = true
             }
         });
@@ -1913,14 +1913,14 @@ async function initEmployeePage() {
     try { console.log('initEmployeePage start', { authMode: 'httpOnly-cookie', userDataPresent: !!localUserData, bodyVisibility: document && document.body && document.body.style ? document.body.style.visibility : null }); } catch (e) {}
 
     // Debug: verificar se usuário deveria ir para área admin
-    console.log('🔍 DEBUG initEmployeePage - Verificando redirecionamento admin:', {
+    console.log('?? DEBUG initEmployeePage - Verificando redirecionamento admin:', {
         userData: localUserData,
         role: localUserData?.role,
         shouldRedirectToAdmin: localUserData && localUserData.role === 'admin'
     });
     
     if (localUserData && localUserData.role === 'admin') {
-        console.log('✅ DEBUG initEmployeePage - Redirecionando admin para área administrativa');
+        console.log('? DEBUG initEmployeePage - Redirecionando admin para área administrativa');
         window.location.href = '/areaadm.html';
         return;
     }
@@ -2063,7 +2063,7 @@ async function initEmployeePage() {
                                             } catch(e) { showToast('Erro ao copiar diagnóstico.', 'error'); }
                                         });
                                         const openLoginBtn = document.getElementById('auth-open-login');
-                                        if (openLoginBtn) openLoginBtn.addEventListener('click', function(){ window.location.href = '/login.html'; });
+                                        if (openLoginBtn) openLoginBtn.addEventListener('click', function(){ window.location.href = window.__withBasePath ? window.__withBasePath('/login.html') : '/login.html'; });
                                     } catch(e) {}
                                 } catch (e) { diag.textContent = 'Diagnostics indisponível'; }
                             }

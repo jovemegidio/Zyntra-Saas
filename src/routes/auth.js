@@ -1,4 +1,4 @@
-﻿// auth.js - Middleware e rota de autenticação corrigida
+// auth.js - Middleware e rota de autenticação corrigida
 const express = require('express');
 const mysql = require('mysql2/promise');
 const bcrypt = require('bcryptjs');
@@ -21,28 +21,6 @@ const router = express.Router();
 const MAX_LOGIN_ATTEMPTS = 5;
 const LOCKOUT_DURATION_MS = 15 * 60 * 1000; // 15 minutos
 const loginAttemptsCache = new Map(); // fallback in-memory
-
-// BE-003: Cache de /api/me — evitar 58+ queries redundantes por pageload
-// TTL de 90s: cobre múltiplas chamadas simultâneas sem tornar os dados obsoletos
-const _meCache = new Map();
-const ME_CACHE_TTL = 90 * 1000; // 90 segundos
-function _meCacheGet(userId) {
-    const entry = _meCache.get(userId);
-    if (!entry) return null;
-    if (Date.now() - entry.ts > ME_CACHE_TTL) { _meCache.delete(userId); return null; }
-    return entry.data;
-}
-function _meCacheSet(userId, data) {
-    _meCache.set(userId, { data, ts: Date.now() });
-    // Limpar entradas antigas a cada 200 usuários em cache
-    if (_meCache.size > 200) {
-        const cutoff = Date.now() - ME_CACHE_TTL;
-        for (const [k, v] of _meCache) { if (v.ts < cutoff) _meCache.delete(k); }
-    }
-}
-function _meCacheInvalidate(userId) { _meCache.delete(userId); }
-// Exportar invalidator para ser chamado após UPDATE de usuário
-module.exports && (module.exports._meCacheInvalidate = _meCacheInvalidate);
 
 async function getLoginAttempt(email) {
     const key = (email || '').toLowerCase().trim();
@@ -306,9 +284,12 @@ router.post('/login', validate(schemas.login), async (req, res) => {
         // Domínios permitidos para login (configurável via .env)
         const defaultDomains = [
             '@aluforce.ind.br',
-            '@labor.com.br',
+            '@aluforce.com',
+            '@energy.com.br',
+            '@laboreletric.com.br',
             '@lumiereassesoria.com.br',
-            '@lumiereassessoria.com.br'
+            '@lumiereassessoria.com.br',
+            '@zyntra.com.br'
         ];
         const dominiosPermitidos = process.env.ALLOWED_EMAIL_DOMAINS
             ? process.env.ALLOWED_EMAIL_DOMAINS.split(',').map(d => d.trim())
@@ -317,13 +298,15 @@ router.post('/login', validate(schemas.login), async (req, res) => {
         const emailValido = dominiosPermitidos.some(dominio => email && email.endsWith(dominio));
 
         if (!isCpfLogin && (!email || !emailValido)) {
-            return res.status(401).json({ message: 'E-mail não autorizado para este sistema.' }); // BUG-006: não expor domínios internos
+            return res.status(401).json({ message: 'E-mail não autorizado. Entre em contato com o administrador.' });
         }
 
         // Mapeamento domínio → empresa_id (multiempresa)
         const dominioEmpresaMap = {
             '@aluforce.ind.br': 1,
-            '@labor.com.br': 2
+            '@aluforce.com': 1,
+            '@laboreletric.com.br': 2,
+            '@energy.com.br': 3
         };
         const emailDominio = email ? ('@' + (email.split('@')[1] || '')) : '';
         const empresaIdPorDominio = dominioEmpresaMap[emailDominio] || null;
@@ -360,15 +343,6 @@ router.post('/login', validate(schemas.login), async (req, res) => {
 
         // Seleciona o usuário (busca por email OU login)
         let [rows] = await safeQuery('SELECT * FROM usuarios WHERE email = ? OR login = ? ORDER BY id ASC LIMIT 1', [email, email.split('@')[0]]);
-
-        // Fallback: @labor.com.br é alias de @aluforce.ind.br — busca com domínio canônico
-        if (!rows.length && email.endsWith('@labor.com.br')) {
-            const canonicalEmail = email.replace('@labor.com.br', '@aluforce.ind.br');
-            [rows] = await safeQuery('SELECT * FROM usuarios WHERE email = ? ORDER BY id ASC LIMIT 1', [canonicalEmail]);
-            if (rows.length) {
-                console.log(`[AUTH/LOGIN] 🔗 Labor alias: ${email} → ${canonicalEmail}`);
-            }
-        }
 
         // ========================================
         // CPF LOGIN SYNC: Sincronizar dados quando usuario é encontrado
@@ -2143,13 +2117,6 @@ router.get('/me', async (req, res) => {
             return res.status(401).json({ message: 'Token inválido', code: 'AUTH_INVALID' });
         }
 
-        // BE-003: Servir do cache se disponível (evita 58+ queries redundantes por pageload)
-        const cached = _meCacheGet(userId);
-        if (cached) {
-            res.setHeader('X-Cache', 'HIT');
-            return res.json(cached);
-        }
-
         const [rows] = await safeQuery(
             'SELECT id, nome, email, role, is_admin, avatar, foto, login, setor, areas FROM usuarios WHERE id = ? LIMIT 1',
             [userId]
@@ -2180,7 +2147,7 @@ router.get('/me', async (req, res) => {
             areas = ['vendas', 'rh', 'pcp', 'financeiro', 'nfe', 'compras', 'ti'];
         }
 
-        const response = {
+        res.json({
             id: u.id,
             nome: u.nome,
             email: u.email,
@@ -2191,12 +2158,7 @@ router.get('/me', async (req, res) => {
             login: u.login,
             setor: u.setor,
             areas
-        };
-
-        // Salvar no cache
-        _meCacheSet(userId, response);
-        res.setHeader('X-Cache', 'MISS');
-        res.json(response);
+        });
     } catch (err) {
         if (err.name === 'TokenExpiredError') {
             return res.status(401).json({ message: 'Token expirado', code: 'AUTH_EXPIRED' });

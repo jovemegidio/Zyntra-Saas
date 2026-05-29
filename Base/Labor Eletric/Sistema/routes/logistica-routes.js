@@ -429,19 +429,7 @@ module.exports = function createLogisticaRoutes(deps) {
                 return res.json(responseBody);
             }
 
-            // LOG001: Criar expedição standalone (sem pedido ou NF-e vinculados)
-            try {
-                const [expResult] = await pool.query(
-                    `INSERT INTO expedicoes (cliente, transportadora_id, status, previsao, prioridade, observacoes, empresa_id, criado_por)
-                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-                    [cliente || null, transportadora_id || null, status || 'pendente', previsao || null,
-                     prioridade || 'normal', observacoes || null, req.user.empresa_id, req.user.id]
-                );
-                return res.json({ success: true, message: 'Expedição criada com sucesso', id: expResult.insertId });
-            } catch (expErr) {
-                console.error('[LOGISTICA/EXPEDICAO] Erro ao criar expedição standalone:', expErr.message);
-                return res.status(400).json({ success: false, message: 'Pedido ou NF-e é obrigatório para criar expedição' });
-            }
+            res.status(400).json({ success: false, message: 'Pedido ou NF-e é obrigatório' });
         } catch (error) {
             console.error('[LOGISTICA/EXPEDICAO] Erro:', error);
             next(error);

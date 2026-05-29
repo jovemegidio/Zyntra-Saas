@@ -4868,7 +4868,7 @@
                                     <div class="metric-icon blue"><i class="fa-solid fa-boxes-stacked"></i></div>
                                     <span class="metric-trend neutral">&mdash;</span>
                                 </div>
-                                <div class="metric-value" id="stat-produtos">0</div>
+                                <div class="metric-value" id="stat-produtos"><span class="alu-skeleton-inline" aria-label="Carregando"></span></div>
                                 <div class="metric-label">Total de Produtos</div>
                             </div>
 
@@ -4877,7 +4877,7 @@
                                     <div class="metric-icon green"><i class="fa-solid fa-industry"></i></div>
                                     <span class="metric-trend neutral">&mdash;</span>
                                 </div>
-                                <div class="metric-value" id="stat-ordens">0</div>
+                                <div class="metric-value" id="stat-ordens"><span class="alu-skeleton-inline" aria-label="Carregando"></span></div>
                                 <div class="metric-label">Ordens em Produção</div>
                             </div>
 
@@ -4886,7 +4886,7 @@
                                     <div class="metric-icon blue"><i class="fa-solid fa-boxes-stacked"></i></div>
                                     <span class="metric-trend neutral">&mdash;</span>
                                 </div>
-                                <div class="metric-value" id="stat-produtos-com-estoque">0</div>
+                                <div class="metric-value" id="stat-produtos-com-estoque"><span class="alu-skeleton-inline" aria-label="Carregando"></span></div>
                                 <div class="metric-label">Produtos com Estoque</div>
                             </div>
 
@@ -4895,7 +4895,7 @@
                                     <div class="metric-icon purple"><i class="fa-solid fa-cubes"></i></div>
                                     <span class="metric-trend neutral">&mdash;</span>
                                 </div>
-                                <div class="metric-value" id="stat-materiais">0</div>
+                                <div class="metric-value" id="stat-materiais"><span class="alu-skeleton-inline" aria-label="Carregando"></span></div>
                                 <div class="metric-label">Total de Materiais</div>
                             </div>
                         </div>
@@ -4992,11 +4992,11 @@
                                     <table class="data-table">
                                         <thead>
                                             <tr>
-                                                <th>OP #</th>
-                                                <th>Produto</th>
-                                                <th>Qtd.</th>
+                                                <th>Código</th>
+                                                <th>Cliente/Empresa</th>
+                                                <th>Valor</th>
                                                 <th>Status</th>
-                                                <th>Previsão</th>
+                                                <th>Data</th>
                                                 <th>Ações</th>
                                             </tr>
                                         </thead>
@@ -13081,7 +13081,9 @@
             try {
                 const response = await fetch('/api/pcp/materias-primas', { credentials: 'include' });
                 const data = await response.json();
-                const materiais = data.materiais || (Array.isArray(data) ? data : []);
+                let materiais = data.materiais || (Array.isArray(data) ? data : []);
+                // Filtrar materiais migrados (status técnico, não exibir para o usuário)
+                materiais = materiais.filter(m => String(m.status || '').toUpperCase() !== 'MIGRADO_PARA_PRODUTOS');
                 const total = materiais.length;
 
                 const materiaisTotal = document.getElementById('materiais-total');
@@ -13123,6 +13125,9 @@
                 const response = await fetch('/api/pcp/materias-primas', { credentials: 'include' });
                 const body = await response.json();
                 let materiais = body.materiais || (Array.isArray(body) ? body : []);
+
+                // Filtrar materiais migrados (status técnico)
+                materiais = materiais.filter(m => String(m.status || '').toUpperCase() !== 'MIGRADO_PARA_PRODUTOS');
 
                 // Filtrar por busca
                 if (query) {
@@ -18514,16 +18519,17 @@
                     'Cache-Control': 'no-cache, no-store, must-revalidate',
                     'Pragma': 'no-cache'
                 };
-                // BUG-009: Carregar Ordens de Produção reais do PCP (não pedidos de Vendas)
+                // USA A MESMA API DO KANBAN DE VENDAS para garantir dados idênticos
+                // Adiciona timestamp para evitar cache
                 const timestamp = new Date().getTime();
-                const response = await fetch(`/api/pcp/ordens?limit=10&_t=${timestamp}`, {
+                const response = await fetch(`/api/vendas/kanban/pedidos?_t=${timestamp}`, {
                     credentials: 'include',
                     cache: 'no-cache',
                     headers: headers
                 });
 
                 if (response.status === 401) {
-                    console.log('Não autenticado - redirecionando para login');
+                    console.log('? Não autenticado - redirecionando para login');
                     localStorage.removeItem('authToken');
                     localStorage.removeItem('token');
                     localStorage.removeItem('userData');
@@ -18531,35 +18537,37 @@
                     return;
                 }
 
-                if (!response.ok) throw new Error('Erro ao carregar ordens de produção');
+                if (!response.ok) throw new Error('Erro ao carregar pedidos do Kanban');
 
-                const resultado = await response.json();
-                const todasAsOrdens = resultado.data || resultado || [];
+                const todosOsPedidos = await response.json();
 
-                console.log('[ORDENS RECENTES] Ordens de produção:', todasAsOrdens.length);
+                // Validar se os dados são do banco real (não são mock)
+                console.log('[ORDENS RECENTES] Dados recebidos:', todosOsPedidos.length, 'pedidos');
 
-                const pedidos = todasAsOrdens.slice(0, 10);
+                // Pegar os 10 mais recentes
+                const pedidos = todosOsPedidos.slice(0, 10);
 
-                // Mapeamento de status de Ordens de Produção
+                // Mapeamento de status IGUAL ao Kanban de Vendas
                 const statusLabels = {
-                    'pendente':     { label: 'Pendente',     class: 'status-badge gray' },
-                    'planejada':    { label: 'Planejada',    class: 'status-badge teal' },
-                    'Planejada':    { label: 'Planejada',    class: 'status-badge teal' },
-                    'ativa':        { label: 'Ativa',        class: 'status-badge blue' },
-                    'em_producao':  { label: 'Em Produção',  class: 'status-badge yellow' },
-                    'Em Produção':  { label: 'Em Produção',  class: 'status-badge yellow' },
-                    'em_andamento': { label: 'Em Andamento', class: 'status-badge orange' },
-                    'A Fazer':      { label: 'A Fazer',      class: 'status-badge gray' },
-                    'concluida':    { label: 'Concluída',    class: 'status-badge green' },
-                    'cancelada':    { label: 'Cancelada',    class: 'status-badge red' }
+                    'orçamento': { label: 'Orçamento', class: 'status-badge gray' },
+                    'análise': { label: 'Análise de Crédito', class: 'status-badge yellow' },
+                    'analise_credito': { label: 'Análise de Crédito', class: 'status-badge yellow' },
+                    'análise-crédito': { label: 'Análise de Crédito', class: 'status-badge yellow' },
+                    'aprovado': { label: 'Pedido Aprovado', class: 'status-badge blue' },
+                    'pedido-aprovado': { label: 'Pedido Aprovado', class: 'status-badge blue' },
+                    'faturar': { label: 'Faturar', class: 'status-badge orange' },
+                    'faturado': { label: 'Faturado', class: 'status-badge green' },
+                    'entregue': { label: 'Entregue', class: 'status-badge purple' },
+                    'recibo': { label: 'Recibo', class: 'status-badge teal' },
+                    'cancelado': { label: 'Cancelado', class: 'status-badge red' }
                 };
 
                 if (pedidos.length === 0) {
                     tbody.innerHTML = `
                         <tr>
                             <td colspan="6" style="text-align: center; padding: 40px;">
-                                <div class="empty-state-icon"><i class="fas fa-industry"></i></div>
-                                <p style="margin-top: 16px; color: var(--gray-500);">Nenhuma ordem de produção encontrada</p>
+                                <div class="empty-state-icon"><i class="fas fa-clipboard-list"></i></div>
+                                <p style="margin-top: 16px; color: var(--gray-500);">Nenhuma ordem encontrada</p>
                             </td>
                         </tr>
                     `;
@@ -18567,24 +18575,47 @@
                 }
 
                 tbody.innerHTML = pedidos.map(pedido => {
-                    const statusInfo = statusLabels[pedido.status] || { label: pedido.status || '-', class: 'status-badge gray' };
-                    const data = pedido.created_at ? new Date(pedido.created_at).toLocaleDateString('pt-BR') : '-';
-                    const previsao = pedido.data_prevista ? new Date(pedido.data_prevista).toLocaleDateString('pt-BR') : '-';
-                    const numero = pedido.numero_pedido || pedido.codigo || ('OP-' + pedido.id);
-                    const produto = pedido.produto_nome || pedido.observacoes || '-';
+                    const statusInfo = statusLabels[pedido.status] || { label: pedido.status, class: 'status-badge gray' };
+                    const data = pedido.created_at || pedido.data_pedido ? new Date(pedido.created_at || pedido.data_pedido).toLocaleDateString('pt-BR') : '-';
+                    const valor = pedido.valor || pedido.valor_total ? `R$ ${parseFloat(pedido.valor || pedido.valor_total).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : '-';
+
+                    // Pedidos aprovado, faturar, faturado ou entregue podem gerar OP
+                    const podeGerarOP = ['aprovado', 'pedido-aprovado', 'faturar', 'faturado', 'entregue'].includes(pedido.status);
+
+                    // Usar cliente do Kanban (campo 'cliente' ou 'cliente_nome')
+                    const clienteNome = pedido.cliente || pedido.cliente_nome || 'Cliente não informado';
+
+                    // Botões de ação - sempre mostrar calculadora + ação condicional
+                    let açãoHTML = `
+                        <button class="btn btn-sm btn-info" onclick="verMateriaisPedido(${pedido.id})" title="Calcular Materiais" style="margin-right: 4px;">
+                            <i class="fas fa-calculator"></i>
+                        </button>
+                    `;
+
+                    if (podeGerarOP) {
+                        açãoHTML += `
+                            <button class="btn btn-sm btn-success" onclick="abrirOrdemProduçãoDePedido(${pedido.id})" title="Gerar Ordem de Produção">
+                                <i class="fas fa-industry"></i>
+                            </button>
+                        `;
+                    } else {
+                        açãoHTML += `
+                            <button class="btn btn-sm btn-secondary" disabled title="Aguardando aprovação">
+                                <i class="fas fa-clock"></i>
+                            </button>
+                        `;
+                    }
 
                     return `
-                        <tr>
-                            <td><strong>${numero}</strong></td>
-                            <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${produto}">${produto}</td>
-                            <td>${pedido.quantidade || '-'}</td>
+                        <tr data-pedido-id="${pedido.id}" style="${podeGerarOP ? 'background: linear-gradient(90deg, rgba(34, 197, 94, 0.05), transparent);' : ''}">
+                            <td><strong>#${pedido.id}</strong></td>
+                            <td>${clienteNome}</td>
+                            <td>${valor}</td>
                             <td><span class="${statusInfo.class}">${statusInfo.label}</span></td>
-                            <td>${previsao}</td>
+                            <td>${data}</td>
                             <td>
                                 <div class="table-actions" style="display: flex; gap: 4px;">
-                                    <button class="btn btn-sm btn-info" onclick="abrirOrdemProdução(${pedido.id})" title="Ver Detalhes">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
+                                    ${açãoHTML}
                                 </div>
                             </td>
                         </tr>

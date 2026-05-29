@@ -85,6 +85,31 @@
                         </div>
                     </div>
 
+                    <div class="modal-config-card admin-only" onclick="abrirConfiguracao('sefaz-status')" tabindex="0" data-admin-only="true" style="display:none;">
+                        <div class="modal-config-card-icon red">
+                            <i class="fas fa-satellite-dish"></i>
+                        </div>
+                        <div class="modal-config-card-content">
+                            <h3>SEFAZ — Comunicação Fiscal</h3>
+                            <p class="modal-config-card-subtitle">Status do serviço, ambiente e histórico de transmissão (admin)</p>
+                        </div>
+                    </div>
+                    <script>
+                        // Mostra cards admin-only apenas para usuários admin
+                        (function applyAdminVisibility() {
+                            try {
+                                const raw = localStorage.getItem('user') || localStorage.getItem('usuarioLogado');
+                                const u = raw ? JSON.parse(raw) : null;
+                                const isAdmin = u && (u.is_admin === 1 || u.is_admin === true ||
+                                    String(u.role || '').toLowerCase() === 'admin' ||
+                                    String(u.role || '').toLowerCase() === 'administrador');
+                                if (isAdmin) {
+                                    document.querySelectorAll('.modal-config-card.admin-only').forEach(el => el.style.display = '');
+                                }
+                            } catch (_) {}
+                        })();
+                    </script>
+
                     <div class="modal-config-card" onclick="abrirConfiguracao('importacao-nfe')" tabindex="0">
                         <div class="modal-config-card-icon teal">
                             <i class="fas fa-file-invoice"></i>

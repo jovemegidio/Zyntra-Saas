@@ -36,7 +36,7 @@ async function handleLogin() {
             const data = await response.json();
             localStorage.setItem('authToken', data.token);
             localStorage.setItem('userData', JSON.stringify(data.user));
-            window.location.href = '/dashboard';
+            window.location.href = window.__withBasePath ? window.__withBasePath('/dashboard') : '/dashboard';
         } catch (error) {
             alert('Erro ao fazer login.');
         }
@@ -105,7 +105,7 @@ function hideUnauthorizedModules(role) {
 function logout() {
     localStorage.removeItem('jwt');
     localStorage.removeItem('userRole');
-    window.location.href = '/login.html';
+    window.location.href = window.__withBasePath ? window.__withBasePath('/login.html') : '/login.html';
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -214,7 +214,7 @@ function initPCPPage() {
                 localStorage.removeItem('userData');
                 localStorage.removeItem('authToken');
                 alert('Sessão inválida ou expirada. Por favor, faça login novamente.');
-                window.location.href = '/login.html';
+                window.location.href = window.__withBasePath ? window.__withBasePath('/login.html') : '/login.html';
                 return Promise.reject(new Error('Não autorizado'));
             }
             return response;
@@ -850,7 +850,7 @@ function initDashboardPage() {
             }
             localStorage.removeItem('authToken');
             localStorage.removeItem('userData');
-            window.location.href = '/login.html';
+            window.location.href = window.__withBasePath ? window.__withBasePath('/login.html') : '/login.html';
         });
     }
 }

@@ -104,20 +104,6 @@ module.exports = function createComprasExtendedRoutes(deps) {
     });
 
     // Criar novo fornecedor
-    function validarCNPJ(cnpj) {
-        cnpj = String(cnpj).replace(/\D/g, '');
-        if (cnpj.length !== 14) return false;
-        if (/^(\d)\1+$/.test(cnpj)) return false;
-        let soma = 0, pos = 5;
-        for (let i = 0; i < 12; i++) { soma += parseInt(cnpj[i]) * pos--; if (pos < 2) pos = 9; }
-        let dig = soma % 11 < 2 ? 0 : 11 - (soma % 11);
-        if (dig !== parseInt(cnpj[12])) return false;
-        soma = 0; pos = 6;
-        for (let i = 0; i < 13; i++) { soma += parseInt(cnpj[i]) * pos--; if (pos < 2) pos = 9; }
-        dig = soma % 11 < 2 ? 0 : 11 - (soma % 11);
-        return dig === parseInt(cnpj[13]);
-    }
-
     router.post('/fornecedores', authenticateToken, requireComprasWrite, async (req, res) => {
         try {
             const {
@@ -128,10 +114,6 @@ module.exports = function createComprasExtendedRoutes(deps) {
 
             if (!razao_social || !cnpj) {
                 return res.status(400).json({ message: 'Razão social e CNPJ são obrigatórios' });
-            }
-
-            if (!validarCNPJ(cnpj)) {
-                return res.status(400).json({ message: 'CNPJ inválido' });
             }
 
             const [result] = await pool.query(
@@ -170,10 +152,6 @@ module.exports = function createComprasExtendedRoutes(deps) {
                 estado, cep, telefone, email, contato_principal,
                 condicoes_pagamento, prazo_entrega_padrao, observacoes, ativo
             } = req.body;
-
-            if (cnpj && !validarCNPJ(cnpj)) {
-                return res.status(400).json({ message: 'CNPJ inválido' });
-            }
 
             await pool.query(
                 `UPDATE fornecedores SET
@@ -1907,7 +1885,7 @@ module.exports = function createComprasExtendedRoutes(deps) {
 
             // Pedidos pendentes
             const [pedidosPendentes] = await pool.query(
-                "SELECT COUNT(*) as total FROM pedidos_compra WHERE LOWER(status) IN ('pendente', 'aberto', 'em_andamento')"
+                'SELECT COUNT(*) as total FROM pedidos_compra WHERE status = \'pendente\''
             );
 
             // Valor total de compras do mês
@@ -1945,16 +1923,10 @@ module.exports = function createComprasExtendedRoutes(deps) {
                 LIMIT 10
             `);
 
-            // Requisições pendentes (pendente + rascunho)
-            const [reqPendentes] = await pool.query(
-                "SELECT COUNT(*) as total FROM requisicoes_compra WHERE status IN ('pendente', 'rascunho')"
-            ).catch(() => [[{ total: 0 }]]);
-
             res.json({
                 stats: {
                     total_pedidos: totalPedidos[0].total,
                     pedidos_pendentes: pedidosPendentes[0].total,
-                    requisicoes_pendentes: reqPendentes[0].total,
                     compras_mes: comprasMes[0].total || 0,
                     fornecedores_ativos: fornecedoresAtivos[0].total
                 },
@@ -2000,62 +1972,6 @@ module.exports = function createComprasExtendedRoutes(deps) {
     });
 
     // ===== REQUISIÇÕES DE COMPRA =====
-
-    // COM001-FIX: Criar tabelas de pedidos de compra se não existirem
-    (async () => {
-        try {
-            await pool.query(`
-                CREATE TABLE IF NOT EXISTS pedidos_compra (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
-                    numero_pedido VARCHAR(50),
-                    fornecedor_id INT,
-                    requisicao_id INT,
-                    data_pedido DATETIME DEFAULT CURRENT_TIMESTAMP,
-                    data_entrega_prevista DATE,
-                    valor_total DECIMAL(15,2) DEFAULT 0,
-                    valor_final DECIMAL(15,2) DEFAULT 0,
-                    status VARCHAR(50) DEFAULT 'pendente',
-                    forma_pagamento VARCHAR(100),
-                    condicao_pagamento VARCHAR(100),
-                    observacoes TEXT,
-                    motivo_cancelamento TEXT,
-                    usuario_solicitante_id INT,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-            `);
-            await pool.query(`
-                CREATE TABLE IF NOT EXISTS pedidos_compra_itens (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
-                    pedido_id INT NOT NULL,
-                    material_id INT,
-                    descricao VARCHAR(255) NOT NULL DEFAULT '',
-                    quantidade DECIMAL(15,4) DEFAULT 0,
-                    preco_unitario DECIMAL(15,4) DEFAULT 0,
-                    subtotal DECIMAL(15,2) DEFAULT 0,
-                    FOREIGN KEY (pedido_id) REFERENCES pedidos_compra(id) ON DELETE CASCADE
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-            `);
-            await pool.query(`
-                CREATE TABLE IF NOT EXISTS itens_pedido (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
-                    pedido_id INT NOT NULL,
-                    codigo_produto VARCHAR(50),
-                    descricao VARCHAR(255) NOT NULL DEFAULT '',
-                    quantidade DECIMAL(15,4) DEFAULT 0,
-                    unidade VARCHAR(20) DEFAULT 'UN',
-                    preco_unitario DECIMAL(15,4) DEFAULT 0,
-                    preco_total DECIMAL(15,2) DEFAULT 0,
-                    quantidade_recebida DECIMAL(15,4) DEFAULT 0,
-                    observacoes TEXT,
-                    FOREIGN KEY (pedido_id) REFERENCES pedidos_compra(id) ON DELETE CASCADE
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-            `);
-            console.log('✅ Tabelas pedidos_compra, pedidos_compra_itens e itens_pedido verificadas/criadas');
-        } catch (err) {
-            console.error('⚠️ Erro ao criar tabelas de pedidos compra:', err.message);
-        }
-    })();
 
     // Criar tabela de requisições se não existir (aguarda conclusão antes de aceitar requests)
     let tabelasRequisicoesProntas = false;
@@ -2164,8 +2080,7 @@ module.exports = function createComprasExtendedRoutes(deps) {
             const { status, prioridade, solicitante, data_inicio, data_fim } = req.query;
             let query = `
                 SELECT r.*,
-                       (SELECT COUNT(*) FROM itens_requisicao WHERE requisicao_id = r.id) as total_itens,
-                       (SELECT ir.descricao FROM itens_requisicao ir WHERE ir.requisicao_id = r.id ORDER BY ir.id ASC LIMIT 1) as descricao
+                       (SELECT COUNT(*) FROM itens_requisicao WHERE requisicao_id = r.id) as total_itens
                 FROM requisicoes_compra r
                 WHERE 1=1
             `;
@@ -2534,7 +2449,7 @@ module.exports = function createComprasExtendedRoutes(deps) {
             const [stats] = await pool.query(`
                 SELECT
                     COUNT(*) as total,
-                    SUM(CASE WHEN status IN ('pendente', 'rascunho') THEN 1 ELSE 0 END) as pendentes,
+                    SUM(CASE WHEN status = 'pendente' THEN 1 ELSE 0 END) as pendentes,
                     SUM(CASE WHEN status = 'aprovado' THEN 1 ELSE 0 END) as aprovadas,
                     SUM(CASE WHEN status = 'cotacao' THEN 1 ELSE 0 END) as em_cotacao,
                     SUM(CASE WHEN prioridade = 'urgente' THEN 1 ELSE 0 END) as urgentes

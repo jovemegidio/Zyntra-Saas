@@ -73,19 +73,58 @@ router.get('/kpis', async (req, res) => {
                 AND status IN ('a_vencer', 'vencida', 'pendente', 'aberto')
             `).catch(() => [[{ total: 0 }]]),
 
-            // UI-02: Alinhado com whitelist de status ativos do PCP (pcp-routes.js linha ~352)
+            // BUG-003: Ordens ativas — exclui apenas terminais (alinhado com query do PCP)
             db.query(`
                 SELECT COUNT(*) as total
                 FROM ordens_producao
-                WHERE status IN ('ativa', 'em_producao', 'Em Produção', 'em_andamento', 'A Fazer', 'pendente', 'planejada', 'Planejada')
+                WHERE status NOT IN ('concluida', 'cancelada', 'finalizada', 'Concluída', 'Cancelada', 'Finalizada')
             `).catch(() => [[{ total: 0 }]])
         ]);
         
         // Processar resultados
-        const vendasAtual = vendasMes.status === 'fulfilled' ? 
+        let vendasAtual = vendasMes.status === 'fulfilled' ?
             parseFloat(vendasMes.value[0]?.[0]?.total || 0) : 0;
-        const vendasAnterior = vendasMesAnterior.status === 'fulfilled' ? 
+        let vendasAnterior = vendasMesAnterior.status === 'fulfilled' ?
             parseFloat(vendasMesAnterior.value[0]?.[0]?.total || 0) : 0;
+
+        // BUG-014: contas_receber está vazia em produção (sem integração Fat→Fin).
+        // Fallback: usa NF-e faturadas no mês como aproximação dos recebimentos.
+        if (vendasAtual === 0) {
+            try {
+                const [[row]] = await db.query(`
+                    SELECT COALESCE(SUM(valor_total), 0) as total
+                    FROM nfe
+                    WHERE status IN ('autorizada', 'emitida', 'concluida', 'enviada')
+                      AND MONTH(COALESCE(data_emissao, created_at)) = MONTH(CURDATE())
+                      AND YEAR(COALESCE(data_emissao, created_at))  = YEAR(CURDATE())
+                `);
+                vendasAtual = parseFloat(row?.total || 0);
+            } catch (_) {
+                // Fallback final: pedidos com status faturado/entregue
+                try {
+                    const [[row2]] = await db.query(`
+                        SELECT COALESCE(SUM(COALESCE(valor_total, valor)), 0) as total
+                        FROM pedidos
+                        WHERE status IN ('faturado', 'entregue', 'recibo', 'convertido')
+                          AND MONTH(COALESCE(data_faturamento, created_at)) = MONTH(CURDATE())
+                          AND YEAR(COALESCE(data_faturamento, created_at))  = YEAR(CURDATE())
+                    `);
+                    vendasAtual = parseFloat(row2?.total || 0);
+                } catch (_) {}
+            }
+        }
+        if (vendasAnterior === 0) {
+            try {
+                const [[row]] = await db.query(`
+                    SELECT COALESCE(SUM(valor_total), 0) as total
+                    FROM nfe
+                    WHERE status IN ('autorizada', 'emitida', 'concluida', 'enviada')
+                      AND MONTH(COALESCE(data_emissao, created_at)) = MONTH(DATE_SUB(CURDATE(), INTERVAL 1 MONTH))
+                      AND YEAR(COALESCE(data_emissao, created_at))  = YEAR(DATE_SUB(CURDATE(), INTERVAL 1 MONTH))
+                `);
+                vendasAnterior = parseFloat(row?.total || 0);
+            } catch (_) {}
+        }
         
         // Calcular tendência
         let trendPercent = 0;
@@ -244,11 +283,11 @@ router.get('/modules', async (req, res) => {
             financeiro,
             rh
         ] = await Promise.allSettled([
-            // Compras: pedidos de compra não finalizados/cancelados
+            // Compras: pedidos de compra pendentes ou em andamento
             db.query(`
-                SELECT COUNT(*) as total
-                FROM pedidos_compra
-                WHERE status NOT IN ('cancelado', 'rejeitado', 'concluido', 'finalizado', 'entregue', 'deletado', 'arquivado')
+                SELECT COUNT(*) as total 
+                FROM pedidos_compra 
+                WHERE status IN ('pendente', 'aprovado', 'parcial', 'em_andamento')
             `).catch(() => [[{ total: 0 }]]),
             
             // Vendas: orçamentos em aberto (usar pedidos se orcamentos não existir)

@@ -1831,24 +1831,22 @@ module.exports = function createVendasRoutes(deps) {
                     }
 
                     if (valorFaturamento > 0) {
-                        // M-06 FIX: Check total covered by existing CRs (partials may have created CRs for < full value)
+                        // Verificar se já existe conta a receber para este pedido (evita duplicação)
                         const [existingCR] = await connection.query(
-                            'SELECT COALESCE(SUM(valor), 0) as total_coberto FROM contas_receber WHERE pedido_id = ? AND status != "cancelada"', [id]
+                            'SELECT id FROM contas_receber WHERE pedido_id = ? LIMIT 1', [id]
                         );
-                        const totalCoberto = parseFloat(existingCR[0].total_coberto) || 0;
-                        const valorFaltante = Math.round((valorFaturamento - totalCoberto) * 100) / 100;
-                        if (valorFaltante > 0.01) {
+                        if (existingCR.length === 0) {
                             contaReceberGerada = await faturamentoShared.gerarContaReceber(connection, {
                                 pedido_id: parseInt(id),
                                 cliente_id: pedidoData.cliente_id || null,
                                 descricao: `Faturamento Pedido #${id} - ${pedidoData.cliente_nome || 'Cliente'}`,
-                                valor: valorFaltante,
+                                valor: valorFaturamento,
                                 tipo: 'faturamento',
                                 pedido: pedidoData
                             });
-                            console.log(`[FINANCEIRO_AUTO] Conta a receber #${contaReceberGerada.insertId} gerada para pedido #${id} (R$${valorFaltante} de R$${valorFaturamento})`);
+                            console.log(`[FINANCEIRO_AUTO] Conta a receber #${contaReceberGerada.insertId} gerada para pedido #${id} (R$${valorFaturamento}, venc. ${contaReceberGerada.data_vencimento_dias} dias)`);
                         } else {
-                            console.log(`[FINANCEIRO_AUTO] Contas a receber já cobrem R$${totalCoberto} de R$${valorFaturamento} para pedido #${id} — pulando`);
+                            console.log(`[FINANCEIRO_AUTO] Conta a receber já existe para pedido #${id} (id=${existingCR[0].id}), pulando`);
                         }
                     }
                 } catch (financeiroError) {
@@ -3647,6 +3645,7 @@ module.exports = function createVendasRoutes(deps) {
                         COALESCE(NULLIF(preco_venda, 0), NULLIF(preco, 0), preco_custo, 0) as preco_venda,
                         COALESCE(preco_custo, 0) as preco_custo,
                         COALESCE(estoque_atual, 0) as estoque_atual,
+                        COALESCE(controla_estoque, 1) as controla_estoque,
                         COALESCE(localizacao, '') as local_estoque,
                         COALESCE(gtin, '') as ean,
                         COALESCE(aliquota_ipi, 0) as aliquota_ipi,
@@ -4655,24 +4654,21 @@ module.exports = function createVendasRoutes(deps) {
                     }
 
                     if (valorFaturamento > 0) {
-                        // M-06 FIX: Check total already covered by existing CRs (partials may have created CRs for < full value)
                         const [existingCR] = await connection.query(
-                            'SELECT COALESCE(SUM(valor), 0) as total_coberto FROM contas_receber WHERE pedido_id = ? AND status != "cancelada"', [id]
+                            'SELECT id FROM contas_receber WHERE pedido_id = ? LIMIT 1', [id]
                         );
-                        const totalCoberto = parseFloat(existingCR[0].total_coberto) || 0;
-                        const valorFaltante = Math.round((valorFaturamento - totalCoberto) * 100) / 100;
-                        if (valorFaltante > 0.01) {
+                        if (existingCR.length === 0) {
                             contaReceberGerada = await faturamentoShared.gerarContaReceber(connection, {
                                 pedido_id: parseInt(id),
                                 cliente_id: pedido.cliente_id || null,
                                 descricao: `Faturamento Pedido #${id} - ${pedido.cliente || 'Cliente'}`,
-                                valor: valorFaltante,
+                                valor: valorFaturamento,
                                 tipo: 'faturamento',
                                 pedido
                             });
-                            console.log(`[FATURAR] Conta a receber #${contaReceberGerada?.insertId} gerada para pedido #${id} (R$${valorFaltante} de R$${valorFaturamento})`);
+                            console.log(`[FATURAR] Conta a receber #${contaReceberGerada?.insertId} gerada para pedido #${id} (R$${valorFaturamento})`);
                         } else {
-                            console.log(`[FATURAR] Contas a receber já cobrem R$${totalCoberto} de R$${valorFaturamento} para pedido #${id} — pulando`);
+                            console.log(`[FATURAR] Conta a receber já existe para pedido #${id} — pulando`);
                         }
                     }
                 } catch (financeiroError) {
@@ -5289,6 +5285,149 @@ module.exports = function createVendasRoutes(deps) {
 
         } catch (error) {
             console.error('[DANFE] Erro ao gerar:', error);
+            next(error);
+        }
+    });
+
+    // ============================================================
+    // GET /api/vendas/pedidos/:id/recibo
+    // Gera recibo HTML (imprimível) do pedido faturado.
+    // BUG-007: endpoint estava ausente; botão de recibo retornava 404.
+    // ============================================================
+    router.get('/pedidos/:id/recibo', authenticateToken, async (req, res, next) => {
+        try {
+            const { id } = req.params;
+
+            const [[pedido]] = await pool.query(`
+                SELECT p.*,
+                       COALESCE(c.nome_fantasia, c.razao_social, c.nome, p.cliente_nome, p.cliente, 'Cliente') AS cliente_nome,
+                       COALESCE(c.cnpj, c.cnpj_cpf, c.cpf, '') AS cliente_doc,
+                       COALESCE(c.endereco, '') AS cliente_endereco,
+                       COALESCE(c.cidade, '') AS cliente_cidade,
+                       COALESCE(c.estado, '') AS cliente_estado,
+                       COALESCE(u.nome, '') AS vendedor_nome
+                FROM pedidos p
+                LEFT JOIN clientes c ON p.cliente_id = c.id
+                LEFT JOIN usuarios u ON p.vendedor_id = u.id
+                WHERE p.id = ?
+                LIMIT 1
+            `, [id]);
+
+            if (!pedido) {
+                return res.status(404).json({ success: false, message: 'Pedido não encontrado' });
+            }
+
+            const [[cfg]] = await pool.query('SELECT * FROM configuracoes_empresa LIMIT 1').catch(() => [[null]]);
+            const empresa = cfg || {
+                razao_social: 'ALUFORCE',
+                nome_fantasia: 'ALUFORCE',
+                cnpj: '',
+                endereco: '',
+                cidade: '',
+                estado: ''
+            };
+
+            const valor = Number(pedido.valor_total || pedido.valor || 0);
+            const valorFmt = valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            const dataEmissao = new Date(pedido.data_faturamento || pedido.updated_at || pedido.created_at || Date.now());
+            const dataFmt = dataEmissao.toLocaleDateString('pt-BR');
+
+            // Valor por extenso (simplificado)
+            function valorExtenso(v) {
+                const inteiro = Math.floor(v);
+                const cents = Math.round((v - inteiro) * 100);
+                return `${inteiro.toLocaleString('pt-BR')} reais${cents > 0 ? ` e ${cents} centavos` : ''}`;
+            }
+
+            const esc = s => String(s == null ? '' : s)
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+            const html = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Recibo Pedido #${esc(pedido.id)}</title>
+<style>
+  body { font-family: 'Inter', Arial, sans-serif; max-width: 780px; margin: 32px auto; padding: 0 24px; color: #111; }
+  .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #111; padding-bottom: 12px; margin-bottom: 24px; }
+  .header h1 { margin: 0; font-size: 28px; letter-spacing: 2px; }
+  .empresa { font-size: 12px; color: #555; text-align: right; }
+  .numero { background: #f4f4f4; padding: 12px 16px; border-radius: 6px; display: flex; justify-content: space-between; margin-bottom: 24px; font-size: 14px; }
+  .valor-destaque { font-size: 32px; font-weight: 700; color: #1e40af; text-align: center; margin: 24px 0; padding: 16px; background: #eff6ff; border-radius: 8px; }
+  .bloco { margin: 16px 0; padding: 12px; border: 1px solid #e5e7eb; border-radius: 6px; font-size: 13px; line-height: 1.6; }
+  .bloco strong { display: inline-block; min-width: 110px; color: #444; }
+  .assinatura { margin-top: 64px; text-align: center; }
+  .assinatura .linha { border-top: 1px solid #111; width: 60%; margin: 0 auto 8px; }
+  .footer { margin-top: 32px; text-align: center; font-size: 11px; color: #888; }
+  @media print {
+    body { margin: 0; }
+    .no-print { display: none; }
+  }
+  .print-btn { background: #1e40af; color: #fff; border: 0; padding: 10px 18px; border-radius: 6px; cursor: pointer; margin-bottom: 16px; }
+</style>
+</head>
+<body>
+  <button class="no-print print-btn" onclick="window.print()">🖨️ Imprimir</button>
+
+  <div class="header">
+    <div>
+      <h1>RECIBO</h1>
+      <div style="font-size:11px;color:#666;">Comprovante de recebimento</div>
+    </div>
+    <div class="empresa">
+      <strong>${esc(empresa.razao_social || empresa.nome_fantasia)}</strong><br>
+      ${esc(empresa.cnpj ? 'CNPJ: ' + empresa.cnpj : '')}<br>
+      ${esc([empresa.endereco, empresa.cidade, empresa.estado].filter(Boolean).join(' - '))}
+    </div>
+  </div>
+
+  <div class="numero">
+    <div><strong>Recibo nº:</strong> ${String(pedido.id).padStart(6, '0')}</div>
+    <div><strong>Pedido:</strong> #${esc(pedido.numero_pedido || pedido.id)}</div>
+    <div><strong>Data:</strong> ${esc(dataFmt)}</div>
+  </div>
+
+  <div class="valor-destaque">
+    ${esc(valorFmt)}
+  </div>
+
+  <div class="bloco">
+    Recebi(emos) de <strong>${esc(pedido.cliente_nome)}</strong>${pedido.cliente_doc ? ' (CNPJ/CPF: ' + esc(pedido.cliente_doc) + ')' : ''},
+    a importância de <strong>${esc(valorFmt)}</strong> (${esc(valorExtenso(valor))}),
+    referente ao pedido nº <strong>#${esc(pedido.numero_pedido || pedido.id)}</strong>${pedido.nf || pedido.numero_nf ? ', NF-e nº ' + esc(pedido.nf || pedido.numero_nf) : ''},
+    emitido em ${esc(dataFmt)}.
+  </div>
+
+  <div class="bloco">
+    <strong>Cliente:</strong> ${esc(pedido.cliente_nome)}<br>
+    <strong>Documento:</strong> ${esc(pedido.cliente_doc || '—')}<br>
+    <strong>Endereço:</strong> ${esc([pedido.cliente_endereco, pedido.cliente_cidade, pedido.cliente_estado].filter(Boolean).join(' - ') || '—')}<br>
+    <strong>Vendedor:</strong> ${esc(pedido.vendedor_nome || '—')}<br>
+    <strong>Cond. pagto:</strong> ${esc(pedido.condicao_pagamento || '—')}
+  </div>
+
+  <div class="bloco">
+    Para clareza, firmo(amos) o presente recibo, dando plena, geral e irrevogável quitação
+    do valor acima descrito.
+  </div>
+
+  <div class="assinatura">
+    <div class="linha"></div>
+    <div>${esc(empresa.razao_social || empresa.nome_fantasia)}</div>
+    <div style="font-size:11px;color:#666;">${esc(empresa.cnpj ? 'CNPJ: ' + empresa.cnpj : '')}</div>
+  </div>
+
+  <div class="footer">
+    Documento gerado eletronicamente por Zyntra ERP em ${new Date().toLocaleString('pt-BR')}
+  </div>
+</body>
+</html>`;
+
+            res.setHeader('Content-Type', 'text/html; charset=utf-8');
+            res.setHeader('Content-Disposition', `inline; filename="recibo-pedido-${id}.html"`);
+            res.send(html);
+        } catch (error) {
+            console.error('[RECIBO] Erro ao gerar:', error.message);
             next(error);
         }
     });

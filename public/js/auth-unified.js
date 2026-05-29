@@ -1,5 +1,5 @@
 // auth-unified.js - Sistema de autenticação unificado para todos os módulos ALUFORCE
-// VERSAO 7.6 - ISOLAMENTO POR ABA + VALIDACAO VIA SERVIDOR + RESILIENCIA
+// VERSÃO 7.5 - ISOLAMENTO POR ABA + VALIDAÇÃO VIA SERVIDOR + RESILIÊNCIA
 // FIX v7.0: Resolve o problema de "espelhamento" onde o login de outro usuário em outra aba
 //      sobrescreve a sessão da aba atual via localStorage/cookie compartilhados.
 // FIX v7.1: NÃO copia mais token/userData de localStorage para sessionStorage em novas abas.
@@ -9,25 +9,18 @@
 //      exige 3 falhas consecutivas no check periódico antes de redirecionar.
 // FIX v7.5: AUTH_INACTIVE retorna Response sintética (evita 401 no caller), 503 retry
 //      sem signal abortado, proactive refresh usa config centralizada.
-// FIX v7.6: 502/504 entram no mesmo caminho resiliente de retry/fallback.
 
 // =============================================================================
-// ANTI-FOUC: restaurar somente header/sidebar escuros.
-// Não aplica `dark-mode` no body para não alterar o conteúdo das páginas.
+// 🎨 ANTI-FOUC: Restaurar dark-mode imediatamente para evitar flash branco
+// Deve rodar ANTES de qualquer outro código (síncrono)
 // =============================================================================
 ;(function antiFlashRestore() {
     try {
-        var legacyDark = localStorage.getItem('darkMode') === '1';
-        if (legacyDark && localStorage.getItem('a11yDarkMode') == null) {
-            localStorage.setItem('a11yDarkMode', '1');
+        if (localStorage.getItem('darkMode') === '1') {
+            document.documentElement.classList.add('dark-mode');
+            if (document.body) document.body.classList.add('dark-mode');
         }
-        if (legacyDark) {
-            localStorage.removeItem('darkMode');
-        }
-        if (localStorage.getItem('a11yDarkMode') === '1') {
-            document.documentElement.classList.add('a11y-dark-mode');
-        }
-    } catch (e) { /* localStorage indisponivel */ }
+    } catch (e) { /* localStorage indisponível */ }
 })();
 
 // =============================================================================
@@ -125,7 +118,6 @@
 
     function syncModalState(modal, force = false) {
         if (!(modal instanceof Element)) return;
-        if (!modal.matches(modalSelector)) return;
 
         const state = modalState.get(modal) || {};
         const isOpen = isModalOpen(modal);
@@ -323,7 +315,7 @@
     if (window.__authUnifiedInitialized) return;
     window.__authUnifiedInitialized = true;
 
-    console.log('[AUTH] Sistema de Autenticacao Unificado ALUFORCE v7.6 (Tab-Isolated + Server Validation + Token Refresh)');
+    console.log('🔐 Sistema de Autenticação Unificado ALUFORCE v7.6 (Tab-Isolated + Server Validation + Token Refresh)');
 
     const AUTH_BASE_PATH = window.__BASE_PATH || window.__MOUNT_PATH__ || '';
     function withAuthBase(path) {
@@ -338,7 +330,7 @@
         loginUrl: withAuthBase('/login.html'),
         apiMeEndpoint: withAuthBase('/api/me'),
         refreshEndpoint: withAuthBase('/api/auth/refresh'),
-        dashboardUrl: withAuthBase('/dashboard'),
+        dashboardUrl: withAuthBase('/index.html'),
         timeout: 5000,
         accessTokenLifetimeMs: 15 * 60 * 1000, // 15 min
         refreshBeforeExpiryMs: 2 * 60 * 1000,  // Refresh 2 min antes de expirar
@@ -454,19 +446,19 @@
         }
         if (timeoutId) clearTimeout(timeoutId);
 
-        // v7.6 FIX: Tratar 502/503/504 (gateway/cache/servico indisponivel) com retry limitado
-        if ([502, 503, 504].includes(response.status)) {
+        // v7.4 FIX: Tratar 503 (cache/serviço indisponível) — retry automático com limite
+        if (response.status === 503) {
             const retryCount = (init._retryCount || 0);
             if (retryCount < 2) {
                 const delay = 2000 * (retryCount + 1); // backoff: 2s, 4s
-                debugLog(`${response.status} retry ${retryCount + 1}/2 em ${delay}ms...`);
+                debugLog(`⚠️ 503 retry ${retryCount + 1}/2 em ${delay}ms...`);
                 await new Promise(r => setTimeout(r, delay));
                 var retryInit = Object.assign({}, init);
                 delete retryInit.signal;
                 retryInit._retryCount = retryCount + 1;
                 return window.fetch(input, retryInit);
             }
-            debugLog(`${response.status} apos 2 retries - retornando resposta original`);
+            debugLog('❌ 503 após 2 retries — retornando resposta original');
         }
 
         if (response.status === 401) {
@@ -684,37 +676,6 @@
         return false;
     }
 
-    // Exibir banner de sessão expirada antes de redirecionar (BE-001)
-    function _showSessionExpiredBanner(reason) {
-        try {
-            if (document.getElementById('__auth-session-banner')) return;
-            const banner = document.createElement('div');
-            banner.id = '__auth-session-banner';
-            banner.setAttribute('role', 'alert');
-            banner.style.cssText = [
-                'position:fixed', 'top:0', 'left:0', 'width:100%', 'z-index:2147483647',
-                'background:linear-gradient(90deg,#c0392b,#e74c3c)', 'color:#fff',
-                'padding:14px 20px', 'font:600 14px/1.4 system-ui,sans-serif',
-                'display:flex', 'align-items:center', 'gap:12px',
-                'box-shadow:0 2px 12px rgba(0,0,0,0.3)',
-                'animation:__bannerSlide .25s ease-out'
-            ].join(';');
-            const style = document.createElement('style');
-            style.textContent = '@keyframes __bannerSlide{from{transform:translateY(-100%)}to{transform:translateY(0)}}';
-            document.head.appendChild(style);
-            const icon = document.createElement('span');
-            icon.textContent = '🔒';
-            icon.style.cssText = 'font-size:18px;flex-shrink:0';
-            const text = document.createElement('span');
-            text.textContent = reason && reason !== 'Não autenticado'
-                ? `Sessão encerrada: ${reason}. Redirecionando para login…`
-                : 'Sua sessão expirou. Redirecionando para login…';
-            banner.appendChild(icon);
-            banner.appendChild(text);
-            document.body ? document.body.prepend(banner) : document.documentElement.prepend(banner);
-        } catch(e) { /* não bloquear redirect por falha no banner */ }
-    }
-
     // Função para redirecionar para login (com proteção contra loop)
     function redirectToLogin(reason = 'Não autenticado') {
         if (isRedirecting) {
@@ -730,18 +691,15 @@
         isRedirecting = true;
         debugLog(`🚪 Redirecionando para login: ${reason}`);
 
-        // BE-001: Mostrar banner visível por ~1.5s antes de redirecionar
-        _showSessionExpiredBanner(reason);
-
         const currentPath = window.location.pathname + window.location.search + window.location.hash;
         const returnTo = encodeURIComponent(currentPath);
 
         let loginUrl = AUTH_CONFIG.loginUrl;
-        if (currentPath !== '/' && currentPath !== '/dashboard' && currentPath.length > 1 && !currentPath.startsWith('/Zyntra-SGE/')) {
+        if (currentPath !== '/' && currentPath !== '/index.html' && currentPath.length > 1) {
             loginUrl = `${AUTH_CONFIG.loginUrl}?returnTo=${returnTo}`;
         }
 
-        setTimeout(() => window.location.assign(loginUrl), 1500);
+        window.location.assign(loginUrl);
     }
 
     // =========================================================================
@@ -1055,6 +1013,6 @@
     // Inicializar
     initAuth();
 
-    debugLog('Sistema de autenticacao v7.6 (Tab-Isolated + Server Validation + Token Refresh) inicializado');
+    debugLog('✅ Sistema de autenticação v7.5 (Tab-Isolated + Server Validation + Token Refresh) inicializado');
 
 })();

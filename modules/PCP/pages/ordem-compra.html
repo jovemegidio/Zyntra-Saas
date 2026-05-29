@@ -30,8 +30,8 @@
         .empty-state-desc { font-size: 14px; color: var(--gray-500); }
 
         /* Modal Styles - PCP Gray Theme */
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; display: none; align-items: flex-start; justify-content: center; z-index: 9999; padding: 20px; overflow-y: auto; }
-        .modal-overlay.active { display: flex !important; }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; align-items: flex-start; justify-content: center; z-index: 9999; padding: 20px; overflow-y: auto; }
+        .modal-overlay.active { display: flex; }
         .modal-pedido-compra { background: white; border-radius: 12px; width: 100%; max-width: 900px; margin: 20px auto; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3); animation: slideUp 0.3s ease; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -357,28 +357,24 @@
                             <div class="metric-header">
                                 <div class="metric-icon blue"><i class="fas fa-file-alt"></i></div>
                             </div>
-                            <div class="metric-value" id="oc-abertas">0</div>
                             <div class="metric-label">OCs Abertas</div>
                         </div>
                         <div class="metric-card green">
                             <div class="metric-header">
                                 <div class="metric-icon green"><i class="fas fa-check-double"></i></div>
                             </div>
-                            <div class="metric-value" id="oc-aprovadas">0</div>
                             <div class="metric-label">Aprovadas</div>
                         </div>
                         <div class="metric-card orange">
                             <div class="metric-header">
                                 <div class="metric-icon orange"><i class="fas fa-hourglass-half"></i></div>
                             </div>
-                            <div class="metric-value" id="oc-aguardando">0</div>
                             <div class="metric-label">Aguardando</div>
                         </div>
                         <div class="metric-card blue">
                             <div class="metric-header">
                                 <div class="metric-icon blue"><i class="fas fa-dollar-sign"></i></div>
                             </div>
-                            <div class="metric-value" id="oc-valor">R$ 0,00</div>
                             <div class="metric-label">Valor Total</div>
                         </div>
                     </div>
@@ -1305,7 +1301,7 @@
     <script src="/js/user-dropdown.js?v=20260319" defer></script>
 
     <!-- Modal: Adicionar Item OC -->
-    <div class="modal-overlay" id="modal-add-item-oc" style="display:none" onclick="if(event.target===this)fecharModalAddItem()">
+    <div class="modal-overlay" id="modal-add-item-oc" onclick="if(event.target===this)fecharModalAddItem()">
         <div style="background:white;border-radius:12px;width:100%;max-width:480px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.3);animation:slideUp .3s ease;">
             <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 24px;background:linear-gradient(135deg,#334155 0%,#475569 100%);color:white;border-bottom:3px solid #0f766e;">
                 <h2 style="margin:0;font-size:16px;font-weight:600;display:flex;align-items:center;gap:10px;"><i class="fas fa-plus-circle" style="color:#5eead4;"></i> Adicionar Item</h2>
@@ -1339,7 +1335,7 @@
     </div>
 
     <!-- Modal: Editar Item OC -->
-    <div class="modal-overlay" id="modal-edit-item-oc" style="display:none" onclick="if(event.target===this)fecharModalEditItem()">
+    <div class="modal-overlay" id="modal-edit-item-oc" onclick="if(event.target===this)fecharModalEditItem()">
         <div style="background:white;border-radius:12px;width:100%;max-width:420px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.3);animation:slideUp .3s ease;">
             <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 24px;background:linear-gradient(135deg,#334155 0%,#475569 100%);color:white;border-bottom:3px solid #0f766e;">
                 <h2 style="margin:0;font-size:16px;font-weight:600;display:flex;align-items:center;gap:10px;"><i class="fas fa-edit" style="color:#5eead4;"></i> Editar Item</h2>
@@ -1369,7 +1365,7 @@
     </div>
 
     <!-- Modal: Excluir Item OC -->
-    <div class="modal-overlay" id="modal-del-item-oc" style="display:none" onclick="if(event.target===this)fecharModalDelItem()">
+    <div class="modal-overlay" id="modal-del-item-oc" onclick="if(event.target===this)fecharModalDelItem()">
         <div style="background:white;border-radius:12px;width:100%;max-width:420px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.3);animation:slideUp .3s ease;">
             <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 24px;background:linear-gradient(135deg,#7f1d1d,#991b1b);color:white;border-bottom:3px solid #ef4444;">
                 <h2 style="margin:0;font-size:16px;font-weight:600;display:flex;align-items:center;gap:10px;"><i class="fas fa-trash" style="color:#fca5a5;"></i> Excluir Item</h2>

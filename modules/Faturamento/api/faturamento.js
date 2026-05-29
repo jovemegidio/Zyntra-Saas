@@ -1442,48 +1442,13 @@ module.exports = (pool, authenticateToken) => {
                 console.log(`[FATURAMENTO-AUDIT] ✅ NFe ${nfe.numero_nfe} AUTORIZADA pela SEFAZ. Protocolo: ${resultado.numeroProtocolo}. Usuário: ${usuario_id}`);
 
                 // FIX: Baixar estoque efetivamente após autorização SEFAZ
-                const integracoesSefaz = { estoque: null, financeiro: null, avisos: [] };
+                const integracoesSefaz = { estoque: null, avisos: [] };
                 try {
                     integracoesSefaz.estoque = await vendasEstoqueService.baixarEstoque(parseInt(id), usuario_id);
                     console.log(`[FATURAMENTO-AUDIT] ✅ Estoque baixado para NFe ${nfe.numero_nfe}`);
                 } catch (estoqueErr) {
                     integracoesSefaz.avisos.push(`Baixa de estoque não concluída: ${estoqueErr.message}`);
                     console.warn(`[FATURAMENTO] ⚠ Estoque não baixado para NFe ${id}: ${estoqueErr.message}`);
-                }
-
-                // FUNC-01: Gerar contas a receber automaticamente após autorização SEFAZ
-                try {
-                    integracoesSefaz.financeiro = await financeiroService.gerarContasReceber(parseInt(id), {
-                        numeroParcelas: 1,
-                        diaVencimento: 30,
-                        intervalo: 30
-                    });
-                    if (!integracoesSefaz.financeiro?.skipped) {
-                        console.log(`[FATURAMENTO-AUDIT] ✅ Contas a receber geradas para NFe ${nfe.numero_nfe}`);
-                    }
-                } catch (finErr) {
-                    integracoesSefaz.avisos.push(`Geração de contas a receber não concluída: ${finErr.message}`);
-                    console.warn(`[FATURAMENTO] ⚠ Contas a receber não geradas para NFe ${id}: ${finErr.message}`);
-                }
-
-                // LA-001: Integração Faturamento → Logística
-                // Quando NF-e é autorizada, sinalizar pedido vinculado para expedição
-                try {
-                    if (nfe.pedido_id) {
-                        await pool.query(`
-                            UPDATE pedidos
-                            SET status = 'faturado',
-                                status_logistica = 'aguardando',
-                                nfe_id = ?,
-                                data_faturamento = NOW()
-                            WHERE id = ?
-                              AND (status_logistica IS NULL OR status_logistica IN ('pendente', 'aguardando', ''))
-                        `, [id, nfe.pedido_id]);
-                        console.log(`[FATURAMENTO-AUDIT] ✅ LA-001: Pedido ${nfe.pedido_id} atualizado para logística (status_logistica=aguardando) via NFe ${nfe.numero || id}`);
-                    }
-                } catch (logErr) {
-                    integracoesSefaz.avisos.push(`Integração logística não concluída: ${logErr.message}`);
-                    console.warn(`[FATURAMENTO] ⚠ LA-001: Pedido não atualizado para logística: ${logErr.message}`);
                 }
 
                 // Enviar DANFE por email automaticamente após autorização SEFAZ

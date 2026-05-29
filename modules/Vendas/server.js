@@ -5261,6 +5261,25 @@ apiVendasRouter.post('/clientes', async (req, res, next) => {
         const b = req.body;
         if (!b.nome) return res.status(400).json({ message: 'Nome é obrigatório.' });
 
+        // DATA-001: impedir cadastro de cliente com CNPJ duplicado (normaliza removendo pontuação).
+        // Escopo por empresa_id (multi-tenant): o mesmo CNPJ pode existir em tenants diferentes.
+        const cnpjLimpo = (b.cnpj || '').replace(/\D/g, '');
+        if (cnpjLimpo) {
+            const [dup] = await pool.query(
+                `SELECT id, nome FROM clientes
+                 WHERE REPLACE(REPLACE(REPLACE(REPLACE(COALESCE(cnpj,''), '.', ''), '/', ''), '-', ''), ' ', '') = ?
+                   AND empresa_id = ?
+                 LIMIT 1`,
+                [cnpjLimpo, b.empresa_id || 1]
+            );
+            if (dup.length > 0) {
+                return res.status(409).json({
+                    message: `Já existe um cliente cadastrado com este CNPJ: ${dup[0].nome}.`,
+                    duplicateId: dup[0].id
+                });
+            }
+        }
+
         const vendedorNome = req.user ? req.user.nome : null;
         const [result] = await pool.query(
             `INSERT INTO clientes (nome, nome_fantasia, razao_social, cnpj, contato, telefone, celular, email, website,
@@ -6590,7 +6609,8 @@ apiVendasRouter.get('/dashboard/top-produtos', authenticateToken, async (req, re
                         SUM(pi.total) as valor
                      FROM pedido_itens pi
                      JOIN pedidos p ON pi.pedido_id = p.id
-                     WHERE p.created_at >= ? AND p.created_at <= DATE_ADD(?, INTERVAL 1 DAY)${vendedorFilter}
+                     WHERE p.created_at >= ? AND p.created_at <= DATE_ADD(?, INTERVAL 1 DAY)
+                       AND p.status IN ('faturado', 'recibo')${vendedorFilter}
                      GROUP BY COALESCE(pi.descricao, pi.codigo)
                      ORDER BY valor DESC
                      LIMIT ?`,
@@ -6621,6 +6641,7 @@ apiVendasRouter.get('/dashboard/top-produtos', authenticateToken, async (req, re
                      LEFT JOIN pedidos_vendas pv ON ip.pedido_id = pv.id
                      LEFT JOIN produtos pr ON ip.produto_id = pr.id
                      WHERE pv.data_pedido >= ? AND pv.data_pedido <= DATE_ADD(?, INTERVAL 1 DAY)
+                       AND pv.status IN ('faturado', 'recibo')
                      GROUP BY COALESCE(ip.descricao, ip.produto_nome, pr.nome)
                      ORDER BY valor DESC
                      LIMIT ?`,

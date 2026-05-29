@@ -238,11 +238,17 @@
                 console.error('Erro ao carregar holerites:', e);
                 holeritesList = [];
                 if (funcionáriosList.length > 0) {
-                    montarHoleritesDeFuncionários(mes, ano);
+                    try { montarHoleritesDeFuncionários(mes, ano); } catch (err) {
+                        console.error('Erro montarHoleritesDeFuncionários:', err);
+                        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:#ef4444;"><i class="fas fa-exclamation-triangle" style="font-size:32px;margin-bottom:12px;display:block;"></i><p>Erro ao renderizar holerites</p><p style="font-size:12px;color:#94a3b8;">' + (err.message || err) + '</p></div>';
+                    }
                     return;
                 }
             }
-            renderizarGrid(mes, ano);
+            try { renderizarGrid(mes, ano); } catch (err) {
+                console.error('Erro renderizarGrid:', err);
+                grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:#ef4444;"><i class="fas fa-exclamation-triangle" style="font-size:32px;margin-bottom:12px;display:block;"></i><p>Erro ao renderizar holerites</p><p style="font-size:12px;color:#94a3b8;">' + (err.message || err) + '</p></div>';
+            }
         }
 
         // Montar cards a partir de funcionários (quando não há holerites gerados)
@@ -272,7 +278,7 @@
                         <div class="item-info">
                             <h4>${f.nome_completo || f.nome || 'Sem nome'}</h4>
                             <p>${f.cargo || 'Sem cargo'}  ${f.departamento || 'Sem depto'}</p>
-                            <p>Bruto: ${fmt(salário)} | Líquido: ${fmt(liq)}</p>
+                            <p>Bruto: ${fmt(salario)} | Líquido: ${fmt(liq)}</p>
                         </div>
                     </div>
                     <div class="item-status"><span class="status-badge pending">Pendente</span></div>

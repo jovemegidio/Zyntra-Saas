@@ -345,8 +345,13 @@
 
                 if (response.ok) {
                     const data = await response.json();
-                    materiaisData = Array.isArray(data) ? data : (data.rows || data.materiais || []);
-                    materiaisData = materiaisData.map(m => ({
+                    let lista = Array.isArray(data) ? data : (data.rows || data.materiais || []);
+                    // Filtrar materiais migrados para a tabela produtos (status técnico de migração)
+                    lista = lista.filter(m => {
+                        const status = String(m.status || '').toUpperCase();
+                        return status !== 'MIGRADO_PARA_PRODUTOS';
+                    });
+                    materiaisData = lista.map(m => ({
                         ...m,
                         código: m.codigo || m.codigo_material || '',
                         descrição: m.descricao || m.nome || '',

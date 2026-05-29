@@ -35,7 +35,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
             port: parseInt(process.env.DB_PORT) || 3306,
             user: process.env.DB_USER || 'aluforce',
             password: process.env.DB_PASSWORD || '',
-            database: 'aluforce_vendas',
+            database: process.env.DB_NAME || 'aluforce_vendas',
             waitForConnections: true,
             connectionLimit: 10,
             charset: 'utf8mb4'

@@ -623,13 +623,11 @@ module.exports = function createFinanceiroExtendedRoutes(deps) {
         }
 
         try {
-            const { cliente_id, valor, descricao, vencimento: venc, data_vencimento, categoria, categoria_id } = req.body;
-            const vencimento = venc || data_vencimento;
-            const catFinal = categoria || categoria_id;
+            const { cliente_id, valor, descricao, vencimento, categoria } = req.body;
 
             const [result] = await pool.query(
                 'INSERT INTO contas_receber (cliente_id, valor, descricao, vencimento, categoria, status, criado_por) VALUES (?, ?, ?, ?, ?, "pendente", ?)',
-                [cliente_id, valor, descricao, vencimento, catFinal, req.user.id]
+                [cliente_id, valor, descricao, vencimento, categoria, req.user.id]
             );
 
             return res.json({
@@ -673,7 +671,7 @@ module.exports = function createFinanceiroExtendedRoutes(deps) {
             const [result] = await pool.query(
                 `INSERT INTO contas_pagar (fornecedor_id, valor, descricao, data_vencimento, categoria_id, banco_id, forma_pagamento, observacoes, status)
                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, "pendente")`,
-                [parseInt(fornecedor_id) || null, valor, descricao, dataVenc, catId || null, banco_id || null, forma_pagamento || null, observacoes || null]
+                [fornecedor_id || null, valor, descricao, dataVenc, catId || null, banco_id || null, forma_pagamento || null, observacoes || null]
             );
 
             return res.json({

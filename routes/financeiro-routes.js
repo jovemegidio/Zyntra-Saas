@@ -1880,5 +1880,83 @@ module.exports = function createFinanceiroRoutes(deps) {
         }
     });
 
+    // ============================================================
+    // BUG-003: backfill — gera contas_receber para pedidos faturados
+    // que ainda não têm conta. Cobre o histórico antes da integração.
+    // ============================================================
+    router.post('/sincronizar-faturamento', async (req, res) => {
+        try {
+            const { getFaturamentoSharedService } = require('../services/faturamento-shared.service');
+            const faturamentoShared = getFaturamentoSharedService(pool);
+
+            const [pedidos] = await pool.query(`
+                SELECT p.id, p.cliente_id, p.cliente, p.cliente_nome, p.valor, p.valor_total,
+                       p.condicao_pagamento, p.condicoes_pagamento, p.nf, p.numero_nf,
+                       p.data_faturamento, p.created_at
+                FROM pedidos p
+                WHERE p.status IN ('faturado', 'entregue', 'recibo', 'convertido')
+                  AND NOT EXISTS (SELECT 1 FROM contas_receber cr WHERE cr.pedido_id = p.id)
+            `);
+
+            if (pedidos.length === 0) {
+                return res.json({ success: true, message: 'Nada a sincronizar.', criadas: 0, erros: 0 });
+            }
+
+            let criadas = 0;
+            let erros = 0;
+            const detalhes = [];
+            const connection = await pool.getConnection();
+
+            try {
+                for (const p of pedidos) {
+                    try {
+                        // Preferir SUM dos itens para precisão
+                        const [[itensSum]] = await connection.query(
+                            'SELECT COUNT(*) as cnt, COALESCE(SUM(subtotal), 0) as tot FROM pedido_itens WHERE pedido_id = ?',
+                            [p.id]
+                        );
+                        let valor = parseFloat(p.valor_total || p.valor || 0);
+                        if (Number(itensSum.cnt) > 0 && parseFloat(itensSum.tot) > 0) {
+                            valor = parseFloat(itensSum.tot);
+                        }
+                        if (valor <= 0) {
+                            detalhes.push({ pedido_id: p.id, status: 'skip', motivo: 'valor zero' });
+                            continue;
+                        }
+
+                        await connection.beginTransaction();
+                        const result = await faturamentoShared.gerarContaReceber(connection, {
+                            pedido_id: p.id,
+                            cliente_id: p.cliente_id || null,
+                            descricao: `Faturamento Pedido #${p.id}${p.nf || p.numero_nf ? ' / NF ' + (p.nf || p.numero_nf) : ''} - ${p.cliente_nome || p.cliente || 'Cliente'}`,
+                            valor,
+                            tipo: 'faturamento',
+                            pedido: p
+                        });
+                        await connection.commit();
+
+                        criadas += result?.total_parcelas || 1;
+                        detalhes.push({ pedido_id: p.id, status: 'ok', conta_id: result?.insertId, parcelas: result?.total_parcelas });
+                    } catch (e) {
+                        try { await connection.rollback(); } catch (_) {}
+                        erros++;
+                        detalhes.push({ pedido_id: p.id, status: 'erro', erro: e.message });
+                    }
+                }
+            } finally {
+                connection.release();
+            }
+
+            res.json({
+                success: true,
+                message: `Sincronização concluída: ${criadas} conta(s)/parcela(s) gerada(s), ${erros} erro(s).`,
+                criadas, erros, total_pedidos: pedidos.length, detalhes
+            });
+        } catch (error) {
+            console.error('[SINC-FATURAMENTO] Erro:', error.message);
+            res.status(500).json({ success: false, message: 'Erro ao sincronizar faturamento.', error: error.message });
+        }
+    });
+
     return router;
 };

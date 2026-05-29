@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Script unificado para o Portal do Funcionário e para a Área Administrativa.
  * * O código detecta em qual página está (admin ou funcionário) e inicializa
  * apenas as funcionalidades relevantes para evitar conflitos.
@@ -50,7 +50,7 @@ function loadPage(pageName) {
   }
 
   // Log de carregamento (sem notificaçáo)
-  console.log(`🔄 Carregando ${getPageDisplayName(pageName)}...`)
+  console.log(`?? Carregando ${getPageDisplayName(pageName)}...`)
 
   // Mostra indicador de carregamento
   mainContent.innerHTML = `
@@ -100,7 +100,7 @@ function loadPage(pageName) {
       console.log(`Página ${pageName} carregada com sucesso`)
       
       // Log de sucesso (sem notificaçáo)
-      console.log(`✅ ${getPageDisplayName(pageName)} carregado`)
+      console.log(`? ${getPageDisplayName(pageName)} carregado`)
       
       // Aplicar visualizaçáo atual (grid/list)
       if (window.headerControls && window.headerControls.currentView) {
@@ -117,7 +117,7 @@ function loadPage(pageName) {
       console.error('Erro ao carregar página:', error)
       
       // Log de erro (sem notificaçáo)
-      console.error(`❌ Erro ao carregar ${getPageDisplayName(pageName)}`)
+      console.error(`? Erro ao carregar ${getPageDisplayName(pageName)}`)
       
       mainContent.innerHTML = `
         <div style="text-align: center; padding: 40px; color: #e74c3c;">
@@ -347,14 +347,14 @@ function initAdminPage () {
 function initEmployeePage () {
   // --- LÓGICA DE AUTENTICAÇÁO E DADOS DO USUÁRIO ---
 
-  console.log('🔍 SCRIPT.JS initEmployeePage: Iniciando verificações...')
+  console.log('?? SCRIPT.JS initEmployeePage: Iniciando verificações...')
 
   // Tenta obter os dados do localStorage. Em um sistema real, isso viria de uma API.
   const authToken = localStorage.getItem('authToken')
   let userData = null
   try {
     userData = JSON.parse(localStorage.getItem('userData'))
-    console.log('🔍 SCRIPT.JS: UserData carregado:', {
+    console.log('?? SCRIPT.JS: UserData carregado:', {
       hasUserData: !!userData,
       id: userData?.id,
       nome: userData?.nome,
@@ -364,7 +364,7 @@ function initEmployeePage () {
     })
   } catch {
     // Se os dados estiverem corrompidos, trata como nulos
-    console.log('❌ SCRIPT.JS: Dados corrompidos no localStorage')
+    console.log('? SCRIPT.JS: Dados corrompidos no localStorage')
     userData = null
   }
 
@@ -376,7 +376,7 @@ function initEmployeePage () {
       hasUserData: !!userData,
       userData: userData
     })
-    if (typeof safeRedirectToLogin === 'function') safeRedirectToLogin(); else window.location.href = '/login.html'
+    if (typeof safeRedirectToLogin === 'function') safeRedirectToLogin(); else window.location.href = window.__withBasePath ? window.__withBasePath('/login.html') : '/login.html'
     return // Para a execuçáo
   }
 
@@ -466,7 +466,7 @@ function initEmployeePage () {
     localStorage.removeItem('authToken')
     localStorage.removeItem('userData')
     showToast('Você foi desconectado.', 'success')
-    window.location.href = '/login.html'
+    window.location.href = window.__withBasePath ? window.__withBasePath('/login.html') : '/login.html'
   }
 
   function enableFormEditing () {

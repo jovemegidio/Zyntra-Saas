@@ -364,7 +364,7 @@ router.post('/login', async (req, res) => {
             : [];
 
         // Se for admin, liberar todas as áreas
-        const todasAreas = ['pcp', 'vendas', 'compras', 'financeiro', 'nfe', 'rh', 'faturamento', 'logistica', 'ti', 'admin'];
+        const todasAreas = ['pcp', 'vendas', 'compras', 'financeiro', 'nfe', 'rh', 'faturamento', 'admin'];
         const areasPermitidas = user.is_admin ? todasAreas : areas;
 
         // Definir cookie HttpOnly
@@ -389,16 +389,12 @@ router.post('/login', async (req, res) => {
             setor: user.setor
         };
 
-        const _emailLow = (user.email || '').toLowerCase();
-        const _isLaborPortal = _emailLow.endsWith('@labor.com.br') && user.role;
-        const redirectTo = _isLaborPortal ? '/Zyntra-SGE/Empresas/dashboard.html' : '/dashboard';
-
         res.json({
             success: true,
             message: 'Login realizado com sucesso',
             token,
             user: userResponse,
-            redirectTo
+            redirectTo: '/index.html'
         });
 
     } catch (error) {
@@ -477,7 +473,7 @@ router.get('/me', authMiddleware, async (req, res) => {
         }
         
         // Se for admin, dar acesso a tudo
-        const todasAreas = ['dashboard', 'pcp', 'vendas', 'compras', 'financeiro', 'nfe', 'rh', 'faturamento', 'logistica', 'ti', 'admin'];
+        const todasAreas = ['dashboard', 'pcp', 'vendas', 'compras', 'financeiro', 'nfe', 'rh', 'faturamento', 'admin'];
         if (user.is_admin) {
             areas = todasAreas;
         }

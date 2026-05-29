@@ -100,8 +100,9 @@
                     </div>
                 </div>
 
-                <!-- Categorias de Relatórios -->
-                <div class="card fade-in-delay-2">
+                <!-- BUG-013: Seção 'Ordens de Serviço' oculta — módulo OS não está integrado.
+                     Quando o módulo for ativado, basta remover o style="display:none". -->
+                <div class="card fade-in-delay-2" style="display:none">
                     <div class="card-header">
                         <h3 class="card-title"><i class="fas fa-tools"></i> Ordens de Serviço</h3>
                     </div>
@@ -136,37 +137,41 @@
                     </div>
                 </div>
 
+                <!-- #11/#18: Módulo de Contratos ainda não integrado — cards desabilitados (badge + not-allowed),
+                     clique mostra toast leve em vez do overlay de preview. -->
                 <div class="card fade-in-delay-3">
                     <div class="card-header">
-                        <h3 class="card-title"><i class="fas fa-file-signature"></i> Contratos</h3>
+                        <h3 class="card-title"><i class="fas fa-file-signature"></i> Contratos
+                            <span style="font-size:10px;font-weight:700;color:#92400e;background:#fef3c7;padding:2px 8px;border-radius:10px;margin-left:8px;vertical-align:middle;">Em breve</span>
+                        </h3>
                     </div>
                     <div class="card-body">
-                        <div class="report-grid">
-                            <div class="option-card" onclick="gerarRelatório('contratos_ativos')">
+                        <div class="report-grid" style="opacity:.55;">
+                            <div class="option-card" style="cursor:not-allowed;" onclick="_modIndisponivel('Contratos')">
                                 <div class="option-card-icon green"><i class="fas fa-file-alt"></i></div>
                                 <div class="option-card-title">Contratos Ativos</div>
-                                <div class="option-card-desc">Contratos em vigência</div>
+                                <div class="option-card-desc">Disponível quando o módulo Contratos for integrado</div>
                             </div>
-                            <div class="option-card" onclick="gerarRelatório('contratos_vencer')">
+                            <div class="option-card" style="cursor:not-allowed;" onclick="_modIndisponivel('Contratos')">
                                 <div class="option-card-icon yellow"><i class="fas fa-calendar-exclamation"></i></div>
                                 <div class="option-card-title">A Vencer</div>
-                                <div class="option-card-desc">Próximos vencimentos</div>
+                                <div class="option-card-desc">Disponível quando o módulo Contratos for integrado</div>
                             </div>
-                            <div class="option-card" onclick="gerarRelatório('contratos_vencidos')">
+                            <div class="option-card" style="cursor:not-allowed;" onclick="_modIndisponivel('Contratos')">
                                 <div class="option-card-icon" style="background:#fef2f2;color:#ef4444;"><i
                                         class="fas fa-calendar-times"></i></div>
                                 <div class="option-card-title">Vencidos</div>
-                                <div class="option-card-desc">Contratos já vencidos</div>
+                                <div class="option-card-desc">Disponível quando o módulo Contratos for integrado</div>
                             </div>
-                            <div class="option-card" onclick="gerarRelatório('contratos_receita')">
+                            <div class="option-card" style="cursor:not-allowed;" onclick="_modIndisponivel('Contratos')">
                                 <div class="option-card-icon"><i class="fas fa-chart-line"></i></div>
                                 <div class="option-card-title">Receita Contratos</div>
-                                <div class="option-card-desc">Receita mensal recorrente</div>
+                                <div class="option-card-desc">Disponível quando o módulo Contratos for integrado</div>
                             </div>
-                            <div class="option-card" onclick="gerarRelatório('contratos_clientes')">
+                            <div class="option-card" style="cursor:not-allowed;" onclick="_modIndisponivel('Contratos')">
                                 <div class="option-card-icon cyan"><i class="fas fa-users"></i></div>
                                 <div class="option-card-title">Contratos por Cliente</div>
-                                <div class="option-card-desc">Agrupamento por cliente</div>
+                                <div class="option-card-desc">Disponível quando o módulo Contratos for integrado</div>
                             </div>
                         </div>
                     </div>
@@ -258,6 +263,15 @@
             impostos: 'Resumo de Impostos', faturamento_cliente: 'Faturamento por Cliente',
             logistica: 'Relatório de Logística', inadimplencia: 'Inadimplência'
         };
+
+        // #11/#18: módulos ainda não integrados mostram um toast leve, não o overlay de preview.
+        function _modIndisponivel(nome) {
+            var t = document.createElement('div');
+            t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#2563eb;color:#fff;padding:12px 20px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.2);z-index:99999;font-family:Inter,sans-serif;font-size:13px;';
+            t.textContent = 'Módulo de ' + nome + ' será integrado em breve.';
+            document.body.appendChild(t);
+            setTimeout(function () { if (t.parentNode) t.parentNode.removeChild(t); }, 4000);
+        }
 
         function gerarRelatório(tipo) {
             const preview = document.getElementById('report-preview');

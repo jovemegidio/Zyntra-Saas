@@ -321,9 +321,16 @@
     // ============================================
     // BLOQUEAR IFRAMES EXTERNOS
     // ============================================
+    // Só "estoura" o frame para páginas reais (http/https). Orçamentos, relatórios e
+    // demais documentos PDF são renderizados em iframes próprios do sistema
+    // (report-viewer) usando blob:, about:srcdoc ou about:blank. Navegar o topo nesses
+    // casos jogava o app para about:srcdoc e gerava a tela "Não é possível acessar esse
+    // site" (ERR_INVALID_URL) ao gerar o PDF.
     if (window.top !== window.self) {
-        // O site está em um iframe
-        window.top.location = window.self.location;
+        const proto = window.location.protocol;
+        if (proto === 'http:' || proto === 'https:') {
+            try { window.top.location = window.self.location; } catch (e) { /* topo cross-origin */ }
+        }
     }
     
     // ============================================
@@ -338,7 +345,8 @@
     // ============================================
     // LOG DE INICIALIZAÇÍO
     // ============================================
-    console.clear();
+    // BUG-020: não usar console.clear() no load — escondia erros reais e dificultava o debug.
+    // Mantém apenas o aviso visual de proteção.
     console.log('%c🔒 ALUFORCE', 'color: #3b82f6; font-size: 24px; font-weight: bold;');
     console.log('%cSistema protegido por direitos autorais', 'color: #9ca3af; font-size: 12px;');
     

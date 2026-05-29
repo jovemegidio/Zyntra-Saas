@@ -71,7 +71,7 @@ class FornecedoresManager {
                 observacoes: f.observacoes || '',
                 pedidos: f.total_pedidos || 0,
                 totalComprado: f.valor_total_compras || 0,
-                avaliacao: parseFloat(f.avaliacao) || 4.0,
+                avaliacao: Number.isFinite(parseFloat(f.avaliacao)) ? parseFloat(f.avaliacao) : 0,
                 status: f.ativo == 1 || f.ativo === true || f.ativo === 'true' || f.ativo === '1' ? 'ativo' : 'inativo',
                 ultimaCompra: f.ultima_compra || null,
                 dataCadastro: f.data_cadastro || f.created_at || null
@@ -140,15 +140,16 @@ class FornecedoresManager {
         }
 
         tbody.innerHTML = fornecedoresFiltrados.map(forn => {
-            // BUG-008: colunas reordenadas para coincidir com headers: Categoria, Contato, Avaliação
+            const avaliacao = Number(forn.avaliacao) || 0;
+            
             return `
             <tr>
                 <td><input type="checkbox" class="row-checkbox" data-id="${forn.id}" title="Selecionar"></td>
                 <td><strong>${this.escapeHtml(forn.nome)}</strong></td>
                 <td><span class="cnpj-text">${this.formatarCNPJ(forn.cnpj)}</span></td>
-                <td><span class="badge badge-${this.getCategoriaColor(forn.categoria)}">${this.escapeHtml(forn.categoria) || '-'}</span></td>
+                <td><span class="badge badge-${this.getCategoriaColor(forn.categoria)}">${this.escapeHtml(forn.categoria)}</span></td>
                 <td>${this.escapeHtml(forn.contato) || '-'}</td>
-                <td>${this.renderizarEstrelas(forn.avaliacao)}</td>
+                <td title="${avaliacao.toFixed(1)} de 5">${this.renderizarEstrelas(avaliacao)}</td>
                 <td><span class="status-badge ${forn.status}">${this.getStatusLabel(forn.status)}</span></td>
                 <td>
                     <button class="btn-action view" title="Ver detalhes" onclick="fornecedoresManager.verDetalhes(${forn.id})"><i class="fas fa-eye"></i></button>

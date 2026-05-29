@@ -5,7 +5,7 @@
     <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Zyntra: Faturamento</title>
+    <title>Zyntra: Faturamento — Painel</title>
     <script src="/js/auth-unified.js?v=20260326" defer></script>
     <script src="/js/inactivity-manager.js?v=20260324" defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
@@ -720,34 +720,23 @@
             } catch { return []; }
         }
 
-        /* ── Carregar Estatísticas (via Vendas API) ──── */
+        /* ── Carregar Estatísticas (FISCAL-08: usa /api/faturamento/estatisticas — UNION nfes + pedidos faturados, mesma fonte do index.html) ──── */
         async function carregarEstatisticas() {
             try {
-                // Buscar pedidos por cada status de faturamento em paralelo
-                const [faturar, faturados, recibos, entregues] = await Promise.all([
-                    buscarPedidosPorStatus('faturar', 500),
-                    buscarPedidosPorStatus('faturado', 500),
-                    buscarPedidosPorStatus('recibo', 500),
-                    buscarPedidosPorStatus('entregue', 500)
-                ]);
+                const r = await fetch('/api/faturamento/estatisticas', { credentials: 'include' });
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                const resp = await r.json();
+                const d = resp.data || resp;
 
-                const pendentes = faturar.length;
-                const faturadosCount = faturados.length + entregues.length;
-                const recibosCount = recibos.length;
-                const total = pendentes + faturadosCount + recibosCount;
-
-                const valorFaturado = [...faturados, ...entregues, ...recibos].reduce((s, p) => s + (Number(p.valor) || Number(p.valor_total) || 0), 0);
-                const mesAtual = new Date().getMonth();
-                const anoAtual = new Date().getFullYear();
-                const valorMes = [...faturados, ...entregues, ...recibos]
-                    .filter(p => {
-                        const d = new Date(p.data_faturamento || p.updated_at);
-                        return d.getMonth() === mesAtual && d.getFullYear() === anoAtual;
-                    })
-                    .reduce((s, p) => s + (Number(p.valor) || Number(p.valor_total) || 0), 0);
+                const total = Number(d.total_nfes) || 0;
+                const autorizadasCount = Number(d.autorizadas) || 0;
+                const pendentes = Number(d.pendentes) || 0;
+                const canceladas = Number(d.canceladas) || 0;
+                const valorFaturado = Number(d.valor_total_faturado) || 0;
+                const valorMes = Number(d.valor_mes_atual) || 0;
 
                 document.getElementById('stat-total').textContent = total;
-                document.getElementById('stat-autorizadas').textContent = faturadosCount;
+                document.getElementById('stat-autorizadas').textContent = autorizadasCount;
                 document.getElementById('stat-pendentes').textContent = pendentes;
                 document.getElementById('stat-valor').textContent = formatarMoeda(valorFaturado);
 
@@ -756,15 +745,15 @@
                     if (mesEl) mesEl.innerHTML = '<a href="relatorios.html">Mês atual: ' + formatarMoeda(valorMes) + ' →</a>';
                 }
 
-                // Distribuição
-                document.getElementById('dist-autorizadas').textContent = faturadosCount;
+                // Distribuição (usa contagens da mesma fonte agregada)
+                document.getElementById('dist-autorizadas').textContent = autorizadasCount;
                 document.getElementById('dist-pendentes').textContent = pendentes;
-                document.getElementById('dist-canceladas').textContent = recibosCount;
+                document.getElementById('dist-canceladas').textContent = canceladas;
 
                 if (total > 0) {
-                    document.getElementById('dist-autorizadas-pct').textContent = ((faturadosCount / total) * 100).toFixed(1) + '%';
+                    document.getElementById('dist-autorizadas-pct').textContent = ((autorizadasCount / total) * 100).toFixed(1) + '%';
                     document.getElementById('dist-pendentes-pct').textContent = ((pendentes / total) * 100).toFixed(1) + '%';
-                    document.getElementById('dist-canceladas-pct').textContent = ((recibosCount / total) * 100).toFixed(1) + '%';
+                    document.getElementById('dist-canceladas-pct').textContent = ((canceladas / total) * 100).toFixed(1) + '%';
                 }
             } catch (e) {
                 console.error('[Dashboard] Erro ao carregar estatísticas:', e);

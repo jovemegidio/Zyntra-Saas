@@ -19,7 +19,22 @@ let configModalsLoaded = false;
  */
 async function abrirConfiguracao(tipo) {
     console.log('[Config Modal] Abrindo configuracao:', tipo);
-    
+
+    // Guard admin-only: SEFAZ requer privilégio
+    const ADMIN_ONLY = new Set(['sefaz-status']);
+    if (ADMIN_ONLY.has(tipo)) {
+        let user = null;
+        try { user = JSON.parse(localStorage.getItem('user') || localStorage.getItem('usuarioLogado') || 'null'); } catch (_) {}
+        const isAdmin = user && (user.is_admin === 1 || user.is_admin === true ||
+            String(user.role || '').toLowerCase() === 'admin' ||
+            String(user.role || '').toLowerCase() === 'administrador');
+        if (!isAdmin) {
+            if (typeof showNotification === 'function') showNotification('Acesso restrito a administradores', 'warning');
+            else alert('Acesso restrito a administradores');
+            return;
+        }
+    }
+
     // Mapeamento de tipos para IDs de modal
     const modalMap = {
         'empresa': 'modal-dados-empresa',
@@ -27,6 +42,7 @@ async function abrirConfiguracao(tipo) {
         'departamentos': 'modal-departamentos',
         'projetos': 'modal-projetos',
         'certificado-digital': 'modal-certificado',
+        'sefaz-status': 'modal-sefaz-status',
         'importacao-nfe': 'modal-nfe-import',
         'funcionarios': 'modal-funcionarios',
         'cargos': 'modal-cargos',

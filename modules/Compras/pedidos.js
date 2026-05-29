@@ -154,7 +154,7 @@ async function carregarPedidos() {
                 fornecedor_nome: p.fornecedor_nome || p.fornecedor,
                 data_pedido: p.data_pedido || p.dataPedido || p.created_at,
                 data_entrega_prevista: p.data_entrega_prevista || p.dataEntrega,
-                status: (p.status || 'pendente').toLowerCase(),
+                status: p.status || 'Pendente',
                 origem: p.origem || 'COMPRAS',
                 itens: p.itens || []
             }));

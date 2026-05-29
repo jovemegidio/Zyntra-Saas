@@ -1332,25 +1332,6 @@ module.exports = (pool, authenticateToken) => {
                     console.warn(`[FATURAMENTO] ⚠ Estoque não baixado para NFe ${id}: ${estoqueErr.message}`);
                 }
 
-                // LA-001: Integração Faturamento → Logística
-                try {
-                    if (nfe.pedido_id) {
-                        await pool.query(`
-                            UPDATE pedidos
-                            SET status = 'faturado',
-                                status_logistica = 'aguardando',
-                                nfe_id = ?,
-                                data_faturamento = NOW()
-                            WHERE id = ?
-                              AND (status_logistica IS NULL OR status_logistica IN ('pendente', 'aguardando', ''))
-                        `, [id, nfe.pedido_id]);
-                        console.log(`[FATURAMENTO-AUDIT] ✅ LA-001: Pedido ${nfe.pedido_id} atualizado para logística (status_logistica=aguardando)`);
-                    }
-                } catch (logErr) {
-                    integracoesSefaz.avisos.push(`Integração logística não concluída: ${logErr.message}`);
-                    console.warn(`[FATURAMENTO] ⚠ LA-001: ${logErr.message}`);
-                }
-
                 // Enviar DANFE por email automaticamente após autorização SEFAZ
                 const emailDanfe = { enviado: false };
                 try {

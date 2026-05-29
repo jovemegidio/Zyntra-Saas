@@ -162,7 +162,7 @@
                 </div>
             </div>
             <div class="dropdown-menu-items">
-                <button class="dropdown-menu-item" onclick="window.location.href='/dashboard'">
+                <button class="dropdown-menu-item" onclick="window.location.href=(window.__withBasePath?window.__withBasePath('/dashboard'):'/dashboard')">
                     <i class="fas fa-home"></i>
                     <span>Painel Principal</span>
                 </button>
@@ -208,7 +208,8 @@
             // Limpar cookie de sessão
             document.cookie = 'connect.sid=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
             // Redirecionar para login (location.assign permite intercepção pelo MOUNT_SCRIPT)
-            window.location.assign('/login.html');
+            const loginPath = window.__withBasePath ? window.__withBasePath('/login.html') : '/login.html';
+            window.location.assign(loginPath);
         });
 
         // Carregar dados do usuário para o dropdown

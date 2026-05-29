@@ -27,6 +27,20 @@
     
     <!-- Desabilitar tooltip nativo do navegador -->
     <script>
+        // BUG-021/SEC-002: em produção, silenciar logs de debug que expõem estrutura da API.
+        // Mantém console.warn/error para erros reais. Ativável com ?debug=1 ou em localhost.
+        (function () {
+            var host = location.hostname;
+            var isDev = host === 'localhost' || host === '127.0.0.1' || host === '' || /(^|\.)teste?\./.test(host);
+            var debugFlag = /[?&]debug=1\b/.test(location.search);
+            if (!isDev && !debugFlag) {
+                var noop = function () {};
+                console.log = noop;
+                console.info = noop;
+                console.debug = noop;
+            }
+        })();
+
         // Remove tooltips nativos do navegador - DESABILITADO para evitar conflitos
         // Este código estava causando criação automática de pedidos
         /*
@@ -2142,7 +2156,7 @@
             box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.1);
         }
 
-        .btn-consulta-crédito {
+        .btn-consulta-credito {
             display: flex;
             align-items: center;
             gap: 6px;
@@ -2156,23 +2170,23 @@
             white-space: nowrap;
         }
 
-        .btn-consulta-crédito:hover {
+        .btn-consulta-credito:hover {
             background: #f5f5f5;
             border-color: #ccc;
         }
 
-        .previsão-faturamento {
+        .previsao-faturamento {
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
-        .previsão-label {
+        .previsao-label {
             font-size: 11px;
             color: #666;
         }
 
-        .previsão-input {
+        .previsao-input {
             padding: 7px 10px;
             border: 1px solid #ddd;
             border-radius: 4px;
@@ -2180,7 +2194,7 @@
             width: 130px;
         }
 
-        .previsão-badge {
+        .previsao-badge {
             width: 16px;
             height: 16px;
             background: var(--primary-orange);
@@ -5399,7 +5413,7 @@
             if (overlay) overlay.classList.toggle('active');
         }
     </script>
-    <script src="/js/auth-unified.js?v=20260418" defer></script>
+    <script src="/js/auth-unified.js?v=20260527" defer></script>
     <script src="/js/anti-copy-protection.js"></script>
     <script src="js/vendas-admin-check.js"></script>
     <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260418">
@@ -5449,7 +5463,7 @@
             </nav>
 
             <div class="sidebar-bottom">
-                <button class="sidebar-btn" title="Configurações">
+                <button class="sidebar-btn" title="Configurações" onclick="window.location.href='/dashboard'">
                     <i class="fas fa-cog"></i>
                 </button>
             </div>
@@ -5590,11 +5604,11 @@
                         </div>
                     </div>
 
-                    <!-- Coluna: Pedido Aprovado -->
+                    <!-- Coluna: Aprovado -->
                     <div class="kanban-column" data-status="aprovado">
                         <div class="kanban-column-header">
                             <div>
-                                <div class="column-title">Pedido Aprovado</div>
+                                <div class="column-title">Aprovado</div>
                                 <div class="column-count" id="count-aprovado">Carregando...</div>
                             </div>
                             <div class="column-indicator aprovado"></div>
@@ -5642,11 +5656,11 @@
                         </div>
                     </div>
 
-                    <!-- Coluna: Finalizado -->
+                    <!-- Coluna: Recibo -->
                     <div class="kanban-column" data-status="recibo">
                         <div class="kanban-column-header">
                             <div>
-                                <div class="column-title">Finalizado</div>
+                                <div class="column-title">Recibo</div>
                                 <div class="column-count" id="count-recibo">Carregando...</div>
                             </div>
                             <div class="column-indicator recibo"></div>
@@ -5718,13 +5732,13 @@
                                     <input type="hidden" id="edit-cliente-id">
                                     <div id="dropdown-edit-clientes" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); max-height: 250px; overflow-y: auto; z-index: 9999;"></div>
                                 </div>
-                                <button type="button" class="btn-consulta-crédito" onclick="consultarCreditoEdit()">
+                                <button type="button" class="btn-consulta-credito" onclick="consultarCreditoEdit()">
                                     <i class="fas fa-search"></i> Consulta de Crédito
                                 </button>
-                                <div class="previsão-faturamento">
-                                    <span class="previsão-label">Previsão de Faturamento</span>
-                                    <div class="previsão-badge"><i class="fas fa-exclamation" style="font-size: 8px;"></i></div>
-                                    <input type="date" class="previsão-input" id="edit-previsão-faturamento">
+                                <div class="previsao-faturamento">
+                                    <span class="previsao-label">Previsão de Faturamento</span>
+                                    <div class="previsao-badge"><i class="fas fa-exclamation" style="font-size: 8px;"></i></div>
+                                    <input type="date" class="previsao-input" id="edit-previsao-faturamento">
                                 </div>
                             </div>
                         </div>
@@ -5786,12 +5800,6 @@
                             <label>Vendedor</label>
                             <select id="edit-vendedor">
                                 <option value="">Selecione o vendedor...</option>
-                                <option value="Augusto Ladeira dos Santos">Augusto Ladeira</option>
-                                <option value="Renata Maria Batista do Nascimento">Renata Nascimento</option>
-                                <option value="Marcia Oliveira do Nascimento Scarcella">Marcia Scarcella</option>
-                                <option value="Fabiano Marques de Oliveira">Fabiano Marques</option>
-                                <option value="Andreia">Andreia</option>
-                                <option value="Fabiola de Souza Santos">Fabiola Souza</option>
                             </select>
                         </div>
                         <div class="info-field">
@@ -5838,6 +5846,7 @@
                     <!-- Tabs -->
                     <div class="modal-tabs">
                         <button class="modal-tab active" data-tab="itens" onclick="switchModalTab('itens')">Itens da Venda</button>
+                        <button class="modal-tab" data-tab="impostos" onclick="switchModalTab('impostos')">Impostos</button>
                         <button class="modal-tab" data-tab="departamentos" onclick="switchModalTab('departamentos')">Departamentos</button>
                         <button class="modal-tab" data-tab="frete" onclick="switchModalTab('frete')">Frete e Outras Despesas</button>
                         <button class="modal-tab" data-tab="informações" onclick="switchModalTab('informações')">Informações Adicionais</button>
@@ -5898,6 +5907,38 @@
                                 <button class="pagination-btn" disabled><i class="fas fa-angle-double-right"></i></button>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- Tab Content: Impostos (BUG-019: resumo fiscal do pedido) -->
+                    <div class="tab-content" id="tab-impostos">
+                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid #e5e7eb;">
+                            <i class="fas fa-file-invoice-dollar" style="color:#f97316;font-size:18px;"></i>
+                            <div>
+                                <h4 style="margin:0;color:#1e293b;font-weight:700;font-size:15px;">Impostos do Pedido</h4>
+                                <p style="margin:2px 0 0;font-size:12px;color:#64748b;">Valores apurados na criação do orçamento (cenário fiscal)</p>
+                            </div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px;">
+                            <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:16px;">
+                                <div style="font-size:12px;color:#64748b;font-weight:600;margin-bottom:6px;"><i class="fas fa-percentage" style="color:#3b82f6;"></i> ICMS</div>
+                                <div id="edit-imp-icms" style="font-size:20px;font-weight:800;color:#1e40af;">R$ 0,00</div>
+                            </div>
+                            <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:16px;">
+                                <div style="font-size:12px;color:#64748b;font-weight:600;margin-bottom:6px;"><i class="fas fa-truck" style="color:#7c3aed;"></i> ICMS ST</div>
+                                <div id="edit-imp-icms-st" style="font-size:20px;font-weight:800;color:#5b21b6;">R$ 0,00</div>
+                            </div>
+                            <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:16px;">
+                                <div style="font-size:12px;color:#64748b;font-weight:600;margin-bottom:6px;"><i class="fas fa-industry" style="color:#059669;"></i> IPI</div>
+                                <div id="edit-imp-ipi" style="font-size:20px;font-weight:800;color:#047857;">R$ 0,00</div>
+                            </div>
+                        </div>
+                        <div style="display:flex;justify-content:space-between;align-items:center;background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;padding:14px 18px;">
+                            <span style="font-size:13px;color:#9a3412;font-weight:600;">Total de Impostos</span>
+                            <span id="edit-imp-total" style="font-size:18px;font-weight:800;color:#c2410c;">R$ 0,00</span>
+                        </div>
+                        <p style="margin:14px 2px 0;font-size:11px;color:#94a3b8;">
+                            <i class="fas fa-info-circle"></i> O recálculo detalhado de alíquotas é feito na criação do orçamento (aba Impostos do Novo Orçamento).
+                        </p>
                     </div>
 
                     <!-- Tab Content: Departamentos -->
@@ -6017,7 +6058,7 @@
                             </div>
                             <div class="form-group">
                                 <label>Previsão de Entrega</label>
-                                <input type="date" id="edit-previsão-entrega">
+                                <input type="date" id="edit-previsao-entrega">
                             </div>
                             <div class="form-group">
                                 <label>Código de Rastreio</label>
@@ -6203,22 +6244,10 @@
                                     </tr>
                                 </thead>
                                 <tbody id="parcelas-tbody">
-                                    <tr ondblclick="editarParcela(1)" style="cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#fff7ed'" onmouseout="this.style.background=''">
-                                        <td style="padding: 12px 10px;">
-                                            <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: #fef3c7; color: #b45309; border-radius: 4px; font-size: 11px; font-weight: 600;">
-                                                <i class="fas fa-clock"></i> Previsão
-                                            </span>
-                                        </td>
-                                        <td style="padding: 12px 10px; font-weight: 500;">001/001</td>
-                                        <td style="padding: 12px 10px;">23/01/26 Qui</td>
-                                        <td style="padding: 12px 10px; font-weight: 600; color: #059669;">0,00</td>
-                                        <td style="padding: 12px 10px;">100%</td>
-                                        <td style="padding: 12px 10px; color: #9ca3af; font-style: italic;">&lt;não informado&gt;</td>
-                                        <td style="padding: 12px 10px; color: #9ca3af; font-style: italic;">&lt;não informado&gt;</td>
-                                        <td style="padding: 12px 10px;">
-                                            <span style="color: #dc2626; font-weight: 500;">Não</span>
-                                        </td>
-                                    </tr>
+                                    <tr><td colspan="8" style="padding: 32px; text-align: center; color: #94a3b8; font-size: 13px;">
+                                        <i class="fas fa-receipt" style="font-size: 24px; opacity: 0.4; display: block; margin-bottom: 8px;"></i>
+                                        As parcelas serão geradas ao abrir o pedido
+                                    </td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -6327,7 +6356,7 @@ PRAZO DE PRODUÇÁO DE 30 DIAS ÚTEIS APÓS RECEPÇÁO FÍSICA..." style="min-he
                     <button class="sidebar-action-btn" onclick="verEmailsEnviados()">
                         <i class="fas fa-envelope"></i> Emails Enviados
                     </button>
-                    <button class="sidebar-action-btn btn-histórico-alterações" id="btn-historico-alteracoes" onclick="verHistórico()" style="display: none;">
+                    <button class="sidebar-action-btn btn-historico-alteracoes" id="btn-historico-alteracoes" onclick="verHistórico()" style="display: none;">
                         <i class="fas fa-history"></i> Histórico de Alterações
                     </button>
                     <button class="sidebar-action-btn" onclick="verTarefas()">
@@ -6598,7 +6627,7 @@ PRAZO DE PRODUÇÁO DE 30 DIAS ÚTEIS APÓS RECEPÇÁO FÍSICA..." style="min-he
                     </div>
                     <div class="filtro-group">
                         <label>Considerar Data de Previsão</label>
-                        <select class="filtro-select" id="filtro-data-previsão">
+                        <select class="filtro-select" id="filtro-data-previsao">
                             <option value="tudo">Tudo</option>
                             <option value="hoje">Hoje</option>
                             <option value="amanha">Amanhá</option>
@@ -6815,13 +6844,13 @@ PRAZO DE PRODUÇÁO DE 30 DIAS ÚTEIS APÓS RECEPÇÁO FÍSICA..." style="min-he
                                     <!-- Dropdown de sugestões -->
                                     <div id="dropdown-clientes" class="dropdown-sugestoes" style="display: none; position: absolute; top: 100%; left: 0; right: 40px; background: #fff; border: 1px solid #ddd; border-radius: 4px; max-height: 200px; overflow-y: auto; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,0.15);"></div>
                                 </div>
-                                <button type="button" class="btn-consulta-crédito" onclick="consultarCredito()">
+                                <button type="button" class="btn-consulta-credito" onclick="consultarCredito()">
                                     <i class="fas fa-search"></i> Consulta de Crédito
                                 </button>
                                 <div class="orcamento-field-group">
                                     <label>Previsão de Faturamento</label>
                                     <div class="input-with-btn">
-                                        <input type="date" id="novo-previsão-faturamento" class="orcamento-input" value="">
+                                        <input type="date" id="novo-previsao-faturamento" class="orcamento-input" value="">
                                         <button type="button" class="btn-input-action"><i class="fas fa-calendar"></i></button>
                                     </div>
                                 </div>
@@ -7427,7 +7456,7 @@ PRAZO DE PRODUÇÁO DE 30 DIAS ÚTEIS APÓS RECEPÇÁO FÍSICA..." style="min-he
                                 <div class="orcamento-field-group">
                                     <label>Previsão de Entrega</label>
                                     <div class="input-with-btn">
-                                        <input type="date" id="novo-previsão-entrega" class="orcamento-input">
+                                        <input type="date" id="novo-previsao-entrega" class="orcamento-input">
                                         <button type="button" class="btn-input-action"><i class="fas fa-calendar"></i></button>
                                     </div>
                                 </div>
@@ -7611,22 +7640,10 @@ PRAZO DE PRODUÇÁO DE 30 DIAS ÚTEIS APÓS RECEPÇÁO FÍSICA..." style="min-he
                                         </tr>
                                     </thead>
                                     <tbody id="tbody-parcelas">
-                                        <tr ondblclick="editarParcelaNovoOrcamento(1)" style="cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#fff7ed'" onmouseout="this.style.background=''">
-                                            <td style="padding: 12px 10px;">
-                                                <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: #fef3c7; color: #b45309; border-radius: 4px; font-size: 11px; font-weight: 600;">
-                                                    <i class="fas fa-clock"></i> Previsão
-                                                </span>
-                                            </td>
-                                            <td style="padding: 12px 10px; font-weight: 500;">001/001</td>
-                                            <td style="padding: 12px 10px;">23/01/26 Qui</td>
-                                            <td style="padding: 12px 10px; font-weight: 600; color: #059669;">0,00</td>
-                                            <td style="padding: 12px 10px;">100%</td>
-                                            <td style="padding: 12px 10px; color: #9ca3af; font-style: italic;">&lt;não informado&gt;</td>
-                                            <td style="padding: 12px 10px; color: #9ca3af; font-style: italic;">&lt;não informado&gt;</td>
-                                            <td style="padding: 12px 10px;">
-                                                <span style="color: #dc2626; font-weight: 500;">Não</span>
-                                            </td>
-                                        </tr>
+                                        <tr><td colspan="8" style="padding: 28px; text-align: center; color: #94a3b8; font-size: 13px;">
+                                            <i class="fas fa-receipt" style="font-size: 22px; opacity: 0.4; display: block; margin-bottom: 8px;"></i>
+                                            Defina o valor e a condição de pagamento para gerar as parcelas
+                                        </td></tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -9089,7 +9106,7 @@ PRAZO DE PRODUÇÁO DE 30 DIAS ÚTEIS APÓS RECEPÇÁO FÍSICA..."></textarea>
                         </div>
                         <div>
                             <label style="display: block; font-size: 12px; color: #475569; margin-bottom: 6px; font-weight: 500;">Previsão de Recebimento</label>
-                            <input type="date" id="parcela-previsão-recebimento" style="width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 13px;">
+                            <input type="date" id="parcela-previsao-recebimento" style="width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 13px;">
                         </div>
                         <div>
                             <label style="display: block; font-size: 12px; color: #475569; margin-bottom: 6px; font-weight: 500;">Número da Parcela</label>
@@ -10356,6 +10373,32 @@ PRAZO DE PRODUÇÁO DE 30 DIAS ÚTEIS APÓS RECEPÇÁO FÍSICA..."></textarea>
             'concluído': 'recibo',
             'concluido': 'recibo'
         };
+
+        // BUG-002 fix: normaliza status para tolerar variações (acento, hífen, underscore, case)
+        // Ex.: 'analise-credito', 'ANALISE_CREDITO', 'Em Análise' → 'análise'
+        function normalizarStatusAPI(status) {
+            if (!status) return 'orcamento';
+            const raw = status.toString().toLowerCase().trim();
+            if (statusParaColuna[raw]) return statusParaColuna[raw];
+            const k = raw.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[-_\s]+/g, '');
+            const aliasMap = {
+                'orcamento': 'orcamento',
+                'analise': 'análise',
+                'analisecredito': 'análise',
+                'emanalise': 'análise',
+                'aprovado': 'aprovado',
+                'pedidoaprovado': 'aprovado',
+                'faturar': 'faturar',
+                'aguardandofaturamento': 'faturar',
+                'faturado': 'faturado',
+                'parcial': 'faturado',
+                'recibo': 'recibo',
+                'entregue': 'recibo',
+                'finalizado': 'recibo',
+                'concluido': 'recibo'
+            };
+            return aliasMap[k] || 'orcamento';
+        }
         
         // Mapeamento de coluna para status da API
         const colunaParaStatus = {
@@ -10366,7 +10409,17 @@ PRAZO DE PRODUÇÁO DE 30 DIAS ÚTEIS APÓS RECEPÇÁO FÍSICA..."></textarea>
             'faturado': 'faturado',
             'recibo': 'recibo'
         };
-        
+
+        // BUG-013: fonte única dos nomes das etapas — Lista, Kanban e Pipeline devem usar estes nomes
+        const ETAPAS_LABEL = {
+            orcamento: 'Orçamento',
+            'análise': 'Análise de Crédito',
+            aprovado: 'Aprovado',
+            faturar: 'Faturar',
+            faturado: 'Faturado',
+            recibo: 'Recibo'
+        };
+
         // Carregar dados da API com filtros
         async function carregarDadosKanban(filtros = null) {
             try {
@@ -10399,12 +10452,7 @@ PRAZO DE PRODUÇÁO DE 30 DIAS ÚTEIS APÓS RECEPÇÁO FÍSICA..."></textarea>
                 }
                 
                 console.log('?? Carregando Kanban:', url);
-
-                // Mostrar estado de carregamento nas colunas enquanto busca dados
-                document.querySelectorAll('.kanban-column-content').forEach(col => {
-                    col.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;padding:32px;color:#9ca3af;font-size:13px;">Carregando...</div>';
-                });
-
+                
                 const resp = await fetch(url, {
                     credentials: 'include',
                     headers: headers
@@ -10643,7 +10691,7 @@ PRAZO DE PRODUÇÁO DE 30 DIAS ÚTEIS APÓS RECEPÇÁO FÍSICA..."></textarea>
                     ${lockBadge}
                     ${nfBadge}
                     <div class="card-header">
-                        <span class="card-number">${prefixo} Nº ${item.id}</span>
+                        <span class="card-number">${prefixo} Nº ${item.numero_pedido || item.id}</span>
                         <button class="card-menu" onclick="event.stopPropagation(); abrirModalEditar(${item.id})" title="Editar pedido">
                             <i class="fas fa-ellipsis-v"></i>
                         </button>
@@ -10818,7 +10866,8 @@ PRAZO DE PRODUÇÁO DE 30 DIAS ÚTEIS APÓS RECEPÇÁO FÍSICA..."></textarea>
             if (!tbody) return;
 
             const stages = ['orcamento', 'análise', 'aprovado', 'faturar', 'faturado', 'recibo'];
-            const statusLabels = { orcamento: 'ORÇAMENTO', análise: 'ANÁLISE', aprovado: 'APROVADO', faturar: 'FATURAR', faturado: 'FATURADO', recibo: 'RECIBO' };
+            // BUG-013: labels derivados da fonte única ETAPAS_LABEL (em maiúsculas para o badge da lista)
+            const statusLabels = Object.fromEntries(stages.map(s => [s, (ETAPAS_LABEL[s] || s).toUpperCase()]));
             const statusColors = { orcamento: '#f59e0b', análise: '#ef4444', aprovado: '#10b981', faturar: '#3b82f6', faturado: '#059669', recibo: '#64748b' };
 
             let allItems = getListaPedidosOrdenada();
@@ -10830,12 +10879,12 @@ PRAZO DE PRODUÇÁO DE 30 DIAS ÚTEIS APÓS RECEPÇÁO FÍSICA..."></textarea>
                 stages.forEach(s => { counts[s] = allItems.filter(it => it._coluna === s).length; });
                 const tabDefs = [
                     { key: 'todos', label: 'Todos', color: '#059669' },
-                    { key: 'orcamento', label: 'Orçamento', color: '#f59e0b' },
-                    { key: 'análise', label: 'Análise', color: '#ef4444' },
-                    { key: 'aprovado', label: 'Aprovado', color: '#10b981' },
-                    { key: 'faturar', label: 'Faturar', color: '#3b82f6' },
-                    { key: 'faturado', label: 'Faturado', color: '#059669' },
-                    { key: 'recibo', label: 'Recibo', color: '#64748b' }
+                    { key: 'orcamento', label: ETAPAS_LABEL.orcamento, color: '#f59e0b' },
+                    { key: 'análise', label: ETAPAS_LABEL['análise'], color: '#ef4444' },
+                    { key: 'aprovado', label: ETAPAS_LABEL.aprovado, color: '#10b981' },
+                    { key: 'faturar', label: ETAPAS_LABEL.faturar, color: '#3b82f6' },
+                    { key: 'faturado', label: ETAPAS_LABEL.faturado, color: '#059669' },
+                    { key: 'recibo', label: ETAPAS_LABEL.recibo, color: '#64748b' }
                 ];
                 tabsEl.innerHTML = tabDefs.map(t => {
                     const count = counts[t.key] || 0;
@@ -10891,7 +10940,7 @@ PRAZO DE PRODUÇÁO DE 30 DIAS ÚTEIS APÓS RECEPÇÁO FÍSICA..."></textarea>
                     <td style="padding:10px 16px;max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;color:#0f172a;">${escaparHTML((it.cliente || 'Cliente não informado').toUpperCase())}</td>
                     <td style="padding:8px 16px;white-space:nowrap;">${statusEl}</td>
                     <td style="padding:10px 16px;text-align:right;font-weight:800;color:#0f172a;white-space:nowrap;">R$ ${valorFmt}</td>
-                    <td style="padding:10px 16px;font-size:12px;color:#374151;white-space:nowrap;">${escaparHTML(it.condicao_pagamento || it.parcelas || '-')}</td>
+                    <td style="padding:10px 16px;font-size:12px;color:#374151;white-space:nowrap;">${escaparHTML(formatarCondicaoPagamento(it.condicao_pagamento || it.parcelas))}</td>
                     <td style="padding:10px 16px;color:#374151;font-size:12px;white-space:nowrap;" title="${escaparHTML(it.vendedor || '')}">${escaparHTML(abreviarNome(it.vendedor) || '-')}</td>
                     <td style="padding:10px 16px;font-size:12px;color:#64748b;white-space:nowrap;">${dataInc}</td>
                     <td style="padding:6px 12px;text-align:center;white-space:nowrap;"><div style="display:inline-flex;gap:4px;align-items:center;">${actions}</div></td>
@@ -10909,7 +10958,8 @@ PRAZO DE PRODUÇÁO DE 30 DIAS ÚTEIS APÓS RECEPÇÁO FÍSICA..."></textarea>
             if (!container) return;
 
             const stages = ['orcamento', 'análise', 'aprovado', 'faturar', 'faturado', 'recibo'];
-            const labels = { orcamento: 'Orçamento', análise: 'Análise de Crédito', aprovado: 'Aprovado', faturar: 'Aguardando Faturamento', faturado: 'Faturado', recibo: 'Recibo' };
+            // BUG-013: nomes das etapas vêm da fonte única ETAPAS_LABEL
+            const labels = { ...ETAPAS_LABEL };
             const colors = { orcamento: '#f59e0b', análise: '#3b82f6', aprovado: '#10b981', faturar: '#8b5cf6', faturado: '#059669', recibo: '#64748b' };
             const icons = { orcamento: 'fa-file-alt', análise: 'fa-search-dollar', aprovado: 'fa-check-circle', faturar: 'fa-file-invoice-dollar', faturado: 'fa-check-double', recibo: 'fa-receipt' };
 
@@ -11567,7 +11617,7 @@ PRAZO DE PRODUÇÁO DE 30 DIAS ÚTEIS APÓS RECEPÇÁO FÍSICA..."></textarea>
             // Limpar seleção de item
             itemSelecionado = null;
             itemSelecionadoIdx = null;
-            
+
             // Restaurar Tipo de Venda (Consumidor Final / Revenda) e Estado Destino do pedido
             // (antes de carregar os itens, para o recálculo de DIFAL/ICMS-ST usar os valores corretos)
             const ufDestinoPedido = pedido.estado_destino || pedido.uf_destino || 'SP';
@@ -11579,7 +11629,13 @@ PRAZO DE PRODUÇÁO DE 30 DIAS ÚTEIS APÓS RECEPÇÁO FÍSICA..."></textarea>
 
             // Carregar itens do pedido da API
             carregarItensPedido(pedido.id);
-            
+
+            // BUG-004: gerar parcelas reais a partir do pedido (valor + condição + data de criação)
+            popularParcelasModalEdit();
+
+            // BUG-019: preencher resumo fiscal da aba Impostos
+            popularImpostosModalEdit();
+
             // Resetar tabs para primeira aba
             switchModalTab('itens');
             
@@ -11631,18 +11687,30 @@ PRAZO DE PRODUÇÁO DE 30 DIAS ÚTEIS APÓS RECEPÇÁO FÍSICA..."></textarea>
             }, 100);
         }
         
+        // Mapa data-tab -> id do conteúdo no modal de EDIÇÃO (o data-tab acentuado diverge do id sem acento)
+        const MODAL_EDIT_TAB_IDS = {
+            'itens': 'tab-itens',
+            'impostos': 'tab-impostos',
+            'departamentos': 'tab-departamentos',
+            'frete': 'tab-frete',
+            'informações': 'tab-informacoes',
+            'parcelas': 'tab-parcelas',
+            'observações': 'tab-observacoes',
+            'email': 'tab-email'
+        };
+
         function switchModalTab(tabId) {
-            // Remover active de todas as tabs
-            document.querySelectorAll('.modal-tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            // Ocultar todos os conteúdos
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
-            });
-            // Ativar tab e conteúdo selecionados
-            document.querySelector(`.modal-tab[data-tab="${tabId}"]`).classList.add('active');
-            document.getElementById(`tab-${tabId}`)?.classList.add('active');
+            // BUG-019: escopar ao modal de edição (antes ativava por engano os divs do modal Novo Orçamento)
+            const modal = document.getElementById('modal-editar-pedido');
+            if (!modal) return;
+            modal.querySelectorAll('.modal-tab').forEach(tab => tab.classList.remove('active'));
+            modal.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            const btn = modal.querySelector(`.modal-tab[data-tab="${tabId}"]`);
+            if (btn) btn.classList.add('active');
+            const content = document.getElementById(MODAL_EDIT_TAB_IDS[tabId] || `tab-${tabId}`);
+            if (content) content.classList.add('active');
+            // Atualiza o resumo fiscal ao abrir a aba Impostos
+            if (tabId === 'impostos') popularImpostosModalEdit();
         }
         
         function formatarMoeda(valor) {
@@ -11666,7 +11734,24 @@ PRAZO DE PRODUÇÁO DE 30 DIAS ÚTEIS APÓS RECEPÇÁO FÍSICA..."></textarea>
                 showNotification('Nenhum pedido selecionado', 'error');
                 return;
             }
-            
+
+            // BUG-019: bloqueia salvar pedidos sem itens / valor R$0,00
+            // (somente para orçamento/rascunho — pedidos faturados podem ter ajustes)
+            try {
+                const statusAtual = String(pedidoAtual.status || '').toLowerCase();
+                const bloquearVazios = !['faturado', 'recibo', 'cancelado', 'denegado'].includes(statusAtual);
+                if (bloquearVazios) {
+                    const itensAtuais = Array.isArray(window.itensPedidoAtual) ? window.itensPedidoAtual
+                                     : Array.isArray(pedidoAtual.itens) ? pedidoAtual.itens
+                                     : [];
+                    const valorAtual = Number(pedidoAtual.valor_total || pedidoAtual.valor || 0);
+                    if (itensAtuais.length === 0 && valorAtual <= 0) {
+                        showNotification('Adicione ao menos 1 item ao orçamento antes de salvar.', 'warning');
+                        return;
+                    }
+                }
+            } catch (_) { /* fail-open: não bloqueia se inspeção falhar */ }
+
             // Capturar alterações para histórico
             const alterações = [];
             
@@ -11747,7 +11832,7 @@ PRAZO DE PRODUÇÁO DE 30 DIAS ÚTEIS APÓS RECEPÇÁO FÍSICA..."></textarea>
             const dadosAgropecuariaStr = dadosAgropecuaria ? JSON.stringify(dadosAgropecuaria) : '';
             
             // Capturar previsão de faturamento
-            const previsaoFaturamento = document.getElementById('edit-previsão-faturamento')?.value || null;
+            const previsaoFaturamento = document.getElementById('edit-previsao-faturamento')?.value || null;
 
             console.log('[DEBUG SALVAR] Valores capturados:', {
                 novasParcelas: novasParcelas,
@@ -13934,7 +14019,7 @@ Zyntra:                                 <div class="razao">I. M. DOS REIS INDÚS
         // Desfazer filtros (restaurar padrões)
         function desfazerFiltros() {
             document.getElementById('filtro-data-inclusao').value = 'tudo';
-            document.getElementById('filtro-data-previsão').value = 'tudo';
+            document.getElementById('filtro-data-previsao').value = 'tudo';
             document.getElementById('filtro-data-faturamento').value = 'tudo';
             document.getElementById('filtro-vendedor').value = '';
             document.getElementById('filtro-vendedor').placeholder = 'Todos os Vendedores';
@@ -13985,7 +14070,7 @@ Zyntra:                                 <div class="razao">I. M. DOS REIS INDÚS
         // Aplicar filtros
         function aplicarFiltros() {
             filtrosState.dataInclusao = document.getElementById('filtro-data-inclusao').value;
-            filtrosState.dataPrevisao = document.getElementById('filtro-data-previsão').value;
+            filtrosState.dataPrevisao = document.getElementById('filtro-data-previsao').value;
             filtrosState.dataFaturamento = document.getElementById('filtro-data-faturamento').value;
             filtrosState.exibirCancelados = document.getElementById('toggle-cancelados').checked;
             filtrosState.exibirDenegados = document.getElementById('toggle-denegados').checked;
@@ -14918,17 +15003,39 @@ Zyntra:                                 <div class="razao">I. M. DOS REIS INDÚS
                 return;
             }
             
-            dropdown.innerHTML = produtos.map((p, idx) => `
-                <div class="autocomplete-item" data-idx="${idx}" onclick="selecionarProdutoAutocomplete(${idx})">
-                    <span class="autocomplete-item-code">${p.codigo || ''}</span>
-                    <span class="autocomplete-item-desc">${p.descricao || ''}</span>
+            dropdown.innerHTML = produtos.map((p, idx) => {
+                const estoque = parseFloat(p.estoque_atual || 0);
+                const preco = parseFloat(p.preco_venda || p.preco_custo || 0);
+                const sobEncomenda = parseInt(p.controla_estoque) === 0;
+                const semEstoque = !sobEncomenda && estoque <= 0;
+                const corEstoque = semEstoque ? '#dc2626' : '#059669';
+                const badge = sobEncomenda
+                    ? `<span style="color:#fff;background:#d97706;padding:1px 7px;border-radius:4px;font-weight:600;font-size:11px"><i class="fas fa-industry"></i> SOB ENCOMENDA</span>`
+                    : `<span style="color:#fff;background:#059669;padding:1px 7px;border-radius:4px;font-weight:600;font-size:11px"><i class="fas fa-box"></i> ESTOQUE</span>`;
+                const rowStyle = sobEncomenda
+                    ? 'border-left:4px solid #d97706;background:linear-gradient(90deg,#fffbeb 0%,#fff 45%)'
+                    : 'border-left:4px solid #059669;background:linear-gradient(90deg,#ecfdf5 0%,#fff 45%)';
+                const descSuffix = sobEncomenda
+                    ? ' <small style="color:#b45309;font-weight:600">(sob encomenda)</small>'
+                    : (semEstoque ? ' <small style="color:#b91c1c;font-weight:600">(sem estoque)</small>' : '');
+                const estoqueInfo = sobEncomenda
+                    ? ''
+                    : `<span style="color:${corEstoque}"><i class="fas fa-cubes"></i> Estoque: ${formatarQuantidade(estoque)} ${escaparHTML(p.unidade || 'M')}</span>`;
+                const localInfo = sobEncomenda
+                    ? ''
+                    : `<span><i class="fas fa-warehouse"></i> ${escaparHTML(p.local_estoque || 'ESTOQUE')}</span>`;
+                return `
+                <div class="autocomplete-item" data-idx="${idx}" onclick="selecionarProdutoAutocomplete(${idx})" style="${rowStyle}">
+                    <span class="autocomplete-item-code">${escaparHTML(p.codigo || '')}</span>
+                    <span class="autocomplete-item-desc">${escaparHTML(p.descricao || p.nome || '')}${descSuffix}</span>
                     <span class="autocomplete-item-info">
-                        <span><i class="fas fa-box"></i> Estoque: ${formatarQuantidade(p.estoque_atual || 0)} ${p.unidade || 'M'}</span>
-                        <span><i class="fas fa-tag"></i> ${formatarMoeda(p.preco_venda || 0)}</span>
-                        <span><i class="fas fa-warehouse"></i> ${p.local_estoque || 'PADRAO'}</span>
+                        ${badge}
+                        ${estoqueInfo}
+                        <span><i class="fas fa-tag"></i> ${formatarMoeda(preco)}</span>
+                        ${localInfo}
                     </span>
-                </div>
-            `).join('');
+                </div>`;
+            }).join('');
             
             // Guardar produtos no DOM para seleção
             dropdown.produtosData = produtos;
@@ -15241,11 +15348,11 @@ Zyntra:                                 <div class="razao">I. M. DOS REIS INDÚS
         async function carregarItensPedido(pedidoId) {
             try {
                 const response = await fetch(`/api/vendas/pedidos/${pedidoId}/itens`, {
+                    credentials: 'include',
                     credentials: 'include'
                 });
                 if (response.ok) {
-                    const data = await response.json();
-                    itensPedidoAtual = Array.isArray(data) ? data : (data.itens || data.data || data.items || []);
+                    itensPedidoAtual = await response.json();
                 } else {
                     itensPedidoAtual = [];
                 }
@@ -15630,14 +15737,14 @@ Zyntra:                                 <div class="razao">I. M. DOS REIS INDÚS
             const totalICMSST = itensPedidoAtual.reduce((sum, item) => {
                 return sum + (parseFloat(item.valor_icms_st) || 0);
             }, 0);
-            
+
             const totalDIFAL = itensPedidoAtual.reduce((sum, item) => {
                 return sum + (parseFloat(item.valor_difal) || 0);
             }, 0);
 
             // Valor final
             const valorTotal = totalMercadorias - totalDesconto + totalIPI + totalICMSST + totalDIFAL;
-            
+
             // Atualizar campos do modal
             const totalMercadoriasInput = document.getElementById('edit-total-mercadorias');
             const descontoInput = document.getElementById('edit-desconto');
@@ -15646,7 +15753,7 @@ Zyntra:                                 <div class="razao">I. M. DOS REIS INDÚS
             const difalInput = document.getElementById('edit-difal');
             const difalContainer = document.getElementById('edit-difal-container');
             const valorTotalInput = document.getElementById('edit-valor-total');
-            
+
             if (totalMercadoriasInput) totalMercadoriasInput.value = formatarMoeda(totalMercadorias);
             if (descontoInput && totalDesconto > 0) descontoInput.value = formatarMoeda(totalDesconto);
             if (ipiInput) ipiInput.value = formatarMoeda(totalIPI);
@@ -15654,20 +15761,21 @@ Zyntra:                                 <div class="razao">I. M. DOS REIS INDÚS
             if (difalInput) difalInput.value = formatarMoeda(totalDIFAL);
             if (difalContainer) difalContainer.style.display = totalDIFAL > 0 ? '' : 'none';
             if (valorTotalInput) valorTotalInput.value = formatarMoeda(valorTotal);
-            
+
             // Atualizar o valor no pedidoAtual
             if (pedidoAtual) {
                 pedidoAtual.valor = valorTotal;
                 pedidoAtual.total_mercadorias = totalMercadorias;
             }
-            
-            console.log('[Vendas] Totais atualizados:', { 
+
+            console.log('[Vendas] Totais atualizados:', {
                 itens: itensPedidoAtual.length,
-                totalMercadorias, 
-                totalDesconto, 
-                totalIPI, 
-                totalICMSST, 
-                valorTotal 
+                totalMercadorias,
+                totalDesconto,
+                totalIPI,
+                totalICMSST,
+                totalDIFAL,
+                valorTotal
             });
         }
 
@@ -16722,15 +16830,27 @@ Zyntra:                                 <div class="razao">I. M. DOS REIS INDÚS
                 select.innerHTML = '<option value="">Selecione o vendedor...</option>';
 
                 // Adicionar vendedores da lista
+                let encontrouSelecionado = false;
                 vendedoresLista.forEach(v => {
                     const option = document.createElement('option');
                     option.value = v.nome;
                     option.textContent = v.nome;
                     if (v.nome === vendedorSelecionado || v.apelido === vendedorSelecionado) {
                         option.selected = true;
+                        encontrouSelecionado = true;
                     }
                     select.appendChild(option);
                 });
+
+                // BUG-012: se o vendedor do pedido não está na lista da API (nome antigo/abreviado),
+                // adiciona como opção para não perder o vínculo ao salvar
+                if (vendedorSelecionado && !encontrouSelecionado) {
+                    const optFallback = document.createElement('option');
+                    optFallback.value = vendedorSelecionado;
+                    optFallback.textContent = vendedorSelecionado + ' (atual)';
+                    optFallback.selected = true;
+                    select.appendChild(optFallback);
+                }
 
                 console.log('Select vendedores populado com', vendedoresLista.length, 'vendedores');
             } catch (err) {
@@ -17512,64 +17632,41 @@ Zyntra:                                 <div class="razao">I. M. DOS REIS INDÚS
             showNotification('Condição de pagamento selecionada: ' + descrição, 'success');
         }
         
+        // BUG-018: alias amigável usado nas tabelas de pedidos para evitar
+        // exibir valores brutos da API como "a_vista" / "para_30_dias".
+        function formatarCondicaoPagamento(raw) {
+            if (raw == null || raw === '') return '-';
+            const mapped = mapearCondicaoParaDescrição(raw);
+            return mapped || String(raw).replace(/_/g, ' ');
+        }
+
         // Mapear código de condição de pagamento para descrição legível
+        // BUG-008/VIS-001: normaliza entrada (case, underscore, espaços em torno de "/")
+        // para que 'a vista'/'a_vista'/'A Vista'/'À Vista' e '28/35' / '28 / 35' caiam no mesmo formato
         function mapearCondicaoParaDescrição(código) {
-            if (!código) return '';
-            
-            // Mapeamento de códigos para descrições
-            const mapeamentos = {
-                'a_vista': 'À Vista',
-                'a vista': 'À Vista',
-                'AV': 'À Vista',
-                '0': 'À Vista',
-                'para_7_dias': 'Para 7 dias',
-                '7': 'Para 7 dias',
-                'para_14_dias': 'Para 14 dias',
-                '14': 'Para 14 dias',
-                'para_15_dias': 'Para 15 dias',
-                '15': 'Para 15 dias',
-                'para_21_dias': 'Para 21 dias',
-                '21': 'Para 21 dias',
-                'para_28_dias': 'Para 28 dias',
-                '28': 'Para 28 dias',
-                'para_30_dias': 'Para 30 dias',
-                '30': 'Para 30 dias',
-                'para_45_dias': 'Para 45 dias',
-                '45': 'Para 45 dias',
-                'para_60_dias': 'Para 60 dias',
-                '60': 'Para 60 dias',
-                '28_35_42_49': '28/35/42/49 dias (4x)',
-                '28/35/42/49': '28/35/42/49 dias (4x)',
-                '30_60': '30/60 dias (2x)',
-                '30/60': '30/60 dias (2x)',
-                '30_60_90': '30/60/90 dias (3x)',
-                '30/60/90': '30/60/90 dias (3x)',
-                '30_60_90_120': '30/60/90/120 dias (4x)',
-                '30/60/90/120': '30/60/90/120 dias (4x)',
-                '30_60_90_120_150': '30/60/90/120/150 dias (5x)',
-                '30/60/90/120/150': '30/60/90/120/150 dias (5x)',
-                '30_60_90_120_150_180': '30/60/90/120/150/180 dias (6x)',
-                '30/60/90/120/150/180': '30/60/90/120/150/180 dias (6x)'
-            };
-            
-            // Se encontrar no mapeamento, retorna a descrição
-            if (mapeamentos[código]) {
-                return mapeamentos[código];
+            if (código == null || código === '') return '';
+
+            const rawStr = código.toString().trim();
+            // Chave normalizada para à-vista / "para N dias": minúsculo, underscore->espaço, espaços colapsados
+            const norm = rawStr.toLowerCase().replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
+            // Versão de parcelas: remove espaços ao redor de "/" e converte underscore em "/"
+            const slash = rawStr.replace(/\s*\/\s*/g, '/').replace(/_/g, '/').trim();
+
+            // À Vista (todas as variantes)
+            if (['a vista', 'à vista', 'av', '0', 'avista'].includes(norm)) return 'À Vista';
+
+            // Padrão de parcelas com barra: 30/60, 28/35/42/49, etc.
+            if (/^\d+(\/\d+)+$/.test(slash)) {
+                const parcelas = slash.split('/');
+                return `${slash} dias (${parcelas.length}x)`;
             }
-            
-            // Se não encontrar, tenta identificar padrão de parcelas
-            if (código.includes('/')) {
-                const parcelas = código.split('/');
-                return `${código} dias (${parcelas.length}x)`;
-            }
-            
-            // Se for apenas um número, retorna como "Para X dias"
-            if (!isNaN(código)) {
-                return `Para ${código} dias`;
-            }
-            
-            // Se nada funcionar, retorna o código original
-            return código;
+
+            // "para N dias" ou número único
+            const numMatch = norm.match(/(?:para\s*)?(\d+)\s*dias?/) || norm.match(/^(\d+)$/);
+            if (numMatch) return `Para ${numMatch[1]} dias`;
+
+            // Fallback: devolve sem underscore
+            return rawStr.replace(/_/g, ' ');
         }
         
         // Salvar nova condição de pagamento
@@ -17762,7 +17859,7 @@ Zyntra:                                 <div class="razao">I. M. DOS REIS INDÚS
                 localEstoque: estoqueLabels[estoque] || estoque,
                 precoUnitario: preco
             });
-            
+
             renderTabelaItens();
             // Recalcular impostos (DIFAL/ICMS-ST) conforme tipo de venda e atualizar totais
             setTipoVendaNovo(document.getElementById('novo-tipo-venda')?.value || 'consumidor');
@@ -18195,7 +18292,7 @@ Zyntra:                                 <div class="razao">I. M. DOS REIS INDÚS
             document.getElementById('parcela-vencimento').value = dataFormatada;
             document.getElementById('parcela-valor').value = valor.replace('R$', '').trim();
             document.getElementById('parcela-numero').value = `${String(númeroParcela).padStart(3, '0')}/001`;
-            document.getElementById('parcela-previsão-recebimento').value = dataFormatada;
+            document.getElementById('parcela-previsao-recebimento').value = dataFormatada;
             
             // Carregar contas correntes no select do modal
             carregarContasParcelaModal();
@@ -18451,7 +18548,7 @@ Zyntra:                                 <div class="razao">I. M. DOS REIS INDÚS
             const transportadora = document.getElementById('novo-transportadora')?.value?.trim() || '';
             const observações = document.getElementById('novo-observacoes').value.trim();
             const cenarioFiscal = document.getElementById('novo-cenario-fiscal').value || document.getElementById('impostos-cenario-fiscal')?.value;
-            const previsaoFaturamento = document.getElementById('novo-previsão-faturamento').value;
+            const previsaoFaturamento = document.getElementById('novo-previsao-faturamento').value;
             const frete = parseFloat(document.getElementById('novo-frete')?.value?.replace(',', '.')) || 0;
             const departamento = document.getElementById('novo-departamento')?.value || '';
             
@@ -18491,7 +18588,7 @@ Zyntra:                                 <div class="razao">I. M. DOS REIS INDÚS
             const emailCliente = document.getElementById('novo-email-cliente')?.value?.trim() || '';
             const seguro = parseFloat(document.getElementById('novo-seguro')?.value?.replace(',', '.')) || 0;
             const outrasDespesas = parseFloat(document.getElementById('novo-outras-despesas')?.value?.replace(',', '.')) || 0;
-            const previsaoEntrega = document.getElementById('novo-previsão-entrega')?.value || '';
+            const previsaoEntrega = document.getElementById('novo-previsao-entrega')?.value || '';
             const dadosAdicionaisNf = document.getElementById('novo-dados-adicionais-nf')?.value?.trim() || '';
             const categoria = document.getElementById('novo-categoria')?.value || '';
             const contaCorrente = document.getElementById('novo-conta-corrente')?.value || '';
@@ -21956,13 +22053,95 @@ Zyntra:                     <title>Catálogo de Produtos</title>
         // FUNÇÕES DE PARCELAS - ESTILO OMIE
         // ========================================
         
+        // BUG-004 fix: parsea condição de pagamento em array de dias
+        // Aceita variantes: 'a vista', 'a_vista', 'À Vista', '30', '30/60/90', 'para_28_dias', etc.
+        function parsearCondicaoEmDias(condicao) {
+            if (!condicao) return [0];
+            const c = condicao.toString().toLowerCase().trim();
+            if (['av', 'a vista', 'a_vista', 'à vista', 'à_vista', 'avista', ''].includes(c)) return [0];
+            // Extrair sequência numérica X/Y/Z (ignora prefixos como 'para_')
+            const onlyDigitsSlash = c.replace(/[^\d/]/g, '');
+            if (onlyDigitsSlash.includes('/')) {
+                const dias = onlyDigitsSlash.split('/').map(n => parseInt(n)).filter(n => !isNaN(n) && n >= 0);
+                if (dias.length > 0) return dias;
+            }
+            const numMatch = c.match(/(\d+)/);
+            if (numMatch) return [parseInt(numMatch[1])];
+            return [0];
+        }
+
+        // BUG-004 fix: gera parcelas a partir do pedido (valor, condição, data de criação)
+        // Valida: (1) pedido com valor zero não renderiza linhas, (2) vencimento sempre >= data do pedido
+        function popularParcelasModalEdit() {
+            const tbody = document.getElementById('parcelas-tbody');
+            if (!tbody) return;
+            if (!pedidoAtual) {
+                tbody.innerHTML = '<tr><td colspan="8" style="padding:32px;text-align:center;color:#94a3b8;">Selecione um pedido</td></tr>';
+                return;
+            }
+            const valor = parseFloat(pedidoAtual.valor || pedidoAtual.valor_total || pedidoAtual.total || 0);
+            if (!valor || valor <= 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="padding:24px;text-align:center;color:#b45309;background:#fffbeb;font-size:13px;"><i class="fas fa-exclamation-triangle"></i> Pedido sem valor definido — adicione itens para gerar parcelas</td></tr>';
+                return;
+            }
+            const condicao = document.getElementById('edit-parcelas')?.value
+                || pedidoAtual.condicao_pagamento
+                || pedidoAtual.condicoes_pagamento
+                || pedidoAtual.parcelas
+                || 'a vista';
+            const dataBaseStr = pedidoAtual.data_inclusao || pedidoAtual.created_at || pedidoAtual.data_pedido;
+            let dataBase = dataBaseStr ? new Date(dataBaseStr) : new Date();
+            if (isNaN(dataBase.getTime())) dataBase = new Date();
+            const hoje = new Date();
+            hoje.setHours(0, 0, 0, 0);
+            // Vencimento nunca pode ser anterior à data do pedido (BUG-004)
+            if (dataBase < hoje && !dataBaseStr) dataBase = hoje;
+
+            const dias = parsearCondicaoEmDias(condicao);
+            const total = dias.length;
+            const valorParcela = valor / total;
+            const percentual = 100 / total;
+            const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+
+            tbody.innerHTML = dias.map((d, i) => {
+                const dataVenc = new Date(dataBase);
+                dataVenc.setDate(dataVenc.getDate() + d);
+                const dataFmt = `${String(dataVenc.getDate()).padStart(2,'0')}/${String(dataVenc.getMonth()+1).padStart(2,'0')}/${String(dataVenc.getFullYear()).slice(-2)} ${diasSemana[dataVenc.getDay()]}`;
+                const valorFmt = valorParcela.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                return `<tr data-parcela="${i+1}" ondblclick="editarParcela(${i+1})" style="cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='#fff7ed'" onmouseout="this.style.background=''">
+                    <td style="padding:12px 10px;"><span style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:#fef3c7;color:#b45309;border-radius:4px;font-size:11px;font-weight:600;"><i class="fas fa-clock"></i> Previsão</span></td>
+                    <td style="padding:12px 10px;font-weight:500;">${String(i+1).padStart(3,'0')}/${String(total).padStart(3,'0')}</td>
+                    <td style="padding:12px 10px;">${dataFmt}</td>
+                    <td style="padding:12px 10px;font-weight:600;color:#059669;">R$ ${valorFmt}</td>
+                    <td style="padding:12px 10px;">${percentual.toFixed(0)}%</td>
+                    <td style="padding:12px 10px;color:#9ca3af;font-style:italic;">&lt;não informado&gt;</td>
+                    <td style="padding:12px 10px;color:#9ca3af;font-style:italic;">&lt;não informado&gt;</td>
+                    <td style="padding:12px 10px;"><span style="color:#dc2626;font-weight:500;">Não</span></td>
+                </tr>`;
+            }).join('');
+        }
+
+        // BUG-019: preenche o resumo fiscal (read-only) na aba Impostos do modal de edição
+        function popularImpostosModalEdit() {
+            if (!pedidoAtual) return;
+            const fmt = v => 'R$ ' + (parseFloat(v) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const icms = parseFloat(pedidoAtual.total_icms) || 0;
+            const icmsSt = parseFloat(pedidoAtual.total_icms_st) || 0;
+            const ipi = parseFloat(pedidoAtual.total_ipi) || 0;
+            const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+            setText('edit-imp-icms', fmt(icms));
+            setText('edit-imp-icms-st', fmt(icmsSt));
+            setText('edit-imp-ipi', fmt(ipi));
+            setText('edit-imp-total', fmt(icms + icmsSt + ipi));
+        }
+
         // Refazer parcelas com base na condição de pagamento selecionada
         function refazerParcelas() {
             if (!pedidoAtual) {
                 showNotification('Selecione um pedido primeiro', 'warning');
                 return;
             }
-            
+
             const condicao = document.getElementById('edit-parcelas')?.value || 'a_vista';
             const valorTotal = parseFloat(pedidoAtual.valor_total || pedidoAtual.total || 0);
             const dataBase = new Date();

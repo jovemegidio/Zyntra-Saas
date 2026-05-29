@@ -3,246 +3,419 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Central de Ajuda Zyntra com guias, artigos e tutoriais do ERP.">
+    <meta name="description" content="Central de Ajuda Zyntra — tutoriais escritos, guias e documentação para cada módulo do ERP.">
+    <meta name="keywords" content="Zyntra, ERP, ajuda, tutorial, guia, documentação">
+    <meta name="author" content="Zyntra">
     <meta name="robots" content="index, follow">
-    <meta name="theme-color" content="#111827">
+    <meta name="theme-color" content="#0F0F23">
     <title>Zyntra: Central de Ajuda</title>
+
+    <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/Zyntra-SGE/css/dashboard.css?v=20260512-help">
-    <link rel="stylesheet" href="/Zyntra-SGE/css/treinamentos.css?v=20260512-help">
-    <link rel="icon" type="image/png" href="/Zyntra-SGE/Favicon - Zyntra.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Padrão visual de treinamentos.html (mesmo dashboard.css + treinamentos.css) -->
+    <link rel="stylesheet" href="/Zyntra-SGE/css/dashboard.css">
+    <link rel="stylesheet" href="/Zyntra-SGE/css/treinamentos.css">
+
+    <style>
+        /* Overrides locais para Ajuda escrita (sem player de vídeo) */
+        .aj-modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 14px;
+        }
+        .aj-module-card {
+            background: #fff;
+            border-radius: var(--radius-lg);
+            padding: 18px;
+            border: 1px solid var(--gray-200);
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--gray-700);
+            position: relative;
+        }
+        .aj-module-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary-light);
+        }
+        .aj-module-card__icon {
+            width: 44px; height: 44px; border-radius: 10px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px;
+        }
+        .aj-module-card__title { font-size: 14px; font-weight: 700; color: var(--gray-800); }
+        .aj-module-card__desc { font-size: 12.5px; color: var(--gray-500); line-height: 1.5; }
+        .aj-module-card__arrow {
+            position: absolute; top: 18px; right: 18px;
+            color: var(--gray-300); font-size: 13px; transition: var(--transition);
+        }
+        .aj-module-card:hover .aj-module-card__arrow { color: var(--primary); transform: translateX(3px); }
+        .aj-module-card[data-color="green"]  .aj-module-card__icon { background: linear-gradient(135deg, #00B894, #00a884); }
+        .aj-module-card[data-color="orange"] .aj-module-card__icon { background: linear-gradient(135deg, #E17055, #d35400); }
+        .aj-module-card[data-color="blue"]   .aj-module-card__icon { background: linear-gradient(135deg, #0984e3, #0775c5); }
+        .aj-module-card[data-color="red"]    .aj-module-card__icon { background: linear-gradient(135deg, #d63031, #b22222); }
+        .aj-module-card[data-color="yellow"] .aj-module-card__icon { background: linear-gradient(135deg, #f39c12, #d68910); }
+        .aj-module-card[data-color="teal"]   .aj-module-card__icon { background: linear-gradient(135deg, #00cec9, #00a39e); }
+
+        .aj-highlights {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 12px;
+        }
+        .aj-highlight {
+            display: flex; align-items: center; gap: 12px;
+            padding: 14px 16px;
+            border-radius: var(--radius-lg);
+            background: linear-gradient(135deg, rgba(108,92,231,0.07) 0%, rgba(108,92,231,0.02) 100%);
+            border: 1px solid rgba(108,92,231,0.18);
+            transition: var(--transition);
+            color: var(--gray-700);
+            text-decoration: none;
+        }
+        .aj-highlight:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+            border-color: var(--primary);
+        }
+        .aj-highlight__icon {
+            width: 36px; height: 36px; border-radius: 9px;
+            background: rgba(108,92,231,0.12); color: var(--primary);
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; font-size: 14px;
+        }
+        .aj-highlight__text { font-size: 13.5px; font-weight: 600; color: var(--gray-800); }
+
+        .aj-sidebar-section { padding: 6px 14px 4px; font-size: 11px; font-weight: 700; color: var(--gray-400); text-transform: uppercase; letter-spacing: .4px; }
+        .aj-sidebar-link { display: flex; align-items: center; gap: 10px; padding: 8px 14px; font-size: 13px; color: var(--gray-700); text-decoration: none; border-left: 3px solid transparent; transition: var(--transition); }
+        .aj-sidebar-link:hover { background: var(--gray-50); color: var(--gray-800); }
+        .aj-sidebar-link.active { background: rgba(108,92,231,0.08); color: var(--primary); border-left-color: var(--primary); font-weight: 600; }
+        .aj-sidebar-link i { width: 16px; text-align: center; font-size: 13px; }
+    </style>
 </head>
 <body>
+
+    <!-- ========== NAVBAR (mesmo padrão do hub / treinamentos) ========== -->
     <nav class="dash-nav">
         <div class="dash-nav__inner">
             <div class="dash-nav__left">
-                <a href="/Empresas/dashboard.html" class="dash-nav__logo">
-                    <img src="/Zyntra-SGE/Zyntra - Branco.png" alt="Zyntra">
+                <a href="/Zyntra-SGE/Empresas/dashboard.html" class="dash-nav__logo">
+                    <img src="/Zyntra-SGE/Zyntra - Branco.png" alt="Zyntra" onerror="this.src='/favicon-zyntra.jpg';this.style.borderRadius='4px'">
                 </a>
                 <div class="dash-nav__links">
-                    <a href="/Empresas/dashboard.html" class="dash-nav__link">Meus Aplicativos</a>
-                    <a href="/Empresas/treinamentos.html" class="dash-nav__link active">Meus Treinamentos</a>
-                    <a href="/Empresas/zyntra-store.html" class="dash-nav__link">Zyntra Store</a>
+                    <a href="/Zyntra-SGE/Empresas/dashboard.html" class="dash-nav__link">Meus Aplicativos</a>
+                    <a href="/Zyntra-SGE/Empresas/treinamentos.html" class="dash-nav__link">Meus Treinamentos</a>
+                    <a href="/Zyntra-SGE/Empresas/zyntra-store.html" class="dash-nav__link">Zyntra Store</a>
+                    <a href="/ajuda/" class="dash-nav__link active">Central de Ajuda</a>
                 </div>
-                <button class="dash-nav__mobile-toggle" id="mobileToggle" aria-label="Menu">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-                </button>
             </div>
             <div class="dash-nav__right">
-                <button class="dash-nav__notifications" aria-label="Notificações">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-                </button>
-                <div style="position:relative;">
-                    <button class="dash-nav__user" id="userBtn" aria-label="Menu do usuário">
-                        <div class="dash-nav__avatar" id="userAvatar">U</div>
-                        <span class="dash-nav__user-name" id="userName">Usuário</span>
-                        <svg class="dash-nav__user-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
-                    </button>
-                    <div class="user-dropdown" id="userDropdown">
-                        <div class="user-dropdown__header">
-                            <div class="user-dropdown__name" id="userFullName">Usuário</div>
-                            <div class="user-dropdown__email" id="userEmail">usuario@email.com</div>
-                        </div>
-                        <button class="user-dropdown__item" onclick="window.location.href='/Empresas/dashboard.html'">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-                            Meus Aplicativos
-                        </button>
-                        <button class="user-dropdown__item logout" id="btnLogout">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                            Sair da conta
-                        </button>
-                    </div>
-                </div>
+                <a href="/Zyntra-SGE/Empresas/dashboard.html" class="dash-nav__link" style="color:var(--white);background:rgba(255,255,255,0.06);padding:6px 14px;border-radius:6px;">
+                    <i class="fas fa-arrow-left" style="margin-right:6px;font-size:11px;"></i>
+                    Voltar ao Hub
+                </a>
             </div>
         </div>
     </nav>
 
-    <div class="dash-mobile-nav" id="mobileNav">
-        <div class="dash-mobile-nav__menu">
-            <a href="/Empresas/dashboard.html" class="dash-nav__link">Meus Aplicativos</a>
-            <a href="/Empresas/treinamentos.html" class="dash-nav__link active">Meus Treinamentos</a>
-            <a href="/Empresas/zyntra-store.html" class="dash-nav__link">Zyntra Store</a>
-        </div>
-    </div>
-
+    <!-- ========== TWO-COLUMN LAYOUT (padrão treinamentos.html) ========== -->
     <div class="trn-layout">
-        <aside class="trn-sidebar" id="trnSidebar">
+
+        <!-- SIDEBAR -->
+        <aside class="trn-sidebar" id="ajSidebar">
             <div class="trn-sidebar__header">
                 <h2 class="trn-sidebar__title">Central de Ajuda</h2>
                 <button class="trn-sidebar__close" id="sidebarCloseBtn" aria-label="Fechar">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
             </div>
+
             <div class="trn-sidebar__search">
                 <svg class="trn-sidebar__search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                <input type="search" class="trn-sidebar__search-input" id="sidebarSearch" placeholder="Buscar ajuda...">
+                <input type="search" class="trn-sidebar__search-input" id="ajSearch" placeholder="Buscar artigos...">
             </div>
-            <nav class="trn-nav" id="trnNav">
-                <a class="trn-nav__item active" href="/ajuda/"><span>Visão geral</span></a>
-                <a class="trn-nav__item" href="/ajuda/colecoes/guia-inicial.html"><span>Guia inicial</span></a>
-                <a class="trn-nav__item" href="/ajuda/colecoes/tutoriais.html"><span>Tutoriais</span></a>
-                <a class="trn-nav__item" href="/ajuda/colecoes/financas.html"><span>Financeiro</span></a>
-                <a class="trn-nav__item" href="/ajuda/colecoes/vendas.html"><span>Vendas</span></a>
-                <a class="trn-nav__item" href="/ajuda/colecoes/rh.html"><span>RH</span></a>
-                <a class="trn-nav__item" href="/ajuda/colecoes/pcp.html"><span>PCP</span></a>
-                <a class="trn-nav__item" href="/ajuda/colecoes/logistica.html"><span>Logística</span></a>
+
+            <nav class="trn-nav" id="ajNav">
+                <div class="aj-sidebar-section">Início</div>
+                <a class="aj-sidebar-link active" href="/ajuda/"><i class="fas fa-home"></i> Visão geral</a>
+
+                <div class="aj-sidebar-section">Comece por aqui</div>
+                <a class="aj-sidebar-link" href="colecoes/guia-inicial.html"><i class="fas fa-rocket"></i> Guia inicial</a>
+                <a class="aj-sidebar-link" href="colecoes/tutoriais.html"><i class="fas fa-graduation-cap"></i> Tutoriais por módulo</a>
+                <a class="aj-sidebar-link" href="colecoes/novidades.html"><i class="fas fa-bullhorn"></i> Novidades</a>
+
+                <div class="aj-sidebar-section">Módulos</div>
+                <a class="aj-sidebar-link" href="colecoes/cadastros.html"><i class="fas fa-users"></i> Cadastros</a>
+                <a class="aj-sidebar-link" href="colecoes/vendas.html"><i class="fas fa-shopping-cart"></i> Vendas</a>
+                <a class="aj-sidebar-link" href="colecoes/compras.html"><i class="fas fa-truck"></i> Compras</a>
+                <a class="aj-sidebar-link" href="colecoes/financas.html"><i class="fas fa-chart-line"></i> Finanças</a>
+                <a class="aj-sidebar-link" href="colecoes/estoque.html"><i class="fas fa-boxes"></i> Estoque</a>
+                <a class="aj-sidebar-link" href="colecoes/notas-fiscais.html"><i class="fas fa-file-alt"></i> Notas Fiscais</a>
+                <a class="aj-sidebar-link" href="colecoes/contabilidade.html"><i class="fas fa-calculator"></i> Contabilidade</a>
+                <a class="aj-sidebar-link" href="colecoes/relatorios.html"><i class="fas fa-chart-bar"></i> Relatórios</a>
+                <a class="aj-sidebar-link" href="colecoes/logistica.html"><i class="fas fa-truck-loading"></i> Logística</a>
+                <a class="aj-sidebar-link" href="colecoes/pcp.html"><i class="fas fa-industry"></i> PCP</a>
+                <a class="aj-sidebar-link" href="colecoes/rh.html"><i class="fas fa-user-tie"></i> RH</a>
+                <a class="aj-sidebar-link" href="colecoes/faturamento.html"><i class="fas fa-money-check-alt"></i> Faturamento</a>
+
+                <div class="aj-sidebar-section">Outros</div>
+                <a class="aj-sidebar-link" href="colecoes/seguranca.html"><i class="fas fa-shield-alt"></i> Segurança</a>
+                <a class="aj-sidebar-link" href="colecoes/app.html"><i class="fas fa-mobile-alt"></i> App Zyntra</a>
+                <a class="aj-sidebar-link" href="colecoes/whatsapp.html"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+                <a class="aj-sidebar-link" href="colecoes/portal.html"><i class="fas fa-globe"></i> Portal</a>
+                <a class="aj-sidebar-link" href="colecoes/cenarios.html"><i class="fas fa-briefcase"></i> Cenários</a>
             </nav>
         </aside>
 
         <div class="trn-sidebar-overlay" id="sidebarOverlay"></div>
 
+        <!-- MAIN -->
         <div class="trn-content">
+
             <div class="trn-mobile-bar">
                 <button class="trn-mobile-menu-btn" id="sidebarOpenBtn">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-                    Ajuda
+                    Categorias
                 </button>
                 <span class="trn-mobile-breadcrumb">Central de Ajuda</span>
             </div>
 
-            <div class="trn-home" id="helpHome">
-                <section class="trn-help-hero" aria-labelledby="helpHeroTitle">
-                    <div class="trn-help-hero__copy">
-                        <span class="trn-help-kicker">Central de Ajuda</span>
-                        <h1 id="helpHeroTitle">Ajuda e Treinamentos Zyntra</h1>
-                        <p>Encontre guias, tutoriais e artigos para operar os módulos do ERP com segurança no dia a dia.</p>
-                    </div>
-                    <label class="trn-help-search" for="mainSearch">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                        <input type="search" id="mainSearch" placeholder="Buscar artigos, tutoriais e documentação...">
-                    </label>
-                </section>
+            <!-- HOME VIEW -->
+            <div class="trn-home">
 
-                <section class="trn-help-featured" aria-labelledby="featuredTitle">
-                    <h2 id="featuredTitle">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v13"/></svg>
-                        Destaques
+                <div class="trn-home__header">
+                    <div>
+                        <h1>Central de Ajuda</h1>
+                        <p>Tutoriais escritos, guias e respostas para operar cada módulo do Zyntra ERP com segurança.</p>
+                    </div>
+                    <div class="trn-progress-badge">
+                        <i class="fas fa-book-open"></i>
+                        <span id="totalArtigos">Carregando…</span>
+                    </div>
+                </div>
+
+                <!-- Search central -->
+                <div style="margin-bottom: 28px;">
+                    <div style="position:relative;max-width:640px;">
+                        <i class="fas fa-search" style="position:absolute;top:50%;left:16px;transform:translateY(-50%);color:var(--gray-400);"></i>
+                        <input type="search" id="mainSearch"
+                               placeholder="Buscar artigos, tutoriais e documentação..."
+                               style="width:100%;padding:14px 16px 14px 44px;border-radius:12px;border:1px solid var(--gray-200);background:#fff;font-family:var(--font);font-size:14px;color:var(--gray-800);transition:var(--transition);">
+                    </div>
+                </div>
+
+                <!-- Destaques -->
+                <div class="trn-section">
+                    <h2 class="trn-section__title">
+                        <i class="fas fa-bullhorn" style="color:var(--primary);"></i>
+                        Destaques e Atualizações
                     </h2>
-                    <div class="trn-help-featured__grid">
-                        <a href="/ajuda/artigos/primeiro-acesso.html" class="trn-help-feature-card" data-help-card>
-                            <span class="trn-help-card__icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v4"/><path d="M10 14 21 3"/><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/></svg></span>
-                            <span>Primeiro acesso</span>
+                    <div class="aj-highlights">
+                        <a href="artigos/nfs-e-nacional.html" class="aj-highlight">
+                            <span class="aj-highlight__icon"><i class="fas fa-file-invoice"></i></span>
+                            <span class="aj-highlight__text">Migração para NFS-e Nacional</span>
                         </a>
-                        <a href="/ajuda/artigos/configuracoes-iniciais.html" class="trn-help-feature-card" data-help-card>
-                            <span class="trn-help-card__icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06A1.65 1.65 0 0 0 15 19.4a1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09A1.65 1.65 0 0 0 15 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.14.31.49 1 1.51 1H21a2 2 0 0 1 0 4h-.09A1.65 1.65 0 0 0 19.4 15z"/></svg></span>
-                            <span>Configurações iniciais</span>
+                        <a href="artigos/desconto-duplicatas.html" class="aj-highlight">
+                            <span class="aj-highlight__icon"><i class="fas fa-percentage"></i></span>
+                            <span class="aj-highlight__text">Desconto de Duplicatas</span>
                         </a>
-                        <a href="/Empresas/treinamentos.html" class="trn-help-feature-card" data-help-card>
-                            <span class="trn-help-card__icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg></span>
-                            <span>Treinamentos completos</span>
+                        <a href="colecoes/guia-inicial.html" class="aj-highlight">
+                            <span class="aj-highlight__icon"><i class="fas fa-rocket"></i></span>
+                            <span class="aj-highlight__text">Primeiro acesso</span>
                         </a>
                     </div>
-                </section>
+                </div>
 
-                <section class="trn-help-section" aria-labelledby="collectionsTitle">
-                    <div class="trn-help-section__header">
-                        <h2 id="collectionsTitle">Explore por categoria</h2>
-                        <p>Navegue pelos módulos e encontre a documentação que precisa.</p>
+                <!-- Explore por categoria -->
+                <div class="trn-section">
+                    <h2 class="trn-section__title">
+                        <i class="fas fa-th-large" style="color:var(--primary);"></i>
+                        Explore por categoria
+                    </h2>
+                    <div class="aj-modules-grid">
+
+                        <a href="colecoes/guia-inicial.html" class="aj-module-card" data-color="blue">
+                            <span class="aj-module-card__icon"><i class="fas fa-rocket"></i></span>
+                            <span class="aj-module-card__title">Guia inicial</span>
+                            <span class="aj-module-card__desc">Primeiros passos: empresa, usuários, ambiente.</span>
+                            <i class="fas fa-chevron-right aj-module-card__arrow"></i>
+                        </a>
+
+                        <a href="colecoes/tutoriais.html" class="aj-module-card" data-color="yellow">
+                            <span class="aj-module-card__icon"><i class="fas fa-graduation-cap"></i></span>
+                            <span class="aj-module-card__title">Tutoriais por módulo</span>
+                            <span class="aj-module-card__desc">Aulas e guias organizados por área do sistema.</span>
+                            <i class="fas fa-chevron-right aj-module-card__arrow"></i>
+                        </a>
+
+                        <a href="colecoes/financas.html" class="aj-module-card" data-color="green">
+                            <span class="aj-module-card__icon"><i class="fas fa-chart-line"></i></span>
+                            <span class="aj-module-card__title">Financeiro</span>
+                            <span class="aj-module-card__desc">Contas, bancos, boletos e fluxo.</span>
+                            <i class="fas fa-chevron-right aj-module-card__arrow"></i>
+                        </a>
+
+                        <a href="colecoes/vendas.html" class="aj-module-card" data-color="green">
+                            <span class="aj-module-card__icon"><i class="fas fa-shopping-cart"></i></span>
+                            <span class="aj-module-card__title">Vendas</span>
+                            <span class="aj-module-card__desc">Pedidos, orçamentos, CRM e comissões.</span>
+                            <i class="fas fa-chevron-right aj-module-card__arrow"></i>
+                        </a>
+
+                        <a href="colecoes/compras.html" class="aj-module-card" data-color="orange">
+                            <span class="aj-module-card__icon"><i class="fas fa-truck"></i></span>
+                            <span class="aj-module-card__title">Compras</span>
+                            <span class="aj-module-card__desc">Pedidos de compra e fornecedores.</span>
+                            <i class="fas fa-chevron-right aj-module-card__arrow"></i>
+                        </a>
+
+                        <a href="colecoes/estoque.html" class="aj-module-card" data-color="yellow">
+                            <span class="aj-module-card__icon"><i class="fas fa-boxes"></i></span>
+                            <span class="aj-module-card__title">Estoque</span>
+                            <span class="aj-module-card__desc">Inventário, ajustes e movimentações.</span>
+                            <i class="fas fa-chevron-right aj-module-card__arrow"></i>
+                        </a>
+
+                        <a href="colecoes/notas-fiscais.html" class="aj-module-card" data-color="red">
+                            <span class="aj-module-card__icon"><i class="fas fa-file-alt"></i></span>
+                            <span class="aj-module-card__title">Notas Fiscais</span>
+                            <span class="aj-module-card__desc">Emissão NF-e/NFS-e, DANFE, cancelamento.</span>
+                            <i class="fas fa-chevron-right aj-module-card__arrow"></i>
+                        </a>
+
+                        <a href="colecoes/contabilidade.html" class="aj-module-card" data-color="blue">
+                            <span class="aj-module-card__icon"><i class="fas fa-calculator"></i></span>
+                            <span class="aj-module-card__title">Contabilidade</span>
+                            <span class="aj-module-card__desc">Integração contábil e SPED.</span>
+                            <i class="fas fa-chevron-right aj-module-card__arrow"></i>
+                        </a>
+
+                        <a href="colecoes/relatorios.html" class="aj-module-card" data-color="teal">
+                            <span class="aj-module-card__icon"><i class="fas fa-chart-bar"></i></span>
+                            <span class="aj-module-card__title">Relatórios</span>
+                            <span class="aj-module-card__desc">Indicadores e análises gerenciais.</span>
+                            <i class="fas fa-chevron-right aj-module-card__arrow"></i>
+                        </a>
+
+                        <a href="colecoes/logistica.html" class="aj-module-card" data-color="orange">
+                            <span class="aj-module-card__icon"><i class="fas fa-truck-loading"></i></span>
+                            <span class="aj-module-card__title">Logística</span>
+                            <span class="aj-module-card__desc">Expedição, transporte e rastreio.</span>
+                            <i class="fas fa-chevron-right aj-module-card__arrow"></i>
+                        </a>
+
+                        <a href="colecoes/pcp.html" class="aj-module-card" data-color="red">
+                            <span class="aj-module-card__icon"><i class="fas fa-industry"></i></span>
+                            <span class="aj-module-card__title">PCP</span>
+                            <span class="aj-module-card__desc">Ordens, apontamentos e materiais.</span>
+                            <i class="fas fa-chevron-right aj-module-card__arrow"></i>
+                        </a>
+
+                        <a href="colecoes/rh.html" class="aj-module-card" data-color="blue">
+                            <span class="aj-module-card__icon"><i class="fas fa-user-tie"></i></span>
+                            <span class="aj-module-card__title">RH</span>
+                            <span class="aj-module-card__desc">Funcionários, ponto, férias e holerites.</span>
+                            <i class="fas fa-chevron-right aj-module-card__arrow"></i>
+                        </a>
+
+                        <a href="colecoes/cadastros.html" class="aj-module-card">
+                            <span class="aj-module-card__icon"><i class="fas fa-users"></i></span>
+                            <span class="aj-module-card__title">Cadastros</span>
+                            <span class="aj-module-card__desc">Clientes, fornecedores e produtos.</span>
+                            <i class="fas fa-chevron-right aj-module-card__arrow"></i>
+                        </a>
+
+                        <a href="colecoes/faturamento.html" class="aj-module-card" data-color="green">
+                            <span class="aj-module-card__icon"><i class="fas fa-money-check-alt"></i></span>
+                            <span class="aj-module-card__title">Faturamento</span>
+                            <span class="aj-module-card__desc">Emissão de faturas e cobrança.</span>
+                            <i class="fas fa-chevron-right aj-module-card__arrow"></i>
+                        </a>
+
+                        <a href="colecoes/seguranca.html" class="aj-module-card" data-color="red">
+                            <span class="aj-module-card__icon"><i class="fas fa-shield-alt"></i></span>
+                            <span class="aj-module-card__title">Segurança</span>
+                            <span class="aj-module-card__desc">Proteção, permissões e auditoria.</span>
+                            <i class="fas fa-chevron-right aj-module-card__arrow"></i>
+                        </a>
+
+                        <a href="colecoes/app.html" class="aj-module-card" data-color="teal">
+                            <span class="aj-module-card__icon"><i class="fas fa-mobile-alt"></i></span>
+                            <span class="aj-module-card__title">App Zyntra</span>
+                            <span class="aj-module-card__desc">Aplicativo móvel para gestão em campo.</span>
+                            <i class="fas fa-chevron-right aj-module-card__arrow"></i>
+                        </a>
+
+                        <a href="colecoes/whatsapp.html" class="aj-module-card" data-color="green">
+                            <span class="aj-module-card__icon"><i class="fab fa-whatsapp"></i></span>
+                            <span class="aj-module-card__title">WhatsApp</span>
+                            <span class="aj-module-card__desc">Gerencie o ERP pelo WhatsApp.</span>
+                            <i class="fas fa-chevron-right aj-module-card__arrow"></i>
+                        </a>
+
+                        <a href="colecoes/cenarios.html" class="aj-module-card" data-color="yellow">
+                            <span class="aj-module-card__icon"><i class="fas fa-briefcase"></i></span>
+                            <span class="aj-module-card__title">Cenários de negócio</span>
+                            <span class="aj-module-card__desc">Exemplos práticos para o dia a dia.</span>
+                            <i class="fas fa-chevron-right aj-module-card__arrow"></i>
+                        </a>
+
+                        <a href="colecoes/novidades.html" class="aj-module-card" data-color="orange">
+                            <span class="aj-module-card__icon"><i class="fas fa-bullhorn"></i></span>
+                            <span class="aj-module-card__title">Novidades</span>
+                            <span class="aj-module-card__desc">Últimas atualizações do produto.</span>
+                            <i class="fas fa-chevron-right aj-module-card__arrow"></i>
+                        </a>
+
+                        <a href="colecoes/portal.html" class="aj-module-card" data-color="blue">
+                            <span class="aj-module-card__icon"><i class="fas fa-globe"></i></span>
+                            <span class="aj-module-card__title">Portal Zyntra</span>
+                            <span class="aj-module-card__desc">Comunicação centralizada com clientes.</span>
+                            <i class="fas fa-chevron-right aj-module-card__arrow"></i>
+                        </a>
+
                     </div>
-                    <div class="trn-help-grid">
-                        <a href="/ajuda/colecoes/guia-inicial.html" class="trn-help-card" data-help-card>
-                            <span class="trn-help-card__icon purple"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20"/><path d="M2 12h20"/></svg></span>
-                            <span class="trn-help-card__content"><strong>Guia inicial</strong><small>Primeiros passos, empresa e usuários</small></span>
-                            <svg class="trn-help-card__arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
-                        </a>
-                        <a href="/ajuda/colecoes/tutoriais.html" class="trn-help-card highlight" data-help-card>
-                            <span class="trn-help-card__icon amber"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg></span>
-                            <span class="trn-help-card__content"><strong>Tutoriais por módulo</strong><small>Aulas e guias organizados por área</small></span>
-                            <svg class="trn-help-card__arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
-                        </a>
-                        <a href="/ajuda/colecoes/financas.html" class="trn-help-card" data-help-card>
-                            <span class="trn-help-card__icon blue"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M19 9l-5 5-4-4-3 3"/></svg></span>
-                            <span class="trn-help-card__content"><strong>Financeiro</strong><small>Contas, bancos, boletos e fluxo</small></span>
-                            <svg class="trn-help-card__arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
-                        </a>
-                        <a href="/ajuda/colecoes/vendas.html" class="trn-help-card" data-help-card>
-                            <span class="trn-help-card__icon green"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39A2 2 0 0 0 9.64 16h7.72a2 2 0 0 0 2-1.61L21 6H6"/></svg></span>
-                            <span class="trn-help-card__content"><strong>Vendas</strong><small>Pedidos, orçamentos, CRM e comissões</small></span>
-                            <svg class="trn-help-card__arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
-                        </a>
-                        <a href="/ajuda/colecoes/rh.html" class="trn-help-card" data-help-card>
-                            <span class="trn-help-card__icon red"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></span>
-                            <span class="trn-help-card__content"><strong>RH</strong><small>Funcionários, ponto, férias e holerites</small></span>
-                            <svg class="trn-help-card__arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
-                        </a>
-                        <a href="/ajuda/colecoes/pcp.html" class="trn-help-card" data-help-card>
-                            <span class="trn-help-card__icon cyan"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></span>
-                            <span class="trn-help-card__content"><strong>PCP</strong><small>Ordens, apontamentos e materiais</small></span>
-                            <svg class="trn-help-card__arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
-                        </a>
-                    </div>
-                </section>
+                </div>
+
             </div>
+
         </div>
     </div>
 
-    <div class="toast" id="toast"></div>
-
     <script>
-        const searchInputs = [document.getElementById('mainSearch'), document.getElementById('sidebarSearch')].filter(Boolean);
-        const helpCards = Array.from(document.querySelectorAll('[data-help-card]'));
-        function filterHelpCards(value) {
-            const term = String(value || '').toLowerCase().trim();
-            helpCards.forEach(card => {
-                const text = card.textContent.toLowerCase();
-                card.style.display = !term || text.includes(term) ? '' : 'none';
+        // Total estimado de artigos (estático por enquanto)
+        document.getElementById('totalArtigos').textContent = '60+ artigos disponíveis';
+
+        // Sidebar mobile toggle
+        const sb = document.getElementById('ajSidebar');
+        const ov = document.getElementById('sidebarOverlay');
+        document.getElementById('sidebarOpenBtn')?.addEventListener('click', () => { sb.classList.add('open'); ov.classList.add('open'); });
+        document.getElementById('sidebarCloseBtn')?.addEventListener('click', () => { sb.classList.remove('open'); ov.classList.remove('open'); });
+        ov.addEventListener('click', () => { sb.classList.remove('open'); ov.classList.remove('open'); });
+
+        // Busca: filtra cards + sidebar
+        function applyFilter(q) {
+            const term = q.trim().toLowerCase();
+            document.querySelectorAll('.aj-module-card, .aj-highlight').forEach(el => {
+                const txt = el.textContent.toLowerCase();
+                el.style.display = (!term || txt.includes(term)) ? '' : 'none';
+            });
+            document.querySelectorAll('.aj-sidebar-link').forEach(el => {
+                if (el.classList.contains('active')) return;
+                const txt = el.textContent.toLowerCase();
+                el.style.display = (!term || txt.includes(term)) ? '' : 'none';
             });
         }
-        searchInputs.forEach(input => input.addEventListener('input', () => {
-            searchInputs.forEach(other => { if (other !== input) other.value = input.value; });
-            filterHelpCards(input.value);
-        }));
-
-        const mobileToggle = document.getElementById('mobileToggle');
-        const mobileNav = document.getElementById('mobileNav');
-        mobileToggle?.addEventListener('click', () => mobileNav?.classList.toggle('open'));
-
-        const userBtn = document.getElementById('userBtn');
-        const userDropdown = document.getElementById('userDropdown');
-        userBtn?.addEventListener('click', event => {
-            event.stopPropagation();
-            userDropdown?.classList.toggle('open');
-        });
-        document.addEventListener('click', event => {
-            if (userDropdown && userBtn && !userDropdown.contains(event.target) && !userBtn.contains(event.target)) {
-                userDropdown.classList.remove('open');
-            }
-        });
-
-        const sidebar = document.getElementById('trnSidebar');
-        const overlay = document.getElementById('sidebarOverlay');
-        document.getElementById('sidebarOpenBtn')?.addEventListener('click', () => {
-            sidebar?.classList.add('open');
-            overlay?.classList.add('open');
-        });
-        document.getElementById('sidebarCloseBtn')?.addEventListener('click', () => {
-            sidebar?.classList.remove('open');
-            overlay?.classList.remove('open');
-        });
-        overlay?.addEventListener('click', () => {
-            sidebar?.classList.remove('open');
-            overlay.classList.remove('open');
-        });
-
-        try {
-            const raw = localStorage.getItem('userData') || sessionStorage.getItem('tabUserData');
-            const user = raw ? JSON.parse(raw) : null;
-            const name = user?.apelido || user?.nome || user?.name || 'Usuário';
-            const email = user?.email || '';
-            document.getElementById('userName').textContent = name.split(/\s+/)[0] || 'Usuário';
-            document.getElementById('userFullName').textContent = name;
-            document.getElementById('userEmail').textContent = email || 'usuario@email.com';
-            document.getElementById('userAvatar').textContent = (name || email || 'U').charAt(0).toUpperCase();
-        } catch (_) {}
-
-        document.getElementById('btnLogout')?.addEventListener('click', async () => {
-            try { await fetch('/api/logout', { method: 'POST', credentials: 'include' }); } catch (_) {}
-            localStorage.removeItem('userData');
-            sessionStorage.removeItem('tabUserData');
-            window.location.href = '/login.html';
-        });
+        document.getElementById('mainSearch')?.addEventListener('input', e => applyFilter(e.target.value));
+        document.getElementById('ajSearch')?.addEventListener('input', e => applyFilter(e.target.value));
     </script>
 </body>
 </html>

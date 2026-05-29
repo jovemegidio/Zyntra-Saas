@@ -932,7 +932,7 @@
         var p = new URLSearchParams();
         if (di) p.append('data_inicio', di);
         if (df) p.append('data_fim', df);
-        showLoading('Gerando relatório de produção...');
+        showLoading('Gerando relatório de metros produzidos...');
         try {
             var r = await fetch(API + '/api/pcp/relatorios/metros-produzidos?' + p.toString(), { credentials: 'include', headers: hdrs() });
             if (!r.ok) throw new Error('HTTP ' + r.status);

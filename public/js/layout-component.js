@@ -13,23 +13,66 @@
 (function () {
     'use strict';
 
+    function withBasePath(path) {
+        return window.__withBasePath ? window.__withBasePath(path) : path;
+    }
+
     // ── 1. CONFIGURAÇÃO DOS MÓDULOS ────────────────────────────────
     const MODULOS = [
         { slug: 'dashboard',   icon: 'fas fa-home',               label: 'Painel',           href: '/dashboard' },
-        { slug: 'vendas',      icon: 'fas fa-shopping-cart',      label: 'Vendas',            href: '/Vendas/' },
-        { slug: 'faturamento', icon: 'fas fa-file-invoice-dollar',label: 'Faturamento',       href: '/Faturamento/emitir' },
-        { slug: 'financeiro',  icon: 'fas fa-wallet',             label: 'Financeiro',        href: '/Financeiro/contas_pagar' },
-        { slug: 'compras',     icon: 'fas fa-truck-loading',      label: 'Compras',           href: '/Compras/' },
-        { slug: 'pcp',         icon: 'fas fa-industry',           label: 'PCP',               href: '/PCP/' },
-        { slug: 'logistica',   icon: 'fas fa-shipping-fast',      label: 'Log\u00edstica',    href: '/Logistica/index.html' },
-        { slug: 'rh',          icon: 'fas fa-users',              label: 'RH',                href: '/RH/' },
+        { slug: 'vendas',      icon: 'fas fa-shopping-cart',      label: 'Vendas',            href: '/modules/Vendas/public/index.html' },
+        { slug: 'faturamento', icon: 'fas fa-file-invoice-dollar',label: 'Faturamento',       href: '/modules/Faturamento/public/index.html' },
+        { slug: 'financeiro',  icon: 'fas fa-wallet',             label: 'Financeiro',        href: '/modules/Financeiro/index.html' },
+        { slug: 'compras',     icon: 'fas fa-truck-loading',      label: 'Compras',           href: '/modules/Compras/index.html' },
+        { slug: 'pcp',         icon: 'fas fa-industry',           label: 'PCP',               href: '/modules/PCP/index.html' },
+        { slug: 'logistica',   icon: 'fas fa-shipping-fast',      label: 'Log\u00edstica',    href: '/modules/Logistica/public/index.html' },
+        { slug: 'rh',          icon: 'fas fa-users',              label: 'RH',                href: '/modules/RH/index.html' },
         { slug: 'relatorios',  icon: 'fas fa-chart-bar',          label: 'Relat\u00f3rios',   href: '/relatorios', bottom: true },
         { slug: 'config',      icon: 'fas fa-cog',                label: 'Configura\u00e7\u00f5es', href: '/config.html', bottom: true },
     ];
 
+    const MODULO_ALIASES = {
+        faturamento: ['faturamento', 'nfe', 'manifestacao-nfe', 'setup-nfe'],
+        rh: ['rh', 'recursos-humanos'],
+        dashboard: ['dashboard', 'painel'],
+        logistica: ['logistica', 'logistica-public'],
+    };
+
+    const DEFAULT_EMPRESA_LOGO = '/images/Logo Monocromatico - Branco - Aluforce.png';
+    const EMPRESA_LOGOS = {
+        1: DEFAULT_EMPRESA_LOGO,
+        2: '/images/labor-eletric-logo.png',
+        3: '/images/labor-energy-logo-branco.png',
+    };
+
+    let userRefreshTimers = [];
+
     // ── 2. LEITURA DOS ATRIBUTOS ───────────────────────────────────
     function getBodyAttr(name, fallback) {
-        return document.body.getAttribute('data-' + name) || fallback;
+        return document.body ? document.body.getAttribute('data-' + name) || fallback : fallback;
+    }
+
+    function escapeHTML(value) {
+        return String(value == null ? '' : value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function sanitizeImageUrl(value) {
+        const raw = String(value || '').trim();
+        if (!raw) return '';
+        if (/^data:image\/(?:png|jpe?g|gif|webp);base64,/i.test(raw)) return raw;
+        if (/^(?:javascript|vbscript|data):/i.test(raw)) return '';
+        if (/^(?:\/|\.\/|\.\.\/)/.test(raw)) return raw;
+        try {
+            const parsed = new URL(raw, window.location.origin);
+            return (parsed.protocol === 'http:' || parsed.protocol === 'https:') ? parsed.href : '';
+        } catch (_) {
+            return '';
+        }
     }
 
     function getUserData() {
@@ -38,6 +81,21 @@
             if (raw) return JSON.parse(raw);
         } catch (_) {}
         return null;
+    }
+
+    function getEmpresaId(user) {
+        const fromAttr = getBodyAttr('empresa-id', '');
+        return String(fromAttr || (user && (user.empresa_id || user.empresaId || user.company_id)) || '').trim();
+    }
+
+    function getEmpresaLogo(empresaId, empresaNome) {
+        const byId = EMPRESA_LOGOS[empresaId];
+        if (byId) return byId;
+
+        const nome = String(empresaNome || '').toLowerCase();
+        if (nome.includes('labor energy')) return EMPRESA_LOGOS[3];
+        if (nome.includes('labor eletric') || nome.includes('labor electric')) return EMPRESA_LOGOS[2];
+        return DEFAULT_EMPRESA_LOGO;
     }
 
     function getEmpresaNome() {
@@ -62,6 +120,14 @@
         return getBodyAttr('titulo-modulo', '');
     }
 
+    function getInitials(name) {
+        const parts = String(name || '')
+            .trim()
+            .split(/\s+/)
+            .filter(Boolean);
+        return (parts.length ? parts.map(function (p) { return p.charAt(0); }).slice(0, 2).join('') : 'U').toUpperCase();
+    }
+
     // ── 3. SAUDAÇÃO TEMPORAL ───────────────────────────────────────
     function getGreeting() {
         const h = new Date().getHours();
@@ -79,13 +145,14 @@
 
     function injectCSS() {
         const head = document.head;
+        if (!head) return;
         REQUIRED_CSS.forEach(function (css) {
             if (!document.getElementById(css.id)) {
                 const link = document.createElement('link');
                 link.id = css.id;
                 link.rel = 'stylesheet';
-                link.href = css.href;
-                head.insertBefore(link, head.firstChild);
+                link.href = withBasePath(css.href);
+                head.appendChild(link);
             }
         });
     }
@@ -97,8 +164,8 @@
 
         function renderItem(m) {
             const isActive = moduloAtivo && m.slug === moduloAtivo;
-            return '<a href="' + m.href + '" class="sidebar-btn' + (isActive ? ' active' : '') + '" data-title="' + m.label + '">' +
-                   '<i class="' + m.icon + '"></i></a>';
+            return '<a href="' + escapeHTML(withBasePath(m.href)) + '" class="sidebar-btn' + (isActive ? ' active' : '') + '" data-title="' + escapeHTML(m.label) + '">' +
+                   '<i class="' + escapeHTML(m.icon) + '"></i></a>';
         }
 
         const navHTML = mainItems.map(renderItem).join('\n');
@@ -107,7 +174,7 @@
         return '' +
             '<div class="sidebar-overlay" id="zc-sidebar-overlay"></div>' +
             '<aside class="sidebar" id="zc-sidebar">' +
-            '  <a href="/dashboard" class="sidebar-logo" data-title="Painel Principal"><i class="fas fa-home"></i></a>' +
+            '  <a href="' + escapeHTML(withBasePath('/dashboard')) + '" class="sidebar-logo" data-title="Painel Principal"><i class="fas fa-home"></i></a>' +
             '  <nav class="sidebar-nav" id="zc-sidebar-nav">' +
             navHTML +
             '  </nav>' +
@@ -118,38 +185,39 @@
     }
 
     // ── 6. CONSTRUIR HTML DO HEADER ───────────────────────────────
-    function buildHeader(empresaNome, tituloModulo, userNome) {
+    function buildHeader(empresaNome, tituloModulo, userNome, logoSrc) {
         const greeting = getGreeting();
-        const moduloLabel = tituloModulo ? ' \u2014 ' + tituloModulo : '';
+        const moduloLabel = tituloModulo ? ' &mdash; ' + escapeHTML(tituloModulo) : '';
 
         // Iniciais do usuário para avatar
-        const initials = userNome
-            ? userNome.split(' ').map(function (p) { return p[0]; }).slice(0, 2).join('').toUpperCase()
-            : 'U';
+        const initials = getInitials(userNome);
+        const safeUserNome = escapeHTML(userNome || 'Usu\u00e1rio');
+        const safeEmpresaNome = escapeHTML(empresaNome || 'Zyntra ERP');
+        const safeLogoSrc = sanitizeImageUrl(logoSrc) || DEFAULT_EMPRESA_LOGO;
 
         return '<header class="header" id="zc-header">' +
             '  <div class="header-left">' +
-            '    <button class="mobile-menu-btn" id="zc-mobile-menu-btn" title="Menu" aria-label="Abrir menu">' +
+            '    <button class="mobile-menu-btn" id="zc-mobile-menu-btn" title="Menu" aria-label="Abrir menu" aria-expanded="false">' +
             '      <i class="fas fa-bars"></i>' +
             '    </button>' +
             '    <div class="header-brand">' +
-            '      <img id="zc-empresa-logo" src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="' + empresaNome + '" style="height:22px;object-fit:contain;">' +
+            '      <img id="zc-empresa-logo" src="' + escapeHTML(safeLogoSrc) + '" alt="' + safeEmpresaNome + '" style="height:22px;object-fit:contain;">' +
             '      <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;">|</span>' +
             '      <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">' +
             '      <span id="zc-modulo-label" style="color:rgba(255,255,255,0.3);font-size:12px;margin-left:4px;">' + moduloLabel + '</span>' +
             '    </div>' +
             '  </div>' +
             '  <div class="header-right">' +
-            '    <button class="header-btn" title="Atualizar" onclick="location.reload()">' +
+            '    <button class="header-btn" id="zc-refresh-btn" title="Atualizar" aria-label="Atualizar pagina">' +
             '      <i class="fas fa-sync-alt"></i>' +
             '    </button>' +
-            '    <button class="header-btn" id="zc-notification-btn" title="Notificações">' +
+            '    <button class="header-btn" id="zc-notification-btn" title="Notificações" aria-label="Notificações">' +
             '      <i class="fas fa-bell"></i>' +
             '    </button>' +
             '    <div class="user-greeting">' +
-            '      <span id="zc-greeting">' + greeting + '</span>, <strong id="zc-user-name">' + userNome + '</strong>' +
+            '      <span id="zc-greeting">' + escapeHTML(greeting) + '</span>, <strong id="zc-user-name">' + safeUserNome + '</strong>' +
             '    </div>' +
-            '    <div class="user-avatar" id="zc-user-avatar" title="' + userNome + '">' +
+            '    <div class="user-avatar" id="zc-user-avatar" title="' + safeUserNome + '">' +
             '      <span id="zc-user-initials">' + initials + '</span>' +
             '    </div>' +
             '  </div>' +
@@ -158,10 +226,15 @@
 
     // ── 7. INJEÇÃO NO DOM ─────────────────────────────────────────
     function injectLayout() {
+        if (!document.body) return;
+
+        const user          = getUserData();
         const moduloAtivo   = getModuloAtivo();
         const tituloModulo  = getTituloModulo();
         const empresaNome   = getEmpresaNome();
         const userNome      = getUserNome();
+        const empresaId     = getEmpresaId(user);
+        const empresaLogo   = getEmpresaLogo(empresaId, empresaNome);
 
         // Garante que .app-container existe
         let container = document.querySelector('.app-container');
@@ -175,10 +248,10 @@
             container = wrapper;
         }
 
-        // Remover sidebar e header existentes (hardcoded ou gerenciados) para substituir pelo padronizado
-        const existingSidebar = container.querySelector('aside.sidebar');
-        if (existingSidebar) existingSidebar.remove();
-
+        // ── Verificar se já existe sidebar com navegação do módulo ────
+        // Se existir, PRESERVAR (respeitar navegação intra-módulo específica).
+        // Se não existir, injetar o sidebar de navegação cross-módulo.
+        // Remover apenas duplicatas gerenciadas por este script
         const zcSidebar  = document.getElementById('zc-sidebar');
         const zcOverlay  = document.getElementById('zc-sidebar-overlay');
         const zcHeader   = document.getElementById('zc-header');
@@ -186,8 +259,12 @@
         if (zcOverlay)  zcOverlay.remove();
         if (zcHeader)   zcHeader.remove();
 
-        const existingHeader = container.querySelector('header.header');
+        // Remover header hardcoded (sempre substituído pelo padronizado)
+        const existingHeader = container.querySelector('header.header:not(#zc-header)');
         if (existingHeader) existingHeader.remove();
+
+        const existingSidebar = container.querySelector('aside.sidebar:not(#zc-sidebar)');
+        const shouldInjectSidebar = !existingSidebar;
 
         // Garantir .main-area
         let mainArea = container.querySelector('.main-area');
@@ -205,20 +282,34 @@
             container.appendChild(mainArea);
         }
 
-        // Sempre injetar o sidebar padronizado dark
-        const sidebarFrag = document.createElement('div');
-        sidebarFrag.innerHTML = buildSidebar(moduloAtivo);
-        while (sidebarFrag.firstChild) {
-            container.insertBefore(sidebarFrag.firstChild, mainArea);
+        if (shouldInjectSidebar) {
+            // Nenhum sidebar existente → injetar sidebar de navegação cross-módulo
+            const sidebarFrag = document.createElement('div');
+            sidebarFrag.innerHTML = buildSidebar(moduloAtivo);
+            while (sidebarFrag.firstChild) {
+                container.insertBefore(sidebarFrag.firstChild, mainArea);
+            }
+        } else if (existingSidebar) {
+            // Sidebar existente sem ID → atribuir ID para ser gerenciado
+            if (!existingSidebar.id) existingSidebar.id = 'zc-sidebar';
+            // Atualizar botão ativo no sidebar existente
+            if (moduloAtivo) {
+                existingSidebar.querySelectorAll('.sidebar-btn').forEach(function (btn) {
+                    const href = btn.getAttribute('href') || '';
+                    const isActive = href.toLowerCase().includes(moduloAtivo);
+                    btn.classList.toggle('active', isActive);
+                });
+            }
         }
 
         // Sempre injetar/substituir o header (padronização visual)
         const headerFrag = document.createElement('div');
-        headerFrag.innerHTML = buildHeader(empresaNome, tituloModulo, userNome);
+        headerFrag.innerHTML = buildHeader(empresaNome, tituloModulo, userNome, empresaLogo);
         mainArea.insertBefore(headerFrag.firstChild, mainArea.firstChild);
 
         // Eventos mobile (funciona com qualquer sidebar)
         setupMobileEvents();
+        setupHeaderEvents();
 
         // Atualizar dados do usuário via sessionStorage (assíncrono)
         refreshUserData();
@@ -243,6 +334,7 @@
             const o = getOverlay();
             if (s) s.classList.add('open');
             if (o) o.classList.add('active');
+            if (menuBtn) menuBtn.setAttribute('aria-expanded', 'true');
             document.body.style.overflow = 'hidden';
         }
 
@@ -251,11 +343,12 @@
             const o = getOverlay();
             if (s) s.classList.remove('open');
             if (o) o.classList.remove('active');
+            if (menuBtn) menuBtn.setAttribute('aria-expanded', 'false');
             document.body.style.overflow = '';
         }
 
         if (menuBtn) {
-            menuBtn.removeEventListener('click', menuBtn._zcOpen);
+            if (menuBtn._zcOpen) menuBtn.removeEventListener('click', menuBtn._zcOpen);
             menuBtn._zcOpen = openSidebar;
             menuBtn.addEventListener('click', openSidebar);
         }
@@ -285,7 +378,19 @@
     }
 
     // ── 9. ATUALIZAR DADOS DO USUÁRIO ─────────────────────────────
+    function setupHeaderEvents() {
+        const refreshBtn = document.getElementById('zc-refresh-btn');
+        if (refreshBtn) {
+            if (refreshBtn._zcRefresh) refreshBtn.removeEventListener('click', refreshBtn._zcRefresh);
+            refreshBtn._zcRefresh = function () { window.location.reload(); };
+            refreshBtn.addEventListener('click', refreshBtn._zcRefresh);
+        }
+    }
+
     function refreshUserData() {
+        userRefreshTimers.forEach(function (timer) { clearTimeout(timer); });
+        userRefreshTimers = [];
+
         // Verificar se auth-unified.js já expôs os dados
         const tryUpdate = function () {
             const user = getUserData();
@@ -299,13 +404,17 @@
 
             if (nameEl)     nameEl.textContent = nome;
             if (initialsEl) {
-                const initials = nome.split(' ').map(function (p) { return p[0]; }).slice(0, 2).join('').toUpperCase();
-                initialsEl.textContent = initials;
+                initialsEl.textContent = getInitials(nome);
             }
 
             // Avatar com foto se disponível
-            if (avatarEl && user.avatar_url) {
-                avatarEl.innerHTML = '<img src="' + user.avatar_url + '" alt="' + nome + '">';
+            const avatarUrl = sanitizeImageUrl(user.avatar_url || user.avatar || user.foto || user.foto_perfil_url);
+            if (avatarEl && avatarUrl) {
+                avatarEl.textContent = '';
+                const img = document.createElement('img');
+                img.src = avatarUrl;
+                img.alt = nome;
+                avatarEl.appendChild(img);
             }
 
             // Atualizar saudação
@@ -314,18 +423,13 @@
 
             // Atualizar logo da empresa se empresa_id diferente de Aluforce
             const logoEl = document.getElementById('zc-empresa-logo');
-            if (logoEl && user.empresa_id) {
-                const logoMap = {
-                    1: '/images/Logo Monocromatico - Branco - Aluforce.png',
-                    2: '/images/Logo Monocromatico - Branco - Labor Eletric.png',
-                    3: '/images/Logo Monocromatico - Branco - Labor Energy.png',
-                };
-                const src = logoMap[user.empresa_id];
+            if (logoEl) {
+                const src = getEmpresaLogo(getEmpresaId(user), user.empresa_nome || getEmpresaNome());
                 if (src) {
                     logoEl.src = src;
                     logoEl.onerror = function () {
                         // Fallback se a imagem não existir
-                        this.src = '/images/Logo Monocromatico - Branco - Aluforce.png';
+                        this.src = DEFAULT_EMPRESA_LOGO;
                         this.onerror = null;
                     };
                 }
@@ -334,8 +438,8 @@
 
         tryUpdate();
         // Tentativas progressivas caso auth-unified.js ainda não finalizou
-        setTimeout(tryUpdate, 300);
-        setTimeout(tryUpdate, 800);
+        userRefreshTimers.push(setTimeout(tryUpdate, 300));
+        userRefreshTimers.push(setTimeout(tryUpdate, 800));
     }
 
     // ── 10. MARCAR MÓDULO ATIVO COM BASE NA URL ───────────────────
@@ -346,7 +450,13 @@
         const path = window.location.pathname.toLowerCase();
         for (let i = 0; i < MODULOS.length; i++) {
             const m = MODULOS[i];
-            if (path.includes('/' + m.slug + '/') || path.includes('/' + m.slug + '.html')) {
+            const aliases = MODULO_ALIASES[m.slug] || [m.slug];
+            const found = aliases.some(function (alias) {
+                return path.includes('/' + alias + '/') ||
+                       path.includes('/' + alias + '.html') ||
+                       path.includes('/modules/' + alias);
+            });
+            if (found) {
                 return m.slug;
             }
         }
@@ -358,16 +468,19 @@
     function init() {
         injectCSS();
 
-        // Definir modulo ativo via auto-detecção se não definido
-        if (!document.body.getAttribute('data-modulo-ativo')) {
-            const detected = detectModuloAtivo();
-            if (detected) document.body.setAttribute('data-modulo-ativo', detected);
+        function start() {
+            if (!document.body) return;
+            if (!document.body.getAttribute('data-modulo-ativo')) {
+                const detected = detectModuloAtivo();
+                if (detected) document.body.setAttribute('data-modulo-ativo', detected);
+            }
+            injectLayout();
         }
 
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', injectLayout);
+            document.addEventListener('DOMContentLoaded', start, { once: true });
         } else {
-            injectLayout();
+            start();
         }
     }
 
@@ -381,10 +494,14 @@
         refreshUser: function () { refreshUserData(); },
         /** Fechar sidebar mobile */
         closeSidebar: function () {
-            const sidebar = document.getElementById('zc-sidebar');
-            const overlay  = document.getElementById('zc-sidebar-overlay');
+            const sidebar = document.getElementById('zc-sidebar') || document.querySelector('aside.sidebar');
+            const overlay  = document.getElementById('zc-sidebar-overlay') ||
+                             document.getElementById('sidebar-overlay') ||
+                             document.querySelector('.sidebar-overlay');
+            const menuBtn = document.getElementById('zc-mobile-menu-btn');
             if (sidebar) sidebar.classList.remove('open');
             if (overlay) overlay.classList.remove('active');
+            if (menuBtn) menuBtn.setAttribute('aria-expanded', 'false');
             document.body.style.overflow = '';
         }
     };

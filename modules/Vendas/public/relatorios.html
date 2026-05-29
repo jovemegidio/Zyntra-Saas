@@ -13,7 +13,7 @@
     <title>Zyntra: Relatórios de Vendas</title>
     
     <!-- Sistema de Autenticação Unificado - DEVE ser carregado primeiro -->
-    <script src="/js/auth-unified.js?v=20260301" defer></script>
+    <script src="/js/auth-unified.js?v=20260527" defer></script>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -117,7 +117,8 @@
 
         /* Tooltip customizada ao passar o mouse */
         .sidebar-btn::after {
-            content: attr(title);
+            /* BUG-015: tooltips-professional.js converte title -> data-title; ler o atributo correto */
+            content: attr(data-title);
             position: absolute;
             left: 54px;
             background: #1a1a2e;
@@ -3762,7 +3763,7 @@ function getCorIntensidade(intensidade) {
     <!-- Performance Utilities -->
     <script src="/js/performance-utils.js?v=20260213"></script>
 
-    <script src="/js/auth-unified.js?v=20260301"></script>
+    <script src="/js/auth-unified.js?v=20260527"></script>
     <script src="/js/mobile-auto-enhance.js?v=20260202" defer></script>
     <!-- Chat Widget BOB AI - DESATIVADO -->
     <!-- <script src="/chat/widget.js?v=20260418" defer></script> -->

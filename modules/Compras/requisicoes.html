@@ -706,13 +706,13 @@
 
     function atualizarContadores() {
         document.getElementById('totalRequisicoes').textContent = requisicoesData.length;
-        document.getElementById('requisicoesPendentes').textContent = requisicoesData.filter(r => r.status === 'pendente' || r.status === 'rascunho').length;
+        document.getElementById('requisicoesPendentes').textContent = requisicoesData.filter(r => r.status === 'pendente' || r.status === 'urgente').length;
         document.getElementById('requisicoesAprovadas').textContent = requisicoesData.filter(r => r.status === 'aprovado' || r.status === 'aprovada').length;
         document.getElementById('requisicoesCotacao').textContent = requisicoesData.filter(r => r.status === 'cotacao' || r.status === 'em_cotacao').length;
     }
 
     /* ========== Modal: Nova Requisição ========== */
-    function abrirModalNovaRequisicao() {
+    async function abrirModalNovaRequisicao() {
         editingId = null;
         document.getElementById('formNovaRequisicao').reset();
         itemCounter = 0;
@@ -724,18 +724,22 @@
         // Populate CC
         const sel = document.getElementById('reqCentroCusto');
         sel.innerHTML = '<option value="">Selecione</option>' + centrosCustoData.map(c => `<option value="${escapeAttr(c.id || c.nome || c.descricao || '')}">${escapeHtml(c.nome || c.descricao || '')}</option>`).join('');
-        // Set placeholder number immediately
-        document.getElementById('reqNumero').value = 'RC-' + String(requisicoesData.length + 1).padStart(3, '0');
+        // Get next number
+        try {
+            const r = await fetch('/api/compras/requisicoes/proximo-numero', { credentials: 'include' });
+            if (r.ok) {
+                const d = await r.json();
+                const num = d.numero || d.proximo_numero || '';
+                document.getElementById('reqNumero').value = num || ('RC-' + String(requisicoesData.length + 1).padStart(3, '0'));
+            } else {
+                document.getElementById('reqNumero').value = 'RC-' + String(requisicoesData.length + 1).padStart(3, '0');
+            }
+        } catch (e) { document.getElementById('reqNumero').value = 'RC-' + String(requisicoesData.length + 1).padStart(3, '0'); }
         // Restaurar título do modal para criação
         const modalTitle = document.querySelector('#modalNovaRequisicao .modal-header h3');
         if (modalTitle) modalTitle.innerHTML = '<i class="fas fa-clipboard-list"></i> Nova Requisição de Compra';
         adicionarItemReq();
         document.getElementById('modalNovaRequisicao').classList.add('active');
-        // Fetch real number asynchronously after modal is visible
-        fetch('/api/compras/requisicoes/proximo-numero', { credentials: 'include' })
-            .then(r => r.ok ? r.json() : null)
-            .then(d => { if (d) { const num = d.numero || d.proximo_numero; if (num) document.getElementById('reqNumero').value = num; } })
-            .catch(() => {});
     }
 
     function fecharModalNovaRequisicao() {
@@ -862,36 +866,11 @@
             });
         });
 
-        // VAL-01: Validação simultânea com highlight visual de todos os campos com erro
-        if (status !== 'rascunho') {
-            const camposObrigatorios = [
-                { id: 'reqDataNecessidade', label: 'Data de Necessidade' },
-                { id: 'reqJustificativa',   label: 'Justificativa' }
-            ];
-            let temErro = false;
-            camposObrigatorios.forEach(c => {
-                const el = document.getElementById(c.id);
-                if (!el || !el.value.trim()) {
-                    temErro = true;
-                    if (el) {
-                        el.style.borderColor = '#ef4444';
-                        el.style.boxShadow = '0 0 0 2px rgba(239,68,68,0.2)';
-                        const limparErro = () => {
-                            el.style.borderColor = '';
-                            el.style.boxShadow = '';
-                            el.removeEventListener('input', limparErro);
-                            el.removeEventListener('focus', limparErro);
-                        };
-                        el.addEventListener('input', limparErro);
-                        el.addEventListener('focus', limparErro);
-                    }
-                }
-            });
-            if (temErro) {
-                showToast('Preencha os campos obrigatórios destacados em vermelho', 'warning');
-                return;
-            }
-        }
+        // BUG-017: Validar campos obrigatórios do cabeçalho ANTES dos itens
+        const dataNecessidade = document.getElementById('reqDataNecessidade').value;
+        if (status !== 'rascunho' && !dataNecessidade) { showToast('Preencha a Data de Necessidade antes de enviar', 'warning'); return; }
+        const justificativa = document.getElementById('reqJustificativa').value;
+        if (status !== 'rascunho' && !justificativa) { showToast('Preencha a Justificativa antes de enviar', 'warning'); return; }
 
         if (items.length === 0) { showToast('Adicione pelo menos 1 item', 'warning'); return; }
         const itemSemDescricao = items.find(i => !i.descricao || !i.descricao.trim());

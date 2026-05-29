@@ -443,7 +443,7 @@
             tbody.innerHTML = requisicoes.slice(0, 5).map(req => `
                 <tr>
                     <td class="code">${req.numero || req.codigo || req.id}</td>
-                    <td>${req.descricao || req.justificativa || req.projeto || req.material || '-'}</td>
+                    <td>${req.descricao || req.material || '-'}</td>
                     <td>${req.solicitante || req.usuario_nome || '-'}</td>
                     <td>${formatarData(req.data || req.created_at)}</td>
                     <td><span class="badge ${getStatusClass(req.status)}">${req.status || 'Pendente'}</span></td>

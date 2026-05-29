@@ -35,6 +35,24 @@ module.exports = function registerConfiguracoesRoutes(router, deps) {
         }
     });
 
+    // Upload genérico para certificado digital (.pfx/.p12) — fix BUG-001:
+    // referência a `upload` quebrava o load do PCP routes inteiro.
+    const certUploadDir = process.platform !== 'win32'
+        ? '/var/www/uploads/certificados'
+        : path.join(__dirname, '..', '..', 'uploads', 'certificados');
+    if (!fs.existsSync(certUploadDir)) {
+        fs.mkdirSync(certUploadDir, { recursive: true });
+    }
+    const upload = multer({
+        dest: certUploadDir,
+        limits: { fileSize: 5 * 1024 * 1024 },
+        fileFilter: (_req, file, cb) => {
+            const ext = (path.extname(file.originalname) || '').toLowerCase();
+            if (ext === '.pfx' || ext === '.p12') return cb(null, true);
+            cb(new Error('Apenas .pfx ou .p12 são aceitos'));
+        }
+    });
+
     // Helpers para defaults por marca
     const BRAND_DEFAULTS = {
         'labor-energy': {

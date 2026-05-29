@@ -366,19 +366,37 @@
                 showToast('Por favor, preencha todos os campos obrigatórios.', 'warning');
                 return;
             }
-
+            // BUG-016: garantir que o nº de cotação esteja gerado antes de salvar
+            const numeroCot = document.getElementById('cotacaoNumero').value;
+            if (!numeroCot) {
+                showToast('Número da cotação não foi gerado. Feche e reabra o modal.', 'warning');
+                return;
+            }
+            // BUG-017: validar que ao menos 1 fornecedor (material já validado acima)
             const fornecedoresChecked = document.querySelectorAll('input[name="fornecedores"]:checked');
             const fornecedores_ids = Array.from(fornecedoresChecked).map(cb => parseInt(cb.value));
+            if (fornecedores_ids.length === 0) {
+                showToast('Selecione ao menos 1 fornecedor para a cotação.', 'warning');
+                return;
+            }
+
+            // BUG-016: enviar solicitante real (não deixar API cair em default 'Sistema')
+            let usuarioLogadoLocal = null;
+            try { usuarioLogadoLocal = typeof usuarioLogado !== 'undefined' ? usuarioLogado : null; } catch (_) {}
+            const solicitante = usuarioLogadoLocal && (usuarioLogadoLocal.nome || usuarioLogadoLocal.name || usuarioLogadoLocal.email) || null;
+            const solicitante_id = usuarioLogadoLocal && usuarioLogadoLocal.id || null;
 
             const body = {
-                numero: document.getElementById('cotacaoNumero').value,
+                numero: numeroCot,
                 descricao: descricao,
                 data_abertura: new Date().toISOString().split('T')[0],
                 data_validade: validade,
                 quantidade: parseFloat(quantidade),
                 unidade: document.getElementById('cotUnidade').value,
                 observacoes: document.getElementById('cotObservacoes').value,
-                fornecedores_ids: fornecedores_ids
+                fornecedores_ids: fornecedores_ids,
+                solicitante,
+                solicitante_id
             };
 
             try {

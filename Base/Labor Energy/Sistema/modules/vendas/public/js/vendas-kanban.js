@@ -66,7 +66,7 @@ async function carregarPedidosDaAPI() {
         });
         if (!resp.ok) {
             if (resp.status === 401) {
-                window.location.href = '/login.html';
+                window.location.href = window.__withBasePath ? window.__withBasePath('/login.html') : '/login.html';
                 return;
             }
             throw new Error(`Erro ${resp.status}`);

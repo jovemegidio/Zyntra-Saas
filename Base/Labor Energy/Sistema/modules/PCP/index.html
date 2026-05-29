@@ -9212,7 +9212,7 @@
             localStorage.removeItem('authToken');
             localStorage.removeItem('token');
             localStorage.removeItem('userData');
-            window.location.href = '/login.html';
+            window.location.href = window.__withBasePath ? window.__withBasePath('/login.html') : '/login.html';
         }
 
         // ============================================
@@ -23925,7 +23925,7 @@
                     }
 
                     if (confirm('Deseja ir para o módulo de Cotações agora?')) {
-                        window.location.href = '/modules/Compras/cotacoes.html';
+                        window.location.href = window.__withBasePath ? window.__withBasePath('/modules/Compras/cotacoes.html') : '/modules/Compras/cotacoes.html';
                     }
                 } else {
                     showNotification('Erro ao enviar para cotação', 'error');

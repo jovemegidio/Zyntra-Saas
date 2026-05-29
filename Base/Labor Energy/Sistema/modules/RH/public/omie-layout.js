@@ -1,4 +1,4 @@
-Ôªø/* ================================================= */
+/* ================================================= */
 /* OMIE LAYOUT MANAGER - ALUFORCE RH               */
 /* ================================================= */
 
@@ -18,26 +18,26 @@ class OmieLayoutManager {
         this.mainContent = document.querySelector('.main-content');
         this.headerAvatar = document.querySelector('#header-avatar');
         
-        // Configurar navega√ß√°o inicial
+        // Configurar navegaÁ·o inicial
         this.initializeNavigation();
         this.updateUserAvatar();
         
-        // Definir visualiza√ß√°o padr√°o como grade
+        // Definir visualizaÁ·o padr·o como grade
         this.setDefaultGridView();
         
         // Inicializar placeholder da busca
         this.initializeSearchPlaceholder();
         
-        // Garantir que as se√ß√µes sejam exibidas corretamente
+        // Garantir que as seÁıes sejam exibidas corretamente
         this.initializeContentSections();
     }
 
     initializeContentSections() {
-        // Encontrar a primeira se√ß√°o ativa ou definir uma padr√°o
+        // Encontrar a primeira seÁ·o ativa ou definir uma padr·o
         let activeSection = document.querySelector('.content-section.active');
         
         if (!activeSection) {
-            // Se n√°o h√° se√ß√°o ativa, usar a primeira dispon√≠vel
+            // Se n·o h· seÁ·o ativa, usar a primeira disponÌvel
             const firstSection = document.querySelector('.content-section');
             if (firstSection) {
                 firstSection.classList.add('active');
@@ -45,7 +45,7 @@ class OmieLayoutManager {
             }
         }
         
-        // Aplicar estilos para todas as se√ß√µes
+        // Aplicar estilos para todas as seÁıes
         document.querySelectorAll('.content-section').forEach(section => {
             if (section.classList.contains('active')) {
                 section.style.display = 'block';
@@ -60,20 +60,20 @@ class OmieLayoutManager {
     }
 
     setDefaultGridView() {
-        // Marcar bot√°o grid como ativo
+        // Marcar bot·o grid como ativo
         const gridBtn = document.querySelector('.header-left-icons .fa-th');
         if (gridBtn) {
             gridBtn.parentElement.classList.add('active');
         }
         
-        // Aplicar classe grid-view em todas as se√ß√µes
+        // Aplicar classe grid-view em todas as seÁıes
         document.querySelectorAll('.content-section').forEach(section => {
             section.classList.add('grid-view');
         });
     }
 
     initializeSearchPlaceholder() {
-        // Detectar se√ß√°o ativa inicial e definir placeholder
+        // Detectar seÁ·o ativa inicial e definir placeholder
         const activeSection = document.querySelector('.content-section.active');
         if (activeSection) {
             this.updateSearchPlaceholder(activeSection.id);
@@ -81,7 +81,7 @@ class OmieLayoutManager {
     }
 
     bindEvents() {
-        // Navega√ß√°o da sidebar
+        // NavegaÁ·o da sidebar
         this.bindSidebarNavigation();
         
         // Avatar do header
@@ -111,34 +111,34 @@ class OmieLayoutManager {
                 // Adiciona active no link clicado
                 link.classList.add('active');
                 
-                // Esconde todas as se√ß√µes
+                // Esconde todas as seÁıes
                 sections.forEach(section => {
                     section.classList.remove('active');
                 });
                 
-                // Mostra a se√ß√°o correspondente
+                // Mostra a seÁ·o correspondente
                 const targetId = link.getAttribute('href').substring(1);
                 const targetSection = document.getElementById(targetId);
                 
                 if (targetSection) {
                     targetSection.classList.add('active');
                     
-                    // Chamar fun√ß√µes do app.js se existirem
+                    // Chamar funÁıes do app.js se existirem
                     this.loadSectionData(targetId);
                     
-                    // Atualizar busca baseada na se√ß√°o
+                    // Atualizar busca baseada na seÁ·o
                     this.updateSearchPlaceholder(targetId);
                 }
                 
-                // Toast de confirma√ß√°o
+                // Toast de confirmaÁ·o
                 const sectionName = this.getSectionName(targetId);
-                this.showToast('Navega√ß√°o', `${sectionName} carregada`, 'success');
+                this.showToast('NavegaÁ·o', `${sectionName} carregada`, 'success');
             });
         });
     }
 
     loadSectionData(sectionId) {
-        // Carregar p√°ginas separadas para √°rea do funcion√°rio
+        // Carregar p·ginas separadas para ·rea do funcion·rio
         switch(sectionId) {
             case 'dados':
                 this.loadExternalPage('pages/dados-cadastrais.html');
@@ -152,13 +152,13 @@ class OmieLayoutManager {
                 this.loadExternalPage('pages/espelho-ponto.html');
                 break;
                 
-            case 'at√©stado':
-                this.loadExternalPage('pages/enviar-at√©stado.html');
+            case 'atÈstado':
+                this.loadExternalPage('pages/enviar-atÈstado.html');
                 break;
                 
             case 'dashboard':
             case 'dashboard-home':
-                // Dashboard permanece na p√°gina principal
+                // Dashboard permanece na p·gina principal
                 if (window.app) {
                     if (window.app.loadDashboard) window.app.loadDashboard();
                     if (window.app.updateDashboard) window.app.updateDashboard();
@@ -166,7 +166,7 @@ class OmieLayoutManager {
                 break;
         }
         
-        // Integra√ß√°o com app.js existente para outras se√ß√µes
+        // IntegraÁ·o com app.js existente para outras seÁıes
         if (window.app) {
             switch(sectionId) {
                     
@@ -175,7 +175,7 @@ class OmieLayoutManager {
                     if (window.app.displayEmployeeTable) window.app.displayEmployeeTable();
                     break;
                     
-                case 'relat√≥rios-section':
+                case 'relatÛrios-section':
                     if (window.app.loadReports) window.app.loadReports();
                     break;
                     
@@ -185,7 +185,7 @@ class OmieLayoutManager {
             }
         }
         
-        // Trigger custom events para outras integra√ß√µes
+        // Trigger custom events para outras integraÁıes
         const event = new CustomEvent('sectionLoaded', {
             detail: { sectionId, timestamp: Date.now() }
         });
@@ -200,7 +200,7 @@ class OmieLayoutManager {
         activeSection.innerHTML = `
             <div class="loading-container" style="display: flex; justify-content: center; align-items: center; min-height: 400px; flex-direction: column;">
                 <div class="loading-spinner" style="width: 40px; height: 40px; border: 3px solid #e2e8f0; border-top: 3px solid #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 16px;"></div>
-                <p style="color: #6b7280; margin: 0;">Carregando p√°gina...</p>
+                <p style="color: #6b7280; margin: 0;">Carregando p·gina...</p>
             </div>
             <style>
                 @keyframes spin {
@@ -210,7 +210,7 @@ class OmieLayoutManager {
             </style>
         `;
         
-        // Carregar p√°gina externa
+        // Carregar p·gina externa
         fetch(pageUrl)
             .then(response => {
                 if (!response.ok) {
@@ -219,7 +219,7 @@ class OmieLayoutManager {
                 return response.text();
             })
             .then(html => {
-                // Extrair conte√∫do do body
+                // Extrair conte˙do do body
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(html, 'text/html');
                 const bodyContent = doc.querySelector('body');
@@ -227,7 +227,7 @@ class OmieLayoutManager {
                 if (bodyContent) {
                     activeSection.innerHTML = bodyContent.innerHTML;
                     
-                    // Executar scripts da p√°gina carregada
+                    // Executar scripts da p·gina carregada
                     const scripts = activeSection.querySelectorAll('script');
                     scripts.forEach(script => {
                         const newScript = document.createElement('script');
@@ -244,12 +244,12 @@ class OmieLayoutManager {
                 }
             })
             .catch(error => {
-                console.error('Erro ao carregar p√°gina:', error);
+                console.error('Erro ao carregar p·gina:', error);
                 activeSection.innerHTML = `
                     <div style="text-align: center; padding: 60px 20px; color: #ef4444;">
                         <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 20px;"></i>
-                        <h3>Erro ao carregar p√°gina</h3>
-                        <p>N√°o foi poss√≠vel carregar o conte√∫do. Tente novamente.</p>
+                        <h3>Erro ao carregar p·gina</h3>
+                        <p>N·o foi possÌvel carregar o conte˙do. Tente novamente.</p>
                         <button class="btn btn-primary" onclick="location.reload()">Recarregar</button>
                     </div>
                 `;
@@ -263,13 +263,13 @@ class OmieLayoutManager {
         const placeholders = {
             'dashboard': 'Buscar no sistema...',
             'dashboard-home': 'Buscar dados gerais...',
-            'holerite': 'Buscar holerites por funcion√°rio...',
+            'holerite': 'Buscar holerites por funcion·rio...',
             'ponto': 'Buscar registros de ponto...',
-            'at√©stado': 'Buscar at√©stados m√©dicos...',
-            'dados': 'Buscar nas configura√ß√µes...',
+            'atÈstado': 'Buscar atÈstados mÈdicos...',
+            'dados': 'Buscar nas configuraÁıes...',
             'dashboard-section': 'Buscar Colaborador(a)...',
-            'relat√≥rios-section': 'Buscar relat√≥rios...',
-            'configuracoes-section': 'Buscar configura√ß√µes do sistema...'
+            'relatÛrios-section': 'Buscar relatÛrios...',
+            'configuracoes-section': 'Buscar configuraÁıes do sistema...'
         };
         
         searchInput.placeholder = placeholders[sectionId] || 'Buscar Colaborador(a)...';
@@ -280,15 +280,15 @@ class OmieLayoutManager {
             'dashboard': 'Dashboard',
             'dashboard-home': 'Dashboard',
             'holerite': 'Holerites',
-            'ponto': 'Ponto Eletr√¥nico',
-            'at√©stado': 'At√©stados',
+            'ponto': 'Ponto EletrÙnico',
+            'atÈstado': 'AtÈstados',
             'dados': 'Meus Dados',
-            'dashboard-section': 'Funcion√°rios',
-            'relat√≥rios-section': 'Relat√≥rios',
-            'configuracoes-section': 'Configura√ß√µes'
+            'dashboard-section': 'Funcion·rios',
+            'relatÛrios-section': 'RelatÛrios',
+            'configuracoes-section': 'ConfiguraÁıes'
         };
         
-        return names[sectionId] || 'Se√ß√°o';
+        return names[sectionId] || 'SeÁ·o';
     }
 
     bindHeaderAvatar() {
@@ -310,7 +310,7 @@ class OmieLayoutManager {
                 // Adiciona active na tab clicada
                 tab.classList.add('active');
                 
-                // Toast de confirma√ß√°o
+                // Toast de confirmaÁ·o
                 this.showToast('Filtro', `${tab.textContent} selecionado`, 'info');
             });
         });
@@ -339,7 +339,7 @@ class OmieLayoutManager {
     }
 
     bindHeaderIcons() {
-        // Grid view - toggle entre visualiza√ß√µes
+        // Grid view - toggle entre visualizaÁıes
         const gridBtn = document.querySelector('.header-left-icons .fa-th').parentElement;
         if (gridBtn) {
             gridBtn.addEventListener('click', () => {
@@ -347,7 +347,7 @@ class OmieLayoutManager {
             });
         }
         
-        // List view - toggle entre visualiza√ß√µes
+        // List view - toggle entre visualizaÁıes
         const listBtn = document.querySelector('.header-left-icons .fa-list').parentElement;
         if (listBtn) {
             listBtn.addEventListener('click', () => {
@@ -355,7 +355,7 @@ class OmieLayoutManager {
             });
         }
         
-        // Refresh - atualizar dados da se√ß√°o atual
+        // Refresh - atualizar dados da seÁ·o atual
         const refreshBtn = document.querySelector('.header-left-icons .fa-sync-alt').parentElement;
         if (refreshBtn) {
             refreshBtn.addEventListener('click', () => {
@@ -371,7 +371,7 @@ class OmieLayoutManager {
             });
         }
         
-        // Notifications - mostrar notifica√ß√µes reais
+        // Notifications - mostrar notificaÁıes reais
         const notifBtn = document.querySelector('.header-right .fa-bell').parentElement;
         if (notifBtn) {
             notifBtn.addEventListener('click', () => {
@@ -400,38 +400,38 @@ class OmieLayoutManager {
         const currentSection = document.querySelector('.content-section.active');
         if (!currentSection) return;
         
-        // Remove classes de visualiza√ß√°o existentes
+        // Remove classes de visualizaÁ·o existentes
         currentSection.classList.remove('grid-view', 'list-view');
         
         // Adiciona nova classe
         currentSection.classList.add(mode + '-view');
         
-        // Atualizar √≠cones ativos - remover de todos primeiro
+        // Atualizar Ìcones ativos - remover de todos primeiro
         document.querySelectorAll('.header-left-icons .header-icon').forEach(btn => {
             btn.classList.remove('active');
         });
         
-        // Adicionar active no bot√°o correto
+        // Adicionar active no bot·o correto
         const activeBtn = document.querySelector(`.header-left-icons .fa-${mode === 'grid' ? 'th' : 'list'}`);
         if (activeBtn) {
             activeBtn.parentElement.classList.add('active');
         }
         
-        // Controlar visualiza√ß√µes espec√≠ficas na se√ß√°o de funcion√°rios
+        // Controlar visualizaÁıes especÌficas na seÁ·o de funcion·rios
         if (currentSection.id === 'dashboard-section') {
             this.toggleEmployeeView(mode);
         }
         
-        // Toast de confirma√ß√°o
+        // Toast de confirmaÁ·o
         const modeText = mode === 'grid' ? 'Grade' : 'Lista';
-        this.showToast('Visualiza√ß√°o', `Modo ${modeText} ativado`, 'success');
+        this.showToast('VisualizaÁ·o', `Modo ${modeText} ativado`, 'success');
         
-        // Se existir app.js, tentar atualizar a visualiza√ß√°o
+        // Se existir app.js, tentar atualizar a visualizaÁ·o
         if (window.app && window.app.updateViewMode) {
             window.app.updateViewMode(mode);
         }
         
-        // Salvar prefer√™ncia do usu√°rio
+        // Salvar preferÍncia do usu·rio
         localStorage.setItem('preferred-view-mode', mode);
     }
 
@@ -454,7 +454,7 @@ class OmieLayoutManager {
         const container = document.getElementById('employees-cards-container');
         if (!container) return;
         
-        // Dados de exemplo (em produ√ß√°o viriam do app.js ou API)
+        // Dados de exemplo (em produÁ·o viriam do app.js ou API)
         const employees = this.getSampleEmployees();
         
         container.innerHTML = employees.map(emp => `
@@ -480,7 +480,7 @@ class OmieLayoutManager {
         const tbody = document.getElementById('employees-table-body');
         if (!tbody) return;
         
-        // Dados de exemplo (em produ√ß√°o viriam do app.js ou API)
+        // Dados de exemplo (em produÁ·o viriam do app.js ou API)
         const employees = this.getSampleEmployees();
         
         tbody.innerHTML = employees.map(emp => `
@@ -513,7 +513,7 @@ class OmieLayoutManager {
             {
                 id: 6,
                 name: 'Teste',
-                role: 'Funcion√°rio',
+                role: 'Funcion·rio',
                 email: 'exemplo@aluforce.ind.br',
                 status: 'active',
                 photo: null
@@ -521,7 +521,7 @@ class OmieLayoutManager {
             {
                 id: 7,
                 name: 'Augusto Ladeira',
-                role: 'Funcion√°rio',
+                role: 'Funcion·rio',
                 email: 'augusto.ladeira@aluforce.ind.br',
                 status: 'active',
                 photo: null
@@ -536,7 +536,7 @@ class OmieLayoutManager {
             },
             {
                 id: 9,
-                name: 'Jo√°o Santos',
+                name: 'Jo·o Santos',
                 role: 'Analista',
                 email: 'joao.santos@aluforce.ind.br',
                 status: 'inactive',
@@ -546,32 +546,32 @@ class OmieLayoutManager {
     }
 
     viewEmployee(id) {
-        this.showToast('Funcion√°rio', `Visualizando detalhes do funcion√°rio ID: ${id}`, 'info');
+        this.showToast('Funcion·rio', `Visualizando detalhes do funcion·rio ID: ${id}`, 'info');
         
-        // Chamar fun√ß√°o do app.js se existir
+        // Chamar funÁ·o do app.js se existir
         if (window.app && window.app.viewEmployee) {
             window.app.viewEmployee(id);
         }
     }
 
     editEmployee(id) {
-        this.showToast('Funcion√°rio', `Editando funcion√°rio ID: ${id}`, 'info');
+        this.showToast('Funcion·rio', `Editando funcion·rio ID: ${id}`, 'info');
         
-        // Chamar fun√ß√°o do app.js se existir
+        // Chamar funÁ·o do app.js se existir
         if (window.app && window.app.editEmployee) {
             window.app.editEmployee(id);
         }
     }
 
     handleSettings() {
-        this.showToast('Configura√ß√µes', 'Abrindo painel de configura√ß√µes', 'info');
+        this.showToast('ConfiguraÁıes', 'Abrindo painel de configuraÁıes', 'info');
         
-        // Navegar para se√ß√°o de configura√ß√µes se existir
+        // Navegar para seÁ·o de configuraÁıes se existir
         const configSection = document.getElementById('configuracoes-section');
         if (configSection) {
             this.navigateToSection('configuracoes-section');
         } else {
-            // Mostrar modal de configura√ß√µes se n√°o houver se√ß√°o espec√≠fica
+            // Mostrar modal de configuraÁıes se n·o houver seÁ·o especÌfica
             this.showSettingsModal();
         }
     }
@@ -581,14 +581,14 @@ class OmieLayoutManager {
             <div class="settings-modal" id="settings-modal">
                 <div class="settings-modal-content">
                     <div class="settings-modal-header">
-                        <h3>Configura√ß√µes</h3>
+                        <h3>ConfiguraÁıes</h3>
                         <button class="settings-modal-close" onclick="omieLayout.closeSettingsModal()">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
                     <div class="settings-modal-body">
                         <div class="settings-section">
-                            <h4>Apar√™ncia</h4>
+                            <h4>AparÍncia</h4>
                             <div class="settings-option">
                                 <label>
                                     <input type="checkbox" id="dark-mode-toggle"> Modo Escuro
@@ -596,7 +596,7 @@ class OmieLayoutManager {
                             </div>
                             <div class="settings-option">
                                 <label>
-                                    Visualiza√ß√°o padr√°o:
+                                    VisualizaÁ·o padr·o:
                                     <select id="default-view-mode">
                                         <option value="grid">Grade</option>
                                         <option value="list">Lista</option>
@@ -606,15 +606,15 @@ class OmieLayoutManager {
                         </div>
                         
                         <div class="settings-section">
-                            <h4>Notifica√ß√µes</h4>
+                            <h4>NotificaÁıes</h4>
                             <div class="settings-option">
                                 <label>
-                                    <input type="checkbox" id="notifications-enabled" checked> Receber notifica√ß√µes
+                                    <input type="checkbox" id="notifications-enabled" checked> Receber notificaÁıes
                                 </label>
                             </div>
                             <div class="settings-option">
                                 <label>
-                                    <input type="checkbox" id="email-notifications" checked> Notifica√ß√µes por email
+                                    <input type="checkbox" id="email-notifications" checked> NotificaÁıes por email
                                 </label>
                             </div>
                         </div>
@@ -629,7 +629,7 @@ class OmieLayoutManager {
         
         document.body.insertAdjacentHTML('beforeend', modalHtml);
         
-        // Carregar configura√ß√µes atuais
+        // Carregar configuraÁıes atuais
         this.loadCurrentSettings();
     }
 
@@ -641,13 +641,13 @@ class OmieLayoutManager {
     }
 
     loadCurrentSettings() {
-        // Carregar configura√ß√µes do localStorage
+        // Carregar configuraÁıes do localStorage
         const darkMode = localStorage.getItem('dark-mode') === 'true';
         const defaultView = localStorage.getItem('preferred-view-mode') || 'grid';
         const notifications = localStorage.getItem('notifications-enabled') !== 'false';
         const emailNotifications = localStorage.getItem('email-notifications') !== 'false';
         
-        // Aplicar nas configura√ß√µes do modal
+        // Aplicar nas configuraÁıes do modal
         const darkModeToggle = document.getElementById('dark-mode-toggle');
         const defaultViewSelect = document.getElementById('default-view-mode');
         const notificationsToggle = document.getElementById('notifications-enabled');
@@ -660,7 +660,7 @@ class OmieLayoutManager {
     }
 
     saveSettings() {
-        // Salvar configura√ß√µes no localStorage
+        // Salvar configuraÁıes no localStorage
         const darkMode = document.getElementById('dark-mode-toggle')?.checked;
         const defaultView = document.getElementById('default-view-mode')?.value;
         const notifications = document.getElementById('notifications-enabled')?.checked;
@@ -671,10 +671,10 @@ class OmieLayoutManager {
         localStorage.setItem('notifications-enabled', notifications);
         localStorage.setItem('email-notifications', emailNotifications);
         
-        this.showToast('Configura√ß√µes', 'Configura√ß√µes salvas com sucesso!', 'success');
+        this.showToast('ConfiguraÁıes', 'ConfiguraÁıes salvas com sucesso!', 'success');
         this.closeSettingsModal();
         
-        // Aplicar configura√ß√µes imediatamente
+        // Aplicar configuraÁıes imediatamente
         if (darkMode) {
             document.body.classList.add('dark-mode');
         } else {
@@ -695,43 +695,43 @@ class OmieLayoutManager {
             activeLink.classList.add('active');
         }
         
-        // Esconder todas as se√ß√µes
+        // Esconder todas as seÁıes
         document.querySelectorAll('.content-section').forEach(section => {
             section.classList.remove('active');
             section.style.display = 'none';
         });
         
-        // Mostrar se√ß√°o selecionada
+        // Mostrar seÁ·o selecionada
         const targetSection = document.getElementById(sectionId);
         if (targetSection) {
             targetSection.classList.add('active');
             targetSection.style.display = 'block';
         } else {
-            console.warn(`Se√ß√°o ${sectionId} n√°o encontrada`);
+            console.warn(`SeÁ·o ${sectionId} n·o encontrada`);
         }
         
-        // Atualizar placeholder de busca baseado na se√ß√°o
+        // Atualizar placeholder de busca baseado na seÁ·o
         this.updateSearchPlaceholder(sectionId);
         
-        // Toast de navega√ß√°o
+        // Toast de navegaÁ·o
         const sectionNames = {
             'dashboard': 'Dashboard',
             'dashboard-home': 'Dashboard',
-            'funcionarios-section': 'Cadastro de Funcion√°rios',
+            'funcionarios-section': 'Cadastro de Funcion·rios',
             'holerites-section': 'Holerites e Folha de Pagamento',
-            'relat√≥rios-section': 'Relat√≥rios e An√°lises',
+            'relatÛrios-section': 'RelatÛrios e An·lises',
             'holerite': 'Holerites',
-            'ponto': 'Ponto Eletr√¥nico',
-            'at√©stado': 'At√©stados',
+            'ponto': 'Ponto EletrÙnico',
+            'atÈstado': 'AtÈstados',
             'dados': 'Meus Dados',
-            'relat√≥rios-section': 'Relat√≥rios',
-            'configuracoes-section': 'Configura√ß√µes'
+            'relatÛrios-section': 'RelatÛrios',
+            'configuracoes-section': 'ConfiguraÁıes'
         };
         
-        const sectionName = sectionNames[sectionId] || 'Se√ß√°o';
-        this.showToast('Navega√ß√°o', `Acessando ${sectionName}`, 'info');
+        const sectionName = sectionNames[sectionId] || 'SeÁ·o';
+        this.showToast('NavegaÁ·o', `Acessando ${sectionName}`, 'info');
         
-        // Integra√ß√°o com app.js se necess√°rio
+        // IntegraÁ·o com app.js se necess·rio
         if (window.app) {
             if (sectionId === 'funcionarios-section') {
                 window.carregarFuncionarios?.();
@@ -744,13 +744,13 @@ class OmieLayoutManager {
     }
 
     handleNotifications() {
-        this.showToast('Notifica√ß√µes', 'Abrindo painel de notifica√ß√µes', 'info');
+        this.showToast('NotificaÁıes', 'Abrindo painel de notificaÁıes', 'info');
         
-        // Criar dropdown de notifica√ß√µes
+        // Criar dropdown de notificaÁıes
         const notificationsHtml = `
             <div class="notifications-dropdown" id="notifications-dropdown">
                 <div class="notifications-header">
-                    <h4>Notifica√ß√µes</h4>
+                    <h4>NotificaÁıes</h4>
                     <button onclick="omieLayout.markAllNotificationsRead()" class="mark-all-read">
                         Marcar todas como lidas
                     </button>
@@ -759,27 +759,27 @@ class OmieLayoutManager {
                     <div class="notification-item unread">
                         <i class="fas fa-user-plus notification-icon"></i>
                         <div class="notification-content">
-                            <p>Novo funcion√°rio cadastrado: Jo√°o Silva</p>
-                            <span class="notification-time">2 min atr√°s</span>
+                            <p>Novo funcion·rio cadastrado: Jo·o Silva</p>
+                            <span class="notification-time">2 min atr·s</span>
                         </div>
                     </div>
                     <div class="notification-item unread">
                         <i class="fas fa-file-alt notification-icon"></i>
                         <div class="notification-content">
-                            <p>Holerite de setembro dispon√≠vel</p>
-                            <span class="notification-time">1 hora atr√°s</span>
+                            <p>Holerite de setembro disponÌvel</p>
+                            <span class="notification-time">1 hora atr·s</span>
                         </div>
                     </div>
                     <div class="notification-item">
                         <i class="fas fa-clock notification-icon"></i>
                         <div class="notification-content">
                             <p>Ponto registrado com sucesso</p>
-                            <span class="notification-time">3 horas atr√°s</span>
+                            <span class="notification-time">3 horas atr·s</span>
                         </div>
                     </div>
                 </div>
                 <div class="notifications-footer">
-                    <a href="#" onclick="omieLayout.viewAllNotifications()">Ver todas as notifica√ß√µes</a>
+                    <a href="#" onclick="omieLayout.viewAllNotifications()">Ver todas as notificaÁıes</a>
                 </div>
             </div>
         `;
@@ -838,7 +838,7 @@ class OmieLayoutManager {
         dropdownContainer.className = `header-dropdown ${type}-dropdown-container`;
         dropdownContainer.innerHTML = content;
         
-        // Posicionar pr√≥ximo ao bot√°o do cabe√ßalho
+        // Posicionar prÛximo ao bot·o do cabeÁalho
         const header = document.querySelector('.header-right');
         if (header) {
             header.appendChild(dropdownContainer);
@@ -862,9 +862,9 @@ class OmieLayoutManager {
     }
 
     markAllNotificationsRead() {
-        this.showToast('Notifica√ß√µes', 'Todas as notifica√ß√µes foram marcadas como lidas', 'success');
+        this.showToast('NotificaÁıes', 'Todas as notificaÁıes foram marcadas como lidas', 'success');
         
-        // Remover badge do bot√°o de notifica√ß√°o
+        // Remover badge do bot·o de notificaÁ·o
         const notificationBadge = document.querySelector('.header-icon .fas.fa-bell + .badge');
         if (notificationBadge) {
             notificationBadge.textContent = '0';
@@ -879,7 +879,7 @@ class OmieLayoutManager {
     }
 
     viewAllNotifications() {
-        this.showToast('Notifica√ß√µes', 'Carregando todas as notifica√ß√µes', 'info');
+        this.showToast('NotificaÁıes', 'Carregando todas as notificaÁıes', 'info');
         // Fechar dropdown
         const dropdown = document.querySelector('.header-dropdown');
         if (dropdown) dropdown.remove();
@@ -906,18 +906,18 @@ class OmieLayoutManager {
         const sectionId = currentSection.id;
         const refreshBtn = document.querySelector('.header-left-icons .fa-sync-alt').parentElement;
         
-        // Adicionar anima√ß√°o de loading
+        // Adicionar animaÁ·o de loading
         refreshBtn.classList.add('loading');
         refreshBtn.querySelector('i').style.animation = 'spin 1s linear infinite';
         
         this.showToast('Sistema', 'Atualizando dados...', 'info');
         
-        // Simular refresh baseado na se√ß√°o
+        // Simular refresh baseado na seÁ·o
         setTimeout(() => {
             refreshBtn.classList.remove('loading');
             refreshBtn.querySelector('i').style.animation = '';
             
-            // Chamar fun√ß√°o espec√≠fica do app.js se existir
+            // Chamar funÁ·o especÌfica do app.js se existir
             if (window.app) {
                 switch(sectionId) {
                     case 'dashboard':
@@ -933,7 +933,7 @@ class OmieLayoutManager {
                     case 'dashboard-section':
                         if (window.app.loadEmployees) window.app.loadEmployees();
                         break;
-                    case 'relat√≥rios-section':
+                    case 'relatÛrios-section':
                         if (window.app.loadReports) window.app.loadReports();
                         break;
                 }
@@ -944,25 +944,25 @@ class OmieLayoutManager {
     }
 
     goToDashboard() {
-        // Detectar se √© admin ou funcion√°rio
+        // Detectar se È admin ou funcion·rio
         const isAdmin = window.location.pathname.includes('areaadm');
         const dashboardId = isAdmin ? 'dashboard-home' : 'dashboard';
         
         // Navegar para dashboard
         this.navigateToSection(dashboardId);
-        this.showToast('Navega√ß√°o', 'Retornando ao dashboard', 'info');
+        this.showToast('NavegaÁ·o', 'Retornando ao dashboard', 'info');
     }
 
     showNotifications() {
-        // Implementar painel de notifica√ß√µes real
-        this.showToast('Notifica√ß√µes', 'Abrindo painel de notifica√ß√µes...', 'info');
+        // Implementar painel de notificaÁıes real
+        this.showToast('NotificaÁıes', 'Abrindo painel de notificaÁıes...', 'info');
         
-        // Se existir modal de notifica√ß√µes, abrir
+        // Se existir modal de notificaÁıes, abrir
         const notifModal = document.getElementById('notifications-modal');
         if (notifModal) {
             this.showModal('notifications-modal');
         } else {
-            // Criar modal tempor√°rio
+            // Criar modal tempor·rio
             this.createNotificationsModal();
         }
     }
@@ -995,14 +995,14 @@ class OmieLayoutManager {
         localStorage.clear();
         sessionStorage.clear();
         
-        // Chamar fun√ß√°o de logout do app.js se existir
+        // Chamar funÁ·o de logout do app.js se existir
         if (window.app && window.app.logout) {
             window.app.logout();
         }
         
-        // Redirecionar ap√≥s delay
+        // Redirecionar apÛs delay
         setTimeout(() => {
-            window.location.href = '/login.html';
+            window.location.href = window.__withBasePath ? window.__withBasePath('/login.html') : '/login.html';
         }, 1500);
     }
 
@@ -1050,7 +1050,7 @@ class OmieLayoutManager {
             link.classList.remove('active');
         });
         
-        // Remove active de todas as se√ß√µes
+        // Remove active de todas as seÁıes
         document.querySelectorAll('.content-section').forEach(section => {
             section.classList.remove('active');
         });
@@ -1061,7 +1061,7 @@ class OmieLayoutManager {
             targetLink.classList.add('active');
         }
         
-        // Mostra a se√ß√°o correspondente
+        // Mostra a seÁ·o correspondente
         const targetSection = document.getElementById(sectionId);
         if (targetSection) {
             targetSection.classList.add('active');
@@ -1076,7 +1076,7 @@ class OmieLayoutManager {
         modal.innerHTML = `
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3 class="modal-title">Notifica√ß√µes</h3>
+                    <h3 class="modal-title">NotificaÁıes</h3>
                     <button class="modal-close" data-dismiss="modal">&times;</button>
                 </div>
                 <div class="modal-body">
@@ -1085,22 +1085,22 @@ class OmieLayoutManager {
                         <div>
                             <strong>Bem-vindo ao sistema!</strong>
                             <p>Sistema Aluforce RH atualizado</p>
-                            <small>H√° 2 horas</small>
+                            <small>H· 2 horas</small>
                         </div>
                     </div>
                     <div class="notification-item">
                         <i class="fas fa-clock text-warning"></i>
                         <div>
                             <strong>Lembrete de Ponto</strong>
-                            <p>N√°o esque√ßa de bater o ponto</p>
-                            <small>H√° 4 horas</small>
+                            <p>N·o esqueÁa de bater o ponto</p>
+                            <small>H· 4 horas</small>
                         </div>
                     </div>
                     <div class="notification-item">
                         <i class="fas fa-file-invoice text-success"></i>
                         <div>
-                            <strong>Holerite Dispon√≠vel</strong>
-                            <p>Seu holerite de setembro est√° dispon√≠vel</p>
+                            <strong>Holerite DisponÌvel</strong>
+                            <p>Seu holerite de setembro est· disponÌvel</p>
                             <small>Ontem</small>
                         </div>
                     </div>
@@ -1160,12 +1160,12 @@ class OmieLayoutManager {
     }
 
     bindResponsiveEvents() {
-        // Detectar mudan√ßas na tela
+        // Detectar mudanÁas na tela
         window.addEventListener('resize', () => {
             this.handleResize();
         });
         
-        // Menu mobile toggle (se necess√°rio)
+        // Menu mobile toggle (se necess·rio)
         const menuToggle = document.querySelector('.menu-toggle');
         if (menuToggle) {
             menuToggle.addEventListener('click', () => {
@@ -1192,16 +1192,16 @@ class OmieLayoutManager {
     }
 
     updateUserAvatar() {
-        // Simular dados do usu√°rio baseado na p√°gina
+        // Simular dados do usu·rio baseado na p·gina
         const isAdmin = window.location.pathname.includes('areaadm');
-        const userName = isAdmin ? 'Administrador' : 'Funcion√°rio';
+        const userName = isAdmin ? 'Administrador' : 'Funcion·rio';
         const userText = document.querySelector('.header-user-text');
         
         if (userText) {
-            userText.textContent = `Ol√°, ${userName}`;
+            userText.textContent = `Ol·, ${userName}`;
         }
         
-        // Adicionar funcionalidade ao menu do usu√°rio
+        // Adicionar funcionalidade ao menu do usu·rio
         const userMenu = document.querySelector('#header-user-menu');
         if (userMenu) {
             userMenu.addEventListener('click', () => {
@@ -1212,15 +1212,15 @@ class OmieLayoutManager {
 
     updateHeaderTabs(sectionId) {
         const tabMappings = {
-            'dashboard': ['Dashboard', 'Vis√°o Geral'],
+            'dashboard': ['Dashboard', 'Vis·o Geral'],
             'holerite': ['Holerites', 'Pagamentos'],
-            'ponto': ['Ponto', 'Frequ√™ncia'],
-            'at√©stado': ['At√©stados', 'Documentos'],
-            'dados': ['Perfil', 'Configura√ß√µes']
+            'ponto': ['Ponto', 'FrequÍncia'],
+            'atÈstado': ['AtÈstados', 'Documentos'],
+            'dados': ['Perfil', 'ConfiguraÁıes']
         };
         
         const tabs = document.querySelectorAll('.header-tab');
-        const mapping = tabMappings[sectionId] || ['Funcion√°rios', 'Relat√≥rios'];
+        const mapping = tabMappings[sectionId] || ['Funcion·rios', 'RelatÛrios'];
         
         tabs.forEach((tab, index) => {
             if (mapping[index]) {
@@ -1240,15 +1240,15 @@ class OmieLayoutManager {
         
         this.showToast('Busca', `Pesquisando por "${query}"...`, 'info');
         
-        // Detectar se√ß√°o ativa para busca contextual
+        // Detectar seÁ·o ativa para busca contextual
         const activeSection = document.querySelector('.content-section.active');
         const sectionId = activeSection ? activeSection.id : '';
         
-        // Chamar fun√ß√°o de busca do app.js se existir
+        // Chamar funÁ·o de busca do app.js se existir
         if (window.app && window.app.performSearch) {
             window.app.performSearch(query, sectionId);
         } else {
-            // Busca gen√©rica se n√°o houver app.js
+            // Busca genÈrica se n·o houver app.js
             this.genericSearch(query, sectionId);
         }
     }
@@ -1269,8 +1269,8 @@ class OmieLayoutManager {
                 case 'ponto':
                     contextMessage = `${resultCount} registro(s) de ponto encontrado(s)`;
                     break;
-                case 'at√©stado':
-                    contextMessage = `${resultCount} at√©stado(s) encontrado(s)`;
+                case 'atÈstado':
+                    contextMessage = `${resultCount} atÈstado(s) encontrado(s)`;
                     break;
                 default:
                     contextMessage = `${resultCount} resultado(s) encontrado(s)`;
@@ -1287,8 +1287,8 @@ class OmieLayoutManager {
     }
 
     toggleUserMenu() {
-        // Implementar menu do usu√°rio (dropdown)
-        this.showToast('Menu', 'Menu do usu√°rio', 'info');
+        // Implementar menu do usu·rio (dropdown)
+        this.showToast('Menu', 'Menu do usu·rio', 'info');
     }
 
     toggleSidebar() {
@@ -1337,7 +1337,7 @@ class OmieLayoutManager {
         tooltip.style.left = (rect.right + 10) + 'px';
         tooltip.style.top = (rect.top + (rect.height / 2) - (tooltip.offsetHeight / 2)) + 'px';
         
-        // Anima√ß√°o de entrada
+        // AnimaÁ·o de entrada
         tooltip.style.opacity = '0';
         tooltip.style.transform = 'translateX(-5px)';
         
@@ -1356,7 +1356,7 @@ class OmieLayoutManager {
     }
 
     showToast(title, message, type = 'info') {
-        // Criar container se n√°o existir
+        // Criar container se n·o existir
         let container = document.querySelector('.toast-container');
         if (!container) {
             container = document.createElement('div');
@@ -1394,7 +1394,7 @@ class OmieLayoutManager {
             this.hideToast(toast);
         });
         
-        // Auto-hide ap√≥s 5 segundos
+        // Auto-hide apÛs 5 segundos
         setTimeout(() => {
             this.hideToast(toast);
         }, 5000);
@@ -1413,7 +1413,7 @@ class OmieLayoutManager {
         }
     }
 
-    // M√©todo p√∫blico para mostrar modais
+    // MÈtodo p˙blico para mostrar modais
     showModal(modalId) {
         const modal = document.getElementById(modalId);
         if (modal) {
@@ -1443,7 +1443,7 @@ class OmieLayoutManager {
         }
     }
 
-    // M√©todo p√∫blico para atualizar dados
+    // MÈtodo p˙blico para atualizar dados
     updateWidget(widgetId, data) {
         const widget = document.getElementById(widgetId);
         if (widget) {
@@ -1460,7 +1460,7 @@ class OmieLayoutManager {
         }
     }
 
-    // Novas fun√ß√µes para os √≠cones do cabe√ßalho
+    // Novas funÁıes para os Ìcones do cabeÁalho
     toggleViewMode(mode) {
         const currentSection = document.querySelector('.content-section.active');
         if (currentSection) {
@@ -1471,14 +1471,14 @@ class OmieLayoutManager {
                 currentSection.classList.add('list-view');
                 currentSection.classList.remove('grid-view');
             }
-            this.showToast('Visualiza√ß√°o', `Modo ${mode === 'grid' ? 'Grade' : 'Lista'} ativado`, 'info');
+            this.showToast('VisualizaÁ·o', `Modo ${mode === 'grid' ? 'Grade' : 'Lista'} ativado`, 'info');
         }
     }
 
     refreshPage() {
         this.showToast('Atualizando', 'Recarregando dados...', 'info');
         
-        // Recarregar dados do usu√°rio
+        // Recarregar dados do usu·rio
         if (window.app && window.app.reloadUserData) {
             window.app.reloadUserData();
         }
@@ -1489,7 +1489,7 @@ class OmieLayoutManager {
             dateEl.textContent = new Date().toLocaleDateString('pt-BR');
         }
         
-        // Simular atualiza√ß√°o de notifica√ß√µes
+        // Simular atualizaÁ·o de notificaÁıes
         setTimeout(() => {
             this.updateNotificationsCount();
         }, 500);
@@ -1499,22 +1499,22 @@ class OmieLayoutManager {
         const activeSection = document.querySelector('.content-section.active');
         if (activeSection && activeSection.id !== 'dashboard') {
             this.navigateToSection('dashboard');
-            this.showToast('Navega√ß√°o', 'Voltando ao Dashboard', 'success');
+            this.showToast('NavegaÁ·o', 'Voltando ao Dashboard', 'success');
         } else {
-            this.showToast('Navega√ß√°o', 'Voc√™ j√° est√° no Dashboard', 'info');
+            this.showToast('NavegaÁ·o', 'VocÍ j· est· no Dashboard', 'info');
         }
     }
 
     toggleUserMenu() {
-        // Implementar menu do usu√°rio futuramente
+        // Implementar menu do usu·rio futuramente
         const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-        const userName = userData.nome_completo || 'Usu√°rio';
+        const userName = userData.nome_completo || 'Usu·rio';
         
-        this.showToast('Perfil', `Ol√°, ${userName.split(' ')[0]}!`, 'info');
+        this.showToast('Perfil', `Ol·, ${userName.split(' ')[0]}!`, 'info');
     }
 
     updateNotificationsCount() {
-        // Buscar notifica√ß√µes reais do servidor
+        // Buscar notificaÁıes reais do servidor
         fetch('/api/notifications/count', {
             headers: window.app ? window.app.getAuthHeaders() : {}
         })
@@ -1527,7 +1527,7 @@ class OmieLayoutManager {
             if (countEl) countEl.textContent = `${data.count || 0} novas`;
         })
         .catch(() => {
-            // Em caso de erro, manter valores padr√°o
+            // Em caso de erro, manter valores padr·o
             const badgeEl = document.querySelector('.badge');
             const countEl = document.getElementById('notifications-count');
             

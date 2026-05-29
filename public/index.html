@@ -64,7 +64,7 @@
     <link rel="stylesheet" href="/modules/PCP/modal-produto-rico.css?v=20260301">
 
     <!-- Background Manager CSS -->
-    <link rel="stylesheet" href="/css/backgrounds.css?v=20260214">
+    <link rel="stylesheet" href="/css/backgrounds.css?v=20260520">
 
     <!-- Prefetch: fundos carregam em segundo plano, sem aviso de preload -->
     <link rel="prefetch" as="image" type="image/webp" href="/Fundos/Fundos (1).webp?v=20260214">
@@ -102,13 +102,17 @@
             --pink-600: #db2777;
         }
 
-        html,
-        body {
+        html {
             height: 100%;
+        }
+        body {
+            min-height: 100vh;
+            height: auto;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: transparent;
             color: var(--slate-900);
             overflow-x: hidden;
+            overflow-y: auto;
         }
 
         /* Background Manager - fundos dinâmicos */
@@ -153,8 +157,11 @@
             }
         }
 
-        /* Header V0 — sticky glassmorphism */
+        /* Header V0 — sticky sólido (padrão Zyntra 56px) */
+        html body .main-header,
+        html body .main-header.dark,
         .main-header,
+        .main-header.dark,
         #dashboard-area .main-header,
         #dashboard-area.bg-contrast-light .main-header,
         #dashboard-area.bg-contrast-dark .main-header {
@@ -162,13 +169,42 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 64px;
-            background: rgba(255, 255, 255, 0.75) !important;
-            -webkit-backdrop-filter: blur(20px) saturate(1.8) !important;
-            backdrop-filter: blur(20px) saturate(1.8) !important;
-            border-bottom: 1px solid rgba(226, 232, 240, 0.6) !important;
+            height: 56px !important;
+            background: #ffffff !important;
+            background-image: none !important;
+            -webkit-backdrop-filter: none !important;
+            backdrop-filter: none !important;
+            border-bottom: 1px solid #e2e8f0 !important;
             z-index: 100;
-            box-shadow: 0 1px 8px rgba(0, 0, 0, 0.06) !important;
+            box-shadow: 0 1px 8px rgba(15, 23, 42, 0.06) !important;
+        }
+
+        /* Ícones do header — escuros sobre fundo branco */
+        html body .main-header .header-icon-btn,
+        html body .main-header.dark .header-icon-btn,
+        .main-header .header-icon-btn {
+            color: #475569 !important;
+            background: transparent !important;
+        }
+        html body .main-header .header-icon-btn:hover,
+        .main-header .header-icon-btn:hover {
+            background: #f1f5f9 !important;
+            color: #1e293b !important;
+        }
+        /* Texto e divisor do header — visível em fundo branco */
+        html body .main-header .user-name,
+        html body .main-header .user-greeting,
+        html body .main-header .user-info-header,
+        .main-header .user-name {
+            color: #1e293b !important;
+        }
+        html body .main-header .header-divider,
+        .main-header .header-divider {
+            background: #e2e8f0 !important;
+        }
+        html body .main-header .user-chevron,
+        .main-header .user-chevron {
+            color: #64748b !important;
         }
 
         /* Acessibilidade: alto contraste */
@@ -1924,11 +1960,11 @@
             background-size: 200% 200% !important;
         }
 
-        /* Updated main-content */
+        /* Updated main-content — padding-top alinhado ao header 56px */
         .main-content {
             max-width: 1280px !important;
             margin: 0 auto !important;
-            padding: 80px 24px 48px !important;
+            padding: 24px 24px 48px !important;
             min-height: unset !important;
             display: block !important;
         }
@@ -2152,40 +2188,6 @@
         }
         .side-card-link:hover { color: #2563eb; }
 
-        .dashboard-bottom-row {
-            grid-column: span 3;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 24px;
-        }
-        @media (max-width: 768px) {
-            .dashboard-bottom-row { grid-template-columns: 1fr; }
-        }
-        .fluxo-chart-wrap { position: relative; height: 180px; }
-        .pedido-item {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 10px 0; border-bottom: 1px solid #f1f5f9;
-        }
-        .pedido-item:last-child { border-bottom: none; }
-        .pedido-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-        .pedido-num { font-size: 12px; font-weight: 600; color: #0f172a; }
-        .pedido-cliente { font-size: 11px; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
-        .pedido-right { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; flex-shrink: 0; }
-        .pedido-valor { font-size: 13px; font-weight: 600; color: #0f172a; }
-        .pedido-status {
-            font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 20px;
-        }
-        .ps-aprovado { background: #dcfce7; color: #166534; }
-        .ps-pendente { background: #fef9c3; color: #854d0e; }
-        .ps-producao { background: #dbeafe; color: #1e40af; }
-        .ps-entregue { background: #f0fdf4; color: #15803d; }
-        .ps-faturado { background: #dcfce7; color: #166534; }
-        .ps-cancelado { background: #fee2e2; color: #991b1b; }
-        body.dark-mode .pedido-item { border-color: #334155; }
-        body.dark-mode .pedido-num { color: #f1f5f9; }
-        body.dark-mode .pedido-valor { color: #f1f5f9; }
-        body.dark-mode .pedido-cliente { color: #94a3b8; }
-
         .quick-actions-grid {
             display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
         }
@@ -2404,12 +2406,12 @@
 
             <!-- Module Grid -->
             <div class="hero-modules-grid">
-                <a href="/Compras/" class="module-card hero-module-card hm-compras" data-area="compras">
+                <a href="/Compras/index.html" class="module-card hero-module-card hm-compras" data-area="compras">
                     <div class="hero-module-icon-wrap"><i class="fas fa-cart-shopping"></i></div>
                     <div class="hero-module-name">Compras</div>
                     <div class="hero-module-desc">Gestão de pedidos</div>
                 </a>
-                <a href="/Vendas/" class="module-card hero-module-card hm-vendas" data-area="vendas">
+                <a href="/Vendas/index.html" class="module-card hero-module-card hm-vendas" data-area="vendas">
                     <div class="hero-module-icon-wrap"><i class="fas fa-chart-line"></i></div>
                     <div class="hero-module-name">Vendas</div>
                     <div class="hero-module-desc">Pipeline comercial</div>
@@ -2424,7 +2426,7 @@
                     <div class="hero-module-name">Logística</div>
                     <div class="hero-module-desc">Entregas e rotas</div>
                 </a>
-                <a href="/PCP/" class="module-card hero-module-card hm-pcp" data-area="pcp">
+                <a href="/PCP/index.html" class="module-card hero-module-card hm-pcp" data-area="pcp">
                     <div class="hero-module-icon-wrap"><i class="fas fa-gears"></i></div>
                     <div class="hero-module-name">PCP</div>
                     <div class="hero-module-desc">Produção</div>
@@ -2434,7 +2436,7 @@
                     <div class="hero-module-name">Financeiro</div>
                     <div class="hero-module-desc">Contas e fluxo</div>
                 </a>
-                <a href="/modules/RH/index.html" class="module-card hero-module-card hm-rh" data-area="rh" id="rh-module-card" onclick="navegarRH(event)">
+                <a href="/RH/areaadm.html" class="module-card hero-module-card hm-rh" data-area="rh" id="rh-module-card" onclick="navegarRH(event)">
                     <div class="hero-module-icon-wrap"><i class="fas fa-people-group"></i></div>
                     <div class="hero-module-name">Recursos Humanos</div>
                     <div class="hero-module-desc">Colaboradores</div>
@@ -2464,7 +2466,7 @@
                     <div class="stat-sub" id="stat-vendas-sub">Mês atual</div>
                 </div>
 
-                <!-- Stat: Pedidos em Aberto (BUG-001: renomeado de "Pendentes" para refletir pedidos ainda não recebidos) -->
+                <!-- Stat: Pedidos Pendentes -->
                 <div class="stat-card">
                     <div class="stat-card-top">
                         <div class="stat-icon" style="background:linear-gradient(135deg,#f59e0b,#ea580c);box-shadow:0 4px 12px rgba(245,158,11,0.3);">
@@ -2474,7 +2476,7 @@
                             Compras
                         </span>
                     </div>
-                    <div class="stat-label">Pedidos em Aberto</div>
+                    <div class="stat-label">Pedidos Pendentes</div>
                     <div class="stat-value" id="stat-pedidos-valor">—</div>
                     <div class="stat-meta">
                         <i class="fas fa-bullseye" style="color:#94a3b8;font-size:12px;"></i>
@@ -2507,19 +2509,19 @@
                 <div class="side-card">
                     <div class="side-card-title">Ações Rápidas</div>
                     <div class="quick-actions-grid">
-                        <button class="quick-action-btn" onclick="window.location.href='/Vendas/'">
+                <button class="quick-action-btn" onclick="window.location.href=window.__withBasePath ? window.__withBasePath('/Vendas/index.html') : '/Vendas/index.html'">
                             <i class="fas fa-chart-line" style="color:#10b981;"></i>
                             <span>Nova Venda</span>
                         </button>
-                        <button class="quick-action-btn" onclick="window.location.href='/Compras/'">
+                <button class="quick-action-btn" onclick="window.location.href=window.__withBasePath ? window.__withBasePath('/Compras/index.html') : '/Compras/index.html'">
                             <i class="fas fa-cart-plus" style="color:#3b82f6;"></i>
                             <span>Novo Pedido</span>
                         </button>
-                        <button class="quick-action-btn" onclick="window.location.href='/Faturamento/index.html'">
+                <button class="quick-action-btn" onclick="window.location.href=window.__withBasePath ? window.__withBasePath('/Faturamento/index.html') : '/Faturamento/index.html'">
                             <i class="fas fa-file-invoice" style="color:#06b6d4;"></i>
                             <span>Emitir NF</span>
                         </button>
-                        <button class="quick-action-btn" onclick="window.location.href='/Financeiro/relatorios'">
+                <button class="quick-action-btn" onclick="window.location.href=window.__withBasePath ? window.__withBasePath('/Financeiro/index.html') : '/Financeiro/index.html'">
                             <i class="fas fa-chart-bar" style="color:#8b5cf6;"></i>
                             <span>Relatórios</span>
                         </button>
@@ -2530,7 +2532,7 @@
                 <div class="side-card">
                     <div class="side-card-header">
                         <span class="side-card-title" style="margin-bottom:0;">Atividade Recente</span>
-                        <a class="side-card-link" href="/Vendas/">Ver tudo</a>
+                        <a class="side-card-link" href="/Compras/index.html">Ver tudo</a>
                     </div>
                     <div class="activity-list" id="activity-list">
                         <div class="activity-item">
@@ -2538,31 +2540,6 @@
                             <div>
                                 <div class="activity-text" style="color:#94a3b8;">Carregando atividades...</div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Fluxo Financeiro + Pedidos Recentes -->
-            <div class="dashboard-bottom-row">
-                <div class="side-card">
-                    <div class="side-card-header">
-                        <span class="side-card-title" style="margin-bottom:0;">Fluxo Financeiro</span>
-                        <a class="side-card-link" href="/Financeiro/fluxo_caixa">Ver detalhes</a>
-                    </div>
-                    <div class="fluxo-chart-wrap">
-                        <canvas id="fluxoFinanceiroChart"></canvas>
-                    </div>
-                </div>
-                <div class="side-card">
-                    <div class="side-card-header">
-                        <span class="side-card-title" style="margin-bottom:0;">Pedidos Recentes</span>
-                        <a class="side-card-link" href="/Vendas/">Ver tudo</a>
-                    </div>
-                    <div id="pedidos-recentes-list">
-                        <div class="activity-item">
-                            <div class="activity-icon" style="background:#e2e8f0;"><i class="fas fa-spinner fa-spin" style="color:#94a3b8;"></i></div>
-                            <div><div class="activity-text" style="color:#94a3b8;">Carregando...</div></div>
                         </div>
                     </div>
                 </div>
@@ -2626,146 +2603,35 @@
             }
         }
 
-        // Carrega atividades recentes reais de múltiplos módulos
+        // Carrega atividades recentes via alertas do dashboard
         async function loadRecentActivity() {
             try {
-                const res = await fetch('/api/dashboard/atividade-recente', { credentials: 'include' });
+                const res = await fetch('/api/dashboard/alerts', { credentials: 'include' });
                 if (!res.ok) throw new Error('api-error');
-                const activities = await res.json();
+                const data = await res.json();
                 const list = document.getElementById('activity-list');
                 if (!list) return;
 
-                if (!activities.length) {
-                    list.innerHTML = '<div class="activity-item"><div class="activity-icon" style="background:#10b981;"><i class="fas fa-check"></i></div><div><div class="activity-text">Tudo em dia!</div><div class="activity-time">Sem atividades recentes</div></div></div>';
+                const activities = [];
+                if (data.pedidosPendentes > 0) activities.push({ icon: 'fa-cart-shopping', color: '#3b82f6', text: `${data.pedidosPendentes} pedido(s) pendente(s)`, time: 'Compras' });
+                if (data.aprovadosHoje > 0) activities.push({ icon: 'fa-check-circle', color: '#10b981', text: `${data.aprovadosHoje} aprovado(s) hoje`, time: 'Hoje' });
+
+                if (activities.length === 0) {
+                    list.innerHTML = '<div class="activity-item"><div class="activity-icon" style="background:#10b981;"><i class="fas fa-check"></i></div><div><div class="activity-text">Tudo em dia!</div><div class="activity-time">Sem pendências</div></div></div>';
                     return;
                 }
 
-                function timeAgo(ts) {
-                    if (!ts) return '';
-                    const diff = Math.floor((Date.now() - new Date(ts).getTime()) / 60000);
-                    if (diff < 1)  return 'agora';
-                    if (diff < 60) return `${diff}min atrás`;
-                    const h = Math.floor(diff / 60);
-                    if (h < 24)    return `${h}h atrás`;
-                    const d = Math.floor(h / 24);
-                    return d === 1 ? 'ontem' : `${d} dias atrás`;
-                }
-
-                list.innerHTML = activities.map(a => `
+                list.innerHTML = activities.slice(0, 3).map(a => `
                     <div class="activity-item">
                         <div class="activity-icon" style="background:${a.color};"><i class="fas ${a.icon}"></i></div>
                         <div>
                             <div class="activity-text">${a.text}</div>
-                            <div class="activity-time">${a.modulo}${a.ts ? ' · ' + timeAgo(a.ts) : ''}</div>
+                            <div class="activity-time">${a.time}</div>
                         </div>
                     </div>`).join('');
             } catch (e) {
                 const list = document.getElementById('activity-list');
                 if (list) list.innerHTML = '<div class="activity-item"><div class="activity-icon" style="background:#e2e8f0;"><i class="fas fa-inbox" style="color:#94a3b8;"></i></div><div><div class="activity-text" style="color:#94a3b8;">Sem atividades recentes</div></div></div>';
-            }
-        }
-
-        // ── Fluxo Financeiro ────────────────────────────────────────
-        let _fluxoChart = null;
-        async function loadFluxoFinanceiro() {
-            try {
-                const res = await fetch('/api/dashboard/fluxo-financeiro', { credentials: 'include' });
-                if (!res.ok) return;
-                const data = await res.json();
-                if (!data.labels || !data.labels.length) return;
-
-                const ctx = document.getElementById('fluxoFinanceiroChart');
-                if (!ctx || typeof Chart === 'undefined') return;
-                if (_fluxoChart) { _fluxoChart.destroy(); _fluxoChart = null; }
-
-                const isDark = document.body.classList.contains('dark-mode');
-                const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)';
-                const textColor = isDark ? '#94a3b8' : '#64748b';
-
-                _fluxoChart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: data.labels.map(d => 'Dia ' + d),
-                        datasets: [
-                            {
-                                label: 'Recebimentos',
-                                data: data.recebimentos,
-                                borderColor: '#10b981',
-                                backgroundColor: 'rgba(16,185,129,0.08)',
-                                borderWidth: 2, fill: true, tension: 0.4,
-                                pointRadius: 0, pointHoverRadius: 4
-                            },
-                            {
-                                label: 'Pagamentos',
-                                data: data.pagamentos,
-                                borderColor: '#f59e0b',
-                                backgroundColor: 'rgba(245,158,11,0.06)',
-                                borderWidth: 2, fill: true, tension: 0.4,
-                                pointRadius: 0, pointHoverRadius: 4
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true, maintainAspectRatio: false,
-                        interaction: { intersect: false, mode: 'index' },
-                        plugins: {
-                            legend: { position: 'bottom', labels: { color: textColor, padding: 12, usePointStyle: true, pointStyle: 'circle', font: { size: 11 } } },
-                            tooltip: {
-                                callbacks: {
-                                    label: ctx => ctx.dataset.label + ': R$ ' + ctx.parsed.y.toLocaleString('pt-BR', { minimumFractionDigits: 2 })
-                                }
-                            }
-                        },
-                        scales: {
-                            x: { grid: { display: false }, ticks: { color: textColor, font: { size: 10 } } },
-                            y: { grid: { color: gridColor }, ticks: { color: textColor, font: { size: 10 }, callback: v => 'R$ ' + (v >= 1000 ? (v/1000).toFixed(0)+'k' : v) } }
-                        }
-                    }
-                });
-            } catch (e) {
-                console.log('Fluxo financeiro não disponível');
-            }
-        }
-
-        // ── Pedidos Recentes ─────────────────────────────────────────
-        async function loadPedidosRecentes() {
-            try {
-                const res = await fetch('/api/dashboard/pedidos-recentes', { credentials: 'include' });
-                if (!res.ok) throw new Error();
-                const orders = await res.json();
-                const container = document.getElementById('pedidos-recentes-list');
-                if (!container) return;
-
-                if (!orders.length) {
-                    container.innerHTML = '<div class="activity-item"><div class="activity-text" style="color:#94a3b8;padding:12px 0;">Nenhum pedido recente.</div></div>';
-                    return;
-                }
-
-                const statusMap = {
-                    'Aprovado': 'ps-aprovado', 'Faturado': 'ps-faturado', 'Entregue': 'ps-entregue',
-                    'Em Produção': 'ps-producao', 'Produção': 'ps-producao',
-                    'Cancelado': 'ps-cancelado', 'Cancelada': 'ps-cancelado'
-                };
-
-                container.innerHTML = orders.map(o => {
-                    const cls = statusMap[o.status] || 'ps-pendente';
-                    const valor = parseFloat(o.valor_total || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                    const cliente = (o.cliente_nome || 'Cliente').substring(0, 30);
-                    const num = o.numero_pedido || `#${o.id}`;
-                    return `<div class="pedido-item" style="cursor:pointer" onclick="window.location.href='/Vendas/'">
-                        <div class="pedido-info">
-                            <span class="pedido-num">${num}</span>
-                            <span class="pedido-cliente">${cliente}</span>
-                        </div>
-                        <div class="pedido-right">
-                            <span class="pedido-valor">R$ ${valor}</span>
-                            <span class="pedido-status ${cls}">${o.status || 'Pendente'}</span>
-                        </div>
-                    </div>`;
-                }).join('');
-            } catch (e) {
-                const container = document.getElementById('pedidos-recentes-list');
-                if (container) container.innerHTML = '<div class="activity-item"><div class="activity-text" style="color:#94a3b8;padding:12px 0;">Erro ao carregar pedidos.</div></div>';
             }
         }
 
@@ -2776,32 +2642,27 @@
                 el.classList.add('visible');
                 loadDashboardStats();
                 loadRecentActivity();
-                // Aguarda Chart.js carregar antes de renderizar o gráfico
-                if (typeof Chart !== 'undefined') {
-                    loadFluxoFinanceiro();
-                } else {
-                    window.addEventListener('load', loadFluxoFinanceiro, { once: true });
-                }
-                loadPedidosRecentes();
             }
         }
 
-        // Mostrar stats para qualquer usuário autenticado
+        // Verificar na autenticação
         window.addEventListener('authSuccess', function(e) {
-            if (e.detail && e.detail.user) showAdminStats();
+            if (e.detail && e.detail.user) {
+                const u = e.detail.user;
+                const isAdmin = u.is_admin === 1 || u.is_admin === true || u.role === 'admin' || u.role === 'administrador';
+                if (isAdmin) showAdminStats();
+            }
         });
 
         // Verificar no DOMContentLoaded (dados locais)
         document.addEventListener('DOMContentLoaded', function() {
             try {
-                const u = JSON.parse(localStorage.getItem('userData') || localStorage.getItem('zyntra_user') || '{}');
-                if (u && (u.id || u.email)) showAdminStats();
+                const u = JSON.parse(localStorage.getItem('userData') || '{}');
+                const isAdmin = u.is_admin === 1 || u.is_admin === true || u.role === 'admin' || u.role === 'administrador';
+                if (isAdmin) showAdminStats();
             } catch(e) {}
         });
     </script>
-
-    <!-- Chart.js para Fluxo Financeiro -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js" defer></script>
 
     <!-- Scripts do sistema original -->
     <script src="/js/header-controls.js?v=20260219"></script>
@@ -3130,7 +2991,7 @@
                     sessionStorage.removeItem(k);
                 } catch { }
             });
-            window.location.href = '/login.html';
+            window.location.href = window.__withBasePath ? window.__withBasePath('/login.html') : '/login.html';
         });
 
         // Navegação RH
@@ -3141,9 +3002,9 @@
                 user.role === 'admin' || user.role === 'administrador';
 
             if (isAdmin) {
-                window.location.href = '/modules/RH/public/areaadm.html';
+                window.location.href = window.__withBasePath ? window.__withBasePath('/RH/areaadm.html') : '/RH/areaadm.html';
             } else {
-                window.location.href = '/modules/RH/public/funcionario.html';
+                window.location.href = window.__withBasePath ? window.__withBasePath('/RH/funcionario.html') : '/RH/funcionario.html';
             }
         }
 
@@ -3233,8 +3094,7 @@
                 'financas': ['financeiro'],
                 'clientes-fornecedores': ['vendas', 'compras'],
                 'venda-produtos': ['vendas'],
-                'venda-servicos': ['vendas', 'nfe'],
-                'pcp': ['pcp']
+                'venda-servicos': ['vendas', 'nfe']
             };
 
             let firstVisibleTab = null;
@@ -3987,7 +3847,7 @@
                         if (data.userId !== myId) return;
                         alert('Seu acesso foi bloqueado pelo administrador. Você será redirecionado.');
                         localStorage.clear();
-                        window.location.href = '/login.html';
+                        window.location.href = window.__withBasePath ? window.__withBasePath('/login.html') : '/login.html';
                     });
 
                     console.log('[REALTIME] ? Listener de permissões ativo para userId=' + myId);
@@ -4619,3 +4479,4 @@
 </body>
 
 </html>
+

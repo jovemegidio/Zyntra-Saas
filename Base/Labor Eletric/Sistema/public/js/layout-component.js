@@ -13,6 +13,10 @@
 (function () {
     'use strict';
 
+    function withBasePath(path) {
+        return window.__withBasePath ? window.__withBasePath(path) : path;
+    }
+
     // ── 1. CONFIGURAÇÃO DOS MÓDULOS ────────────────────────────────
     const MODULOS = [
         { slug: 'dashboard',   icon: 'fas fa-home',               label: 'Painel',           href: '/dashboard' },
@@ -147,7 +151,7 @@
                 const link = document.createElement('link');
                 link.id = css.id;
                 link.rel = 'stylesheet';
-                link.href = css.href;
+                link.href = withBasePath(css.href);
                 head.appendChild(link);
             }
         });
@@ -160,7 +164,7 @@
 
         function renderItem(m) {
             const isActive = moduloAtivo && m.slug === moduloAtivo;
-            return '<a href="' + escapeHTML(m.href) + '" class="sidebar-btn' + (isActive ? ' active' : '') + '" data-title="' + escapeHTML(m.label) + '">' +
+            return '<a href="' + escapeHTML(withBasePath(m.href)) + '" class="sidebar-btn' + (isActive ? ' active' : '') + '" data-title="' + escapeHTML(m.label) + '">' +
                    '<i class="' + escapeHTML(m.icon) + '"></i></a>';
         }
 
@@ -170,7 +174,7 @@
         return '' +
             '<div class="sidebar-overlay" id="zc-sidebar-overlay"></div>' +
             '<aside class="sidebar" id="zc-sidebar">' +
-            '  <a href="/dashboard" class="sidebar-logo" data-title="Painel Principal"><i class="fas fa-home"></i></a>' +
+            '  <a href="' + escapeHTML(withBasePath('/dashboard')) + '" class="sidebar-logo" data-title="Painel Principal"><i class="fas fa-home"></i></a>' +
             '  <nav class="sidebar-nav" id="zc-sidebar-nav">' +
             navHTML +
             '  </nav>' +
